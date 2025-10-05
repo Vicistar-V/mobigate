@@ -3,12 +3,13 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MapPin, MessageCircle, MoreVertical, CheckCircle } from "lucide-react";
+import { Phone, Heart, Gift, MapPin, MessageCircle, MoreVertical, CheckCircle, Play, Image, Headphones, FileText, MoreHorizontal } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { ELibrarySection } from "@/components/ELibrarySection";
+import { useState } from "react";
 
 const Profile = () => {
+  const [contentFilter, setContentFilter] = useState<string>("all");
   const userProfile = {
     name: "Amaka Jane Johnson",
     location: "Lagos, Nigeria",
@@ -30,6 +31,8 @@ const Profile = () => {
       title: "SOME SECRET TRUTH ABOUT WOMEN",
       subtitle: "- How Much Do You Know About Your Woman?",
       author: "AMAKA JANE JOHNSON",
+      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+      userId: "1",
       status: "Online" as const,
       views: "6.8k",
       comments: "255",
@@ -41,6 +44,8 @@ const Profile = () => {
       title: "I DON'T GET INVOLVED ROMANTICALLY WITH SMALL BOYS",
       subtitle: "- Last Time I Did, It Almost Got Me Washing Dishes For A Thousand Years In Abuja!",
       author: "AMAKA JANE JOHNSON",
+      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+      userId: "1",
       status: "Online" as const,
       views: "8k",
       comments: "875",
@@ -52,6 +57,8 @@ const Profile = () => {
       title: "THE POWER OF CONSISTENCY IN LIFE",
       subtitle: "- Small Daily Actions Lead to Massive Results",
       author: "AMAKA JANE JOHNSON",
+      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+      userId: "1",
       status: "Online" as const,
       views: "12k",
       comments: "432",
@@ -63,6 +70,8 @@ const Profile = () => {
       title: "BUILDING YOUR PERSONAL BRAND IN 2025",
       subtitle: "- Digital Marketing Strategies That Actually Work",
       author: "AMAKA JANE JOHNSON",
+      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+      userId: "1",
       status: "Online" as const,
       views: "9.2k",
       comments: "567",
@@ -71,6 +80,10 @@ const Profile = () => {
       imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
     },
   ];
+
+  const filteredPosts = contentFilter === "all" 
+    ? userPosts 
+    : userPosts.filter(post => post.type.toLowerCase() === contentFilter);
 
   return (
     <div className="min-h-screen bg-background">
@@ -171,9 +184,6 @@ const Profile = () => {
           </ScrollArea>
 
           <TabsContent value="status" className="space-y-6">
-            {/* E-Library Contents Section */}
-            <ELibrarySection />
-
             {/* Create Monetized Post */}
             <Card className="p-4 bg-muted/50">
               <div className="text-center">
@@ -217,13 +227,50 @@ const Profile = () => {
               </ScrollArea>
             </div>
 
+            {/* Content Filter */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-base">Filter Contents</h3>
+              </div>
+              <ScrollArea className="w-full">
+                <Tabs value={contentFilter} onValueChange={setContentFilter} className="w-full">
+                  <TabsList className="inline-flex w-full min-w-max">
+                    <TabsTrigger value="all" className="text-xs md:text-sm gap-1.5">
+                      All
+                    </TabsTrigger>
+                    <TabsTrigger value="video" className="text-xs md:text-sm gap-1.5">
+                      <Play className="w-3 h-3" />
+                      Videos
+                    </TabsTrigger>
+                    <TabsTrigger value="photo" className="text-xs md:text-sm gap-1.5">
+                      <Image className="w-3 h-3" />
+                      Photos
+                    </TabsTrigger>
+                    <TabsTrigger value="audio" className="text-xs md:text-sm gap-1.5">
+                      <Headphones className="w-3 h-3" />
+                      Audio
+                    </TabsTrigger>
+                    <TabsTrigger value="article" className="text-xs md:text-sm gap-1.5">
+                      <FileText className="w-3 h-3" />
+                      Articles
+                    </TabsTrigger>
+                    <TabsTrigger value="more" className="text-xs md:text-sm gap-1.5">
+                      <MoreHorizontal className="w-3 h-3" />
+                      More
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </Card>
+
             {/* Feed Posts */}
             <div className="space-y-6">
-              {userPosts.map((post, index) => (
+              {filteredPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
                   {/* Insert ad after every 2 posts */}
-                  {(index + 1) % 2 === 0 && index < userPosts.length - 1 && (
+                  {(index + 1) % 2 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
                       <AdCard />
                     </div>
