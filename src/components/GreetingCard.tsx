@@ -47,18 +47,20 @@ export const GreetingSection = () => {
         </div>
 
         {/* Search Section */}
-        <div className="relative pt-4 border-t">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search for anything on Mobigate..." 
-            className="pl-10 pr-24"
-          />
-          <Button 
-            size="sm"
-            className="absolute right-1 top-1/2 -translate-y-1/2"
-          >
-            SEARCH
-          </Button>
+        <div className="pt-4 border-t">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search for anything on Mobigate..." 
+              className="pl-10 pr-24"
+            />
+            <Button 
+              size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2"
+            >
+              SEARCH
+            </Button>
+          </div>
         </div>
       </Card>
 
