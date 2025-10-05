@@ -8,13 +8,13 @@ import { CreatePostDialog } from "./CreatePostDialog";
 
 export const GreetingSection = () => {
   const navLinks = [
-    { label: "Mobi Quiz Game", href: "#" },
-    { label: "Mobi-Store", href: "#" },
-    { label: "E-Library", href: "#" },
     { label: "Friends", href: "#" },
     { label: "Followers", href: "#" },
     { label: "Following", href: "#" },
     { label: "Gifts", href: "#" },
+    { label: "Mobi Quiz Game", href: "#" },
+    { label: "Mobi-Store", href: "#" },
+    { label: "E-Library", href: "#" },
     { label: "Adverts Log", href: "#" },
   ];
 
