@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Phone, Heart, Gift, MapPin, MessageCircle, MoreVertical, CheckCircle } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ELibrarySection } from "@/components/ELibrarySection";
 
 const Profile = () => {
   const userProfile = {
@@ -171,25 +172,7 @@ const Profile = () => {
 
           <TabsContent value="status" className="space-y-6">
             {/* E-Library Contents Section */}
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Recommended E-Library Contents</h2>
-                <Button variant="outline" size="sm">Filter Contents</Button>
-              </div>
-              <div className="flex flex-wrap gap-2 text-sm">
-                <Button variant="link" className="text-primary underline">All</Button>
-                <span>|</span>
-                <Button variant="link" className="text-primary">Videos</Button>
-                <span>|</span>
-                <Button variant="link" className="text-primary">Photos</Button>
-                <span>|</span>
-                <Button variant="link" className="text-primary">Audio</Button>
-                <span>|</span>
-                <Button variant="link" className="text-primary">Articles</Button>
-                <span>|</span>
-                <Button variant="link" className="text-primary">...More</Button>
-              </div>
-            </Card>
+            <ELibrarySection />
 
             {/* Create Monetized Post */}
             <Card className="p-4 bg-muted/50">
