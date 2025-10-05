@@ -185,9 +185,6 @@ const Profile = () => {
           </ScrollArea>
 
           <TabsContent value="status" className="space-y-6">
-            {/* Content Filter */}
-            <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
-
             {/* Create Monetized Post */}
             <Card className="p-4 bg-muted/50">
               <div className="text-center">
@@ -231,9 +228,11 @@ const Profile = () => {
               </ScrollArea>
             </div>
 
-            {/* Feed Posts */}
-            <div className="space-y-6">
-              {filteredPosts.map((post, index) => (
+            {/* Feed Posts with Filter */}
+            <div className="space-y-0">
+              <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+              <div className="space-y-6 mt-6">
+                {filteredPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
                   {/* Insert ad after every 2 posts */}
@@ -243,7 +242,8 @@ const Profile = () => {
                     </div>
                   )}
                 </div>
-              ))}
+                ))}
+              </div>
             </div>
           </TabsContent>
 

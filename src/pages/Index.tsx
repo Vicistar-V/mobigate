@@ -159,11 +159,12 @@ const Index = () => {
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6">
             <WallStatus />
-            <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
             
-            {/* Feed Posts */}
-            <div className="space-y-6">
-              {filteredPosts.map((post, index) => (
+            {/* Feed Posts with Filter */}
+            <div className="space-y-0">
+              <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+              <div className="space-y-6 mt-6">
+                {filteredPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
                   {/* Insert ad after every 2 posts */}
@@ -173,7 +174,8 @@ const Index = () => {
                     </div>
                   )}
                 </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
