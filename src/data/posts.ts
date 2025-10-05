@@ -17,7 +17,7 @@ export const feedPosts: Post[] = [
   {
     title: "SOME SECRET TRUTH ABOUT WOMEN",
     subtitle: "- How Much Do You Know About Your Woman?",
-    author: "PETER NKEMJKA I.prec.",
+    author: "PETER NKEMJKA iprec",
     authorProfileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
     userId: "1",
     status: "Offline",
@@ -56,7 +56,7 @@ export const feedPosts: Post[] = [
   {
     title: "I DON'T GET INVOLVED ROMANTICALLY WITH SMALL BOYS",
     subtitle: "- Last Time I Did, It Almost Got Me Washing Dishes For A Thousand Years In Abuja!",
-    author: "PETER NKEMJKA I.prec.",
+    author: "PETER NKEMJKA iprec",
     authorProfileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
     userId: "1",
     status: "Offline",
