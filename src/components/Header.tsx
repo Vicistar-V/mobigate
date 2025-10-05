@@ -10,7 +10,7 @@ export const Header = () => {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" className="lg:hidden">
-            <Menu className="h-7 w-7" />
+            <Menu className="h-8 w-8" />
           </Button>
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">

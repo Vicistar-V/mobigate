@@ -14,7 +14,7 @@ export const ProfileDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+        <Avatar className="h-12 w-12 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
           <AvatarImage src={profilePhoto} alt="Profile" />
           <AvatarFallback>NP</AvatarFallback>
         </Avatar>
