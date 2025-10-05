@@ -184,8 +184,8 @@ const Profile = () => {
                 {filteredPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
-                  {/* Insert ad after every 2 posts */}
-                  {(index + 1) % 2 === 0 && index < filteredPosts.length - 1 && (
+                  {/* Insert ad after every 5 posts */}
+                  {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
                       <AdCard />
                     </div>
