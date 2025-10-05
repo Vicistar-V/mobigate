@@ -3,20 +3,24 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MapPin } from "lucide-react";
+import { Phone, Heart, Gift, MapPin, MessageCircle, MoreVertical, CheckCircle } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const Profile = () => {
   const userProfile = {
     name: "Amaka Jane Johnson",
     location: "Lagos, Nigeria",
     profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    verified: true,
+    status: "Online" as const,
+    isFriend: true,
     stats: {
-      posts: "245",
-      likes: "12.5k",
-      comments: "3.2k",
-      followers: "8.9k",
-      following: "456"
+      friends: "4.6k",
+      followers: "586",
+      following: "421",
+      likes: "8.5k",
+      contents: "318"
     }
   };
 
@@ -76,88 +80,159 @@ const Profile = () => {
         <Card className="p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Profile Image */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 relative">
               <img 
                 src={userProfile.profileImage} 
                 alt={userProfile.name}
                 className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
               />
+              {userProfile.status === "Online" && (
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  Online
+                </div>
+              )}
             </div>
 
             {/* Profile Info */}
             <div className="flex-1 space-y-4">
               <div>
-                <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-                <div className="flex items-center gap-2 text-muted-foreground mt-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{userProfile.location}</span>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">{userProfile.name}</h1>
+                  {userProfile.verified && (
+                    <CheckCircle className="h-6 w-6 text-emerald-500 fill-emerald-500" />
+                  )}
                 </div>
+                {userProfile.verified && (
+                  <p className="text-emerald-600 font-medium text-sm">Verified Content Creator</p>
+                )}
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-5 gap-4">
-                <div className="text-center">
-                  <p className="text-xl font-bold text-primary">{userProfile.stats.posts}</p>
-                  <p className="text-xs text-muted-foreground">Posts</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-bold text-primary">{userProfile.stats.likes}</p>
-                  <p className="text-xs text-muted-foreground">Likes</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-bold text-primary">{userProfile.stats.comments}</p>
-                  <p className="text-xs text-muted-foreground">Comments</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-bold text-primary">{userProfile.stats.followers}</p>
-                  <p className="text-xs text-muted-foreground">Followers</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-bold text-primary">{userProfile.stats.following}</p>
-                  <p className="text-xs text-muted-foreground">Following</p>
-                </div>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>
+                  <span className="font-bold text-foreground">{userProfile.stats.friends}</span> Friends | 
+                  <span className="font-bold text-foreground"> {userProfile.stats.followers}</span> Followers
+                </p>
+                <p>
+                  <span className="font-bold text-foreground">{userProfile.stats.following}</span> Following | 
+                  <span className="font-bold text-foreground"> {userProfile.stats.likes}</span> Likes | 
+                  <span className="font-bold text-foreground"> {userProfile.stats.contents}</span> Contents
+                </p>
               </div>
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-2">
-                <Button variant="default" size="sm" className="gap-2">
+                <Button variant="default" size="sm" className="gap-2 bg-black hover:bg-black/80">
                   <Phone className="h-4 w-4" />
-                  CALL
+                  Call
                 </Button>
-                <Button variant="secondary" size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 bg-yellow-400 hover:bg-yellow-500 text-black">
                   <Heart className="h-4 w-4" />
                   Like
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50">
-                  <Gift className="h-4 w-4" />
-                  GIFT
+                <Button size="sm" className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white">
+                  <MessageCircle className="h-4 w-4" />
+                  Chat
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+                <Button size="sm" className="gap-2 bg-purple-500 hover:bg-purple-600 text-white">
                   <Gift className="h-4 w-4" />
-                  GIFT
+                  Gift
+                </Button>
+                <Button size="icon" variant="destructive" className="rounded-full">
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </div>
+
+              {/* Friend Status */}
+              {userProfile.isFriend && (
+                <p className="text-emerald-600 font-medium">
+                  You are Friends with {userProfile.name}
+                </p>
+              )}
             </div>
           </div>
         </Card>
 
         {/* Tabs Section */}
         <Tabs defaultValue="status" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 mb-6">
-            <TabsTrigger value="status">Status</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="friends">Friends</TabsTrigger>
-            <TabsTrigger value="contents">Contents</TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full whitespace-nowrap mb-6">
+            <TabsList className="inline-flex w-auto">
+              <TabsTrigger value="status">Status</TabsTrigger>
+              <TabsTrigger value="about">About</TabsTrigger>
+              <TabsTrigger value="friends">Friends</TabsTrigger>
+              <TabsTrigger value="contents">Contents</TabsTrigger>
+              <TabsTrigger value="gifts">Gifts</TabsTrigger>
+              <TabsTrigger value="likes">Likes</TabsTrigger>
+              <TabsTrigger value="followers">Followers</TabsTrigger>
+              <TabsTrigger value="following">Following</TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <TabsContent value="status" className="space-y-6">
-            {/* Wall Status Header */}
+            {/* E-Library Contents Section */}
             <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Wall Status</h2>
-                <Button variant="destructive" size="sm">Her Posts</Button>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Recommended E-Library Contents</h2>
+                <Button variant="outline" size="sm">Filter Contents</Button>
+              </div>
+              <div className="flex flex-wrap gap-2 text-sm">
+                <Button variant="link" className="text-primary underline">All</Button>
+                <span>|</span>
+                <Button variant="link" className="text-primary">Videos</Button>
+                <span>|</span>
+                <Button variant="link" className="text-primary">Photos</Button>
+                <span>|</span>
+                <Button variant="link" className="text-primary">Audio</Button>
+                <span>|</span>
+                <Button variant="link" className="text-primary">Articles</Button>
+                <span>|</span>
+                <Button variant="link" className="text-primary">...More</Button>
               </div>
             </Card>
+
+            {/* Create Monetized Post */}
+            <Card className="p-4 bg-muted/50">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-primary underline">
+                  Create a Monetized Post on {userProfile.name.split(' ')[0]}'s Status
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  [{userProfile.name.split(' ')[0]} could turn off this in Privacy Setting]
+                </p>
+              </div>
+            </Card>
+
+            {/* Wall Status Horizontal Scroll */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Wall Status</h2>
+                <Button variant="outline" size="sm">Filter Posts</Button>
+              </div>
+              
+              <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+                <div className="flex gap-4 pb-4">
+                  {userPosts.slice(0, 3).map((post, index) => (
+                    <Card key={index} className="inline-block w-[300px] flex-shrink-0 overflow-hidden hover:shadow-md transition-shadow">
+                      {post.imageUrl && (
+                        <div className="relative h-48 bg-muted">
+                          <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="p-3">
+                        <h4 className="font-semibold text-sm line-clamp-2">{post.title}</h4>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <span>{post.views} Views</span>
+                          <span>•</span>
+                          <span>{post.likes} Likes</span>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </div>
 
             {/* Feed Posts */}
             <div className="space-y-6">
@@ -193,6 +268,34 @@ const Profile = () => {
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Contents</h2>
               <p className="text-muted-foreground">User contents will be displayed here.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="gifts">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Gifts</h2>
+              <p className="text-muted-foreground">Gifts received will be displayed here.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="likes">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Likes</h2>
+              <p className="text-muted-foreground">Liked posts will be displayed here.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="followers">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Followers</h2>
+              <p className="text-muted-foreground">Followers list will be displayed here.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="following">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Following</h2>
+              <p className="text-muted-foreground">Following list will be displayed here.</p>
             </Card>
           </TabsContent>
         </Tabs>
