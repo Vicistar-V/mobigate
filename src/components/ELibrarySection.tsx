@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Play, Image, Headphones, FileText, MoreHorizontal } from "lucide-react";
 
 interface ELibrarySectionProps {
@@ -24,28 +23,25 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
         <h3 className="font-semibold text-base md:text-lg">Recommended E-Library Contents</h3>
       </div>
       
-      <ScrollArea className="w-full">
-        <div className="flex items-center gap-2 pb-2">
-          {filterOptions.map((option) => {
-            const Icon = option.icon;
-            const isActive = activeFilter === option.value;
-            
-            return (
-              <Button
-                key={option.value}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                onClick={() => onFilterChange(option.value)}
-                className="text-xs md:text-sm gap-1.5 whitespace-nowrap"
-              >
-                {Icon && <Icon className="w-3 h-3" />}
-                {option.label}
-              </Button>
-            );
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <div className="flex flex-wrap items-center gap-2">
+        {filterOptions.map((option) => {
+          const Icon = option.icon;
+          const isActive = activeFilter === option.value;
+          
+          return (
+            <Button
+              key={option.value}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
+              onClick={() => onFilterChange(option.value)}
+              className="text-xs md:text-sm gap-1.5"
+            >
+              {Icon && <Icon className="w-3 h-3" />}
+              {option.label}
+            </Button>
+          );
+        })}
+      </div>
     </Card>
   );
 };
