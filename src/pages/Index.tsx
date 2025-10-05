@@ -1,5 +1,5 @@
 import { Header } from "@/components/Header";
-import { UserProfileCard } from "@/components/UserProfileCard";
+import { GreetingSection } from "@/components/GreetingSection";
 import { WallStatus } from "@/components/WallStatus";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { FeedPost } from "@/components/FeedPost";
@@ -125,9 +125,9 @@ const Index = () => {
       
       <main className="container max-w-7xl mx-auto px-4 py-6">
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Sidebar - User Profile */}
+          {/* Left Sidebar - Greeting Section */}
           <aside className="lg:col-span-1 space-y-6">
-            <UserProfileCard />
+            <GreetingSection />
           </aside>
 
           {/* Main Feed */}
