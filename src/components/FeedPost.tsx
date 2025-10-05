@@ -2,11 +2,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye, MessageSquare, Heart } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface FeedPostProps {
   title: string;
   subtitle?: string;
   author: string;
+  authorProfileImage?: string;
+  userId?: string;
   status: "Online" | "Offline";
   views: string;
   comments: string;
@@ -20,6 +24,8 @@ export const FeedPost = ({
   title,
   subtitle,
   author,
+  authorProfileImage,
+  userId = "1",
   status,
   views,
   comments,
@@ -79,15 +85,21 @@ export const FeedPost = ({
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t">
-          <div className="flex-1">
-            <p className="text-sm font-medium">By {author}</p>
-            <div className="flex items-center gap-1.5">
-              <div className={`h-2 w-2 rounded-full ${status === "Online" ? "bg-emerald-500" : "bg-red-500"}`} />
-              <p className={`text-xs font-medium ${status === "Online" ? "text-emerald-600" : "text-red-600"}`}>
-                {status}
-              </p>
+          <Link to={`/profile/${userId}`} className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={authorProfileImage} alt={author} />
+              <AvatarFallback>{author.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium">By {author}</p>
+              <div className="flex items-center gap-1.5">
+                <div className={`h-2 w-2 rounded-full ${status === "Online" ? "bg-emerald-500" : "bg-red-500"}`} />
+                <p className={`text-xs font-medium ${status === "Online" ? "text-emerald-600" : "text-red-600"}`}>
+                  {status}
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <button
               onClick={handleLike}
