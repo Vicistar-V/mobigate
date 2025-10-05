@@ -2,8 +2,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpg";
+import { CreatePostDialog } from "./CreatePostDialog";
 
 export const GreetingSection = () => {
   const navLinks = [
@@ -63,20 +64,8 @@ export const GreetingSection = () => {
         </div>
       </Card>
 
-      {/* Create Post Button */}
-      <button className="w-full p-5 bg-card border-2 border-success/30 rounded-lg shadow-sm hover:shadow-md hover:border-success/50 transition-all cursor-pointer group">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 text-left">
-            <p className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-              Create a Monetized Status Post
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Share your thoughts and earn
-            </p>
-          </div>
-          <Plus className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
-        </div>
-      </button>
+      {/* Create Post Dialog */}
+      <CreatePostDialog />
     </div>
   );
 };

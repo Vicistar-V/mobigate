@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { FilterDialog } from "./FilterDialog";
 import {
   Carousel,
   CarouselContent,
@@ -60,9 +60,7 @@ export const WallStatus = () => {
     <Card className="p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-lg">Wall Status</h3>
-        <Button variant="outline" size="sm">
-          Filter Posts
-        </Button>
+        <FilterDialog />
       </div>
       
       <Carousel
