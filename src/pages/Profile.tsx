@@ -3,9 +3,10 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MapPin, MessageCircle, MoreVertical, CheckCircle, Play, Image, Headphones, FileText, MoreHorizontal } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
 
 const Profile = () => {
@@ -184,6 +185,9 @@ const Profile = () => {
           </ScrollArea>
 
           <TabsContent value="status" className="space-y-6">
+            {/* Content Filter */}
+            <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+
             {/* Create Monetized Post */}
             <Card className="p-4 bg-muted/50">
               <div className="text-center">
@@ -226,43 +230,6 @@ const Profile = () => {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </div>
-
-            {/* Content Filter */}
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-base">Filter Contents</h3>
-              </div>
-              <ScrollArea className="w-full">
-                <Tabs value={contentFilter} onValueChange={setContentFilter} className="w-full">
-                  <TabsList className="inline-flex w-full min-w-max">
-                    <TabsTrigger value="all" className="text-xs md:text-sm gap-1.5">
-                      All
-                    </TabsTrigger>
-                    <TabsTrigger value="video" className="text-xs md:text-sm gap-1.5">
-                      <Play className="w-3 h-3" />
-                      Videos
-                    </TabsTrigger>
-                    <TabsTrigger value="photo" className="text-xs md:text-sm gap-1.5">
-                      <Image className="w-3 h-3" />
-                      Photos
-                    </TabsTrigger>
-                    <TabsTrigger value="audio" className="text-xs md:text-sm gap-1.5">
-                      <Headphones className="w-3 h-3" />
-                      Audio
-                    </TabsTrigger>
-                    <TabsTrigger value="article" className="text-xs md:text-sm gap-1.5">
-                      <FileText className="w-3 h-3" />
-                      Articles
-                    </TabsTrigger>
-                    <TabsTrigger value="more" className="text-xs md:text-sm gap-1.5">
-                      <MoreHorizontal className="w-3 h-3" />
-                      More
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </Card>
 
             {/* Feed Posts */}
             <div className="space-y-6">

@@ -4,8 +4,10 @@ import { WallStatus } from "@/components/WallStatus";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { FeedPost } from "@/components/FeedPost";
 import { AdCard } from "@/components/AdCard";
+import { useState } from "react";
 
 const Index = () => {
+  const [contentFilter, setContentFilter] = useState<string>("all");
   const feedPosts = [
     {
       title: "SOME SECRET TRUTH ABOUT WOMEN",
@@ -139,6 +141,10 @@ const Index = () => {
     },
   ];
 
+  const filteredPosts = contentFilter === "all" 
+    ? feedPosts 
+    : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -153,15 +159,15 @@ const Index = () => {
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6">
             <WallStatus />
-            <ELibrarySection />
+            <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
             
             {/* Feed Posts */}
             <div className="space-y-6">
-              {feedPosts.map((post, index) => (
+              {filteredPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
                   {/* Insert ad after every 2 posts */}
-                  {(index + 1) % 2 === 0 && index < feedPosts.length - 1 && (
+                  {(index + 1) % 2 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
                       <AdCard />
                     </div>
