@@ -12,6 +12,7 @@ interface FeedPostProps {
   likes: string;
   type: "Video" | "Article" | "Photo";
   imageUrl?: string;
+  fee?: string;
 }
 
 export const FeedPost = ({
@@ -24,6 +25,7 @@ export const FeedPost = ({
   likes,
   type,
   imageUrl,
+  fee = "6",
 }: FeedPostProps) => {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
@@ -44,16 +46,19 @@ export const FeedPost = ({
           )}
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-4 text-sm flex-wrap">
+          <div className="flex items-center gap-1 text-emerald-600 font-medium">
+            <span>Fee: {fee} Mobi</span>
+          </div>
+          <div className="flex items-center gap-1 text-red-600">
             <Eye className="h-4 w-4" />
             <span>{views} Views</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 text-red-600">
             <MessageSquare className="h-4 w-4" />
             <span>{comments} Comments</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 text-red-600">
             <Heart className="h-4 w-4" />
             <span>{likes} Likes</span>
           </div>
@@ -62,7 +67,12 @@ export const FeedPost = ({
         <div className="flex items-center justify-between pt-2 border-t">
           <div>
             <p className="text-sm font-medium">By {author}</p>
-            <p className="text-xs text-muted-foreground">PPEC {status}</p>
+            <div className="flex items-center gap-1.5">
+              <div className={`h-2 w-2 rounded-full ${status === "Online" ? "bg-emerald-500" : "bg-red-500"}`} />
+              <p className={`text-xs font-medium ${status === "Online" ? "text-emerald-600" : "text-red-600"}`}>
+                {status}
+              </p>
+            </div>
           </div>
           {!imageUrl && (
             <Badge variant={type === "Video" ? "destructive" : "secondary"}>
