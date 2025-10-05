@@ -23,6 +23,32 @@ const Index = () => {
       imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80"
     },
     {
+      title: "BEAUTIFUL SUNSET PHOTOGRAPHY",
+      subtitle: "- Captured at Lekki Beach, Lagos",
+      author: "SARAH OKAFOR",
+      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+      userId: "2",
+      status: "Online" as const,
+      views: "5.2k",
+      comments: "189",
+      likes: "923",
+      type: "Photo" as const,
+      imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+    },
+    {
+      title: "MOTIVATIONAL PODCAST EPISODE 45",
+      subtitle: "- Finding Your Purpose in Life",
+      author: "JAMES ADEWALE",
+      authorProfileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
+      userId: "3",
+      status: "Online" as const,
+      views: "4.1k",
+      comments: "67",
+      likes: "512",
+      type: "Audio" as const,
+      imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80"
+    },
+    {
       title: "I DON'T GET INVOLVED ROMANTICALLY WITH SMALL BOYS",
       subtitle: "- Last Time I Did, It Almost Got Me Washing Dishes For A Thousand Years In Abuja!",
       author: "PETER NKEMJKA (PPEC)",
@@ -34,6 +60,19 @@ const Index = () => {
       likes: "1.9k",
       type: "Video" as const,
       imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80"
+    },
+    {
+      title: "DELICIOUS NIGERIAN JOLLOF RICE",
+      subtitle: "- Step by Step Photo Guide",
+      author: "CHEF NGOZI",
+      authorProfileImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80",
+      userId: "8",
+      status: "Online" as const,
+      views: "11k",
+      comments: "456",
+      likes: "2.1k",
+      type: "Photo" as const,
+      imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
     },
     {
       title: "THE POWER OF CONSISTENCY IN LIFE",
@@ -49,6 +88,19 @@ const Index = () => {
       imageUrl: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80"
     },
     {
+      title: "RELAXING MEDITATION AUDIO",
+      subtitle: "- 30 Minutes of Pure Calm",
+      author: "DR. AMINA YUSUF",
+      authorProfileImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80",
+      userId: "6",
+      status: "Online" as const,
+      views: "6.7k",
+      comments: "123",
+      likes: "845",
+      type: "Audio" as const,
+      imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80"
+    },
+    {
       title: "BUILDING YOUR PERSONAL BRAND IN 2025",
       subtitle: "- Digital Marketing Strategies That Actually Work",
       author: "JAMES ADEWALE",
@@ -62,6 +114,19 @@ const Index = () => {
       imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
     },
     {
+      title: "AFRICAN FASHION PHOTOGRAPHY",
+      subtitle: "- Ankara Styles Collection 2025",
+      author: "CHIOMA EZE",
+      authorProfileImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80",
+      userId: "4",
+      status: "Offline" as const,
+      views: "8.5k",
+      comments: "298",
+      likes: "1.4k",
+      type: "Photo" as const,
+      imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80"
+    },
+    {
       title: "CRYPTOCURRENCY INVESTING FOR BEGINNERS",
       subtitle: "- What You Need to Know Before You Start",
       author: "CHIOMA EZE",
@@ -73,71 +138,6 @@ const Index = () => {
       likes: "3.4k",
       type: "Article" as const,
       imageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80"
-    },
-    {
-      title: "FITNESS JOURNEY: FROM ZERO TO HERO",
-      subtitle: "- My 90-Day Transformation Story",
-      author: "DAVID OKONKWO",
-      authorProfileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80",
-      userId: "5",
-      status: "Online" as const,
-      views: "18k",
-      comments: "945",
-      likes: "4.1k",
-      type: "Video" as const,
-      imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80"
-    },
-    {
-      title: "MENTAL HEALTH MATTERS",
-      subtitle: "- Breaking the Stigma in African Communities",
-      author: "DR. AMINA YUSUF",
-      authorProfileImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80",
-      userId: "6",
-      status: "Online" as const,
-      views: "11k",
-      comments: "678",
-      likes: "2.7k",
-      type: "Article" as const,
-      imageUrl: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800&q=80"
-    },
-    {
-      title: "TECH STARTUPS IN NIGERIA",
-      subtitle: "- Success Stories and Lessons Learned",
-      author: "TUNDE BAKARE",
-      authorProfileImage: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80",
-      userId: "7",
-      status: "Offline" as const,
-      views: "14k",
-      comments: "823",
-      likes: "3.2k",
-      type: "Video" as const,
-      imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
-    },
-    {
-      title: "COOKING WITH LOVE: NIGERIAN DELICACIES",
-      subtitle: "- Traditional Recipes with a Modern Twist",
-      author: "CHEF NGOZI",
-      authorProfileImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80",
-      userId: "8",
-      status: "Online" as const,
-      views: "22k",
-      comments: "1.5k",
-      likes: "5.6k",
-      type: "Video" as const,
-      imageUrl: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80"
-    },
-    {
-      title: "REAL ESTATE INVESTMENT STRATEGIES",
-      subtitle: "- How to Build Wealth Through Property",
-      author: "EMEKA NWOSU",
-      authorProfileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
-      userId: "9",
-      status: "Offline" as const,
-      views: "13k",
-      comments: "734",
-      likes: "2.9k",
-      type: "Article" as const,
-      imageUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80"
     },
   ];
 
