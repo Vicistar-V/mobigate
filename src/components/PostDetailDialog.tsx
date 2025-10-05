@@ -7,9 +7,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Eye, MessageSquare, Heart, Share2 } from "lucide-react";
+import { Eye, MessageSquare, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SharePopover } from "./SharePopover";
 
 interface PostDetailDialogProps {
   children: ReactNode;
@@ -99,10 +100,7 @@ export const PostDetailDialog = ({
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Comment
               </Button>
-              <Button className="flex-1" variant="outline">
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
+              <SharePopover title={title} className="flex-1" />
             </div>
           </div>
         </ScrollArea>
