@@ -52,7 +52,7 @@ export const MessagesSheet = () => {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon">
-          <MessageSquare className="h-5 w-5" />
+          <MessageSquare className="h-6 w-6" />
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">

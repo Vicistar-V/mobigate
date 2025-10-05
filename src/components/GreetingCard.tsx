@@ -39,7 +39,7 @@ export const GreetingSection = () => {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm font-medium text-primary hover:underline transition-all hover:text-primary/80"
+              className="text-base font-medium text-primary hover:underline transition-all hover:text-primary/80"
             >
               {link.label}
             </a>
