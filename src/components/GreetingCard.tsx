@@ -45,11 +45,9 @@ export const GreetingSection = () => {
             </a>
           ))}
         </div>
-      </Card>
 
-      {/* Search Card */}
-      <Card className="p-4 hover:shadow-md transition-shadow">
-        <div className="relative">
+        {/* Search Section */}
+        <div className="relative pt-4 border-t">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Search for anything on Mobigate..." 
