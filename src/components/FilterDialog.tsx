@@ -1,41 +1,45 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export const FilterDialog = () => {
   const { toast } = useToast();
+  const [open, setOpen] = useState(false);
 
   const handleApply = () => {
     toast({
       title: "Filter Applied",
       description: "Your wall status has been filtered successfully.",
     });
+    setOpen(false);
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button variant="outline" size="sm">
           Filter Posts
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Filter Wall Status</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent side="bottom" className="h-auto">
+        <SheetHeader>
+          <SheetTitle>Filter Wall Status</SheetTitle>
+          <SheetDescription>
             Choose how you want to filter the wall status posts.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-6 py-4">
+          </SheetDescription>
+        </SheetHeader>
+        <div className="space-y-6 py-6">
           <div className="space-y-3">
             <Label>Post Type</Label>
             <RadioGroup defaultValue="all">
@@ -66,13 +70,13 @@ export const FilterDialog = () => {
             </RadioGroup>
           </div>
         </div>
-        <div className="flex justify-end gap-3">
-          <DialogTrigger asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogTrigger>
-          <Button onClick={handleApply}>Apply Filter</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        <SheetFooter className="flex gap-3">
+          <Button variant="outline" onClick={() => setOpen(false)} className="flex-1">
+            Cancel
+          </Button>
+          <Button onClick={handleApply} className="flex-1">Apply Filter</Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
