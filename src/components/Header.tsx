@@ -9,8 +9,8 @@ export const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="lg:hidden">
-            <Menu className="h-10 w-10" />
+          <Button variant="ghost" size="iconLg" className="lg:hidden">
+            <Menu />
           </Button>
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
