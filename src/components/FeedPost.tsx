@@ -64,17 +64,17 @@ export const FeedPost = ({
           <span className="text-muted-foreground">|</span>
           <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
             <Eye className="h-3.5 w-3.5" />
-            <span>{views}</span>
+            <span>{views} Views</span>
           </div>
           <span className="text-muted-foreground">|</span>
           <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
             <MessageSquare className="h-3.5 w-3.5" />
-            <span>{comments}</span>
+            <span>{comments} Comments</span>
           </div>
           <span className="text-muted-foreground">|</span>
           <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
             <Heart className="h-3.5 w-3.5" />
-            <span>{likeCount}</span>
+            <span>{likeCount} Likes</span>
           </div>
         </div>
 
