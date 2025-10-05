@@ -5,56 +5,51 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 export const UserProfileCard = () => {
-  const navLinks = [
-    { label: "Mobi Quiz Game", href: "#" },
-    { label: "Mobi-Store", href: "#" },
-    { label: "E-Library", href: "#" },
+  const stats = [
+    { label: "Magazine", value: "12" },
+    { label: "Following", value: "245" },
+    { label: "Followers", value: "1.2k" },
+    { label: "Video Calls", value: "8" },
+    { label: "Gifts", value: "34" },
+    { label: "Adverts Log", value: "5" },
   ];
 
   return (
-    <Card className="p-6 space-y-6">
-      <div className="space-y-2">
-        <p className="text-sm text-destructive font-medium">Good Evening</p>
-        <h2 className="text-xl font-bold">NKEMJKA PETER I.</h2>
-        <p className="text-sm text-muted-foreground">Oct; 1, 2025, 4:50pm</p>
+    <Card className="p-4 space-y-4">
+      <div className="flex items-start gap-4">
+        <Avatar className="h-16 w-16">
+          <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=nkemjka" />
+          <AvatarFallback>NP</AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h2 className="text-lg font-semibold">NKEMJKA PETER L</h2>
+          <p className="text-sm text-muted-foreground">Oct. 1, 2025, 8:42pm</p>
+          <div className="mt-2">
+            <span className="text-xs font-medium text-primary">Quick Soul Game</span>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        {navLinks.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            className="text-sm font-medium text-primary hover:underline"
+      <div className="grid grid-cols-3 gap-2">
+        {stats.map((stat) => (
+          <button
+            key={stat.label}
+            className="flex flex-col items-center p-2 rounded-lg hover:bg-muted transition-colors"
           >
-            {link.label}
-          </a>
+            <span className="text-xs font-semibold text-primary">{stat.value}</span>
+            <span className="text-xs text-muted-foreground">{stat.label}</span>
+          </button>
         ))}
       </div>
 
       <div className="relative">
-        <Input 
-          placeholder="Search for anything on Mobigate..." 
-          className="pr-24"
-        />
-        <Button 
-          size="sm"
-          className="absolute right-1 top-1/2 -translate-y-1/2"
-        >
-          SEARCH
-        </Button>
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search for anything on Mobigate..." className="pl-9" />
       </div>
 
-      <Card className="p-4 bg-muted">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=nkemjka" />
-            <AvatarFallback>NP</AvatarFallback>
-          </Avatar>
-          <p className="text-lg font-bold text-primary flex-1 text-center">
-            Create a Monetized Status Post
-          </p>
-        </div>
-      </Card>
+      <Button className="w-full" variant="default">
+        Create a Monetized Status Post
+      </Button>
     </Card>
   );
 };
