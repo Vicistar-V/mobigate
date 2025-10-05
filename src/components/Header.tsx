@@ -9,7 +9,7 @@ export const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="iconLg" className="lg:hidden">
+          <Button variant="ghost" size="iconXl" className="lg:hidden">
             <Menu />
           </Button>
           <div className="flex items-center gap-2">

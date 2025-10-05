@@ -53,7 +53,7 @@ export const NotificationsSheet = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="iconLg" className="relative">
+        <Button variant="ghost" size="iconXl" className="relative">
           <Bell />
           <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
         </Button>
