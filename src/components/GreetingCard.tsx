@@ -34,15 +34,17 @@ export const GreetingSection = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-10 pt-2 border-t">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-base font-medium text-primary hover:underline transition-all hover:text-primary/80"
-            >
-              {link.label}
-            </a>
+        <div className="flex flex-wrap gap-x-1 gap-y-1 pt-2 border-t">
+          {navLinks.map((link, index) => (
+            <span key={link.label}>
+              <a
+                href={link.href}
+                className="text-base font-medium text-primary hover:underline transition-all hover:text-primary/80"
+              >
+                {link.label}
+              </a>
+              {index < navLinks.length - 1 && <span className="text-muted-foreground">,</span>}
+            </span>
           ))}
         </div>
 
