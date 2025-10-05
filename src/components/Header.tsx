@@ -1,6 +1,7 @@
 import { Menu, Bell, MessageSquare } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import profilePhoto from "@/assets/profile-photo.jpg";
 
 export const Header = () => {
   return (
@@ -27,7 +28,7 @@ export const Header = () => {
             <MessageSquare className="h-5 w-5" />
           </Button>
           <Avatar className="h-9 w-9 cursor-pointer">
-            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" />
+            <AvatarImage src={profilePhoto} alt="Profile" />
             <AvatarFallback>NP</AvatarFallback>
           </Avatar>
         </div>
