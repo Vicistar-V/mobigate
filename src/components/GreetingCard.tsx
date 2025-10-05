@@ -43,7 +43,7 @@ export const GreetingSection = () => {
               >
                 {link.label}
               </a>
-              {index < navLinks.length - 1 && <span className="text-muted-foreground">,</span>}
+              {index < navLinks.length - 1 && <span className="text-muted-foreground mx-2">|</span>}
             </span>
           ))}
         </div>
