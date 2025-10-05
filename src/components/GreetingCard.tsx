@@ -34,7 +34,7 @@ export const GreetingSection = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap pt-2 border-t">
+        <div className="flex flex-wrap gap-2 pt-2 border-t">
           {navLinks.map((link, index) => (
             <span key={link.label}>
               <a
