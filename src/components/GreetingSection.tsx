@@ -52,21 +52,19 @@ export const GreetingSection = () => {
       </Card>
 
       {/* Create Post Card */}
-      <Card className="p-5 hover:shadow-md transition-shadow cursor-pointer group">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-14 w-14 border-2 border-primary/20 group-hover:border-primary/40 transition-colors">
+      <Card className="p-4 hover:shadow-md transition-shadow">
+        <Button 
+          className="w-full h-auto py-4 px-4 flex items-center gap-4 justify-start"
+          size="lg"
+        >
+          <Avatar className="h-12 w-12">
             <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=nkemjka" />
             <AvatarFallback>NP</AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <p className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-              Create a Monetized Status Post
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Share your thoughts and earn
-            </p>
-          </div>
-        </div>
+          <span className="text-base font-semibold">
+            Create a Monetized Status Post
+          </span>
+        </Button>
       </Card>
     </div>
   );
