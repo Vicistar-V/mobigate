@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye, MessageSquare, Heart } from "lucide-react";
+import { useState } from "react";
 
 interface FeedPostProps {
   title: string;
@@ -27,6 +28,18 @@ export const FeedPost = ({
   imageUrl,
   fee = "6",
 }: FeedPostProps) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(parseInt(likes));
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikeCount(likeCount - 1);
+    } else {
+      setLikeCount(likeCount + 1);
+    }
+    setIsLiked(!isLiked);
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       {imageUrl && (
@@ -46,26 +59,27 @@ export const FeedPost = ({
           )}
         </div>
 
-        <div className="flex items-center gap-4 text-sm flex-wrap">
-          <div className="flex items-center gap-1 text-emerald-600 font-medium">
-            <span>Fee: {fee} Mobi</span>
+        <div className="flex items-center gap-2 text-xs flex-nowrap overflow-x-auto">
+          <span className="text-emerald-600 font-medium whitespace-nowrap">Fee: {fee} Mobi</span>
+          <span className="text-muted-foreground">|</span>
+          <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
+            <Eye className="h-3.5 w-3.5" />
+            <span>{views}</span>
           </div>
-          <div className="flex items-center gap-1 text-red-600">
-            <Eye className="h-4 w-4" />
-            <span>{views} Views</span>
+          <span className="text-muted-foreground">|</span>
+          <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
+            <MessageSquare className="h-3.5 w-3.5" />
+            <span>{comments}</span>
           </div>
-          <div className="flex items-center gap-1 text-red-600">
-            <MessageSquare className="h-4 w-4" />
-            <span>{comments} Comments</span>
-          </div>
-          <div className="flex items-center gap-1 text-red-600">
-            <Heart className="h-4 w-4" />
-            <span>{likes} Likes</span>
+          <span className="text-muted-foreground">|</span>
+          <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
+            <Heart className="h-3.5 w-3.5" />
+            <span>{likeCount}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t">
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-medium">By {author}</p>
             <div className="flex items-center gap-1.5">
               <div className={`h-2 w-2 rounded-full ${status === "Online" ? "bg-emerald-500" : "bg-red-500"}`} />
@@ -74,11 +88,27 @@ export const FeedPost = ({
               </p>
             </div>
           </div>
-          {!imageUrl && (
-            <Badge variant={type === "Video" ? "destructive" : "secondary"}>
-              {type}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleLike}
+              className={`p-2 rounded-full transition-colors ${
+                isLiked 
+                  ? "bg-red-100 text-red-600" 
+                  : "bg-muted hover:bg-muted/80"
+              }`}
+              aria-label={isLiked ? "Unlike post" : "Like post"}
+            >
+              <Heart 
+                className="h-5 w-5" 
+                fill={isLiked ? "currentColor" : "none"}
+              />
+            </button>
+            {!imageUrl && (
+              <Badge variant={type === "Video" ? "destructive" : "secondary"}>
+                {type}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
     </Card>
