@@ -8,6 +8,7 @@ import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
+import { getPostsByUserId } from "@/data/posts";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
@@ -27,138 +28,8 @@ const Profile = () => {
     }
   };
 
-  const userPosts = [
-    {
-      title: "SOME SECRET TRUTH ABOUT WOMEN",
-      subtitle: "- How Much Do You Know About Your Woman?",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "6.8k",
-      comments: "255",
-      likes: "584",
-      type: "Video" as const,
-      imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80"
-    },
-    {
-      title: "SUNSET VIEWS FROM MY BALCONY",
-      subtitle: "- Nature's Beauty in Lagos",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "4.2k",
-      comments: "128",
-      likes: "892",
-      type: "Photo" as const,
-      imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
-    },
-    {
-      title: "MY LATEST PODCAST EPISODE",
-      subtitle: "- Discussing Women Empowerment in Africa",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "3.5k",
-      comments: "89",
-      likes: "456",
-      type: "Audio" as const,
-      imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80"
-    },
-    {
-      title: "I DON'T GET INVOLVED ROMANTICALLY WITH SMALL BOYS",
-      subtitle: "- Last Time I Did, It Almost Got Me Washing Dishes For A Thousand Years In Abuja!",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "8k",
-      comments: "875",
-      likes: "1.9k",
-      type: "Video" as const,
-      imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80"
-    },
-    {
-      title: "BEAUTIFUL AFRICAN FASHION COLLECTION",
-      subtitle: "- My New Ankara Designs",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "9.1k",
-      comments: "342",
-      likes: "1.5k",
-      type: "Photo" as const,
-      imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80"
-    },
-    {
-      title: "THE POWER OF CONSISTENCY IN LIFE",
-      subtitle: "- Small Daily Actions Lead to Massive Results",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "12k",
-      comments: "432",
-      likes: "2.3k",
-      type: "Article" as const,
-      imageUrl: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80"
-    },
-    {
-      title: "MOTIVATIONAL AUDIO MESSAGE",
-      subtitle: "- Start Your Day Right with Positive Affirmations",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "5.8k",
-      comments: "156",
-      likes: "734",
-      type: "Audio" as const,
-      imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80"
-    },
-    {
-      title: "BUILDING YOUR PERSONAL BRAND IN 2025",
-      subtitle: "- Digital Marketing Strategies That Actually Work",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "9.2k",
-      comments: "567",
-      likes: "1.8k",
-      type: "Video" as const,
-      imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
-    },
-    {
-      title: "FOOD PHOTOGRAPHY COLLECTION",
-      subtitle: "- Nigerian Delicacies That Will Make You Hungry",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "7.3k",
-      comments: "289",
-      likes: "1.2k",
-      type: "Photo" as const,
-      imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
-    },
-    {
-      title: "HOW TO OVERCOME SELF-DOUBT",
-      subtitle: "- A Personal Journey to Self-Confidence",
-      author: "AMAKA JANE JOHNSON",
-      authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
-      userId: "1",
-      status: "Online" as const,
-      views: "6.5k",
-      comments: "234",
-      likes: "987",
-      type: "Article" as const,
-      imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80"
-    },
-  ];
+  // Get posts for this specific user (userId from route params would go here)
+  const userPosts = getPostsByUserId("1");
 
   const filteredPosts = contentFilter === "all" 
     ? userPosts 
