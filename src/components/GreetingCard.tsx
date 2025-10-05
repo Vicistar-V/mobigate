@@ -2,13 +2,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 
 export const GreetingSection = () => {
   const navLinks = [
     { label: "Mobi Quiz Game", href: "#" },
     { label: "Mobi-Store", href: "#" },
     { label: "E-Library", href: "#" },
+    { label: "Friends", href: "#" },
+    { label: "Followers", href: "#" },
+    { label: "Following", href: "#" },
+    { label: "Gifts", href: "#" },
+    { label: "Adverts Log", href: "#" },
   ];
 
   return (
@@ -66,6 +71,7 @@ export const GreetingSection = () => {
               Share your thoughts and earn
             </p>
           </div>
+          <Plus className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
         </div>
       </Card>
     </div>

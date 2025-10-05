@@ -1,5 +1,5 @@
 import { Header } from "@/components/Header";
-import { GreetingSection } from "@/components/GreetingSection";
+import { GreetingSection } from "@/components/GreetingCard";
 import { WallStatus } from "@/components/WallStatus";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { FeedPost } from "@/components/FeedPost";
