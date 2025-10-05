@@ -64,21 +64,18 @@ export const GreetingSection = () => {
       </Card>
 
       {/* Create Post Card */}
-      <Card className="p-4 hover:shadow-md transition-shadow">
-        <Button 
-          className="w-auto gap-3 px-5 py-5 h-auto"
-          size="lg"
-        >
-          <div className="text-left">
-            <p className="text-sm font-semibold">
+      <Card className="p-5 hover:shadow-md transition-shadow cursor-pointer group">
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <p className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
               Create a Monetized Status Post
             </p>
-            <p className="text-xs font-normal opacity-90 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-1">
               Share your thoughts and earn
             </p>
           </div>
-          <Plus className="h-5 w-5" />
-        </Button>
+          <Plus className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+        </div>
       </Card>
     </div>
   );
