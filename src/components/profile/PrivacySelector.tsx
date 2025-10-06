@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Globe, Users, UsersRound, Heart, Eye } from "lucide-react";
+import { Globe, Users, UsersRound, Heart, Eye, Star, ShieldMinus } from "lucide-react";
 
 interface PrivacySelectorProps {
   value: string;
@@ -37,6 +37,18 @@ export const PrivacySelector = ({ value, onChange }: PrivacySelectorProps) => {
             <div className="flex items-center gap-2">
               <UsersRound className="h-3 w-3" />
               <span>Followers</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="fans">
+            <div className="flex items-center gap-2">
+              <Star className="h-3 w-3" />
+              <span>Fans</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="all-except">
+            <div className="flex items-center gap-2">
+              <ShieldMinus className="h-3 w-3" />
+              <span>All Except</span>
             </div>
           </SelectItem>
           <SelectItem value="only-me">
