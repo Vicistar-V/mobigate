@@ -1,0 +1,148 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Pencil, Trash2, Plus } from "lucide-react";
+import { toast } from "sonner";
+
+const educationSchema = z.object({
+  school: z.string().min(1, "School is required"),
+  period: z.string().min(1, "Period is required"),
+});
+
+interface Education {
+  id: string;
+  school: string;
+  period: string;
+}
+
+interface EditEducationFormProps {
+  currentData: Education[];
+  onSave: (data: Education[]) => void;
+  onClose: () => void;
+}
+
+export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducationFormProps) => {
+  const [education, setEducation] = useState<Education[]>(currentData);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const form = useForm({
+    resolver: zodResolver(educationSchema),
+    defaultValues: { school: "", period: "" },
+  });
+
+  const handleAdd = () => {
+    setIsAdding(true);
+    form.reset({ school: "", period: "" });
+  };
+
+  const handleEdit = (edu: Education) => {
+    setEditingId(edu.id);
+    form.reset(edu);
+  };
+
+  const handleDelete = (id: string) => {
+    setEducation(education.filter(edu => edu.id !== id));
+  };
+
+  const onSubmit = (data: z.infer<typeof educationSchema>) => {
+    if (isAdding) {
+      const newEducation: Education = { school: data.school, period: data.period, id: Date.now().toString() };
+      setEducation([...education, newEducation]);
+      setIsAdding(false);
+    } else if (editingId) {
+      setEducation(education.map(edu => edu.id === editingId ? { school: data.school, period: data.period, id: editingId } : edu));
+      setEditingId(null);
+    }
+    form.reset({ school: "", period: "" });
+  };
+
+  const handleSave = () => {
+    onSave(education);
+    toast.success("Education updated successfully");
+    onClose();
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+        {education.map((edu) => (
+          <Card key={edu.id} className="p-3">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-medium">{edu.school}</p>
+                <p className="text-sm text-muted-foreground">{edu.period}</p>
+              </div>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(edu)}>
+                  <Pencil className="h-3 w-3" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(edu.id)}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {(isAdding || editingId) && (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
+            <FormField
+              control={form.control}
+              name="school"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>School/Institution</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., University of Nigeria, Nsukka" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="period"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Period</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Class of 2020 - 2025" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex gap-2">
+              <Button type="submit" size="sm">{editingId ? "Update" : "Add"}</Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Form>
+      )}
+
+      {!isAdding && !editingId && (
+        <Button variant="outline" className="w-full" onClick={handleAdd}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Education
+        </Button>
+      )}
+
+      <div className="flex justify-end gap-2 pt-4 border-t">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Close
+        </Button>
+        <Button onClick={handleSave}>Save All Changes</Button>
+      </div>
+    </div>
+  );
+};
