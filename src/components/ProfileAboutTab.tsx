@@ -189,9 +189,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
                   <div>
-                    <p className="font-medium">{mate.institution}</p>
+                    <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+                    <p className="text-sm text-muted-foreground">{mate.institution}</p>
                     {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
-                    {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
                   </div>
                 </div>
               ))}
@@ -223,9 +223,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
                   <div>
-                    <p className="font-medium">{mate.institution}</p>
+                    <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+                    <p className="text-sm text-muted-foreground">{mate.institution}</p>
                     {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
-                    {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
                   </div>
                 </div>
               ))}
@@ -291,8 +291,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <div key={colleague.id}>
                   {index > 0 && <Separator className="mb-3" />}
                   <div>
-                    <p className="font-medium">{colleague.workplaceName}</p>
-                    {colleague.workplaceLocation && <p className="text-sm text-muted-foreground">{colleague.workplaceLocation}</p>}
+                    <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
+                    <p className="text-sm text-muted-foreground">{colleague.workplaceName}{colleague.workplaceLocation && `, ${colleague.workplaceLocation}`}</p>
                     {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
                   </div>
                 </div>
