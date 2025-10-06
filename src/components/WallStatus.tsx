@@ -456,7 +456,7 @@ export const WallStatus = () => {
               {filteredItems.map((item) => (
                 <Card 
                   key={item.id} 
-                  className="flex-none min-w-[33.333%] basis-1/3 snap-start aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                  className="flex-none w-[70vw] max-w-[300px] snap-start aspect-[3/4] overflow-hidden relative group cursor-pointer"
                 >
                   <img 
                     src={item.image} 
