@@ -15,7 +15,7 @@ interface FeedPostProps {
   views: string;
   comments: string;
   likes: string;
-  type: "Video" | "Article" | "Photo" | "Audio";
+  type: "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL";
   imageUrl?: string;
   fee?: string;
 }
