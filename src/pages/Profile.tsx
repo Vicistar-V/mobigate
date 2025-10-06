@@ -223,11 +223,11 @@ const Profile = () => {
                 />
               </div>
               
-              {/* Normal View - Horizontal Scroll */}
+              {/* Normal View - Horizontal Carousel */}
               {wallStatusView === "normal" && (
                 <ScrollArea className="w-full whitespace-nowrap rounded-lg">
                   <div className="flex gap-4 pb-4">
-                    {filteredWallPosts.slice(0, 8).map((post, index) => (
+                    {filteredWallPosts.map((post, index) => (
                       <Card key={index} className="inline-block w-[300px] flex-shrink-0 overflow-hidden hover:shadow-md transition-all">
                         {post.imageUrl && (
                           <div className="relative h-48 bg-muted">
@@ -251,29 +251,32 @@ const Profile = () => {
                 </ScrollArea>
               )}
               
-              {/* Large Grid View */}
+              {/* Large View - Horizontal Carousel with Bigger Cards */}
               {wallStatusView === "large" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredWallPosts.map((post, index) => (
-                    <Card key={index} className="overflow-hidden hover:shadow-lg transition-all">
-                      {post.imageUrl && (
-                        <div className="relative h-64 bg-muted">
-                          <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+                  <div className="flex gap-6 pb-4">
+                    {filteredWallPosts.map((post, index) => (
+                      <Card key={index} className="inline-block w-[450px] flex-shrink-0 overflow-hidden hover:shadow-lg transition-all">
+                        {post.imageUrl && (
+                          <div className="relative h-72 bg-muted">
+                            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="p-4">
+                          <h4 className="font-semibold text-base line-clamp-2">{post.title}</h4>
+                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.subtitle}</p>
+                          <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                            <span className="bg-primary/10 text-primary px-2 py-1 rounded">{post.type}</span>
+                            <span>{post.views} Views</span>
+                            <span>•</span>
+                            <span>{post.likes} Likes</span>
+                          </div>
                         </div>
-                      )}
-                      <div className="p-4">
-                        <h4 className="font-semibold text-base line-clamp-2">{post.title}</h4>
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.subtitle}</p>
-                        <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                          <span className="bg-primary/10 text-primary px-2 py-1 rounded">{post.type}</span>
-                          <span>{post.views} Views</span>
-                          <span>•</span>
-                          <span>{post.likes} Likes</span>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                      </Card>
+                    ))}
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               )}
             </div>
 

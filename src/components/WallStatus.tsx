@@ -1,13 +1,17 @@
 import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { FilterDialog } from "./FilterDialog";
+import { Grid3x3, Grid2x2 } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 type FilterType = "all" | "user" | "friends";
 
 export const WallStatus = () => {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [sortFilter, setSortFilter] = useState("all");
+  const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
 
   const filterOptions = [
     { value: "all", label: "All Posts" },
@@ -90,7 +94,26 @@ export const WallStatus = () => {
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h3 className="font-semibold text-lg">Wall Status</h3>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setWallStatusView(wallStatusView === "normal" ? "large" : "normal")}
+            className="gap-2"
+          >
+            {wallStatusView === "normal" ? (
+              <>
+                <Grid2x2 className="h-4 w-4" />
+                Large
+              </>
+            ) : (
+              <>
+                <Grid3x3 className="h-4 w-4" />
+                Normal
+              </>
+            )}
+          </Button>
+          
           <ToggleGroup type="single" value={activeFilter} onValueChange={(value) => value && setActiveFilter(value as FilterType)}>
             <ToggleGroupItem value="all" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
               All
@@ -114,28 +137,58 @@ export const WallStatus = () => {
         </div>
       </div>
       
-      <div className="relative">
-        <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div className="flex gap-3 pb-2 flex-nowrap snap-x snap-mandatory">
+      {/* Normal View - Horizontal Carousel */}
+      {wallStatusView === "normal" && (
+        <div className="relative">
+          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
+            <div className="flex gap-3 pb-2 flex-nowrap snap-x snap-mandatory">
+              {filteredItems.map((item) => (
+                <Card 
+                  key={item.id} 
+                  className="flex-none min-w-[33.333%] basis-1/3 snap-start aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                >
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2">
+                    <p className="text-white text-[10px] font-medium truncate">{item.author}</p>
+                    <p className="text-white/80 text-[9px] truncate">{item.title}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Large View - Horizontal Carousel with Bigger Cards */}
+      {wallStatusView === "large" && (
+        <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+          <div className="flex gap-6 pb-4">
             {filteredItems.map((item) => (
               <Card 
                 key={item.id} 
-                className="flex-none min-w-[33.333%] basis-1/3 snap-start aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                className="inline-block w-[450px] flex-shrink-0 overflow-hidden relative group cursor-pointer"
               >
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2">
-                  <p className="text-white text-[10px] font-medium truncate">{item.author}</p>
-                  <p className="text-white/80 text-[9px] truncate">{item.title}</p>
+                <div className="h-[600px]">
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+                    <p className="text-white text-base font-medium">{item.author}</p>
+                    <p className="text-white/90 text-sm">{item.title}</p>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
-        </div>
-      </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      )}
     </Card>
   );
 };
