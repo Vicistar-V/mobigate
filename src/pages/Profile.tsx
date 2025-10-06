@@ -11,11 +11,14 @@ import { useState } from "react";
 import { getPostsByUserId } from "@/data/posts";
 import profileBanner from "@/assets/profile-banner.jpg";
 import { WallStatusFilters } from "@/components/WallStatusFilters";
+import { AdRotation } from "@/components/AdRotation";
+import React from "react";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
+  
   const userProfile = {
     name: "Amaka Jane Johnson",
     location: "Lagos, Nigeria",
@@ -32,6 +35,61 @@ const Profile = () => {
       contents: "318"
     }
   };
+
+  // Ad data for rotation
+  const adSlots = [
+    {
+      slotId: "profile-slot-1",
+      ads: [
+        {
+          id: "ad-p1-1",
+          content: "Premium Content Upgrade - 50% Off!",
+          image: "https://images.unsplash.com/photo-1557838923-2985c318be48?w=800&q=80",
+          duration: 10
+        },
+        {
+          id: "ad-p1-2",
+          content: "New Features Available Now",
+          image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80",
+          duration: 10
+        },
+      ]
+    },
+    {
+      slotId: "profile-slot-2",
+      ads: [
+        {
+          id: "ad-p2-1",
+          content: "Limited Time Offer - Join Premium",
+          image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80",
+          duration: 10
+        },
+        {
+          id: "ad-p2-2",
+          content: "Exclusive Member Benefits",
+          image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80",
+          duration: 10
+        },
+      ]
+    },
+    {
+      slotId: "profile-slot-3",
+      ads: [
+        {
+          id: "ad-p3-1",
+          content: "Boost Your Reach - Advertise Here",
+          image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80",
+          duration: 10
+        },
+        {
+          id: "ad-p3-2",
+          content: "Connect With More Friends",
+          image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
+          duration: 10
+        },
+      ]
+    },
+  ];
 
   // Get posts for this specific user (userId from route params would go here)
   const userPosts = getPostsByUserId("1");
@@ -247,28 +305,44 @@ const Profile = () => {
                 </ScrollArea>
               )}
               
-              {/* Large View - 2-Column Vertical Grid */}
+              {/* Large View - 3-Column Vertical Grid with Ads */}
               {wallStatusView === "large" && (
-                <div className="grid grid-cols-2 gap-4">
-                  {filteredWallPosts.map((post, index) => (
-                    <Card key={index} className="overflow-hidden hover:shadow-lg transition-all">
-                      {post.imageUrl && (
-                        <div className="relative aspect-[3/4] bg-muted">
-                          <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <h4 className="font-semibold text-base line-clamp-2">{post.title}</h4>
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.subtitle}</p>
-                        <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                          <span className="bg-primary/10 text-primary px-2 py-1 rounded">{post.type}</span>
-                          <span>{post.views} Views</span>
-                          <span>•</span>
-                          <span>{post.likes} Likes</span>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                <div className="grid grid-cols-3 gap-3">
+                  {filteredWallPosts.slice(0, 45).map((post, index) => {
+                    const shouldShowAd = (index + 1) % 15 === 0 && index < 44;
+                    const adSlotIndex = Math.floor((index + 1) / 15) - 1;
+                    
+                    return (
+                      <React.Fragment key={`${post.title}-${index}`}>
+                        <Card 
+                          className="overflow-hidden relative group cursor-pointer"
+                        >
+                          <div className="aspect-[3/4]">
+                            {post.imageUrl && (
+                              <img 
+                                src={post.imageUrl} 
+                                alt={post.title}
+                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
+                              <p className="text-white text-sm font-medium truncate">{post.author}</p>
+                              <p className="text-white/90 text-xs truncate">{post.title}</p>
+                            </div>
+                          </div>
+                        </Card>
+                        
+                        {/* Insert ad after every 15 images (5 rows of 3) */}
+                        {shouldShowAd && adSlotIndex >= 0 && adSlotIndex < adSlots.length && (
+                          <AdRotation 
+                            key={`ad-${adSlots[adSlotIndex].slotId}`}
+                            slotId={adSlots[adSlotIndex].slotId}
+                            ads={adSlots[adSlotIndex].ads}
+                          />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
               )}
             </div>
