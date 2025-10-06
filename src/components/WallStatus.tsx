@@ -99,18 +99,12 @@ export const WallStatus = () => {
             variant="outline"
             size="sm"
             onClick={() => setWallStatusView(wallStatusView === "normal" ? "large" : "normal")}
-            className="gap-2"
+            className="gap-1"
           >
             {wallStatusView === "normal" ? (
-              <>
-                <Grid2x2 className="h-4 w-4" />
-                Large
-              </>
+              <Grid2x2 className="h-4 w-4" />
             ) : (
-              <>
-                <Grid3x3 className="h-4 w-4" />
-                Normal
-              </>
+              <Grid3x3 className="h-4 w-4" />
             )}
           </Button>
           
@@ -170,7 +164,7 @@ export const WallStatus = () => {
             {filteredItems.map((item) => (
               <Card 
                 key={item.id} 
-                className="inline-block w-[450px] flex-shrink-0 overflow-hidden relative group cursor-pointer"
+                className="inline-block w-[80%] max-w-[500px] flex-shrink-0 overflow-hidden relative group cursor-pointer"
               >
                 <div className="h-[600px]">
                   <img 
