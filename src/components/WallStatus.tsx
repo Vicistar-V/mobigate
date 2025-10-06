@@ -96,11 +96,11 @@ export const WallStatus = () => {
       
       <div className="relative">
         <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <div className="flex gap-2 pb-2">
+          <div className="flex gap-3 pb-2 flex-nowrap snap-x snap-mandatory">
             {filteredItems.map((item) => (
               <Card 
                 key={item.id} 
-                className="flex-none w-24 aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                className="flex-none min-w-[33.333%] basis-1/3 snap-start aspect-[3/4] overflow-hidden relative group cursor-pointer"
               >
                 <img 
                   src={item.image} 
