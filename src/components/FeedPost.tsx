@@ -4,8 +4,10 @@ import { Eye, MessageSquare, Heart } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { PostOptionsMenu } from "@/components/PostOptionsMenu";
 
 interface FeedPostProps {
+  id?: string;
   title: string;
   subtitle?: string;
   author: string;
@@ -18,9 +20,13 @@ interface FeedPostProps {
   type: "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL";
   imageUrl?: string;
   fee?: string;
+  isOwner?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export const FeedPost = ({
+  id,
   title,
   subtitle,
   author,
@@ -33,6 +39,9 @@ export const FeedPost = ({
   type,
   imageUrl,
   fee = "6",
+  isOwner = false,
+  onEdit,
+  onDelete,
 }: FeedPostProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(parseInt(likes));
@@ -58,10 +67,15 @@ export const FeedPost = ({
       )}
       
       <div className="p-4 space-y-3">
-        <div>
-          <h3 className="font-semibold text-lg leading-tight line-clamp-2">{title}</h3>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg leading-tight line-clamp-2">{title}</h3>
+            {subtitle && (
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
+            )}
+          </div>
+          {isOwner && onEdit && onDelete && (
+            <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
           )}
         </div>
 

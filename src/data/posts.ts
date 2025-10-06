@@ -1,4 +1,5 @@
 export interface Post {
+  id?: string;
   title: string;
   subtitle?: string;
   author: string;
@@ -15,6 +16,7 @@ export interface Post {
 
 export const feedPosts: Post[] = [
   {
+    id: "post_1",
     title: "SOME SECRET TRUTH ABOUT WOMEN",
     subtitle: "- How Much Do You Know About Your Woman?",
     author: "PETER NKEMJKA IPREC",
@@ -28,6 +30,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80"
   },
   {
+    id: "post_2",
     title: "BEAUTIFUL SUNSET PHOTOGRAPHY",
     subtitle: "- Captured at Lekki Beach, Lagos",
     author: "SARAH OKAFOR",
@@ -41,6 +44,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
   },
   {
+    id: "post_3",
     title: "MOTIVATIONAL PODCAST EPISODE 45",
     subtitle: "- Finding Your Purpose in Life",
     author: "JAMES ADEWALE",
@@ -54,6 +58,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80"
   },
   {
+    id: "post_4",
     title: "I DON'T GET INVOLVED ROMANTICALLY WITH SMALL BOYS",
     subtitle: "- Last Time I Did, It Almost Got Me Washing Dishes For A Thousand Years In Abuja!",
     author: "PETER NKEMJKA IPREC",
@@ -67,6 +72,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80"
   },
   {
+    id: "post_5",
     title: "DELICIOUS NIGERIAN JOLLOF RICE",
     subtitle: "- Step by Step Photo Guide",
     author: "CHEF NGOZI",
@@ -80,6 +86,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
   },
   {
+    id: "post_6",
     title: "THE POWER OF CONSISTENCY IN LIFE",
     subtitle: "- Small Daily Actions Lead to Massive Results",
     author: "SARAH OKAFOR",
@@ -93,6 +100,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80"
   },
   {
+    id: "post_7",
     title: "RELAXING MEDITATION AUDIO",
     subtitle: "- 30 Minutes of Pure Calm",
     author: "DR. AMINA YUSUF",
@@ -106,6 +114,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80"
   },
   {
+    id: "post_8",
     title: "BUILDING YOUR PERSONAL BRAND IN 2025",
     subtitle: "- Digital Marketing Strategies That Actually Work",
     author: "JAMES ADEWALE",
@@ -119,6 +128,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
   },
   {
+    id: "post_9",
     title: "AFRICAN FASHION PHOTOGRAPHY",
     subtitle: "- Ankara Styles Collection 2025",
     author: "CHIOMA EZE",
@@ -132,6 +142,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80"
   },
   {
+    id: "post_10",
     title: "CRYPTOCURRENCY INVESTING FOR BEGINNERS",
     subtitle: "- What You Need to Know Before You Start",
     author: "CHIOMA EZE",
@@ -145,6 +156,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80"
   },
   {
+    id: "post_11",
     title: "SUNSET VIEWS FROM MY BALCONY",
     subtitle: "- Nature's Beauty in Lagos",
     author: "AMAKA JANE JOHNSON",
@@ -158,6 +170,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
   },
   {
+    id: "post_12",
     title: "MY LATEST PODCAST EPISODE",
     subtitle: "- Discussing Women Empowerment in Africa",
     author: "AMAKA JANE JOHNSON",
@@ -171,6 +184,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80"
   },
   {
+    id: "post_13",
     title: "BEAUTIFUL AFRICAN FASHION COLLECTION",
     subtitle: "- My New Ankara Designs",
     author: "AMAKA JANE JOHNSON",
@@ -184,6 +198,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80"
   },
   {
+    id: "post_14",
     title: "MOTIVATIONAL AUDIO MESSAGE",
     subtitle: "- Start Your Day Right with Positive Affirmations",
     author: "AMAKA JANE JOHNSON",
@@ -197,6 +212,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80"
   },
   {
+    id: "post_15",
     title: "FOOD PHOTOGRAPHY COLLECTION",
     subtitle: "- Nigerian Delicacies That Will Make You Hungry",
     author: "AMAKA JANE JOHNSON",
@@ -210,6 +226,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
   },
   {
+    id: "post_16",
     title: "HOW TO OVERCOME SELF-DOUBT",
     subtitle: "- A Personal Journey to Self-Confidence",
     author: "AMAKA JANE JOHNSON",
@@ -223,6 +240,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80"
   },
   {
+    id: "post_17",
     title: "COMPLETE GUIDE TO FINANCIAL FREEDOM",
     subtitle: "- PDF E-Book with Investment Strategies",
     author: "TUNDE BAKARE",
@@ -236,6 +254,7 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80"
   },
   {
+    id: "post_18",
     title: "LEARN PYTHON PROGRAMMING - FULL COURSE",
     subtitle: "- Free PDF Tutorial for Beginners",
     author: "JAMES ADEWALE",

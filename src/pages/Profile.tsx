@@ -9,15 +9,22 @@ import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
-import { getPostsByUserId } from "@/data/posts";
+import { getPostsByUserId, Post } from "@/data/posts";
 import profileBanner from "@/assets/profile-banner.jpg";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ProfileAboutTab } from "@/components/ProfileAboutTab";
+import { EditPostDialog } from "@/components/EditPostDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const { toast } = useToast();
+  
+  // Get posts for this specific user and manage as state
+  const [userPosts, setUserPosts] = useState<Post[]>(() => getPostsByUserId("1"));
   
   const userProfile = {
     name: "Amaka Jane Johnson",
@@ -91,8 +98,23 @@ const Profile = () => {
     },
   ];
 
-  // Get posts for this specific user (userId from route params would go here)
-  const userPosts = getPostsByUserId("1");
+  const handleEditPost = (post: Post) => {
+    setEditingPost(post);
+  };
+
+  const handleSavePost = (updatedPost: Post) => {
+    setUserPosts(posts => 
+      posts.map(p => p.id === updatedPost.id ? updatedPost : p)
+    );
+  };
+
+  const handleDeletePost = (postId: string) => {
+    setUserPosts(posts => posts.filter(p => p.id !== postId));
+    toast({
+      title: "Post deleted",
+      description: "Your post has been deleted successfully",
+    });
+  };
 
   // Filter wall status posts based on media type
   const filteredWallPosts = wallStatusFilter === "all"
@@ -259,8 +281,13 @@ const Profile = () => {
               <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               <div className="space-y-6 mt-6">
                 {filteredPosts.map((post, index) => (
-                <div key={index}>
-                  <FeedPost {...post} />
+                <div key={post.id || index}>
+                  <FeedPost 
+                    {...post} 
+                    isOwner={post.userId === "1"}
+                    onEdit={() => handleEditPost(post)}
+                    onDelete={() => handleDeletePost(post.id!)}
+                  />
                   {/* Insert ad after every 5 posts */}
                   {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
@@ -322,6 +349,15 @@ const Profile = () => {
       </main>
 
       <Footer />
+
+      {editingPost && (
+        <EditPostDialog
+          post={editingPost}
+          open={!!editingPost}
+          onOpenChange={(open) => !open && setEditingPost(null)}
+          onSave={handleSavePost}
+        />
+      )}
     </div>
   );
 };
