@@ -11,12 +11,13 @@ import {
   Megaphone,
   Download,
   FolderOpen,
-  ThumbsUp,
+  ShieldCheck,
   RefreshCw,
-  Power,
-  ChevronDown,
+  LogOut,
+  ChevronRight,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useState } from "react";
 
 import {
   Sidebar,
@@ -25,6 +26,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -38,6 +40,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
   {
@@ -101,73 +104,119 @@ const menuItems = [
   },
   { title: "Funds Management", icon: Download, url: "/funds" },
   { title: "Account Statement", icon: FolderOpen, url: "/statement" },
-  { title: "Account Verification", icon: ThumbsUp, url: "/verification" },
+  { title: "Account Verification", icon: ShieldCheck, url: "/verification" },
 ];
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  const toggleExpand = (title: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(title)
+        ? prev.filter((item) => item !== title)
+        : [...prev, title]
+    );
+  };
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-sidebar">
-      <SidebarContent>
+    <Sidebar collapsible="icon" className="border-r border-border/50 bg-gradient-to-b from-card to-muted/30">
+      <SidebarHeader className="border-b border-border/50 px-4 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground font-bold shadow-lg">
+            M
+          </div>
+          {open && (
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-foreground">Mobigate</span>
+              <span className="text-xs text-muted-foreground">Dashboard</span>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="px-3 py-4">
         {/* Dashboard Section */}
-        <SidebarGroup>
+        <SidebarGroup className="mb-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Dashboard">
-                <NavLink
-                  to="/"
-                  end
-                  className={({ isActive }) =>
-                    isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                      : ""
-                  }
-                >
-                  <LayoutDashboard className="h-5 w-5" />
-                  <span>Dashboard</span>
-                </NavLink>
-              </SidebarMenuButton>
+              <NavLink to="/" end>
+                {({ isActive }) => (
+                  <SidebarMenuButton
+                    tooltip="Dashboard"
+                    className={cn(
+                      "group relative overflow-hidden transition-all duration-200",
+                      isActive
+                        ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md hover:shadow-lg"
+                        : "hover:bg-accent/50"
+                    )}
+                  >
+                    <LayoutDashboard className="h-5 w-5" />
+                    <span className="font-medium">Dashboard</span>
+                    {isActive && open && (
+                      <div className="absolute right-0 top-0 h-full w-1 bg-primary-foreground rounded-l-full" />
+                    )}
+                  </SidebarMenuButton>
+                )}
+              </NavLink>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
 
         {/* USERS' MENU Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            USERS' MENU
+          <SidebarGroupLabel className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest px-3 mb-2">
+            Users' Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {menuItems.map((item) => {
+                const isExpanded = expandedItems.includes(item.title);
+
                 // Items with sub-menu
                 if (item.items) {
                   return (
-                    <Collapsible key={item.title} asChild defaultOpen={false}>
+                    <Collapsible
+                      key={item.title}
+                      open={isExpanded}
+                      onOpenChange={() => toggleExpand(item.title)}
+                    >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
-                          <SidebarMenuButton tooltip={item.title}>
-                            <item.icon className="h-5 w-5" />
-                            <span>{item.title}</span>
-                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                          <SidebarMenuButton
+                            tooltip={item.title}
+                            className="group hover:bg-accent/50 transition-all duration-200"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="font-medium">{item.title}</span>
+                            <ChevronRight
+                              className={cn(
+                                "ml-auto h-4 w-4 transition-transform duration-200",
+                                isExpanded && "rotate-90"
+                              )}
+                            />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
+                        <CollapsibleContent className="mt-1">
+                          <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
                             {item.items.map((subItem) => (
                               <SidebarMenuSubItem key={subItem.title}>
-                                <SidebarMenuSubButton asChild>
-                                  <NavLink
-                                    to={subItem.url}
-                                    className={({ isActive }) =>
-                                      isActive
-                                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                                        : ""
-                                    }
-                                  >
-                                    <span>{subItem.title}</span>
-                                  </NavLink>
-                                </SidebarMenuSubButton>
+                                <NavLink to={subItem.url}>
+                                  {({ isActive }) => (
+                                    <SidebarMenuSubButton
+                                      className={cn(
+                                        "transition-all duration-200",
+                                        isActive
+                                          ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
+                                          : "hover:bg-accent/30"
+                                      )}
+                                    >
+                                      <span>{subItem.title}</span>
+                                    </SidebarMenuSubButton>
+                                  )}
+                                </NavLink>
                               </SidebarMenuSubItem>
                             ))}
                           </SidebarMenuSub>
@@ -180,19 +229,31 @@ export function AppSidebar() {
                 // Items without sub-menu
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <NavLink
-                        to={item.url!}
-                        className={({ isActive }) =>
-                          isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                            : ""
-                        }
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
+                    <NavLink to={item.url!}>
+                      {({ isActive }) => (
+                        <SidebarMenuButton
+                          tooltip={item.title}
+                          className={cn(
+                            "group transition-all duration-200",
+                            isActive
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "hover:bg-accent/50"
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
+                              isActive
+                                ? "bg-primary text-primary-foreground shadow-md"
+                                : "bg-primary/10 text-primary group-hover:bg-primary/20"
+                            )}
+                          >
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          <span className="font-medium">{item.title}</span>
+                        </SidebarMenuButton>
+                      )}
+                    </NavLink>
                   </SidebarMenuItem>
                 );
               })}
@@ -202,28 +263,32 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer Actions */}
-      <SidebarFooter>
-        <SidebarMenu>
+      <SidebarFooter className="border-t border-border/50 px-3 py-3 bg-muted/30">
+        <SidebarMenu className="space-y-1">
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Reload"
               onClick={() => window.location.reload()}
+              className="group hover:bg-accent/50 transition-all duration-200"
             >
-              <RefreshCw className="h-5 w-5" />
-              <span>Reload</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted-foreground/10 text-muted-foreground group-hover:bg-muted-foreground/20">
+                <RefreshCw className="h-4 w-4" />
+              </div>
+              <span className="font-medium">Reload</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Sign Out"
               onClick={() => {
-                // Add sign out logic here
                 console.log("Sign out clicked");
               }}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="group hover:bg-destructive/10 text-destructive transition-all duration-200"
             >
-              <Power className="h-5 w-5" />
-              <span>Sign Out</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive group-hover:bg-destructive/20">
+                <LogOut className="h-4 w-4" />
+              </div>
+              <span className="font-medium">Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
