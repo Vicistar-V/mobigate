@@ -17,12 +17,16 @@ import { PrivacySelector } from "./PrivacySelector";
 
 const educationSchema = z.object({
   school: z.string().min(1, "School is required"),
+  faculty: z.string().optional(),
+  department: z.string().optional(),
   period: z.string().min(1, "Period is required"),
 });
 
 interface Education {
   id: string;
   school: string;
+  faculty?: string;
+  department?: string;
   period: string;
 }
 
@@ -40,12 +44,12 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
 
   const form = useForm({
     resolver: zodResolver(educationSchema),
-    defaultValues: { school: "", period: "" },
+    defaultValues: { school: "", faculty: "", department: "", period: "" },
   });
 
   const handleAdd = () => {
     setIsAdding(true);
-    form.reset({ school: "", period: "" });
+    form.reset({ school: "", faculty: "", department: "", period: "" });
   };
 
   const handleEdit = (edu: Education) => {
@@ -59,14 +63,26 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
 
   const onSubmit = (data: z.infer<typeof educationSchema>) => {
     if (isAdding) {
-      const newEducation: Education = { school: data.school, period: data.period, id: Date.now().toString() };
+      const newEducation: Education = { 
+        school: data.school, 
+        faculty: data.faculty, 
+        department: data.department, 
+        period: data.period, 
+        id: Date.now().toString() 
+      };
       setEducation([...education, newEducation]);
       setIsAdding(false);
     } else if (editingId) {
-      setEducation(education.map(edu => edu.id === editingId ? { school: data.school, period: data.period, id: editingId } : edu));
+      setEducation(education.map(edu => edu.id === editingId ? { 
+        school: data.school, 
+        faculty: data.faculty, 
+        department: data.department, 
+        period: data.period, 
+        id: editingId 
+      } : edu));
       setEditingId(null);
     }
-    form.reset({ school: "", period: "" });
+    form.reset({ school: "", faculty: "", department: "", period: "" });
   };
 
   const handleSave = () => {
@@ -83,6 +99,8 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
             <div className="flex justify-between items-start">
               <div>
                 <p className="font-medium">{edu.school}</p>
+                {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
+                {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
                 <p className="text-sm text-muted-foreground">{edu.period}</p>
               </div>
               <div className="flex gap-1">
@@ -109,6 +127,32 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
                   <FormLabel>School/Institution</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., University of Nigeria, Nsukka" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="faculty"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Faculty (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Faculty of Engineering" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="department"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Department (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Civil Engineering" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

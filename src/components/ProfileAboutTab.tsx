@@ -33,6 +33,8 @@ interface Location {
 interface Education {
   id: string;
   school: string;
+  faculty?: string;
+  department?: string;
   period: string;
 }
 
@@ -110,8 +112,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   );
   const [education, setEducation] = useState<Education[]>(() => 
     loadFromStorage("profile_education", [
-      { id: "1", school: "Studied at Nike Grammar School, Enugu, Nigeria", period: "Class of 2013 - 2019." },
-      { id: "2", school: "Studied Civil Engineering at University of Nigeria, Nsukka, Nigeria", period: "Class of 2020 - 2025." },
+      { id: "1", school: "Nike Grammar School, Enugu, Nigeria", period: "Class of 2013 - 2019." },
+      { id: "2", school: "University of Nigeria, Nsukka, Nigeria", faculty: "Faculty of Engineering", department: "Civil Engineering Department", period: "Class of 2020 - 2025." },
     ])
   );
   const [work, setWork] = useState<Work[]>(() => 
@@ -405,6 +407,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {index > 0 && <Separator className="mb-4" />}
               <div>
                 <p className="font-medium">{edu.school}</p>
+                {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
+                {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
                 <p className="text-sm text-muted-foreground">{edu.period}</p>
               </div>
             </div>
