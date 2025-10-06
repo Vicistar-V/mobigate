@@ -105,7 +105,7 @@ const Profile = () => {
     : userPosts.filter(post => post.type.toLowerCase() === contentFilter);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex flex-col w-full min-h-screen bg-background">
       <Header />
       
       <main className="container max-w-4xl mx-auto px-4 py-6 flex-1">
