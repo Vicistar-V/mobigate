@@ -1,11 +1,20 @@
 import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useState } from "react";
+import { FilterDialog } from "./FilterDialog";
 
 type FilterType = "all" | "user" | "friends";
 
 export const WallStatus = () => {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [sortFilter, setSortFilter] = useState("all");
+
+  const filterOptions = [
+    { value: "all", label: "All Posts" },
+    { value: "recent", label: "Most Recent" },
+    { value: "popular", label: "Most Popular" },
+    { value: "trending", label: "Trending" },
+  ];
 
   const allStatusItems: Array<{
     id: number | string;
@@ -81,17 +90,28 @@ export const WallStatus = () => {
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h3 className="font-semibold text-lg">Wall Status</h3>
         
-        <ToggleGroup type="single" value={activeFilter} onValueChange={(value) => value && setActiveFilter(value as FilterType)}>
-          <ToggleGroupItem value="all" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-            All
-          </ToggleGroupItem>
-          <ToggleGroupItem value="user" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-            User's
-          </ToggleGroupItem>
-          <ToggleGroupItem value="friends" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-            Friends
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <div className="flex items-center gap-2">
+          <ToggleGroup type="single" value={activeFilter} onValueChange={(value) => value && setActiveFilter(value as FilterType)}>
+            <ToggleGroupItem value="all" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              All
+            </ToggleGroupItem>
+            <ToggleGroupItem value="user" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              User's
+            </ToggleGroupItem>
+            <ToggleGroupItem value="friends" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              Friends
+            </ToggleGroupItem>
+          </ToggleGroup>
+          
+          <FilterDialog
+            title="Filter Wall Status"
+            description="Choose how you want to sort the wall status posts."
+            options={filterOptions}
+            defaultValue={sortFilter}
+            onApply={setSortFilter}
+            triggerLabel="Filter"
+          />
+        </div>
       </div>
       
       <div className="relative">

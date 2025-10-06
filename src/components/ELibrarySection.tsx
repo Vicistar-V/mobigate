@@ -7,6 +7,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal } from "lucide-react";
+import { FilterDialog } from "./FilterDialog";
+import { useState } from "react";
 
 interface ELibrarySectionProps {
   activeFilter: string;
@@ -28,6 +30,15 @@ const moreFilters = [
 
 export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectionProps) => {
   const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
+  const [sortFilter, setSortFilter] = useState("all");
+
+  const filterOptions = [
+    { value: "all", label: "All Content" },
+    { value: "recent", label: "Most Recent" },
+    { value: "popular", label: "Most Popular" },
+    { value: "trending", label: "Trending" },
+    { value: "viewed", label: "Most Viewed" },
+  ];
   
   return (
     <Card className="p-4">
@@ -83,6 +94,15 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
             })}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <FilterDialog
+          title="Filter E-Library Contents"
+          description="Choose how you want to sort the library content."
+          options={filterOptions}
+          defaultValue={sortFilter}
+          onApply={setSortFilter}
+          triggerLabel="Filter"
+        />
       </div>
     </Card>
   );

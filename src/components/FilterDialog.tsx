@@ -12,15 +12,39 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { SlidersHorizontal } from "lucide-react";
 
-export const FilterDialog = () => {
+interface FilterOption {
+  value: string;
+  label: string;
+}
+
+interface FilterDialogProps {
+  title?: string;
+  description?: string;
+  options: FilterOption[];
+  defaultValue?: string;
+  onApply?: (value: string) => void;
+  triggerLabel?: string;
+}
+
+export const FilterDialog = ({
+  title = "Filter Options",
+  description = "Choose how you want to filter the content.",
+  options,
+  defaultValue = "all",
+  onApply,
+  triggerLabel = "Filter",
+}: FilterDialogProps) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState(defaultValue);
 
   const handleApply = () => {
+    onApply?.(selectedValue);
     toast({
       title: "Filter Applied",
-      description: "Your wall status has been filtered successfully.",
+      description: "Your content has been filtered successfully.",
     });
     setOpen(false);
   };
@@ -28,45 +52,28 @@ export const FilterDialog = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm">
-          Filter Posts
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <SlidersHorizontal className="w-3 h-3" />
+          {triggerLabel}
         </Button>
       </SheetTrigger>
       <SheetContent side="bottom" className="h-auto">
         <SheetHeader>
-          <SheetTitle>Filter Wall Status</SheetTitle>
-          <SheetDescription>
-            Choose how you want to filter the wall status posts.
-          </SheetDescription>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-6">
           <div className="space-y-3">
-            <Label>Post Type</Label>
-            <RadioGroup defaultValue="all">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="all" id="all" />
-                <Label htmlFor="all" className="font-normal cursor-pointer">
-                  All Posts
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="recent" id="recent" />
-                <Label htmlFor="recent" className="font-normal cursor-pointer">
-                  Most Recent
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="popular" id="popular" />
-                <Label htmlFor="popular" className="font-normal cursor-pointer">
-                  Most Popular
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="trending" id="trending" />
-                <Label htmlFor="trending" className="font-normal cursor-pointer">
-                  Trending
-                </Label>
-              </div>
+            <Label>Filter Options</Label>
+            <RadioGroup value={selectedValue} onValueChange={setSelectedValue}>
+              {options.map((option) => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option.value} id={option.value} />
+                  <Label htmlFor={option.value} className="font-normal cursor-pointer">
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
             </RadioGroup>
           </div>
         </div>
