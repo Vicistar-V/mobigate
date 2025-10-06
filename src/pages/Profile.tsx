@@ -3,16 +3,14 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle, LayoutGrid, Columns2 } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
 import { getPostsByUserId } from "@/data/posts";
 import profileBanner from "@/assets/profile-banner.jpg";
-import { WallStatusFilters } from "@/components/WallStatusFilters";
-import { AdRotation } from "@/components/AdRotation";
-import React from "react";
+import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
@@ -250,103 +248,14 @@ const Profile = () => {
             </Card>
 
             {/* Wall Status */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold">Wall Status</h2>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setWallStatusView(wallStatusView === "normal" ? "large" : "normal")}
-                    className="gap-1"
-                  >
-                    {wallStatusView === "normal" ? (
-                      <Columns2 className="h-4 w-4" />
-                    ) : (
-                      <LayoutGrid className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Wall Status Media Type Filters */}
-              <div className="mb-4">
-                <WallStatusFilters 
-                  activeFilter={wallStatusFilter} 
-                  onFilterChange={setWallStatusFilter} 
-                />
-              </div>
-              
-              {/* Normal View - Horizontal Carousel */}
-              {wallStatusView === "normal" && (
-                <div className="relative -mx-4 px-4">
-                  <ScrollArea className="w-full">
-                    <div className="flex gap-3 pb-2">
-                      {filteredWallPosts.map((post, index) => (
-                        <Card 
-                          key={index} 
-                          className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
-                        >
-                          {post.imageUrl && (
-                            <img 
-                              src={post.imageUrl} 
-                              alt={post.title}
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                            <p className="text-white text-sm font-medium truncate">{post.author}</p>
-                            <p className="text-white/90 text-xs truncate">{post.title}</p>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </div>
-              )}
-              
-              {/* Large View - 3-Column Vertical Grid with Ads */}
-              {wallStatusView === "large" && (
-                <div className="grid grid-cols-3 gap-3">
-                  {filteredWallPosts.slice(0, 45).map((post, index) => {
-                    const shouldShowAd = (index + 1) % 15 === 0 && index < 44;
-                    const adSlotIndex = Math.floor((index + 1) / 15) - 1;
-                    
-                    return (
-                      <React.Fragment key={`${post.title}-${index}`}>
-                        <Card 
-                          className="overflow-hidden relative group cursor-pointer"
-                        >
-                          <div className="aspect-[3/4]">
-                            {post.imageUrl && (
-                              <img 
-                                src={post.imageUrl} 
-                                alt={post.title}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                              />
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                              <p className="text-white text-sm font-medium truncate">{post.author}</p>
-                              <p className="text-white/90 text-xs truncate">{post.title}</p>
-                            </div>
-                          </div>
-                        </Card>
-                        
-                        {/* Insert ad after every 15 images (5 rows of 3) */}
-                        {shouldShowAd && adSlotIndex >= 0 && adSlotIndex < adSlots.length && (
-                          <AdRotation 
-                            key={`ad-${adSlots[adSlotIndex].slotId}`}
-                            slotId={adSlots[adSlotIndex].slotId}
-                            ads={adSlots[adSlotIndex].ads}
-                          />
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <WallStatusCarousel 
+              items={userPosts}
+              adSlots={adSlots}
+              view={wallStatusView}
+              onViewChange={setWallStatusView}
+              filter={wallStatusFilter}
+              onFilterChange={setWallStatusFilter}
+            />
 
             {/* Feed Posts with Filter */}
             <div className="space-y-0">

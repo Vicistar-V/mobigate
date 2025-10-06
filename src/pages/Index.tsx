@@ -1,6 +1,6 @@
 import { Header } from "@/components/Header";
 import { GreetingSection } from "@/components/GreetingCard";
-import { WallStatus } from "@/components/WallStatus";
+import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { FeedPost } from "@/components/FeedPost";
 import { AdCard } from "@/components/AdCard";
@@ -9,6 +9,62 @@ import { feedPosts } from "@/data/posts";
 
 const Index = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
+  const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
+  const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
+
+  const adSlots = [
+    {
+      slotId: "home-slot-1",
+      ads: [
+        {
+          id: "ad-h1-1",
+          content: "Premium Content Upgrade - 50% Off!",
+          image: "https://images.unsplash.com/photo-1557838923-2985c318be48?w=800&q=80",
+          duration: 10
+        },
+        {
+          id: "ad-h1-2",
+          content: "New Features Available Now",
+          image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80",
+          duration: 10
+        },
+      ]
+    },
+    {
+      slotId: "home-slot-2",
+      ads: [
+        {
+          id: "ad-h2-1",
+          content: "Limited Time Offer - Join Premium",
+          image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80",
+          duration: 10
+        },
+        {
+          id: "ad-h2-2",
+          content: "Exclusive Member Benefits",
+          image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80",
+          duration: 10
+        },
+      ]
+    },
+    {
+      slotId: "home-slot-3",
+      ads: [
+        {
+          id: "ad-h3-1",
+          content: "Boost Your Reach - Advertise Here",
+          image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80",
+          duration: 10
+        },
+        {
+          id: "ad-h3-2",
+          content: "Connect With More Friends",
+          image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
+          duration: 10
+        },
+      ]
+    },
+  ];
 
   const filteredPosts = contentFilter === "all" 
     ? feedPosts 
@@ -26,8 +82,15 @@ const Index = () => {
           </aside>
 
           {/* Main Feed */}
-          <div className="lg:col-span-2 space-y-6">
-            <WallStatus />
+          <div className="lg:col-span-2 space-y-6 min-w-0">
+            <WallStatusCarousel 
+              items={feedPosts}
+              adSlots={adSlots}
+              view={wallStatusView}
+              onViewChange={setWallStatusView}
+              filter={wallStatusFilter}
+              onFilterChange={setWallStatusFilter}
+            />
             
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
