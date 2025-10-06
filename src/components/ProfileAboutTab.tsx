@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -22,6 +22,43 @@ interface ProfileAboutTabProps {
   userName: string;
 }
 
+interface Location {
+  id: string;
+  place: string;
+  description: string;
+  period?: string;
+}
+
+interface Education {
+  id: string;
+  school: string;
+  period: string;
+}
+
+interface Work {
+  id: string;
+  position: string;
+  period: string;
+}
+
+interface BasicInfo {
+  gender: string;
+  birthday: string;
+  languages: string;
+}
+
+interface FamilyMember {
+  id: string;
+  name: string;
+  relation: string;
+}
+
+interface ContactInfo {
+  phone1: string;
+  phone2?: string;
+  email: string;
+}
+
 export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   // Dialog states
   const [editLocationOpen, setEditLocationOpen] = useState(false);
@@ -37,45 +74,134 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [editAboutOpen, setEditAboutOpen] = useState(false);
 
-  // Data states
-  const [designations, setDesignations] = useState("2-Star User, Mobi-Celebrity");
-  const [locations, setLocations] = useState<{ id: string; place: string; description: string; period?: string }[]>([
-    { id: "1", place: "Onitsha, Anambra State, Nigeria.", description: "Current City" },
-    { id: "2", place: "Awka, Anambra State, Nigeria.", description: "Hometown" },
-    { id: "3", place: "Lived in Aba, Abia, Nigeria", description: "1992 - 1998", period: "1992 - 1998" },
-    { id: "4", place: "Lived in Port-Harcourt, Rivers, Nigeria", description: "2002 - 2009", period: "2002 - 2009" },
-  ]);
-  const [education, setEducation] = useState([
-    { id: "1", school: "Studied at Nike Grammar School, Enugu, Nigeria", period: "Class of 2013 - 2019." },
-    { id: "2", school: "Studied Civil Engineering at University of Nigeria, Nsukka, Nigeria", period: "Class of 2020 - 2025." },
-  ]);
-  const [work, setWork] = useState([
-    { id: "1", position: "CEO at BeamColumn PCC Limited, Onitsha.", period: "January 5, 1995 - Present" },
-    { id: "2", position: "MD at Kemjik Allied Resources Ltd, Aba, Abia State", period: "July 22, 2010 - December 10, 2024." },
-  ]);
-  const [basicInfo, setBasicInfo] = useState({
-    gender: "Female",
-    birthday: "1976-09-20",
-    languages: "English, French and Igbo",
-  });
-  const [relationship, setRelationship] = useState("Married");
-  const [family, setFamily] = useState([
-    { id: "1", name: "Emeka Anigbogu", relation: "Brother" },
-    { id: "2", name: "Stella Anthonia Obi", relation: "Wife" },
-    { id: "3", name: "Michael Johnson Obi", relation: "Son" },
-  ]);
-  const [contact, setContact] = useState<{ phone1: string; phone2?: string; email: string }>({
-    phone1: "+234-806-408-9171",
-    phone2: "+234-803-477-1843",
-    email: "kemjikng@yahoo.com",
-  });
-  const [about, setAbout] = useState(
-    "I'm a Lawyer, Media Professional and Schola, with unique passion and experince in real estates, property development and management.\n\nI work with BeamColumn PCC Limited as Legal Adviser on Property Investments and Corporate Law; and also Senior Negotiator and Evaluator, etc."
+  // Load data from localStorage on mount
+  const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  };
+
+  // Data states with localStorage initialization
+  const [designations, setDesignations] = useState<string>(() => 
+    loadFromStorage("profile_designations", "2-Star User, Mobi-Celebrity")
   );
-  const [schoolMates, setSchoolMates] = useState<SchoolMate[]>([]);
-  const [classmates, setClassmates] = useState<Classmate[]>([]);
-  const [ageMates, setAgeMates] = useState<AgeMate[]>([]);
-  const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>([]);
+  const [locations, setLocations] = useState<Location[]>(() => 
+    loadFromStorage("profile_locations", [
+      { id: "1", place: "Onitsha, Anambra State, Nigeria.", description: "Current City" },
+      { id: "2", place: "Awka, Anambra State, Nigeria.", description: "Hometown" },
+      { id: "3", place: "Lived in Aba, Abia, Nigeria", description: "1992 - 1998", period: "1992 - 1998" },
+      { id: "4", place: "Lived in Port-Harcourt, Rivers, Nigeria", description: "2002 - 2009", period: "2002 - 2009" },
+    ])
+  );
+  const [education, setEducation] = useState<Education[]>(() => 
+    loadFromStorage("profile_education", [
+      { id: "1", school: "Studied at Nike Grammar School, Enugu, Nigeria", period: "Class of 2013 - 2019." },
+      { id: "2", school: "Studied Civil Engineering at University of Nigeria, Nsukka, Nigeria", period: "Class of 2020 - 2025." },
+    ])
+  );
+  const [work, setWork] = useState<Work[]>(() => 
+    loadFromStorage("profile_work", [
+      { id: "1", position: "CEO at BeamColumn PCC Limited, Onitsha.", period: "January 5, 1995 - Present" },
+      { id: "2", position: "MD at Kemjik Allied Resources Ltd, Aba, Abia State", period: "July 22, 2010 - December 10, 2024." },
+    ])
+  );
+  const [basicInfo, setBasicInfo] = useState<BasicInfo>(() => 
+    loadFromStorage("profile_basicInfo", {
+      gender: "Female",
+      birthday: "1976-09-20",
+      languages: "English, French and Igbo",
+    })
+  );
+  const [relationship, setRelationship] = useState<string>(() => 
+    loadFromStorage("profile_relationship", "Married")
+  );
+  const [family, setFamily] = useState<FamilyMember[]>(() => 
+    loadFromStorage("profile_family", [
+      { id: "1", name: "Emeka Anigbogu", relation: "Brother" },
+      { id: "2", name: "Stella Anthonia Obi", relation: "Wife" },
+      { id: "3", name: "Michael Johnson Obi", relation: "Son" },
+    ])
+  );
+  const [contact, setContact] = useState<ContactInfo>(() => 
+    loadFromStorage("profile_contact", {
+      phone1: "+234-806-408-9171",
+      phone2: "+234-803-477-1843",
+      email: "kemjikng@yahoo.com",
+    })
+  );
+  const [about, setAbout] = useState<string>(() => 
+    loadFromStorage("profile_about", 
+      "I'm a Lawyer, Media Professional and Schola, with unique passion and experince in real estates, property development and management.\n\nI work with BeamColumn PCC Limited as Legal Adviser on Property Investments and Corporate Law; and also Senior Negotiator and Evaluator, etc."
+    )
+  );
+  const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => 
+    loadFromStorage<SchoolMate[]>("profile_schoolMates", [])
+  );
+  const [classmates, setClassmates] = useState<Classmate[]>(() => 
+    loadFromStorage<Classmate[]>("profile_classmates", [])
+  );
+  const [ageMates, setAgeMates] = useState<AgeMate[]>(() => 
+    loadFromStorage<AgeMate[]>("profile_ageMates", [])
+  );
+  const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>(() => 
+    loadFromStorage<WorkColleague[]>("profile_workColleagues", [])
+  );
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem("profile_designations", JSON.stringify(designations));
+  }, [designations]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_locations", JSON.stringify(locations));
+  }, [locations]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_education", JSON.stringify(education));
+  }, [education]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_work", JSON.stringify(work));
+  }, [work]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_basicInfo", JSON.stringify(basicInfo));
+  }, [basicInfo]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_relationship", JSON.stringify(relationship));
+  }, [relationship]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_family", JSON.stringify(family));
+  }, [family]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_contact", JSON.stringify(contact));
+  }, [contact]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_about", JSON.stringify(about));
+  }, [about]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_schoolMates", JSON.stringify(schoolMates));
+  }, [schoolMates]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_classmates", JSON.stringify(classmates));
+  }, [classmates]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_ageMates", JSON.stringify(ageMates));
+  }, [ageMates]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_workColleagues", JSON.stringify(workColleagues));
+  }, [workColleagues]);
 
   return (
     <div className="space-y-6">
