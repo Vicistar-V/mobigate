@@ -9,6 +9,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
 import { getPostsByUserId } from "@/data/posts";
+import profileBanner from "@/assets/profile-banner.jpg";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
@@ -41,35 +42,45 @@ const Profile = () => {
       
       <main className="container max-w-4xl mx-auto px-4 py-6">
         {/* Profile Header Card */}
-        <Card className="p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Profile Image */}
-            <div className="flex-shrink-0 relative">
-              <img 
-                src={userProfile.profileImage} 
-                alt={userProfile.name}
-                className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
-              />
-              {userProfile.status === "Online" && (
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                  Online
-                </div>
-              )}
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1 space-y-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-                  {userProfile.verified && (
-                    <CheckCircle className="h-6 w-6 text-emerald-500 fill-emerald-500" />
-                  )}
-                </div>
-                {userProfile.verified && (
-                  <p className="text-emerald-600 font-medium text-sm">Verified Content Creator</p>
+        <Card className="mb-6 overflow-hidden">
+          {/* Profile Banner */}
+          <div className="relative h-48 bg-muted">
+            <img 
+              src={profileBanner} 
+              alt="Profile Banner"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          <div className="px-6 pb-6">
+            <div className="flex flex-col md:flex-row gap-6 -mt-16 relative">
+              {/* Profile Image */}
+              <div className="flex-shrink-0 flex flex-col items-center">
+                <img 
+                  src={userProfile.profileImage} 
+                  alt={userProfile.name}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-card"
+                />
+                {userProfile.status === "Online" && (
+                  <div className="mt-2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                    Online
+                  </div>
                 )}
               </div>
+
+              {/* Profile Info */}
+              <div className="flex-1 space-y-4 md:mt-16">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-2xl font-bold">{userProfile.name}</h1>
+                    {userProfile.verified && (
+                      <CheckCircle className="h-6 w-6 text-emerald-500 fill-emerald-500" />
+                    )}
+                  </div>
+                  {userProfile.verified && (
+                    <p className="text-emerald-600 font-light italic text-sm">Verified Content Creator</p>
+                  )}
+                </div>
 
               {/* Stats */}
               <div className="text-sm text-muted-foreground space-y-1">
@@ -107,12 +118,13 @@ const Profile = () => {
                 </Button>
               </div>
 
-              {/* Friend Status */}
-              {userProfile.isFriend && (
-                <p className="text-emerald-600 font-medium">
-                  You are Friends with {userProfile.name}
-                </p>
-              )}
+                {/* Friend Status */}
+                {userProfile.isFriend && (
+                  <p className="text-emerald-600 font-medium">
+                    You are Friends with {userProfile.name}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </Card>
