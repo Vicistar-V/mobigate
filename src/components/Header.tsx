@@ -16,7 +16,7 @@ export const Header = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
               M
             </div>
-            <span className="text-xl font-bold text-primary">Mobigate</span>
+            <span className="text-xl font-bold text-primary hidden sm:inline">Mobigate</span>
           </div>
         </div>
 
