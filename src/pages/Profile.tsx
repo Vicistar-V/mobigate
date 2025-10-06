@@ -3,7 +3,7 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -144,12 +144,7 @@ const Profile = () => {
 
               {/* Name and Verified Badge */}
               <div className="flex-1 mt-16">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-                  {userProfile.verified && (
-                    <CheckCircle className="h-6 w-6 text-emerald-500 fill-emerald-500" />
-                  )}
-                </div>
+                <h1 className="text-2xl font-bold">{userProfile.name}</h1>
                 {userProfile.verified && (
                   <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
                 )}
