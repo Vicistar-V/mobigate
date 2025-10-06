@@ -44,12 +44,19 @@ const Profile = () => {
         {/* Profile Header Card */}
         <Card className="mb-6 overflow-hidden">
           {/* Profile Banner */}
-          <div className="relative h-48 bg-muted">
+          <div className="relative h-48 bg-muted group">
             <img 
               src={profileBanner} 
               alt="Profile Banner"
               className="w-full h-full object-cover"
             />
+            <Button 
+              size="sm" 
+              className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+              variant="secondary"
+            >
+              Change Banner
+            </Button>
           </div>
           
           <div className="px-6 pb-6">
