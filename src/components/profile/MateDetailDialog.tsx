@@ -110,6 +110,18 @@ export const MateDetailDialog = ({ open, onOpenChange, mate, type }: MateDetailD
           </div>
         </>
       )}
+
+      {data.privacy && (
+        <>
+          <Separator />
+          <div>
+            <h4 className="font-semibold text-sm text-muted-foreground mb-1">Privacy</h4>
+            <Badge variant={data.privacy === 'public' ? 'default' : data.privacy === 'friends' ? 'secondary' : 'outline'} className="capitalize">
+              {data.privacy}
+            </Badge>
+          </div>
+        </>
+      )}
     </>
   );
 
@@ -149,6 +161,18 @@ export const MateDetailDialog = ({ open, onOpenChange, mate, type }: MateDetailD
           <div>
             <h4 className="font-semibold text-sm text-muted-foreground mb-1">Posts Held</h4>
             <p className="whitespace-pre-wrap">{data.postsHeld}</p>
+          </div>
+        </>
+      )}
+
+      {data.privacy && (
+        <>
+          <Separator />
+          <div>
+            <h4 className="font-semibold text-sm text-muted-foreground mb-1">Privacy</h4>
+            <Badge variant={data.privacy === 'public' ? 'default' : data.privacy === 'friends' ? 'secondary' : 'outline'} className="capitalize">
+              {data.privacy}
+            </Badge>
           </div>
         </>
       )}
@@ -212,6 +236,18 @@ export const MateDetailDialog = ({ open, onOpenChange, mate, type }: MateDetailD
           <h4 className="font-semibold text-sm text-muted-foreground mb-1">Special Skills</h4>
           <p className="whitespace-pre-wrap">{data.specialSkills}</p>
         </div>
+      )}
+
+      {data.privacy && (
+        <>
+          <Separator />
+          <div>
+            <h4 className="font-semibold text-sm text-muted-foreground mb-1">Privacy</h4>
+            <Badge variant={data.privacy === 'public' ? 'default' : data.privacy === 'friends' ? 'secondary' : 'outline'} className="capitalize">
+              {data.privacy}
+            </Badge>
+          </div>
+        </>
       )}
     </>
   );
