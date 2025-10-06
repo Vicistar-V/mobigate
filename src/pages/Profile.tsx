@@ -90,19 +90,29 @@ const Profile = () => {
             </div>
 
             {/* Stats and Other Content */}
-            <div className="space-y-4">
+            <div className="space-y-3">
 
               {/* Stats */}
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p>
-                  <span className="font-bold text-foreground">{userProfile.stats.friends}</span> Friends | 
-                  <span className="font-bold text-foreground"> {userProfile.stats.followers}</span> Followers
-                </p>
-                <p>
-                  <span className="font-bold text-foreground">{userProfile.stats.following}</span> Following | 
-                  <span className="font-bold text-foreground"> {userProfile.stats.likes}</span> Likes | 
-                  <span className="font-bold text-foreground"> {userProfile.stats.contents}</span> Contents
-                </p>
+              <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span>
+                  <span className="font-bold text-foreground">{userProfile.stats.friends}</span> Friends
+                </span>
+                <span>|</span>
+                <span>
+                  <span className="font-bold text-foreground">{userProfile.stats.followers}</span> Followers
+                </span>
+                <span>|</span>
+                <span>
+                  <span className="font-bold text-foreground">{userProfile.stats.following}</span> Following
+                </span>
+                <span>|</span>
+                <span>
+                  <span className="font-bold text-foreground">{userProfile.stats.likes}</span> Likes
+                </span>
+                <span>|</span>
+                <span>
+                  <span className="font-bold text-foreground">{userProfile.stats.contents}</span> Contents
+                </span>
               </div>
 
               {/* Action Buttons */}
