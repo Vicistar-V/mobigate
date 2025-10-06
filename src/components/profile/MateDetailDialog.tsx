@@ -128,8 +128,13 @@ export const MateDetailDialog = ({ open, onOpenChange, mate, type }: MateDetailD
   const renderAgeMateDetails = (data: AgeMate) => (
     <>
       <div>
+        <h4 className="font-semibold text-sm text-muted-foreground mb-1">Name</h4>
+        <p className="font-medium">{data.name}</p>
+      </div>
+
+      <div>
         <h4 className="font-semibold text-sm text-muted-foreground mb-1">Community</h4>
-        <p className="font-medium">{data.community}</p>
+        <p>{data.community}</p>
       </div>
 
       {data.nickname && (

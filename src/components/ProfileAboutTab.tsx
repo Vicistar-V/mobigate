@@ -225,6 +225,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
     loadFromStorage<AgeMate[]>("profile_ageMates", [
       {
         id: "1",
+        name: "Chukwuemeka Okafor",
         community: "Onitsha Urban Community",
         ageGrade: "Otu Udo 1975",
         ageBrackets: "1970-1980",
@@ -234,6 +235,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       },
       {
         id: "2",
+        name: "Ifeanyi Nwosu",
         community: "Awka Community Development Union",
         ageGrade: "Ndi Oganiru 1976",
         ageBrackets: "1971-1981",
@@ -516,9 +518,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                     onClick={() => openMateDetails(mate, "agemate")}
                     className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
                   >
-                    <p className="font-medium">{mate.community}</p>
+                    <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+                    <p className="text-sm text-muted-foreground">{mate.community}</p>
                     {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
-                    {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
                     <p className="text-xs text-primary mt-1">Click to view full details</p>
                   </div>
                 </div>

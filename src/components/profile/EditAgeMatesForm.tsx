@@ -10,6 +10,7 @@ import { Trash2, Plus, Save, X } from "lucide-react";
 import { PrivacySelector } from "./PrivacySelector";
 
 const ageMateSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   community: z.string().min(1, "Community is required"),
   ageGrade: z.string().optional(),
   ageBrackets: z.string().optional(),
@@ -19,6 +20,7 @@ const ageMateSchema = z.object({
 
 export interface AgeMate {
   id: string;
+  name: string;
   community: string;
   ageGrade?: string;
   ageBrackets?: string;
@@ -89,9 +91,9 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
       {ageMates.map((mate) => (
         <div key={mate.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
           <div className="flex-1">
-            <p className="font-medium">{mate.community}</p>
+            <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+            <p className="text-sm text-muted-foreground">{mate.community}</p>
             {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
-            {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => handleEdit(mate)}>
@@ -106,6 +108,12 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
 
       {(isAdding || editingId) && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
+          <div>
+            <Label htmlFor="name">Name *</Label>
+            <Input id="name" {...register("name")} />
+            {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
+          </div>
+
           <div>
             <Label htmlFor="community">Community *</Label>
             <Input id="community" {...register("community")} />
