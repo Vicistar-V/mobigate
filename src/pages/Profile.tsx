@@ -3,7 +3,7 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle, Grid3x3, Grid2x2 } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle, LayoutGrid, Columns2 } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -194,19 +194,21 @@ const Profile = () => {
             {/* Wall Status */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Wall Status</h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setWallStatusView(wallStatusView === "normal" ? "large" : "normal")}
-                  className="gap-1"
-                >
-                  {wallStatusView === "normal" ? (
-                    <Grid2x2 className="h-4 w-4" />
-                  ) : (
-                    <Grid3x3 className="h-4 w-4" />
-                  )}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold">Wall Status</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setWallStatusView(wallStatusView === "normal" ? "large" : "normal")}
+                    className="gap-1"
+                  >
+                    {wallStatusView === "normal" ? (
+                      <Columns2 className="h-4 w-4" />
+                    ) : (
+                      <LayoutGrid className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
               
               {/* Wall Status Media Type Filters */}
@@ -245,32 +247,29 @@ const Profile = () => {
                 </ScrollArea>
               )}
               
-              {/* Large View - Horizontal Carousel with Bigger Cards */}
+              {/* Large View - 2-Column Vertical Grid */}
               {wallStatusView === "large" && (
-                <ScrollArea className="w-full whitespace-nowrap rounded-lg">
-                  <div className="flex gap-6 pb-4">
-                    {filteredWallPosts.map((post, index) => (
-                      <Card key={index} className="inline-block w-[70vw] max-w-[600px] flex-shrink-0 overflow-hidden hover:shadow-lg transition-all">
-                        {post.imageUrl && (
-                          <div className="relative h-72 bg-muted">
-                            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
-                          </div>
-                        )}
-                        <div className="p-4">
-                          <h4 className="font-semibold text-base line-clamp-2">{post.title}</h4>
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.subtitle}</p>
-                          <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                            <span className="bg-primary/10 text-primary px-2 py-1 rounded">{post.type}</span>
-                            <span>{post.views} Views</span>
-                            <span>•</span>
-                            <span>{post.likes} Likes</span>
-                          </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {filteredWallPosts.map((post, index) => (
+                    <Card key={index} className="overflow-hidden hover:shadow-lg transition-all">
+                      {post.imageUrl && (
+                        <div className="relative aspect-[3/4] bg-muted">
+                          <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
                         </div>
-                      </Card>
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                      )}
+                      <div className="p-4">
+                        <h4 className="font-semibold text-base line-clamp-2">{post.title}</h4>
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.subtitle}</p>
+                        <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                          <span className="bg-primary/10 text-primary px-2 py-1 rounded">{post.type}</span>
+                          <span>{post.views} Views</span>
+                          <span>•</span>
+                          <span>{post.likes} Likes</span>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               )}
             </div>
 

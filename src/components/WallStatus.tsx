@@ -3,7 +3,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { FilterDialog } from "./FilterDialog";
-import { Grid3x3, Grid2x2 } from "lucide-react";
+import { LayoutGrid, Columns2 } from "lucide-react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 type FilterType = "all" | "user" | "friends";
@@ -101,9 +101,9 @@ export const WallStatus = () => {
             className="gap-1"
           >
             {wallStatusView === "normal" ? (
-              <Grid2x2 className="h-4 w-4" />
+              <Columns2 className="h-4 w-4" />
             ) : (
-              <Grid3x3 className="h-4 w-4" />
+              <LayoutGrid className="h-4 w-4" />
             )}
           </Button>
         </div>
@@ -158,31 +158,28 @@ export const WallStatus = () => {
         </div>
       )}
       
-      {/* Large View - Horizontal Carousel with Bigger Cards */}
+      {/* Large View - 2-Column Vertical Grid */}
       {wallStatusView === "large" && (
-        <ScrollArea className="w-full whitespace-nowrap rounded-lg">
-          <div className="flex gap-6 pb-4">
-            {filteredItems.map((item) => (
-              <Card 
-                key={item.id} 
-                className="inline-block w-[70vw] max-w-[600px] flex-shrink-0 overflow-hidden relative group cursor-pointer"
-              >
-                <div className="h-[600px]">
-                  <img 
-                    src={item.image} 
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
-                    <p className="text-white text-base font-medium">{item.author}</p>
-                    <p className="text-white/90 text-sm">{item.title}</p>
-                  </div>
+        <div className="grid grid-cols-2 gap-4">
+          {filteredItems.map((item) => (
+            <Card 
+              key={item.id} 
+              className="overflow-hidden relative group cursor-pointer"
+            >
+              <div className="aspect-[3/4]">
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+                  <p className="text-white text-base font-medium">{item.author}</p>
+                  <p className="text-white/90 text-sm">{item.title}</p>
                 </div>
-              </Card>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+              </div>
+            </Card>
+          ))}
+        </div>
       )}
     </Card>
   );
