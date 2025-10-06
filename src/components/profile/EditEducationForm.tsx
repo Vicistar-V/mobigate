@@ -20,6 +20,7 @@ const educationSchema = z.object({
   faculty: z.string().optional(),
   department: z.string().optional(),
   period: z.string().min(1, "Period is required"),
+  extraSkills: z.string().optional(),
 });
 
 interface Education {
@@ -28,6 +29,7 @@ interface Education {
   faculty?: string;
   department?: string;
   period: string;
+  extraSkills?: string;
 }
 
 interface EditEducationFormProps {
@@ -44,12 +46,12 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
 
   const form = useForm({
     resolver: zodResolver(educationSchema),
-    defaultValues: { school: "", faculty: "", department: "", period: "" },
+    defaultValues: { school: "", faculty: "", department: "", period: "", extraSkills: "" },
   });
 
   const handleAdd = () => {
     setIsAdding(true);
-    form.reset({ school: "", faculty: "", department: "", period: "" });
+    form.reset({ school: "", faculty: "", department: "", period: "", extraSkills: "" });
   };
 
   const handleEdit = (edu: Education) => {
@@ -68,6 +70,7 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
         faculty: data.faculty, 
         department: data.department, 
         period: data.period, 
+        extraSkills: data.extraSkills,
         id: Date.now().toString() 
       };
       setEducation([...education, newEducation]);
@@ -78,11 +81,12 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
         faculty: data.faculty, 
         department: data.department, 
         period: data.period, 
+        extraSkills: data.extraSkills,
         id: editingId 
       } : edu));
       setEditingId(null);
     }
-    form.reset({ school: "", faculty: "", department: "", period: "" });
+    form.reset({ school: "", faculty: "", department: "", period: "", extraSkills: "" });
   };
 
   const handleSave = () => {
@@ -102,6 +106,7 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
                 {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
                 {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
                 <p className="text-sm text-muted-foreground">{edu.period}</p>
+                {edu.extraSkills && <p className="text-sm text-muted-foreground">Skills: {edu.extraSkills}</p>}
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(edu)}>
@@ -166,6 +171,19 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
                   <FormLabel>Period</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Class of 2020 - 2025" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="extraSkills"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Extra Skills (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., AutoCAD, Project Management, Research" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

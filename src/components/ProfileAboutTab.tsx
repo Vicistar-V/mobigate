@@ -36,6 +36,7 @@ interface Education {
   faculty?: string;
   department?: string;
   period: string;
+  extraSkills?: string;
 }
 
 interface Work {
@@ -113,7 +114,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [education, setEducation] = useState<Education[]>(() => 
     loadFromStorage("profile_education", [
       { id: "1", school: "Nike Grammar School, Enugu, Nigeria", period: "Class of 2013 - 2019." },
-      { id: "2", school: "University of Nigeria, Nsukka, Nigeria", faculty: "Faculty of Engineering", department: "Civil Engineering Department", period: "Class of 2020 - 2025." },
+      { id: "2", school: "University of Nigeria, Nsukka, Nigeria", faculty: "Faculty of Engineering", department: "Civil Engineering Department", period: "Class of 2020 - 2025.", extraSkills: "AutoCAD, Project Management, Research" },
     ])
   );
   const [work, setWork] = useState<Work[]>(() => 
@@ -410,6 +411,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
                 {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
                 <p className="text-sm text-muted-foreground">{edu.period}</p>
+                {edu.extraSkills && <p className="text-sm text-muted-foreground">Skills: {edu.extraSkills}</p>}
               </div>
             </div>
           ))}
