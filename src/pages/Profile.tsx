@@ -279,30 +279,30 @@ const Profile = () => {
               
               {/* Normal View - Horizontal Carousel */}
               {wallStatusView === "normal" && (
-                <ScrollArea className="w-full whitespace-nowrap rounded-lg">
-                  <div className="flex gap-4 pb-4">
-                    {filteredWallPosts.map((post, index) => (
-                      <Card key={index} className="inline-block w-[300px] flex-shrink-0 overflow-hidden hover:shadow-md transition-all">
-                        {post.imageUrl && (
-                          <div className="relative h-48 bg-muted">
-                            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                <div className="relative">
+                  <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
+                    <div className="flex gap-3 pb-2 flex-nowrap snap-x snap-mandatory">
+                      {filteredWallPosts.map((post, index) => (
+                        <Card 
+                          key={index} 
+                          className="flex-none w-[70vw] max-w-[300px] snap-start aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                        >
+                          {post.imageUrl && (
+                            <img 
+                              src={post.imageUrl} 
+                              alt={post.title}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
+                            <p className="text-white text-sm font-medium truncate">{post.author}</p>
+                            <p className="text-white/90 text-xs truncate">{post.title}</p>
                           </div>
-                        )}
-                        <div className="p-3">
-                          <h4 className="font-semibold text-sm line-clamp-2">{post.title}</h4>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{post.subtitle}</p>
-                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                            <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{post.type}</span>
-                            <span>{post.views} Views</span>
-                            <span>•</span>
-                            <span>{post.likes} Likes</span>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      ))}
+                    </div>
                   </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                </div>
               )}
               
               {/* Large View - 3-Column Vertical Grid with Ads */}
