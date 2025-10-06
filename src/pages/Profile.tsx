@@ -44,7 +44,7 @@ const Profile = () => {
         {/* Profile Header Card */}
         <Card className="mb-6 overflow-hidden">
           {/* Profile Banner */}
-          <div className="relative h-48 bg-muted group">
+          <div className="relative h-48 bg-muted">
             <img 
               src={profileBanner} 
               alt="Profile Banner"
@@ -52,8 +52,7 @@ const Profile = () => {
             />
             <Button 
               size="sm" 
-              className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
-              variant="secondary"
+              className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm"
             >
               Change Banner
             </Button>
