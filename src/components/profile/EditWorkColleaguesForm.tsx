@@ -11,6 +11,7 @@ import { Trash2, Plus, Save, X } from "lucide-react";
 import { PrivacySelector } from "./PrivacySelector";
 
 const workColleagueSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   workplaceName: z.string().min(1, "Workplace name is required"),
   workplaceLocation: z.string().optional(),
   nickname: z.string().optional(),
@@ -22,6 +23,7 @@ const workColleagueSchema = z.object({
 
 export interface WorkColleague {
   id: string;
+  name: string;
   workplaceName: string;
   workplaceLocation?: string;
   nickname?: string;
@@ -100,7 +102,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
       {colleagues.map((colleague) => (
         <div key={colleague.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
           <div className="flex-1">
-            <p className="font-medium">{colleague.workplaceName}</p>
+            <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
+            <p className="text-sm text-muted-foreground">{colleague.workplaceName}</p>
             {colleague.workplaceLocation && <p className="text-sm text-muted-foreground">{colleague.workplaceLocation}</p>}
             {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
           </div>
@@ -117,6 +120,12 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
 
       {(isAdding || editingId) && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
+          <div>
+            <Label htmlFor="name">Name *</Label>
+            <Input id="name" {...register("name")} />
+            {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
+          </div>
+
           <div>
             <Label htmlFor="workplaceName">Workplace Name *</Label>
             <Input id="workplaceName" {...register("workplaceName")} />

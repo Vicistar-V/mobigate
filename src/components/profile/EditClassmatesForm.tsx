@@ -10,6 +10,7 @@ import { Trash2, Plus, Save, X } from "lucide-react";
 import { PrivacySelector } from "./PrivacySelector";
 
 const classmateSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   institution: z.string().min(1, "Institution is required"),
   period: z.string().optional(),
   postsHeld: z.string().optional(),
@@ -25,6 +26,7 @@ const classmateSchema = z.object({
 
 export interface Classmate {
   id: string;
+  name: string;
   institution: string;
   period?: string;
   postsHeld?: string;
@@ -101,9 +103,9 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
       {classmates.map((mate) => (
         <div key={mate.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
           <div className="flex-1">
-            <p className="font-medium">{mate.institution}</p>
+            <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+            <p className="text-sm text-muted-foreground">{mate.institution}</p>
             {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
-            {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => handleEdit(mate)}>
@@ -118,6 +120,12 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
 
       {(isAdding || editingId) && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
+          <div>
+            <Label htmlFor="name">Name *</Label>
+            <Input id="name" {...register("name")} />
+            {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
+          </div>
+
           <div>
             <Label htmlFor="institution">School/Institution *</Label>
             <Input id="institution" {...register("institution")} />
