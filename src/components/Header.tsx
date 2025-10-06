@@ -15,11 +15,11 @@ export const Header = () => {
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
-            size="icon"
+            size="iconXl"
             onClick={toggleSidebar}
             className="hover:bg-primary/10"
           >
-            <Menu className="h-5 w-5" />
+            <Menu />
           </Button>
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
