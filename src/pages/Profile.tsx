@@ -25,6 +25,7 @@ const Profile = () => {
       followers: "586",
       following: "421",
       likes: "8.5k",
+      gifts: "142",
       contents: "318"
     }
   };
@@ -108,6 +109,10 @@ const Profile = () => {
                 <span>|</span>
                 <span>
                   <span className="font-bold text-foreground">{userProfile.stats.likes}</span> Likes
+                </span>
+                <span>|</span>
+                <span>
+                  <span className="font-bold text-foreground">{userProfile.stats.gifts}</span> Gifts
                 </span>
                 <span>|</span>
                 <span>
