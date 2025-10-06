@@ -150,16 +150,126 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
     )
   );
   const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => 
-    loadFromStorage<SchoolMate[]>("profile_schoolMates", [])
+    loadFromStorage<SchoolMate[]>("profile_schoolMates", [
+      {
+        id: "1",
+        name: "Chidi Okafor",
+        nickname: "Chief",
+        institution: "Nike Grammar School, Enugu, Nigeria",
+        period: "2013-2019",
+        postsHeld: "Class Captain, Football Team Captain",
+        sportsPlayed: "Football, Basketball",
+        clubsAssociations: "Science Club, Debate Society",
+        favouriteTeacher: "Mr. James Okoli",
+        teacherNickname: "Prof James",
+        teacherHometown: "Enugu",
+        teacherSubject: "Mathematics",
+        teacherPosition: "Senior Teacher",
+        privacy: "public"
+      },
+      {
+        id: "2",
+        name: "Ngozi Eze",
+        nickname: "Ngo",
+        institution: "Nike Grammar School, Enugu, Nigeria",
+        period: "2013-2019",
+        postsHeld: "Library Prefect, Drama Club President",
+        sportsPlayed: "Volleyball, Athletics",
+        clubsAssociations: "Drama Club, Literary Society",
+        favouriteTeacher: "Mrs. Grace Uche",
+        teacherNickname: "Mama Grace",
+        teacherHometown: "Nsukka",
+        teacherSubject: "English Literature",
+        teacherPosition: "Head of Languages",
+        privacy: "friends"
+      }
+    ])
   );
   const [classmates, setClassmates] = useState<Classmate[]>(() => 
-    loadFromStorage<Classmate[]>("profile_classmates", [])
+    loadFromStorage<Classmate[]>("profile_classmates", [
+      {
+        id: "1",
+        name: "Emeka Nnamdi",
+        nickname: "Eme",
+        institution: "University of Nigeria, Nsukka - Civil Engineering",
+        period: "2020-2025",
+        postsHeld: "Class Representative, NICE President",
+        sportsPlayed: "Tennis, Chess",
+        clubsAssociations: "Nigerian Institution of Civil Engineers (NICE), Rotaract Club",
+        favouriteTeacher: "Dr. Peter Obiora",
+        teacherNickname: "Dr. Pete",
+        teacherHometown: "Awka",
+        teacherSubject: "Structural Analysis",
+        teacherPosition: "Senior Lecturer",
+        privacy: "public"
+      },
+      {
+        id: "2",
+        name: "Amaka Okonkwo",
+        nickname: "Amy",
+        institution: "University of Nigeria, Nsukka - Civil Engineering",
+        period: "2020-2025",
+        postsHeld: "Course Rep, Female Engineers Forum Secretary",
+        sportsPlayed: "Badminton, Swimming",
+        clubsAssociations: "Female Engineers Forum, Environmental Club",
+        favouriteTeacher: "Prof. Chinedu Agu",
+        teacherNickname: "Prof. CA",
+        teacherHometown: "Owerri",
+        teacherSubject: "Hydraulic Engineering",
+        teacherPosition: "Professor",
+        privacy: "friends"
+      }
+    ])
   );
   const [ageMates, setAgeMates] = useState<AgeMate[]>(() => 
-    loadFromStorage<AgeMate[]>("profile_ageMates", [])
+    loadFromStorage<AgeMate[]>("profile_ageMates", [
+      {
+        id: "1",
+        community: "Onitsha Urban Community",
+        ageGrade: "Otu Udo 1975",
+        ageBrackets: "1970-1980",
+        nickname: "The Peacemaker",
+        postsHeld: "Youth Leader (1995-1998), Financial Secretary (2005-2010)",
+        privacy: "public"
+      },
+      {
+        id: "2",
+        community: "Awka Community Development Union",
+        ageGrade: "Ndi Oganiru 1976",
+        ageBrackets: "1971-1981",
+        nickname: "Odogwu",
+        postsHeld: "PRO (2000-2005), Vice Chairman (2012-2015)",
+        privacy: "public"
+      }
+    ])
   );
   const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>(() => 
-    loadFromStorage<WorkColleague[]>("profile_workColleagues", [])
+    loadFromStorage<WorkColleague[]>("profile_workColleagues", [
+      {
+        id: "1",
+        name: "Ifeanyi Mbah",
+        nickname: "Ify",
+        workplaceName: "BeamColumn PCC Limited",
+        workplaceLocation: "Onitsha, Anambra State",
+        position: "Senior Engineer",
+        duration: "2015-Present",
+        superiority: "Colleague",
+        specialSkills: "Project Management, Structural Design",
+        privacy: "public"
+      },
+      {
+        id: "2",
+        name: "Obiageli Nwankwo",
+        nickname: "Obi",
+        workplaceName: "Kemjik Allied Resources Ltd",
+        workplaceLocation: "Aba, Abia State",
+        position: "Marketing Manager",
+        duration: "2010-2024",
+        superiority: "Subordinate",
+        specialSkills: "Brand Development, Client Relations",
+        privacy: "friends"
+      }
+    ])
   );
 
   // Save to localStorage whenever data changes
