@@ -1,4 +1,5 @@
 import { Menu } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ProfileDropdown } from "./ProfileDropdown";
 import { NotificationsSheet } from "./NotificationsSheet";
@@ -20,12 +21,12 @@ export const Header = () => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
               M
             </div>
             <span className="text-xl font-bold text-primary hidden sm:inline">Mobigate</span>
-          </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">
