@@ -17,6 +17,7 @@ import { EditSchoolMatesForm, SchoolMate } from "./profile/EditSchoolMatesForm";
 import { EditClassmatesForm, Classmate } from "./profile/EditClassmatesForm";
 import { EditAgeMatesForm, AgeMate } from "./profile/EditAgeMatesForm";
 import { EditWorkColleaguesForm, WorkColleague } from "./profile/EditWorkColleaguesForm";
+import { MateDetailDialog } from "./profile/MateDetailDialog";
 
 interface ProfileAboutTabProps {
   userName: string;
@@ -73,6 +74,17 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editFamilyOpen, setEditFamilyOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [editAboutOpen, setEditAboutOpen] = useState(false);
+  
+  // Detail dialog states
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedMate, setSelectedMate] = useState<SchoolMate | Classmate | AgeMate | WorkColleague | null>(null);
+  const [mateType, setMateType] = useState<"schoolmate" | "classmate" | "agemate" | "colleague">("schoolmate");
+
+  const openMateDetails = (mate: SchoolMate | Classmate | AgeMate | WorkColleague, type: typeof mateType) => {
+    setSelectedMate(mate);
+    setMateType(type);
+    setDetailDialogOpen(true);
+  };
 
   // Load data from localStorage on mount
   const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
@@ -314,10 +326,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {schoolMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div>
+                  <div 
+                    onClick={() => openMateDetails(mate, "schoolmate")}
+                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+                  >
                     <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                     <p className="text-sm text-muted-foreground">{mate.institution}</p>
                     {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                    <p className="text-xs text-primary mt-1">Click to view full details</p>
                   </div>
                 </div>
               ))}
@@ -348,10 +364,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {classmates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div>
+                  <div 
+                    onClick={() => openMateDetails(mate, "classmate")}
+                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+                  >
                     <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                     <p className="text-sm text-muted-foreground">{mate.institution}</p>
                     {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                    <p className="text-xs text-primary mt-1">Click to view full details</p>
                   </div>
                 </div>
               ))}
@@ -382,10 +402,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {ageMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div>
+                  <div 
+                    onClick={() => openMateDetails(mate, "agemate")}
+                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+                  >
                     <p className="font-medium">{mate.community}</p>
                     {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
                     {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
+                    <p className="text-xs text-primary mt-1">Click to view full details</p>
                   </div>
                 </div>
               ))}
@@ -416,10 +440,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {workColleagues.map((colleague, index) => (
                 <div key={colleague.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div>
+                  <div 
+                    onClick={() => openMateDetails(colleague, "colleague")}
+                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+                  >
                     <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
                     <p className="text-sm text-muted-foreground">{colleague.workplaceName}{colleague.workplaceLocation && `, ${colleague.workplaceLocation}`}</p>
                     {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
+                    <p className="text-xs text-primary mt-1">Click to view full details</p>
                   </div>
                 </div>
               ))}
@@ -756,6 +784,13 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           onClose={() => setEditWorkColleaguesOpen(false)}
         />
       </EditSectionDialog>
+
+      <MateDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        mate={selectedMate}
+        type={mateType}
+      />
     </div>
   );
 };
