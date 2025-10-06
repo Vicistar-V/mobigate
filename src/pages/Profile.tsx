@@ -11,6 +11,7 @@ import { useState } from "react";
 import { getPostsByUserId } from "@/data/posts";
 import profileBanner from "@/assets/profile-banner.jpg";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
+import { ProfileAboutTab } from "@/components/ProfileAboutTab";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
@@ -277,10 +278,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="about">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">About</h2>
-              <p className="text-muted-foreground">User information will be displayed here.</p>
-            </Card>
+            <ProfileAboutTab userName={userProfile.name} />
           </TabsContent>
 
           <TabsContent value="friends">
