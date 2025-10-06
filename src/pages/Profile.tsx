@@ -35,6 +35,12 @@ const Profile = () => {
   // Get posts for this specific user (userId from route params would go here)
   const userPosts = getPostsByUserId("1");
 
+  // Filter wall status posts based on media type
+  const filteredWallPosts = wallStatusFilter === "all"
+    ? userPosts
+    : userPosts.filter(post => post.type.toLowerCase() === wallStatusFilter);
+
+  // Filter e-library content posts
   const filteredPosts = contentFilter === "all" 
     ? userPosts 
     : userPosts.filter(post => post.type.toLowerCase() === contentFilter);
@@ -200,7 +206,7 @@ const Profile = () => {
               
               <ScrollArea className="w-full whitespace-nowrap rounded-lg">
                 <div className="flex gap-4 pb-4">
-                  {userPosts.slice(0, 3).map((post, index) => (
+                  {filteredWallPosts.slice(0, 8).map((post, index) => (
                     <Card key={index} className="inline-block w-[300px] flex-shrink-0 overflow-hidden hover:shadow-md transition-shadow">
                       {post.imageUrl && (
                         <div className="relative h-48 bg-muted">
@@ -209,7 +215,9 @@ const Profile = () => {
                       )}
                       <div className="p-3">
                         <h4 className="font-semibold text-sm line-clamp-2">{post.title}</h4>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{post.subtitle}</p>
                         <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{post.type}</span>
                           <span>{post.views} Views</span>
                           <span>•</span>
                           <span>{post.likes} Likes</span>
