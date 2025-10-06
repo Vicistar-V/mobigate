@@ -1,4 +1,5 @@
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,10 +105,10 @@ const Profile = () => {
     : userPosts.filter(post => post.type.toLowerCase() === contentFilter);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main className="container max-w-4xl mx-auto px-4 py-6">
+      <main className="container max-w-4xl mx-auto px-4 py-6 flex-1">
         {/* Profile Header Card */}
         <Card className="mb-6 overflow-hidden">
           {/* Profile Banner */}
@@ -319,6 +320,8 @@ const Profile = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      <Footer />
     </div>
   );
 };

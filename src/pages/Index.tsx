@@ -1,4 +1,5 @@
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { GreetingSection } from "@/components/GreetingCard";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -71,10 +72,10 @@ const Index = () => {
     : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main className="container max-w-7xl mx-auto px-4 py-6">
+      <main className="container max-w-7xl mx-auto px-4 py-6 flex-1">
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Sidebar - Greeting Section */}
           <aside className="lg:col-span-1 space-y-6">
@@ -112,6 +113,8 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
