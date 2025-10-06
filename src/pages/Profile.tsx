@@ -53,7 +53,8 @@ const Profile = () => {
           </div>
           
           <div className="px-6 pb-6">
-            <div className="flex flex-col md:flex-row gap-6 -mt-16 relative">
+            {/* Profile Image and Name Row */}
+            <div className="flex items-start gap-4 -mt-16 relative mb-6">
               {/* Profile Image */}
               <div className="flex-shrink-0 flex flex-col items-center">
                 <img 
@@ -68,19 +69,22 @@ const Profile = () => {
                 )}
               </div>
 
-              {/* Profile Info */}
-              <div className="flex-1 space-y-4 md:mt-16">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-                    {userProfile.verified && (
-                      <CheckCircle className="h-6 w-6 text-emerald-500 fill-emerald-500" />
-                    )}
-                  </div>
+              {/* Name and Verified Badge */}
+              <div className="flex-1 mt-16">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">{userProfile.name}</h1>
                   {userProfile.verified && (
-                    <p className="text-emerald-600 font-light italic text-sm">Verified Content Creator</p>
+                    <CheckCircle className="h-6 w-6 text-emerald-500 fill-emerald-500" />
                   )}
                 </div>
+                {userProfile.verified && (
+                  <p className="text-emerald-600 font-light italic text-sm">Verified Content Creator</p>
+                )}
+              </div>
+            </div>
+
+            {/* Stats and Other Content */}
+            <div className="space-y-4">
 
               {/* Stats */}
               <div className="text-sm text-muted-foreground space-y-1">
@@ -118,13 +122,12 @@ const Profile = () => {
                 </Button>
               </div>
 
-                {/* Friend Status */}
-                {userProfile.isFriend && (
-                  <p className="text-emerald-600 font-medium">
-                    You are Friends with {userProfile.name}
-                  </p>
-                )}
-              </div>
+              {/* Friend Status */}
+              {userProfile.isFriend && (
+                <p className="text-emerald-600 font-medium">
+                  You are Friends with {userProfile.name}
+                </p>
+              )}
             </div>
           </div>
         </Card>
