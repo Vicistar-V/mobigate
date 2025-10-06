@@ -2,12 +2,18 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { PrivacySelector } from "./PrivacySelector";
 
 const locationSchema = z.object({
   place: z.string().min(1, "Place is required"),
@@ -32,6 +38,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   const [locations, setLocations] = useState<Location[]>(currentData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [privacy, setPrivacy] = useState("public");
 
   const form = useForm({
     resolver: zodResolver(locationSchema),
@@ -45,7 +52,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
 
   const handleEdit = (location: Location) => {
     setEditingId(location.id);
-    form.reset(location);
+    form.reset({ place: location.place, description: location.description, period: location.period || "" });
   };
 
   const handleDelete = (id: string) => {
@@ -136,6 +143,12 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
                 </FormItem>
               )}
             />
+            <div>
+              <FormLabel>Privacy</FormLabel>
+              <div className="mt-2">
+                <PrivacySelector value={privacy} onChange={setPrivacy} />
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button type="submit" size="sm">{editingId ? "Update" : "Add"}</Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>

@@ -3,9 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { EditSectionDialog } from "./profile/EditSectionDialog";
 import { EditBasicInfoForm } from "./profile/EditBasicInfoForm";
-import { EditDesignationsForm } from "./profile/EditDesignationsForm";
 import { EditRelationshipForm } from "./profile/EditRelationshipForm";
 import { EditAboutForm } from "./profile/EditAboutForm";
 import { EditContactForm } from "./profile/EditContactForm";
@@ -20,7 +20,6 @@ interface ProfileAboutTabProps {
 
 export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   // Dialog states
-  const [editDesignationsOpen, setEditDesignationsOpen] = useState(false);
   const [editLocationOpen, setEditLocationOpen] = useState(false);
   const [editEducationOpen, setEditEducationOpen] = useState(false);
   const [editWorkOpen, setEditWorkOpen] = useState(false);
@@ -75,6 +74,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <CheckCircle className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">User Category</h3>
           </div>
+          <Badge variant="secondary" className="text-xs">System Managed</Badge>
         </div>
         <p className="text-sm text-muted-foreground">Verified User</p>
       </Card>
@@ -86,14 +86,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <CheckCircle className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">Designations</h3>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
-            onClick={() => setEditDesignationsOpen(true)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
+          <Badge variant="secondary" className="text-xs">Auto-Assigned</Badge>
         </div>
         <p className="font-medium">{designations}</p>
       </Card>
@@ -331,18 +324,6 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       </Card>
 
       {/* Edit Dialogs */}
-      <EditSectionDialog
-        open={editDesignationsOpen}
-        onOpenChange={setEditDesignationsOpen}
-        title="Edit Designations"
-      >
-        <EditDesignationsForm
-          currentData={designations}
-          onSave={setDesignations}
-          onClose={() => setEditDesignationsOpen(false)}
-        />
-      </EditSectionDialog>
-
       <EditSectionDialog
         open={editLocationOpen}
         onOpenChange={setEditLocationOpen}

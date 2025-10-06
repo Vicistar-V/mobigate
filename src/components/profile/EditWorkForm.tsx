@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { PrivacySelector } from "./PrivacySelector";
 
 const workSchema = z.object({
   position: z.string().min(1, "Position is required"),
@@ -18,6 +19,7 @@ interface Work {
   id: string;
   position: string;
   period: string;
+  privacy?: string;
 }
 
 interface EditWorkFormProps {
@@ -30,8 +32,9 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
   const [work, setWork] = useState<Work[]>(currentData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [privacy, setPrivacy] = useState("public");
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof workSchema>>({
     resolver: zodResolver(workSchema),
     defaultValues: { position: "", period: "" },
   });
@@ -43,7 +46,8 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
 
   const handleEdit = (workItem: Work) => {
     setEditingId(workItem.id);
-    form.reset(workItem);
+    form.reset({ position: workItem.position, period: workItem.period });
+    setPrivacy(workItem.privacy || "public");
   };
 
   const handleDelete = (id: string) => {
@@ -52,14 +56,25 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
 
   const onSubmit = (data: z.infer<typeof workSchema>) => {
     if (isAdding) {
-      const newWork: Work = { position: data.position, period: data.period, id: Date.now().toString() };
+      const newWork: Work = { 
+        position: data.position, 
+        period: data.period, 
+        id: Date.now().toString(),
+        privacy 
+      };
       setWork([...work, newWork]);
       setIsAdding(false);
     } else if (editingId) {
-      setWork(work.map(w => w.id === editingId ? { position: data.position, period: data.period, id: editingId } : w));
+      setWork(work.map(w => w.id === editingId ? { 
+        position: data.position, 
+        period: data.period, 
+        id: editingId,
+        privacy 
+      } : w));
       setEditingId(null);
     }
     form.reset({ position: "", period: "" });
+    setPrivacy("public");
   };
 
   const handleSave = () => {
@@ -120,6 +135,12 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
                 </FormItem>
               )}
             />
+            <div>
+              <FormLabel>Privacy</FormLabel>
+              <div className="mt-2">
+                <PrivacySelector value={privacy} onChange={setPrivacy} />
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button type="submit" size="sm">{editingId ? "Update" : "Add"}</Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>

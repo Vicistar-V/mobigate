@@ -4,20 +4,31 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { PrivacySelector } from "./PrivacySelector";
 
 const familySchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  friendId: z.string().min(1, "Please select a friend"),
   relation: z.string().min(1, "Relation is required"),
 });
+
+// Mock friends data - in real app this would come from backend
+const mockFriends = [
+  { id: "1", name: "John Doe" },
+  { id: "2", name: "Jane Smith" },
+  { id: "3", name: "Mike Johnson" },
+  { id: "4", name: "Sarah Williams" },
+  { id: "5", name: "David Brown" },
+];
 
 interface FamilyMember {
   id: string;
   name: string;
   relation: string;
+  privacy?: string;
 }
 
 interface EditFamilyFormProps {
@@ -30,20 +41,22 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
   const [family, setFamily] = useState<FamilyMember[]>(currentData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [privacy, setPrivacy] = useState("public");
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof familySchema>>({
     resolver: zodResolver(familySchema),
-    defaultValues: { name: "", relation: "" },
+    defaultValues: { friendId: "", relation: "" },
   });
 
   const handleAdd = () => {
     setIsAdding(true);
-    form.reset({ name: "", relation: "" });
+    form.reset({ friendId: "", relation: "" });
   };
 
   const handleEdit = (member: FamilyMember) => {
     setEditingId(member.id);
-    form.reset(member);
+    form.reset({ friendId: "", relation: member.relation });
+    setPrivacy(member.privacy || "public");
   };
 
   const handleDelete = (id: string) => {
@@ -51,15 +64,29 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
   };
 
   const onSubmit = (data: z.infer<typeof familySchema>) => {
+    const selectedFriend = mockFriends.find(f => f.id === data.friendId);
+    if (!selectedFriend) return;
+
     if (isAdding) {
-      const newMember: FamilyMember = { name: data.name, relation: data.relation, id: Date.now().toString() };
+      const newMember: FamilyMember = { 
+        name: selectedFriend.name, 
+        relation: data.relation, 
+        id: Date.now().toString(),
+        privacy 
+      };
       setFamily([...family, newMember]);
       setIsAdding(false);
     } else if (editingId) {
-      setFamily(family.map(m => m.id === editingId ? { name: data.name, relation: data.relation, id: editingId } : m));
+      setFamily(family.map(m => m.id === editingId ? { 
+        name: selectedFriend.name, 
+        relation: data.relation, 
+        id: editingId,
+        privacy 
+      } : m));
       setEditingId(null);
     }
-    form.reset({ name: "", relation: "" });
+    form.reset({ friendId: "", relation: "" });
+    setPrivacy("public");
   };
 
   const handleSave = () => {
@@ -96,13 +123,24 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
             <FormField
               control={form.control}
-              name="name"
+              name="friendId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., John Doe" {...field} />
-                  </FormControl>
+                  <FormLabel>Select Friend</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a friend" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-50 bg-background">
+                      {mockFriends.map((friend) => (
+                        <SelectItem key={friend.id} value={friend.id}>
+                          {friend.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -112,14 +150,41 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
               name="relation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Relation</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Brother, Sister, Son" {...field} />
-                  </FormControl>
+                  <FormLabel>Family Relation</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select relationship" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-50 bg-background">
+                      <SelectItem value="Father">Father</SelectItem>
+                      <SelectItem value="Mother">Mother</SelectItem>
+                      <SelectItem value="Brother">Brother</SelectItem>
+                      <SelectItem value="Sister">Sister</SelectItem>
+                      <SelectItem value="Son">Son</SelectItem>
+                      <SelectItem value="Daughter">Daughter</SelectItem>
+                      <SelectItem value="Husband">Husband</SelectItem>
+                      <SelectItem value="Wife">Wife</SelectItem>
+                      <SelectItem value="Uncle">Uncle</SelectItem>
+                      <SelectItem value="Aunt">Aunt</SelectItem>
+                      <SelectItem value="Cousin">Cousin</SelectItem>
+                      <SelectItem value="Nephew">Nephew</SelectItem>
+                      <SelectItem value="Niece">Niece</SelectItem>
+                      <SelectItem value="Grandfather">Grandfather</SelectItem>
+                      <SelectItem value="Grandmother">Grandmother</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div>
+              <FormLabel>Privacy</FormLabel>
+              <div className="mt-2">
+                <PrivacySelector value={privacy} onChange={setPrivacy} />
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button type="submit" size="sm">{editingId ? "Update" : "Add"}</Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>

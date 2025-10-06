@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { PrivacySelector } from "./PrivacySelector";
 
 const formSchema = z.object({
   phone1: z.string().min(1, "Primary phone is required"),
@@ -25,6 +27,8 @@ interface EditContactFormProps {
 }
 
 export const EditContactForm = ({ currentData, onSave, onClose }: EditContactFormProps) => {
+  const [privacy, setPrivacy] = useState("public");
+  
   const form = useForm<ContactInfo>({
     resolver: zodResolver(formSchema),
     defaultValues: currentData,
@@ -78,6 +82,12 @@ export const EditContactForm = ({ currentData, onSave, onClose }: EditContactFor
             </FormItem>
           )}
         />
+        <div>
+          <FormLabel>Privacy</FormLabel>
+          <div className="mt-2">
+            <PrivacySelector value={privacy} onChange={setPrivacy} />
+          </div>
+        </div>
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel

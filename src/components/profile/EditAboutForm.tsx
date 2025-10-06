@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { PrivacySelector } from "./PrivacySelector";
 
 const formSchema = z.object({
   about: z.string().min(10, "About must be at least 10 characters").max(1000, "About must be less than 1000 characters"),
@@ -17,6 +19,8 @@ interface EditAboutFormProps {
 }
 
 export const EditAboutForm = ({ currentData, onSave, onClose }: EditAboutFormProps) => {
+  const [privacy, setPrivacy] = useState("public");
+  
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: { about: currentData },
@@ -55,6 +59,12 @@ export const EditAboutForm = ({ currentData, onSave, onClose }: EditAboutFormPro
             </FormItem>
           )}
         />
+        <div>
+          <FormLabel>Privacy</FormLabel>
+          <div className="mt-2">
+            <PrivacySelector value={privacy} onChange={setPrivacy} />
+          </div>
+        </div>
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel

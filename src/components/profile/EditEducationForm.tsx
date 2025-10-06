@@ -2,12 +2,18 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { PrivacySelector } from "./PrivacySelector";
 
 const educationSchema = z.object({
   school: z.string().min(1, "School is required"),
@@ -30,6 +36,7 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
   const [education, setEducation] = useState<Education[]>(currentData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [privacy, setPrivacy] = useState("public");
 
   const form = useForm({
     resolver: zodResolver(educationSchema),
@@ -120,6 +127,12 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
                 </FormItem>
               )}
             />
+            <div>
+              <FormLabel>Privacy</FormLabel>
+              <div className="mt-2">
+                <PrivacySelector value={privacy} onChange={setPrivacy} />
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button type="submit" size="sm">{editingId ? "Update" : "Add"}</Button>
               <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>

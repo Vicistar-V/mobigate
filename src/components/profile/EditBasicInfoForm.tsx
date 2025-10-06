@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -6,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { PrivacySelector } from "./PrivacySelector";
 
 const formSchema = z.object({
   gender: z.string().min(1, "Gender is required"),
@@ -26,6 +28,8 @@ interface EditBasicInfoFormProps {
 }
 
 export const EditBasicInfoForm = ({ currentData, onSave, onClose }: EditBasicInfoFormProps) => {
+  const [privacy, setPrivacy] = useState("public");
+  
   const form = useForm<BasicInfo>({
     resolver: zodResolver(formSchema),
     defaultValues: currentData,
@@ -52,7 +56,7 @@ export const EditBasicInfoForm = ({ currentData, onSave, onClose }: EditBasicInf
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="z-50 bg-background">
                   <SelectItem value="Male">Male</SelectItem>
                   <SelectItem value="Female">Female</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
@@ -88,6 +92,12 @@ export const EditBasicInfoForm = ({ currentData, onSave, onClose }: EditBasicInf
             </FormItem>
           )}
         />
+        <div>
+          <FormLabel>Privacy</FormLabel>
+          <div className="mt-2">
+            <PrivacySelector value={privacy} onChange={setPrivacy} />
+          </div>
+        </div>
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
