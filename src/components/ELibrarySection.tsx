@@ -62,7 +62,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
               className="text-xs md:text-sm gap-1.5"
             >
               <MoreHorizontal className="w-3 h-3" />
-              ...More
+              More
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-card z-50">
