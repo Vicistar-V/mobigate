@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { EditSectionDialog } from "./profile/EditSectionDialog";
 import { EditBasicInfoForm } from "./profile/EditBasicInfoForm";
@@ -13,6 +13,10 @@ import { EditLocationForm } from "./profile/EditLocationForm";
 import { EditEducationForm } from "./profile/EditEducationForm";
 import { EditWorkForm } from "./profile/EditWorkForm";
 import { EditFamilyForm } from "./profile/EditFamilyForm";
+import { EditSchoolMatesForm, SchoolMate } from "./profile/EditSchoolMatesForm";
+import { EditClassmatesForm, Classmate } from "./profile/EditClassmatesForm";
+import { EditAgeMatesForm, AgeMate } from "./profile/EditAgeMatesForm";
+import { EditWorkColleaguesForm, WorkColleague } from "./profile/EditWorkColleaguesForm";
 
 interface ProfileAboutTabProps {
   userName: string;
@@ -22,6 +26,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   // Dialog states
   const [editLocationOpen, setEditLocationOpen] = useState(false);
   const [editEducationOpen, setEditEducationOpen] = useState(false);
+  const [editSchoolMatesOpen, setEditSchoolMatesOpen] = useState(false);
+  const [editClassmatesOpen, setEditClassmatesOpen] = useState(false);
+  const [editAgeMatesOpen, setEditAgeMatesOpen] = useState(false);
+  const [editWorkColleaguesOpen, setEditWorkColleaguesOpen] = useState(false);
   const [editWorkOpen, setEditWorkOpen] = useState(false);
   const [editBasicInfoOpen, setEditBasicInfoOpen] = useState(false);
   const [editRelationshipOpen, setEditRelationshipOpen] = useState(false);
@@ -64,6 +72,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [about, setAbout] = useState(
     "I'm a Lawyer, Media Professional and Schola, with unique passion and experince in real estates, property development and management.\n\nI work with BeamColumn PCC Limited as Legal Adviser on Property Investments and Corporate Law; and also Senior Negotiator and Evaluator, etc."
   );
+  const [schoolMates, setSchoolMates] = useState<SchoolMate[]>([]);
+  const [classmates, setClassmates] = useState<Classmate[]>([]);
+  const [ageMates, setAgeMates] = useState<AgeMate[]>([]);
+  const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>([]);
 
   return (
     <div className="space-y-6">
@@ -147,6 +159,148 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               </div>
             </div>
           ))}
+        </div>
+      </Card>
+
+      {/* Life Mates */}
+      <Card className="p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <UserCog className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Life Mates</h3>
+        </div>
+
+        {/* School Mates */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium">School Mates</h4>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 text-muted-foreground hover:text-primary"
+              onClick={() => setEditSchoolMatesOpen(true)}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+          {schoolMates.length > 0 ? (
+            <div className="space-y-3">
+              {schoolMates.map((mate, index) => (
+                <div key={mate.id}>
+                  {index > 0 && <Separator className="mb-3" />}
+                  <div>
+                    <p className="font-medium">{mate.institution}</p>
+                    {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                    {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No school mates added</p>
+          )}
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Classmates */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium">Classmates</h4>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 text-muted-foreground hover:text-primary"
+              onClick={() => setEditClassmatesOpen(true)}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+          {classmates.length > 0 ? (
+            <div className="space-y-3">
+              {classmates.map((mate, index) => (
+                <div key={mate.id}>
+                  {index > 0 && <Separator className="mb-3" />}
+                  <div>
+                    <p className="font-medium">{mate.institution}</p>
+                    {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                    {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No classmates added</p>
+          )}
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Age Mates */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium">Age Mates</h4>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 text-muted-foreground hover:text-primary"
+              onClick={() => setEditAgeMatesOpen(true)}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+          {ageMates.length > 0 ? (
+            <div className="space-y-3">
+              {ageMates.map((mate, index) => (
+                <div key={mate.id}>
+                  {index > 0 && <Separator className="mb-3" />}
+                  <div>
+                    <p className="font-medium">{mate.community}</p>
+                    {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
+                    {mate.nickname && <p className="text-sm text-muted-foreground">Nickname: {mate.nickname}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No age mates added</p>
+          )}
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Work Colleagues */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium">Work Colleagues</h4>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 text-muted-foreground hover:text-primary"
+              onClick={() => setEditWorkColleaguesOpen(true)}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+          {workColleagues.length > 0 ? (
+            <div className="space-y-3">
+              {workColleagues.map((colleague, index) => (
+                <div key={colleague.id}>
+                  {index > 0 && <Separator className="mb-3" />}
+                  <div>
+                    <p className="font-medium">{colleague.workplaceName}</p>
+                    {colleague.workplaceLocation && <p className="text-sm text-muted-foreground">{colleague.workplaceLocation}</p>}
+                    {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No work colleagues added</p>
+          )}
         </div>
       </Card>
 
@@ -422,6 +576,58 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           currentData={about}
           onSave={setAbout}
           onClose={() => setEditAboutOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editSchoolMatesOpen}
+        onOpenChange={setEditSchoolMatesOpen}
+        title="Edit School Mates"
+        maxWidth="2xl"
+      >
+        <EditSchoolMatesForm
+          currentData={schoolMates}
+          onSave={setSchoolMates}
+          onClose={() => setEditSchoolMatesOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editClassmatesOpen}
+        onOpenChange={setEditClassmatesOpen}
+        title="Edit Classmates"
+        maxWidth="2xl"
+      >
+        <EditClassmatesForm
+          currentData={classmates}
+          onSave={setClassmates}
+          onClose={() => setEditClassmatesOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editAgeMatesOpen}
+        onOpenChange={setEditAgeMatesOpen}
+        title="Edit Age Mates"
+        maxWidth="lg"
+      >
+        <EditAgeMatesForm
+          currentData={ageMates}
+          onSave={setAgeMates}
+          onClose={() => setEditAgeMatesOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editWorkColleaguesOpen}
+        onOpenChange={setEditWorkColleaguesOpen}
+        title="Edit Work Colleagues"
+        maxWidth="lg"
+      >
+        <EditWorkColleaguesForm
+          currentData={workColleagues}
+          onSave={setWorkColleagues}
+          onClose={() => setEditWorkColleaguesOpen(false)}
         />
       </EditSectionDialog>
     </div>
