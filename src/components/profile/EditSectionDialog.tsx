@@ -26,11 +26,11 @@ export const EditSectionDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${widthClasses[maxWidth]} max-h-[90vh] flex flex-col`}>
-        <DialogHeader>
+      <DialogContent className={`${widthClasses[maxWidth]} max-h-[85vh] sm:max-h-[90vh] flex flex-col`}>
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="overflow-y-auto flex-1 -mx-6 px-6">
+        <div className="overflow-y-auto flex-1 -mx-6 px-6 overscroll-contain">
           {children}
         </div>
       </DialogContent>
