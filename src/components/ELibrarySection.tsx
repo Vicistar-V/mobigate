@@ -1,22 +1,34 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Image, Headphones, FileText, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal } from "lucide-react";
 
 interface ELibrarySectionProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
 }
 
-const filterOptions = [
+const primaryFilters = [
   { value: "all", label: "All", icon: null },
   { value: "video", label: "Videos", icon: Play },
   { value: "photo", label: "Photos", icon: Image },
-  { value: "audio", label: "Audio", icon: Headphones },
   { value: "article", label: "Articles", icon: FileText },
-  { value: "more", label: "More", icon: MoreHorizontal },
+];
+
+const moreFilters = [
+  { value: "audio", label: "Audio", icon: Headphones },
+  { value: "pdf", label: "PDF Documents", icon: FileIcon },
+  { value: "url", label: "URL Links", icon: Link },
 ];
 
 export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectionProps) => {
+  const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
+  
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between mb-4">
@@ -24,7 +36,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
       </div>
       
       <div className="flex flex-wrap items-center gap-2">
-        {filterOptions.map((option) => {
+        {primaryFilters.map((option) => {
           const Icon = option.icon;
           const isActive = activeFilter === option.value;
           
@@ -41,6 +53,36 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
             </Button>
           );
         })}
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={isMoreActive ? "default" : "outline"}
+              size="sm"
+              className="text-xs md:text-sm gap-1.5"
+            >
+              <MoreHorizontal className="w-3 h-3" />
+              ...More
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-card z-50">
+            {moreFilters.map((option) => {
+              const Icon = option.icon;
+              const isActive = activeFilter === option.value;
+              
+              return (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => onFilterChange(option.value)}
+                  className={isActive ? "bg-primary text-primary-foreground" : ""}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {option.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </Card>
   );
