@@ -3,7 +3,7 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, CheckCircle, Grid3x3, Grid2x2 } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -15,6 +15,7 @@ import { WallStatusFilters } from "@/components/WallStatusFilters";
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
+  const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const userProfile = {
     name: "Amaka Jane Johnson",
     location: "Lagos, Nigeria",
@@ -190,10 +191,28 @@ const Profile = () => {
               </div>
             </Card>
 
-            {/* Wall Status Horizontal Scroll */}
+            {/* Wall Status */}
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Wall Status</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setWallStatusView(wallStatusView === "normal" ? "large" : "normal")}
+                  className="gap-2"
+                >
+                  {wallStatusView === "normal" ? (
+                    <>
+                      <Grid2x2 className="h-4 w-4" />
+                      Large Grid
+                    </>
+                  ) : (
+                    <>
+                      <Grid3x3 className="h-4 w-4" />
+                      Normal View
+                    </>
+                  )}
+                </Button>
               </div>
               
               {/* Wall Status Media Type Filters */}
@@ -204,20 +223,49 @@ const Profile = () => {
                 />
               </div>
               
-              <ScrollArea className="w-full whitespace-nowrap rounded-lg">
-                <div className="flex gap-4 pb-4">
-                  {filteredWallPosts.slice(0, 8).map((post, index) => (
-                    <Card key={index} className="inline-block w-[300px] flex-shrink-0 overflow-hidden hover:shadow-md transition-shadow">
+              {/* Normal View - Horizontal Scroll */}
+              {wallStatusView === "normal" && (
+                <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+                  <div className="flex gap-4 pb-4">
+                    {filteredWallPosts.slice(0, 8).map((post, index) => (
+                      <Card key={index} className="inline-block w-[300px] flex-shrink-0 overflow-hidden hover:shadow-md transition-all">
+                        {post.imageUrl && (
+                          <div className="relative h-48 bg-muted">
+                            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="p-3">
+                          <h4 className="font-semibold text-sm line-clamp-2">{post.title}</h4>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{post.subtitle}</p>
+                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                            <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{post.type}</span>
+                            <span>{post.views} Views</span>
+                            <span>•</span>
+                            <span>{post.likes} Likes</span>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              )}
+              
+              {/* Large Grid View */}
+              {wallStatusView === "large" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredWallPosts.map((post, index) => (
+                    <Card key={index} className="overflow-hidden hover:shadow-lg transition-all">
                       {post.imageUrl && (
-                        <div className="relative h-48 bg-muted">
+                        <div className="relative h-64 bg-muted">
                           <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
                         </div>
                       )}
-                      <div className="p-3">
-                        <h4 className="font-semibold text-sm line-clamp-2">{post.title}</h4>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{post.subtitle}</p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                          <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{post.type}</span>
+                      <div className="p-4">
+                        <h4 className="font-semibold text-base line-clamp-2">{post.title}</h4>
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.subtitle}</p>
+                        <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                          <span className="bg-primary/10 text-primary px-2 py-1 rounded">{post.type}</span>
                           <span>{post.views} Views</span>
                           <span>•</span>
                           <span>{post.likes} Likes</span>
@@ -226,8 +274,7 @@ const Profile = () => {
                     </Card>
                   ))}
                 </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              )}
             </div>
 
             {/* Feed Posts with Filter */}
