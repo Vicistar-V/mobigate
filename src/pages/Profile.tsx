@@ -10,9 +10,11 @@ import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
 import { getPostsByUserId } from "@/data/posts";
 import profileBanner from "@/assets/profile-banner.jpg";
+import { WallStatusFilters } from "@/components/WallStatusFilters";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
+  const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const userProfile = {
     name: "Amaka Jane Johnson",
     location: "Lagos, Nigeria",
@@ -186,7 +188,14 @@ const Profile = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Wall Status</h2>
-                <Button variant="outline" size="sm">Filter Posts</Button>
+              </div>
+              
+              {/* Wall Status Media Type Filters */}
+              <div className="mb-4">
+                <WallStatusFilters 
+                  activeFilter={wallStatusFilter} 
+                  onFilterChange={setWallStatusFilter} 
+                />
               </div>
               
               <ScrollArea className="w-full whitespace-nowrap rounded-lg">
