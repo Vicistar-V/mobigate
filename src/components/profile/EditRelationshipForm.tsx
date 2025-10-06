@@ -50,10 +50,15 @@ export const EditRelationshipForm = ({ currentData, onSave, onClose }: EditRelat
                 <SelectContent className="z-50 bg-background">
                   <SelectItem value="Single">Single</SelectItem>
                   <SelectItem value="In a relationship">In a relationship</SelectItem>
+                  <SelectItem value="In a Serious Relationship">In a Serious Relationship</SelectItem>
+                  <SelectItem value="In an Open Relationship">In an Open Relationship</SelectItem>
+                  <SelectItem value="In Domestic Partnership">In Domestic Partnership</SelectItem>
                   <SelectItem value="Engaged">Engaged</SelectItem>
                   <SelectItem value="Married">Married</SelectItem>
                   <SelectItem value="Divorced">Divorced</SelectItem>
                   <SelectItem value="Widowed">Widowed</SelectItem>
+                  <SelectItem value="Complicated">Complicated</SelectItem>
+                  <SelectItem value="Undisclosed">Undisclosed</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
