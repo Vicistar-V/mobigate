@@ -42,10 +42,20 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
   
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-base md:text-lg">Recommended E-Library Contents</h3>
         
-        <div className="flex flex-wrap items-center gap-2">
+        <FilterDialog
+          title="Filter E-Library Contents"
+          description="Choose how you want to sort the library content."
+          options={filterOptions}
+          defaultValue={sortFilter}
+          onApply={setSortFilter}
+          triggerLabel="Filter"
+        />
+      </div>
+      
+      <div className="flex flex-wrap items-center gap-2">
         {primaryFilters.map((option) => {
           const Icon = option.icon;
           const isActive = activeFilter === option.value;
@@ -93,16 +103,6 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
             })}
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <FilterDialog
-          title="Filter E-Library Contents"
-          description="Choose how you want to sort the library content."
-          options={filterOptions}
-          defaultValue={sortFilter}
-          onApply={setSortFilter}
-          triggerLabel="Filter"
-        />
-        </div>
       </div>
     </Card>
   );
