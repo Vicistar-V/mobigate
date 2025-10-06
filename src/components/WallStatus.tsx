@@ -99,7 +99,7 @@ export const WallStatus = () => {
               User's
             </ToggleGroupItem>
             <ToggleGroupItem value="friends" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-              Friends
+              Friends'
             </ToggleGroupItem>
           </ToggleGroup>
           
