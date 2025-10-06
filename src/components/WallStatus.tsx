@@ -1,95 +1,91 @@
 import { Card } from "@/components/ui/card";
-import { FilterDialog } from "./FilterDialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
-import { useEffect, useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useState } from "react";
+
+type FilterType = "all" | "user" | "friends";
 
 export const WallStatus = () => {
-  const [api, setApi] = useState<CarouselApi>();
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
-  const statusItems = [
+  const allStatusItems: Array<{
+    id: number | string;
+    image: string;
+    title: string;
+    type: "user" | "friends";
+    author: string;
+  }> = [
     {
       id: 1,
       image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
-      title: "Team Collaboration"
+      title: "Team Collaboration",
+      type: "user" as const,
+      author: "You"
     },
     {
       id: 2,
       image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
-      title: "Creative Workspace"
+      title: "Creative Workspace",
+      type: "friends" as const,
+      author: "John Doe"
     },
     {
       id: 3,
       image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
-      title: "Business Meeting"
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80",
-      title: "Innovation Hub"
-    },
-    {
-      id: 5,
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80",
-      title: "Digital Strategy"
-    },
-    {
-      id: 6,
-      image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80",
-      title: "Tech Community"
+      title: "Business Meeting",
+      type: "friends" as const,
+      author: "Jane Smith"
     },
   ];
 
-  useEffect(() => {
-    if (!api) return;
+  const filteredItems = activeFilter === "all" 
+    ? allStatusItems 
+    : allStatusItems.filter(item => item.type === activeFilter);
 
-    const interval = setInterval(() => {
-      api.scrollNext();
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [api]);
+  // Always show exactly 3 items (pad with placeholders if needed)
+  const displayItems = [...filteredItems];
+  while (displayItems.length < 3) {
+    displayItems.push({
+      id: `placeholder-${displayItems.length}`,
+      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
+      title: "No more status",
+      type: "user" as const,
+      author: "You"
+    });
+  }
 
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h3 className="font-semibold text-lg">Wall Status</h3>
-        <FilterDialog />
+        
+        <ToggleGroup type="single" value={activeFilter} onValueChange={(value) => value && setActiveFilter(value as FilterType)}>
+          <ToggleGroupItem value="all" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+            All
+          </ToggleGroupItem>
+          <ToggleGroupItem value="user" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+            User's
+          </ToggleGroupItem>
+          <ToggleGroupItem value="friends" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+            Friends
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
       
-      <Carousel
-        setApi={setApi}
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full relative"
-      >
-        <CarouselContent>
-          {statusItems.map((item) => (
-            <CarouselItem key={item.id} className="md:basis-1/2 lg:basis-1/3">
-              <Card className="aspect-video overflow-hidden relative group cursor-pointer">
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                  <p className="text-white font-semibold">{item.title}</p>
-                </div>
-              </Card>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white" />
-        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white" />
-      </Carousel>
+      <div className="grid grid-cols-3 gap-3">
+        {displayItems.slice(0, 3).map((item) => (
+          <Card key={item.id} className="aspect-[3/4] overflow-hidden relative group cursor-pointer">
+            <img 
+              src={item.image} 
+              alt={item.title}
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
+              <p className="text-white text-xs font-medium">{item.author}</p>
+              <p className="text-white/80 text-xs truncate">{item.title}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
     </Card>
   );
 };
