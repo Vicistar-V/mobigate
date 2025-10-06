@@ -279,13 +279,13 @@ const Profile = () => {
               
               {/* Normal View - Horizontal Carousel */}
               {wallStatusView === "normal" && (
-                <div className="relative">
-                  <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
-                    <div className="flex gap-3 pb-2 flex-nowrap snap-x snap-mandatory">
+                <div className="relative -mx-4 px-4">
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-3 pb-2">
                       {filteredWallPosts.map((post, index) => (
                         <Card 
                           key={index} 
-                          className="flex-none w-[70vw] max-w-[300px] snap-start aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                          className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
                         >
                           {post.imageUrl && (
                             <img 
@@ -301,7 +301,8 @@ const Profile = () => {
                         </Card>
                       ))}
                     </div>
-                  </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </div>
               )}
               
