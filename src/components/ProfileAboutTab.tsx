@@ -25,10 +25,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <CheckCircle className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-semibold">Designations</h3>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="default" className="text-sm">2-Star</Badge>
-          <Badge variant="default" className="text-sm">Mobi-Celebrity</Badge>
-        </div>
+        <p className="font-medium">2-Star User, Mobi-Celebrity</p>
       </Card>
 
       {/* Location */}
