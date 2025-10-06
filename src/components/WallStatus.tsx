@@ -96,20 +96,20 @@ export const WallStatus = () => {
       </div>
       
       <ScrollArea className="w-full">
-        <div className="flex gap-3 pb-4">
+        <div className="flex gap-2 pb-4">
           {filteredItems.map((item) => (
             <Card 
               key={item.id} 
-              className="flex-none w-[calc(33.333%-0.5rem)] min-w-[120px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
+              className="flex-none w-24 aspect-[3/4] overflow-hidden relative group cursor-pointer"
             >
               <img 
                 src={item.image} 
                 alt={item.title}
                 className="w-full h-full object-cover transition-transform group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                <p className="text-white text-xs font-medium">{item.author}</p>
-                <p className="text-white/80 text-xs truncate">{item.title}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2">
+                <p className="text-white text-[10px] font-medium truncate">{item.author}</p>
+                <p className="text-white/80 text-[9px] truncate">{item.title}</p>
               </div>
             </Card>
           ))}
