@@ -39,11 +39,11 @@ export const GreetingSection = () => {
             <span key={link.label}>
               <a
                 href={link.href}
-                className="text-base font-medium text-primary hover:underline transition-all hover:text-primary/80"
+                className="text-[17px] font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide"
               >
                 {link.label}
               </a>
-              {index < navLinks.length - 1 && <span className="text-muted-foreground">  |  </span>}
+              {index < navLinks.length - 1 && <span className="text-muted-foreground px-1.5">|</span>}
             </span>
           ))}
         </div>
