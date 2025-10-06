@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
 
 type FilterType = "all" | "user" | "friends";
@@ -95,27 +94,28 @@ export const WallStatus = () => {
         </ToggleGroup>
       </div>
       
-      <ScrollArea className="w-full">
-        <div className="flex gap-2 pb-4">
-          {filteredItems.map((item) => (
-            <Card 
-              key={item.id} 
-              className="flex-none w-24 aspect-[3/4] overflow-hidden relative group cursor-pointer"
-            >
-              <img 
-                src={item.image} 
-                alt={item.title}
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2">
-                <p className="text-white text-[10px] font-medium truncate">{item.author}</p>
-                <p className="text-white/80 text-[9px] truncate">{item.title}</p>
-              </div>
-            </Card>
-          ))}
+      <div className="relative">
+        <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
+          <div className="flex gap-2 pb-2">
+            {filteredItems.map((item) => (
+              <Card 
+                key={item.id} 
+                className="flex-none w-24 aspect-[3/4] overflow-hidden relative group cursor-pointer"
+              >
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2">
+                  <p className="text-white text-[10px] font-medium truncate">{item.author}</p>
+                  <p className="text-white/80 text-[9px] truncate">{item.title}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
     </Card>
   );
 };
