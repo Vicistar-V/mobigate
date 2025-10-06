@@ -250,7 +250,7 @@ const Profile = () => {
                 <ScrollArea className="w-full whitespace-nowrap rounded-lg">
                   <div className="flex gap-6 pb-4">
                     {filteredWallPosts.map((post, index) => (
-                      <Card key={index} className="inline-block w-[400px] flex-shrink-0 overflow-hidden hover:shadow-lg transition-all">
+                      <Card key={index} className="inline-block w-[70vw] max-w-[600px] flex-shrink-0 overflow-hidden hover:shadow-lg transition-all">
                         {post.imageUrl && (
                           <div className="relative h-72 bg-muted">
                             <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
