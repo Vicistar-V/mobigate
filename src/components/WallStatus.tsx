@@ -92,9 +92,8 @@ export const WallStatus = () => {
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <h3 className="font-semibold text-lg">Wall Status</h3>
-        
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-lg">Wall Status</h3>
           <Button
             variant="outline"
             size="sm"
@@ -107,7 +106,9 @@ export const WallStatus = () => {
               <Grid3x3 className="h-4 w-4" />
             )}
           </Button>
-          
+        </div>
+        
+        <div className="flex items-center gap-2 flex-wrap">
           <ToggleGroup type="single" value={activeFilter} onValueChange={(value) => value && setActiveFilter(value as FilterType)}>
             <ToggleGroupItem value="all" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
               All
@@ -164,7 +165,7 @@ export const WallStatus = () => {
             {filteredItems.map((item) => (
               <Card 
                 key={item.id} 
-                className="inline-block w-[80%] max-w-[500px] flex-shrink-0 overflow-hidden relative group cursor-pointer"
+                className="inline-block w-[70vw] max-w-[600px] flex-shrink-0 overflow-hidden relative group cursor-pointer"
               >
                 <div className="h-[600px]">
                   <img 
