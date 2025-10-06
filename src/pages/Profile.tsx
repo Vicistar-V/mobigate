@@ -84,7 +84,7 @@ const Profile = () => {
                   )}
                 </div>
                 {userProfile.verified && (
-                  <p className="text-emerald-600 font-light italic text-sm">Verified Content Creator</p>
+                  <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
                 )}
               </div>
             </div>
