@@ -15,16 +15,16 @@ interface ELibrarySectionProps {
 }
 
 const primaryFilters = [
-  { value: "all", label: "All", icon: null },
-  { value: "video", label: "Videos", icon: Play },
-  { value: "photo", label: "Photos", icon: Image },
-  { value: "article", label: "Articles", icon: FileText },
+  { value: "all", label: "All", icon: null, count: "500k" },
+  { value: "video", label: "Videos", icon: Play, count: "200.0k" },
+  { value: "photo", label: "Photos", icon: Image, count: "100.0k" },
+  { value: "article", label: "Articles", icon: FileText, count: "100.0k" },
 ];
 
 const moreFilters = [
-  { value: "audio", label: "Audio", icon: Headphones },
-  { value: "pdf", label: "PDF Documents", icon: FileIcon },
-  { value: "url", label: "URL Links", icon: Link },
+  { value: "audio", label: "Audio", icon: Headphones, count: "30k" },
+  { value: "pdf", label: "PDF Documents", icon: FileIcon, count: "50.0k" },
+  { value: "url", label: "URL Links", icon: Link, count: "20.0k" },
 ];
 
 export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectionProps) => {
@@ -68,7 +68,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
               className="text-xs md:text-sm gap-1.5"
             >
               {Icon && <Icon className="w-3 h-3" />}
-              {option.label}
+              {option.label} ({option.count})
             </Button>
           );
         })}
@@ -96,7 +96,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
                   className={isActive ? "bg-primary text-primary-foreground" : ""}
                 >
                   <Icon className="w-4 h-4 mr-2" />
-                  {option.label}
+                  {option.label} ({option.count})
                 </DropdownMenuItem>
               );
             })}
