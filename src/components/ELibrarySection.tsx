@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -41,7 +40,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
   ];
   
   return (
-    <Card className="p-4">
+    <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-base md:text-lg">Recommended E-Library Contents</h3>
         
@@ -104,6 +103,6 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </Card>
+    </div>
   );
 };
