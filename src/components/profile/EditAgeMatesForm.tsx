@@ -115,14 +115,14 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
           </div>
 
           <div>
-            <Label htmlFor="community">Community *</Label>
-            <Input id="community" {...register("community")} />
-            {errors.community && <p className="text-sm text-destructive mt-1">{errors.community.message as string}</p>}
+            <Label htmlFor="ageGrade">Age-Grade</Label>
+            <Input id="ageGrade" placeholder="e.g., 1975 Age Grade" {...register("ageGrade")} />
           </div>
 
           <div>
-            <Label htmlFor="ageGrade">Age-Grade</Label>
-            <Input id="ageGrade" placeholder="e.g., 1975 Age Grade" {...register("ageGrade")} />
+            <Label htmlFor="community">Community *</Label>
+            <Input id="community" {...register("community")} />
+            {errors.community && <p className="text-sm text-destructive mt-1">{errors.community.message as string}</p>}
           </div>
 
           <div>
