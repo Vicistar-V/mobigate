@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import mobigateIcon from "@/assets/mobigate-icon.svg";
+import mobigateLogo from "@/assets/mobigate-logo.svg";
 
 import {
   Sidebar,
@@ -123,14 +125,18 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border/50 bg-gradient-to-b from-card to-muted/30">
       <SidebarHeader className="border-b border-border/50 px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground font-bold shadow-lg">
-            M
-          </div>
-          {open && (
-            <div className="flex flex-col">
-              <span className="text-base font-bold text-foreground">Mobigate</span>
-              <span className="text-xs text-muted-foreground">Dashboard</span>
-            </div>
+          {open ? (
+            <img 
+              src={mobigateLogo} 
+              alt="Mobigate" 
+              className="h-10 w-auto"
+            />
+          ) : (
+            <img 
+              src={mobigateIcon} 
+              alt="Mobigate" 
+              className="h-10 w-10"
+            />
           )}
         </div>
       </SidebarHeader>

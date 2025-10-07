@@ -5,6 +5,8 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { NotificationsSheet } from "./NotificationsSheet";
 import { MessagesSheet } from "./MessagesSheet";
 import { useSidebar } from "@/components/ui/sidebar";
+import mobigateIcon from "@/assets/mobigate-icon.svg";
+import mobigateLogo from "@/assets/mobigate-logo.svg";
 
 export const Header = () => {
   const { toggleSidebar } = useSidebar();
@@ -22,10 +24,18 @@ export const Header = () => {
             <Menu />
           </Button>
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-              M
-            </div>
-            <span className="text-xl font-bold text-primary hidden sm:inline">Mobigate</span>
+            {/* Icon only on mobile */}
+            <img 
+              src={mobigateIcon} 
+              alt="Mobigate" 
+              className="h-10 w-auto sm:hidden"
+            />
+            {/* Full logo with text on tablet and desktop */}
+            <img 
+              src={mobigateLogo} 
+              alt="Mobigate" 
+              className="h-10 w-auto hidden sm:block"
+            />
           </Link>
         </div>
 
