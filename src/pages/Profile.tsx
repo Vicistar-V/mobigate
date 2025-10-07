@@ -4,7 +4,7 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -24,6 +24,7 @@ const Profile = () => {
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingProfilePicture, setEditingProfilePicture] = useState(false);
+  const [editingBanner, setEditingBanner] = useState(false);
   const { toast } = useToast();
   
   // Load profile image from localStorage or use default
@@ -32,10 +33,21 @@ const Profile = () => {
     return saved || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
   });
 
+  // Load banner image from localStorage or use default
+  const [bannerImage, setBannerImage] = useState<string>(() => {
+    const saved = localStorage.getItem("bannerImage");
+    return saved || profileBanner;
+  });
+
   // Save profile image to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("profileImage", profileImage);
   }, [profileImage]);
+
+  // Save banner image to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("bannerImage", bannerImage);
+  }, [bannerImage]);
   
   // Get posts for this specific user and manage as state
   const [userPosts, setUserPosts] = useState<Post[]>(() => getPostsByUserId("1"));
@@ -148,16 +160,18 @@ const Profile = () => {
         {/* Profile Header Card */}
         <Card className="mb-6 overflow-hidden">
           {/* Profile Banner */}
-          <div className="relative h-48 bg-muted">
+          <div className="relative h-48 bg-muted group">
             <img 
-              src={profileBanner} 
+              src={bannerImage} 
               alt="Profile Banner"
               className="w-full h-full object-cover"
             />
             <Button 
               size="sm" 
-              className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm"
+              className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+              onClick={() => setEditingBanner(true)}
             >
+              <Camera className="h-4 w-4 mr-2" />
               Change Banner
             </Button>
           </div>
@@ -175,9 +189,10 @@ const Profile = () => {
                   />
                   <button
                     onClick={() => setEditingProfilePicture(true)}
-                    className="absolute inset-0 w-32 h-32 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium"
+                    className="absolute inset-0 w-32 h-32 rounded-full bg-black/50 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium"
                   >
-                    Change Photo
+                    <Camera className="h-5 w-5 mr-2" />
+                    Change
                   </button>
                 </div>
                 <div className="mt-3">
@@ -413,6 +428,13 @@ const Profile = () => {
         onOpenChange={setEditingProfilePicture}
         currentImage={profileImage}
         onSave={setProfileImage}
+      />
+
+      <EditProfilePictureDialog
+        open={editingBanner}
+        onOpenChange={setEditingBanner}
+        currentImage={bannerImage}
+        onSave={setBannerImage}
       />
     </div>
   );
