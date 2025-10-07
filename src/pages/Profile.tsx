@@ -249,6 +249,9 @@ const Profile = () => {
               <TabsTrigger value="likes">Likes</TabsTrigger>
               <TabsTrigger value="followers">Followers</TabsTrigger>
               <TabsTrigger value="following">Following</TabsTrigger>
+              <TabsTrigger value="mobi-circle">Mobi-Circle</TabsTrigger>
+              <TabsTrigger value="mobi-shop">Mobi-Shop</TabsTrigger>
+              <TabsTrigger value="biz-catalogue">Biz-Catalogue</TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
@@ -343,6 +346,27 @@ const Profile = () => {
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Following</h2>
               <p className="text-muted-foreground">Following list will be displayed here.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="mobi-circle">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Mobi-Circle</h2>
+              <p className="text-muted-foreground">Welcome to your Mobi-Circle community hub.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="mobi-shop">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">My Mobi-Shop @ Mobi-Store</h2>
+              <p className="text-muted-foreground">Manage your Mobi-Shop and products here.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="biz-catalogue">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Biz-Catalogue</h2>
+              <p className="text-muted-foreground">Browse and manage your business catalogue.</p>
             </Card>
           </TabsContent>
         </Tabs>
