@@ -10,9 +10,9 @@ import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
 
-const familySchema = z.object({
+const loveFriendshipSchema = z.object({
   friendId: z.string().min(1, "Please select a friend"),
-  relation: z.string().min(1, "Relation is required"),
+  relationshipTag: z.string().min(1, "Relationship tag is required"),
 });
 
 // Mock friends data - in real app this would come from backend
@@ -24,92 +24,100 @@ const mockFriends = [
   { id: "5", name: "David Brown" },
 ];
 
-interface FamilyMember {
+export interface LoveFriendship {
   id: string;
   name: string;
-  relation: string;
+  relationshipTag: string;
   privacy?: string;
 }
 
-interface EditFamilyFormProps {
-  currentData: FamilyMember[];
-  onSave: (data: FamilyMember[]) => void;
+interface EditLoveFriendshipFormProps {
+  currentData: LoveFriendship[];
+  onSave: (data: LoveFriendship[]) => void;
   onClose: () => void;
 }
 
-export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormProps) => {
-  const [family, setFamily] = useState<FamilyMember[]>(currentData);
+export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLoveFriendshipFormProps) => {
+  const [friendships, setFriendships] = useState<LoveFriendship[]>(currentData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
 
-  const form = useForm<z.infer<typeof familySchema>>({
-    resolver: zodResolver(familySchema),
-    defaultValues: { friendId: "", relation: "" },
+  const form = useForm<z.infer<typeof loveFriendshipSchema>>({
+    resolver: zodResolver(loveFriendshipSchema),
+    defaultValues: { friendId: "", relationshipTag: "" },
   });
 
   const handleAdd = () => {
+    if (friendships.length >= 25) {
+      toast.error("Maximum 25 friends allowed");
+      return;
+    }
     setIsAdding(true);
-    form.reset({ friendId: "", relation: "" });
+    form.reset({ friendId: "", relationshipTag: "" });
   };
 
-  const handleEdit = (member: FamilyMember) => {
-    setEditingId(member.id);
-    form.reset({ friendId: "", relation: member.relation });
-    setPrivacy(member.privacy || "public");
+  const handleEdit = (friendship: LoveFriendship) => {
+    setEditingId(friendship.id);
+    form.reset({ friendId: "", relationshipTag: friendship.relationshipTag });
+    setPrivacy(friendship.privacy || "public");
   };
 
   const handleDelete = (id: string) => {
-    setFamily(family.filter(m => m.id !== id));
+    setFriendships(friendships.filter(f => f.id !== id));
   };
 
-  const onSubmit = (data: z.infer<typeof familySchema>) => {
+  const onSubmit = (data: z.infer<typeof loveFriendshipSchema>) => {
     const selectedFriend = mockFriends.find(f => f.id === data.friendId);
     if (!selectedFriend) return;
 
     if (isAdding) {
-      const newMember: FamilyMember = { 
+      const newFriendship: LoveFriendship = { 
         name: selectedFriend.name, 
-        relation: data.relation, 
+        relationshipTag: data.relationshipTag, 
         id: Date.now().toString(),
         privacy 
       };
-      setFamily([...family, newMember]);
+      setFriendships([...friendships, newFriendship]);
       setIsAdding(false);
     } else if (editingId) {
-      setFamily(family.map(m => m.id === editingId ? { 
+      setFriendships(friendships.map(f => f.id === editingId ? { 
         name: selectedFriend.name, 
-        relation: data.relation, 
+        relationshipTag: data.relationshipTag, 
         id: editingId,
         privacy 
-      } : m));
+      } : f));
       setEditingId(null);
     }
-    form.reset({ friendId: "", relation: "" });
+    form.reset({ friendId: "", relationshipTag: "" });
     setPrivacy("public");
   };
 
   const handleSave = () => {
-    onSave(family);
-    toast.success("Family information updated successfully");
+    onSave(friendships);
+    toast.success("Love Life & Friendship updated successfully");
     onClose();
   };
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        You can add up to 25 friends with different relationship tags ({friendships.length}/25)
+      </p>
+
       <div className="space-y-2 max-h-[400px] overflow-y-auto">
-        {family.map((member) => (
-          <Card key={member.id} className="p-3">
+        {friendships.map((friendship) => (
+          <Card key={friendship.id} className="p-3">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-medium">{member.name}</p>
-                <p className="text-sm text-muted-foreground">{member.relation}</p>
+                <p className="font-medium">{friendship.name}</p>
+                <p className="text-sm text-muted-foreground">{friendship.relationshipTag}</p>
               </div>
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(member)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(friendship)}>
                   <Pencil className="h-3 w-3" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(member.id)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(friendship.id)}>
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
@@ -147,39 +155,24 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
             />
             <FormField
               control={form.control}
-              name="relation"
+              name="relationshipTag"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Family Relation</FormLabel>
+                  <FormLabel>Relationship Tag</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select relationship" />
+                        <SelectValue placeholder="Select relationship tag" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="z-50 bg-background">
-                      <SelectItem value="Father">Father</SelectItem>
-                      <SelectItem value="Mother">Mother</SelectItem>
-                      <SelectItem value="Brother">Brother</SelectItem>
-                      <SelectItem value="Sister">Sister</SelectItem>
-                      <SelectItem value="Son">Son</SelectItem>
-                      <SelectItem value="Daughter">Daughter</SelectItem>
-                      <SelectItem value="Husband">Husband</SelectItem>
-                      <SelectItem value="Wife">Wife</SelectItem>
-                      <SelectItem value="Uncle">Uncle</SelectItem>
-                      <SelectItem value="Aunt">Aunt</SelectItem>
-                      <SelectItem value="Cousin">Cousin</SelectItem>
-                      <SelectItem value="Nephew">Nephew</SelectItem>
-                      <SelectItem value="Niece">Niece</SelectItem>
-                      <SelectItem value="Grandfather">Grandfather</SelectItem>
-                      <SelectItem value="Grandmother">Grandmother</SelectItem>
-                      <SelectItem value="Brother-Inlaw">Brother-Inlaw</SelectItem>
-                      <SelectItem value="Sister-Inlaw">Sister-Inlaw</SelectItem>
-                      <SelectItem value="Father-Inlaw">Father-Inlaw</SelectItem>
-                      <SelectItem value="Mother-Inlaw">Mother-Inlaw</SelectItem>
-                      <SelectItem value="Extended-Inlaw">Extended-Inlaw</SelectItem>
-                      <SelectItem value="Kinsfolk">Kinsfolk</SelectItem>
-                      <SelectItem value="Extended Relative">Extended Relative</SelectItem>
+                      <SelectItem value="In Love with">In Love with</SelectItem>
+                      <SelectItem value="Married to">Married to</SelectItem>
+                      <SelectItem value="Besty with">Besty with</SelectItem>
+                      <SelectItem value="Best of Friends with">Best of Friends with</SelectItem>
+                      <SelectItem value="Close Friends with">Close Friends with</SelectItem>
+                      <SelectItem value="Business Friends with">Business Friends with</SelectItem>
+                      <SelectItem value="Platonic Friends with">Platonic Friends with</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -202,10 +195,10 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
         </Form>
       )}
 
-      {!isAdding && !editingId && (
+      {!isAdding && !editingId && friendships.length < 25 && (
         <Button variant="outline" className="w-full" onClick={handleAdd}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Family Member
+          Add Friend
         </Button>
       )}
 

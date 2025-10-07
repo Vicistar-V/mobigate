@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
 
 const workSchema = z.object({
+  workplaceName: z.string().min(1, "Workplace name is required"),
   position: z.string().min(1, "Position is required"),
   period: z.string().min(1, "Period is required"),
 });
 
 interface Work {
   id: string;
+  workplaceName: string;
   position: string;
   period: string;
   privacy?: string;
@@ -36,17 +38,17 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
 
   const form = useForm<z.infer<typeof workSchema>>({
     resolver: zodResolver(workSchema),
-    defaultValues: { position: "", period: "" },
+    defaultValues: { workplaceName: "", position: "", period: "" },
   });
 
   const handleAdd = () => {
     setIsAdding(true);
-    form.reset({ position: "", period: "" });
+    form.reset({ workplaceName: "", position: "", period: "" });
   };
 
   const handleEdit = (workItem: Work) => {
     setEditingId(workItem.id);
-    form.reset({ position: workItem.position, period: workItem.period });
+    form.reset({ workplaceName: workItem.workplaceName, position: workItem.position, period: workItem.period });
     setPrivacy(workItem.privacy || "public");
   };
 
@@ -57,6 +59,7 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
   const onSubmit = (data: z.infer<typeof workSchema>) => {
     if (isAdding) {
       const newWork: Work = { 
+        workplaceName: data.workplaceName,
         position: data.position, 
         period: data.period, 
         id: Date.now().toString(),
@@ -66,6 +69,7 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
       setIsAdding(false);
     } else if (editingId) {
       setWork(work.map(w => w.id === editingId ? { 
+        workplaceName: data.workplaceName,
         position: data.position, 
         period: data.period, 
         id: editingId,
@@ -73,7 +77,7 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
       } : w));
       setEditingId(null);
     }
-    form.reset({ position: "", period: "" });
+    form.reset({ workplaceName: "", position: "", period: "" });
     setPrivacy("public");
   };
 
@@ -90,7 +94,8 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
           <Card key={workItem.id} className="p-3">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-medium">{workItem.position}</p>
+                <p className="font-medium">{workItem.workplaceName}</p>
+                <p className="text-sm">{workItem.position}</p>
                 <p className="text-sm text-muted-foreground">{workItem.period}</p>
               </div>
               <div className="flex gap-1">
@@ -111,12 +116,25 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
             <FormField
               control={form.control}
+              name="workplaceName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Workplace Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., BeamColumn PCC Limited" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="position"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Position</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., CEO at BeamColumn PCC Limited" {...field} />
+                    <Input placeholder="e.g., CEO" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

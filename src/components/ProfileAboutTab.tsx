@@ -17,6 +17,8 @@ import { EditSchoolMatesForm, SchoolMate } from "./profile/EditSchoolMatesForm";
 import { EditClassmatesForm, Classmate } from "./profile/EditClassmatesForm";
 import { EditAgeMatesForm, AgeMate } from "./profile/EditAgeMatesForm";
 import { EditWorkColleaguesForm, WorkColleague } from "./profile/EditWorkColleaguesForm";
+import { EditLoveFriendshipForm, LoveFriendship } from "./profile/EditLoveFriendshipForm";
+import { EditExtraSourceForm } from "./profile/EditExtraSourceForm";
 import { MateDetailDialog } from "./profile/MateDetailDialog";
 
 interface ProfileAboutTabProps {
@@ -41,6 +43,7 @@ interface Education {
 
 interface Work {
   id: string;
+  workplaceName: string;
   position: string;
   period: string;
 }
@@ -74,6 +77,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editWorkOpen, setEditWorkOpen] = useState(false);
   const [editBasicInfoOpen, setEditBasicInfoOpen] = useState(false);
   const [editRelationshipOpen, setEditRelationshipOpen] = useState(false);
+  const [editLoveFriendshipOpen, setEditLoveFriendshipOpen] = useState(false);
+  const [editExtraSourceOpen, setEditExtraSourceOpen] = useState(false);
   const [editFamilyOpen, setEditFamilyOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [editAboutOpen, setEditAboutOpen] = useState(false);
@@ -119,8 +124,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   );
   const [work, setWork] = useState<Work[]>(() => 
     loadFromStorage("profile_work", [
-      { id: "1", position: "CEO at BeamColumn PCC Limited, Onitsha.", period: "January 5, 1995 - Present" },
-      { id: "2", position: "MD at Kemjik Allied Resources Ltd, Aba, Abia State", period: "July 22, 2010 - December 10, 2024." },
+      { id: "1", workplaceName: "BeamColumn PCC Limited, Onitsha", position: "CEO", period: "January 5, 1995 - Present" },
+      { id: "2", workplaceName: "Kemjik Allied Resources Ltd, Aba, Abia State", position: "MD", period: "July 22, 2010 - December 10, 2024." },
     ])
   );
   const [basicInfo, setBasicInfo] = useState<BasicInfo>(() => 
@@ -597,7 +602,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <div key={workItem.id}>
               {index > 0 && <Separator className="mb-4" />}
               <div>
-                <p className="font-medium">{workItem.position}</p>
+                <p className="font-medium">{workItem.workplaceName}</p>
+                <p className="text-sm">{workItem.position}</p>
                 <p className="text-sm text-muted-foreground">{workItem.period}</p>
               </div>
             </div>
