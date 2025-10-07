@@ -7,6 +7,7 @@ import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card } from "@/components/ui/card";
@@ -18,8 +19,24 @@ import { PrivacySelector } from "./PrivacySelector";
 const locationSchema = z.object({
   place: z.string().min(1, "Place is required"),
   description: z.string().min(1, "Description is required"),
+  customDescription: z.string().optional(),
   period: z.string().optional(),
 });
+
+const descriptionOptions = [
+  "Hometown",
+  "Current City/Town",
+  "Lived in",
+  "Worked in",
+  "Just Visited",
+  "Grew Up in",
+  "Schooled in",
+  "Went to Prison in",
+  "Jailed in",
+  "Hospitalised in",
+  "Just Passed By",
+  "Other",
+];
 
 interface Location {
   id: string;
@@ -39,20 +56,29 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(locationSchema),
-    defaultValues: { place: "", description: "", period: "" },
+    defaultValues: { place: "", description: "", customDescription: "", period: "" },
   });
 
   const handleAdd = () => {
     setIsAdding(true);
-    form.reset({ place: "", description: "", period: "" });
+    setShowCustomInput(false);
+    form.reset({ place: "", description: "", customDescription: "", period: "" });
   };
 
   const handleEdit = (location: Location) => {
     setEditingId(location.id);
-    form.reset({ place: location.place, description: location.description, period: location.period || "" });
+    const isCustom = !descriptionOptions.slice(0, -1).includes(location.description);
+    setShowCustomInput(isCustom);
+    form.reset({ 
+      place: location.place, 
+      description: isCustom ? "Other" : location.description, 
+      customDescription: isCustom ? location.description : "",
+      period: location.period || "" 
+    });
   };
 
   const handleDelete = (id: string) => {
@@ -60,15 +86,28 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   };
 
   const onSubmit = (data: z.infer<typeof locationSchema>) => {
+    const finalDescription = data.description === "Other" ? (data.customDescription || "") : data.description;
+    
     if (isAdding) {
-      const newLocation: Location = { place: data.place, description: data.description, period: data.period, id: Date.now().toString() };
+      const newLocation: Location = { 
+        place: data.place, 
+        description: finalDescription, 
+        period: data.period, 
+        id: Date.now().toString() 
+      };
       setLocations([...locations, newLocation]);
       setIsAdding(false);
     } else if (editingId) {
-      setLocations(locations.map(loc => loc.id === editingId ? { place: data.place, description: data.description, period: data.period, id: editingId } : loc));
+      setLocations(locations.map(loc => loc.id === editingId ? { 
+        place: data.place, 
+        description: finalDescription, 
+        period: data.period, 
+        id: editingId 
+      } : loc));
       setEditingId(null);
     }
-    form.reset({ place: "", description: "", period: "" });
+    setShowCustomInput(false);
+    form.reset({ place: "", description: "", customDescription: "", period: "" });
   };
 
   const handleSave = () => {
@@ -123,13 +162,45 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Current City, Hometown" {...field} />
-                  </FormControl>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setShowCustomInput(value === "Other");
+                    }} 
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select description" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-50 bg-background">
+                      {descriptionOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {showCustomInput && (
+              <FormField
+                control={form.control}
+                name="customDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custom Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter custom description" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="period"
