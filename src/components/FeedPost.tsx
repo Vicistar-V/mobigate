@@ -79,7 +79,7 @@ export const FeedPost = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-xs flex-nowrap overflow-x-auto">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
           <span className="text-emerald-600 font-medium whitespace-nowrap">Fee: {fee} Mobi</span>
           <span className="text-muted-foreground">|</span>
           <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
