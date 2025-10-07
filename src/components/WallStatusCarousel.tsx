@@ -3,14 +3,17 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { WallStatusFilters } from "@/components/WallStatusFilters";
 import { AdRotation } from "@/components/AdRotation";
+import { PostOptionsMenu } from "@/components/PostOptionsMenu";
 import { Columns2, LayoutGrid } from "lucide-react";
 import React from "react";
 
 interface Post {
+  id?: string;
   title: string;
   imageUrl?: string;
   author: string;
   type: string;
+  isOwner?: boolean;
 }
 
 interface AdSlot {
@@ -31,6 +34,8 @@ interface WallStatusCarouselProps {
   filter: string;
   onFilterChange: (filter: string) => void;
   title?: string;
+  onEdit?: (post: Post) => void;
+  onDelete?: (postId: string) => void;
 }
 
 export const WallStatusCarousel = ({
@@ -40,7 +45,9 @@ export const WallStatusCarousel = ({
   onViewChange,
   filter,
   onFilterChange,
-  title = "Wall Status"
+  title = "Wall Status",
+  onEdit,
+  onDelete
 }: WallStatusCarouselProps) => {
   const filteredItems = filter === "all"
     ? items
@@ -99,6 +106,14 @@ export const WallStatusCarousel = ({
                         <p className="text-white text-sm font-medium truncate">{item.author}</p>
                         <p className="text-white/90 text-xs truncate">{item.title}</p>
                       </div>
+                      {item.isOwner && onEdit && onDelete && item.id && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <PostOptionsMenu 
+                            onEdit={() => onEdit(item)}
+                            onDelete={() => onDelete(item.id!)}
+                          />
+                        </div>
+                      )}
                     </Card>
                     
                     {/* Insert ad after every 15 posts */}
@@ -144,6 +159,14 @@ export const WallStatusCarousel = ({
                       <p className="text-white text-sm font-medium truncate">{item.author}</p>
                       <p className="text-white/90 text-xs truncate">{item.title}</p>
                     </div>
+                    {item.isOwner && onEdit && onDelete && item.id && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <PostOptionsMenu 
+                          onEdit={() => onEdit(item)}
+                          onDelete={() => onDelete(item.id!)}
+                        />
+                      </div>
+                    )}
                   </div>
                 </Card>
                 

@@ -5,13 +5,42 @@ import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { FeedPost } from "@/components/FeedPost";
 import { AdCard } from "@/components/AdCard";
+import { EditPostDialog } from "@/components/EditPostDialog";
 import { useState } from "react";
-import { feedPosts } from "@/data/posts";
+import { feedPosts, Post } from "@/data/posts";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const { toast } = useToast();
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const handleEditPost = (post: Post) => {
+    setEditingPost(post);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSavePost = (updatedPost: Post) => {
+    // In a real app, this would update the post in the database
+    console.log("Saving post:", updatedPost);
+    toast({
+      title: "Post updated",
+      description: "Your Wall Status post has been updated successfully.",
+    });
+  };
+
+  const handleDeletePost = (postId: string) => {
+    // In a real app, this would delete the post from the database
+    console.log("Deleting post:", postId);
+    toast({
+      title: "Post deleted",
+      description: "Your Wall Status post has been deleted successfully.",
+      variant: "destructive",
+    });
+  };
 
   const adSlots = [
     {
@@ -91,7 +120,18 @@ const Index = () => {
               onViewChange={setWallStatusView}
               filter={wallStatusFilter}
               onFilterChange={setWallStatusFilter}
+              onEdit={handleEditPost}
+              onDelete={handleDeletePost}
             />
+            
+            {editingPost && (
+              <EditPostDialog
+                post={editingPost}
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+                onSave={handleSavePost}
+              />
+            )}
             
             {/* Feed Posts with Filter */}
             <div className="space-y-0">

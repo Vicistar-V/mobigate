@@ -12,6 +12,7 @@ export interface Post {
   type: "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL";
   imageUrl?: string;
   fee?: string;
+  isOwner?: boolean;
 }
 
 export const feedPosts: Post[] = [
@@ -27,7 +28,8 @@ export const feedPosts: Post[] = [
     comments: "255",
     likes: "584",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_2",
@@ -69,7 +71,8 @@ export const feedPosts: Post[] = [
     comments: "875",
     likes: "1.9k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_5",
@@ -317,7 +320,8 @@ export const feedPosts: Post[] = [
     comments: "534",
     likes: "2.7k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
+    isOwner: true
   },
   {
     title: "WILDLIFE PHOTOGRAPHY IN AFRICA",
@@ -486,7 +490,8 @@ export const feedPosts: Post[] = [
     comments: "678",
     likes: "3.2k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1519821172144-4f87d85de2a1?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1519821172144-4f87d85de2a1?w=800&q=80",
+    isOwner: true
   },
   {
     title: "NATURE LANDSCAPE PHOTOGRAPHY",
