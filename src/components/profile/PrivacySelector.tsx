@@ -84,6 +84,16 @@ export const PrivacySelector = ({ value, onChange, exceptions = [], onExceptions
             </SelectItem>
           </SelectContent>
         </Select>
+        
+        {value === "all-except" && (
+          <button
+            type="button"
+            onClick={() => setShowExceptionDialog(true)}
+            className="text-xs text-primary hover:underline"
+          >
+            Edit ({exceptions.length})
+          </button>
+        )}
       </div>
 
       <FriendExceptionDialog
