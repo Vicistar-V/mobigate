@@ -281,6 +281,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       }
     ])
   );
+  const [loveFriendship, setLoveFriendship] = useState<LoveFriendship[]>(() => 
+    loadFromStorage<LoveFriendship[]>("profile_loveFriendship", [])
+  );
 
   // Save to localStorage whenever data changes
   useEffect(() => {
@@ -334,6 +337,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   useEffect(() => {
     localStorage.setItem("profile_workColleagues", JSON.stringify(workColleagues));
   }, [workColleagues]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_loveFriendship", JSON.stringify(loveFriendship));
+  }, [loveFriendship]);
 
   return (
     <div className="space-y-6">
@@ -611,6 +618,27 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         </div>
       </Card>
 
+      {/* Extra Source */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Briefcase className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Extra Source</h3>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            onClick={() => setEditExtraSourceOpen(true)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Click edit to explore additional resources and services
+        </div>
+      </Card>
+
       {/* Basic Information */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
@@ -664,6 +692,39 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         <div>
           <p className="font-medium">{relationship}</p>
           <p className="text-sm text-muted-foreground">Status</p>
+        </div>
+      </Card>
+
+      {/* Love Life & Friendship */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Heart className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Love Life & Friendship</h3>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            onClick={() => setEditLoveFriendshipOpen(true)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="space-y-4">
+          {loveFriendship.length > 0 ? (
+            loveFriendship.map((friendship, index) => (
+              <div key={friendship.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div>
+                  <p className="font-medium">{friendship.name}</p>
+                  <p className="text-sm text-muted-foreground">{friendship.relationshipTag}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">No friendships added</p>
+          )}
         </div>
       </Card>
 
@@ -796,6 +857,17 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       </EditSectionDialog>
 
       <EditSectionDialog
+        open={editExtraSourceOpen}
+        onOpenChange={setEditExtraSourceOpen}
+        title="Extra Source"
+        maxWidth="lg"
+      >
+        <EditExtraSourceForm
+          onClose={() => setEditExtraSourceOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
         open={editBasicInfoOpen}
         onOpenChange={setEditBasicInfoOpen}
         title="Edit Basic Information"
@@ -816,6 +888,19 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           currentData={relationship}
           onSave={setRelationship}
           onClose={() => setEditRelationshipOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editLoveFriendshipOpen}
+        onOpenChange={setEditLoveFriendshipOpen}
+        title="Edit Love Life & Friendship"
+        maxWidth="lg"
+      >
+        <EditLoveFriendshipForm
+          currentData={loveFriendship}
+          onSave={setLoveFriendship}
+          onClose={() => setEditLoveFriendshipOpen(false)}
         />
       </EditSectionDialog>
 
