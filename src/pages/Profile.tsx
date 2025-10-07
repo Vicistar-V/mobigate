@@ -152,7 +152,7 @@ const Profile = () => {
             {/* Profile Image and Name Row */}
             <div className="relative flex items-start justify-between">
               {/* Profile Image and Name Column */}
-              <div className="flex flex-col items-start -mt-16">
+              <div className="flex flex-col items-start -mt-20">
                 <img 
                   src={userProfile.profileImage} 
                   alt={userProfile.name}
