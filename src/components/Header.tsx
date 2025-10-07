@@ -24,12 +24,7 @@ export const Header = () => {
             <Menu />
           </Button>
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            {/* Icon and logo on mobile */}
-            <img 
-              src={mobigateIcon} 
-              alt="Mobigate Icon" 
-              className="h-12 w-auto"
-            />
+            {/* Full logo with text on all screens */}
             <img 
               src={mobigateLogo} 
               alt="Mobigate" 
