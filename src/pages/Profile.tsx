@@ -150,30 +150,28 @@ const Profile = () => {
           
           <div className="px-6 pb-6">
             {/* Profile Image and Name Row */}
-            <div className="relative -mt-20">
-              <div className="flex items-start justify-between">
-                {/* Profile Image and Name Column */}
-                <div className="flex flex-col items-start ml-4">
-                  <img 
-                    src={userProfile.profileImage} 
-                    alt={userProfile.name}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-card"
-                  />
-                  <div className="mt-3 text-left">
-                    <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-                    {userProfile.verified && (
-                      <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
-                    )}
-                  </div>
+            <div className="relative flex items-start justify-between">
+              {/* Profile Image and Name Column */}
+              <div className="flex flex-col items-start -mt-16">
+                <img 
+                  src={userProfile.profileImage} 
+                  alt={userProfile.name}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-card"
+                />
+                <div className="mt-3">
+                  <h1 className="text-2xl font-bold">{userProfile.name}</h1>
+                  {userProfile.verified && (
+                    <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
+                  )}
                 </div>
-
-                {/* Online Indicator - Far Right */}
-                {userProfile.status === "Online" && (
-                  <div className="mt-2 mr-4 bg-emerald-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">
-                    Online
-                  </div>
-                )}
               </div>
+
+              {/* Online Indicator - Under Banner, Far Right */}
+              {userProfile.status === "Online" && (
+                <div className="mt-4 bg-emerald-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">
+                  Online
+                </div>
+              )}
             </div>
 
             {/* Stats and Actions Container */}
