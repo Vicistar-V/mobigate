@@ -23,11 +23,11 @@ export const Footer = () => {
           {/* About Us */}
           <Collapsible open={openSections.about} onOpenChange={() => toggleSection('about')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-base font-semibold group-hover:text-primary transition-colors">About Us</h3>
+              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">About Us</h3>
               <ChevronDown className={`h-4 w-4 transition-transform ${openSections.about ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-base text-muted-foreground leading-relaxed">
                 Connect, share, and engage with a vibrant community. Build meaningful relationships and discover new opportunities.
               </p>
             </CollapsibleContent>
@@ -36,11 +36,11 @@ export const Footer = () => {
           {/* Quick Links */}
           <Collapsible open={openSections.links} onOpenChange={() => toggleSection('links')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-base font-semibold group-hover:text-primary transition-colors">Quick Links</h3>
+              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">Quick Links</h3>
               <ChevronDown className={`h-4 w-4 transition-transform ${openSections.links ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-3">
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2 text-base">
                 <li>
                   <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
                     Home
@@ -73,11 +73,11 @@ export const Footer = () => {
           {/* Support */}
           <Collapsible open={openSections.support} onOpenChange={() => toggleSection('support')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-base font-semibold group-hover:text-primary transition-colors">Support</h3>
+              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">Support</h3>
               <ChevronDown className={`h-4 w-4 transition-transform ${openSections.support ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-3">
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2 text-base">
                 <li>
                   <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
                     Help Center
@@ -105,11 +105,11 @@ export const Footer = () => {
           {/* Contact */}
           <Collapsible open={openSections.contact} onOpenChange={() => toggleSection('contact')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-base font-semibold group-hover:text-primary transition-colors">Contact</h3>
+              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">Contact</h3>
               <ChevronDown className={`h-4 w-4 transition-transform ${openSections.contact ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-3">
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2 text-base">
                 <li className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground">
@@ -136,7 +136,7 @@ export const Footer = () => {
         <Separator className="my-6" />
 
         {/* Second Row - Copyright and Legal Links */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-base text-muted-foreground">
           <p>© {currentYear} Your Platform Name. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-primary transition-colors">

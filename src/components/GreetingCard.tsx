@@ -30,9 +30,9 @@ export const GreetingSection = () => {
             <AvatarFallback>NP</AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-2">
-            <p className="text-sm text-destructive font-semibold">Good Evening</p>
-            <h2 className="text-2xl font-bold">NKEMJKA PETER I.</h2>
-            <p className="text-sm text-muted-foreground">Oct 5, 2025, 5:30pm</p>
+            <p className="text-lg text-destructive font-semibold">Good Evening</p>
+            <h2 className="text-3xl font-bold">NKEMJKA PETER I.</h2>
+            <p className="text-base text-muted-foreground">Oct 5, 2025, 5:30pm</p>
           </div>
         </div>
 
@@ -41,7 +41,7 @@ export const GreetingSection = () => {
             <span key={link.label}>
               <a
                 href={link.href}
-                className="text-[17px] font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide"
+                className="text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide"
               >
                 {link.label}
               </a>
