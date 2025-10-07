@@ -126,11 +126,18 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-border/50 px-4 py-4">
         <div className="flex items-center gap-3">
           {open ? (
-            <img 
-              src={mobigateLogo} 
-              alt="Mobigate" 
-              className="h-10 w-auto"
-            />
+            <>
+              <img 
+                src={mobigateIcon} 
+                alt="Mobigate Icon" 
+                className="h-10 w-10"
+              />
+              <img 
+                src={mobigateLogo} 
+                alt="Mobigate" 
+                className="h-10 w-auto"
+              />
+            </>
           ) : (
             <img 
               src={mobigateIcon} 
