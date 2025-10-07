@@ -168,7 +168,7 @@ const Profile = () => {
             />
             <Button 
               size="sm" 
-              className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+              className="absolute bottom-4 right-4 bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity"
               onClick={() => setEditingBanner(true)}
             >
               <Camera className="h-4 w-4 mr-2" />
@@ -189,10 +189,10 @@ const Profile = () => {
                   />
                   <button
                     onClick={() => setEditingProfilePicture(true)}
-                    className="absolute inset-0 w-32 h-32 rounded-full bg-black/50 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium"
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium"
                   >
-                    <Camera className="h-5 w-5 mr-2" />
-                    Change
+                    <Camera className="h-3 w-3 mr-1" />
+                    Edit
                   </button>
                 </div>
                 <div className="mt-3">
