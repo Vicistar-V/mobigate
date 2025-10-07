@@ -17,18 +17,24 @@ export const Header = () => {
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
-            size="iconXl"
+            size="icon"
             onClick={toggleSidebar}
             className="hover:bg-primary/10"
           >
-            <Menu />
+            <Menu className="h-5 w-5" />
           </Button>
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            {/* Full logo with text on all screen sizes */}
+            {/* Icon only on mobile */}
+            <img 
+              src={mobigateIcon} 
+              alt="Mobigate" 
+              className="h-12 w-auto md:hidden"
+            />
+            {/* Full logo with text on tablet and desktop */}
             <img 
               src={mobigateLogo} 
               alt="Mobigate" 
-              className="h-10 w-auto"
+              className="h-12 w-auto hidden md:block"
             />
           </Link>
         </div>
