@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal } from "lucide-react";
+import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal, Package } from "lucide-react";
 
 interface WallStatusFiltersProps {
   activeFilter: string;
@@ -23,6 +23,7 @@ const moreFilters = [
   { value: "audio", label: "Audio", icon: Headphones },
   { value: "pdf", label: "PDF Documents", icon: FileIcon },
   { value: "url", label: "URL Links", icon: Link },
+  { value: "biz-catalogue", label: "Biz-Catalogue", icon: Package },
 ];
 
 export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFiltersProps) => {
