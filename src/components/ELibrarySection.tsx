@@ -40,7 +40,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
   ];
   
   return (
-    <div>
+    <div className="py-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-base md:text-lg">Recommended E-Library Contents</h3>
         
