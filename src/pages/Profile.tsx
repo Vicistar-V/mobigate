@@ -14,14 +14,28 @@ import profileBanner from "@/assets/profile-banner.jpg";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ProfileAboutTab } from "@/components/ProfileAboutTab";
 import { EditPostDialog } from "@/components/EditPostDialog";
+import { EditProfilePictureDialog } from "@/components/profile/EditProfilePictureDialog";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editingProfilePicture, setEditingProfilePicture] = useState(false);
   const { toast } = useToast();
+  
+  // Load profile image from localStorage or use default
+  const [profileImage, setProfileImage] = useState<string>(() => {
+    const saved = localStorage.getItem("profileImage");
+    return saved || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
+  });
+
+  // Save profile image to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("profileImage", profileImage);
+  }, [profileImage]);
   
   // Get posts for this specific user and manage as state
   const [userPosts, setUserPosts] = useState<Post[]>(() => getPostsByUserId("1"));
@@ -29,7 +43,7 @@ const Profile = () => {
   const userProfile = {
     name: "Amaka Jane Johnson",
     location: "Lagos, Nigeria",
-    profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    profileImage: profileImage,
     verified: true,
     status: "Online" as const,
     isFriend: true,
@@ -153,11 +167,19 @@ const Profile = () => {
             <div className="relative flex items-start justify-between">
               {/* Profile Image and Name Column */}
               <div className="flex flex-col items-start -mt-20">
-                <img 
-                  src={userProfile.profileImage} 
-                  alt={userProfile.name}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-card"
-                />
+                <div className="relative group">
+                  <img 
+                    src={userProfile.profileImage} 
+                    alt={userProfile.name}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-card"
+                  />
+                  <button
+                    onClick={() => setEditingProfilePicture(true)}
+                    className="absolute inset-0 w-32 h-32 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium"
+                  >
+                    Change Photo
+                  </button>
+                </div>
                 <div className="mt-3">
                   <h1 className="text-2xl font-bold">{userProfile.name}</h1>
                   {userProfile.verified && (
@@ -385,6 +407,13 @@ const Profile = () => {
           onSave={handleSavePost}
         />
       )}
+
+      <EditProfilePictureDialog
+        open={editingProfilePicture}
+        onOpenChange={setEditingProfilePicture}
+        currentImage={profileImage}
+        onSave={setProfileImage}
+      />
     </div>
   );
 };
