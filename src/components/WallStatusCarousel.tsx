@@ -79,24 +79,41 @@ export const WallStatusCarousel = ({
         <div className="relative -mx-4 px-4">
           <ScrollArea className="w-full">
             <div className="flex gap-3 pb-2">
-              {filteredItems.map((item, index) => (
-                <Card 
-                  key={index} 
-                  className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
-                >
-                  {item.imageUrl && (
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                    <p className="text-white text-sm font-medium truncate">{item.author}</p>
-                    <p className="text-white/90 text-xs truncate">{item.title}</p>
-                  </div>
-                </Card>
-              ))}
+              {filteredItems.map((item, index) => {
+                const shouldShowAd = (index + 1) % 15 === 0 && index < filteredItems.length - 1;
+                const adSlotIndex = Math.floor((index + 1) / 15) - 1;
+                
+                return (
+                  <React.Fragment key={`${item.title}-${index}`}>
+                    <Card 
+                      className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                    >
+                      {item.imageUrl && (
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.title}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
+                        <p className="text-white text-sm font-medium truncate">{item.author}</p>
+                        <p className="text-white/90 text-xs truncate">{item.title}</p>
+                      </div>
+                    </Card>
+                    
+                    {/* Insert ad after every 15 posts */}
+                    {shouldShowAd && adSlotIndex >= 0 && adSlotIndex < adSlots.length && (
+                      <div className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4]">
+                        <AdRotation 
+                          key={`ad-${adSlots[adSlotIndex].slotId}`}
+                          slotId={adSlots[adSlotIndex].slotId}
+                          ads={adSlots[adSlotIndex].ads}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
