@@ -6,8 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Trash2, Plus, Save, X } from "lucide-react";
+import { Trash2, Plus, Save, X, User } from "lucide-react";
 import { PrivacySelector } from "./PrivacySelector";
+import { ImageUploader } from "./ImageUploader";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const schoolMateSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -39,6 +41,8 @@ export interface SchoolMate {
   teacherSubject?: string;
   teacherPosition?: string;
   privacy?: string;
+  profileImage?: string;
+  institutionLogo?: string;
 }
 
 interface EditSchoolMatesFormProps {
@@ -52,6 +56,8 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [profileImage, setProfileImage] = useState<string | undefined>();
+  const [institutionLogo, setInstitutionLogo] = useState<string | undefined>();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(schoolMateSchema),
@@ -61,6 +67,8 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
     setIsAdding(true);
     setEditingId(null);
     setPrivacy("public");
+    setProfileImage(undefined);
+    setInstitutionLogo(undefined);
     reset({});
   };
 
@@ -68,6 +76,8 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
     setEditingId(mate.id);
     setIsAdding(false);
     setPrivacy(mate.privacy || "public");
+    setProfileImage(mate.profileImage);
+    setInstitutionLogo(mate.institutionLogo);
     reset(mate);
   };
 
@@ -81,15 +91,19 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
         id: Date.now().toString(),
         ...data,
         privacy,
+        profileImage,
+        institutionLogo,
       };
       setSchoolMates([...schoolMates, newMate]);
       setIsAdding(false);
     } else if (editingId) {
       setSchoolMates(schoolMates.map(m => 
-        m.id === editingId ? { ...m, ...data, privacy } : m
+        m.id === editingId ? { ...m, ...data, privacy, profileImage, institutionLogo } : m
       ));
       setEditingId(null);
     }
+    setProfileImage(undefined);
+    setInstitutionLogo(undefined);
     reset({});
   };
 
@@ -102,10 +116,23 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
     <div className="space-y-4 max-h-[70vh] overflow-y-auto">
       {schoolMates.map((mate) => (
         <div key={mate.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex-1">
-            <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-            <p className="text-sm text-muted-foreground">{mate.institution}</p>
-            {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+          <div className="flex items-center gap-3 flex-1">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={mate.profileImage} alt={mate.name} />
+              <AvatarFallback>
+                <User className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+              <div className="flex items-center gap-2">
+                {mate.institutionLogo && (
+                  <img src={mate.institutionLogo} alt="" className="h-4 w-4 object-contain" />
+                )}
+                <p className="text-sm text-muted-foreground">{mate.institution}</p>
+              </div>
+              {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+            </div>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => handleEdit(mate)}>
@@ -121,6 +148,15 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
       {(isAdding || editingId) && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
           <div>
+            <Label>Profile Picture</Label>
+            <ImageUploader
+              value={profileImage}
+              onChange={setProfileImage}
+              type="avatar"
+            />
+          </div>
+
+          <div>
             <Label htmlFor="name">Name *</Label>
             <Input id="name" {...register("name")} />
             {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
@@ -130,6 +166,16 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
             <Label htmlFor="institution">School/Institution *</Label>
             <Input id="institution" {...register("institution")} />
             {errors.institution && <p className="text-sm text-destructive mt-1">{errors.institution.message as string}</p>}
+          </div>
+
+          <div>
+            <Label>Institution Logo</Label>
+            <ImageUploader
+              value={institutionLogo}
+              onChange={setInstitutionLogo}
+              type="logo"
+              placeholder="Upload Institution Logo"
+            />
           </div>
 
           <div>

@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, User } from "lucide-react";
 import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const loveFriendshipSchema = z.object({
   friendId: z.string().min(1, "Please select a friend"),
@@ -29,6 +30,7 @@ export interface LoveFriendship {
   name: string;
   relationshipTag: string;
   privacy?: string;
+  profileImage?: string;
 }
 
 interface EditLoveFriendshipFormProps {
@@ -106,12 +108,20 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
       </p>
 
       <div className="space-y-2 max-h-[400px] overflow-y-auto">
-        {friendships.map((friendship) => (
+      {friendships.map((friendship) => (
           <Card key={friendship.id} className="p-3">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium">{friendship.name}</p>
-                <p className="text-sm text-muted-foreground">{friendship.relationshipTag}</p>
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={friendship.profileImage} alt={friendship.name} />
+                  <AvatarFallback>
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{friendship.name}</p>
+                  <p className="text-sm text-muted-foreground">{friendship.relationshipTag}</p>
+                </div>
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(friendship)}>

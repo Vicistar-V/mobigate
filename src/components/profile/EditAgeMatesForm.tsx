@@ -6,8 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Trash2, Plus, Save, X } from "lucide-react";
+import { Trash2, Plus, Save, X, User } from "lucide-react";
 import { PrivacySelector } from "./PrivacySelector";
+import { ImageUploader } from "./ImageUploader";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const ageMateSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -27,6 +29,7 @@ export interface AgeMate {
   postsHeld?: string;
   nickname?: string;
   privacy?: string;
+  profileImage?: string;
 }
 
 interface EditAgeMatesFormProps {
@@ -40,6 +43,7 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [profileImage, setProfileImage] = useState<string | undefined>();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(ageMateSchema),
@@ -49,6 +53,7 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
     setIsAdding(true);
     setEditingId(null);
     setPrivacy("public");
+    setProfileImage(undefined);
     reset({});
   };
 
@@ -56,6 +61,7 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
     setEditingId(mate.id);
     setIsAdding(false);
     setPrivacy(mate.privacy || "public");
+    setProfileImage(mate.profileImage);
     reset(mate);
   };
 
@@ -69,15 +75,17 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
         id: Date.now().toString(),
         ...data,
         privacy,
+        profileImage,
       };
       setAgeMates([...ageMates, newMate]);
       setIsAdding(false);
     } else if (editingId) {
       setAgeMates(ageMates.map(m => 
-        m.id === editingId ? { ...m, ...data, privacy } : m
+        m.id === editingId ? { ...m, ...data, privacy, profileImage } : m
       ));
       setEditingId(null);
     }
+    setProfileImage(undefined);
     reset({});
   };
 
@@ -90,10 +98,18 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
     <div className="space-y-4 max-h-[70vh] overflow-y-auto">
       {ageMates.map((mate) => (
         <div key={mate.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex-1">
-            <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-            <p className="text-sm text-muted-foreground">{mate.community}</p>
-            {mate.ageGrade && <p className="text-sm text-muted-foreground">{mate.ageGrade}</p>}
+          <div className="flex items-center gap-3 flex-1">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={mate.profileImage} alt={mate.name} />
+              <AvatarFallback>
+                <User className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+              <p className="text-sm text-muted-foreground">{mate.community}</p>
+              {mate.ageGrade && <p className="text-sm text-muted-foreground">{mate.ageGrade}</p>}
+            </div>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => handleEdit(mate)}>
@@ -108,6 +124,15 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
 
       {(isAdding || editingId) && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
+          <div>
+            <Label>Profile Picture</Label>
+            <ImageUploader
+              value={profileImage}
+              onChange={setProfileImage}
+              type="avatar"
+            />
+          </div>
+
           <div>
             <Label htmlFor="name">Name *</Label>
             <Input id="name" {...register("name")} />

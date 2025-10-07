@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Trash2, Plus, Save, X } from "lucide-react";
+import { Trash2, Plus, Save, X, User } from "lucide-react";
 import { PrivacySelector } from "./PrivacySelector";
+import { ImageUploader } from "./ImageUploader";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const workColleagueSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -32,6 +34,8 @@ export interface WorkColleague {
   superiority?: string;
   specialSkills?: string;
   privacy?: string;
+  profileImage?: string;
+  workplaceLogo?: string;
 }
 
 interface EditWorkColleaguesFormProps {
@@ -46,6 +50,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
   const [superiority, setSuperiority] = useState("");
+  const [profileImage, setProfileImage] = useState<string | undefined>();
+  const [workplaceLogo, setWorkplaceLogo] = useState<string | undefined>();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(workColleagueSchema),
@@ -56,6 +62,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
     setEditingId(null);
     setPrivacy("public");
     setSuperiority("");
+    setProfileImage(undefined);
+    setWorkplaceLogo(undefined);
     reset({});
   };
 
@@ -64,6 +72,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
     setIsAdding(false);
     setPrivacy(colleague.privacy || "public");
     setSuperiority(colleague.superiority || "");
+    setProfileImage(colleague.profileImage);
+    setWorkplaceLogo(colleague.workplaceLogo);
     reset(colleague);
   };
 
@@ -72,7 +82,7 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
   };
 
   const onSubmit = (data: any) => {
-    const colleagueData = { ...data, superiority };
+    const colleagueData = { ...data, superiority, profileImage, workplaceLogo };
     
     if (isAdding) {
       const newColleague: WorkColleague = {
@@ -88,6 +98,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
       ));
       setEditingId(null);
     }
+    setProfileImage(undefined);
+    setWorkplaceLogo(undefined);
     reset({});
     setSuperiority("");
   };
@@ -101,11 +113,24 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
     <div className="space-y-4 max-h-[70vh] overflow-y-auto">
       {colleagues.map((colleague) => (
         <div key={colleague.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex-1">
-            <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
-            <p className="text-sm text-muted-foreground">{colleague.workplaceName}</p>
-            {colleague.workplaceLocation && <p className="text-sm text-muted-foreground">{colleague.workplaceLocation}</p>}
-            {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
+          <div className="flex items-center gap-3 flex-1">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={colleague.profileImage} alt={colleague.name} />
+              <AvatarFallback>
+                <User className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
+              <div className="flex items-center gap-2">
+                {colleague.workplaceLogo && (
+                  <img src={colleague.workplaceLogo} alt="" className="h-4 w-4 object-contain" />
+                )}
+                <p className="text-sm text-muted-foreground">{colleague.workplaceName}</p>
+              </div>
+              {colleague.workplaceLocation && <p className="text-sm text-muted-foreground">{colleague.workplaceLocation}</p>}
+              {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
+            </div>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => handleEdit(colleague)}>
@@ -121,6 +146,15 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
       {(isAdding || editingId) && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
           <div>
+            <Label>Profile Picture</Label>
+            <ImageUploader
+              value={profileImage}
+              onChange={setProfileImage}
+              type="avatar"
+            />
+          </div>
+
+          <div>
             <Label htmlFor="name">Name *</Label>
             <Input id="name" {...register("name")} />
             {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
@@ -130,6 +164,16 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
             <Label htmlFor="workplaceName">Workplace Name *</Label>
             <Input id="workplaceName" {...register("workplaceName")} />
             {errors.workplaceName && <p className="text-sm text-destructive mt-1">{errors.workplaceName.message as string}</p>}
+          </div>
+
+          <div>
+            <Label>Workplace Logo</Label>
+            <ImageUploader
+              value={workplaceLogo}
+              onChange={setWorkplaceLogo}
+              type="logo"
+              placeholder="Upload Workplace Logo"
+            />
           </div>
 
           <div>

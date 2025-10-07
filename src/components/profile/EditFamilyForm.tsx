@@ -9,6 +9,9 @@ import { Card } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
+import { ImageUploader } from "./ImageUploader";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 
 const familySchema = z.object({
   friendId: z.string().min(1, "Please select a friend"),
@@ -29,6 +32,7 @@ interface FamilyMember {
   name: string;
   relation: string;
   privacy?: string;
+  profileImage?: string;
 }
 
 interface EditFamilyFormProps {
@@ -42,6 +46,7 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [profileImage, setProfileImage] = useState<string | undefined>();
 
   const form = useForm<z.infer<typeof familySchema>>({
     resolver: zodResolver(familySchema),
@@ -51,12 +56,14 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
   const handleAdd = () => {
     setIsAdding(true);
     form.reset({ friendId: "", relation: "" });
+    setProfileImage(undefined);
   };
 
   const handleEdit = (member: FamilyMember) => {
     setEditingId(member.id);
     form.reset({ friendId: "", relation: member.relation });
     setPrivacy(member.privacy || "public");
+    setProfileImage(member.profileImage);
   };
 
   const handleDelete = (id: string) => {
@@ -72,7 +79,8 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
         name: selectedFriend.name, 
         relation: data.relation, 
         id: Date.now().toString(),
-        privacy 
+        privacy,
+        profileImage
       };
       setFamily([...family, newMember]);
       setIsAdding(false);
@@ -81,12 +89,14 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
         name: selectedFriend.name, 
         relation: data.relation, 
         id: editingId,
-        privacy 
+        privacy,
+        profileImage
       } : m));
       setEditingId(null);
     }
     form.reset({ friendId: "", relation: "" });
     setPrivacy("public");
+    setProfileImage(undefined);
   };
 
   const handleSave = () => {
@@ -100,10 +110,18 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
       <div className="space-y-2 max-h-[400px] overflow-y-auto">
         {family.map((member) => (
           <Card key={member.id} className="p-3">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium">{member.name}</p>
-                <p className="text-sm text-muted-foreground">{member.relation}</p>
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={member.profileImage} alt={member.name} />
+                  <AvatarFallback>
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{member.name}</p>
+                  <p className="text-sm text-muted-foreground">{member.relation}</p>
+                </div>
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(member)}>
@@ -121,6 +139,16 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
       {(isAdding || editingId) && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
+            <div>
+              <FormLabel>Profile Picture</FormLabel>
+              <div className="mt-2">
+                <ImageUploader
+                  value={profileImage}
+                  onChange={setProfileImage}
+                  type="avatar"
+                />
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="friendId"

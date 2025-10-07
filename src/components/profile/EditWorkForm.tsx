@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
+import { ImageUploader } from "./ImageUploader";
 
 const workSchema = z.object({
   workplaceName: z.string().min(1, "Workplace name is required"),
@@ -22,6 +23,7 @@ interface Work {
   position: string;
   period: string;
   privacy?: string;
+  logo?: string;
 }
 
 interface EditWorkFormProps {
@@ -35,6 +37,7 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [logo, setLogo] = useState<string | undefined>();
 
   const form = useForm<z.infer<typeof workSchema>>({
     resolver: zodResolver(workSchema),
@@ -44,12 +47,14 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
   const handleAdd = () => {
     setIsAdding(true);
     form.reset({ workplaceName: "", position: "", period: "" });
+    setLogo(undefined);
   };
 
   const handleEdit = (workItem: Work) => {
     setEditingId(workItem.id);
     form.reset({ workplaceName: workItem.workplaceName, position: workItem.position, period: workItem.period });
     setPrivacy(workItem.privacy || "public");
+    setLogo(workItem.logo);
   };
 
   const handleDelete = (id: string) => {
@@ -63,7 +68,8 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
         position: data.position, 
         period: data.period, 
         id: Date.now().toString(),
-        privacy 
+        privacy,
+        logo
       };
       setWork([...work, newWork]);
       setIsAdding(false);
@@ -73,12 +79,14 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
         position: data.position, 
         period: data.period, 
         id: editingId,
-        privacy 
+        privacy,
+        logo
       } : w));
       setEditingId(null);
     }
     form.reset({ workplaceName: "", position: "", period: "" });
     setPrivacy("public");
+    setLogo(undefined);
   };
 
   const handleSave = () => {
@@ -93,10 +101,17 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
         {work.map((workItem) => (
           <Card key={workItem.id} className="p-3">
             <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium">{workItem.workplaceName}</p>
-                <p className="text-sm">{workItem.position}</p>
-                <p className="text-sm text-muted-foreground">{workItem.period}</p>
+              <div className="flex items-center gap-3">
+                {workItem.logo && (
+                  <div className="h-10 w-10 rounded border flex items-center justify-center overflow-hidden bg-background">
+                    <img src={workItem.logo} alt="" className="max-h-full max-w-full object-contain" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium">{workItem.workplaceName}</p>
+                  <p className="text-sm">{workItem.position}</p>
+                  <p className="text-sm text-muted-foreground">{workItem.period}</p>
+                </div>
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(workItem)}>
@@ -114,6 +129,17 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
       {(isAdding || editingId) && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
+            <div>
+              <FormLabel>Workplace Logo</FormLabel>
+              <div className="mt-2">
+                <ImageUploader
+                  value={logo}
+                  onChange={setLogo}
+                  type="logo"
+                  placeholder="Upload Workplace Logo"
+                />
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="workplaceName"

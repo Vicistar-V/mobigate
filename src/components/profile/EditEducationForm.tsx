@@ -14,6 +14,7 @@ import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PrivacySelector } from "./PrivacySelector";
+import { ImageUploader } from "./ImageUploader";
 
 const educationSchema = z.object({
   school: z.string().min(1, "School is required"),
@@ -30,6 +31,7 @@ interface Education {
   department?: string;
   period: string;
   extraSkills?: string;
+  logo?: string;
 }
 
 interface EditEducationFormProps {
@@ -43,6 +45,7 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [logo, setLogo] = useState<string | undefined>();
 
   const form = useForm({
     resolver: zodResolver(educationSchema),
@@ -52,11 +55,13 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
   const handleAdd = () => {
     setIsAdding(true);
     form.reset({ school: "", faculty: "", department: "", period: "", extraSkills: "" });
+    setLogo(undefined);
   };
 
   const handleEdit = (edu: Education) => {
     setEditingId(edu.id);
     form.reset(edu);
+    setLogo(edu.logo);
   };
 
   const handleDelete = (id: string) => {
@@ -71,6 +76,7 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
         department: data.department, 
         period: data.period, 
         extraSkills: data.extraSkills,
+        logo,
         id: Date.now().toString() 
       };
       setEducation([...education, newEducation]);
@@ -82,11 +88,13 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
         department: data.department, 
         period: data.period, 
         extraSkills: data.extraSkills,
+        logo,
         id: editingId 
       } : edu));
       setEditingId(null);
     }
     form.reset({ school: "", faculty: "", department: "", period: "", extraSkills: "" });
+    setLogo(undefined);
   };
 
   const handleSave = () => {
@@ -101,12 +109,19 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
         {education.map((edu) => (
           <Card key={edu.id} className="p-3">
             <div className="flex justify-between items-start">
-              <div>
-                <p className="font-medium">{edu.school}</p>
-                {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
-                {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
-                <p className="text-sm text-muted-foreground">{edu.period}</p>
-                {edu.extraSkills && <p className="text-sm text-muted-foreground">Skills: {edu.extraSkills}</p>}
+              <div className="flex items-center gap-3">
+                {edu.logo && (
+                  <div className="h-10 w-10 rounded border flex items-center justify-center overflow-hidden bg-background">
+                    <img src={edu.logo} alt="" className="max-h-full max-w-full object-contain" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium">{edu.school}</p>
+                  {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
+                  {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
+                  <p className="text-sm text-muted-foreground">{edu.period}</p>
+                  {edu.extraSkills && <p className="text-sm text-muted-foreground">Skills: {edu.extraSkills}</p>}
+                </div>
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(edu)}>
@@ -124,6 +139,17 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
       {(isAdding || editingId) && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
+            <div>
+              <FormLabel>Institution Logo</FormLabel>
+              <div className="mt-2">
+                <ImageUploader
+                  value={logo}
+                  onChange={setLogo}
+                  type="logo"
+                  placeholder="Upload Institution Logo"
+                />
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="school"
