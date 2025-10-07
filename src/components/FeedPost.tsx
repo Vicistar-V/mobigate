@@ -67,7 +67,7 @@ export const FeedPost = ({
       )}
       
       <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2">
           <div className="flex-1">
             <h3 className="font-semibold text-lg leading-tight line-clamp-2">{title}</h3>
             {subtitle && (
@@ -75,7 +75,9 @@ export const FeedPost = ({
             )}
           </div>
           {isOwner && onEdit && onDelete && (
-            <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
+            <div className="flex-shrink-0">
+              <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
+            </div>
           )}
         </div>
 

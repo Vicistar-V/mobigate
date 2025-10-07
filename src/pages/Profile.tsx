@@ -326,10 +326,7 @@ const Profile = () => {
                 {filteredPosts.map((post, index) => (
                 <div key={post.id || index}>
                   <FeedPost 
-                    {...post} 
-                    isOwner={post.userId === "1"}
-                    onEdit={() => handleEditPost(post)}
-                    onDelete={() => handleDeletePost(post.id!)}
+                    {...post}
                   />
                   {/* Insert ad after every 5 posts */}
                   {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (

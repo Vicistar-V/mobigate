@@ -35,7 +35,6 @@ export const EditPostDialog = ({
   const [title, setTitle] = useState(post.title);
   const [subtitle, setSubtitle] = useState(post.subtitle || "");
   const [type, setType] = useState(post.type);
-  const [fee, setFee] = useState(post.fee || "6");
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -53,7 +52,6 @@ export const EditPostDialog = ({
       title: title.trim(),
       subtitle: subtitle.trim() || undefined,
       type,
-      fee,
     };
 
     onSave(updatedPost);
@@ -107,18 +105,6 @@ export const EditPostDialog = ({
                 <SelectItem value="URL">URL</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="fee">Fee (Mobi)</Label>
-            <Input
-              id="fee"
-              value={fee}
-              onChange={(e) => setFee(e.target.value)}
-              placeholder="Enter fee"
-              type="number"
-              min="0"
-            />
           </div>
         </div>
 
