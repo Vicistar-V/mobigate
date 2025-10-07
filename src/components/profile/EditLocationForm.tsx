@@ -43,6 +43,8 @@ interface Location {
   place: string;
   description: string;
   period?: string;
+  privacy?: string;
+  exceptions?: string[];
 }
 
 interface EditLocationFormProps {
@@ -56,6 +58,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [exceptions, setExceptions] = useState<string[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
 
   const form = useForm({
@@ -66,6 +69,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   const handleAdd = () => {
     setIsAdding(true);
     setShowCustomInput(false);
+    setExceptions([]);
     form.reset({ place: "", description: "", customDescription: "", period: "" });
   };
 
@@ -73,6 +77,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
     setEditingId(location.id);
     const isCustom = !descriptionOptions.slice(0, -1).includes(location.description);
     setShowCustomInput(isCustom);
+    setExceptions(location.exceptions || []);
     form.reset({ 
       place: location.place, 
       description: isCustom ? "Other" : location.description, 
@@ -93,6 +98,8 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
         place: data.place, 
         description: finalDescription, 
         period: data.period, 
+        privacy,
+        exceptions: privacy === "all-except" ? exceptions : undefined,
         id: Date.now().toString() 
       };
       setLocations([...locations, newLocation]);
@@ -102,11 +109,14 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
         place: data.place, 
         description: finalDescription, 
         period: data.period, 
+        privacy,
+        exceptions: privacy === "all-except" ? exceptions : undefined,
         id: editingId 
       } : loc));
       setEditingId(null);
     }
     setShowCustomInput(false);
+    setExceptions([]);
     form.reset({ place: "", description: "", customDescription: "", period: "" });
   };
 
@@ -217,7 +227,12 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
             <div>
               <FormLabel>Privacy</FormLabel>
               <div className="mt-2">
-                <PrivacySelector value={privacy} onChange={setPrivacy} />
+                <PrivacySelector 
+                  value={privacy} 
+                  onChange={setPrivacy}
+                  exceptions={exceptions}
+                  onExceptionsChange={setExceptions}
+                />
               </div>
             </div>
             <div className="flex gap-2">
