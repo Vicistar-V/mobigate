@@ -93,7 +93,7 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
           <div className="flex-1">
             <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
             <p className="text-sm text-muted-foreground">{mate.community}</p>
-            {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
+            {mate.ageGrade && <p className="text-sm text-muted-foreground">{mate.ageGrade}</p>}
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => handleEdit(mate)}>
