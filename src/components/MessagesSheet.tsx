@@ -51,8 +51,8 @@ export const MessagesSheet = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="hover:bg-primary/10">
-          <MessageSquare className="h-4 w-4" />
+        <Button variant="ghost" size="iconLg" className="hover:bg-primary/10">
+          <MessageSquare />
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">
