@@ -150,31 +150,35 @@ const Profile = () => {
           
           <div className="px-6 pb-6">
             {/* Profile Image and Name Row */}
-            <div className="flex items-start gap-4 -mt-16 relative mb-6">
-              {/* Profile Image */}
-              <div className="flex-shrink-0 flex flex-col items-center">
-                <img 
-                  src={userProfile.profileImage} 
-                  alt={userProfile.name}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-card"
-                />
+            <div className="relative -mt-20">
+              <div className="flex items-start justify-between">
+                {/* Profile Image and Name Column */}
+                <div className="flex flex-col items-start ml-4">
+                  <img 
+                    src={userProfile.profileImage} 
+                    alt={userProfile.name}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-card"
+                  />
+                  <div className="mt-3 text-left">
+                    <h1 className="text-2xl font-bold">{userProfile.name}</h1>
+                    {userProfile.verified && (
+                      <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Online Indicator - Far Right */}
                 {userProfile.status === "Online" && (
-                  <div className="mt-2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  <div className="mt-2 mr-4 bg-emerald-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">
                     Online
                   </div>
                 )}
               </div>
-
-              {/* Name and Verified Badge */}
-              <div className="flex-1 mt-16">
-                <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-                {userProfile.verified && (
-                  <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
-                )}
-              </div>
             </div>
 
-            {/* Stats and Other Content */}
+            {/* Stats and Actions Container */}
+            <div className="mt-6">
+
             <div className="space-y-3">
 
               {/* Stats */}
@@ -233,6 +237,7 @@ const Profile = () => {
                   You are Friends with {userProfile.name}
                 </p>
               )}
+            </div>
             </div>
           </div>
         </Card>
