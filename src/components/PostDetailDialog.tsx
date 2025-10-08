@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, MessageSquare, Heart, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { MediaViewer } from "@/components/MediaViewer";
 
 interface PostDetailDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export const PostDetailDialog = ({
 }: PostDetailDialogProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(parseInt(post.likes) || 0);
+  const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
 
   const handleLike = () => {
     if (isLiked) {
@@ -50,6 +52,14 @@ export const PostDetailDialog = ({
   };
 
   return (
+    <>
+      <MediaViewer
+        open={mediaViewerOpen}
+        onOpenChange={setMediaViewerOpen}
+        mediaUrl={post.imageUrl}
+        mediaType={post.type}
+        title={post.title}
+      />
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
         {/* Fixed Header */}
@@ -61,7 +71,10 @@ export const PostDetailDialog = ({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="space-y-4">
             {post.imageUrl && (
-              <div className="relative w-full h-96 bg-muted rounded-lg overflow-hidden">
+              <div 
+                className="relative w-full h-96 bg-muted rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => setMediaViewerOpen(true)}
+              >
                 <img
                   src={post.imageUrl}
                   alt={post.title}
@@ -158,5 +171,6 @@ export const PostDetailDialog = ({
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 };
