@@ -38,6 +38,7 @@ interface WallStatusCarouselProps {
   title?: string;
   onEdit?: (post: Post) => void;
   onDelete?: (postId: string) => void;
+  onItemClick?: (post: Post) => void;
 }
 
 export const WallStatusCarousel = ({
@@ -49,7 +50,8 @@ export const WallStatusCarousel = ({
   onFilterChange,
   title = "Wall Status",
   onEdit,
-  onDelete
+  onDelete,
+  onItemClick
 }: WallStatusCarouselProps) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -73,8 +75,12 @@ export const WallStatusCarousel = ({
   };
 
   const openDetails = (post: Post) => {
-    setSelectedPost(post);
-    setDetailOpen(true);
+    if (onItemClick) {
+      onItemClick(post);
+    } else {
+      setSelectedPost(post);
+      setDetailOpen(true);
+    }
   };
 
   return (

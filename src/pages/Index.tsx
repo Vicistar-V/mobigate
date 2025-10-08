@@ -6,6 +6,7 @@ import { ELibrarySection } from "@/components/ELibrarySection";
 import { FeedPost } from "@/components/FeedPost";
 import { AdCard } from "@/components/AdCard";
 import { EditPostDialog } from "@/components/EditPostDialog";
+import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useState } from "react";
 import { feedPosts, Post } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,9 @@ const Index = () => {
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
+  const [galleryItems, setGalleryItems] = useState<MediaItem[]>([]);
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
 
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
@@ -40,6 +44,27 @@ const Index = () => {
       description: "Your Wall Status post has been deleted successfully.",
       variant: "destructive",
     });
+  };
+
+  // Open media gallery for wall status
+  const openWallStatusGallery = (initialPost: Post) => {
+    const wallPosts = feedPosts.filter(p => p.imageUrl);
+    const items: MediaItem[] = wallPosts.map((post) => ({
+      id: post.id,
+      url: post.imageUrl || "",
+      type: post.type.toLowerCase() === "video" ? "video" : post.type.toLowerCase() === "audio" ? "audio" : "photo",
+      author: post.author,
+      authorImage: post.authorProfileImage,
+      title: post.title,
+      description: post.subtitle,
+      likes: parseInt(post.likes) || 0,
+      comments: parseInt(post.comments) || 0,
+      isLiked: false,
+    }));
+    const initialIndex = wallPosts.findIndex(p => p.id === initialPost.id);
+    setGalleryItems(items);
+    setGalleryInitialIndex(initialIndex >= 0 ? initialIndex : 0);
+    setMediaGalleryOpen(true);
   };
 
   const adSlots = [
@@ -122,6 +147,7 @@ const Index = () => {
               onFilterChange={setWallStatusFilter}
               onEdit={handleEditPost}
               onDelete={handleDeletePost}
+              onItemClick={openWallStatusGallery}
             />
             
             {editingPost && (
@@ -155,6 +181,15 @@ const Index = () => {
       </main>
 
       <Footer />
+
+      <MediaGalleryViewer
+        open={mediaGalleryOpen}
+        onOpenChange={setMediaGalleryOpen}
+        items={galleryItems}
+        initialIndex={galleryInitialIndex}
+        showActions={true}
+        galleryType="wall-status"
+      />
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostOptionsMenu } from "@/components/PostOptionsMenu";
-import { PostDetailDialog } from "@/components/PostDetailDialog";
+import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 
 interface FeedPostProps {
   id?: string;
@@ -48,7 +48,7 @@ export const FeedPost = ({
 }: FeedPostProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(parseInt(likes));
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
 
   const handleLike = () => {
     if (isLiked) {
@@ -59,13 +59,32 @@ export const FeedPost = ({
     setIsLiked(!isLiked);
   };
 
+  const openMediaGallery = () => {
+    if (imageUrl) {
+      setMediaGalleryOpen(true);
+    }
+  };
+
+  const mediaItem: MediaItem = {
+    id: id,
+    url: imageUrl || "",
+    type: type.toLowerCase() === "video" ? "video" : type.toLowerCase() === "audio" ? "audio" : "photo",
+    title: title,
+    description: subtitle || description,
+    author: author,
+    authorImage: authorProfileImage,
+    likes: likeCount,
+    comments: parseInt(comments),
+    isLiked: isLiked,
+  };
+
   return (
     <>
       <Card className="overflow-hidden hover:shadow-md transition-shadow">
         {imageUrl && (
           <div 
             className="relative h-48 bg-muted cursor-pointer" 
-            onClick={() => setDetailOpen(true)}
+            onClick={openMediaGallery}
           >
             <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
             <Badge className="absolute top-2 left-2" variant="destructive">
@@ -76,11 +95,8 @@ export const FeedPost = ({
       
       <div className="p-4 space-y-3">
         <div className="flex items-start gap-2">
-          <div 
-            className="flex-1 cursor-pointer" 
-            onClick={() => setDetailOpen(true)}
-          >
-            <h3 className="font-semibold text-2xl leading-tight line-clamp-2 hover:text-primary transition-colors">{title}</h3>
+          <div className="flex-1">
+            <h3 className="font-semibold text-2xl leading-tight line-clamp-2">{title}</h3>
             {subtitle && (
               <p className="text-lg text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
             )}
@@ -155,26 +171,16 @@ export const FeedPost = ({
       </div>
     </Card>
 
-    <PostDetailDialog
-      open={detailOpen}
-      onOpenChange={setDetailOpen}
-      post={{
-        id,
-        title,
-        subtitle,
-        description,
-        author,
-        authorProfileImage,
-        userId,
-        status,
-        views,
-        comments,
-        likes,
-        type,
-        imageUrl,
-        fee,
-      }}
-    />
+    {imageUrl && (
+      <MediaGalleryViewer
+        open={mediaGalleryOpen}
+        onOpenChange={setMediaGalleryOpen}
+        items={[mediaItem]}
+        initialIndex={0}
+        showActions={true}
+        galleryType="post"
+      />
+    )}
     </>
   );
 };

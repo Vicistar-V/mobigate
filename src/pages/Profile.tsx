@@ -16,6 +16,7 @@ import { ProfileAboutTab } from "@/components/ProfileAboutTab";
 import { EditPostDialog } from "@/components/EditPostDialog";
 import { EditProfilePictureDialog } from "@/components/profile/EditProfilePictureDialog";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
+import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 
@@ -26,29 +27,77 @@ const Profile = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingProfilePicture, setEditingProfilePicture] = useState(false);
   const [editingBanner, setEditingBanner] = useState(false);
+  const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
+  const [galleryItems, setGalleryItems] = useState<MediaItem[]>([]);
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  const [galleryType, setGalleryType] = useState<"wall-status" | "profile-picture" | "banner" | "post">("wall-status");
   const { toast } = useToast();
   
-  // Load profile image from localStorage or use default
+  // Load profile image and history from localStorage
   const [profileImage, setProfileImage] = useState<string>(() => {
     const saved = localStorage.getItem("profileImage");
     return saved || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
   });
 
-  // Load banner image from localStorage or use default
+  const [profileImageHistory, setProfileImageHistory] = useState<string[]>(() => {
+    const saved = localStorage.getItem("profileImageHistory");
+    const history = saved ? JSON.parse(saved) : [];
+    const currentImage = localStorage.getItem("profileImage") || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
+    // Ensure current image is in history
+    if (!history.includes(currentImage)) {
+      return [currentImage, ...history];
+    }
+    return history;
+  });
+
+  // Load banner image and history from localStorage
   const [bannerImage, setBannerImage] = useState<string>(() => {
     const saved = localStorage.getItem("bannerImage");
     return saved || profileBanner;
   });
 
-  // Save profile image to localStorage whenever it changes
+  const [bannerImageHistory, setBannerImageHistory] = useState<string[]>(() => {
+    const saved = localStorage.getItem("bannerImageHistory");
+    const history = saved ? JSON.parse(saved) : [];
+    const currentBanner = localStorage.getItem("bannerImage") || profileBanner;
+    // Ensure current banner is in history
+    if (!history.includes(currentBanner)) {
+      return [currentBanner, ...history];
+    }
+    return history;
+  });
+
+  // Save profile image and history to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("profileImage", profileImage);
+    // Add to history if it's a new image
+    if (!profileImageHistory.includes(profileImage)) {
+      const newHistory = [profileImage, ...profileImageHistory];
+      setProfileImageHistory(newHistory);
+      localStorage.setItem("profileImageHistory", JSON.stringify(newHistory));
+    }
   }, [profileImage]);
 
-  // Save banner image to localStorage whenever it changes
+  // Save profile image history
+  useEffect(() => {
+    localStorage.setItem("profileImageHistory", JSON.stringify(profileImageHistory));
+  }, [profileImageHistory]);
+
+  // Save banner image and history to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("bannerImage", bannerImage);
+    // Add to history if it's a new banner
+    if (!bannerImageHistory.includes(bannerImage)) {
+      const newHistory = [bannerImage, ...bannerImageHistory];
+      setBannerImageHistory(newHistory);
+      localStorage.setItem("bannerImageHistory", JSON.stringify(newHistory));
+    }
   }, [bannerImage]);
+
+  // Save banner image history
+  useEffect(() => {
+    localStorage.setItem("bannerImageHistory", JSON.stringify(bannerImageHistory));
+  }, [bannerImageHistory]);
   
   // Get posts for this specific user and manage as state
   const [userPosts, setUserPosts] = useState<Post[]>(() => getPostsByUserId("1"));
@@ -143,6 +192,62 @@ const Profile = () => {
     });
   };
 
+  // Open media gallery for profile pictures
+  const openProfilePictureGallery = () => {
+    const items: MediaItem[] = profileImageHistory.map((url, index) => ({
+      id: `profile-${index}`,
+      url,
+      type: "photo" as const,
+      author: userProfile.name,
+      authorImage: profileImage,
+      timestamp: index === 0 ? "Current" : "Previous",
+      title: index === 0 ? "Current Profile Picture" : `Profile Picture ${profileImageHistory.length - index}`,
+    }));
+    setGalleryItems(items);
+    setGalleryInitialIndex(0);
+    setGalleryType("profile-picture");
+    setMediaGalleryOpen(true);
+  };
+
+  // Open media gallery for banners
+  const openBannerGallery = () => {
+    const items: MediaItem[] = bannerImageHistory.map((url, index) => ({
+      id: `banner-${index}`,
+      url,
+      type: "photo" as const,
+      author: userProfile.name,
+      authorImage: profileImage,
+      timestamp: index === 0 ? "Current" : "Previous",
+      title: index === 0 ? "Current Banner" : `Banner ${bannerImageHistory.length - index}`,
+    }));
+    setGalleryItems(items);
+    setGalleryInitialIndex(0);
+    setGalleryType("banner");
+    setMediaGalleryOpen(true);
+  };
+
+  // Open media gallery for wall status
+  const openWallStatusGallery = (initialPost: Post) => {
+    const wallPosts = filteredWallPosts.filter(p => p.imageUrl);
+    const items: MediaItem[] = wallPosts.map((post) => ({
+      id: post.id,
+      url: post.imageUrl || "",
+      type: post.type.toLowerCase() === "video" ? "video" : post.type.toLowerCase() === "audio" ? "audio" : "photo",
+      author: post.author,
+      authorImage: post.authorProfileImage,
+      title: post.title,
+      description: post.subtitle,
+      likes: parseInt(post.likes) || 0,
+      comments: parseInt(post.comments) || 0,
+      isLiked: false,
+    }));
+    const initialIndex = wallPosts.findIndex(p => p.id === initialPost.id);
+    setGalleryItems(items);
+    setGalleryInitialIndex(initialIndex >= 0 ? initialIndex : 0);
+    setGalleryType("wall-status");
+    setMediaGalleryOpen(true);
+  };
+
   // Filter wall status posts based on media type
   const filteredWallPosts = wallStatusFilter === "all"
     ? userPosts
@@ -165,7 +270,8 @@ const Profile = () => {
             <img 
               src={bannerImage} 
               alt="Profile Banner"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer"
+              onClick={openBannerGallery}
             />
             <Button 
               size="sm" 
@@ -186,7 +292,8 @@ const Profile = () => {
                   <img 
                     src={userProfile.profileImage} 
                     alt={userProfile.name}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-card"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-card cursor-pointer"
+                    onClick={openProfilePictureGallery}
                   />
                   <button
                     onClick={() => setEditingProfilePicture(true)}
@@ -311,6 +418,7 @@ const Profile = () => {
               onFilterChange={setWallStatusFilter}
               onEdit={handleEditPost}
               onDelete={handleDeletePost}
+              onItemClick={openWallStatusGallery}
             />
 
             {/* Feed Posts with Filter */}
@@ -426,6 +534,15 @@ const Profile = () => {
         onOpenChange={setEditingBanner}
         currentImage={bannerImage}
         onSave={setBannerImage}
+      />
+
+      <MediaGalleryViewer
+        open={mediaGalleryOpen}
+        onOpenChange={setMediaGalleryOpen}
+        items={galleryItems}
+        initialIndex={galleryInitialIndex}
+        showActions={galleryType === "wall-status"}
+        galleryType={galleryType}
       />
     </div>
   );
