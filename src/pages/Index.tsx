@@ -8,7 +8,7 @@ import { AdCard } from "@/components/AdCard";
 import { EditPostDialog } from "@/components/EditPostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useState } from "react";
-import { feedPosts, Post } from "@/data/posts";
+import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -48,24 +48,43 @@ const Index = () => {
 
   // Open media gallery for wall status
   const openWallStatusGallery = (initialPost: Post) => {
-    const wallPosts = feedPosts.filter(p => p.imageUrl);
-    const items: MediaItem[] = wallPosts.map((post) => ({
+    // Convert wall status posts to MediaItem format
+    const items: MediaItem[] = wallStatusPosts.map((post) => ({
       id: post.id,
-      url: post.imageUrl || "",
-      type: post.type.toLowerCase() === "video" ? "video" : post.type.toLowerCase() === "audio" ? "audio" : "photo",
+      url: post.url,
+      type: post.type,
       author: post.author,
-      authorImage: post.authorProfileImage,
+      authorImage: post.authorImage,
       title: post.title,
-      description: post.subtitle,
-      likes: parseInt(post.likes) || 0,
-      comments: parseInt(post.comments) || 0,
-      isLiked: false,
+      description: post.description,
+      timestamp: post.timestamp,
+      likes: post.likes,
+      comments: post.comments,
+      isLiked: post.isLiked,
     }));
-    const initialIndex = wallPosts.findIndex(p => p.id === initialPost.id);
+    const initialIndex = wallStatusPosts.findIndex(p => p.id === initialPost.id);
     setGalleryItems(items);
     setGalleryInitialIndex(initialIndex >= 0 ? initialIndex : 0);
     setMediaGalleryOpen(true);
   };
+
+  // Convert wall status posts to Post format for WallStatusCarousel
+  const wallStatusPostsForCarousel = wallStatusPosts.map(post => ({
+    id: post.id,
+    title: post.title || "Wall Status",
+    subtitle: post.description,
+    description: post.description,
+    author: post.author,
+    authorProfileImage: post.authorImage,
+    userId: "1",
+    status: "Online" as const,
+    views: "0",
+    comments: String(post.comments),
+    likes: String(post.likes),
+    type: post.type === "video" ? "Video" as const : "Photo" as const,
+    imageUrl: post.url,
+    isOwner: false
+  }));
 
   const adSlots = [
     {
@@ -139,7 +158,7 @@ const Index = () => {
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6 min-w-0">
             <WallStatusCarousel 
-              items={feedPosts}
+              items={wallStatusPostsForCarousel}
               adSlots={adSlots}
               view={wallStatusView}
               onViewChange={setWallStatusView}

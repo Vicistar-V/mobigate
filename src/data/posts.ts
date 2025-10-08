@@ -931,6 +931,461 @@ export const feedPosts: Post[] = [
   },
 ];
 
+// Mock wall status posts with more visual content
+export interface WallStatusPost {
+  id: string;
+  url: string;
+  type: "photo" | "video";
+  title?: string;
+  author: string;
+  authorImage: string;
+  timestamp: string;
+  description?: string;
+  likes: number;
+  comments: number;
+  isLiked?: boolean;
+}
+
+export const wallStatusPosts: WallStatusPost[] = [
+  {
+    id: "wall_1",
+    url: "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=1200&q=80",
+    type: "photo",
+    title: "Golden Hour Serenity",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "2 hours ago",
+    description: "Captured this beautiful moment during sunset. Nature never fails to amaze! 🌅",
+    likes: 1248,
+    comments: 89,
+    isLiked: false
+  },
+  {
+    id: "wall_2",
+    url: "https://images.unsplash.com/photo-1682687221038-404cb8830901?w=1200&q=80",
+    type: "photo",
+    title: "Urban Exploration",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "5 hours ago",
+    description: "Exploring the city's hidden gems. Every corner tells a story.",
+    likes: 892,
+    comments: 56,
+    isLiked: true
+  },
+  {
+    id: "wall_3",
+    url: "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?w=1200&q=80",
+    type: "photo",
+    title: "Morning Coffee Vibes",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "1 day ago",
+    description: "Starting the day right ☕️✨",
+    likes: 2156,
+    comments: 143,
+    isLiked: true
+  },
+  {
+    id: "wall_4",
+    url: "https://images.unsplash.com/photo-1682687220499-d9c06b872eee?w=1200&q=80",
+    type: "photo",
+    title: "Nature's Canvas",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "2 days ago",
+    description: "When nature paints the perfect picture 🎨🌿",
+    likes: 1567,
+    comments: 98,
+    isLiked: false
+  },
+  {
+    id: "wall_5",
+    url: "https://images.unsplash.com/photo-1682687220923-c58b9a4592ae?w=1200&q=80",
+    type: "photo",
+    title: "Weekend Adventures",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "3 days ago",
+    description: "Making memories that last forever! 📸",
+    likes: 3421,
+    comments: 234,
+    isLiked: true
+  },
+  {
+    id: "wall_6",
+    url: "https://images.unsplash.com/photo-1682687221080-5cb261c645cb?w=1200&q=80",
+    type: "photo",
+    title: "Reflections",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "4 days ago",
+    description: "Sometimes you need to pause and reflect 💭",
+    likes: 987,
+    comments: 67,
+    isLiked: false
+  },
+  {
+    id: "wall_7",
+    url: "https://images.unsplash.com/photo-1682687221213-5a4b8e7de4b0?w=1200&q=80",
+    type: "photo",
+    title: "Street Style",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "5 days ago",
+    description: "Fashion is art, and the street is my runway 👗",
+    likes: 2789,
+    comments: 176,
+    isLiked: true
+  },
+  {
+    id: "wall_8",
+    url: "https://images.unsplash.com/photo-1682687221363-72518e2c2feb?w=1200&q=80",
+    type: "photo",
+    title: "Minimalist Moments",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "6 days ago",
+    description: "Less is more. Simple beauty. 🤍",
+    likes: 1423,
+    comments: 92,
+    isLiked: false
+  },
+  {
+    id: "wall_9",
+    url: "https://images.unsplash.com/photo-1682695794947-17061dc284dd?w=1200&q=80",
+    type: "photo",
+    title: "Ocean Dreams",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "1 week ago",
+    description: "The ocean is calling and I must go 🌊",
+    likes: 4567,
+    comments: 312,
+    isLiked: true
+  },
+  {
+    id: "wall_10",
+    url: "https://images.unsplash.com/photo-1682695795255-b236b1f1267d?w=1200&q=80",
+    type: "photo",
+    title: "Cityscapes",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "1 week ago",
+    description: "City lights and late nights 🌃",
+    likes: 2134,
+    comments: 145,
+    isLiked: false
+  },
+  {
+    id: "wall_11",
+    url: "https://images.unsplash.com/photo-1682695796954-bad0d0f59ff1?w=1200&q=80",
+    type: "photo",
+    title: "Peaceful Moments",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "1 week ago",
+    description: "Finding peace in the chaos 🧘‍♀️",
+    likes: 1876,
+    comments: 103,
+    isLiked: true
+  },
+  {
+    id: "wall_12",
+    url: "https://images.unsplash.com/photo-1682695797221-8164ff1fafc9?w=1200&q=80",
+    type: "photo",
+    title: "Architectural Beauty",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "2 weeks ago",
+    description: "When buildings become art 🏛️",
+    likes: 1345,
+    comments: 87,
+    isLiked: false
+  },
+  {
+    id: "wall_13",
+    url: "https://images.unsplash.com/photo-1682686581030-7fa4ea2b96c3?w=1200&q=80",
+    type: "photo",
+    title: "Vibrant Colors",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "2 weeks ago",
+    description: "Life is too short to wear boring colors 🌈",
+    likes: 3245,
+    comments: 198,
+    isLiked: true
+  },
+  {
+    id: "wall_14",
+    url: "https://images.unsplash.com/photo-1682686581362-796145f774e1?w=1200&q=80",
+    type: "photo",
+    title: "Mountain Views",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "2 weeks ago",
+    description: "On top of the world! ⛰️",
+    likes: 2678,
+    comments: 167,
+    isLiked: false
+  },
+  {
+    id: "wall_15",
+    url: "https://images.unsplash.com/photo-1682686581498-5e85c7228119?w=1200&q=80",
+    type: "photo",
+    title: "Desert Sunset",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "3 weeks ago",
+    description: "Golden sands and endless skies 🏜️",
+    likes: 4123,
+    comments: 256,
+    isLiked: true
+  }
+];
+
+// Mock profile picture history
+export const mockProfilePictures = [
+  {
+    id: "profile_1",
+    url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80",
+    type: "photo" as const,
+    title: "Current Profile Picture",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "Current",
+    description: "My latest profile picture",
+    likes: 2345,
+    comments: 187,
+    isLiked: true
+  },
+  {
+    id: "profile_2",
+    url: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80",
+    type: "photo" as const,
+    title: "Previous Profile Picture",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "1 month ago",
+    description: "Professional headshot",
+    likes: 1876,
+    comments: 143,
+    isLiked: false
+  },
+  {
+    id: "profile_3",
+    url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80",
+    type: "photo" as const,
+    title: "Summer Vibes",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "2 months ago",
+    description: "Summer memories",
+    likes: 2987,
+    comments: 234,
+    isLiked: true
+  },
+  {
+    id: "profile_4",
+    url: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&q=80",
+    type: "photo" as const,
+    title: "Casual Look",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "3 months ago",
+    description: "Weekend vibes",
+    likes: 2156,
+    comments: 167,
+    isLiked: false
+  },
+  {
+    id: "profile_5",
+    url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80",
+    type: "photo" as const,
+    title: "Elegant Style",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "4 months ago",
+    description: "Dressed to impress",
+    likes: 3421,
+    comments: 298,
+    isLiked: true
+  },
+  {
+    id: "profile_6",
+    url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=80",
+    type: "photo" as const,
+    title: "Natural Beauty",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "5 months ago",
+    description: "Au naturel",
+    likes: 2789,
+    comments: 209,
+    isLiked: false
+  },
+  {
+    id: "profile_7",
+    url: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&q=80",
+    type: "photo" as const,
+    title: "Outdoor Portrait",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "6 months ago",
+    description: "Nature and me",
+    likes: 3156,
+    comments: 245,
+    isLiked: true
+  },
+  {
+    id: "profile_8",
+    url: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80",
+    type: "photo" as const,
+    title: "Vintage Style",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "7 months ago",
+    description: "Throwback vibes",
+    likes: 1923,
+    comments: 156,
+    isLiked: false
+  }
+];
+
+// Mock banner history
+export const mockBannerImages = [
+  {
+    id: "banner_1",
+    url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80",
+    type: "photo" as const,
+    title: "Current Banner",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "Current",
+    description: "Sunset over mountains - my current vibe",
+    likes: 4567,
+    comments: 312,
+    isLiked: true
+  },
+  {
+    id: "banner_2",
+    url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&q=80",
+    type: "photo" as const,
+    title: "Nature Escape",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "1 month ago",
+    description: "Forest retreat",
+    likes: 3789,
+    comments: 256,
+    isLiked: false
+  },
+  {
+    id: "banner_3",
+    url: "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1600&q=80",
+    type: "photo" as const,
+    title: "Ocean Blues",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "2 months ago",
+    description: "Peaceful ocean waves",
+    likes: 5234,
+    comments: 398,
+    isLiked: true
+  },
+  {
+    id: "banner_4",
+    url: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1600&q=80",
+    type: "photo" as const,
+    title: "Mountain Peaks",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "3 months ago",
+    description: "Reaching new heights",
+    likes: 4123,
+    comments: 287,
+    isLiked: false
+  },
+  {
+    id: "banner_5",
+    url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&q=80",
+    type: "photo" as const,
+    title: "Starry Night",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "4 months ago",
+    description: "Under the stars",
+    likes: 6789,
+    comments: 456,
+    isLiked: true
+  },
+  {
+    id: "banner_6",
+    url: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600&q=80",
+    type: "photo" as const,
+    title: "Desert Dunes",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "5 months ago",
+    description: "Golden desert landscape",
+    likes: 3567,
+    comments: 234,
+    isLiked: false
+  },
+  {
+    id: "banner_7",
+    url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80",
+    type: "photo" as const,
+    title: "City Skyline",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "6 months ago",
+    description: "Urban dreams",
+    likes: 4234,
+    comments: 298,
+    isLiked: true
+  },
+  {
+    id: "banner_8",
+    url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80",
+    type: "photo" as const,
+    title: "Tropical Paradise",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "7 months ago",
+    description: "Beach life",
+    likes: 5678,
+    comments: 367,
+    isLiked: false
+  },
+  {
+    id: "banner_9",
+    url: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&q=80",
+    type: "photo" as const,
+    title: "Misty Mountains",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "8 months ago",
+    description: "Foggy morning views",
+    likes: 3890,
+    comments: 276,
+    isLiked: true
+  },
+  {
+    id: "banner_10",
+    url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&q=80",
+    type: "photo" as const,
+    title: "Aurora Lights",
+    author: "AMAKA JANE JOHNSON",
+    authorImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    timestamp: "9 months ago",
+    description: "Northern lights magic",
+    likes: 7234,
+    comments: 512,
+    isLiked: true
+  }
+];
+
 // Helper function to get posts by user ID
 export const getPostsByUserId = (userId: string): Post[] => {
   return feedPosts.filter(post => post.userId === userId);

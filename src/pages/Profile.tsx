@@ -9,7 +9,7 @@ import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
-import { getPostsByUserId, Post } from "@/data/posts";
+import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts } from "@/data/posts";
 import profileBanner from "@/assets/profile-banner.jpg";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ProfileAboutTab } from "@/components/ProfileAboutTab";
@@ -41,13 +41,17 @@ const Profile = () => {
 
   const [profileImageHistory, setProfileImageHistory] = useState<string[]>(() => {
     const saved = localStorage.getItem("profileImageHistory");
-    const history = saved ? JSON.parse(saved) : [];
-    const currentImage = localStorage.getItem("profileImage") || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
-    // Ensure current image is in history
-    if (!history.includes(currentImage)) {
-      return [currentImage, ...history];
+    if (saved) {
+      const history = JSON.parse(saved);
+      const currentImage = localStorage.getItem("profileImage") || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
+      // Ensure current image is in history
+      if (!history.includes(currentImage)) {
+        return [currentImage, ...history];
+      }
+      return history;
     }
-    return history;
+    // Initialize with mock data
+    return mockProfilePictures.map(pic => pic.url);
   });
 
   // Load banner image and history from localStorage
@@ -58,13 +62,17 @@ const Profile = () => {
 
   const [bannerImageHistory, setBannerImageHistory] = useState<string[]>(() => {
     const saved = localStorage.getItem("bannerImageHistory");
-    const history = saved ? JSON.parse(saved) : [];
-    const currentBanner = localStorage.getItem("bannerImage") || profileBanner;
-    // Ensure current banner is in history
-    if (!history.includes(currentBanner)) {
-      return [currentBanner, ...history];
+    if (saved) {
+      const history = JSON.parse(saved);
+      const currentBanner = localStorage.getItem("bannerImage") || profileBanner;
+      // Ensure current banner is in history
+      if (!history.includes(currentBanner)) {
+        return [currentBanner, ...history];
+      }
+      return history;
     }
-    return history;
+    // Initialize with mock data
+    return mockBannerImages.map(banner => banner.url);
   });
 
   // Save profile image and history to localStorage whenever they change
@@ -228,30 +236,49 @@ const Profile = () => {
 
   // Open media gallery for wall status
   const openWallStatusGallery = (initialPost: Post) => {
-    const wallPosts = filteredWallPosts.filter(p => p.imageUrl);
-    const items: MediaItem[] = wallPosts.map((post) => ({
+    // Convert wall status posts to MediaItem format
+    const items: MediaItem[] = wallStatusPosts.map((post) => ({
       id: post.id,
-      url: post.imageUrl || "",
-      type: post.type.toLowerCase() === "video" ? "video" : post.type.toLowerCase() === "audio" ? "audio" : "photo",
+      url: post.url,
+      type: post.type,
       author: post.author,
-      authorImage: post.authorProfileImage,
+      authorImage: post.authorImage,
       title: post.title,
-      description: post.subtitle,
-      likes: parseInt(post.likes) || 0,
-      comments: parseInt(post.comments) || 0,
-      isLiked: false,
+      description: post.description,
+      timestamp: post.timestamp,
+      likes: post.likes,
+      comments: post.comments,
+      isLiked: post.isLiked,
     }));
-    const initialIndex = wallPosts.findIndex(p => p.id === initialPost.id);
+    const initialIndex = wallStatusPosts.findIndex(p => p.id === initialPost.id);
     setGalleryItems(items);
     setGalleryInitialIndex(initialIndex >= 0 ? initialIndex : 0);
     setGalleryType("wall-status");
     setMediaGalleryOpen(true);
   };
 
+  // Convert wall status posts to Post format for WallStatusCarousel
+  const wallStatusPostsForCarousel = wallStatusPosts.map(post => ({
+    id: post.id,
+    title: post.title || "Wall Status",
+    subtitle: post.description,
+    description: post.description,
+    author: post.author,
+    authorProfileImage: post.authorImage,
+    userId: "1",
+    status: "Online" as const,
+    views: "0",
+    comments: String(post.comments),
+    likes: String(post.likes),
+    type: post.type === "video" ? "Video" as const : "Photo" as const,
+    imageUrl: post.url,
+    isOwner: true
+  }));
+
   // Filter wall status posts based on media type
   const filteredWallPosts = wallStatusFilter === "all"
-    ? userPosts
-    : userPosts.filter(post => post.type.toLowerCase() === wallStatusFilter);
+    ? wallStatusPostsForCarousel
+    : wallStatusPostsForCarousel.filter(post => post.type.toLowerCase() === wallStatusFilter);
 
   // Filter e-library content posts
   const filteredPosts = contentFilter === "all" 
@@ -410,7 +437,7 @@ const Profile = () => {
 
             {/* Wall Status */}
             <WallStatusCarousel 
-              items={userPosts}
+              items={wallStatusPostsForCarousel}
               adSlots={adSlots}
               view={wallStatusView}
               onViewChange={setWallStatusView}
