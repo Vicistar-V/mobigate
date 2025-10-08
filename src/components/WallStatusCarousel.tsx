@@ -5,8 +5,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { WallStatusFilters } from "@/components/WallStatusFilters";
 import { AdRotation } from "@/components/AdRotation";
 import { PostOptionsMenu } from "@/components/PostOptionsMenu";
+import { PostDetailDialog } from "@/components/PostDetailDialog";
 import { Columns2, LayoutGrid } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 interface Post {
   id?: string;
@@ -50,9 +51,17 @@ export const WallStatusCarousel = ({
   onEdit,
   onDelete
 }: WallStatusCarouselProps) => {
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
   const filteredItems = filter === "all"
     ? items
     : items.filter(item => item.type.toLowerCase() === filter);
+
+  const openDetails = (post: Post) => {
+    setSelectedPost(post);
+    setDetailOpen(true);
+  };
 
   return (
     <div>
@@ -95,6 +104,7 @@ export const WallStatusCarousel = ({
                   <React.Fragment key={`${item.title}-${index}`}>
                     <Card 
                       className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                      onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
                         <img 
@@ -111,7 +121,7 @@ export const WallStatusCarousel = ({
                         <p className="text-white/90 text-xs truncate">{item.title}</p>
                       </div>
 {onEdit && onDelete && (
-                          <div className="absolute top-2 right-2 z-10">
+                          <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
                             <PostOptionsMenu 
                               onEdit={() => onEdit(item)}
                               onDelete={() => onDelete(item.id ?? String(index))}
@@ -150,6 +160,7 @@ export const WallStatusCarousel = ({
               <React.Fragment key={`${item.title}-${index}`}>
                 <Card 
                   className="overflow-hidden relative group cursor-pointer"
+                  onClick={() => openDetails(item)}
                 >
                   <div className="aspect-[3/4]">
                     {item.imageUrl && (
@@ -167,7 +178,7 @@ export const WallStatusCarousel = ({
                       <p className="text-white/90 text-xs truncate">{item.title}</p>
                     </div>
 {onEdit && onDelete && (
-                     <div className="absolute top-2 right-2 z-10">
+                     <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
                        <PostOptionsMenu 
                          onEdit={() => onEdit(item)}
                          onDelete={() => onDelete(item.id ?? String(index))}
@@ -189,6 +200,30 @@ export const WallStatusCarousel = ({
             );
           })}
         </div>
+      )}
+
+      {/* Post Detail Dialog */}
+      {selectedPost && (
+        <PostDetailDialog
+          open={detailOpen}
+          onOpenChange={setDetailOpen}
+          post={{
+            id: selectedPost.id,
+            title: selectedPost.title,
+            subtitle: selectedPost.author,
+            description: selectedPost.title,
+            imageUrl: selectedPost.imageUrl,
+            views: "0",
+            comments: "0",
+            likes: "0",
+            author: selectedPost.author,
+            authorProfileImage: "/placeholder.svg",
+            userId: "1",
+            status: "Offline",
+            type: selectedPost.type as "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL",
+            fee: "0"
+          }}
+        />
       )}
     </div>
   );
