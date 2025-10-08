@@ -170,7 +170,8 @@ export const feedPosts: Post[] = [
     comments: "128",
     likes: "892",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_12",
@@ -184,7 +185,8 @@ export const feedPosts: Post[] = [
     comments: "89",
     likes: "456",
     type: "Audio",
-    imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_13",
@@ -198,7 +200,8 @@ export const feedPosts: Post[] = [
     comments: "342",
     likes: "1.5k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_14",
@@ -212,7 +215,8 @@ export const feedPosts: Post[] = [
     comments: "156",
     likes: "734",
     type: "Audio",
-    imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_15",
@@ -226,7 +230,8 @@ export const feedPosts: Post[] = [
     comments: "289",
     likes: "1.2k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_16",
@@ -240,7 +245,8 @@ export const feedPosts: Post[] = [
     comments: "234",
     likes: "987",
     type: "Article",
-    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
+    isOwner: true
   },
   {
     id: "post_17",
