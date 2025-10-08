@@ -17,7 +17,6 @@ const Index = () => {
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [visiblePostsCount, setVisiblePostsCount] = useState(15);
 
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
@@ -101,19 +100,6 @@ const Index = () => {
     ? feedPosts 
     : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
 
-  const displayedPosts = filteredPosts.slice(0, visiblePostsCount);
-  const hasMorePosts = visiblePostsCount < filteredPosts.length;
-  const canCollapse = visiblePostsCount > 15;
-
-  const handleLoadMore = () => {
-    setVisiblePostsCount(prev => Math.min(prev + 15, filteredPosts.length));
-  };
-
-  const handleShowLess = () => {
-    setVisiblePostsCount(15);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
       <Header />
@@ -151,39 +137,17 @@ const Index = () => {
             <div className="space-y-0">
               <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               <div className="space-y-6 mt-6">
-                {displayedPosts.map((post, index) => (
+                {filteredPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
                   {/* Insert ad after every 5 posts */}
-                  {(index + 1) % 5 === 0 && index < displayedPosts.length - 1 && (
+                  {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
                       <AdCard />
                     </div>
                   )}
                 </div>
                 ))}
-                
-                {/* Pagination Controls */}
-                {(hasMorePosts || canCollapse) && (
-                  <div className="flex items-center justify-center gap-8 py-8">
-                    {hasMorePosts && (
-                      <button
-                        onClick={handleLoadMore}
-                        className="text-3xl font-bold text-destructive hover:text-destructive/80 transition-colors"
-                      >
-                        ...more
-                      </button>
-                    )}
-                    {canCollapse && (
-                      <button
-                        onClick={handleShowLess}
-                        className="text-3xl font-bold text-destructive hover:text-destructive/80 transition-colors"
-                      >
-                        Less...
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </div>
