@@ -106,14 +106,14 @@ export const WallStatusCarousel = ({
                         <p className="text-white text-sm font-medium truncate">{item.author}</p>
                         <p className="text-white/90 text-xs truncate">{item.title}</p>
                       </div>
-                      {item.isOwner && onEdit && onDelete && item.id && (
-                        <div className="absolute top-2 right-2 z-10">
-                          <PostOptionsMenu 
-                            onEdit={() => onEdit(item)}
-                            onDelete={() => onDelete(item.id!)}
-                          />
-                        </div>
-                      )}
+{onEdit && onDelete && (
+                          <div className="absolute top-2 right-2 z-10">
+                            <PostOptionsMenu 
+                              onEdit={() => onEdit(item)}
+                              onDelete={() => onDelete(item.id ?? String(index))}
+                            />
+                          </div>
+                        )}
                     </Card>
                     
                     {/* Insert ad after every 15 posts */}
@@ -159,14 +159,14 @@ export const WallStatusCarousel = ({
                       <p className="text-white text-sm font-medium truncate">{item.author}</p>
                       <p className="text-white/90 text-xs truncate">{item.title}</p>
                     </div>
-                    {item.isOwner && onEdit && onDelete && item.id && (
-                      <div className="absolute top-2 right-2 z-10">
-                        <PostOptionsMenu 
-                          onEdit={() => onEdit(item)}
-                          onDelete={() => onDelete(item.id!)}
-                        />
-                      </div>
-                    )}
+{onEdit && onDelete && (
+                     <div className="absolute top-2 right-2 z-10">
+                       <PostOptionsMenu 
+                         onEdit={() => onEdit(item)}
+                         onDelete={() => onDelete(item.id ?? String(index))}
+                       />
+                     </div>
+                   )}
                   </div>
                 </Card>
                 

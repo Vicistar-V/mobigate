@@ -40,12 +40,12 @@ export const PostOptionsMenu = ({ onEdit, onDelete }: PostOptionsMenuProps) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="icon"
-            className="h-8 w-8 rounded-full"
+            className="h-10 w-10 rounded-full"
             aria-label="Post options"
           >
-            <MoreVertical className="h-4 w-4" />
+            <MoreVertical className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
