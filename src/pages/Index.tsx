@@ -107,7 +107,7 @@ const Index = () => {
       <main className="container max-w-7xl mx-auto px-4 py-6 flex-1">
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Sidebar - Greeting Section */}
-          <aside className="lg:col-span-1 space-y-6">
+          <aside className="lg:col-span-1 space-y-6 min-w-0">
             <GreetingSection />
           </aside>
 
