@@ -216,14 +216,15 @@ export const WallStatusCarousel = ({
         </div>
       )}
 
-      {/* Pagination Controls */}
-      {(hasMoreItems || canCollapse) && (
-        <div className="flex justify-center gap-4 mt-6">
+      {/* Pagination Controls - Only in Large View */}
+      {view === "large" && (hasMoreItems || canCollapse) && (
+        <div className="flex justify-center items-center gap-6 mt-8 mb-4">
           {hasMoreItems && (
             <Button
               onClick={handleLoadMore}
-              variant="ghost"
-              className="text-3xl font-bold text-destructive hover:text-destructive/80"
+              variant="outline"
+              size="lg"
+              className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
             >
               ...more
             </Button>
@@ -231,8 +232,9 @@ export const WallStatusCarousel = ({
           {canCollapse && (
             <Button
               onClick={handleShowLess}
-              variant="ghost"
-              className="text-3xl font-bold text-destructive hover:text-destructive/80"
+              variant="outline"
+              size="lg"
+              className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
             >
               Less...
             </Button>
