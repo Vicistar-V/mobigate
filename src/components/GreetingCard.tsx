@@ -2,14 +2,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, MoreHorizontal } from "lucide-react";
 import profilePhoto from "@/assets/profile-photo.jpg";
 import { CreatePostDialog } from "./CreatePostDialog";
+import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 
 export const GreetingSection = () => {
-  const navLinks = [
+  const primaryLinks = [
     { label: "Friends", href: "#" },
     { label: "Followers", href: "#" },
+  ];
+
+  const moreLinks = [
     { label: "Following", href: "#" },
     { label: "Gifts", href: "#" },
     { label: "Mobi Quiz Game", href: "#" },
@@ -36,8 +46,8 @@ export const GreetingSection = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1 pt-2 border-t">
-          {navLinks.map((link, index) => (
+        <div className="flex flex-wrap items-center gap-1 pt-2 border-t">
+          {primaryLinks.map((link) => (
             <span key={link.label}>
               <a
                 href={link.href}
@@ -45,9 +55,27 @@ export const GreetingSection = () => {
               >
                 {link.label}
               </a>
-              {index < navLinks.length - 1 && <span className="text-muted-foreground px-1.5">|</span>}
+              <span className="text-muted-foreground px-1.5">|</span>
             </span>
           ))}
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide inline-flex items-center gap-1">
+                <MoreHorizontal className="h-4 w-4" />
+                More
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="bg-card z-50 w-48">
+              {moreLinks.map((link) => (
+                <DropdownMenuItem key={link.label} asChild>
+                  <a href={link.href} className="cursor-pointer">
+                    {link.label}
+                  </a>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Search Section */}
@@ -70,6 +98,9 @@ export const GreetingSection = () => {
 
       {/* Create Post Dialog */}
       <CreatePostDialog />
+      
+      {/* People You May Know */}
+      <PeopleYouMayKnow />
     </div>
   );
 };
