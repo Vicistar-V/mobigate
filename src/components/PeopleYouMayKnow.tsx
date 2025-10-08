@@ -24,15 +24,15 @@ const suggestedUsers: SuggestedUser[] = [
 
 export const PeopleYouMayKnow = () => {
   return (
-    <Card className="p-4 space-y-4 hover:shadow-md transition-shadow overflow-hidden">
+    <Card className="p-4 space-y-4 hover:shadow-md transition-shadow">
       <h3 className="font-semibold text-lg">People you may know</h3>
       
-      <div className="relative -mx-4 px-4">
+      <div className="relative -mx-4 px-4 max-w-full">
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent snap-x snap-mandatory">
           {suggestedUsers.map((user) => (
             <div
               key={user.id}
-              className="flex-shrink-0 w-[140px] space-y-2"
+              className="flex-shrink-0 w-[140px] space-y-2 snap-start"
             >
               <Link to={`/profile/${user.id}`} className="block">
                 <Avatar className="h-28 w-28 mx-auto border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
