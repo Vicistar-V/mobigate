@@ -53,10 +53,24 @@ export const WallStatusCarousel = ({
 }: WallStatusCarouselProps) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(15);
 
   const filteredItems = filter === "all"
     ? items
     : items.filter(item => item.type.toLowerCase() === filter);
+
+  const displayedItems = filteredItems.slice(0, visibleCount);
+  const hasMoreItems = visibleCount < filteredItems.length;
+  const canCollapse = visibleCount > 15;
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => Math.min(prev + 15, filteredItems.length));
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(15);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const openDetails = (post: Post) => {
     setSelectedPost(post);
@@ -96,8 +110,8 @@ export const WallStatusCarousel = ({
         <div className="relative -mx-4 px-4">
           <ScrollArea className="w-full">
             <div className="flex gap-3 pb-2">
-              {filteredItems.map((item, index) => {
-                const shouldShowAd = (index + 1) % 15 === 0 && index < filteredItems.length - 1;
+              {displayedItems.map((item, index) => {
+                const shouldShowAd = (index + 1) % 15 === 0 && index < displayedItems.length - 1;
                 const adSlotIndex = Math.floor((index + 1) / 15) - 1;
                 
                 return (
@@ -152,8 +166,8 @@ export const WallStatusCarousel = ({
       {/* Large View - 3-Column Vertical Grid with Ads */}
       {view === "large" && (
         <div className="grid grid-cols-3 gap-3">
-          {filteredItems.slice(0, 45).map((item, index) => {
-            const shouldShowAd = (index + 1) % 15 === 0 && index < 44;
+          {displayedItems.map((item, index) => {
+            const shouldShowAd = (index + 1) % 15 === 0 && index < displayedItems.length - 1;
             const adSlotIndex = Math.floor((index + 1) / 15) - 1;
             
             return (
@@ -199,6 +213,30 @@ export const WallStatusCarousel = ({
               </React.Fragment>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {(hasMoreItems || canCollapse) && (
+        <div className="flex justify-center gap-4 mt-6">
+          {hasMoreItems && (
+            <Button
+              onClick={handleLoadMore}
+              variant="ghost"
+              className="text-3xl font-bold text-destructive hover:text-destructive/80"
+            >
+              ...more
+            </Button>
+          )}
+          {canCollapse && (
+            <Button
+              onClick={handleShowLess}
+              variant="ghost"
+              className="text-3xl font-bold text-destructive hover:text-destructive/80"
+            >
+              Less...
+            </Button>
+          )}
         </div>
       )}
 
