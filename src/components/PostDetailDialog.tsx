@@ -37,39 +37,47 @@ export const PostDetailDialog = ({
 }: PostDetailDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{post.title}</DialogTitle>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
+        {/* Fixed Header */}
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b">
+          <DialogTitle className="text-2xl pr-8">{post.title}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {post.imageUrl && (
-            <div className="relative w-full h-96 bg-muted rounded-lg overflow-hidden">
-              <img
-                src={post.imageUrl}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-              <Badge className="absolute top-4 left-4" variant="destructive">
-                {post.type}
-              </Badge>
-            </div>
-          )}
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-4">
+            {post.imageUrl && (
+              <div className="relative w-full h-96 bg-muted rounded-lg overflow-hidden">
+                <img
+                  src={post.imageUrl}
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                />
+                <Badge className="absolute top-4 left-4" variant="destructive">
+                  {post.type}
+                </Badge>
+              </div>
+            )}
 
-          {post.subtitle && (
-            <p className="text-xl text-muted-foreground">{post.subtitle}</p>
-          )}
+            {post.subtitle && (
+              <p className="text-xl text-muted-foreground">{post.subtitle}</p>
+            )}
 
-          {post.description && (
-            <div className="space-y-2">
-              <h4 className="font-semibold text-lg">Description</h4>
-              <p className="text-muted-foreground whitespace-pre-wrap">
-                {post.description}
-              </p>
-            </div>
-          )}
+            {post.description && (
+              <div className="space-y-2">
+                <h4 className="font-semibold text-lg">Description</h4>
+                <p className="text-muted-foreground whitespace-pre-wrap">
+                  {post.description}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
-          <div className="flex items-center gap-4 text-base flex-wrap pt-4 border-t">
+        {/* Fixed Footer */}
+        <div className="flex-shrink-0 px-6 pb-6 pt-4 border-t bg-card space-y-4">
+          {/* Stats Section */}
+          <div className="flex items-center gap-4 text-base flex-wrap">
             <span className="text-emerald-600 font-medium">Fee: {post.fee} Mobi</span>
             <span className="text-muted-foreground">|</span>
             <div className="flex items-center gap-1 text-red-600">
@@ -88,37 +96,36 @@ export const PostDetailDialog = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 pt-4 border-t">
-            <Link
-              to={`/profile/${post.userId}`}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-              onClick={() => onOpenChange(false)}
-            >
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={post.authorProfileImage} alt={post.author} />
-                <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-lg font-medium">By {post.author}</p>
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className={`h-2 w-2 rounded-full ${
-                      post.status === "Online" ? "bg-emerald-500" : "bg-red-500"
-                    }`}
-                  />
-                  <p
-                    className={`text-base font-medium ${
-                      post.status === "Online"
-                        ? "text-emerald-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {post.status}
-                  </p>
-                </div>
+          {/* Author Section */}
+          <Link
+            to={`/profile/${post.userId}`}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            onClick={() => onOpenChange(false)}
+          >
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={post.authorProfileImage} alt={post.author} />
+              <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-lg font-medium">By {post.author}</p>
+              <div className="flex items-center gap-1.5">
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    post.status === "Online" ? "bg-emerald-500" : "bg-red-500"
+                  }`}
+                />
+                <p
+                  className={`text-base font-medium ${
+                    post.status === "Online"
+                      ? "text-emerald-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {post.status}
+                </p>
               </div>
-            </Link>
-          </div>
+            </div>
+          </Link>
         </div>
       </DialogContent>
     </Dialog>
