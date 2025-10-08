@@ -68,8 +68,8 @@ export const GreetingSection = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-card z-50 w-48">
               {moreLinks.map((link) => (
-                <DropdownMenuItem key={link.label} asChild>
-                  <a href={link.href} className="cursor-pointer text-xl font-medium text-primary">
+                <DropdownMenuItem key={link.label} asChild className="text-xl font-medium text-primary">
+                  <a href={link.href} className="cursor-pointer">
                     {link.label}
                   </a>
                 </DropdownMenuItem>
