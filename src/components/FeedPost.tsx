@@ -10,6 +10,7 @@ interface FeedPostProps {
   id?: string;
   title: string;
   subtitle?: string;
+  description?: string;
   author: string;
   authorProfileImage?: string;
   userId?: string;
@@ -29,6 +30,7 @@ export const FeedPost = ({
   id,
   title,
   subtitle,
+  description,
   author,
   authorProfileImage,
   userId = "1",
@@ -72,6 +74,9 @@ export const FeedPost = ({
             <h3 className="font-semibold text-2xl leading-tight line-clamp-2">{title}</h3>
             {subtitle && (
               <p className="text-lg text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
+            )}
+            {description && (
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{description}</p>
             )}
           </div>
           {isOwner && onEdit && onDelete && (
