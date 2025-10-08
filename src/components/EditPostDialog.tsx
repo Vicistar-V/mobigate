@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
 
 interface EditPostDialogProps {
   post: Post;
@@ -36,7 +37,39 @@ export const EditPostDialog = ({
   const [subtitle, setSubtitle] = useState(post.subtitle || "");
   const [description, setDescription] = useState(post.description || "");
   const [type, setType] = useState(post.type);
+  const [imageUrl, setImageUrl] = useState(post.imageUrl || "");
+  const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setNewMediaFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      toast({
+        title: "Media selected",
+        description: `${file.name} ready to upload`,
+      });
+    }
+  };
+
+  const handleRemoveMedia = () => {
+    setNewMediaFile(null);
+    setMediaPreview(null);
+    setImageUrl("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSave = () => {
     if (!title.trim()) {
@@ -48,12 +81,17 @@ export const EditPostDialog = ({
       return;
     }
 
+    // In a real app, you would upload the newMediaFile to storage here
+    // and get back the URL to save in the post
+    const finalImageUrl = mediaPreview || imageUrl;
+
     const updatedPost: Post = {
       ...post,
       title: title.trim(),
       subtitle: subtitle.trim() || undefined,
       description: description.trim() || undefined,
       type,
+      imageUrl: finalImageUrl || undefined,
     };
 
     onSave(updatedPost);
@@ -118,6 +156,53 @@ export const EditPostDialog = ({
                 <SelectItem value="URL">URL</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Media File</Label>
+            
+            {/* Current or New Media Preview */}
+            {(mediaPreview || imageUrl) && (
+              <div className="relative rounded-lg border overflow-hidden bg-muted">
+                <img 
+                  src={mediaPreview || imageUrl} 
+                  alt="Media preview" 
+                  className="w-full h-48 object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={handleRemoveMedia}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Upload Button */}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {mediaPreview || imageUrl ? "Change Media" : "Upload Media"}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*,audio/*,.pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Supported formats: Images, Videos, Audio, PDF (Max 20MB)
+            </p>
           </div>
         </div>
 
