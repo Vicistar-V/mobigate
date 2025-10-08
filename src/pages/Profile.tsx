@@ -15,6 +15,7 @@ import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ProfileAboutTab } from "@/components/ProfileAboutTab";
 import { EditPostDialog } from "@/components/EditPostDialog";
 import { EditProfilePictureDialog } from "@/components/profile/EditProfilePictureDialog";
+import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 
@@ -298,16 +299,7 @@ const Profile = () => {
 
           <TabsContent value="status" className="space-y-6">
             {/* Create Monetized Post */}
-            <Card className="p-4 bg-muted/50">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-primary underline">
-                  Create a Monetized Post on {userProfile.name.split(' ')[0]}'s Status
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  [{userProfile.name.split(' ')[0]} could turn off this in Privacy Setting]
-                </p>
-              </div>
-            </Card>
+            <CreatePostDialog />
 
             {/* Wall Status */}
             <WallStatusCarousel 
