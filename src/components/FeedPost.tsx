@@ -68,7 +68,7 @@ export const FeedPost = ({
             onClick={() => setDetailOpen(true)}
           >
             <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
-            <Badge className="absolute top-2 right-2" variant="destructive">
+            <Badge className="absolute top-2 left-2" variant="destructive">
               {type}
             </Badge>
           </div>

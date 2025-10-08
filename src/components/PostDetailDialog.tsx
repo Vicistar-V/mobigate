@@ -50,7 +50,7 @@ export const PostDetailDialog = ({
                 alt={post.title}
                 className="w-full h-full object-cover"
               />
-              <Badge className="absolute top-4 right-4" variant="destructive">
+              <Badge className="absolute top-4 left-4" variant="destructive">
                 {post.type}
               </Badge>
             </div>
