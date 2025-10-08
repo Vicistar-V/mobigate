@@ -6,8 +6,10 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Eye, MessageSquare, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Eye, MessageSquare, Heart, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 interface PostDetailDialogProps {
   open: boolean;
@@ -35,6 +37,18 @@ export const PostDetailDialog = ({
   onOpenChange,
   post,
 }: PostDetailDialogProps) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(parseInt(post.likes) || 0);
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikeCount(prev => prev - 1);
+    } else {
+      setLikeCount(prev => prev + 1);
+    }
+    setIsLiked(!isLiked);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
@@ -59,17 +73,32 @@ export const PostDetailDialog = ({
               </div>
             )}
 
-            {post.subtitle && (
-              <p className="text-xl text-muted-foreground">{post.subtitle}</p>
-            )}
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLike}
+                className={isLiked ? "text-red-600 border-red-600" : ""}
+              >
+                <Heart className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`} />
+                Like ({likeCount})
+              </Button>
+              <Button variant="outline" size="sm">
+                <MessageSquare className="h-4 w-4 mr-1" />
+                Comment
+              </Button>
+              <Button variant="outline" size="sm">
+                <Share2 className="h-4 w-4 mr-1" />
+                Share
+              </Button>
+            </div>
 
+            {/* Description */}
             {post.description && (
-              <div className="space-y-2">
-                <h4 className="font-semibold text-lg">Description</h4>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {post.description}
-                </p>
-              </div>
+              <p className="text-muted-foreground whitespace-pre-wrap pt-2">
+                {post.description}
+              </p>
             )}
           </div>
         </div>
