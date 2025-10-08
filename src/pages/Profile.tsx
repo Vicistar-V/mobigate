@@ -196,7 +196,7 @@ const Profile = () => {
                   </button>
                 </div>
                 <div className="mt-3">
-                  <h1 className="text-2xl font-bold">{userProfile.name}</h1>
+                  <h1 className="text-4xl font-extrabold">{userProfile.name}</h1>
                   {userProfile.verified && (
                     <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
                   )}
