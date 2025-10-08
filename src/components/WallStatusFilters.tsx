@@ -13,17 +13,17 @@ interface WallStatusFiltersProps {
 }
 
 const primaryFilters = [
-  { value: "all", label: "All", icon: null, count: "500k" },
+  { value: "all", label: "All", icon: null, count: "500.0k" },
   { value: "video", label: "Videos", icon: Play, count: "200.0k" },
   { value: "photo", label: "Photos", icon: Image, count: "100.0k" },
   { value: "article", label: "Articles", icon: FileText, count: "100.0k" },
 ];
 
 const moreFilters = [
-  { value: "audio", label: "Audio", icon: Headphones, count: "30k" },
+  { value: "audio", label: "Audio", icon: Headphones, count: "30.0k" },
   { value: "pdf", label: "PDF Documents", icon: FileIcon, count: "50.0k" },
   { value: "url", label: "URL Links", icon: Link, count: "20.0k" },
-  { value: "biz-catalogue", label: "Biz-Catalogue", icon: Package, count: "15k" },
+  { value: "biz-catalogue", label: "Biz-Catalogue", icon: Package, count: "15.0k" },
 ];
 
 export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFiltersProps) => {
