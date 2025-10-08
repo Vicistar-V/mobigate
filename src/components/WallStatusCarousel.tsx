@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { WallStatusFilters } from "@/components/WallStatusFilters";
 import { AdRotation } from "@/components/AdRotation";
@@ -102,6 +103,9 @@ export const WallStatusCarousel = ({
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
                         />
                       )}
+                      <Badge className="absolute top-2 left-2 z-10" variant="destructive">
+                        {item.type}
+                      </Badge>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
                         <p className="text-white text-sm font-medium truncate">{item.author}</p>
                         <p className="text-white/90 text-xs truncate">{item.title}</p>
@@ -155,6 +159,9 @@ export const WallStatusCarousel = ({
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                       />
                     )}
+                    <Badge className="absolute top-2 left-2 z-10" variant="destructive">
+                      {item.type}
+                    </Badge>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
                       <p className="text-white text-sm font-medium truncate">{item.author}</p>
                       <p className="text-white/90 text-xs truncate">{item.title}</p>
