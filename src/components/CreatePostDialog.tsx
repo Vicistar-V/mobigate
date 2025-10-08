@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,34 +8,102 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Plus, Image, Video, FileText } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export const CreatePostDialog = () => {
-  const [content, setContent] = useState("");
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState<"Photo" | "Video" | "Audio" | "Article" | "PDF" | "URL">("Photo");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "File size must be less than 20MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setMediaFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      toast({
+        title: "Media selected",
+        description: `${file.name} ready to upload`,
+      });
+    }
+  };
+
+  const handleRemoveMedia = () => {
+    setMediaFile(null);
+    setMediaPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setSubtitle("");
+    setDescription("");
+    setType("Photo");
+    setMediaFile(null);
+    setMediaPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = () => {
-    if (!content.trim()) {
+    if (!title.trim()) {
       toast({
         title: "Error",
-        description: "Please write something before posting.",
+        description: "Title is required",
         variant: "destructive",
       });
       return;
     }
+
+    // In a real app, you would upload the mediaFile to storage here
+    // and create the post in the database
     
     toast({
       title: "Success!",
       description: "Your monetized post has been created.",
     });
-    setContent("");
+    
+    resetForm();
+    setOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="w-full p-5 bg-card border-2 border-success/30 rounded-lg shadow-sm hover:shadow-md hover:border-success/50 transition-all cursor-pointer group">
           <div className="flex items-center gap-4">
@@ -51,7 +119,7 @@ export const CreatePostDialog = () => {
           </div>
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create a Monetized Post</DialogTitle>
           <DialogDescription>
@@ -60,35 +128,107 @@ export const CreatePostDialog = () => {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="content">What's on your mind?</Label>
-            <Textarea
-              id="content"
-              placeholder="Share something valuable with your audience..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[150px]"
+            <Label htmlFor="title">Title *</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter post title"
             />
           </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex-1">
-              <Image className="h-4 w-4 mr-2" />
-              Photo
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1">
-              <Video className="h-4 w-4 mr-2" />
-              Video
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1">
-              <FileText className="h-4 w-4 mr-2" />
-              Article
-            </Button>
+
+          <div className="space-y-2">
+            <Label htmlFor="subtitle">Subtitle</Label>
+            <Input
+              id="subtitle"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              placeholder="Enter post subtitle (optional)"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description / Story</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add accompanying story, description or more information about your media"
+              className="min-h-[120px]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="type">Content Type</Label>
+            <Select value={type} onValueChange={(value: any) => setType(value)}>
+              <SelectTrigger id="type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Photo">Photo</SelectItem>
+                <SelectItem value="Video">Video</SelectItem>
+                <SelectItem value="Audio">Audio</SelectItem>
+                <SelectItem value="Article">Article</SelectItem>
+                <SelectItem value="PDF">PDF</SelectItem>
+                <SelectItem value="URL">URL</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Media File</Label>
+            
+            {/* Media Preview */}
+            {mediaPreview && (
+              <div className="relative rounded-lg border overflow-hidden bg-muted">
+                <img 
+                  src={mediaPreview} 
+                  alt="Media preview" 
+                  className="w-full h-48 object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={handleRemoveMedia}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Upload Button */}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {mediaPreview ? "Change Media" : "Upload Media"}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*,audio/*,.pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Supported formats: Images, Videos, Audio, PDF (Max 20MB)
+            </p>
           </div>
         </div>
         <div className="flex justify-end gap-3">
-          <DialogTrigger asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogTrigger>
+          <Button variant="outline" onClick={() => {
+            resetForm();
+            setOpen(false);
+          }}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit}>Publish Post</Button>
         </div>
       </DialogContent>
