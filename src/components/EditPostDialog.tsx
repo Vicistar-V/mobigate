@@ -34,6 +34,7 @@ export const EditPostDialog = ({
 }: EditPostDialogProps) => {
   const [title, setTitle] = useState(post.title);
   const [subtitle, setSubtitle] = useState(post.subtitle || "");
+  const [description, setDescription] = useState(post.description || "");
   const [type, setType] = useState(post.type);
   const { toast } = useToast();
 
@@ -51,6 +52,7 @@ export const EditPostDialog = ({
       ...post,
       title: title.trim(),
       subtitle: subtitle.trim() || undefined,
+      description: description.trim() || undefined,
       type,
     };
 
@@ -87,6 +89,17 @@ export const EditPostDialog = ({
               value={subtitle}
               onChange={(e) => setSubtitle(e.target.value)}
               placeholder="Enter post subtitle (optional)"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description / Story</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add accompanying story, description or more information about your media"
+              className="min-h-[120px]"
             />
           </div>
 
