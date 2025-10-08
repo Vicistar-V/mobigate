@@ -3,6 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { UserPlus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import sarahJohnson from "@/assets/profile-sarah-johnson.jpg";
+import michaelChen from "@/assets/profile-michael-chen.jpg";
+import emilyDavis from "@/assets/profile-emily-davis.jpg";
+import jamesWilson from "@/assets/profile-james-wilson.jpg";
+import lisaAnderson from "@/assets/profile-lisa-anderson.jpg";
+import davidMartinez from "@/assets/profile-david-martinez.jpg";
+import jenniferTaylor from "@/assets/profile-jennifer-taylor.jpg";
+import robertBrown from "@/assets/profile-robert-brown.jpg";
 
 interface SuggestedUser {
   id: string;
@@ -12,14 +20,14 @@ interface SuggestedUser {
 }
 
 const suggestedUsers: SuggestedUser[] = [
-  { id: "2", name: "Sarah Johnson", profileImage: "/placeholder.svg", mutualFriends: 5 },
-  { id: "3", name: "Michael Chen", profileImage: "/placeholder.svg", mutualFriends: 3 },
-  { id: "4", name: "Emily Davis", profileImage: "/placeholder.svg", mutualFriends: 8 },
-  { id: "5", name: "James Wilson", profileImage: "/placeholder.svg", mutualFriends: 2 },
-  { id: "6", name: "Lisa Anderson", profileImage: "/placeholder.svg", mutualFriends: 6 },
-  { id: "7", name: "David Martinez", profileImage: "/placeholder.svg", mutualFriends: 4 },
-  { id: "8", name: "Jennifer Taylor", profileImage: "/placeholder.svg", mutualFriends: 7 },
-  { id: "9", name: "Robert Brown", profileImage: "/placeholder.svg", mutualFriends: 1 },
+  { id: "2", name: "Sarah Johnson", profileImage: sarahJohnson, mutualFriends: 5 },
+  { id: "3", name: "Michael Chen", profileImage: michaelChen, mutualFriends: 3 },
+  { id: "4", name: "Emily Davis", profileImage: emilyDavis, mutualFriends: 8 },
+  { id: "5", name: "James Wilson", profileImage: jamesWilson, mutualFriends: 2 },
+  { id: "6", name: "Lisa Anderson", profileImage: lisaAnderson, mutualFriends: 6 },
+  { id: "7", name: "David Martinez", profileImage: davidMartinez, mutualFriends: 4 },
+  { id: "8", name: "Jennifer Taylor", profileImage: jenniferTaylor, mutualFriends: 7 },
+  { id: "9", name: "Robert Brown", profileImage: robertBrown, mutualFriends: 1 },
 ];
 
 export const PeopleYouMayKnow = () => {
