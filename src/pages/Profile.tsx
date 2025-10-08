@@ -329,9 +329,6 @@ const Profile = () => {
                 <div key={post.id || index}>
                   <FeedPost 
                     {...post}
-                    isOwner={post.isOwner}
-                    onEdit={() => handleEditPost(post)}
-                    onDelete={() => handleDeletePost(post.id!)}
                   />
                   {/* Insert ad after every 5 posts */}
                   {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (

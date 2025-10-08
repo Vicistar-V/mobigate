@@ -139,12 +139,7 @@ const Index = () => {
               <div className="space-y-6 mt-6">
                 {filteredPosts.map((post, index) => (
                 <div key={index}>
-                  <FeedPost 
-                    {...post} 
-                    isOwner={post.isOwner}
-                    onEdit={() => handleEditPost(post)}
-                    onDelete={() => handleDeletePost(post.id!)}
-                  />
+                  <FeedPost {...post} />
                   {/* Insert ad after every 5 posts */}
                   {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
