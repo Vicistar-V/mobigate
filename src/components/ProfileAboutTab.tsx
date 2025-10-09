@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { EditSectionDialog } from "./profile/EditSectionDialog";
 import { EditBasicInfoForm } from "./profile/EditBasicInfoForm";
@@ -19,6 +19,7 @@ import { EditAgeMatesForm, AgeMate } from "./profile/EditAgeMatesForm";
 import { EditWorkColleaguesForm, WorkColleague } from "./profile/EditWorkColleaguesForm";
 import { EditLoveFriendshipForm, LoveFriendship } from "./profile/EditLoveFriendshipForm";
 import { EditExtraSourceForm } from "./profile/EditExtraSourceForm";
+import { EditSocialCommunityForm, SocialCommunity } from "./profile/EditSocialCommunityForm";
 import { MateDetailDialog } from "./profile/MateDetailDialog";
 
 interface ProfileAboutTabProps {
@@ -80,6 +81,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editLoveFriendshipOpen, setEditLoveFriendshipOpen] = useState(false);
   const [editExtraSourceOpen, setEditExtraSourceOpen] = useState(false);
   const [editFamilyOpen, setEditFamilyOpen] = useState(false);
+  const [editSocialCommunityOpen, setEditSocialCommunityOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [editAboutOpen, setEditAboutOpen] = useState(false);
   
@@ -284,6 +286,39 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [loveFriendship, setLoveFriendship] = useState<LoveFriendship[]>(() => 
     loadFromStorage<LoveFriendship[]>("profile_loveFriendship", [])
   );
+  const [socialCommunities, setSocialCommunities] = useState<SocialCommunity[]>(() => 
+    loadFromStorage<SocialCommunity[]>("profile_socialCommunities", [
+      {
+        id: "1",
+        name: "Onitsha Town Union",
+        type: "Town Union",
+        role: "Financial Secretary",
+        joinDate: "2015-03-10",
+        status: "Active",
+        location: "Onitsha, Anambra State",
+        privacy: "public"
+      },
+      {
+        id: "2",
+        name: "Rotary Club of Awka",
+        type: "Club",
+        role: "Member",
+        joinDate: "2018-06-15",
+        status: "Active",
+        location: "Awka, Anambra State",
+        privacy: "friends"
+      },
+      {
+        id: "3",
+        name: "Nigerian Bar Association (NBA)",
+        type: "Association",
+        role: "Member",
+        joinDate: "2010-01-20",
+        status: "Active",
+        privacy: "public"
+      }
+    ])
+  );
 
   // Save to localStorage whenever data changes
   useEffect(() => {
@@ -341,6 +376,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   useEffect(() => {
     localStorage.setItem("profile_loveFriendship", JSON.stringify(loveFriendship));
   }, [loveFriendship]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_socialCommunities", JSON.stringify(socialCommunities));
+  }, [socialCommunities]);
 
   return (
     <div className="space-y-6">
@@ -757,6 +796,72 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         </div>
       </Card>
 
+      {/* Social Community */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Users className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Social Community</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs">System Managed</Badge>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 text-muted-foreground hover:text-primary"
+              onClick={() => setEditSocialCommunityOpen(true)}
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Manage Privacy
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-4">
+          {socialCommunities.length > 0 ? (
+            socialCommunities.map((community, index) => (
+              <div key={community.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div className="space-y-2">
+                  <div>
+                    <p className="font-medium">{community.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {community.type}
+                      {community.role && ` • ${community.role}`}
+                      {` • ${community.status}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Member since: {new Date(community.joinDate).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                    {community.location && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <MapPin className="h-3 w-3" />
+                        {community.location}
+                      </p>
+                    )}
+                  </div>
+                  <Badge 
+                    variant={community.privacy === "public" ? "default" : community.privacy === "friends" ? "secondary" : "outline"}
+                    className="text-xs"
+                  >
+                    {community.privacy === "public" && "🌐 Public"}
+                    {community.privacy === "friends" && "👥 Friends"}
+                    {community.privacy === "only_me" && "🔒 Only Me"}
+                  </Badge>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              You haven't joined any Social Communities yet. Join Town Unions, Clubs, and Associations on Mobigate to see them here.
+            </p>
+          )}
+        </div>
+      </Card>
+
       {/* Contact Information */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
@@ -914,6 +1019,19 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           currentData={family}
           onSave={setFamily}
           onClose={() => setEditFamilyOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editSocialCommunityOpen}
+        onOpenChange={setEditSocialCommunityOpen}
+        title="Manage Social Community Privacy"
+        maxWidth="lg"
+      >
+        <EditSocialCommunityForm
+          currentData={socialCommunities}
+          onSave={setSocialCommunities}
+          onClose={() => setEditSocialCommunityOpen(false)}
         />
       </EditSectionDialog>
 
