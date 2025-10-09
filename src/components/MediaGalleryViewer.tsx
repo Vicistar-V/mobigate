@@ -242,10 +242,10 @@ export const MediaGalleryViewer = ({
         </div>
 
         {/* Bottom Info & Actions */}
-        <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/90 to-transparent p-6">
+        <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent p-6 pb-8">
           {currentItem.title && (
-            <div className="text-white mb-4">
-              <h3 className="text-xl font-semibold mb-1">{currentItem.title}</h3>
+            <div className="text-white mb-6">
+              <h3 className="text-2xl font-bold mb-1">{currentItem.title}</h3>
               {currentItem.description && (
                 <p className="text-sm text-white/80">{currentItem.description}</p>
               )}
@@ -253,38 +253,38 @@ export const MediaGalleryViewer = ({
           )}
 
           {showActions && (
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-6">
+              <div className="flex items-center gap-6">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="default"
                   onClick={handleLike}
-                  className={`gap-2 ${
+                  className={`gap-2.5 px-4 py-3 h-auto ${
                     isLiked
-                      ? "text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                      ? "text-red-500 hover:text-red-400 hover:bg-red-500/10"
                       : "text-white hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
-                  <span className="text-base font-medium">{likeCount}</span>
+                  <Heart className={`h-7 w-7 ${isLiked ? "fill-current" : ""}`} />
+                  <span className="text-xl font-bold">{likeCount}</span>
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="default"
                   onClick={handleComment}
-                  className="gap-2 text-white hover:text-white hover:bg-white/10"
+                  className="gap-2.5 px-4 py-3 h-auto text-white hover:text-white hover:bg-white/10"
                 >
-                  <MessageCircle className="h-5 w-5" />
-                  <span className="text-base font-medium">{currentItem.comments || 0}</span>
+                  <MessageCircle className="h-7 w-7" />
+                  <span className="text-xl font-bold">{currentItem.comments || 0}</span>
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="default"
                   onClick={handleShare}
-                  className="gap-2 text-white hover:text-white hover:bg-white/10"
+                  className="gap-2.5 px-4 py-3 h-auto text-white hover:text-white hover:bg-white/10"
                 >
-                  <Share2 className="h-5 w-5" />
-                  <span className="text-base font-medium">Share</span>
+                  <Share2 className="h-7 w-7" />
+                  <span className="text-xl font-bold">Share</span>
                 </Button>
               </div>
 
