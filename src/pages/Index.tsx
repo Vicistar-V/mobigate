@@ -7,6 +7,7 @@ import { FeedPost } from "@/components/FeedPost";
 import { AdCard } from "@/components/AdCard";
 import { EditPostDialog } from "@/components/EditPostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
+import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { useState } from "react";
 import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
@@ -189,6 +190,12 @@ const Index = () => {
                   {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
                       <AdCard />
+                    </div>
+                  )}
+                  {/* Insert People You May Know after every 10 posts */}
+                  {(index + 1) % 10 === 0 && index < filteredPosts.length - 1 && (
+                    <div className="my-6">
+                      <PeopleYouMayKnow compact />
                     </div>
                   )}
                 </div>
