@@ -17,6 +17,7 @@ interface AddToCircleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userName: string;
+  onComplete?: () => void;
 }
 
 const availableCircles = [
@@ -34,6 +35,7 @@ export const AddToCircleDialog = ({
   open,
   onOpenChange,
   userName,
+  onComplete,
 }: AddToCircleDialogProps) => {
   const [selectedCircles, setSelectedCircles] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +64,8 @@ export const AddToCircleDialog = ({
         title: "Added to circles",
         description: `${userName} has been added to ${selectedNames}`,
       });
+      
+      onComplete?.();
     }
     setSelectedCircles([]);
     setSearchQuery("");

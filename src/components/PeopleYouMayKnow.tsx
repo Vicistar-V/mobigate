@@ -40,6 +40,7 @@ interface PeopleYouMayKnowProps {
 export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => {
   const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
   const [friendRequestStatus, setFriendRequestStatus] = useState<Record<string, boolean>>({});
+  const [addedToCircleStatus, setAddedToCircleStatus] = useState<Record<string, boolean>>({});
   const [circleDialogOpen, setCircleDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
   const { toast } = useToast();
@@ -55,6 +56,10 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
   const handleAddToCircle = (userId: string, userName: string) => {
     setSelectedUser({ id: userId, name: userName });
     setCircleDialogOpen(true);
+  };
+
+  const handleCircleComplete = (userId: string) => {
+    setAddedToCircleStatus((prev) => ({ ...prev, [userId]: true }));
   };
 
   if (compact) {
@@ -156,11 +161,21 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
                   <Button 
                     size="sm" 
                     className="w-full h-8 text-xs"
-                    variant="outline"
+                    variant={addedToCircleStatus[user.id] ? "secondary" : "outline"}
                     onClick={() => handleAddToCircle(user.id, user.name)}
+                    disabled={addedToCircleStatus[user.id]}
                   >
-                    <Users className="h-3 w-3 mr-1" />
-                    Add to Circle
+                    {addedToCircleStatus[user.id] ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        Added to Circle
+                      </>
+                    ) : (
+                      <>
+                        <Users className="h-3 w-3 mr-1" />
+                        Add to Circle
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -215,11 +230,21 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
                 <Button 
                   size="sm" 
                   className="w-full h-8 text-xs"
-                  variant="outline"
+                  variant={addedToCircleStatus[user.id] ? "secondary" : "outline"}
                   onClick={() => handleAddToCircle(user.id, user.name)}
+                  disabled={addedToCircleStatus[user.id]}
                 >
-                  <Users className="h-3 w-3 mr-1" />
-                  Add to Circle
+                  {addedToCircleStatus[user.id] ? (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      Added to Circle
+                    </>
+                  ) : (
+                    <>
+                      <Users className="h-3 w-3 mr-1" />
+                      Add to Circle
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -231,6 +256,7 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
         open={circleDialogOpen}
         onOpenChange={setCircleDialogOpen}
         userName={selectedUser?.name || ""}
+        onComplete={() => selectedUser && handleCircleComplete(selectedUser.id)}
       />
     </Card>
   );
