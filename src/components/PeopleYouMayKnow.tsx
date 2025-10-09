@@ -1,9 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { UserPlus, Users, Grid3x3, List } from "lucide-react";
+import { UserPlus, Users, Grid3x3, List, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { AddToCircleDialog } from "./AddToCircleDialog";
 import sarahJohnson from "@/assets/profile-sarah-johnson.jpg";
 import michaelChen from "@/assets/profile-michael-chen.jpg";
 import emilyDavis from "@/assets/profile-emily-davis.jpg";
@@ -37,6 +39,23 @@ interface PeopleYouMayKnowProps {
 
 export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => {
   const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
+  const [friendRequestStatus, setFriendRequestStatus] = useState<Record<string, boolean>>({});
+  const [circleDialogOpen, setCircleDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
+  const { toast } = useToast();
+
+  const handleAddFriend = (userId: string, userName: string) => {
+    setFriendRequestStatus((prev) => ({ ...prev, [userId]: true }));
+    toast({
+      title: "Friend request sent",
+      description: `Friend request sent to ${userName}`,
+    });
+  };
+
+  const handleAddToCircle = (userId: string, userName: string) => {
+    setSelectedUser({ id: userId, name: userName });
+    setCircleDialogOpen(true);
+  };
 
   if (compact) {
     return (
@@ -118,15 +137,27 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
                   <Button 
                     size="sm" 
                     className="w-full h-8 text-xs"
-                    variant="default"
+                    variant={friendRequestStatus[user.id] ? "secondary" : "default"}
+                    onClick={() => handleAddFriend(user.id, user.name)}
+                    disabled={friendRequestStatus[user.id]}
                   >
-                    <UserPlus className="h-3 w-3 mr-1" />
-                    Add Friend
+                    {friendRequestStatus[user.id] ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        Request Sent
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-3 w-3 mr-1" />
+                        Add Friend
+                      </>
+                    )}
                   </Button>
                   <Button 
                     size="sm" 
                     className="w-full h-8 text-xs"
                     variant="outline"
+                    onClick={() => handleAddToCircle(user.id, user.name)}
                   >
                     <Users className="h-3 w-3 mr-1" />
                     Add to Circle
@@ -161,19 +192,31 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
                 )}
               </div>
               
-              <div className="space-y-1.5">
+               <div className="space-y-1.5">
                 <Button 
                   size="sm" 
                   className="w-full h-8 text-xs"
-                  variant="default"
+                  variant={friendRequestStatus[user.id] ? "secondary" : "default"}
+                  onClick={() => handleAddFriend(user.id, user.name)}
+                  disabled={friendRequestStatus[user.id]}
                 >
-                  <UserPlus className="h-3 w-3 mr-1" />
-                  Add Friend
+                  {friendRequestStatus[user.id] ? (
+                    <>
+                      <Check className="h-3 w-3 mr-1" />
+                      Request Sent
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-3 w-3 mr-1" />
+                      Add Friend
+                    </>
+                  )}
                 </Button>
                 <Button 
                   size="sm" 
                   className="w-full h-8 text-xs"
                   variant="outline"
+                  onClick={() => handleAddToCircle(user.id, user.name)}
                 >
                   <Users className="h-3 w-3 mr-1" />
                   Add to Circle
@@ -183,6 +226,12 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
           ))}
         </div>
       )}
+
+      <AddToCircleDialog
+        open={circleDialogOpen}
+        onOpenChange={setCircleDialogOpen}
+        userName={selectedUser?.name || ""}
+      />
     </Card>
   );
 };
