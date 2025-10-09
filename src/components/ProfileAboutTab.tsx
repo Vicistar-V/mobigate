@@ -664,17 +664,58 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <Briefcase className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">Extra Source</h3>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Click on any option to navigate to the respective page
+        </p>
+        <div className="space-y-3">
+          <Card 
+            className="p-4 cursor-pointer hover:bg-muted/50 transition-colors border-muted"
             onClick={() => setEditExtraSourceOpen(true)}
           >
-            <Pencil className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Click edit to explore additional resources and services
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Briefcase className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium">My Mobi-Shop @ Mobi-Store</h4>
+                <p className="text-sm text-muted-foreground">Your personal online store</p>
+              </div>
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </Card>
+          
+          <Card 
+            className="p-4 cursor-pointer hover:bg-muted/50 transition-colors border-muted"
+            onClick={() => setEditExtraSourceOpen(true)}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium">Mobi-Circle</h4>
+                <p className="text-sm text-muted-foreground">Connect with your community</p>
+              </div>
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </Card>
+          
+          <Card 
+            className="p-4 cursor-pointer hover:bg-muted/50 transition-colors border-muted"
+            onClick={() => setEditExtraSourceOpen(true)}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <GraduationCap className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium">Biz-Catalogue</h4>
+                <p className="text-sm text-muted-foreground">Browse business offerings</p>
+              </div>
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </Card>
         </div>
       </Card>
 
