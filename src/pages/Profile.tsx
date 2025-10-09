@@ -19,6 +19,7 @@ import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
+import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
@@ -436,8 +437,11 @@ const Profile = () => {
             {/* Create Monetized Post */}
             <CreatePostDialog />
 
+            {/* People You May Know - First Slot */}
+            <PeopleYouMayKnow />
+
             {/* Wall Status */}
-            <WallStatusCarousel 
+            <WallStatusCarousel
               items={wallStatusPostsForCarousel}
               adSlots={adSlots}
               view={wallStatusView}
@@ -462,6 +466,12 @@ const Profile = () => {
                   {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
                     <div className="my-6">
                       <AdCard />
+                    </div>
+                  )}
+                  {/* Insert People You May Know after every 10 posts */}
+                  {(index + 1) % 10 === 0 && index < filteredPosts.length - 1 && (
+                    <div className="my-6">
+                      <PeopleYouMayKnow compact />
                     </div>
                   )}
                 </div>
