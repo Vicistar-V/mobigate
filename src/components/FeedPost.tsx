@@ -80,12 +80,12 @@ export const FeedPost = ({
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-md transition-shadow">
+      <Card 
+        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer" 
+        onClick={openMediaGallery}
+      >
         {imageUrl && (
-          <div 
-            className="relative h-48 bg-muted cursor-pointer" 
-            onClick={openMediaGallery}
-          >
+          <div className="relative h-48 bg-muted">
             <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
             <Badge className="absolute top-2 left-2" variant="destructive">
               {type}
@@ -105,7 +105,7 @@ export const FeedPost = ({
             )}
           </div>
           {isOwner && onEdit && onDelete && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
               <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
             </div>
           )}
@@ -131,7 +131,11 @@ export const FeedPost = ({
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t">
-          <Link to={`/profile/${userId}`} className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Link 
+            to={`/profile/${userId}`} 
+            className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Avatar className="h-10 w-10">
               <AvatarImage src={authorProfileImage} alt={author} />
               <AvatarFallback>{author.charAt(0)}</AvatarFallback>
@@ -148,7 +152,10 @@ export const FeedPost = ({
           </Link>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleLike}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLike();
+              }}
               className={`p-2 rounded-full transition-colors ${
                 isLiked 
                   ? "bg-red-100 text-red-600" 
