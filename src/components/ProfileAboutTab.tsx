@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { EditSectionDialog } from "./profile/EditSectionDialog";
 import { EditBasicInfoForm } from "./profile/EditBasicInfoForm";
 import { EditRelationshipForm } from "./profile/EditRelationshipForm";
@@ -843,19 +844,25 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <div className="flex items-center gap-3">
             <Users className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">Social Community</h3>
+            <Badge variant="secondary" className="text-xs px-2 py-0.5">System Managed</Badge>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">System Managed</Badge>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="h-8 text-muted-foreground hover:text-primary"
-              onClick={() => setEditSocialCommunityOpen(true)}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              Manage Privacy
-            </Button>
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  onClick={() => setEditSocialCommunityOpen(true)}
+                >
+                  <Shield className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Manage Privacy</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="space-y-4">
           {socialCommunities.length > 0 ? (
