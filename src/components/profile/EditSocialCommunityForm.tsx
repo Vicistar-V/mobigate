@@ -65,82 +65,111 @@ export const EditSocialCommunityForm = ({
   };
 
   return (
-    <div className="space-y-6">
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          Social Communities are automatically added when you join organizations on Mobigate. 
-          You can only manage privacy settings for these memberships.
-        </AlertDescription>
+    <div className="space-y-6 p-1">
+      {/* Alert - Enhanced */}
+      <Alert className="p-5 bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+        <div className="flex gap-3">
+          <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <AlertDescription className="text-sm leading-relaxed">
+            Social Communities are automatically added when you join organizations on Mobigate. 
+            You can only manage privacy settings for these memberships.
+          </AlertDescription>
+        </div>
       </Alert>
 
-      {/* Global Privacy Setting */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4 text-primary" />
-          <Label className="text-base font-semibold">Global Privacy Setting</Label>
+      {/* Global Privacy Setting - Card Container */}
+      <div className="rounded-lg border bg-card p-5 space-y-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <h3 className="text-base font-semibold">Global Privacy Setting</h3>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed pl-7">
+            Apply the same privacy setting to all communities
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">Apply the same privacy setting to all communities</p>
-        <PrivacySelector
-          value={globalPrivacy}
-          onChange={(value) => handleGlobalPrivacyChange(value as "public" | "friends" | "only_me")}
-        />
+        
+        <div className="pl-7">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Privacy Level</Label>
+            <PrivacySelector
+              value={globalPrivacy}
+              onChange={(value) => handleGlobalPrivacyChange(value as "public" | "friends" | "only_me")}
+            />
+          </div>
+        </div>
       </div>
 
       <Separator />
 
-      {/* Individual Community Privacy */}
+      {/* Individual Communities */}
       <div className="space-y-4">
-        <Label className="text-base font-semibold">Individual Privacy Settings</Label>
+        <h3 className="text-base font-semibold px-1">Individual Privacy Settings</h3>
         
         {communities.length > 0 ? (
           <div className="space-y-4">
-            {communities.map((community, index) => (
-              <div key={community.id}>
-                {index > 0 && <Separator className="mb-4" />}
-                <div className="space-y-3">
-                  <div>
-                    <p className="font-medium">{community.name}</p>
-                    <p className="text-sm text-muted-foreground">
+            {communities.map((community) => (
+              <div key={community.id} className="rounded-lg border bg-card p-4 space-y-4">
+                {/* Community Header */}
+                <div className="space-y-2">
+                  <h4 className="font-medium text-base">{community.name}</h4>
+                  <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                    <span className="inline-flex items-center">
                       {community.type}
-                      {community.role && ` • ${community.role}`}
-                      {` • ${community.status}`}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Member since: {new Date(community.joinDate).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
-                    </p>
+                    </span>
+                    {community.role && (
+                      <>
+                        <span>•</span>
+                        <span>{community.role}</span>
+                      </>
+                    )}
+                    <span>•</span>
+                    <span className={community.status === 'Active' ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+                      {community.status}
+                    </span>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor={`privacy-${community.id}`} className="text-sm">
-                      Who can see this?
-                    </Label>
-                    <PrivacySelector
-                      value={community.privacy}
-                      onChange={(value) => handlePrivacyChange(community.id, value as "public" | "friends" | "only_me")}
-                    />
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Member since {new Date(community.joinDate).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+
+                {/* Privacy Control */}
+                <div className="space-y-2 pt-2 border-t">
+                  <Label className="text-sm font-medium">Who can see this?</Label>
+                  <PrivacySelector
+                    value={community.privacy}
+                    onChange={(value) => handlePrivacyChange(community.id, value as "public" | "friends" | "only_me")}
+                  />
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            You haven't joined any Social Communities yet.
-          </p>
+          <div className="rounded-lg border bg-muted/20 p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              You haven't joined any Social Communities yet.
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-3 pt-4">
-        <Button variant="outline" onClick={onClose}>
+      {/* Action Buttons - Mobile Optimized */}
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+        <Button 
+          variant="outline" 
+          onClick={onClose}
+          className="w-full sm:w-auto min-h-[44px] sm:min-h-[40px]"
+        >
           Cancel
         </Button>
-        <Button onClick={handleSave}>
+        <Button 
+          onClick={handleSave}
+          className="w-full sm:w-auto min-h-[44px] sm:min-h-[40px]"
+        >
           Save Changes
         </Button>
       </div>
