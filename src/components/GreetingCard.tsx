@@ -96,9 +96,6 @@ export const GreetingSection = () => {
         </div>
       </Card>
 
-      {/* Create Post Dialog */}
-      <CreatePostDialog />
-
       {/* People You May Know */}
       <PeopleYouMayKnow />
     </div>
