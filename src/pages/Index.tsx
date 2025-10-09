@@ -8,6 +8,7 @@ import { AdCard } from "@/components/AdCard";
 import { EditPostDialog } from "@/components/EditPostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { useState } from "react";
 import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
@@ -158,7 +159,10 @@ const Index = () => {
 
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6 min-w-0">
-            <WallStatusCarousel 
+            {/* Create Monetized Post - Directly above Wall Status */}
+            <CreatePostDialog />
+            
+            <WallStatusCarousel
               items={wallStatusPostsForCarousel}
               adSlots={adSlots}
               view={wallStatusView}
