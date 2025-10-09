@@ -96,11 +96,11 @@ export const GreetingSection = () => {
         </div>
       </Card>
 
-      {/* People You May Know */}
-      <PeopleYouMayKnow />
-
       {/* Create Post Dialog */}
       <CreatePostDialog />
+
+      {/* People You May Know */}
+      <PeopleYouMayKnow />
     </div>
   );
 };

@@ -437,9 +437,6 @@ const Profile = () => {
             {/* People You May Know - First Slot */}
             <PeopleYouMayKnow />
 
-            {/* Create Monetized Post */}
-            <CreatePostDialog />
-
             {/* Wall Status */}
             <WallStatusCarousel
               items={wallStatusPostsForCarousel}
@@ -456,6 +453,12 @@ const Profile = () => {
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
               <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+              
+              {/* Create Monetized Post - Directly above feed */}
+              <div className="mt-6">
+                <CreatePostDialog />
+              </div>
+
               <div className="space-y-6 mt-6">
                 {filteredPosts.map((post, index) => (
                 <div key={post.id || index}>
