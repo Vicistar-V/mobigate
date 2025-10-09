@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/select";
 import { Plus, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AlbumSelector } from "./AlbumSelector";
+import { CreateAlbumDialog } from "./CreateAlbumDialog";
+import { mockAlbums } from "@/data/posts";
 
 export const CreatePostDialog = () => {
   const [open, setOpen] = useState(false);
@@ -29,6 +32,8 @@ export const CreatePostDialog = () => {
   const [type, setType] = useState<"Photo" | "Video" | "Audio" | "Article" | "PDF" | "URL">("Photo");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
+  const [showNewAlbumDialog, setShowNewAlbumDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -75,9 +80,18 @@ export const CreatePostDialog = () => {
     setType("Photo");
     setMediaFile(null);
     setMediaPreview(null);
+    setSelectedAlbum(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleAlbumCreated = (albumId: string, albumName: string) => {
+    setSelectedAlbum(albumId);
+    toast({
+      title: "Album created",
+      description: `"${albumName}" is now ready for your posts.`,
+    });
   };
 
   const handleSubmit = () => {
@@ -93,9 +107,15 @@ export const CreatePostDialog = () => {
     // In a real app, you would upload the mediaFile to storage here
     // and create the post in the database
     
+    const albumName = selectedAlbum 
+      ? mockAlbums.find(a => a.id === selectedAlbum)?.name 
+      : null;
+    
     toast({
       title: "Success!",
-      description: "Your monetized post has been created.",
+      description: albumName 
+        ? `Your post has been published to "${albumName}".`
+        : "Your monetized post has been created.",
     });
     
     resetForm();
@@ -221,6 +241,18 @@ export const CreatePostDialog = () => {
               Supported formats: Images, Videos, Audio, PDF (Max 20MB)
             </p>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="album">Album (Optional)</Label>
+            <AlbumSelector
+              value={selectedAlbum}
+              onChange={setSelectedAlbum}
+              onCreateNew={() => setShowNewAlbumDialog(true)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Organize your post into an album for better management
+            </p>
+          </div>
         </div>
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={() => {
@@ -232,6 +264,12 @@ export const CreatePostDialog = () => {
           <Button onClick={handleSubmit}>Publish Post</Button>
         </div>
       </DialogContent>
+      
+      <CreateAlbumDialog
+        open={showNewAlbumDialog}
+        onOpenChange={setShowNewAlbumDialog}
+        onAlbumCreated={handleAlbumCreated}
+      />
     </Dialog>
   );
 };

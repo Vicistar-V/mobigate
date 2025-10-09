@@ -1,3 +1,13 @@
+export interface Album {
+  id: string;
+  name: string;
+  description?: string;
+  coverImage?: string;
+  itemCount: number;
+  privacy?: "Public" | "Friends" | "Private";
+  createdAt: string;
+}
+
 export interface Post {
   id?: string;
   title: string;
@@ -14,7 +24,84 @@ export interface Post {
   imageUrl?: string;
   fee?: string;
   isOwner?: boolean;
+  albumId?: string;
+  albumName?: string;
 }
+
+export const mockAlbums: Album[] = [
+  {
+    id: "alb_1",
+    name: "Travel Adventures",
+    description: "Photos and videos from my travels around the world",
+    coverImage: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
+    itemCount: 45,
+    privacy: "Public",
+    createdAt: "2024-01-15",
+  },
+  {
+    id: "alb_2",
+    name: "Family Moments",
+    description: "Precious memories with loved ones",
+    coverImage: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&q=80",
+    itemCount: 123,
+    privacy: "Friends",
+    createdAt: "2024-02-20",
+  },
+  {
+    id: "alb_3",
+    name: "Work Projects",
+    description: "Professional content and achievements",
+    coverImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+    itemCount: 28,
+    privacy: "Public",
+    createdAt: "2024-03-10",
+  },
+  {
+    id: "alb_4",
+    name: "Food & Recipes",
+    description: "Delicious meals and culinary experiments",
+    coverImage: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
+    itemCount: 67,
+    privacy: "Public",
+    createdAt: "2024-04-05",
+  },
+  {
+    id: "alb_5",
+    name: "Nature & Wildlife",
+    description: "Beautiful nature photography",
+    coverImage: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+    itemCount: 89,
+    privacy: "Public",
+    createdAt: "2024-05-12",
+  },
+  {
+    id: "alb_6",
+    name: "Personal Thoughts",
+    description: "My personal blog and reflections",
+    coverImage: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80",
+    itemCount: 34,
+    privacy: "Private",
+    createdAt: "2024-06-08",
+  },
+  {
+    id: "alb_7",
+    name: "Fitness Journey",
+    description: "My fitness transformation and workout routines",
+    coverImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80",
+    itemCount: 52,
+    privacy: "Public",
+    createdAt: "2024-07-18",
+  },
+  {
+    id: "alb_8",
+    name: "Art & Creativity",
+    description: "Creative projects and artistic expressions",
+    coverImage: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80",
+    itemCount: 41,
+    privacy: "Public",
+    createdAt: "2024-08-22",
+  },
+];
 
 export const feedPosts: Post[] = [
   {
