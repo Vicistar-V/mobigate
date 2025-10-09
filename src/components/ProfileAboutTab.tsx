@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { EditSectionDialog } from "./profile/EditSectionDialog";
@@ -69,6 +71,9 @@ interface ContactInfo {
 }
 
 export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   // Dialog states
   const [editLocationOpen, setEditLocationOpen] = useState(false);
   const [editEducationOpen, setEditEducationOpen] = useState(false);
@@ -95,6 +100,17 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
     setSelectedMate(mate);
     setMateType(type);
     setDetailDialogOpen(true);
+  };
+
+  const handleUserProfileClick = (userId: string) => {
+    navigate(`/profile/${userId}`);
+  };
+
+  const handleCommunityClick = (communityId: string) => {
+    toast({
+      title: "Community Profile",
+      description: "Community profile pages are coming soon!",
+    });
   };
 
   // Load data from localStorage on mount
@@ -496,14 +512,23 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {schoolMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div 
-                    onClick={() => openMateDetails(mate, "schoolmate")}
-                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
-                  >
-                    <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-                    <p className="text-sm text-muted-foreground">{mate.institution}</p>
-                    {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
-                    <p className="text-xs text-primary mt-1">Click to view full details</p>
+                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div 
+                      onClick={() => handleUserProfileClick(mate.id)}
+                      className="flex-1 cursor-pointer"
+                    >
+                      <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+                      <p className="text-sm text-muted-foreground">{mate.institution}</p>
+                      {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openMateDetails(mate, "schoolmate")}
+                      className="text-xs shrink-0"
+                    >
+                      Details
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -534,14 +559,23 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {classmates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div 
-                    onClick={() => openMateDetails(mate, "classmate")}
-                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
-                  >
-                    <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-                    <p className="text-sm text-muted-foreground">{mate.institution}</p>
-                    {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
-                    <p className="text-xs text-primary mt-1">Click to view full details</p>
+                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div 
+                      onClick={() => handleUserProfileClick(mate.id)}
+                      className="flex-1 cursor-pointer"
+                    >
+                      <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+                      <p className="text-sm text-muted-foreground">{mate.institution}</p>
+                      {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openMateDetails(mate, "classmate")}
+                      className="text-xs shrink-0"
+                    >
+                      Details
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -572,14 +606,23 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {ageMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div 
-                    onClick={() => openMateDetails(mate, "agemate")}
-                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
-                  >
-                    <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-                    <p className="text-sm text-muted-foreground">{mate.community}</p>
-                    {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
-                    <p className="text-xs text-primary mt-1">Click to view full details</p>
+                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div 
+                      onClick={() => handleUserProfileClick(mate.id)}
+                      className="flex-1 cursor-pointer"
+                    >
+                      <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+                      <p className="text-sm text-muted-foreground">{mate.community}</p>
+                      {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openMateDetails(mate, "agemate")}
+                      className="text-xs shrink-0"
+                    >
+                      Details
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -610,14 +653,23 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {workColleagues.map((colleague, index) => (
                 <div key={colleague.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div 
-                    onClick={() => openMateDetails(colleague, "colleague")}
-                    className="cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
-                  >
-                    <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
-                    <p className="text-sm text-muted-foreground">{colleague.workplaceName}{colleague.workplaceLocation && `, ${colleague.workplaceLocation}`}</p>
-                    {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
-                    <p className="text-xs text-primary mt-1">Click to view full details</p>
+                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div 
+                      onClick={() => handleUserProfileClick(colleague.id)}
+                      className="flex-1 cursor-pointer"
+                    >
+                      <p className="font-medium text-primary hover:underline">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
+                      <p className="text-sm text-muted-foreground">{colleague.workplaceName}{colleague.workplaceLocation && `, ${colleague.workplaceLocation}`}</p>
+                      {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openMateDetails(colleague, "colleague")}
+                      className="text-xs shrink-0"
+                    >
+                      Details
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -798,7 +850,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               <div key={friendship.id}>
                 {index > 0 && <Separator className="mb-4" />}
                 <div>
-                  <p className="font-medium">{friendship.name}</p>
+                  <p 
+                    className="font-medium text-primary hover:underline cursor-pointer"
+                    onClick={() => handleUserProfileClick(friendship.id)}
+                  >
+                    {friendship.name}
+                  </p>
                   <p className="text-sm text-muted-foreground">{friendship.relationshipTag}</p>
                 </div>
               </div>
@@ -830,7 +887,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <div key={member.id}>
               {index > 0 && <Separator className="mb-4" />}
               <div>
-                <p className="font-medium">{member.name}</p>
+                <p 
+                  className="font-medium text-primary hover:underline cursor-pointer"
+                  onClick={() => handleUserProfileClick(member.id)}
+                >
+                  {member.name}
+                </p>
                 <p className="text-sm text-muted-foreground">{member.relation}</p>
               </div>
             </div>
@@ -871,7 +933,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 {index > 0 && <Separator className="mb-4" />}
                 <div className="space-y-2">
                   <div>
-                    <p className="font-medium">{community.name}</p>
+                    <p 
+                      className="font-medium text-primary hover:underline cursor-pointer"
+                      onClick={() => handleCommunityClick(community.id)}
+                    >
+                      {community.name}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {community.type}
                       {community.role && ` • ${community.role}`}
