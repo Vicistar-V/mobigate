@@ -434,11 +434,11 @@ const Profile = () => {
           </ScrollArea>
 
           <TabsContent value="status" className="space-y-6">
-            {/* Create Monetized Post */}
-            <CreatePostDialog />
-
             {/* People You May Know - First Slot */}
             <PeopleYouMayKnow />
+
+            {/* Create Monetized Post */}
+            <CreatePostDialog />
 
             {/* Wall Status */}
             <WallStatusCarousel
