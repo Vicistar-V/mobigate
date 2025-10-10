@@ -9,6 +9,8 @@ import { EditPostDialog } from "@/components/EditPostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { useState } from "react";
 import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
@@ -142,7 +144,157 @@ const Index = () => {
     },
   ];
 
-  const filteredPosts = contentFilter === "all" 
+  // Premium ad data for large, dynamic ads
+  const premiumAdSlots: PremiumAdCardProps[] = [
+    {
+      id: "premium-feed-1",
+      advertiser: {
+        name: "Kerex Group Co.,Ltd",
+        verified: true,
+      },
+      content: {
+        headline: "Professional Leading Manufacturer of Heavy Equipment",
+        description: "Drilling Rig | Air Compressor | Generator - Quality You Can Trust. Drilling Made Easy with Kerex.",
+        ctaText: "Get in touch",
+        ctaUrl: "https://example.com/kerex",
+      },
+      media: {
+        type: "image" as const,
+        items: [
+          {
+            url: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1200&q=80",
+          },
+        ],
+      },
+      layout: "standard" as const,
+      duration: 15,
+    },
+    {
+      id: "premium-feed-2",
+      advertiser: {
+        name: "China Used Machinery For Sale",
+        verified: false,
+      },
+      content: {
+        headline: "Small-scale contractors, grow your business",
+        description: "Quality used construction equipment at unbeatable prices. Financing available.",
+        ctaText: "Get quote",
+        ctaUrl: "https://example.com/machinery",
+      },
+      media: {
+        type: "carousel" as const,
+        items: [
+          {
+            url: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=80",
+            caption: "Second-hand skid steer loader",
+            price: "$15,000",
+          },
+          {
+            url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80",
+            caption: "Caterpillar Second-hand excavator",
+            price: "$28,000",
+          },
+          {
+            url: "https://images.unsplash.com/photo-1625321423565-fdc88f6e1c55?w=800&q=80",
+            caption: "Used bulldozer - excellent condition",
+            price: "$35,000",
+          },
+        ],
+      },
+      layout: "standard" as const,
+      duration: 15,
+    },
+    {
+      id: "premium-feed-3",
+      advertiser: {
+        name: "TechStart Business Solutions",
+        verified: true,
+      },
+      content: {
+        headline: "Scale Your Business with Cloud Solutions",
+        description: "Enterprise-grade tools at startup prices. Get 50% off your first 3 months.",
+        ctaText: "Start Free Trial",
+        ctaUrl: "https://example.com/techstart",
+      },
+      media: {
+        type: "image" as const,
+        items: [
+          {
+            url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80",
+          },
+        ],
+      },
+      layout: "fullscreen" as const,
+      duration: 15,
+    },
+  ];
+
+  // Premium ad slots for Wall Status section
+  const wallStatusPremiumAdSlots = [
+    {
+      slotId: "wall-status-premium-1",
+      ads: [
+        {
+          id: "premium-wall-1",
+          advertiser: {
+            name: "SmartTech Solutions",
+            verified: true,
+          },
+          content: {
+            headline: "Transform Your Business with AI",
+            description: "Cutting-edge AI solutions for modern businesses. Get started with a free consultation.",
+            ctaText: "Learn More",
+            ctaUrl: "https://example.com/smarttech",
+          },
+          media: {
+            type: "image" as const,
+            items: [
+              {
+                url: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80",
+              },
+            ],
+          },
+          layout: "standard" as const,
+          duration: 15,
+        },
+      ],
+    },
+    {
+      slotId: "wall-status-premium-2",
+      ads: [
+        {
+          id: "premium-wall-2",
+          advertiser: {
+            name: "Elite Fitness Center",
+            verified: true,
+          },
+          content: {
+            headline: "Get Fit, Stay Healthy",
+            description: "Join Nigeria's premier fitness destination. First month 50% off for new members!",
+            ctaText: "Join Now",
+            ctaUrl: "https://example.com/fitness",
+          },
+          media: {
+            type: "carousel" as const,
+            items: [
+              {
+                url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+                caption: "State-of-the-art gym equipment",
+              },
+              {
+                url: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
+                caption: "Personal training sessions",
+              },
+            ],
+          },
+          layout: "standard" as const,
+          duration: 15,
+        },
+      ],
+    },
+  ];
+
+  const filteredPosts = contentFilter === "all"
     ? feedPosts 
     : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
 
@@ -165,6 +317,7 @@ const Index = () => {
             <WallStatusCarousel
               items={wallStatusPostsForCarousel}
               adSlots={adSlots}
+              premiumAdSlots={wallStatusPremiumAdSlots}
               view={wallStatusView}
               onViewChange={setWallStatusView}
               filter={wallStatusFilter}
@@ -190,10 +343,14 @@ const Index = () => {
                 {filteredPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
-                  {/* Insert ad after every 5 posts */}
-                  {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
-                    <div className="my-6">
-                      <AdCard />
+                  {/* Insert premium ad after every 4 posts */}
+                  {(index + 1) % 4 === 0 && index < filteredPosts.length - 1 && (
+                    <div className="my-8">
+                      <PremiumAdRotation
+                        slotId={`feed-premium-${Math.floor((index + 1) / 4)}`}
+                        ads={[premiumAdSlots[Math.floor((index + 1) / 4) % premiumAdSlots.length]]}
+                        context="feed"
+                      />
                     </div>
                   )}
                   {/* Insert People You May Know after every 10 posts */}

@@ -10,6 +10,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState } from "react";
 import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts } from "@/data/posts";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import profileBanner from "@/assets/profile-banner.jpg";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ProfileAboutTab } from "@/components/ProfileAboutTab";
@@ -181,6 +183,77 @@ const Profile = () => {
           duration: 10
         },
       ]
+    },
+  ];
+
+  // Premium ad data for large, dynamic ads
+  const premiumAdSlots: PremiumAdCardProps[] = [
+    {
+      id: "premium-profile-1",
+      advertiser: {
+        name: "Professional Training Academy",
+        verified: true,
+      },
+      content: {
+        headline: "Advance Your Career with Certified Courses",
+        description: "Industry-recognized certifications in tech, business, and creative fields. Join 50,000+ successful graduates.",
+        ctaText: "Browse Courses",
+        ctaUrl: "https://example.com/training",
+      },
+      media: {
+        type: "image" as const,
+        items: [
+          {
+            url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&q=80",
+          },
+        ],
+      },
+      layout: "standard" as const,
+      duration: 15,
+    },
+    {
+      id: "premium-profile-2",
+      advertiser: {
+        name: "Global Marketplace",
+        verified: true,
+      },
+      content: {
+        headline: "Buy and Sell with Confidence",
+        description: "Connect with millions of buyers and sellers worldwide. Secure payments, fast shipping.",
+        ctaText: "Start Selling",
+        ctaUrl: "https://example.com/marketplace",
+      },
+      media: {
+        type: "carousel" as const,
+        items: [
+          {
+            url: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80",
+            caption: "Electronics & Gadgets",
+          },
+          {
+            url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80",
+            caption: "Fashion & Accessories",
+          },
+          {
+            url: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&q=80",
+            caption: "Home & Living",
+          },
+        ],
+      },
+      layout: "standard" as const,
+      duration: 15,
+    },
+  ];
+
+  // Premium ad slots for Wall Status section in Profile
+  const wallStatusPremiumAdSlots = [
+    {
+      slotId: "profile-wall-premium-1",
+      ads: [premiumAdSlots[0]],
+    },
+    {
+      slotId: "profile-wall-premium-2",
+      ads: [premiumAdSlots[1]],
     },
   ];
 
@@ -468,6 +541,7 @@ const Profile = () => {
             <WallStatusCarousel
               items={wallStatusPostsForCarousel}
               adSlots={adSlots}
+              premiumAdSlots={wallStatusPremiumAdSlots}
               view={wallStatusView}
               onViewChange={setWallStatusView}
               filter={wallStatusFilter}
@@ -487,10 +561,14 @@ const Profile = () => {
                   <FeedPost 
                     {...post}
                   />
-                  {/* Insert ad after every 5 posts */}
-                  {(index + 1) % 5 === 0 && index < filteredPosts.length - 1 && (
-                    <div className="my-6">
-                      <AdCard />
+                  {/* Insert premium ad after every 4 posts */}
+                  {(index + 1) % 4 === 0 && index < filteredPosts.length - 1 && (
+                    <div className="my-8">
+                      <PremiumAdRotation
+                        slotId={`profile-premium-${Math.floor((index + 1) / 4)}`}
+                        ads={[premiumAdSlots[Math.floor((index + 1) / 4) % premiumAdSlots.length]]}
+                        context="profile"
+                      />
                     </div>
                   )}
                   {/* Insert People You May Know after every 10 posts */}

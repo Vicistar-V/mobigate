@@ -5,6 +5,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { WallStatusFilters } from "@/components/WallStatusFilters";
 import { AdRotation } from "@/components/AdRotation";
 import { PostOptionsMenu } from "@/components/PostOptionsMenu";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
 import { Columns2, LayoutGrid } from "lucide-react";
 import React, { useState } from "react";
@@ -28,9 +30,15 @@ interface AdSlot {
   }>;
 }
 
+interface PremiumAdSlot {
+  slotId: string;
+  ads: PremiumAdCardProps[];
+}
+
 interface WallStatusCarouselProps {
   items: Post[];
   adSlots?: AdSlot[];
+  premiumAdSlots?: PremiumAdSlot[];
   view: "normal" | "large";
   onViewChange: (view: "normal" | "large") => void;
   filter: string;
@@ -44,6 +52,7 @@ interface WallStatusCarouselProps {
 export const WallStatusCarousel = ({
   items,
   adSlots = [],
+  premiumAdSlots = [],
   view,
   onViewChange,
   filter,
@@ -117,8 +126,8 @@ export const WallStatusCarousel = ({
           <ScrollArea className="w-full">
             <div className="flex gap-3 pb-2">
               {displayedItems.map((item, index) => {
-                const shouldShowAd = (index + 1) % 15 === 0 && index < displayedItems.length - 1;
-                const adSlotIndex = Math.floor((index + 1) / 15) - 1;
+                const shouldShowAd = (index + 1) % 4 === 0 && index < displayedItems.length - 1;
+                const adSlotIndex = Math.floor((index + 1) / 4) - 1;
                 
                 return (
                   <React.Fragment key={`${item.title}-${index}`}>
@@ -150,13 +159,14 @@ export const WallStatusCarousel = ({
                         )}
                     </Card>
                     
-                    {/* Insert ad after every 15 posts */}
-                    {shouldShowAd && adSlotIndex >= 0 && adSlotIndex < adSlots.length && (
-                      <div className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4]">
-                        <AdRotation 
-                          key={`ad-${adSlots[adSlotIndex].slotId}`}
-                          slotId={adSlots[adSlotIndex].slotId}
-                          ads={adSlots[adSlotIndex].ads}
+                    {/* Insert premium ad after every 4 posts */}
+                    {shouldShowAd && premiumAdSlots.length > 0 && (
+                      <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
+                        <PremiumAdRotation
+                          key={`premium-ad-${adSlotIndex}`}
+                          slotId={`wall-status-premium-${adSlotIndex}`}
+                          ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
+                          context="wall-status"
                         />
                       </div>
                     )}
@@ -171,10 +181,12 @@ export const WallStatusCarousel = ({
       
       {/* Large View - 3-Column Vertical Grid with Ads */}
       {view === "large" && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {displayedItems.map((item, index) => {
-            const shouldShowAd = (index + 1) % 15 === 0 && index < displayedItems.length - 1;
-            const adSlotIndex = Math.floor((index + 1) / 15) - 1;
+            const shouldShowAd = (index + 1) % 4 === 0 && index < displayedItems.length - 1;
+            const adSlotIndex = Math.floor((index + 1) / 4) - 1;
+            const isLastInRow = (index + 1) % 3 === 0;
             
             return (
               <React.Fragment key={`${item.title}-${index}`}>
@@ -208,17 +220,38 @@ export const WallStatusCarousel = ({
                   </div>
                 </Card>
                 
-                {/* Insert ad after every 15 images (5 rows of 3) */}
-                {shouldShowAd && adSlotIndex >= 0 && adSlotIndex < adSlots.length && (
-                  <AdRotation 
-                    key={`ad-${adSlots[adSlotIndex].slotId}`}
-                    slotId={adSlots[adSlotIndex].slotId}
-                    ads={adSlots[adSlotIndex].ads}
-                  />
+                {/* Close grid before premium ad, then reopen */}
+                {shouldShowAd && isLastInRow && premiumAdSlots.length > 0 && (
+                  <React.Fragment>
+                    {/* This will be rendered after the current grid row closes */}
+                  </React.Fragment>
                 )}
               </React.Fragment>
             );
           })}
+          </div>
+          
+          {/* Premium ads as full-width breaks between grid sections */}
+          {displayedItems
+            .map((_, index) => {
+              const shouldShowAd = (index + 1) % 4 === 0 && index < displayedItems.length - 1;
+              const adSlotIndex = Math.floor((index + 1) / 4) - 1;
+              const isLastInRow = (index + 1) % 3 === 0;
+              
+              if (shouldShowAd && isLastInRow && premiumAdSlots.length > 0) {
+                return (
+                  <div key={`premium-ad-break-${index}`} className="w-full my-4">
+                    <PremiumAdRotation
+                      slotId={`wall-status-grid-premium-${adSlotIndex}`}
+                      ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
+                      context="wall-status"
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })
+            .filter(Boolean)}
         </div>
       )}
 
