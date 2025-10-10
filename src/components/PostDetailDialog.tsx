@@ -11,6 +11,8 @@ import { Eye, MessageSquare, Heart, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { MediaViewer } from "@/components/MediaViewer";
+import { CommentSection } from "@/components/CommentSection";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface PostDetailDialogProps {
   open: boolean;
@@ -41,6 +43,7 @@ export const PostDetailDialog = ({
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(parseInt(post.likes) || 0);
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const handleLike = () => {
     if (isLiked) {
@@ -104,9 +107,13 @@ export const PostDetailDialog = ({
                   </span>
                 )}
               </div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowComments(!showComments)}
+              >
                 <MessageSquare className="h-4 w-4 mr-1" />
-                Comment
+                {showComments ? "Hide Comments" : "Show Comments"}
               </Button>
               <Button variant="outline" size="sm">
                 <Share2 className="h-4 w-4 mr-1" />
@@ -120,6 +127,13 @@ export const PostDetailDialog = ({
                 {post.description}
               </p>
             )}
+
+            {/* Comments Section */}
+            <Collapsible open={showComments} onOpenChange={setShowComments}>
+              <CollapsibleContent className="pt-4">
+                <CommentSection postId={post.id || "unknown"} />
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
 

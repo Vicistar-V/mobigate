@@ -4,6 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { CommentDialog } from "@/components/CommentDialog";
 
 export interface MediaItem {
   id?: string;
@@ -39,6 +40,7 @@ export const MediaGalleryViewer = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const currentItem = items[currentIndex];
@@ -90,7 +92,7 @@ export const MediaGalleryViewer = ({
   };
 
   const handleComment = () => {
-    toast({ description: "Comment feature coming soon!" });
+    setCommentDialogOpen(true);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -324,5 +326,20 @@ export const MediaGalleryViewer = ({
         </div>
       </DialogContent>
     </Dialog>
+
+      <CommentDialog
+        open={commentDialogOpen}
+        onOpenChange={setCommentDialogOpen}
+        post={{
+          id: currentItem?.id,
+          title: currentItem?.title || "Media Item",
+          author: currentItem?.author || "Unknown Author",
+          authorProfileImage: currentItem?.authorImage,
+          type: currentItem?.type === "video" ? "Video" : currentItem?.type === "audio" ? "Audio" : "Photo",
+          imageUrl: currentItem?.url,
+          likes: likeCount.toString(),
+        }}
+      />
+    </>
   );
 };

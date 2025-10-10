@@ -6,6 +6,7 @@ import { X, Heart, MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { CommentDialog } from "@/components/CommentDialog";
 
 interface MediaViewerProps {
   open: boolean;
@@ -32,6 +33,7 @@ export const MediaViewer = ({
 }: MediaViewerProps) => {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [likeCount, setLikeCount] = useState(likes);
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleLike = () => {
@@ -59,7 +61,7 @@ export const MediaViewer = ({
   };
 
   const handleComment = () => {
-    toast({ description: "Comment feature coming soon!" });
+    setCommentDialogOpen(true);
   };
 
   const renderMedia = () => {
@@ -142,6 +144,7 @@ export const MediaViewer = ({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0 bg-black border-none">
         {/* Header with close button */}
@@ -213,5 +216,17 @@ export const MediaViewer = ({
         )}
       </DialogContent>
     </Dialog>
+
+    <CommentDialog
+      open={commentDialogOpen}
+      onOpenChange={setCommentDialogOpen}
+      post={{
+        title,
+        type: mediaType,
+        author: "Unknown Author",
+        imageUrl: mediaUrl,
+      }}
+    />
+    </>
   );
 };

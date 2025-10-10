@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostOptionsMenu } from "@/components/PostOptionsMenu";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
+import { CommentDialog } from "@/components/CommentDialog";
 
 interface FeedPostProps {
   id?: string;
@@ -49,6 +50,7 @@ export const FeedPost = ({
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(parseInt(likes));
   const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
 
   const handleLike = () => {
     if (isLiked) {
@@ -119,10 +121,16 @@ export const FeedPost = ({
             <span>{views} Views</span>
           </div>
           <span className="text-muted-foreground">|</span>
-          <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
+          <button 
+            className="flex items-center gap-1 text-red-600 whitespace-nowrap hover:underline transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCommentDialogOpen(true);
+            }}
+          >
             <MessageSquare className="h-4 w-4" />
             <span>{comments} Comments</span>
-          </div>
+          </button>
           <span className="text-muted-foreground">|</span>
           <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
             <Heart className="h-4 w-4" />
@@ -195,6 +203,22 @@ export const FeedPost = ({
         galleryType="post"
       />
     )}
+
+    <CommentDialog
+      open={commentDialogOpen}
+      onOpenChange={setCommentDialogOpen}
+      post={{
+        id,
+        title,
+        subtitle,
+        author,
+        authorProfileImage,
+        type,
+        imageUrl,
+        views,
+        likes: likeCount.toString(),
+      }}
+    />
     </>
   );
 };
