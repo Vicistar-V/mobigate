@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AlbumCard } from "./AlbumCard";
 import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
 import { mockAlbums, Album, Post } from "@/data/posts";
-import { Button } from "@/components/ui/button";
 
 interface ProfileAlbumsTabProps {
   userId: string;
@@ -20,7 +20,6 @@ export const ProfileAlbumsTab = ({
 }: ProfileAlbumsTabProps) => {
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { isSystem?: boolean }) | null>(null);
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
-  const [visibleAlbumCount, setVisibleAlbumCount] = useState(4);
 
   // Create system albums
   const profilePicturesAlbum: Album & { isSystem: boolean } = useMemo(
@@ -128,20 +127,6 @@ export const ProfileAlbumsTab = ({
     return photos.sort((a, b) => b.date.localeCompare(a.date));
   }, [profileImageHistory, bannerImageHistory, userPosts]);
 
-  // Pagination logic for albums
-  const displayedAlbums = allAlbums.slice(0, visibleAlbumCount);
-  const hasMoreAlbums = visibleAlbumCount < allAlbums.length;
-  const canCollapseAlbums = visibleAlbumCount > 4;
-
-  const handleLoadMoreAlbums = () => {
-    setVisibleAlbumCount(prev => Math.min(prev + 4, allAlbums.length));
-  };
-
-  const handleShowLessAlbums = () => {
-    setVisibleAlbumCount(4);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   // Handle album click
   const handleAlbumClick = (album: Album & { isSystem?: boolean }) => {
     setSelectedAlbum(album);
@@ -180,45 +165,24 @@ export const ProfileAlbumsTab = ({
 
   return (
     <div className="space-y-8">
-      {/* Albums Grid Section */}
+      {/* Albums Carousel Section */}
       {allAlbums.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-4">Albums</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {displayedAlbums.map((album) => (
-              <AlbumCard
-                key={album.id}
-                album={album}
-                onClick={() => handleAlbumClick(album)}
-              />
-            ))}
+          <div className="relative -mx-4 px-4">
+            <ScrollArea className="w-full">
+              <div className="flex gap-3 pb-2">
+                {allAlbums.map((album) => (
+                  <AlbumCard
+                    key={album.id}
+                    album={album}
+                    onClick={() => handleAlbumClick(album)}
+                  />
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
-          
-          {/* Expansion Controls */}
-          {(hasMoreAlbums || canCollapseAlbums) && (
-            <div className="flex justify-center items-center gap-6 mt-6">
-              {hasMoreAlbums && (
-                <Button
-                  onClick={handleLoadMoreAlbums}
-                  variant="outline"
-                  size="lg"
-                  className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
-                >
-                  ...more
-                </Button>
-              )}
-              {canCollapseAlbums && (
-                <Button
-                  onClick={handleShowLessAlbums}
-                  variant="outline"
-                  size="lg"
-                  className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
-                >
-                  Less...
-                </Button>
-              )}
-            </div>
-          )}
         </div>
       )}
 
