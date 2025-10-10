@@ -5,6 +5,7 @@ import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle } from "luci
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
+import { useSwipeable } from "react-swipeable";
 
 export interface MediaItem {
   id?: string;
@@ -95,6 +96,15 @@ export const MediaGalleryViewer = ({
     setCommentDialogOpen(true);
   };
 
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => goToNext(),
+    onSwipedRight: () => goToPrevious(),
+    onSwipedDown: () => onOpenChange(false),
+    trackMouse: false,
+    preventScrollOnSwipe: true,
+    delta: 50,
+  });
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (!open) return;
     if (e.key === "ArrowLeft") goToPrevious();
@@ -180,27 +190,27 @@ export const MediaGalleryViewer = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0 bg-black border-none">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-4">
+        <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-2 sm:p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {currentItem.author && (
                 <>
-                  <Avatar className="h-10 w-10 border-2 border-white/20">
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-white/20">
                     <AvatarImage src={currentItem.authorImage} alt={currentItem.author} />
                     <AvatarFallback>{currentItem.author.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="text-white">
-                    <p className="font-semibold">{currentItem.author}</p>
+                    <p className="text-sm sm:text-base font-semibold">{currentItem.author}</p>
                     {currentItem.timestamp && (
-                      <p className="text-xs text-white/70">{currentItem.timestamp}</p>
+                      <p className="text-[10px] sm:text-xs text-white/70">{currentItem.timestamp}</p>
                     )}
                   </div>
                 </>
               )}
               {!currentItem.author && (
                 <div className="text-white">
-                  <p className="font-semibold">{getGalleryTitle()}</p>
-                  <p className="text-xs text-white/70">
+                  <p className="text-sm sm:text-base font-semibold">{getGalleryTitle()}</p>
+                  <p className="text-[10px] sm:text-xs text-white/70">
                     {currentIndex + 1} of {items.length}
                   </p>
                 </div>
@@ -218,7 +228,10 @@ export const MediaGalleryViewer = ({
         </div>
 
         {/* Main Content */}
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div 
+          {...swipeHandlers}
+          className="relative w-full h-full flex items-center justify-center touch-pan-y"
+        >
           {renderMedia()}
 
           {/* Navigation Buttons */}
@@ -227,101 +240,110 @@ export const MediaGalleryViewer = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20"
                 onClick={goToPrevious}
               >
-                <ChevronLeft className="h-8 w-8" />
+                <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20"
                 onClick={goToNext}
               >
-                <ChevronRight className="h-8 w-8" />
+                <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
               </Button>
             </>
           )}
         </div>
 
         {/* Bottom Info & Actions */}
-        <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent p-6 pb-8">
+        <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent p-3 sm:p-6 pb-4 sm:pb-8">
           {currentItem.title && (
-            <div className="text-white mb-6">
-              <h3 className="text-2xl font-bold mb-1">{currentItem.title}</h3>
+            <div className="text-white mb-3 sm:mb-6">
+              <h3 className="text-base sm:text-2xl font-bold mb-0.5 sm:mb-1">{currentItem.title}</h3>
               {currentItem.description && (
-                <p className="text-sm text-white/80">{currentItem.description}</p>
+                <p className="text-xs sm:text-sm text-white/80 line-clamp-2 sm:line-clamp-none">{currentItem.description}</p>
               )}
             </div>
           )}
 
           {showActions && (
-            <div className="flex items-center justify-between gap-6">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 sm:gap-6">
+                {/* Like Button with "You Liked this" below */}
+                <div className="flex flex-col items-start gap-0.5">
                   <Button
                     variant="ghost"
-                    size="default"
+                    size="icon"
                     onClick={handleLike}
-                    className={`gap-2.5 px-4 py-3 h-auto ${
+                    className={`flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 ${
                       isLiked
                         ? "text-red-500 hover:text-red-400 hover:bg-red-500/10"
                         : "text-white hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    <Heart className={`h-7 w-7 ${isLiked ? "fill-current" : ""}`} />
-                    <span className="text-xl font-bold">{likeCount}</span>
+                    <Heart className={`h-5 w-5 sm:h-7 sm:w-7 ${isLiked ? "fill-current" : ""}`} />
+                    <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
                   </Button>
                   {isLiked && (
-                    <span className="text-lg font-medium text-red-500">
+                    <span className="text-[10px] sm:text-base font-medium text-red-500 pl-1 sm:pl-2">
                       You Liked this
                     </span>
                   )}
                 </div>
+
+                {/* Comment Button */}
                 <Button
                   variant="ghost"
-                  size="default"
+                  size="icon"
                   onClick={handleComment}
-                  className="gap-2.5 px-4 py-3 h-auto text-white hover:text-white hover:bg-white/10"
+                  className="flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 text-white hover:text-white hover:bg-white/10"
                 >
-                  <MessageCircle className="h-7 w-7" />
-                  <span className="text-xl font-bold">{currentItem.comments || 0}</span>
+                  <MessageCircle className="h-5 w-5 sm:h-7 sm:w-7" />
+                  <span className="text-sm sm:text-xl font-bold">{currentItem.comments || 0}</span>
                 </Button>
+
+                {/* Share Button */}
                 <Button
                   variant="ghost"
-                  size="default"
+                  size="icon"
                   onClick={handleShare}
-                  className="gap-2.5 px-4 py-3 h-auto text-white hover:text-white hover:bg-white/10"
+                  className="flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 text-white hover:text-white hover:bg-white/10"
                 >
-                  <Share2 className="h-7 w-7" />
-                  <span className="text-xl font-bold">Share</span>
+                  <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
+                  <span className="text-sm sm:text-xl font-bold">Share</span>
                 </Button>
               </div>
 
-              {/* Pagination Dots */}
-              {items.length > 1 && items.length <= 20 && (
-                <div className="flex gap-1.5">
-                  {items.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentIndex(index)}
-                      className={`h-2 rounded-full transition-all ${
-                        index === currentIndex
-                          ? "w-8 bg-white"
-                          : "w-2 bg-white/40 hover:bg-white/60"
-                      }`}
-                      aria-label={`Go to item ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
+              {/* Pagination - Moved to separate row on mobile */}
+              <div className="flex justify-center sm:justify-end">
+                {/* Pagination Dots */}
+                {items.length > 1 && items.length <= 20 && (
+                  <div className="flex gap-1 sm:gap-1.5">
+                    {items.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentIndex(index)}
+                        className={`h-1.5 sm:h-2 rounded-full transition-all ${
+                          index === currentIndex
+                            ? "w-6 sm:w-8 bg-white"
+                            : "w-1.5 sm:w-2 bg-white/40 hover:bg-white/60"
+                        }`}
+                        aria-label={`Go to item ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
 
-              {/* Counter for large galleries */}
-              {items.length > 20 && (
-                <div className="text-white/80 text-sm font-medium">
-                  {currentIndex + 1} / {items.length}
-                </div>
-              )}
+                {/* Counter for large galleries */}
+                {items.length > 20 && (
+                  <div className="text-white/80 text-xs sm:text-sm font-medium">
+                    {currentIndex + 1} / {items.length}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
+import { useSwipeable } from "react-swipeable";
 
 interface MediaViewerProps {
   open: boolean;
@@ -63,6 +64,12 @@ export const MediaViewer = ({
   const handleComment = () => {
     setCommentDialogOpen(true);
   };
+
+  const swipeHandlers = useSwipeable({
+    onSwipedDown: () => onOpenChange(false),
+    trackMouse: false,
+    delta: 50,
+  });
 
   const renderMedia = () => {
     if (!mediaUrl) {
@@ -165,51 +172,54 @@ export const MediaViewer = ({
         </div>
 
         {/* Main Content */}
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div 
+          {...swipeHandlers}
+          className="relative w-full h-full flex items-center justify-center"
+        >
           {renderMedia()}
         </div>
 
         {/* Bottom Actions */}
         {showActions && (
-          <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent p-6 pb-8">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
+          <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent p-3 sm:p-6 pb-4 sm:pb-8">
+            <div className="flex items-start sm:items-center gap-3 sm:gap-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                 <Button
                   variant="ghost"
-                  size="default"
+                  size="icon"
                   onClick={handleLike}
-                  className={`gap-2.5 px-4 py-3 h-auto ${
+                  className={`flex-col sm:flex-row gap-1 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 h-auto ${
                     isLiked
                       ? "text-red-500 hover:text-red-400 hover:bg-red-500/10"
                       : "text-white hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  <Heart className={`h-7 w-7 ${isLiked ? "fill-current" : ""}`} />
-                  <span className="text-xl font-bold">{likeCount}</span>
+                  <Heart className={`h-5 w-5 sm:h-7 sm:w-7 ${isLiked ? "fill-current" : ""}`} />
+                  <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
                 </Button>
                 {isLiked && (
-                  <span className="text-lg font-medium text-red-500">
+                  <span className="text-xs sm:text-lg font-medium text-red-500 pl-3 sm:pl-0">
                     You Liked this
                   </span>
                 )}
               </div>
               <Button
                 variant="ghost"
-                size="default"
+                size="icon"
                 onClick={handleComment}
-                className="gap-2.5 px-4 py-3 h-auto text-white hover:text-white hover:bg-white/10"
+                className="flex-col sm:flex-row gap-1 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 h-auto text-white hover:text-white hover:bg-white/10"
               >
-                <MessageCircle className="h-7 w-7" />
-                <span className="text-xl font-bold">{comments}</span>
+                <MessageCircle className="h-5 w-5 sm:h-7 sm:w-7" />
+                <span className="text-sm sm:text-xl font-bold">{comments}</span>
               </Button>
               <Button
                 variant="ghost"
-                size="default"
+                size="icon"
                 onClick={handleShare}
-                className="gap-2.5 px-4 py-3 h-auto text-white hover:text-white hover:bg-white/10"
+                className="flex-col sm:flex-row gap-1 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 h-auto text-white hover:text-white hover:bg-white/10"
               >
-                <Share2 className="h-7 w-7" />
-                <span className="text-xl font-bold">Share</span>
+                <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
+                <span className="text-sm sm:text-xl font-bold">Share</span>
               </Button>
             </div>
           </div>
