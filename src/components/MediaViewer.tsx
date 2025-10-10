@@ -38,11 +38,11 @@ export const MediaViewer = ({
     if (isLiked) {
       setLikeCount(likeCount - 1);
       setIsLiked(false);
-      toast({ description: "Removed from likes" });
+      toast({ description: "You Unliked this" });
     } else {
       setLikeCount(likeCount + 1);
       setIsLiked(true);
-      toast({ description: "Added to likes" });
+      toast({ description: "You Liked this" });
     }
   };
 
