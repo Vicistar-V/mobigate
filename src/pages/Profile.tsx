@@ -32,6 +32,7 @@ const Profile = () => {
   const [galleryItems, setGalleryItems] = useState<MediaItem[]>([]);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const [galleryType, setGalleryType] = useState<"wall-status" | "profile-picture" | "banner" | "post">("wall-status");
+  const [isProfileLiked, setIsProfileLiked] = useState(false);
   const { toast } = useToast();
   
   // Load profile image and history from localStorage
@@ -198,6 +199,14 @@ const Profile = () => {
     toast({
       title: "Post deleted",
       description: "Your post has been deleted successfully",
+    });
+  };
+
+  const handleProfileLike = () => {
+    setIsProfileLiked(!isProfileLiked);
+    toast({
+      title: isProfileLiked ? "Unliked" : "You Liked this",
+      description: isProfileLiked ? "You unliked this profile" : "You liked this profile",
     });
   };
 
@@ -385,10 +394,25 @@ const Profile = () => {
                   <Phone className="h-4 w-4" />
                   Call
                 </Button>
-                <Button size="sm" className="gap-2 bg-yellow-400 hover:bg-yellow-500 text-black">
-                  <Heart className="h-4 w-4" />
-                  Like
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    size="sm" 
+                    className={`gap-2 ${
+                      isProfileLiked 
+                        ? "bg-red-500 hover:bg-red-600 text-white" 
+                        : "bg-yellow-400 hover:bg-yellow-500 text-black"
+                    }`}
+                    onClick={handleProfileLike}
+                  >
+                    <Heart className={`h-4 w-4 ${isProfileLiked ? "fill-current" : ""}`} />
+                    Like
+                  </Button>
+                  {isProfileLiked && (
+                    <span className="text-sm font-medium text-red-600">
+                      You Liked this
+                    </span>
+                  )}
+                </div>
                 <Button size="sm" className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white">
                   <MessageCircle className="h-4 w-4" />
                   Chat
