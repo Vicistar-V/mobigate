@@ -11,7 +11,8 @@ import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,6 +26,7 @@ const Index = () => {
   const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
   const [galleryItems, setGalleryItems] = useState<MediaItem[]>([]);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  const [visiblePostCount, setVisiblePostCount] = useState(20);
 
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
@@ -71,6 +73,20 @@ const Index = () => {
     setGalleryInitialIndex(initialIndex >= 0 ? initialIndex : 0);
     setMediaGalleryOpen(true);
   };
+
+  const handleLoadMorePosts = () => {
+    setVisiblePostCount(prev => Math.min(prev + 20, filteredPosts.length));
+  };
+
+  const handleShowLessPosts = () => {
+    setVisiblePostCount(20);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Reset pagination when filter changes
+  useEffect(() => {
+    setVisiblePostCount(20);
+  }, [contentFilter]);
 
   // Convert wall status posts to Post format for WallStatusCarousel
   const wallStatusPostsForCarousel = wallStatusPosts.map(post => ({
@@ -297,6 +313,10 @@ const Index = () => {
   const filteredPosts = contentFilter === "all"
     ? feedPosts 
     : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
+  
+  const displayedPosts = filteredPosts.slice(0, visiblePostCount);
+  const hasMorePosts = visiblePostCount < filteredPosts.length;
+  const canCollapsePosts = visiblePostCount > 20;
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
@@ -340,11 +360,11 @@ const Index = () => {
             <div className="space-y-0">
               <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               <div className="space-y-6 mt-6">
-                {filteredPosts.map((post, index) => (
+                {displayedPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post} />
                   {/* Insert premium ad after every 4 posts */}
-                  {(index + 1) % 4 === 0 && index < filteredPosts.length - 1 && (
+                  {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
                     <div className="my-8">
                       <PremiumAdRotation
                         slotId={`feed-premium-${Math.floor((index + 1) / 4)}`}
@@ -354,7 +374,7 @@ const Index = () => {
                     </div>
                   )}
                   {/* Insert People You May Know after every 10 posts */}
-                  {(index + 1) % 10 === 0 && index < filteredPosts.length - 1 && (
+                  {(index + 1) % 10 === 0 && index < displayedPosts.length - 1 && (
                     <div className="my-6">
                       <PeopleYouMayKnow compact />
                     </div>
@@ -362,6 +382,32 @@ const Index = () => {
                 </div>
                 ))}
               </div>
+
+              {/* Pagination Controls */}
+              {(hasMorePosts || canCollapsePosts) && (
+                <div className="flex justify-center items-center gap-6 mt-8 mb-4">
+                  {hasMorePosts && (
+                    <Button
+                      onClick={handleLoadMorePosts}
+                      variant="outline"
+                      size="lg"
+                      className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
+                    >
+                      ...more
+                    </Button>
+                  )}
+                  {canCollapsePosts && (
+                    <Button
+                      onClick={handleShowLessPosts}
+                      variant="outline"
+                      size="lg"
+                      className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
+                    >
+                      Less...
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

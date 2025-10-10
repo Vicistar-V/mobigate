@@ -20,7 +20,7 @@ import { EditProfilePictureDialog } from "@/components/profile/EditProfilePictur
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useEffect, useState as useReactState } from "react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 
 const Profile = () => {
@@ -35,6 +35,7 @@ const Profile = () => {
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const [galleryType, setGalleryType] = useState<"wall-status" | "profile-picture" | "banner" | "post">("wall-status");
   const [isProfileLiked, setIsProfileLiked] = useState(false);
+  const [visiblePostCount, setVisiblePostCount] = useState(20);
   const { toast } = useToast();
   
   // Load profile image and history from localStorage
@@ -367,6 +368,24 @@ const Profile = () => {
   const filteredPosts = contentFilter === "all" 
     ? userPosts 
     : userPosts.filter(post => post.type.toLowerCase() === contentFilter);
+  
+  const displayedPosts = filteredPosts.slice(0, visiblePostCount);
+  const hasMorePosts = visiblePostCount < filteredPosts.length;
+  const canCollapsePosts = visiblePostCount > 20;
+
+  const handleLoadMorePosts = () => {
+    setVisiblePostCount(prev => Math.min(prev + 20, filteredPosts.length));
+  };
+
+  const handleShowLessPosts = () => {
+    setVisiblePostCount(20);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Reset pagination when filter changes
+  useEffect(() => {
+    setVisiblePostCount(20);
+  }, [contentFilter]);
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
@@ -556,13 +575,13 @@ const Profile = () => {
               <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               
               <div className="space-y-6 mt-6">
-                {filteredPosts.map((post, index) => (
+                {displayedPosts.map((post, index) => (
                 <div key={post.id || index}>
                   <FeedPost 
                     {...post}
                   />
                   {/* Insert premium ad after every 4 posts */}
-                  {(index + 1) % 4 === 0 && index < filteredPosts.length - 1 && (
+                  {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
                     <div className="my-8">
                       <PremiumAdRotation
                         slotId={`profile-premium-${Math.floor((index + 1) / 4)}`}
@@ -572,7 +591,7 @@ const Profile = () => {
                     </div>
                   )}
                   {/* Insert People You May Know after every 10 posts */}
-                  {(index + 1) % 10 === 0 && index < filteredPosts.length - 1 && (
+                  {(index + 1) % 10 === 0 && index < displayedPosts.length - 1 && (
                     <div className="my-6">
                       <PeopleYouMayKnow compact />
                     </div>
@@ -580,6 +599,32 @@ const Profile = () => {
                 </div>
                 ))}
               </div>
+
+              {/* Pagination Controls */}
+              {(hasMorePosts || canCollapsePosts) && (
+                <div className="flex justify-center items-center gap-6 mt-8 mb-4">
+                  {hasMorePosts && (
+                    <Button
+                      onClick={handleLoadMorePosts}
+                      variant="outline"
+                      size="lg"
+                      className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
+                    >
+                      ...more
+                    </Button>
+                  )}
+                  {canCollapsePosts && (
+                    <Button
+                      onClick={handleShowLessPosts}
+                      variant="outline"
+                      size="lg"
+                      className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl"
+                    >
+                      Less...
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </TabsContent>
 
