@@ -28,10 +28,10 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   };
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 pb-6">
       {/* Header */}
-      <div className="text-center space-y-2 pt-2">
-        <h2 className="text-xl font-bold uppercase">
+      <div className="space-y-1">
+        <h2 className="text-lg font-bold uppercase">
           {mockFriends.length} FRIENDS OF {userName}
         </h2>
         <p className="text-sm text-destructive italic">
@@ -40,68 +40,61 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
       </div>
 
       {/* Friends List */}
-      <div className="space-y-4">
-        {mockFriends.map((friend, index) => (
-          <Card key={friend.id} className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center sm:items-start space-y-2">
-                <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
-                  <AvatarImage src={friend.avatar} alt={friend.name} />
-                  <AvatarFallback>{friend.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <span className={`text-xs font-medium ${friend.isOnline ? 'text-success' : 'text-destructive'}`}>
-                  {friend.isOnline ? 'Online' : 'Offline'}
-                </span>
-              </div>
-
-              {/* Info Section */}
-              <div className="flex-1 space-y-3">
-                <h3 className="text-lg font-bold uppercase text-center sm:text-left">
-                  {friend.name}
-                </h3>
-                
-                <div className="text-center sm:text-left space-y-1">
-                  <p className="text-sm text-primary font-medium">
-                    {friend.stats.friends.toLocaleString()} Friends , {friend.stats.likes.toLocaleString()} Likes
-                  </p>
-                  <p className="text-sm text-primary/80 italic">
-                    {friend.stats.followers.toLocaleString()} Followers
-                  </p>
-                  <p className="text-sm text-primary/80 italic">
-                    {friend.stats.following.toLocaleString()} Following
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                  <Button
-                    onClick={() => handleAddFriend(friend.name)}
-                    className="flex-1 bg-primary hover:bg-primary/90"
-                    size="default"
-                  >
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Add Friend
-                  </Button>
-                  <Button
-                    onClick={() => handleViewUser(friend.id)}
-                    className="flex-1 bg-success hover:bg-success/90 text-success-foreground"
-                    size="default"
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View User
-                  </Button>
-                </div>
-              </div>
+      <Card className="divide-y">
+        {mockFriends.map((friend) => (
+          <div key={friend.id} className="p-4 flex gap-4">
+            {/* Avatar Section */}
+            <div className="flex-shrink-0 flex flex-col items-start gap-1">
+              <Avatar className="h-16 w-16 sm:h-18 sm:w-18">
+                <AvatarImage src={friend.avatar} alt={friend.name} />
+                <AvatarFallback>{friend.name.substring(0, 2)}</AvatarFallback>
+              </Avatar>
+              <span className={`text-xs font-medium ${friend.isOnline ? 'text-success' : 'text-destructive'}`}>
+                {friend.isOnline ? 'Online' : 'Offline'}
+              </span>
             </div>
 
-            {/* Divider - only show if not the last item */}
-            {index < mockFriends.length - 1 && (
-              <div className="border-t border-border mt-4" />
-            )}
-          </Card>
+            {/* Content Section */}
+            <div className="flex-1 min-w-0 space-y-2">
+              <h3 className="text-base font-bold uppercase">
+                {friend.name}
+              </h3>
+              
+              <div className="space-y-0.5">
+                <p className="text-sm text-primary font-medium">
+                  {friend.stats.friends.toLocaleString()} Friends , {friend.stats.likes.toLocaleString()} Likes
+                </p>
+                <p className="text-sm text-primary/80 italic">
+                  {friend.stats.followers.toLocaleString()} Followers
+                </p>
+                <p className="text-sm text-primary/80 italic">
+                  {friend.stats.following.toLocaleString()} Following
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <Button
+                  onClick={() => handleAddFriend(friend.name)}
+                  className="bg-primary hover:bg-primary/90"
+                  size="sm"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Add Friend
+                </Button>
+                <Button
+                  onClick={() => handleViewUser(friend.id)}
+                  className="bg-success hover:bg-success/90 text-success-foreground"
+                  size="sm"
+                >
+                  <Eye className="h-4 w-4" />
+                  View User
+                </Button>
+              </div>
+            </div>
+          </div>
         ))}
-      </div>
+      </Card>
     </div>
   );
 };

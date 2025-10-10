@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { mockFollowing } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Eye } from "lucide-react";
+import { UserPlus, UserCheck, Eye } from "lucide-react";
 import { useState } from "react";
 
 interface ProfileFollowingTabProps {
@@ -15,7 +15,7 @@ interface ProfileFollowingTabProps {
 export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
   const { toast } = useToast();
   const [followingStatus, setFollowingStatus] = useState<Map<string, boolean>>(
-    new Map(mockFollowing.map(user => [user.id, user.isFollowing]))
+    new Map(mockFollowing.map(user => [user.id, true]))
   );
 
   const handleViewUser = (userId: string) => {
@@ -25,27 +25,25 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
     });
   };
 
-  const handleFollowToggle = (userId: string, userName: string) => {
-    const currentStatus = followingStatus.get(userId) || false;
-    setFollowingStatus(prev => {
-      const newMap = new Map(prev);
-      newMap.set(userId, !currentStatus);
-      return newMap;
-    });
+  const handleFollowToggle = (userId: string, userNameToFollow: string) => {
+    const newStatus = new Map(followingStatus);
+    const isCurrentlyFollowing = newStatus.get(userId);
+    newStatus.set(userId, !isCurrentlyFollowing);
+    setFollowingStatus(newStatus);
 
     toast({
-      title: currentStatus ? "Unfollowed" : "Following",
-      description: currentStatus 
-        ? `You unfollowed ${userName}`
-        : `You are now following ${userName}`,
+      title: isCurrentlyFollowing ? "Unfollowed" : "Following",
+      description: isCurrentlyFollowing 
+        ? `You unfollowed ${userNameToFollow}`
+        : `You are now following ${userNameToFollow}`,
     });
   };
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 pb-6">
       {/* Header */}
-      <div className="text-center space-y-2 pt-2">
-        <h2 className="text-xl font-bold uppercase">
+      <div className="space-y-1">
+        <h2 className="text-lg font-bold uppercase">
           {mockFollowing.length} USER{mockFollowing.length !== 1 ? 'S' : ''} FOLLOWED BY {userName}
         </h2>
         <p className="text-sm text-destructive italic">
@@ -54,13 +52,15 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
       </div>
 
       {/* Following List */}
-      <div className="space-y-4">
-        {mockFollowing.map((user, index) => (
-          <Card key={user.id} className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
+      <Card className="divide-y">
+        {mockFollowing.map((user) => {
+          const isFollowing = followingStatus.get(user.id);
+          
+          return (
+            <div key={user.id} className="p-4 flex gap-4">
               {/* Avatar Section */}
-              <div className="flex flex-col items-center sm:items-start space-y-2">
-                <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+              <div className="flex-shrink-0 flex flex-col items-start gap-1">
+                <Avatar className="h-16 w-16 sm:h-18 sm:w-18">
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
                 </Avatar>
@@ -69,56 +69,46 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                 </span>
               </div>
 
-              {/* Info Section */}
-              <div className="flex-1 space-y-3">
-                <h3 className="text-lg font-bold uppercase text-center sm:text-left">
+              {/* Content Section */}
+              <div className="flex-1 min-w-0 space-y-2">
+                <h3 className="text-base font-bold uppercase">
                   {user.name}
                 </h3>
                 
-                <div className="text-center sm:text-left space-y-2">
-                  {user.isContentCreator && (
-                    <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
-                      Upcoming Content Creator
-                    </Badge>
-                  )}
-                </div>
+                {user.isContentCreator && (
+                  <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
+                    Upcoming Content Creator
+                  </Badge>
+                )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
                   <Button
                     onClick={() => handleFollowToggle(user.id, user.name)}
-                    className="flex-1"
                     style={{ 
-                      backgroundColor: followingStatus.get(user.id) 
-                        ? 'hsl(189, 94%, 43%)' 
-                        : 'hsl(189, 94%, 33%)',
-                      color: 'hsl(0, 0%, 100%)',
-                      opacity: followingStatus.get(user.id) ? 0.7 : 1
+                      backgroundColor: 'hsl(var(--accent))',
+                      opacity: isFollowing ? 0.7 : 1
                     }}
-                    size="default"
+                    className="text-accent-foreground hover:opacity-80"
+                    size="sm"
                   >
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    {followingStatus.get(user.id) ? 'Following' : 'Follow'}
+                    {isFollowing ? <UserCheck className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                    {isFollowing ? 'Following' : 'Follow'}
                   </Button>
                   <Button
                     onClick={() => handleViewUser(user.id)}
-                    className="flex-1 bg-success hover:bg-success/90 text-success-foreground"
-                    size="default"
+                    className="bg-success hover:bg-success/90 text-success-foreground"
+                    size="sm"
                   >
-                    <Eye className="mr-2 h-4 w-4" />
+                    <Eye className="h-4 w-4" />
                     View User
                   </Button>
                 </div>
               </div>
             </div>
-
-            {/* Divider - only show if not the last item */}
-            {index < mockFollowing.length - 1 && (
-              <div className="border-t border-border mt-4" />
-            )}
-          </Card>
-        ))}
-      </div>
+          );
+        })}
+      </Card>
     </div>
   );
 };

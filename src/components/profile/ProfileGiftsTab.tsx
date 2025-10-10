@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { mockGifts, mockReceivedGifts } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronDown, ChevronUp, Gift } from "lucide-react";
+import { ChevronDown, ChevronUp, Gift, Wallet } from "lucide-react";
 import { useState } from "react";
 import {
   Select,
@@ -24,8 +24,8 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const [walletBalance] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
 
-  const totalGifts = mockReceivedGifts.length;
-  const totalMobiValue = mockReceivedGifts.reduce((sum, gift) => sum + gift.mobiValue, 0);
+  const totalGiftsValue = mockReceivedGifts.reduce((sum, gift) => sum + gift.mobiValue, 0);
+  const totalGiftsCount = mockReceivedGifts.length;
 
   const handleSendGift = () => {
     if (!selectedGift) {
@@ -43,7 +43,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
     if (walletBalance < gift.mobiValue) {
       toast({
         title: "Insufficient Funds",
-        description: `You need ${gift.mobiValue.toLocaleString()} Mobi to send this gift`,
+        description: `You need ${gift.mobiValue} Mobi to send this gift. Your balance is ${walletBalance} Mobi.`,
         variant: "destructive",
       });
       return;
@@ -51,86 +51,70 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
     toast({
       title: "Gift Sent!",
-      description: `You sent ${gift.name} ${gift.icon} to ${userName}`,
+      description: `You sent ${gift.name} to ${userName}`,
     });
     setSelectedGift("");
   };
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 pb-6">
       {/* Header */}
-      <div className="text-center space-y-2 pt-2">
-        <h2 className="text-xl font-bold uppercase">
-          {userName} HAS RECEIVED {totalGifts} GIFT{totalGifts !== 1 ? 'S' : ''} WORTH {totalMobiValue.toLocaleString()} Mobi
+      <div className="space-y-1">
+        <h2 className="text-lg font-bold uppercase">
+          {userName} HAS RECEIVED {totalGiftsCount} GIFT{totalGiftsCount !== 1 ? 'S' : ''} WORTH {totalGiftsValue.toLocaleString()} Mobi
         </h2>
       </div>
 
       {/* Send Gift Section */}
-      <Card className="p-4 sm:p-6">
+      <Card>
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger className="w-full">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold uppercase">
-                SEND {userName.split(' ')[0]} A GIFT
-              </h3>
-              {isOpen ? (
-                <ChevronUp className="h-5 w-5" />
-              ) : (
-                <ChevronDown className="h-5 w-5" />
-              )}
-            </div>
+          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+            <h3 className="text-base font-bold uppercase">
+              SEND {userName} A GIFT
+            </h3>
+            <ChevronDown className={`h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <div className="p-4 pt-0 space-y-4">
+              {/* Wallet Balance */}
+              <div className="bg-warning/20 border border-warning p-3 rounded-md flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-warning" />
+                <span className="text-sm font-medium">WALLET BALANCE {walletBalance} Mobi</span>
+              </div>
 
-          <CollapsibleContent className="pt-6 space-y-4">
-            {/* Wallet Balance */}
-            <div 
-              className="p-4 rounded-lg text-center font-bold"
-              style={{ backgroundColor: 'hsl(48, 96%, 89%)' }}
-            >
-              <span className="text-lg">WALLET BALANCE {walletBalance.toLocaleString()} Mobi</span>
-            </div>
+              {/* Gift Selection */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Choose A Gift</label>
+                <Select value={selectedGift} onValueChange={setSelectedGift}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a gift..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockGifts.map((gift) => (
+                      <SelectItem key={gift.id} value={gift.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{gift.icon}</span>
+                          <span>{gift.name} - {gift.mobiValue} Mobi</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Gift Selector */}
-            <div className="space-y-2">
-              <Select value={selectedGift} onValueChange={setSelectedGift}>
-                <SelectTrigger className="w-full border-primary/50">
-                  <SelectValue placeholder="Choose A Gift" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockGifts.map((gift) => (
-                    <SelectItem key={gift.id} value={gift.id}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{gift.icon}</span>
-                        <span>{gift.name}</span>
-                        <span className="text-primary font-medium">
-                          ({gift.mobiValue.toLocaleString()} Mobi)
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Send Button */}
-            <div className="flex justify-center pt-2">
-              <Button
+              {/* Send Button */}
+              <Button 
                 onClick={handleSendGift}
-                className="px-8"
-                style={{ 
-                  backgroundColor: 'hsl(189, 94%, 43%)',
-                  color: 'hsl(0, 0%, 100%)'
-                }}
-                size="default"
+                style={{ backgroundColor: 'hsl(var(--accent))' }}
+                className="w-full text-accent-foreground"
               >
-                <Gift className="mr-2 h-4 w-4" />
+                <Gift className="h-4 w-4" />
                 Send Gift
               </Button>
-            </div>
 
-            {/* Status Message */}
-            <div className="text-center pt-4">
-              <p className="text-sm text-muted-foreground italic">
+              {/* Status Message */}
+              <p className="text-sm text-muted-foreground text-center">
                 You have not gifted {userName}
               </p>
             </div>
@@ -138,34 +122,19 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </Collapsible>
       </Card>
 
-      {/* Received Gifts List */}
+      {/* Received Gifts */}
       {mockReceivedGifts.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold uppercase text-center">
-            GIFTS RECEIVED
-          </h3>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <h3 className="text-base font-bold uppercase">RECEIVED GIFTS</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {mockReceivedGifts.map((gift) => (
-              <Card key={`${gift.giftId}-${gift.fromUserId}`} className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-4xl">{gift.icon}</div>
-                  <div className="flex-1 space-y-1">
-                    <h4 className="font-bold">{gift.giftName}</h4>
-                    <p className="text-sm text-primary font-medium">
-                      {gift.mobiValue.toLocaleString()} Mobi
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      From {gift.fromUserName}
-                    </p>
-                    <p className="text-xs text-muted-foreground italic">
-                      {new Date(gift.date).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
-                    </p>
-                  </div>
+              <Card key={gift.giftId} className="p-3 space-y-2">
+                <div className="text-3xl text-center">{gift.icon}</div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-center">{gift.giftName}</p>
+                  <p className="text-xs text-primary text-center">{gift.mobiValue} Mobi</p>
+                  <p className="text-xs text-muted-foreground text-center">From: {gift.fromUserName}</p>
+                  <p className="text-xs text-muted-foreground text-center">{gift.date}</p>
                 </div>
               </Card>
             ))}

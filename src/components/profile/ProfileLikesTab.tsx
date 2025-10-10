@@ -23,31 +23,29 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
     });
   };
 
-  const handleLike = (userId: string, userName: string) => {
-    if (likedUsers.has(userId)) {
-      setLikedUsers(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(userId);
-        return newSet;
-      });
+  const handleLike = (userId: string, userNameToLike: string) => {
+    const newLikedUsers = new Set(likedUsers);
+    if (newLikedUsers.has(userId)) {
+      newLikedUsers.delete(userId);
       toast({
         title: "Like Removed",
-        description: `You unliked ${userName}`,
+        description: `You unliked ${userNameToLike}`,
       });
     } else {
-      setLikedUsers(prev => new Set(prev).add(userId));
+      newLikedUsers.add(userId);
       toast({
-        title: "Like Sent",
-        description: `You liked ${userName}`,
+        title: "Liked",
+        description: `You liked ${userNameToLike}`,
       });
     }
+    setLikedUsers(newLikedUsers);
   };
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 pb-6">
       {/* Header */}
-      <div className="text-center space-y-2 pt-2">
-        <h2 className="text-xl font-bold uppercase">
+      <div className="space-y-1">
+        <h2 className="text-lg font-bold uppercase">
           LIKES RECEIVED BY {userName}
         </h2>
         <p className="text-sm text-destructive italic">
@@ -56,76 +54,65 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
       </div>
 
       {/* Likes List */}
-      <div className="space-y-4">
-        {mockLikes.map((like, index) => (
-          <Card key={like.id} className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center sm:items-start space-y-2">
-                <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
-                  <AvatarImage src={like.avatar} alt={like.name} />
-                  <AvatarFallback>{like.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <span className={`text-xs font-medium ${like.isOnline ? 'text-success' : 'text-destructive'}`}>
-                  {like.isOnline ? 'Online' : 'Offline'}
-                </span>
-              </div>
-
-              {/* Info Section */}
-              <div className="flex-1 space-y-3">
-                <h3 className="text-lg font-bold uppercase text-center sm:text-left">
-                  {like.name}
-                </h3>
-                
-                <div className="text-center sm:text-left space-y-2">
-                  <p className="text-sm text-foreground">
-                    Has given {userName.split(' ')[0]} {like.likeCount} Like{like.likeCount !== 1 ? 's' : ''}
-                  </p>
-                  
-                  {like.isContentCreator && (
-                    <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
-                      Upcoming Content Creator
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                  <Button
-                    onClick={() => handleViewProfile(like.id)}
-                    className="flex-1 bg-success hover:bg-success/90 text-success-foreground"
-                    size="default"
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Profile
-                  </Button>
-                  <Button
-                    onClick={() => handleLike(like.id, like.name)}
-                    className="flex-1 hover:opacity-90"
-                    style={{ 
-                      backgroundColor: likedUsers.has(like.id) ? 'hsl(48, 96%, 53%)' : 'hsl(48, 96%, 53%)',
-                      color: 'hsl(0, 0%, 0%)',
-                      opacity: likedUsers.has(like.id) ? 0.7 : 1
-                    }}
-                    size="default"
-                  >
-                    <Heart 
-                      className="mr-2 h-4 w-4" 
-                      fill={likedUsers.has(like.id) ? 'currentColor' : 'none'}
-                    />
-                    {likedUsers.has(like.id) ? 'Liked' : 'Like'}
-                  </Button>
-                </div>
-              </div>
+      <Card className="divide-y">
+        {mockLikes.map((like) => (
+          <div key={like.id} className="p-4 flex gap-4">
+            {/* Avatar Section */}
+            <div className="flex-shrink-0 flex flex-col items-start gap-1">
+              <Avatar className="h-16 w-16 sm:h-18 sm:w-18">
+                <AvatarImage src={like.avatar} alt={like.name} />
+                <AvatarFallback>{like.name.substring(0, 2)}</AvatarFallback>
+              </Avatar>
+              <span className={`text-xs font-medium ${like.isOnline ? 'text-success' : 'text-destructive'}`}>
+                {like.isOnline ? 'Online' : 'Offline'}
+              </span>
             </div>
 
-            {/* Divider - only show if not the last item */}
-            {index < mockLikes.length - 1 && (
-              <div className="border-t border-border mt-4" />
-            )}
-          </Card>
+            {/* Content Section */}
+            <div className="flex-1 min-w-0 space-y-2">
+              <h3 className="text-base font-bold uppercase">
+                {like.name}
+              </h3>
+              
+              <div className="space-y-1">
+                <p className="text-sm text-foreground">
+                  Has given {userName} {like.likeCount} Like{like.likeCount !== 1 ? 's' : ''}
+                </p>
+                
+                {like.isContentCreator && (
+                  <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
+                    Upcoming Content Creator
+                  </Badge>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <Button
+                  onClick={() => handleViewProfile(like.id)}
+                  className="bg-success hover:bg-success/90 text-success-foreground"
+                  size="sm"
+                >
+                  <Eye className="h-4 w-4" />
+                  View Profile
+                </Button>
+                <Button
+                  onClick={() => handleLike(like.id, like.name)}
+                  style={{ 
+                    backgroundColor: 'hsl(var(--warning))',
+                    opacity: likedUsers.has(like.id) ? 0.7 : 1
+                  }}
+                  className="text-warning-foreground hover:opacity-80"
+                  size="sm"
+                >
+                  <Heart className={`h-4 w-4 ${likedUsers.has(like.id) ? 'fill-current' : ''}`} />
+                  {likedUsers.has(like.id) ? 'Liked' : 'Like'}
+                </Button>
+              </div>
+            </div>
+          </div>
         ))}
-      </div>
+      </Card>
     </div>
   );
 };
