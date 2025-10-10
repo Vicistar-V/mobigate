@@ -76,12 +76,6 @@ export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => 
             />
             <span className="text-[11px] sm:text-xs font-medium">{comment.likes}</span>
           </Button>
-
-          {comment.isLiked && (
-            <span className="text-[10px] sm:text-xs font-medium text-red-600">
-              You Liked this
-            </span>
-          )}
         </div>
       </div>
     </div>

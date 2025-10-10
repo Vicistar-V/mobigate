@@ -177,11 +177,6 @@ export const FeedPost = ({
                   fill={isLiked ? "currentColor" : "none"}
                 />
               </button>
-              {isLiked && (
-                <span className="text-sm font-medium text-red-600">
-                  You Liked this
-                </span>
-              )}
             </div>
             {!imageUrl && (
               <Badge variant={type === "Video" ? "destructive" : "secondary"}>

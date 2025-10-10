@@ -279,7 +279,7 @@ const Profile = () => {
   const handleProfileLike = () => {
     setIsProfileLiked(!isProfileLiked);
     toast({
-      title: isProfileLiked ? "Unliked" : "You Liked this",
+      title: isProfileLiked ? "Unliked" : "Liked",
       description: isProfileLiked ? "You unliked this profile" : "You liked this profile",
     });
   };
@@ -499,11 +499,6 @@ const Profile = () => {
                     <Heart className={`h-4 w-4 ${isProfileLiked ? "fill-current" : ""}`} />
                     Like
                   </Button>
-                  {isProfileLiked && (
-                    <span className="text-sm font-medium text-red-600">
-                      You Liked this
-                    </span>
-                  )}
                 </div>
                 <Button size="sm" className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white">
                   <MessageCircle className="h-4 w-4" />

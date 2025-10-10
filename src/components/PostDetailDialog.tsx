@@ -101,11 +101,6 @@ export const PostDetailDialog = ({
                   <Heart className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`} />
                   Like ({likeCount})
                 </Button>
-                {isLiked && (
-                  <span className="text-sm font-medium text-red-600">
-                    You Liked this
-                  </span>
-                )}
               </div>
               <Button 
                 variant="outline" 

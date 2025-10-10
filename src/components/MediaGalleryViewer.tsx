@@ -73,7 +73,6 @@ export const MediaGalleryViewer = ({
     } else {
       setLikeCount(likeCount + 1);
       setIsLiked(true);
-      toast({ description: "You Liked this" });
     }
   };
 
@@ -287,11 +286,6 @@ export const MediaGalleryViewer = ({
                     <Heart className={`h-5 w-5 sm:h-7 sm:w-7 ${isLiked ? "fill-current" : ""}`} />
                     <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
                   </Button>
-                  {isLiked && (
-                    <span className="text-[10px] sm:text-base font-medium text-red-500 pl-1 sm:pl-2">
-                      You Liked this
-                    </span>
-                  )}
                 </div>
 
                 {/* Comment Button */}
