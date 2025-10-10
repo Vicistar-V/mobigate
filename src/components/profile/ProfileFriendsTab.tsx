@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { mockFriends } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Eye, Users, Heart, Loader2, Clock, Check } from "lucide-react";
+import { UserPlus, Eye, Users, Heart, Clock, Check } from "lucide-react";
 
 interface ProfileFriendsTabProps {
   userName: string;
@@ -18,24 +18,13 @@ interface FriendStatuses {
   [friendId: string]: FriendStatus;
 }
 
-interface LoadingStates {
-  [friendId: string]: boolean;
-}
-
 export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [friendStatuses, setFriendStatuses] = useState<FriendStatuses>({});
-  const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
 
-  const handleAddFriend = async (friendId: string, friendName: string) => {
-    setLoadingStates(prev => ({ ...prev, [friendId]: true }));
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+  const handleAddFriend = (friendId: string, friendName: string) => {
     setFriendStatuses(prev => ({ ...prev, [friendId]: 'pending' }));
-    setLoadingStates(prev => ({ ...prev, [friendId]: false }));
     
     toast({
       title: "Friend Request Sent",
@@ -89,7 +78,6 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
         {mockFriends.map((friend) => {
           const buttonConfig = getFriendButtonConfig(friendStatuses[friend.id]);
           const ButtonIcon = buttonConfig.icon;
-          const isLoading = loadingStates[friend.id];
           
           return (
             <div 
@@ -115,7 +103,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                     className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card transition-all ${
                       friend.isOnline 
                         ? 'bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50' 
-                        : 'bg-muted'
+                        : 'bg-destructive'
                     }`}
                     aria-label={friend.isOnline ? 'Online' : 'Offline'}
                   />
@@ -157,15 +145,11 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                 <div className="flex flex-col sm:flex-row gap-2 pt-1">
                   <Button
                     onClick={() => handleAddFriend(friend.id, friend.name)}
-                    disabled={isLoading || buttonConfig.disabled}
+                    disabled={buttonConfig.disabled}
                     className={buttonConfig.className}
                     size="sm"
                   >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <ButtonIcon className="h-4 w-4" />
-                    )}
+                    <ButtonIcon className="h-4 w-4" />
                     {buttonConfig.text}
                   </Button>
                   
