@@ -376,7 +376,7 @@ const Index = () => {
                   {/* Insert People You May Know after every 10 posts */}
                   {(index + 1) % 10 === 0 && index < displayedPosts.length - 1 && (
                     <div className="my-6">
-                      <PeopleYouMayKnow compact />
+                      <PeopleYouMayKnow />
                     </div>
                   )}
                 </div>
