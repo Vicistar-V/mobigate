@@ -123,7 +123,7 @@ export const WallStatusCarousel = ({
                 return (
                   <React.Fragment key={`${item.title}-${index}`}>
                     <Card 
-                      className="flex-shrink-0 w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                      className="flex-shrink-0 w-[45vw] sm:w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
@@ -133,15 +133,15 @@ export const WallStatusCarousel = ({
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
                         />
                       )}
-                      <Badge className="absolute top-2 left-2 z-10" variant="destructive">
+                      <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-[10px] sm:text-xs px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
                         {item.type}
                       </Badge>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                        <p className="text-white text-sm font-medium truncate">{item.author}</p>
-                        <p className="text-white/90 text-xs truncate">{item.title}</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                        <p className="text-white text-xs sm:text-sm font-medium truncate">{item.author}</p>
+                        <p className="text-white/90 text-[10px] sm:text-xs truncate">{item.title}</p>
                       </div>
 {onEdit && onDelete && (
-                          <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10" onClick={(e) => e.stopPropagation()}>
                             <PostOptionsMenu 
                               onEdit={() => onEdit(item)}
                               onDelete={() => onDelete(item.id ?? String(index))}
@@ -171,7 +171,7 @@ export const WallStatusCarousel = ({
       
       {/* Large View - 3-Column Vertical Grid with Ads */}
       {view === "large" && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {displayedItems.map((item, index) => {
             const shouldShowAd = (index + 1) % 15 === 0 && index < displayedItems.length - 1;
             const adSlotIndex = Math.floor((index + 1) / 15) - 1;
@@ -190,15 +190,15 @@ export const WallStatusCarousel = ({
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                       />
                     )}
-                    <Badge className="absolute top-2 left-2 z-10" variant="destructive">
+                    <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-[10px] sm:text-xs px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
                       {item.type}
                     </Badge>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                      <p className="text-white text-sm font-medium truncate">{item.author}</p>
-                      <p className="text-white/90 text-xs truncate">{item.title}</p>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                      <p className="text-white text-xs sm:text-sm font-medium truncate">{item.author}</p>
+                      <p className="text-white/90 text-[10px] sm:text-xs truncate">{item.title}</p>
                     </div>
 {onEdit && onDelete && (
-                     <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                     <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10" onClick={(e) => e.stopPropagation()}>
                        <PostOptionsMenu 
                          onEdit={() => onEdit(item)}
                          onDelete={() => onDelete(item.id ?? String(index))}
