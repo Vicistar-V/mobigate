@@ -255,19 +255,26 @@ export const MediaGalleryViewer = ({
           {showActions && (
             <div className="flex items-center justify-between gap-6">
               <div className="flex items-center gap-6">
-                <Button
-                  variant="ghost"
-                  size="default"
-                  onClick={handleLike}
-                  className={`gap-2.5 px-4 py-3 h-auto ${
-                    isLiked
-                      ? "text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                      : "text-white hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  <Heart className={`h-7 w-7 ${isLiked ? "fill-current" : ""}`} />
-                  <span className="text-xl font-bold">{likeCount}</span>
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="default"
+                    onClick={handleLike}
+                    className={`gap-2.5 px-4 py-3 h-auto ${
+                      isLiked
+                        ? "text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                        : "text-white hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <Heart className={`h-7 w-7 ${isLiked ? "fill-current" : ""}`} />
+                    <span className="text-xl font-bold">{likeCount}</span>
+                  </Button>
+                  {isLiked && (
+                    <span className="text-lg font-medium text-red-500">
+                      You Liked this
+                    </span>
+                  )}
+                </div>
                 <Button
                   variant="ghost"
                   size="default"

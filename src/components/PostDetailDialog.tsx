@@ -88,15 +88,22 @@ export const PostDetailDialog = ({
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLike}
-                className={isLiked ? "text-red-600 border-red-600" : ""}
-              >
-                <Heart className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`} />
-                Like ({likeCount})
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLike}
+                  className={isLiked ? "text-red-600 border-red-600" : ""}
+                >
+                  <Heart className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`} />
+                  Like ({likeCount})
+                </Button>
+                {isLiked && (
+                  <span className="text-sm font-medium text-red-600">
+                    You Liked this
+                  </span>
+                )}
+              </div>
               <Button variant="outline" size="sm">
                 <MessageSquare className="h-4 w-4 mr-1" />
                 Comment

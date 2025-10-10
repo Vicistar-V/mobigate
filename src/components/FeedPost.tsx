@@ -151,23 +151,30 @@ export const FeedPost = ({
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleLike();
-              }}
-              className={`p-2 rounded-full transition-colors ${
-                isLiked 
-                  ? "bg-red-100 text-red-600" 
-                  : "bg-muted hover:bg-muted/80"
-              }`}
-              aria-label={isLiked ? "Unlike post" : "Like post"}
-            >
-              <Heart 
-                className="h-5 w-5" 
-                fill={isLiked ? "currentColor" : "none"}
-              />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLike();
+                }}
+                className={`p-2 rounded-full transition-colors ${
+                  isLiked 
+                    ? "bg-red-100 text-red-600" 
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+                aria-label={isLiked ? "Unlike post" : "Like post"}
+              >
+                <Heart 
+                  className="h-5 w-5" 
+                  fill={isLiked ? "currentColor" : "none"}
+                />
+              </button>
+              {isLiked && (
+                <span className="text-sm font-medium text-red-600">
+                  You Liked this
+                </span>
+              )}
+            </div>
             {!imageUrl && (
               <Badge variant={type === "Video" ? "destructive" : "secondary"}>
                 {type}
