@@ -40,19 +40,19 @@ export const CommentSection = ({ postId, className = "" }: CommentSectionProps) 
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-4 sm:space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
+      <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+        <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
           Comments ({comments.length})
         </h3>
         {comments.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-1 sm:gap-2">
                 <ArrowUpDown className="h-4 w-4" />
-                {getSortLabel(sortBy)}
+                <span className="hidden sm:inline">{getSortLabel(sortBy)}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -78,11 +78,11 @@ export const CommentSection = ({ postId, className = "" }: CommentSectionProps) 
       <Separator />
 
       {/* Comments List */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {sortedComments.length === 0 ? (
           <div className="text-center py-12">
-            <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <h4 className="text-lg font-medium mb-2">No comments yet</h4>
+            <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h4 className="text-base sm:text-lg font-medium mb-2">No comments yet</h4>
             <p className="text-sm text-muted-foreground">
               Be the first to share your thoughts!
             </p>

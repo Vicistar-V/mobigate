@@ -48,8 +48,8 @@ export const CommentInput = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-3">
-        <Avatar className="h-10 w-10 flex-shrink-0">
+      <div className="flex gap-2 sm:gap-3">
+        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
           <AvatarImage src={userAvatar} alt={userName} />
           <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
         </Avatar>
@@ -59,12 +59,12 @@ export const CommentInput = ({
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="min-h-[80px] resize-none"
+            className="min-h-[60px] sm:min-h-[80px] resize-none"
             disabled={loading}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 sm:justify-between">
             <span
-              className={`text-sm ${
+              className={`text-xs sm:text-sm ${
                 isOverLimit
                   ? "text-red-600 font-semibold"
                   : remainingChars < 50
@@ -78,16 +78,16 @@ export const CommentInput = ({
               onClick={handleSubmit}
               disabled={loading || content.trim().length === 0 || isOverLimit}
               size="sm"
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {loading ? "Posting..." : "Post Comment"}
             </Button>
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground pl-[52px]">
+      <p className="text-[10px] sm:text-xs text-muted-foreground pl-0 sm:pl-[52px] hidden sm:block">
         Tip: Press Ctrl+Enter (Cmd+Enter on Mac) to submit
       </p>
     </div>

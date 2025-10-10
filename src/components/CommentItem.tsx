@@ -18,22 +18,22 @@ interface CommentItemProps {
 
 export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => {
   return (
-    <div className="flex gap-3 group animate-fade-in">
-      <Avatar className="h-10 w-10 flex-shrink-0">
+    <div className="flex gap-2 sm:gap-3 group animate-fade-in">
+      <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
         <AvatarImage src={comment.authorProfileImage} alt={comment.author} />
         <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
       </Avatar>
 
-      <div className="flex-1 space-y-1">
+      <div className="flex-1 space-y-0.5 sm:space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="font-semibold text-sm">{comment.author}</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="font-semibold text-xs sm:text-sm">{comment.author}</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground">
                 {formatCommentTime(comment.timestamp)}
               </span>
             </div>
-            <p className="text-sm mt-1 whitespace-pre-wrap break-words">
+            <p className="text-xs sm:text-sm mt-1 whitespace-pre-wrap break-words hyphens-auto">
               {comment.content}
             </p>
           </div>
@@ -44,7 +44,7 @@ export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => 
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-7 w-7 sm:h-8 sm:w-8 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
@@ -62,7 +62,7 @@ export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => 
           )}
         </div>
 
-        <div className="flex items-center gap-4 pt-1">
+        <div className="flex items-center gap-2 sm:gap-4 pt-1">
           <Button
             variant="ghost"
             size="sm"
@@ -72,13 +72,13 @@ export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => 
             }`}
           >
             <Heart
-              className={`h-4 w-4 ${comment.isLiked ? "fill-current" : ""}`}
+              className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${comment.isLiked ? "fill-current" : ""}`}
             />
-            <span className="text-xs font-medium">{comment.likes}</span>
+            <span className="text-[11px] sm:text-xs font-medium">{comment.likes}</span>
           </Button>
 
           {comment.isLiked && (
-            <span className="text-xs font-medium text-red-600">
+            <span className="text-[10px] sm:text-xs font-medium text-red-600">
               You Liked this
             </span>
           )}
