@@ -20,7 +20,7 @@ export const ProfileAlbumsTab = ({
 }: ProfileAlbumsTabProps) => {
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { isSystem?: boolean }) | null>(null);
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
-  const [visibleAlbumCount, setVisibleAlbumCount] = useState(8);
+  const [visibleAlbumCount, setVisibleAlbumCount] = useState(4);
 
   // Create system albums
   const profilePicturesAlbum: Album & { isSystem: boolean } = useMemo(
@@ -131,14 +131,14 @@ export const ProfileAlbumsTab = ({
   // Pagination logic for albums
   const displayedAlbums = allAlbums.slice(0, visibleAlbumCount);
   const hasMoreAlbums = visibleAlbumCount < allAlbums.length;
-  const canCollapseAlbums = visibleAlbumCount > 8;
+  const canCollapseAlbums = visibleAlbumCount > 4;
 
   const handleLoadMoreAlbums = () => {
-    setVisibleAlbumCount(prev => Math.min(prev + 8, allAlbums.length));
+    setVisibleAlbumCount(prev => Math.min(prev + 4, allAlbums.length));
   };
 
   const handleShowLessAlbums = () => {
-    setVisibleAlbumCount(8);
+    setVisibleAlbumCount(4);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
