@@ -26,7 +26,6 @@ export const GreetingSection = () => {
     { label: "Mobi-Store", href: "#" },
     { label: "Mobi-Circle", href: "#" },
     { label: "Community", href: "#" },
-    { label: "Comment", href: "#comments" },
     { label: "Biz-Catalogue", href: "#" },
     { label: "E-Library", href: "#" },
     { label: "Adverts Log", href: "#" },
