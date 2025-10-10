@@ -64,34 +64,82 @@ export const PeopleYouMayKnow = ({ compact = false }: PeopleYouMayKnowProps) => 
 
   if (compact) {
     return (
-      <Card className="p-4 hover:shadow-md transition-shadow">
-        <h3 className="font-semibold text-sm mb-3">People you may know</h3>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-          {suggestedUsers.slice(0, 4).map((user) => (
-            <div key={user.id} className="flex-shrink-0 w-[120px] space-y-2">
-              <Link to={`/profile/${user.id}`} className="block">
-                <Avatar className="h-20 w-full aspect-[3/4] rounded-lg border-2 border-primary/20 hover:border-primary/40 transition-colors">
-                  <AvatarImage src={user.profileImage} alt={user.name} className="object-cover" />
-                  <AvatarFallback className="rounded-lg">{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-              </Link>
-              <div className="text-center">
-                <Link 
-                  to={`/profile/${user.id}`}
-                  className="font-medium text-xs hover:text-primary transition-colors line-clamp-2"
-                >
-                  {user.name}
+      <>
+        <Card className="p-4 hover:shadow-md transition-shadow">
+          <h3 className="font-semibold text-sm mb-3">People you may know</h3>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+            {suggestedUsers.slice(0, 4).map((user) => (
+              <div key={user.id} className="flex-shrink-0 w-[120px] space-y-2">
+                <Link to={`/profile/${user.id}`} className="block">
+                  <Avatar className="h-20 w-full aspect-[3/4] rounded-lg border-2 border-primary/20 hover:border-primary/40 transition-colors">
+                    <AvatarImage src={user.profileImage} alt={user.name} className="object-cover" />
+                    <AvatarFallback className="rounded-lg">{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
                 </Link>
-                {user.mutualFriends && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    {user.mutualFriends} mutual
-                  </p>
-                )}
+                <div className="text-center">
+                  <Link 
+                    to={`/profile/${user.id}`}
+                    className="font-medium text-xs hover:text-primary transition-colors line-clamp-2"
+                  >
+                    {user.name}
+                  </Link>
+                  {user.mutualFriends && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {user.mutualFriends} mutual
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Button 
+                    size="sm" 
+                    className="w-full h-7 text-[10px]"
+                    variant={friendRequestStatus[user.id] ? "secondary" : "default"}
+                    onClick={() => handleAddFriend(user.id, user.name)}
+                    disabled={friendRequestStatus[user.id]}
+                  >
+                    {friendRequestStatus[user.id] ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        Sent
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-3 w-3 mr-1" />
+                        Add Friend
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="w-full h-7 text-[10px]"
+                    variant={addedToCircleStatus[user.id] ? "secondary" : "outline"}
+                    onClick={() => handleAddToCircle(user.id, user.name)}
+                    disabled={addedToCircleStatus[user.id]}
+                  >
+                    {addedToCircleStatus[user.id] ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1" />
+                        Added
+                      </>
+                    ) : (
+                      <>
+                        <Users className="h-3 w-3 mr-1" />
+                        Add to Circle
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+        <AddToCircleDialog
+          open={circleDialogOpen}
+          onOpenChange={setCircleDialogOpen}
+          userName={selectedUser?.name || ""}
+          onComplete={() => selectedUser && handleCircleComplete(selectedUser.id)}
+        />
+      </>
     );
   }
 
