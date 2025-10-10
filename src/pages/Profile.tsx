@@ -636,6 +636,15 @@ const Profile = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="albums" className="space-y-6">
+            <ProfileAlbumsTab
+              userId="1"
+              profileImageHistory={profileImageHistory}
+              bannerImageHistory={bannerImageHistory}
+              userPosts={userPosts}
+            />
+          </TabsContent>
+
           <TabsContent value="contents">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Contents</h2>

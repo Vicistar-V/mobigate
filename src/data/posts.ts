@@ -117,7 +117,9 @@ export const feedPosts: Post[] = [
     likes: "584",
     type: "Video",
     imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80",
-    isOwner: true
+    isOwner: true,
+    albumId: "alb_2",
+    albumName: "Family Moments"
   },
   {
     id: "post_2",
@@ -162,7 +164,9 @@ export const feedPosts: Post[] = [
     likes: "1.9k",
     type: "Video",
     imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80",
-    isOwner: true
+    isOwner: true,
+    albumId: "alb_2",
+    albumName: "Family Moments"
   },
   {
     id: "post_5",
@@ -220,7 +224,9 @@ export const feedPosts: Post[] = [
     comments: "567",
     likes: "1.8k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+    albumId: "alb_3",
+    albumName: "Work Projects"
   },
   {
     id: "post_9",
@@ -739,7 +745,9 @@ export const feedPosts: Post[] = [
     comments: "678",
     likes: "3.2k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
+    albumId: "alb_7",
+    albumName: "Fitness Journey"
   },
   {
     title: "AFRICAN ART PHOTOGRAPHY",
@@ -752,7 +760,9 @@ export const feedPosts: Post[] = [
     comments: "432",
     likes: "1.9k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=800&q=80",
+    albumId: "alb_8",
+    albumName: "Art & Creativity"
   },
   {
     title: "SELF-CARE ROUTINE GUIDE",
@@ -817,7 +827,9 @@ export const feedPosts: Post[] = [
     comments: "1.5k",
     likes: "6.2k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1580837119756-563d608dd119?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1580837119756-563d608dd119?w=800&q=80",
+    albumId: "alb_1",
+    albumName: "Travel Adventures"
   },
   {
     title: "BEACH VACATION PHOTOS",
@@ -830,7 +842,9 @@ export const feedPosts: Post[] = [
     comments: "876",
     likes: "4.7k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80",
+    albumId: "alb_1",
+    albumName: "Travel Adventures"
   },
   {
     title: "OVERCOMING CHALLENGES AS A WOMAN",
@@ -895,7 +909,9 @@ export const feedPosts: Post[] = [
     comments: "1.6k",
     likes: "7.3k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=800&q=80",
+    albumId: "alb_8",
+    albumName: "Art & Creativity"
   },
   {
     title: "INTERIOR DESIGN INSPIRATION",
@@ -908,7 +924,9 @@ export const feedPosts: Post[] = [
     comments: "789",
     likes: "4.2k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80",
+    albumId: "alb_8",
+    albumName: "Art & Creativity"
   },
   {
     title: "BUILDING CONFIDENCE IN BUSINESS",
@@ -973,7 +991,9 @@ export const feedPosts: Post[] = [
     comments: "1.7k",
     likes: "7.1k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
+    albumId: "alb_7",
+    albumName: "Fitness Journey"
   },
   {
     title: "PORTRAIT PHOTOGRAPHY COLLECTION",
@@ -986,7 +1006,9 @@ export const feedPosts: Post[] = [
     comments: "654",
     likes: "3.8k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&q=80",
+    albumId: "alb_2",
+    albumName: "Family Moments"
   },
   {
     title: "TIME MANAGEMENT FOR BUSY WOMEN",
@@ -1078,7 +1100,9 @@ export const feedPosts: Post[] = [
     likes: "3.5k",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
-    isOwner: true
+    isOwner: true,
+    albumId: "alb_1",
+    albumName: "Travel Adventures"
   },
   {
     title: "HEALTHY EATING HABITS FOR BUSY PROFESSIONALS",
@@ -1104,7 +1128,9 @@ export const feedPosts: Post[] = [
     comments: "1.6k",
     likes: "6.8k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80",
+    albumId: "alb_3",
+    albumName: "Work Projects"
   },
   {
     title: "PORTRAIT PHOTOGRAPHY MASTERCLASS",
@@ -1117,7 +1143,9 @@ export const feedPosts: Post[] = [
     comments: "1.1k",
     likes: "5.4k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&q=80",
+    albumId: "alb_8",
+    albumName: "Art & Creativity"
   },
   {
     title: "LEARN GRAPHIC DESIGN - COMPLETE COURSE",
@@ -1169,7 +1197,9 @@ export const feedPosts: Post[] = [
     comments: "634",
     likes: "3.7k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1577083165633-14ebcdb0f658?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1577083165633-14ebcdb0f658?w=800&q=80",
+    albumId: "alb_8",
+    albumName: "Art & Creativity"
   },
   {
     title: "NIGERIAN STREET FOOD GUIDE",
