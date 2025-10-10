@@ -22,6 +22,7 @@ import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState as useReactState } from "react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+import { ProfileAlbumsTab } from "@/components/profile/ProfileAlbumsTab";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
@@ -531,6 +532,7 @@ const Profile = () => {
               <TabsTrigger value="status">Status</TabsTrigger>
               <TabsTrigger value="about">About</TabsTrigger>
               <TabsTrigger value="friends">Friends</TabsTrigger>
+              <TabsTrigger value="albums">Albums</TabsTrigger>
               <TabsTrigger value="contents">Contents</TabsTrigger>
               <TabsTrigger value="gifts">Gifts</TabsTrigger>
               <TabsTrigger value="likes">Likes</TabsTrigger>

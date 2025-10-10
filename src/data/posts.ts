@@ -131,7 +131,9 @@ export const feedPosts: Post[] = [
     comments: "189",
     likes: "923",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    albumId: "alb_1",
+    albumName: "Travel Adventures"
   },
   {
     id: "post_3",
@@ -174,7 +176,9 @@ export const feedPosts: Post[] = [
     comments: "456",
     likes: "2.1k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80",
+    albumId: "alb_4",
+    albumName: "Food & Recipes"
   },
   {
     id: "post_6",
@@ -230,7 +234,9 @@ export const feedPosts: Post[] = [
     comments: "298",
     likes: "1.4k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80",
+    albumId: "alb_8",
+    albumName: "Art & Creativity"
   },
   {
     id: "post_10",
@@ -259,7 +265,9 @@ export const feedPosts: Post[] = [
     likes: "892",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-    isOwner: true
+    isOwner: true,
+    albumId: "alb_5",
+    albumName: "Nature & Wildlife"
   },
   {
     id: "post_12",
@@ -289,7 +297,9 @@ export const feedPosts: Post[] = [
     likes: "1.5k",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80",
-    isOwner: true
+    isOwner: true,
+    albumId: "alb_8",
+    albumName: "Art & Creativity"
   },
   {
     id: "post_14",
@@ -319,7 +329,9 @@ export const feedPosts: Post[] = [
     likes: "1.2k",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80",
-    isOwner: true
+    isOwner: true,
+    albumId: "alb_4",
+    albumName: "Food & Recipes"
   },
   {
     id: "post_16",
@@ -428,7 +440,9 @@ export const feedPosts: Post[] = [
     comments: "876",
     likes: "4.1k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
+    albumId: "alb_5",
+    albumName: "Nature & Wildlife"
   },
   {
     title: "URBAN ARCHITECTURE PHOTOGRAPHY",
@@ -441,7 +455,9 @@ export const feedPosts: Post[] = [
     comments: "423",
     likes: "2.5k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&q=80",
+    albumId: "alb_3",
+    albumName: "Work Projects"
   },
   {
     title: "THE FUTURE OF ARTIFICIAL INTELLIGENCE",
@@ -558,7 +574,9 @@ export const feedPosts: Post[] = [
     comments: "1.2k",
     likes: "4.7k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+    albumId: "alb_7",
+    albumName: "Fitness Journey"
   },
   {
     title: "COOKING WITH AFRICAN SPICES",
@@ -571,7 +589,9 @@ export const feedPosts: Post[] = [
     comments: "945",
     likes: "3.9k",
     type: "Video",
-    imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+    albumId: "alb_4",
+    albumName: "Food & Recipes"
   },
   {
     title: "STREET PHOTOGRAPHY COLLECTION",
@@ -585,7 +605,9 @@ export const feedPosts: Post[] = [
     likes: "3.2k",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1519821172144-4f87d85de2a1?w=800&q=80",
-    isOwner: true
+    isOwner: true,
+    albumId: "alb_1",
+    albumName: "Travel Adventures"
   },
   {
     title: "NATURE LANDSCAPE PHOTOGRAPHY",
@@ -598,7 +620,9 @@ export const feedPosts: Post[] = [
     comments: "823",
     likes: "4.5k",
     type: "Photo",
-    imageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
+    albumId: "alb_5",
+    albumName: "Nature & Wildlife"
   },
   {
     title: "ENTREPRENEURSHIP IN AFRICA",
