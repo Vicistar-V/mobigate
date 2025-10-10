@@ -23,6 +23,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState as useReactState } from "react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { ProfileAlbumsTab } from "@/components/profile/ProfileAlbumsTab";
+import { ProfileFriendsTab } from "@/components/profile/ProfileFriendsTab";
+import { ProfileLikesTab } from "@/components/profile/ProfileLikesTab";
+import { ProfileGiftsTab } from "@/components/profile/ProfileGiftsTab";
+import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
+import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
 
 const Profile = () => {
   const [contentFilter, setContentFilter] = useState<string>("all");
@@ -630,10 +635,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="friends">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Friends</h2>
-              <p className="text-muted-foreground">Friends list will be displayed here.</p>
-            </Card>
+            <ProfileFriendsTab userName={userProfile.name} userId="1" />
           </TabsContent>
 
           <TabsContent value="albums" className="space-y-6">
@@ -653,31 +655,19 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="gifts">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Gifts</h2>
-              <p className="text-muted-foreground">Gifts received will be displayed here.</p>
-            </Card>
+            <ProfileGiftsTab userName={userProfile.name} userId="1" />
           </TabsContent>
 
           <TabsContent value="likes">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Likes</h2>
-              <p className="text-muted-foreground">Liked posts will be displayed here.</p>
-            </Card>
+            <ProfileLikesTab userName={userProfile.name} userId="1" />
           </TabsContent>
 
           <TabsContent value="followers">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Followers</h2>
-              <p className="text-muted-foreground">Followers list will be displayed here.</p>
-            </Card>
+            <ProfileFollowersTab userName={userProfile.name} userId="1" />
           </TabsContent>
 
           <TabsContent value="following">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Following</h2>
-              <p className="text-muted-foreground">Following list will be displayed here.</p>
-            </Card>
+            <ProfileFollowingTab userName={userProfile.name} userId="1" />
           </TabsContent>
 
           <TabsContent value="community">
