@@ -18,6 +18,8 @@ interface ContactInfo {
   phone1: string;
   phone2?: string;
   email: string;
+  privacy?: string;
+  exceptions?: string[];
 }
 
 interface EditContactFormProps {
@@ -27,7 +29,8 @@ interface EditContactFormProps {
 }
 
 export const EditContactForm = ({ currentData, onSave, onClose }: EditContactFormProps) => {
-  const [privacy, setPrivacy] = useState("public");
+  const [privacy, setPrivacy] = useState(currentData.privacy || "public");
+  const [exceptions, setExceptions] = useState<string[]>(currentData.exceptions || []);
   
   const form = useForm<ContactInfo>({
     resolver: zodResolver(formSchema),
@@ -35,7 +38,7 @@ export const EditContactForm = ({ currentData, onSave, onClose }: EditContactFor
   });
 
   const onSubmit = (data: ContactInfo) => {
-    onSave(data);
+    onSave({ ...data, privacy, exceptions });
     toast.success("Contact information updated successfully");
     onClose();
   };
@@ -83,9 +86,14 @@ export const EditContactForm = ({ currentData, onSave, onClose }: EditContactFor
           )}
         />
         <div>
-          <FormLabel>Privacy</FormLabel>
+          <FormLabel>Who Can See This Information</FormLabel>
           <div className="mt-2">
-            <PrivacySelector value={privacy} onChange={setPrivacy} />
+            <PrivacySelector 
+              value={privacy} 
+              onChange={setPrivacy}
+              exceptions={exceptions}
+              onExceptionsChange={setExceptions}
+            />
           </div>
         </div>
         <div className="flex justify-end gap-2 pt-4">

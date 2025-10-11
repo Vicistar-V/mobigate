@@ -32,6 +32,8 @@ interface Education {
   period: string;
   extraSkills?: string;
   logo?: string;
+  privacy?: string;
+  exceptions?: string[];
 }
 
 interface EditEducationFormProps {
@@ -45,6 +47,7 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [exceptions, setExceptions] = useState<string[]>([]);
   const [logo, setLogo] = useState<string | undefined>();
 
   const form = useForm({
@@ -56,12 +59,16 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
     setIsAdding(true);
     form.reset({ school: "", faculty: "", department: "", period: "", extraSkills: "" });
     setLogo(undefined);
+    setPrivacy("public");
+    setExceptions([]);
   };
 
   const handleEdit = (edu: Education) => {
     setEditingId(edu.id);
     form.reset(edu);
     setLogo(edu.logo);
+    setPrivacy(edu.privacy || "public");
+    setExceptions(edu.exceptions || []);
   };
 
   const handleDelete = (id: string) => {
@@ -77,6 +84,8 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
         period: data.period, 
         extraSkills: data.extraSkills,
         logo,
+        privacy,
+        exceptions,
         id: Date.now().toString() 
       };
       setEducation([...education, newEducation]);
@@ -89,12 +98,16 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
         period: data.period, 
         extraSkills: data.extraSkills,
         logo,
+        privacy,
+        exceptions,
         id: editingId 
       } : edu));
       setEditingId(null);
     }
     form.reset({ school: "", faculty: "", department: "", period: "", extraSkills: "" });
     setLogo(undefined);
+    setPrivacy("public");
+    setExceptions([]);
   };
 
   const handleSave = () => {
@@ -216,9 +229,14 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
               )}
             />
             <div>
-              <FormLabel>Privacy</FormLabel>
+              <FormLabel>Who Can See This</FormLabel>
               <div className="mt-2">
-                <PrivacySelector value={privacy} onChange={setPrivacy} />
+                <PrivacySelector 
+                  value={privacy} 
+                  onChange={setPrivacy}
+                  exceptions={exceptions}
+                  onExceptionsChange={setExceptions}
+                />
               </div>
             </div>
             <div className="flex gap-2">

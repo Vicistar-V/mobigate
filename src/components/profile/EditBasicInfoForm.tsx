@@ -13,12 +13,16 @@ const formSchema = z.object({
   gender: z.string().min(1, "Gender is required"),
   birthday: z.string().min(1, "Birthday is required"),
   languages: z.string().min(1, "Languages are required"),
+  birthdayPrivacy: z.enum(["full", "partial", "hidden"]),
 });
 
 interface BasicInfo {
   gender: string;
   birthday: string;
   languages: string;
+  birthdayPrivacy?: "full" | "partial" | "hidden";
+  privacy?: string;
+  exceptions?: string[];
 }
 
 interface EditBasicInfoFormProps {
@@ -28,15 +32,19 @@ interface EditBasicInfoFormProps {
 }
 
 export const EditBasicInfoForm = ({ currentData, onSave, onClose }: EditBasicInfoFormProps) => {
-  const [privacy, setPrivacy] = useState("public");
+  const [privacy, setPrivacy] = useState(currentData.privacy || "public");
+  const [exceptions, setExceptions] = useState<string[]>(currentData.exceptions || []);
   
   const form = useForm<BasicInfo>({
     resolver: zodResolver(formSchema),
-    defaultValues: currentData,
+    defaultValues: {
+      ...currentData,
+      birthdayPrivacy: currentData.birthdayPrivacy || "full",
+    },
   });
 
   const onSubmit = (data: BasicInfo) => {
-    onSave(data);
+    onSave({ ...data, privacy, exceptions });
     toast.success("Basic information updated successfully");
     onClose();
   };
@@ -81,6 +89,28 @@ export const EditBasicInfoForm = ({ currentData, onSave, onClose }: EditBasicInf
         />
         <FormField
           control={form.control}
+          name="birthdayPrivacy"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Birthday Display</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select display option" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="z-50 bg-background">
+                  <SelectItem value="full">Show Full Date (Day/Month/Year)</SelectItem>
+                  <SelectItem value="partial">Show Only Day & Month (Hide Year)</SelectItem>
+                  <SelectItem value="hidden">Hide Birthday</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="languages"
           render={({ field }) => (
             <FormItem>
@@ -93,9 +123,14 @@ export const EditBasicInfoForm = ({ currentData, onSave, onClose }: EditBasicInf
           )}
         />
         <div>
-          <FormLabel>Privacy</FormLabel>
+          <FormLabel>Who Can See This Information</FormLabel>
           <div className="mt-2">
-            <PrivacySelector value={privacy} onChange={setPrivacy} />
+            <PrivacySelector 
+              value={privacy} 
+              onChange={setPrivacy}
+              exceptions={exceptions}
+              onExceptionsChange={setExceptions}
+            />
           </div>
         </div>
         <div className="flex justify-end gap-2 pt-4">

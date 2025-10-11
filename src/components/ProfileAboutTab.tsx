@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { format, parse } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -24,6 +25,8 @@ import { EditLoveFriendshipForm, LoveFriendship } from "./profile/EditLoveFriend
 import { EditExtraSourceForm } from "./profile/EditExtraSourceForm";
 import { EditSocialCommunityForm, SocialCommunity } from "./profile/EditSocialCommunityForm";
 import { MateDetailDialog } from "./profile/MateDetailDialog";
+import { PrivacyBadge } from "./profile/PrivacyBadge";
+import { PrivacyLevel } from "@/types/privacy";
 
 interface ProfileAboutTabProps {
   userName: string;
@@ -43,6 +46,8 @@ interface Education {
   department?: string;
   period: string;
   extraSkills?: string;
+  privacy?: string;
+  exceptions?: string[];
 }
 
 interface Work {
@@ -56,6 +61,21 @@ interface BasicInfo {
   gender: string;
   birthday: string;
   languages: string;
+  birthdayPrivacy?: "full" | "partial" | "hidden";
+  privacy?: string;
+  exceptions?: string[];
+}
+
+interface RelationshipInfo {
+  status: string;
+  privacy?: string;
+  exceptions?: string[];
+}
+
+interface AboutInfo {
+  text: string;
+  privacy?: string;
+  exceptions?: string[];
 }
 
 interface FamilyMember {
@@ -68,6 +88,8 @@ interface ContactInfo {
   phone1: string;
   phone2?: string;
   email: string;
+  privacy?: string;
+  exceptions?: string[];
 }
 
 export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
@@ -152,11 +174,17 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       gender: "Female",
       birthday: "1976-09-20",
       languages: "English, French and Igbo",
+      birthdayPrivacy: "full",
+      privacy: "public",
     })
   );
-  const [relationship, setRelationship] = useState<string>(() => 
-    loadFromStorage("profile_relationship", "Married")
-  );
+  const [relationship, setRelationship] = useState<RelationshipInfo>(() => {
+    const stored = loadFromStorage<RelationshipInfo | string>("profile_relationship", "Married");
+    if (typeof stored === 'string') {
+      return { status: stored, privacy: "public", exceptions: [] };
+    }
+    return stored;
+  });
   const [family, setFamily] = useState<FamilyMember[]>(() => 
     loadFromStorage("profile_family", [
       { id: "1", name: "Emeka Anigbogu", relation: "Brother" },
@@ -171,11 +199,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       email: "kemjikng@yahoo.com",
     })
   );
-  const [about, setAbout] = useState<string>(() => 
-    loadFromStorage("profile_about", 
+  const [about, setAbout] = useState<AboutInfo>(() => {
+    const stored = loadFromStorage<AboutInfo | string>("profile_about", 
       "I'm a Lawyer, Media Professional and Schola, with unique passion and experince in real estates, property development and management.\n\nI work with BeamColumn PCC Limited as Legal Adviser on Property Investments and Corporate Law; and also Senior Negotiator and Evaluator, etc."
-    )
-  );
+    );
+    if (typeof stored === 'string') {
+      return { text: stored, privacy: "public", exceptions: [] };
+    }
+    return stored;
+  });
   const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => 
     loadFromStorage<SchoolMate[]>("profile_schoolMates", [
       {
@@ -398,6 +430,21 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
     localStorage.setItem("profile_socialCommunities", JSON.stringify(socialCommunities));
   }, [socialCommunities]);
 
+  // Helper function to format birthday based on privacy setting
+  const formatBirthday = (birthday: string, birthdayPrivacy: "full" | "partial" | "hidden" = "full") => {
+    if (birthdayPrivacy === "hidden") return null;
+    
+    try {
+      const date = parse(birthday, "yyyy-MM-dd", new Date());
+      if (birthdayPrivacy === "partial") {
+        return format(date, "MMMM d"); // e.g., "September 20"
+      }
+      return format(date, "MMMM d, yyyy"); // e.g., "September 20, 1976"
+    } catch {
+      return birthday;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* User Category */}
@@ -474,8 +521,16 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           {education.map((edu, index) => (
             <div key={edu.id}>
               {index > 0 && <Separator className="mb-4" />}
-              <div>
-                <p className="font-medium">{edu.school}</p>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium">{edu.school}</p>
+                  {edu.privacy && (
+                    <PrivacyBadge 
+                      level={edu.privacy as PrivacyLevel} 
+                      exceptionsCount={edu.exceptions?.length}
+                    />
+                  )}
+                </div>
                 {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
                 {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
                 <p className="text-sm text-muted-foreground">{edu.period}</p>
@@ -812,6 +867,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <div className="flex items-center gap-3">
             <Heart className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">Relationship</h3>
+            {relationship.privacy && (
+              <PrivacyBadge 
+                level={relationship.privacy as PrivacyLevel} 
+                exceptionsCount={relationship.exceptions?.length}
+              />
+            )}
           </div>
           <Button 
             variant="ghost" 
@@ -823,7 +884,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           </Button>
         </div>
         <div>
-          <p className="font-medium">{relationship}</p>
+          <p className="font-medium">{relationship.status}</p>
           <p className="text-sm text-muted-foreground">Status</p>
         </div>
       </Card>
@@ -983,6 +1044,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <div className="flex items-center gap-3">
             <Phone className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">Contact Information</h3>
+            {contact.privacy && (
+              <PrivacyBadge 
+                level={contact.privacy as PrivacyLevel} 
+                exceptionsCount={contact.exceptions?.length}
+              />
+            )}
           </div>
           <Button 
             variant="ghost" 
@@ -1017,6 +1084,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <div className="flex items-center gap-3">
             <User className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">About</h3>
+            {about.privacy && (
+              <PrivacyBadge 
+                level={about.privacy as PrivacyLevel} 
+                exceptionsCount={about.exceptions?.length}
+              />
+            )}
           </div>
           <Button 
             variant="ghost" 
@@ -1028,7 +1101,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           </Button>
         </div>
         <div className="prose prose-sm max-w-none">
-          {about.split('\n\n').map((paragraph, index) => (
+          {about.text.split('\n\n').map((paragraph, index) => (
             <p key={index} className="text-foreground leading-relaxed mt-3 first:mt-0">
               {paragraph}
             </p>

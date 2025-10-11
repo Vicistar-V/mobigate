@@ -12,24 +12,35 @@ const formSchema = z.object({
   about: z.string().min(10, "About must be at least 10 characters").max(1000, "About must be less than 1000 characters"),
 });
 
+interface AboutInfo {
+  text: string;
+  privacy?: string;
+  exceptions?: string[];
+}
+
 interface EditAboutFormProps {
-  currentData: string;
-  onSave: (data: string) => void;
+  currentData: AboutInfo | string;
+  onSave: (data: AboutInfo) => void;
   onClose: () => void;
 }
 
 export const EditAboutForm = ({ currentData, onSave, onClose }: EditAboutFormProps) => {
-  const [privacy, setPrivacy] = useState("public");
+  const aboutData = typeof currentData === 'string' 
+    ? { text: currentData, privacy: 'public', exceptions: [] }
+    : currentData;
+    
+  const [privacy, setPrivacy] = useState(aboutData.privacy || "public");
+  const [exceptions, setExceptions] = useState<string[]>(aboutData.exceptions || []);
   
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { about: currentData },
+    defaultValues: { about: aboutData.text },
   });
 
   const aboutValue = form.watch("about");
 
   const onSubmit = (data: { about: string }) => {
-    onSave(data.about);
+    onSave({ text: data.about, privacy, exceptions });
     toast.success("About section updated successfully");
     onClose();
   };
@@ -60,9 +71,14 @@ export const EditAboutForm = ({ currentData, onSave, onClose }: EditAboutFormPro
           )}
         />
         <div>
-          <FormLabel>Privacy</FormLabel>
+          <FormLabel>Who Can See This</FormLabel>
           <div className="mt-2">
-            <PrivacySelector value={privacy} onChange={setPrivacy} />
+            <PrivacySelector 
+              value={privacy} 
+              onChange={setPrivacy}
+              exceptions={exceptions}
+              onExceptionsChange={setExceptions}
+            />
           </div>
         </div>
         <div className="flex justify-end gap-2 pt-4">

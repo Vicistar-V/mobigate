@@ -12,22 +12,33 @@ const formSchema = z.object({
   status: z.string().min(1, "Relationship status is required"),
 });
 
+interface RelationshipInfo {
+  status: string;
+  privacy?: string;
+  exceptions?: string[];
+}
+
 interface EditRelationshipFormProps {
-  currentData: string;
-  onSave: (data: string) => void;
+  currentData: RelationshipInfo | string;
+  onSave: (data: RelationshipInfo) => void;
   onClose: () => void;
 }
 
 export const EditRelationshipForm = ({ currentData, onSave, onClose }: EditRelationshipFormProps) => {
-  const [privacy, setPrivacy] = useState("public");
+  const relationshipData = typeof currentData === 'string' 
+    ? { status: currentData, privacy: 'public', exceptions: [] }
+    : currentData;
+    
+  const [privacy, setPrivacy] = useState(relationshipData.privacy || "public");
+  const [exceptions, setExceptions] = useState<string[]>(relationshipData.exceptions || []);
   
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { status: currentData },
+    defaultValues: { status: relationshipData.status },
   });
 
   const onSubmit = (data: { status: string }) => {
-    onSave(data.status);
+    onSave({ status: data.status, privacy, exceptions });
     toast.success("Relationship status updated successfully");
     onClose();
   };
@@ -66,9 +77,14 @@ export const EditRelationshipForm = ({ currentData, onSave, onClose }: EditRelat
           )}
         />
         <div>
-          <FormLabel>Privacy</FormLabel>
+          <FormLabel>Who Can See This</FormLabel>
           <div className="mt-2">
-            <PrivacySelector value={privacy} onChange={setPrivacy} />
+            <PrivacySelector 
+              value={privacy} 
+              onChange={setPrivacy}
+              exceptions={exceptions}
+              onExceptionsChange={setExceptions}
+            />
           </div>
         </div>
         <div className="flex justify-end gap-2 pt-4">
