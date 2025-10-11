@@ -287,3 +287,64 @@ export const albumVideosAdSlots: PremiumAdCardProps[][] = [
     },
   ],
 ];
+
+// Albums Carousel Ad Pool
+export const albumsCarouselAdSlots: PremiumAdCardProps[][] = [
+  [
+    {
+      id: "albums-carousel-ad-1",
+      advertiser: { name: "PhotoCloud Pro", verified: true, logo: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=100&q=80" },
+      content: {
+        headline: "Organize Your Memories",
+        description: "Smart albums that auto-organize your photos by date, location, and people.",
+        ctaText: "Try Free",
+        ctaUrl: "https://example.com/photocloud",
+      },
+      media: {
+        type: "carousel",
+        items: [
+          { url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80", caption: "Auto Organization" },
+          { url: "https://images.unsplash.com/photo-1516542076529-1ea3854896f2?w=800&q=80", caption: "Smart Albums" },
+        ],
+      },
+      layout: "standard",
+      duration: 15,
+    },
+  ],
+  [
+    {
+      id: "albums-carousel-ad-2",
+      advertiser: { name: "AlbumShare", verified: true, logo: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=100&q=80" },
+      content: {
+        headline: "Share Albums Instantly",
+        description: "Create shareable links for your albums. No app required.",
+        ctaText: "Get Started",
+        ctaUrl: "https://example.com/albumshare",
+      },
+      media: {
+        type: "image",
+        items: [{ url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80" }],
+      },
+      layout: "compact",
+      duration: 15,
+    },
+  ],
+  [
+    {
+      id: "albums-carousel-ad-3",
+      advertiser: { name: "MemoryVault", verified: true, logo: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?w=100&q=80" },
+      content: {
+        headline: "Secure Cloud Storage",
+        description: "Store unlimited albums with military-grade encryption. Never lose a memory.",
+        ctaText: "Protect Now",
+        ctaUrl: "https://example.com/memoryvault",
+      },
+      media: {
+        type: "image",
+        items: [{ url: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80" }],
+      },
+      layout: "standard",
+      duration: 15,
+    },
+  ],
+];

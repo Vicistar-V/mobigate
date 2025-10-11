@@ -5,7 +5,7 @@ interface PremiumAdRotationProps {
   slotId: string;
   ads: PremiumAdCardProps[];
   defaultDuration?: number;
-  context?: 'feed' | 'wall-status' | 'profile';
+  context?: 'feed' | 'wall-status' | 'profile' | 'albums-carousel';
 }
 
 export const PremiumAdRotation = ({ 

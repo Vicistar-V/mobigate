@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlbumCard } from "./AlbumCard";
@@ -6,6 +6,9 @@ import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
 import { AllVideosGrid } from "./AllVideosGrid";
 import { mockAlbums, Album, Post } from "@/data/posts";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { albumsCarouselAdSlots } from "@/data/profileAds";
+import { getRandomAdSlot } from "@/lib/adUtils";
 
 interface ProfileAlbumsTabProps {
   userId: string;
@@ -201,13 +204,31 @@ export const ProfileAlbumsTab = ({
           <div className="relative -mx-4 px-4">
             <ScrollArea className="w-full">
               <div className="flex gap-3 pb-2">
-                {allAlbums.map((album) => (
-                  <AlbumCard
-                    key={album.id}
-                    album={album}
-                    onClick={() => handleAlbumClick(album)}
-                  />
-                ))}
+                {allAlbums.map((album, index) => {
+                  const shouldShowAd = (index + 1) % 4 === 0 && index < allAlbums.length - 1;
+                  const adSlotIndex = Math.floor((index + 1) / 4) - 1;
+                  
+                  return (
+                    <React.Fragment key={album.id}>
+                      {/* Album Card */}
+                      <AlbumCard
+                        album={album}
+                        onClick={() => handleAlbumClick(album)}
+                      />
+                      
+                      {/* Insert Premium Ad after every 4 albums */}
+                      {shouldShowAd && (
+                        <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
+                          <PremiumAdRotation
+                            slotId={`albums-carousel-premium-${adSlotIndex}`}
+                            ads={getRandomAdSlot(albumsCarouselAdSlots)}
+                            context="albums-carousel"
+                          />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
