@@ -98,6 +98,12 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                     </h3>
                   </button>
                   
+                  {user.isContentCreator && (
+                    <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
+                      Upcoming Content Creator
+                    </Badge>
+                  )}
+                  
                   {/* Stats */}
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
                     <div className="flex items-center gap-1.5 text-sm text-primary font-medium">
@@ -117,12 +123,6 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                       <span>{user.stats.following.toLocaleString()} Following</span>
                     </div>
                   </div>
-                  
-                  {user.isContentCreator && (
-                    <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
-                      Upcoming Content Creator
-                    </Badge>
-                  )}
 
                   {/* Action Buttons */}
                   <div className="flex flex-row gap-2 pt-1">
