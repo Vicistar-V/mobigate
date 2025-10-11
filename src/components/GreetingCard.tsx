@@ -18,10 +18,10 @@ export const GreetingSection = () => {
   const primaryLinks = [
     { label: "About Me", href: "/profile/current-user" },
     { label: "Friends (Albums)", href: "#" },
-    { label: "Followers", href: "#" },
   ];
 
   const moreLinks = [
+    { label: "Followers", href: "#" },
     { label: "Following", href: "#" },
     { label: "Gifts", href: "#" },
     { label: "Mobi Quiz Game", href: "#" },
