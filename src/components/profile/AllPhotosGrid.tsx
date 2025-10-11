@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ImageIcon } from "lucide-react";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { albumPhotosAdSlots } from "@/data/profileAds";
+import { getRandomAdSlot } from "@/lib/adUtils";
 
 interface Photo {
   id: string;
@@ -55,6 +58,14 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
   const hasMorePhotos = visibleCount < photos.length;
   const canShowLess = visibleCount > itemsPerLoad;
 
+  // Calculate ad break intervals based on grid columns
+  const adBreakInterval = useMemo(() => {
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    if (width < 640) return 8; // Mobile: 2 cols × 4 rows
+    if (width < 1024) return 12; // Tablet: 3 cols × 4 rows
+    return 16; // Desktop: 4 cols × 4 rows
+  }, [itemsPerLoad]);
+
   const handleLoadMore = () => {
     setVisibleCount((prev) => Math.min(prev + itemsPerLoad, photos.length));
   };
@@ -64,8 +75,9 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handlePhotoClick = (index: number) => {
-    setSelectedIndex(index);
+  const handlePhotoClick = (photoIndex: number) => {
+    // Calculate actual photo index excluding ads
+    setSelectedIndex(photoIndex);
   };
 
   // Convert photos to MediaItems for the gallery viewer
@@ -92,34 +104,61 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-        {displayedPhotos.map((photo, index) => (
-          <div
-            key={photo.id}
-            className="aspect-square overflow-hidden rounded-lg cursor-pointer group relative"
-            onClick={() => handlePhotoClick(index)}
-          >
-            <img
-              src={photo.url}
-              alt={photo.title || "Photo"}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              loading="lazy"
-            />
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+      {displayedPhotos.map((photo, index) => {
+        const shouldShowAd = (index + 1) % adBreakInterval === 0 && index < displayedPhotos.length - 1;
+        
+        return (
+          <div key={`photo-section-${index}`}>
+            {/* Start or continue grid */}
+            {index % adBreakInterval === 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-6">
+                {displayedPhotos.slice(
+                  index,
+                  Math.min(index + adBreakInterval, displayedPhotos.length)
+                ).map((photo, subIndex) => {
+                  const photoIndex = index + subIndex;
+                  return (
+                    <div
+                      key={photo.id}
+                      className="aspect-square overflow-hidden rounded-lg cursor-pointer group relative"
+                      onClick={() => handlePhotoClick(photoIndex)}
+                    >
+                      <img
+                        src={photo.url}
+                        alt={photo.title || "Photo"}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                      
+                      {/* Type badge */}
+                      {photo.type !== "post" && (
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white">
+                            {photo.type === "profile-picture" ? "Profile" : "Banner"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             
-            {/* Type badge */}
-            {photo.type !== "post" && (
-              <div className="absolute top-2 left-2 z-10">
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white">
-                  {photo.type === "profile-picture" ? "Profile" : "Banner"}
-                </span>
+            {/* Insert Ad after complete rows */}
+            {shouldShowAd && (
+              <div className="w-full mb-6">
+                <PremiumAdRotation
+                  slotId={`album-photos-premium-${Math.floor((index + 1) / adBreakInterval)}`}
+                  ads={getRandomAdSlot(albumPhotosAdSlots)}
+                  context="feed"
+                />
               </div>
             )}
           </div>
-        ))}
-      </div>
+        );
+      })}
 
       {/* Pagination Controls */}
       {(hasMorePhotos || canShowLess) && (
