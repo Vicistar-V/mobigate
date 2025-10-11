@@ -1,23 +1,22 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ImageIcon } from "lucide-react";
+import { Play, Video } from "lucide-react";
 
-interface Photo {
+interface VideoItem {
   id: string;
   url: string;
-  type: "profile-picture" | "banner" | "post";
+  type: "post";
   date: string;
   title?: string;
   author?: string;
 }
 
-interface AllPhotosGridProps {
-  photos: Photo[];
+interface AllVideosGridProps {
+  videos: VideoItem[];
 }
 
-export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
+export const AllVideosGrid = ({ videos }: AllVideosGridProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   
   // Responsive items per load: 10 rows based on grid columns
@@ -51,12 +50,12 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
     return () => window.removeEventListener('resize', updateItemsPerLoad);
   }, []);
 
-  const displayedPhotos = photos.slice(0, visibleCount);
-  const hasMorePhotos = visibleCount < photos.length;
+  const displayedVideos = videos.slice(0, visibleCount);
+  const hasMoreVideos = visibleCount < videos.length;
   const canShowLess = visibleCount > itemsPerLoad;
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + itemsPerLoad, photos.length));
+    setVisibleCount((prev) => Math.min(prev + itemsPerLoad, videos.length));
   };
 
   const handleShowLess = () => {
@@ -64,28 +63,28 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handlePhotoClick = (index: number) => {
+  const handleVideoClick = (index: number) => {
     setSelectedIndex(index);
   };
 
-  // Convert photos to MediaItems for the gallery viewer
-  const mediaItems: MediaItem[] = photos.map((photo) => ({
-    id: photo.id,
-    type: "photo" as const,
-    url: photo.url,
-    title: photo.title || "Photo",
-    author: photo.author || "You",
+  // Convert videos to MediaItems for the gallery viewer
+  const mediaItems: MediaItem[] = videos.map((video) => ({
+    id: video.id,
+    type: "video" as const,
+    url: video.url,
+    title: video.title || "Video",
+    author: video.author || "You",
     authorImage: "/placeholder.svg",
     likes: 0,
     comments: 0,
   }));
 
-  if (photos.length === 0) {
+  if (videos.length === 0) {
     return (
       <div className="text-center py-16 bg-muted/30 rounded-lg">
-        <ImageIcon className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-        <p className="text-lg text-muted-foreground">No photos to display yet.</p>
-        <p className="text-sm text-muted-foreground/70 mt-2">Upload some photos to see them here!</p>
+        <Video className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+        <p className="text-lg text-muted-foreground">No videos to display yet.</p>
+        <p className="text-sm text-muted-foreground/70 mt-2">Upload some videos to see them here!</p>
       </div>
     );
   }
@@ -94,42 +93,49 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
     <div className="space-y-6">
       {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-        {displayedPhotos.map((photo, index) => (
+        {displayedVideos.map((video, index) => (
           <div
-            key={photo.id}
+            key={video.id}
             className="aspect-square overflow-hidden rounded-lg cursor-pointer group relative"
-            onClick={() => handlePhotoClick(index)}
+            onClick={() => handleVideoClick(index)}
           >
             <img
-              src={photo.url}
-              alt={photo.title || "Photo"}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              src={video.url}
+              alt={video.title || "Video"}
+              className="w-full h-full object-cover"
               loading="lazy"
             />
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
             
-            {/* Type badge */}
-            {photo.type !== "post" && (
-              <div className="absolute top-2 left-2 z-10">
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white">
-                  {photo.type === "profile-picture" ? "Profile" : "Banner"}
-                </span>
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors duration-300" />
+            
+            {/* Play button overlay */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Play className="h-6 w-6 sm:h-8 sm:w-8 text-black ml-1" fill="currentColor" />
               </div>
-            )}
+            </div>
+            
+            {/* Video badge */}
+            <div className="absolute top-2 left-2 z-10">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-white flex items-center gap-1">
+                <Video className="h-2.5 w-2.5" />
+                Video
+              </span>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Pagination Controls */}
-      {(hasMorePhotos || canShowLess) && (
-        <div className="flex justify-center items-center gap-6 mt-8">
-          {hasMorePhotos && (
+      {(hasMoreVideos || canShowLess) && (
+        <div className="flex justify-center items-center gap-4 sm:gap-6 mt-8">
+          {hasMoreVideos && (
             <Button
               onClick={handleLoadMore}
               variant="outline"
               size="lg"
-              className="text-2xl font-bold text-primary hover:text-primary hover:bg-primary/10 border-2 border-primary/20 px-8 py-6 rounded-xl"
+              className="text-xl sm:text-2xl font-bold text-primary hover:text-primary hover:bg-primary/10 border-2 border-primary/20 px-6 py-5 sm:px-8 sm:py-6 rounded-xl"
             >
               ...more
             </Button>
@@ -139,7 +145,7 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
               onClick={handleShowLess}
               variant="outline"
               size="lg"
-              className="text-2xl font-bold text-primary hover:text-primary hover:bg-primary/10 border-2 border-primary/20 px-8 py-6 rounded-xl"
+              className="text-xl sm:text-2xl font-bold text-primary hover:text-primary hover:bg-primary/10 border-2 border-primary/20 px-6 py-5 sm:px-8 sm:py-6 rounded-xl"
             >
               Less...
             </Button>

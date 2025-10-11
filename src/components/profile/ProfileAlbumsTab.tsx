@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlbumCard } from "./AlbumCard";
 import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
+import { AllVideosGrid } from "./AllVideosGrid";
 import { mockAlbums, Album, Post } from "@/data/posts";
 
 interface ProfileAlbumsTabProps {
@@ -76,7 +78,7 @@ export const ProfileAlbumsTab = ({
     return albums;
   }, [profilePicturesAlbum, profileBannersAlbum, userAlbums]);
 
-  // Prepare all photos for the "All Photos" grid
+  // Prepare all photos for the "All Photos" grid (excluding videos)
   const allPhotos = useMemo(() => {
     const photos: Array<{
       id: string;
@@ -93,7 +95,7 @@ export const ProfileAlbumsTab = ({
         id: `profile_pic_${index}`,
         url,
         type: "profile-picture",
-        date: new Date(Date.now() - index * 86400000).toISOString(), // Simulate dates
+        date: new Date(Date.now() - index * 86400000).toISOString(),
         title: "Profile Picture",
       });
     });
@@ -109,9 +111,9 @@ export const ProfileAlbumsTab = ({
       });
     });
 
-    // Add post images (only Photo and Video types with imageUrl)
+    // Add ONLY Photo type posts (exclude videos)
     userPosts
-      .filter((post) => post.imageUrl && (post.type === "Photo" || post.type === "Video"))
+      .filter((post) => post.imageUrl && post.type === "Photo")
       .forEach((post) => {
         photos.push({
           id: post.id || `post_${Math.random()}`,
@@ -123,9 +125,36 @@ export const ProfileAlbumsTab = ({
         });
       });
 
-    // Sort by most recent (assuming id or date indicates recency)
     return photos.sort((a, b) => b.date.localeCompare(a.date));
   }, [profileImageHistory, bannerImageHistory, userPosts]);
+
+  // Prepare all videos for the "All Videos" grid
+  const allVideos = useMemo(() => {
+    const videos: Array<{
+      id: string;
+      url: string;
+      type: "post";
+      date: string;
+      title?: string;
+      author?: string;
+    }> = [];
+
+    // Add ONLY Video type posts
+    userPosts
+      .filter((post) => post.imageUrl && post.type === "Video")
+      .forEach((post) => {
+        videos.push({
+          id: post.id || `video_${Math.random()}`,
+          url: post.imageUrl!,
+          type: "post",
+          date: post.id || new Date().toISOString(),
+          title: post.title,
+          author: post.author,
+        });
+      });
+
+    return videos.sort((a, b) => b.date.localeCompare(a.date));
+  }, [userPosts]);
 
   // Handle album click
   const handleAlbumClick = (album: Album & { isSystem?: boolean }) => {
@@ -186,10 +215,29 @@ export const ProfileAlbumsTab = ({
         </div>
       )}
 
-      {/* All Photos Grid Section */}
+      {/* All Photos/Videos Tabbed Section */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">All Photos</h2>
-        <AllPhotosGrid photos={allPhotos} />
+        <Tabs defaultValue="photos" className="w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold">Media Gallery</h2>
+            <TabsList className="grid w-full sm:w-auto sm:max-w-md grid-cols-2">
+              <TabsTrigger value="photos" className="text-sm sm:text-base">
+                All Photos ({allPhotos.length})
+              </TabsTrigger>
+              <TabsTrigger value="videos" className="text-sm sm:text-base">
+                All Videos ({allVideos.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          
+          <TabsContent value="photos" className="mt-0">
+            <AllPhotosGrid photos={allPhotos} />
+          </TabsContent>
+          
+          <TabsContent value="videos" className="mt-0">
+            <AllVideosGrid videos={allVideos} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Album Detail Dialog */}
