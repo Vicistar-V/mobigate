@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2, Plus, User } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Pencil, Trash2, Plus, User, Search, Globe, Users, ExternalLink, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { MobigateUserSearch, MobigateUser } from "./MobigateUserSearch";
+import { FriendsListSearch, Friend } from "./FriendsListSearch";
 
 const loveFriendshipSchema = z.object({
   friendId: z.string().min(1, "Please select a friend"),
@@ -28,6 +32,11 @@ const mockFriends = [
 export interface LoveFriendship {
   id: string;
   name: string;
+  originalName?: string;
+  linkedUserId?: string;
+  linkedUserName?: string;
+  linkedUserProfileImage?: string;
+  isActive?: boolean;
   relationshipTag: string;
   privacy?: string;
   profileImage?: string;
@@ -44,6 +53,9 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
+  const [selectedUser, setSelectedUser] = useState<MobigateUser | Friend | null>(null);
+  const [searchMobigateOpen, setSearchMobigateOpen] = useState(false);
+  const [searchFriendsOpen, setSearchFriendsOpen] = useState(false);
 
   const form = useForm<z.infer<typeof loveFriendshipSchema>>({
     resolver: zodResolver(loveFriendshipSchema),
@@ -56,6 +68,7 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
       return;
     }
     setIsAdding(true);
+    setSelectedUser(null);
     form.reset({ friendId: "", relationshipTag: "" });
   };
 
@@ -70,28 +83,28 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
   };
 
   const onSubmit = (data: z.infer<typeof loveFriendshipSchema>) => {
-    const selectedFriend = mockFriends.find(f => f.id === data.friendId);
-    if (!selectedFriend) return;
+    const friendData: LoveFriendship = {
+      id: isAdding ? Date.now().toString() : editingId!,
+      originalName: !selectedUser && data.friendId ? mockFriends.find(f => f.id === data.friendId)?.name : undefined,
+      name: selectedUser ? selectedUser.name : (mockFriends.find(f => f.id === data.friendId)?.name || ""),
+      linkedUserId: selectedUser?.id,
+      linkedUserName: selectedUser?.name,
+      linkedUserProfileImage: selectedUser?.profileImage,
+      isActive: !!selectedUser,
+      relationshipTag: data.relationshipTag,
+      privacy,
+      profileImage: selectedUser?.profileImage,
+    };
 
     if (isAdding) {
-      const newFriendship: LoveFriendship = { 
-        name: selectedFriend.name, 
-        relationshipTag: data.relationshipTag, 
-        id: Date.now().toString(),
-        privacy 
-      };
-      setFriendships([...friendships, newFriendship]);
+      setFriendships([...friendships, friendData]);
       setIsAdding(false);
     } else if (editingId) {
-      setFriendships(friendships.map(f => f.id === editingId ? { 
-        name: selectedFriend.name, 
-        relationshipTag: data.relationshipTag, 
-        id: editingId,
-        privacy 
-      } : f));
+      setFriendships(friendships.map(f => f.id === editingId ? friendData : f));
       setEditingId(null);
     }
     form.reset({ friendId: "", relationshipTag: "" });
+    setSelectedUser(null);
     setPrivacy("public");
   };
 
@@ -118,9 +131,29 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
                     <User className="h-5 w-5" />
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-medium">{friendship.name}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium truncate">{friendship.name}</p>
+                    {friendship.isActive && (
+                      <Badge variant="secondary" className="text-xs">
+                        <Check className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
+                    )}
+                  </div>
+                  {friendship.originalName && friendship.originalName !== friendship.name && (
+                    <p className="text-xs text-muted-foreground">Originally: {friendship.originalName}</p>
+                  )}
                   <p className="text-sm text-muted-foreground">{friendship.relationshipTag}</p>
+                  {friendship.isActive && friendship.linkedUserId && (
+                    <button
+                      onClick={() => window.location.href = `/profile?id=${friendship.linkedUserId}`}
+                      className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                    >
+                      View Profile
+                      <ExternalLink className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="flex gap-1">
@@ -139,12 +172,66 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
       {(isAdding || editingId) && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
+            <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium">Link to Mobigate User</Label>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSearchMobigateOpen(true)}
+                  className="w-full"
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Search on Mobigate
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSearchFriendsOpen(true)}
+                  className="w-full"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Select from Friends
+                </Button>
+              </div>
+              
+              {selectedUser && (
+                <div className="flex items-center gap-3 p-2 sm:p-3 bg-background rounded-md border">
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                    <AvatarImage src={selectedUser.profileImage} />
+                    <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{selectedUser.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedUser(null)}
+                    className="h-8 w-8 shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Link a Mobigate user or select from friends below
+              </p>
+            </div>
+
             <FormField
               control={form.control}
               name="friendId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Select Friend</FormLabel>
+                  <FormLabel>Or Select Friend (Optional if linked above)</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -212,7 +299,19 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
         </Button>
       )}
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
+      <MobigateUserSearch
+        open={searchMobigateOpen}
+        onOpenChange={setSearchMobigateOpen}
+        onSelect={(user) => setSelectedUser(user)}
+      />
+
+      <FriendsListSearch
+        open={searchFriendsOpen}
+        onOpenChange={setSearchFriendsOpen}
+        onSelect={(friend) => setSelectedUser(friend)}
+      />
+
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onClose}>
           Close
         </Button>

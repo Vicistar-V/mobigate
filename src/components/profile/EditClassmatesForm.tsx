@@ -6,10 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Trash2, Plus, Save, X, User } from "lucide-react";
+import { Trash2, Plus, Save, X, User, Search, Globe, Users, ExternalLink, Check } from "lucide-react";
 import { PrivacySelector } from "./PrivacySelector";
 import { ImageUploader } from "./ImageUploader";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { MobigateUserSearch, MobigateUser } from "./MobigateUserSearch";
+import { FriendsListSearch, Friend } from "./FriendsListSearch";
 
 const classmateSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -29,6 +32,11 @@ const classmateSchema = z.object({
 export interface Classmate {
   id: string;
   name: string;
+  originalName?: string;
+  linkedUserId?: string;
+  linkedUserName?: string;
+  linkedUserProfileImage?: string;
+  isActive?: boolean;
   institution: string;
   period?: string;
   postsHeld?: string;
@@ -58,6 +66,9 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
   const [privacy, setPrivacy] = useState("public");
   const [profileImage, setProfileImage] = useState<string | undefined>();
   const [institutionLogo, setInstitutionLogo] = useState<string | undefined>();
+  const [selectedUser, setSelectedUser] = useState<MobigateUser | Friend | null>(null);
+  const [searchMobigateOpen, setSearchMobigateOpen] = useState(false);
+  const [searchFriendsOpen, setSearchFriendsOpen] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(classmateSchema),
@@ -69,6 +80,7 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
     setPrivacy("public");
     setProfileImage(undefined);
     setInstitutionLogo(undefined);
+    setSelectedUser(null);
     reset({});
   };
 
@@ -86,24 +98,32 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
   };
 
   const onSubmit = (data: any) => {
+    const mateData: Classmate = {
+      id: isAdding ? Date.now().toString() : editingId!,
+      ...data,
+      originalName: !selectedUser ? data.name : (data.name || undefined),
+      name: selectedUser ? selectedUser.name : data.name,
+      linkedUserId: selectedUser?.id,
+      linkedUserName: selectedUser?.name,
+      linkedUserProfileImage: selectedUser?.profileImage,
+      isActive: !!selectedUser,
+      privacy,
+      profileImage: selectedUser?.profileImage || profileImage,
+      institutionLogo,
+    };
+
     if (isAdding) {
-      const newMate: Classmate = {
-        id: Date.now().toString(),
-        ...data,
-        privacy,
-        profileImage,
-        institutionLogo,
-      };
-      setClassmates([...classmates, newMate]);
+      setClassmates([...classmates, mateData]);
       setIsAdding(false);
     } else if (editingId) {
       setClassmates(classmates.map(m => 
-        m.id === editingId ? { ...m, ...data, privacy, profileImage, institutionLogo } : m
+        m.id === editingId ? mateData : m
       ));
       setEditingId(null);
     }
     setProfileImage(undefined);
     setInstitutionLogo(undefined);
+    setSelectedUser(null);
     reset({});
   };
 
@@ -123,15 +143,35 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
                 <User className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
+                {mate.isActive && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Check className="h-3 w-3 mr-1" />
+                    Active
+                  </Badge>
+                )}
+              </div>
+              {mate.originalName && mate.originalName !== mate.name && (
+                <p className="text-xs text-muted-foreground">Originally: {mate.originalName}</p>
+              )}
               <div className="flex items-center gap-2">
                 {mate.institutionLogo && (
                   <img src={mate.institutionLogo} alt="" className="h-4 w-4 object-contain" />
                 )}
-                <p className="text-sm text-muted-foreground">{mate.institution}</p>
+                <p className="text-sm text-muted-foreground truncate">{mate.institution}</p>
               </div>
               {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+              {mate.isActive && mate.linkedUserId && (
+                <button
+                  onClick={() => window.location.href = `/profile?id=${mate.linkedUserId}`}
+                  className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                >
+                  View Profile
+                  <ExternalLink className="h-3 w-3" />
+                </button>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
@@ -147,10 +187,61 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
 
       {(isAdding || editingId) && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
+          <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
+            <div className="flex items-center gap-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Label className="text-sm font-medium">Link to Mobigate User</Label>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSearchMobigateOpen(true)}
+                className="w-full"
+              >
+                <Globe className="h-4 w-4 mr-2" />
+                Search on Mobigate
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSearchFriendsOpen(true)}
+                className="w-full"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Select from Friends
+              </Button>
+            </div>
+            
+            {selectedUser && (
+              <div className="flex items-center gap-3 p-2 sm:p-3 bg-background rounded-md border">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                  <AvatarImage src={selectedUser.profileImage} />
+                  <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{selectedUser.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedUser(null)}
+                  className="h-8 w-8 shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+
           <div>
             <Label>Profile Picture</Label>
             <ImageUploader
-              value={profileImage}
+              value={selectedUser?.profileImage || profileImage}
               onChange={setProfileImage}
               type="avatar"
             />
@@ -158,7 +249,15 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
 
           <div>
             <Label htmlFor="name">Name *</Label>
-            <Input id="name" {...register("name")} />
+            <Input 
+              id="name" 
+              {...register("name")} 
+              value={selectedUser?.name || undefined}
+              placeholder="Type manually or search above"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Type manually or search above to link a Mobigate user
+            </p>
             {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
           </div>
 
@@ -255,9 +354,27 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
         </Button>
       )}
 
-      <div className="flex gap-2 pt-4 border-t">
+      <MobigateUserSearch
+        open={searchMobigateOpen}
+        onOpenChange={setSearchMobigateOpen}
+        onSelect={(user) => {
+          setSelectedUser(user);
+          reset({ ...reset, name: user.name });
+        }}
+      />
+
+      <FriendsListSearch
+        open={searchFriendsOpen}
+        onOpenChange={setSearchFriendsOpen}
+        onSelect={(friend) => {
+          setSelectedUser(friend);
+          reset({ ...reset, name: friend.name });
+        }}
+      />
+
+      <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
         <Button onClick={handleSave} className="flex-1">Save All Changes</Button>
-        <Button onClick={onClose} variant="outline">Close</Button>
+        <Button onClick={onClose} variant="outline" className="sm:w-auto">Close</Button>
       </div>
     </div>
   );
