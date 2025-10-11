@@ -3,10 +3,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal } from "lucide-react";
+import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal, Settings } from "lucide-react";
 import { FilterDialog } from "./FilterDialog";
+import { ManageELibraryDialog } from "./ManageELibraryDialog";
 import { useState } from "react";
 
 interface ELibrarySectionProps {
@@ -30,6 +32,7 @@ const moreFilters = [
 export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectionProps) => {
   const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
   const [sortFilter, setSortFilter] = useState("all");
+  const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
 
   const filterOptions = [
     { value: "all", label: "All Content" },
@@ -100,9 +103,24 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
                 </DropdownMenuItem>
               );
             })}
+            
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuItem
+              onClick={() => setIsManageDialogOpen(true)}
+              className="font-semibold text-primary cursor-pointer"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Manage E-Library
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      
+      <ManageELibraryDialog 
+        open={isManageDialogOpen} 
+        onClose={() => setIsManageDialogOpen(false)} 
+      />
     </div>
   );
 };
