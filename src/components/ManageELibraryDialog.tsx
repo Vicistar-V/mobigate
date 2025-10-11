@@ -6,13 +6,17 @@ import {
   SheetTitle 
 } from "@/components/ui/sheet";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { 
   Upload, 
   FolderOpen, 
   FolderTree, 
   Settings, 
   BarChart, 
-  Trash2 
+  Trash2,
+  Library,
+  ArrowRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,6 +27,21 @@ interface ManageELibraryDialogProps {
 
 export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProps) => {
   const { toast } = useToast();
+
+  const handleViewELibrary = () => {
+    onClose();
+    
+    // Scroll to E-Library section
+    setTimeout(() => {
+      const eLibrarySection = document.querySelector('[data-elibrary-section]');
+      if (eLibrarySection) {
+        eLibrarySection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
+  };
 
   const managementOptions = [
     {
@@ -96,6 +115,25 @@ export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProp
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
+        {/* Navigation Bar - View E-Library Contents */}
+        <Card 
+          className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground mb-6 cursor-pointer hover:shadow-xl transition-all border-none -mt-2" 
+          onClick={handleViewELibrary}
+        >
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Library className="w-6 h-6" />
+              <div>
+                <p className="font-bold text-lg">View E-Library Contents Now</p>
+                <p className="text-sm opacity-90">Browse all available content</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5" />
+          </CardContent>
+        </Card>
+
+        <Separator className="mb-6" />
+
         <SheetHeader>
           <SheetTitle>Manage E-Library</SheetTitle>
           <SheetDescription>
