@@ -88,20 +88,22 @@ export const ProfileFollowersTab = ({ userName }: ProfileFollowersTabProps) => {
 
                 {/* Content Section */}
                 <div className="flex-1 min-w-0 space-y-2">
-                  <button
-                    onClick={() => handleViewProfile(follower.id, follower.name)}
-                    className="text-left hover:underline focus:outline-none focus:underline group/name"
-                  >
-                    <h3 className="text-base font-bold uppercase group-hover/name:text-primary transition-colors">
-                      {follower.name}
-                    </h3>
-                  </button>
-                  
-                  {follower.isContentCreator && (
-                    <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
-                      Upcoming Content Creator
-                    </Badge>
-                  )}
+                  <div>
+                    <button
+                      onClick={() => handleViewProfile(follower.id, follower.name)}
+                      className="text-left hover:underline focus:outline-none focus:underline group/name"
+                    >
+                      <h3 className="text-base font-bold uppercase group-hover/name:text-primary transition-colors">
+                        {follower.name}
+                      </h3>
+                    </button>
+                    
+                    {follower.isContentCreator && (
+                      <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30 mt-1">
+                        Upcoming Content Creator
+                      </Badge>
+                    )}
+                  </div>
                   
                   {/* Stats */}
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
