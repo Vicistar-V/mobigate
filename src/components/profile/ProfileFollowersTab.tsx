@@ -124,7 +124,7 @@ export const ProfileFollowersTab = ({ userName }: ProfileFollowersTabProps) => {
                   )}
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <div className="flex flex-row gap-2 pt-1">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
