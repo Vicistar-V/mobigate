@@ -30,6 +30,7 @@ import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
 import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
 
 const Profile = () => {
+  const [activeTab, setActiveTab] = useState<string>("status");
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
@@ -43,6 +44,14 @@ const Profile = () => {
   const [isProfileLiked, setIsProfileLiked] = useState(false);
   const [visiblePostCount, setVisiblePostCount] = useState(20);
   const { toast } = useToast();
+
+  // Handle hash-based tab navigation
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      setActiveTab(hash);
+    }
+  }, []);
   
   // Load profile image and history from localStorage
   const [profileImage, setProfileImage] = useState<string>(() => {
@@ -531,7 +540,7 @@ const Profile = () => {
         </Card>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="status" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <ScrollArea className="w-full whitespace-nowrap mb-6">
             <TabsList className="inline-flex w-auto">
               <TabsTrigger value="status">Status</TabsTrigger>

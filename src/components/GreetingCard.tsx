@@ -16,8 +16,9 @@ import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 
 export const GreetingSection = () => {
   const primaryLinks = [
-    { label: "About Me", href: "/profile/current-user" },
-    { label: "Friends (Albums)", href: "#" },
+    { label: "About Me", href: "/profile/current-user#about" },
+    { label: "Friends", href: "/profile/current-user#friends" },
+    { label: "Albums", href: "/profile/current-user#albums" },
   ];
 
   const moreLinks = [
