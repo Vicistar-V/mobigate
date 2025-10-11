@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2, Plus, Check, ChevronsUpDown } from "lucide-react";
+import { Pencil, Trash2, Plus, Check, ChevronsUpDown, Search, Globe, Users, ExternalLink, X, User } from "lucide-react";
 import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
 import { ImageUploader } from "./ImageUploader";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { MobigateUserSearch, MobigateUser } from "./MobigateUserSearch";
+import { FriendsListSearch, Friend } from "./FriendsListSearch";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -33,6 +36,11 @@ const mockFriends = [
 interface FamilyMember {
   id: string;
   name: string;
+  originalName?: string;
+  linkedUserId?: string;
+  linkedUserName?: string;
+  linkedUserProfileImage?: string;
+  isActive?: boolean;
   relation: string;
   privacy?: string;
   profileImage?: string;
@@ -51,6 +59,9 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
   const [privacy, setPrivacy] = useState("public");
   const [profileImage, setProfileImage] = useState<string | undefined>();
   const [open, setOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<MobigateUser | Friend | null>(null);
+  const [searchMobigateOpen, setSearchMobigateOpen] = useState(false);
+  const [searchFriendsOpen, setSearchFriendsOpen] = useState(false);
 
   const form = useForm<z.infer<typeof familySchema>>({
     resolver: zodResolver(familySchema),
@@ -61,6 +72,7 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
     setIsAdding(true);
     form.reset({ friendId: "", relation: "" });
     setProfileImage(undefined);
+    setSelectedUser(null);
   };
 
   const handleEdit = (member: FamilyMember) => {
@@ -75,32 +87,30 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
   };
 
   const onSubmit = (data: z.infer<typeof familySchema>) => {
-    const selectedFriend = mockFriends.find(f => f.id === data.friendId);
-    if (!selectedFriend) return;
+    const memberData: FamilyMember = {
+      id: isAdding ? Date.now().toString() : editingId!,
+      originalName: !selectedUser && data.friendId ? mockFriends.find(f => f.id === data.friendId)?.name : undefined,
+      name: selectedUser ? selectedUser.name : (mockFriends.find(f => f.id === data.friendId)?.name || ""),
+      linkedUserId: selectedUser?.id,
+      linkedUserName: selectedUser?.name,
+      linkedUserProfileImage: selectedUser?.profileImage,
+      isActive: !!selectedUser,
+      relation: data.relation,
+      privacy,
+      profileImage: selectedUser?.profileImage || profileImage,
+    };
 
     if (isAdding) {
-      const newMember: FamilyMember = { 
-        name: selectedFriend.name, 
-        relation: data.relation, 
-        id: Date.now().toString(),
-        privacy,
-        profileImage
-      };
-      setFamily([...family, newMember]);
+      setFamily([...family, memberData]);
       setIsAdding(false);
     } else if (editingId) {
-      setFamily(family.map(m => m.id === editingId ? { 
-        name: selectedFriend.name, 
-        relation: data.relation, 
-        id: editingId,
-        privacy,
-        profileImage
-      } : m));
+      setFamily(family.map(m => m.id === editingId ? memberData : m));
       setEditingId(null);
     }
     form.reset({ friendId: "", relation: "" });
     setPrivacy("public");
     setProfileImage(undefined);
+    setSelectedUser(null);
   };
 
   const handleSave = () => {
@@ -115,16 +125,36 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
         {family.map((member) => (
           <Card key={member.id} className="p-3">
             <div className="flex justify-between items-start gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={member.profileImage} alt={member.name} />
                   <AvatarFallback>
                     <User className="h-5 w-5" />
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="font-medium">{member.name}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium truncate">{member.name}</p>
+                    {member.isActive && (
+                      <Badge variant="secondary" className="text-xs">
+                        <Check className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
+                    )}
+                  </div>
+                  {member.originalName && member.originalName !== member.name && (
+                    <p className="text-xs text-muted-foreground">Originally: {member.originalName}</p>
+                  )}
                   <p className="text-sm text-muted-foreground">{member.relation}</p>
+                  {member.isActive && member.linkedUserId && (
+                    <button
+                      onClick={() => window.location.href = `/profile?id=${member.linkedUserId}`}
+                      className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                    >
+                      View Profile
+                      <ExternalLink className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="flex gap-1">
@@ -143,11 +173,65 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
       {(isAdding || editingId) && (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 border-t pt-4">
+            <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium">Link to Mobigate User</Label>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSearchMobigateOpen(true)}
+                  className="w-full"
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Search on Mobigate
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSearchFriendsOpen(true)}
+                  className="w-full"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Select from Friends
+                </Button>
+              </div>
+              
+              {selectedUser && (
+                <div className="flex items-center gap-3 p-2 sm:p-3 bg-background rounded-md border">
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                    <AvatarImage src={selectedUser.profileImage} />
+                    <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{selectedUser.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedUser(null)}
+                    className="h-8 w-8 shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Link a Mobigate user or select from friends below
+              </p>
+            </div>
+
             <div>
               <FormLabel>Profile Picture</FormLabel>
               <div className="mt-2">
                 <ImageUploader
-                  value={profileImage}
+                  value={selectedUser?.profileImage || profileImage}
                   onChange={setProfileImage}
                   type="avatar"
                 />
@@ -158,7 +242,7 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
               name="friendId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Select Friend</FormLabel>
+                  <FormLabel>Or Select Friend (Optional if linked above)</FormLabel>
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -258,15 +342,27 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
                 <PrivacySelector value={privacy} onChange={setPrivacy} />
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button type="submit" size="sm">{editingId ? "Update" : "Add"}</Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button type="submit" size="sm" className="flex-1 sm:flex-initial">{editingId ? "Update" : "Add"}</Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }} className="flex-1 sm:flex-initial">
                 Cancel
               </Button>
             </div>
           </form>
         </Form>
       )}
+
+      <MobigateUserSearch
+        open={searchMobigateOpen}
+        onOpenChange={setSearchMobigateOpen}
+        onSelect={(user) => setSelectedUser(user)}
+      />
+
+      <FriendsListSearch
+        open={searchFriendsOpen}
+        onOpenChange={setSearchFriendsOpen}
+        onSelect={(friend) => setSelectedUser(friend)}
+      />
 
       {!isAdding && !editingId && (
         <Button variant="outline" className="w-full" onClick={handleAdd}>
@@ -275,7 +371,7 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
         </Button>
       )}
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onClose}>
           Close
         </Button>
