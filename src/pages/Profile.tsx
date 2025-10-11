@@ -501,20 +501,18 @@ const Profile = () => {
                   <Phone className="h-4 w-4" />
                   Call
                 </Button>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    size="sm" 
-                    className={`gap-2 ${
-                      isProfileLiked 
-                        ? "bg-red-500 hover:bg-red-600 text-white" 
-                        : "bg-yellow-400 hover:bg-yellow-500 text-black"
-                    }`}
-                    onClick={handleProfileLike}
-                  >
-                    <Heart className={`h-4 w-4 ${isProfileLiked ? "fill-current" : ""}`} />
-                    Like
-                  </Button>
-                </div>
+                <Button 
+                  size="sm" 
+                  className={`gap-2 ${
+                    isProfileLiked 
+                      ? "bg-red-500 hover:bg-red-600 text-white" 
+                      : "bg-yellow-400 hover:bg-yellow-500 text-black"
+                  }`}
+                  onClick={handleProfileLike}
+                >
+                  <Heart className={`h-4 w-4 ${isProfileLiked ? "fill-current" : ""}`} />
+                  Like
+                </Button>
                 <Button size="sm" className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white">
                   <MessageCircle className="h-4 w-4" />
                   Chat
