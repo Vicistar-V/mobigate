@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Search, MoreHorizontal } from "lucide-react";
+import { Link } from "react-router-dom";
 import profilePhoto from "@/assets/profile-photo.jpg";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
@@ -51,12 +52,12 @@ export const GreetingSection = () => {
         <div className="flex flex-wrap items-center gap-1 pt-2 border-t">
           {primaryLinks.map((link) => (
             <span key={link.label}>
-              <a
-                href={link.href}
+              <Link
+                to={link.href}
                 className="text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide"
               >
                 {link.label}
-              </a>
+              </Link>
               <span className="text-muted-foreground px-1.5">|</span>
             </span>
           ))}
@@ -71,9 +72,9 @@ export const GreetingSection = () => {
             <DropdownMenuContent align="start" className="bg-card z-50 w-48">
               {moreLinks.map((link) => (
                 <DropdownMenuItem key={link.label} asChild className="text-xl font-medium text-primary">
-                  <a href={link.href} className="cursor-pointer">
+                  <Link to={link.href} className="cursor-pointer">
                     {link.label}
-                  </a>
+                  </Link>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
