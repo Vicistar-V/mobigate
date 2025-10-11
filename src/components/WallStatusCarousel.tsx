@@ -8,6 +8,7 @@ import { PostOptionsMenu } from "@/components/PostOptionsMenu";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
+import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { Columns2, LayoutGrid } from "lucide-react";
 import React, { useState } from "react";
 
@@ -47,6 +48,7 @@ interface WallStatusCarouselProps {
   onEdit?: (post: Post) => void;
   onDelete?: (postId: string) => void;
   onItemClick?: (post: Post) => void;
+  showFriendsSuggestions?: boolean;
 }
 
 export const WallStatusCarousel = ({
@@ -60,7 +62,8 @@ export const WallStatusCarousel = ({
   title = "Wall Status",
   onEdit,
   onDelete,
-  onItemClick
+  onItemClick,
+  showFriendsSuggestions = false
 }: WallStatusCarouselProps) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -182,7 +185,141 @@ export const WallStatusCarousel = ({
       {/* Large View - 3-Column Vertical Grid with Ads */}
       {view === "large" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+          {/* Friends Suggestions after 6 posts */}
+          {showFriendsSuggestions && displayedItems.length > 6 && (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {displayedItems.slice(0, 6).map((item, index) => (
+                  <Card 
+                    key={`${item.title}-${index}`}
+                    className="overflow-hidden relative group cursor-pointer"
+                    onClick={() => openDetails(item)}
+                  >
+                    <div className="aspect-[3/4]">
+                      {item.imageUrl && (
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.title}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      )}
+                      <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-[10px] sm:text-xs px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
+                        {item.type}
+                      </Badge>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                        <p className="text-white text-xs sm:text-sm font-medium truncate">{item.author}</p>
+                        <p className="text-white/90 text-[10px] sm:text-xs truncate">{item.title}</p>
+                      </div>
+                      {onEdit && onDelete && (
+                        <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                          <PostOptionsMenu 
+                            onEdit={() => onEdit(item)}
+                            onDelete={() => onDelete(item.id ?? String(index))}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              
+              {/* Friends Suggestions Component */}
+              <div className="w-full my-4">
+                <PeopleYouMayKnow />
+              </div>
+              
+              {/* Remaining posts */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {displayedItems.slice(6).map((item, index) => {
+                  const actualIndex = index + 6;
+                  const shouldShowAd = (actualIndex + 1) % 4 === 0 && actualIndex < displayedItems.length - 1;
+                  const adSlotIndex = Math.floor((actualIndex + 1) / 4) - 1;
+                  const isLastInRow = (actualIndex + 1) % 3 === 0;
+                  
+                  // Show Friends Suggestions again every 12 posts after the first one
+                  const shouldShowFriendsSuggestions = showFriendsSuggestions && 
+                    (actualIndex + 1) % 12 === 0 && 
+                    actualIndex < displayedItems.length - 1;
+                  
+                  return (
+                    <React.Fragment key={`${item.title}-${actualIndex}`}>
+                      <Card 
+                        className="overflow-hidden relative group cursor-pointer"
+                        onClick={() => openDetails(item)}
+                      >
+                        <div className="aspect-[3/4]">
+                          {item.imageUrl && (
+                            <img 
+                              src={item.imageUrl} 
+                              alt={item.title}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          )}
+                          <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-[10px] sm:text-xs px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
+                            {item.type}
+                          </Badge>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                            <p className="text-white text-xs sm:text-sm font-medium truncate">{item.author}</p>
+                            <p className="text-white/90 text-[10px] sm:text-xs truncate">{item.title}</p>
+                          </div>
+                          {onEdit && onDelete && (
+                            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                              <PostOptionsMenu 
+                                onEdit={() => onEdit(item)}
+                                onDelete={() => onDelete(item.id ?? String(actualIndex))}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                      
+                      {/* Close grid for ads and Friends Suggestions */}
+                      {(shouldShowAd && isLastInRow && premiumAdSlots.length > 0) || shouldShowFriendsSuggestions ? (
+                        <React.Fragment>
+                          {/* These will be rendered as full-width breaks */}
+                        </React.Fragment>
+                      ) : null}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+              
+              {/* Premium ads and Friends Suggestions as full-width breaks */}
+              {displayedItems.slice(6).map((_, index) => {
+                const actualIndex = index + 6;
+                const shouldShowAd = (actualIndex + 1) % 4 === 0 && actualIndex < displayedItems.length - 1;
+                const adSlotIndex = Math.floor((actualIndex + 1) / 4) - 1;
+                const isLastInRow = (actualIndex + 1) % 3 === 0;
+                const shouldShowFriendsSuggestions = showFriendsSuggestions && 
+                  (actualIndex + 1) % 12 === 0 && 
+                  actualIndex < displayedItems.length - 1;
+                
+                return (
+                  <React.Fragment key={`break-${actualIndex}`}>
+                    {shouldShowAd && isLastInRow && premiumAdSlots.length > 0 && (
+                      <div className="w-full my-4">
+                        <PremiumAdRotation
+                          slotId={`wall-status-grid-premium-${adSlotIndex}`}
+                          ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
+                          context="wall-status"
+                        />
+                      </div>
+                    )}
+                    {shouldShowFriendsSuggestions && (
+                      <div className="w-full my-4">
+                        <PeopleYouMayKnow />
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </>
+          )}
+          
+          {/* Render without Friends Suggestions if not enabled or not enough posts */}
+          {(!showFriendsSuggestions || displayedItems.length <= 6) && (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {displayedItems.map((item, index) => {
             const shouldShowAd = (index + 1) % 4 === 0 && index < displayedItems.length - 1;
             const adSlotIndex = Math.floor((index + 1) / 4) - 1;
@@ -252,6 +389,8 @@ export const WallStatusCarousel = ({
               return null;
             })
             .filter(Boolean)}
+            </>
+          )}
         </div>
       )}
 

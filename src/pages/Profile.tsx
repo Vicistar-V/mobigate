@@ -579,6 +579,7 @@ const Profile = () => {
               onEdit={handleEditPost}
               onDelete={handleDeletePost}
               onItemClick={openWallStatusGallery}
+              showFriendsSuggestions={true}
             />
 
             {/* Feed Posts with Filter */}
