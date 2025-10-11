@@ -89,7 +89,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
 
                 {/* Content Section */}
                 <div className="flex-1 min-w-0 space-y-2">
-                  <div>
+                  <div className="space-y-1">
                     <button
                       onClick={() => handleViewProfile(user.id, user.name)}
                       className="text-left hover:underline focus:outline-none focus:underline group/name"
@@ -100,9 +100,11 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                     </button>
                     
                     {user.isContentCreator && (
-                      <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30 mt-1">
-                        Upcoming Content Creator
-                      </Badge>
+                      <div>
+                        <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30 inline-block">
+                          Upcoming Content Creator
+                        </Badge>
+                      </div>
                     )}
                   </div>
                   
