@@ -345,6 +345,7 @@ const Index = () => {
               onEdit={handleEditPost}
               onDelete={handleDeletePost}
               onItemClick={openWallStatusGallery}
+              showFriendsSuggestions={true}
             />
             
             {editingPost && (
