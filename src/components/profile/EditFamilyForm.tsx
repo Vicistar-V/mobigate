@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
 import { ImageUploader } from "./ImageUploader";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const familySchema = z.object({
   friendId: z.string().min(1, "Please select a friend"),
@@ -47,6 +50,7 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
   const [profileImage, setProfileImage] = useState<string | undefined>();
+  const [open, setOpen] = useState(false);
 
   const form = useForm<z.infer<typeof familySchema>>({
     resolver: zodResolver(familySchema),
@@ -153,22 +157,56 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
               control={form.control}
               name="friendId"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Select Friend</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a friend" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="z-50 bg-background">
-                      {mockFriends.map((friend) => (
-                        <SelectItem key={friend.id} value={friend.id}>
-                          {friend.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={open}
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value
+                            ? mockFriends.find((friend) => friend.id === field.value)?.name
+                            : "Search friend's name..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search friend's name..." />
+                        <CommandList>
+                          <CommandEmpty>No friend found.</CommandEmpty>
+                          <CommandGroup>
+                            {mockFriends.map((friend) => (
+                              <CommandItem
+                                key={friend.id}
+                                value={friend.name}
+                                onSelect={() => {
+                                  form.setValue("friendId", friend.id);
+                                  setOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    friend.id === field.value ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {friend.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
