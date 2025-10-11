@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { mockFriends } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Eye, Users, Heart, Clock, Check } from "lucide-react";
+import { UserPlus, Eye, Users, Heart, Clock, Check, MoreVertical, UserMinus, ThumbsUp, ThumbsDown, Gift, MessageCircle, Phone, Ban, Flag } from "lucide-react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { friendsAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
 import React from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProfileFriendsTabProps {
   userName: string;
@@ -22,10 +29,19 @@ interface FriendStatuses {
   [friendId: string]: FriendStatus;
 }
 
+interface FriendInteractions {
+  [friendId: string]: {
+    isFollowing: boolean;
+    isLiked: boolean;
+    isBlocked: boolean;
+  };
+}
+
 export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [friendStatuses, setFriendStatuses] = useState<FriendStatuses>({});
+  const [interactions, setInteractions] = useState<FriendInteractions>({});
 
   const handleAddFriend = (friendId: string, friendName: string) => {
     setFriendStatuses(prev => ({ ...prev, [friendId]: 'pending' }));
@@ -39,6 +55,75 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
 
   const handleViewUser = (friendId: string) => {
     navigate(`/profile/${friendId}`);
+  };
+
+  const handleToggleFollow = (friendId: string, friendName: string) => {
+    const isFollowing = interactions[friendId]?.isFollowing || false;
+    setInteractions(prev => ({
+      ...prev,
+      [friendId]: { ...prev[friendId], isFollowing: !isFollowing }
+    }));
+    
+    toast({
+      title: isFollowing ? "Unfollowed" : "Following",
+      description: `You are ${isFollowing ? 'no longer following' : 'now following'} ${friendName}`,
+    });
+  };
+
+  const handleToggleLike = (friendId: string, friendName: string) => {
+    const isLiked = interactions[friendId]?.isLiked || false;
+    setInteractions(prev => ({
+      ...prev,
+      [friendId]: { ...prev[friendId], isLiked: !isLiked }
+    }));
+    
+    toast({
+      title: isLiked ? "Unliked" : "Liked",
+      description: `You ${isLiked ? 'unliked' : 'liked'} ${friendName}`,
+    });
+  };
+
+  const handleSendGift = (friendId: string, friendName: string) => {
+    toast({
+      title: "Gift Store",
+      description: `Opening gift store for ${friendName}`,
+    });
+  };
+
+  const handleChat = (friendId: string, friendName: string) => {
+    toast({
+      title: "Opening Chat",
+      description: `Starting conversation with ${friendName}`,
+    });
+  };
+
+  const handleCall = (friendId: string, friendName: string) => {
+    toast({
+      title: "Calling",
+      description: `Initiating call with ${friendName}`,
+    });
+  };
+
+  const handleBlock = (friendId: string, friendName: string) => {
+    const isBlocked = interactions[friendId]?.isBlocked || false;
+    setInteractions(prev => ({
+      ...prev,
+      [friendId]: { ...prev[friendId], isBlocked: !isBlocked }
+    }));
+    
+    toast({
+      title: isBlocked ? "Unblocked" : "Blocked",
+      description: `You ${isBlocked ? 'unblocked' : 'blocked'} ${friendName}`,
+      variant: isBlocked ? "default" : "destructive",
+    });
+  };
+
+  const handleReport = (friendId: string, friendName: string) => {
+    toast({
+      title: "Report User",
+      description: `Opening report form for ${friendName}`,
+      variant: "destructive",
+    });
   };
 
   const getFriendButtonConfig = (status: FriendStatus = 'none') => {
@@ -144,25 +229,117 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                   </div>
 
                   {/* Interactive Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <div className="space-y-2 pt-1">
                     <Button
                       onClick={() => handleAddFriend(friend.id, friend.name)}
                       disabled={buttonConfig.disabled}
-                      className={buttonConfig.className}
+                      className={`${buttonConfig.className} w-full sm:w-auto`}
                       size="sm"
                     >
                       <ButtonIcon className="h-4 w-4" />
                       {buttonConfig.text}
                     </Button>
                     
-                    <Button
-                      onClick={() => handleViewUser(friend.id)}
-                      className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform"
-                      size="sm"
-                    >
-                      <Eye className="h-4 w-4" />
-                      View Profile
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleViewUser(friend.id)}
+                        className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform flex-1 sm:flex-initial"
+                        size="sm"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Profile
+                      </Button>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="hover:scale-105 transition-transform"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                            More
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-card z-50">
+                          <DropdownMenuItem
+                            onClick={() => handleToggleFollow(friend.id, friend.name)}
+                            className="cursor-pointer"
+                          >
+                            {interactions[friend.id]?.isFollowing ? (
+                              <>
+                                <UserMinus className="h-4 w-4 mr-2" />
+                                Unfollow
+                              </>
+                            ) : (
+                              <>
+                                <UserPlus className="h-4 w-4 mr-2" />
+                                Follow
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => handleToggleLike(friend.id, friend.name)}
+                            className="cursor-pointer"
+                          >
+                            {interactions[friend.id]?.isLiked ? (
+                              <>
+                                <ThumbsDown className="h-4 w-4 mr-2" />
+                                Unlike
+                              </>
+                            ) : (
+                              <>
+                                <ThumbsUp className="h-4 w-4 mr-2" />
+                                Like
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => handleSendGift(friend.id, friend.name)}
+                            className="cursor-pointer"
+                          >
+                            <Gift className="h-4 w-4 mr-2" />
+                            Send Gift
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => handleChat(friend.id, friend.name)}
+                            className="cursor-pointer"
+                          >
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            Chat
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => handleCall(friend.id, friend.name)}
+                            className="cursor-pointer"
+                          >
+                            <Phone className="h-4 w-4 mr-2" />
+                            Call
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuSeparator />
+                          
+                          <DropdownMenuItem
+                            onClick={() => handleBlock(friend.id, friend.name)}
+                            className="cursor-pointer text-destructive focus:text-destructive"
+                          >
+                            <Ban className="h-4 w-4 mr-2" />
+                            {interactions[friend.id]?.isBlocked ? 'Unblock' : 'Block'}
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => handleReport(friend.id, friend.name)}
+                            className="cursor-pointer text-destructive focus:text-destructive"
+                          >
+                            <Flag className="h-4 w-4 mr-2" />
+                            Report
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </div>
               </div>
