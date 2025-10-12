@@ -291,7 +291,246 @@ export const mockLikes: LikeEntry[] = [
   }
 ];
 
-// Special Digital Gifts (Occasion-based)
+// Special Digital Gifts (Occasion-based with folder structure)
+export interface SpecialDigitalGiftValue {
+  id: string;
+  mobiValue: number;
+}
+
+export interface SpecialDigitalGiftFolder {
+  id: string;
+  name: string;
+  icon: string;
+  gifts: SpecialDigitalGiftValue[];
+}
+
+export const specialDigitalGiftFolders: SpecialDigitalGiftFolder[] = [
+  { 
+    id: "appreciation", 
+    name: "Appreciation Gifts", 
+    icon: "🙏", 
+    gifts: [
+      { id: "app-500", mobiValue: 500 },
+      { id: "app-1000", mobiValue: 1000 },
+      { id: "app-2000", mobiValue: 2000 },
+      { id: "app-5000", mobiValue: 5000 },
+    ]
+  },
+  { 
+    id: "anniversary", 
+    name: "Anniversary Gifts", 
+    icon: "💑", 
+    gifts: [
+      { id: "ann-1000", mobiValue: 1000 },
+      { id: "ann-2500", mobiValue: 2500 },
+      { id: "ann-5000", mobiValue: 5000 },
+      { id: "ann-10000", mobiValue: 10000 },
+    ]
+  },
+  { 
+    id: "apology", 
+    name: "Apology Gifts", 
+    icon: "😔", 
+    gifts: [
+      { id: "apo-300", mobiValue: 300 },
+      { id: "apo-500", mobiValue: 500 },
+      { id: "apo-1000", mobiValue: 1000 },
+      { id: "apo-2000", mobiValue: 2000 },
+    ]
+  },
+  { 
+    id: "birthday", 
+    name: "Birthday Gifts", 
+    icon: "🎂", 
+    gifts: [
+      { id: "bir-500", mobiValue: 500 },
+      { id: "bir-1000", mobiValue: 1000 },
+      { id: "bir-3000", mobiValue: 3000 },
+      { id: "bir-5000", mobiValue: 5000 },
+      { id: "bir-10000", mobiValue: 10000 },
+    ]
+  },
+  { 
+    id: "celebration", 
+    name: "Celebration Gifts", 
+    icon: "🎉", 
+    gifts: [
+      { id: "cel-500", mobiValue: 500 },
+      { id: "cel-1000", mobiValue: 1000 },
+      { id: "cel-2500", mobiValue: 2500 },
+      { id: "cel-5000", mobiValue: 5000 },
+    ]
+  },
+  { 
+    id: "christmas", 
+    name: "Christmas Gifts", 
+    icon: "🎄", 
+    gifts: [
+      { id: "chr-1000", mobiValue: 1000 },
+      { id: "chr-2000", mobiValue: 2000 },
+      { id: "chr-5000", mobiValue: 5000 },
+      { id: "chr-10000", mobiValue: 10000 },
+    ]
+  },
+  { 
+    id: "compassion", 
+    name: "Compassion Gifts", 
+    icon: "❤️", 
+    gifts: [
+      { id: "com-300", mobiValue: 300 },
+      { id: "com-500", mobiValue: 500 },
+      { id: "com-1000", mobiValue: 1000 },
+      { id: "com-2000", mobiValue: 2000 },
+    ]
+  },
+  { 
+    id: "congratulation", 
+    name: "Congratulation Gifts", 
+    icon: "🎊", 
+    gifts: [
+      { id: "con-500", mobiValue: 500 },
+      { id: "con-1000", mobiValue: 1000 },
+      { id: "con-2000", mobiValue: 2000 },
+      { id: "con-5000", mobiValue: 5000 },
+    ]
+  },
+  { 
+    id: "crushing", 
+    name: "Crushing Gifts", 
+    icon: "💘", 
+    gifts: [
+      { id: "cru-700", mobiValue: 700 },
+      { id: "cru-1500", mobiValue: 1500 },
+      { id: "cru-3000", mobiValue: 3000 },
+      { id: "cru-5000", mobiValue: 5000 },
+    ]
+  },
+  { 
+    id: "easter", 
+    name: "Easter Gifts", 
+    icon: "🐰", 
+    gifts: [
+      { id: "eas-400", mobiValue: 400 },
+      { id: "eas-800", mobiValue: 800 },
+      { id: "eas-1500", mobiValue: 1500 },
+      { id: "eas-3000", mobiValue: 3000 },
+    ]
+  },
+  { 
+    id: "eid", 
+    name: "Eid Gifts", 
+    icon: "🌙", 
+    gifts: [
+      { id: "eid-600", mobiValue: 600 },
+      { id: "eid-1000", mobiValue: 1000 },
+      { id: "eid-2000", mobiValue: 2000 },
+      { id: "eid-5000", mobiValue: 5000 },
+    ]
+  },
+  { 
+    id: "encouragement", 
+    name: "Encouragement Gifts", 
+    icon: "💪", 
+    gifts: [
+      { id: "enc-300", mobiValue: 300 },
+      { id: "enc-600", mobiValue: 600 },
+      { id: "enc-1000", mobiValue: 1000 },
+      { id: "enc-2000", mobiValue: 2000 },
+    ]
+  },
+  { 
+    id: "friendship", 
+    name: "Friendship Gifts", 
+    icon: "🤝", 
+    gifts: [
+      { id: "fri-400", mobiValue: 400 },
+      { id: "fri-800", mobiValue: 800 },
+      { id: "fri-1500", mobiValue: 1500 },
+      { id: "fri-3000", mobiValue: 3000 },
+    ]
+  },
+  { 
+    id: "getwell", 
+    name: "Get Well Soon Gifts", 
+    icon: "🏥", 
+    gifts: [
+      { id: "gws-400", mobiValue: 400 },
+      { id: "gws-800", mobiValue: 800 },
+      { id: "gws-1500", mobiValue: 1500 },
+      { id: "gws-3000", mobiValue: 3000 },
+    ]
+  },
+  { 
+    id: "goodluck", 
+    name: "Good Luck Gifts", 
+    icon: "🍀", 
+    gifts: [
+      { id: "gl-300", mobiValue: 300 },
+      { id: "gl-700", mobiValue: 700 },
+      { id: "gl-1200", mobiValue: 1200 },
+      { id: "gl-2500", mobiValue: 2500 },
+    ]
+  },
+  { 
+    id: "graduation", 
+    name: "Graduation Gifts", 
+    icon: "🎓", 
+    gifts: [
+      { id: "gra-1000", mobiValue: 1000 },
+      { id: "gra-2000", mobiValue: 2000 },
+      { id: "gra-5000", mobiValue: 5000 },
+      { id: "gra-10000", mobiValue: 10000 },
+    ]
+  },
+  { 
+    id: "newyear", 
+    name: "New Year Gifts", 
+    icon: "🎆", 
+    gifts: [
+      { id: "ny-700", mobiValue: 700 },
+      { id: "ny-1500", mobiValue: 1500 },
+      { id: "ny-3000", mobiValue: 3000 },
+      { id: "ny-7000", mobiValue: 7000 },
+    ]
+  },
+  { 
+    id: "thankyou", 
+    name: "Thank You Gifts", 
+    icon: "🙌", 
+    gifts: [
+      { id: "ty-400", mobiValue: 400 },
+      { id: "ty-800", mobiValue: 800 },
+      { id: "ty-1500", mobiValue: 1500 },
+      { id: "ty-3000", mobiValue: 3000 },
+    ]
+  },
+  { 
+    id: "valentine", 
+    name: "Valentine Gifts", 
+    icon: "💖", 
+    gifts: [
+      { id: "val-1000", mobiValue: 1000 },
+      { id: "val-2500", mobiValue: 2500 },
+      { id: "val-5000", mobiValue: 5000 },
+      { id: "val-10000", mobiValue: 10000 },
+      { id: "val-20000", mobiValue: 20000 },
+    ]
+  },
+  { 
+    id: "wedding", 
+    name: "Wedding Gifts", 
+    icon: "💒", 
+    gifts: [
+      { id: "wed-2000", mobiValue: 2000 },
+      { id: "wed-5000", mobiValue: 5000 },
+      { id: "wed-10000", mobiValue: 10000 },
+      { id: "wed-20000", mobiValue: 20000 },
+      { id: "wed-50000", mobiValue: 50000 },
+    ]
+  },
+];
+
+// Legacy export for backwards compatibility
 export interface SpecialDigitalGift {
   id: string;
   name: string;
@@ -299,28 +538,14 @@ export interface SpecialDigitalGift {
   mobiValue: number;
 }
 
-export const specialDigitalGifts: SpecialDigitalGift[] = [
-  { id: "sdg1", name: "Appreciation Gift", icon: "🙏", mobiValue: 200 },
-  { id: "sdg2", name: "Anniversary Gift", icon: "💑", mobiValue: 500 },
-  { id: "sdg3", name: "Apology Gift", icon: "😔", mobiValue: 150 },
-  { id: "sdg4", name: "Birthday Gift", icon: "🎂", mobiValue: 300 },
-  { id: "sdg5", name: "Celebration Gift", icon: "🎉", mobiValue: 250 },
-  { id: "sdg6", name: "Christmas Gift", icon: "🎄", mobiValue: 400 },
-  { id: "sdg7", name: "Compassion Gift", icon: "❤️", mobiValue: 180 },
-  { id: "sdg8", name: "Congratulation Gift", icon: "🎊", mobiValue: 220 },
-  { id: "sdg9", name: "Crushing Gift", icon: "💘", mobiValue: 350 },
-  { id: "sdg10", name: "Easter Gift", icon: "🐰", mobiValue: 200 },
-  { id: "sdg11", name: "Eid Gift", icon: "🌙", mobiValue: 300 },
-  { id: "sdg12", name: "Encouragement Gift", icon: "💪", mobiValue: 150 },
-  { id: "sdg13", name: "Friendship Gift", icon: "🤝", mobiValue: 180 },
-  { id: "sdg14", name: "Get Well Soon Gift", icon: "🏥", mobiValue: 200 },
-  { id: "sdg15", name: "Good Luck Gift", icon: "🍀", mobiValue: 170 },
-  { id: "sdg16", name: "Graduation Gift", icon: "🎓", mobiValue: 400 },
-  { id: "sdg17", name: "New Year Gift", icon: "🎆", mobiValue: 350 },
-  { id: "sdg18", name: "Thank You Gift", icon: "🙌", mobiValue: 180 },
-  { id: "sdg19", name: "Valentine Gift", icon: "💖", mobiValue: 500 },
-  { id: "sdg20", name: "Wedding Gift", icon: "💒", mobiValue: 1000 },
-];
+export const specialDigitalGifts: SpecialDigitalGift[] = specialDigitalGiftFolders.flatMap(folder => 
+  folder.gifts.map(gift => ({
+    id: gift.id,
+    name: folder.name.replace(" Gifts", ""),
+    icon: folder.icon,
+    mobiValue: gift.mobiValue
+  }))
+);
 
 // Classic Digital Gifts (Categorized)
 export interface ClassicDigitalGift {

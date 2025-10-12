@@ -5,14 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  specialDigitalGifts, 
+  specialDigitalGiftFolders,
   classicDigitalGifts, 
   tangibleGifts, 
   giftsVault,
   mockReceivedGifts 
 } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { Gift, Wallet, Heart, User, ExternalLink } from "lucide-react";
+import { Gift, Wallet, Heart, User, ExternalLink, ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import {
   Select,
@@ -45,6 +45,7 @@ type GiftSelection = {
 export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const { toast } = useToast();
   const [selectedGift, setSelectedGift] = useState<GiftSelection>(null);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
   const [walletBalance] = useState(50000);
 
@@ -151,40 +152,105 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </Card>
       )}
 
-      {/* SECTION 2: Select a Special Digital Gift */}
+      {/* SECTION 2: Select a Special Digital Gift - Folder Structure */}
       <Card className="p-4">
-        <Select 
-          value={selectedGift?.type === 'special' ? selectedGift.giftId : ""} 
-          onValueChange={(value) => {
-            const gift = specialDigitalGifts.find(g => g.id === value);
-            if (gift) {
-              setSelectedGift({
-                type: 'special',
-                giftId: value,
-                giftData: gift
-              });
-            }
-          }}
-        >
-          <SelectTrigger className="w-full h-12">
-            <SelectValue placeholder="Select a Special Digital Gift to Send..." />
-          </SelectTrigger>
-          <SelectContent>
-            {specialDigitalGifts.map(gift => (
-              <SelectItem key={gift.id} value={gift.id}>
-                <div className="flex items-center justify-between gap-4 w-full">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{gift.icon}</span>
-                    <span>{gift.name}</span>
-                  </div>
-                  <span className="font-semibold text-primary">
-                    {gift.mobiValue.toLocaleString()} Mobi
+        <Label className="text-sm font-medium mb-3 block">
+          Select a Special Digital Gift to Send...
+        </Label>
+        
+        {!selectedFolder ? (
+          // Show gift folders
+          <ScrollArea className="h-[320px]">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pr-2">
+              {specialDigitalGiftFolders.map(folder => (
+                <button
+                  key={folder.id}
+                  onClick={() => setSelectedFolder(folder.id)}
+                  className="p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center gap-2 text-center group"
+                >
+                  <span className="text-3xl">{folder.icon}</span>
+                  <span className="text-xs font-medium group-hover:text-primary transition-colors">
+                    {folder.name}
                   </span>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+        ) : (
+          // Show gifts within selected folder
+          <div className="space-y-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedFolder(null);
+                if (selectedGift?.type === 'special') {
+                  setSelectedGift(null);
+                }
+              }}
+              className="mb-2"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back to Folders
+            </Button>
+            
+            {(() => {
+              const folder = specialDigitalGiftFolders.find(f => f.id === selectedFolder);
+              if (!folder) return null;
+              
+              return (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-3 p-2 bg-muted/50 rounded-lg">
+                    <span className="text-2xl">{folder.icon}</span>
+                    <span className="font-semibold">{folder.name}</span>
+                  </div>
+                  
+                  <ScrollArea className="h-[240px] pr-2">
+                    <div className="space-y-2">
+                      {folder.gifts.map(gift => (
+                        <button
+                          key={gift.id}
+                          onClick={() => {
+                            setSelectedGift({
+                              type: 'special',
+                              giftId: gift.id,
+                              giftData: {
+                                id: gift.id,
+                                name: `${folder.name.replace(" Gifts", "")} ${gift.mobiValue.toLocaleString()} Mobi`,
+                                icon: folder.icon,
+                                mobiValue: gift.mobiValue
+                              }
+                            });
+                          }}
+                          className={cn(
+                            "w-full p-3 rounded-lg border-2 transition-all",
+                            "flex items-center justify-between",
+                            "hover:bg-muted/50 hover:shadow-md",
+                            selectedGift?.type === 'special' && selectedGift.giftId === gift.id
+                              ? "border-primary bg-primary/5 shadow-sm"
+                              : "border-border"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{folder.icon}</span>
+                            <span className="font-medium text-sm">
+                              {folder.name.replace(" Gifts", "")} - {gift.mobiValue.toLocaleString()} Mobi
+                            </span>
+                          </div>
+                          {selectedGift?.type === 'special' && selectedGift.giftId === gift.id && (
+                            <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                              <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              );
+            })()}
+          </div>
+        )}
       </Card>
 
       {/* SECTION 3: Select Classic Digital Gift - LIST VIEW */}
