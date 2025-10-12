@@ -131,7 +131,7 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
   };
 
   return (
-    <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+    <div className="space-y-4">
       {colleagues.map((colleague) => (
         <div key={colleague.id} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/50 rounded-lg flex-wrap sm:flex-nowrap">
           <div className="flex items-center gap-3 flex-1 min-w-0">

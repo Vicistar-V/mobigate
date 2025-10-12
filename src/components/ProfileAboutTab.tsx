@@ -568,7 +568,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {schoolMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors flex-wrap sm:flex-nowrap min-w-0">
                     <div className="flex-shrink-0">
                       <Avatar 
                         className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
@@ -595,7 +595,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "schoolmate")}
-                      className="text-xs shrink-0"
+                      className="text-xs shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -629,7 +629,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {classmates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors flex-wrap sm:flex-nowrap min-w-0">
                     <div className="flex-shrink-0">
                       <Avatar 
                         className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
@@ -656,7 +656,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "classmate")}
-                      className="text-xs shrink-0"
+                      className="text-xs shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -690,7 +690,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {ageMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors flex-wrap sm:flex-nowrap min-w-0">
                     <div className="flex-shrink-0">
                       <Avatar 
                         className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
@@ -717,7 +717,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "agemate")}
-                      className="text-xs shrink-0"
+                      className="text-xs shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -751,7 +751,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {workColleagues.map((colleague, index) => (
                 <div key={colleague.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors flex-wrap sm:flex-nowrap min-w-0">
                     <div className="flex-shrink-0">
                       <Avatar 
                         className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
@@ -778,7 +778,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(colleague, "colleague")}
-                      className="text-xs shrink-0"
+                      className="text-xs shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
