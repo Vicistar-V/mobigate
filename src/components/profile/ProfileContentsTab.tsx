@@ -3,8 +3,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp } from "lucide-react";
+import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal } from "lucide-react";
 import { getPostsByUserId, Post } from "@/data/posts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProfileContentsTabProps {
   userName: string;
@@ -65,12 +71,53 @@ const sortContent = (posts: Post[], sortBy: string) => {
 export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps) => {
   const [sortBy, setSortBy] = useState<string>("recent");
   const [visibleCount, setVisibleCount] = useState<number>(15);
+  const [contentFilter, setContentFilter] = useState<string>("all");
+
+  // Filter options configuration
+  const primaryFilters = [
+    { value: "all", label: "All", icon: null },
+    { value: "Video", label: "Videos", icon: Video },
+    { value: "Photo", label: "Photos", icon: Image },
+    { value: "Article", label: "Articles", icon: FileText },
+  ];
+
+  const moreFilters = [
+    { value: "Audio", label: "Audio", icon: Music },
+    { value: "PDF", label: "PDF", icon: FileIcon },
+    { value: "URL", label: "URL Links", icon: Link },
+  ];
 
   // Fetch user's posts
   const userPosts = useMemo(() => getPostsByUserId(userId), [userId]);
   
-  // Apply sorting
-  const sortedPosts = useMemo(() => sortContent(userPosts, sortBy), [userPosts, sortBy]);
+  // Calculate content counts
+  const contentCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      all: userPosts.length,
+      Video: 0,
+      Photo: 0,
+      Article: 0,
+      Audio: 0,
+      PDF: 0,
+      URL: 0,
+    };
+    
+    userPosts.forEach(post => {
+      counts[post.type] = (counts[post.type] || 0) + 1;
+    });
+    
+    return counts;
+  }, [userPosts]);
+
+  // Filter content by type
+  const filterContent = (posts: Post[], filterType: string) => {
+    if (filterType === "all") return posts;
+    return posts.filter(post => post.type === filterType);
+  };
+
+  // Apply filtering first, then sorting
+  const filteredPosts = useMemo(() => filterContent(userPosts, contentFilter), [userPosts, contentFilter]);
+  const sortedPosts = useMemo(() => sortContent(filteredPosts, sortBy), [filteredPosts, sortBy]);
   
   // Get visible posts based on pagination
   const visiblePosts = sortedPosts.slice(0, visibleCount);
@@ -103,22 +150,81 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   return (
     <div className="space-y-4">
       {/* Header Section */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h2 className="text-lg font-semibold">
-          All Contents <span className="text-muted-foreground">({sortedPosts.length})</span>
-        </h2>
-        
-        {/* Sort Dropdown */}
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="recent">Most Recent</SelectItem>
-            <SelectItem value="popular">Most Popular</SelectItem>
-            <SelectItem value="oldest">Oldest First</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <h2 className="text-lg font-semibold">
+            All Contents <span className="text-muted-foreground">({sortedPosts.length})</span>
+          </h2>
+          
+          {/* Sort Dropdown */}
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="popular">Most Popular</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Content Type Filters */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Primary Filters */}
+          {primaryFilters.map((filter) => {
+            const isActive = contentFilter === filter.value;
+            const Icon = filter.icon;
+            const count = contentCounts[filter.value] || 0;
+            
+            return (
+              <Button
+                key={filter.value}
+                variant={isActive ? "default" : "outline"}
+                size="sm"
+                onClick={() => setContentFilter(filter.value)}
+                className="gap-1.5"
+              >
+                {Icon && <Icon className="h-4 w-4" />}
+                <span>{filter.label}</span>
+                <span className={isActive ? "opacity-90" : "text-muted-foreground"}>
+                  ({count})
+                </span>
+              </Button>
+            );
+          })}
+
+          {/* More Filters Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <MoreHorizontal className="h-4 w-4" />
+                <span>More</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              {moreFilters.map((filter) => {
+                const isActive = contentFilter === filter.value;
+                const Icon = filter.icon;
+                const count = contentCounts[filter.value] || 0;
+                
+                return (
+                  <DropdownMenuItem
+                    key={filter.value}
+                    onClick={() => setContentFilter(filter.value)}
+                    className={isActive ? "bg-accent" : ""}
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    <span>{filter.label}</span>
+                    <span className="ml-auto text-muted-foreground text-xs">
+                      ({count})
+                    </span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Content List */}
