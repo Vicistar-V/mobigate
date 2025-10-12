@@ -722,6 +722,64 @@ export const mockReceivedGifts: ReceivedGift[] = [
   }
 ];
 
+export interface SentGift {
+  giftId: string;
+  giftName: string;
+  icon: string;
+  mobiValue: number;
+  toUserId: string;
+  toUserName: string;
+  date: string;
+}
+
+export const mockSentGifts: SentGift[] = [
+  {
+    giftId: "1",
+    giftName: "Red Rose",
+    icon: "🌹",
+    mobiValue: 50,
+    toUserId: "6",
+    toUserName: "DAVID MARTINEZ",
+    date: "2025-10-10"
+  },
+  {
+    giftId: "3",
+    giftName: "Birthday Cake",
+    icon: "🎂",
+    mobiValue: 100,
+    toUserId: "7",
+    toUserName: "JENNIFER TAYLOR",
+    date: "2025-10-09"
+  },
+  {
+    giftId: "9",
+    giftName: "Watch",
+    icon: "⌚",
+    mobiValue: 2000,
+    toUserId: "8",
+    toUserName: "ROBERT BROWN",
+    date: "2025-10-08"
+  },
+  {
+    giftId: "4",
+    giftName: "Champagne",
+    icon: "🍾",
+    mobiValue: 500,
+    toUserId: "5",
+    toUserName: "LISA ANDERSON",
+    date: "2025-10-07"
+  },
+  {
+    giftId: "2",
+    giftName: "Diamond Ring",
+    icon: "💍",
+    mobiValue: 5000,
+    toUserId: "6",
+    toUserName: "DAVID MARTINEZ",
+    date: "2025-10-05"
+  }
+];
+
 // Mock Followers Data
 export const mockFollowers: Follower[] = [
   {
