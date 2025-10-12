@@ -28,6 +28,7 @@ import { ProfileLikesTab } from "@/components/profile/ProfileLikesTab";
 import { ProfileGiftsTab } from "@/components/profile/ProfileGiftsTab";
 import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
 import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
+import { ProfileContentsTab } from "@/components/profile/ProfileContentsTab";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState<string>("status");
@@ -656,10 +657,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="contents">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Contents</h2>
-              <p className="text-muted-foreground">User contents will be displayed here.</p>
-            </Card>
+            <ProfileContentsTab userName={userProfile.name} userId="1" />
           </TabsContent>
 
           <TabsContent value="gifts">
