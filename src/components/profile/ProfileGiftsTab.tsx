@@ -28,18 +28,28 @@ interface ProfileGiftsTabProps {
   userId?: string;
 }
 
+type GiftSelection = {
+  type: 'special' | 'classic' | 'tangible';
+  giftId: string;
+  giftData: {
+    id: string;
+    name: string;
+    mobiValue: number;
+    icon?: string;
+    image?: string;
+    category?: string;
+    description?: string;
+  };
+} | null;
+
 export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const { toast } = useToast();
-  const [selectedSpecialGift, setSelectedSpecialGift] = useState<string>("");
-  const [selectedClassicGift, setSelectedClassicGift] = useState<string>("");
-  const [selectedTangibleGift, setSelectedTangibleGift] = useState<string>("");
+  const [selectedGift, setSelectedGift] = useState<GiftSelection>(null);
   const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
   const [walletBalance] = useState(50000);
 
   const handleSendGift = () => {
-    const selectedGiftId = selectedSpecialGift || selectedClassicGift || selectedTangibleGift;
-    
-    if (!selectedGiftId) {
+    if (!selectedGift) {
       toast({
         title: "No Gift Selected",
         description: "Please select a gift to send",
@@ -48,33 +58,12 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
       return;
     }
 
-    let giftName = "";
-    let giftValue = 0;
-
-    if (selectedSpecialGift) {
-      const gift = specialDigitalGifts.find(g => g.id === selectedSpecialGift);
-      if (gift) {
-        giftName = gift.name;
-        giftValue = gift.mobiValue;
-      }
-    } else if (selectedClassicGift) {
-      const gift = classicDigitalGifts.find(g => g.id === selectedClassicGift);
-      if (gift) {
-        giftName = gift.name;
-        giftValue = gift.mobiValue;
-      }
-    } else if (selectedTangibleGift) {
-      const gift = tangibleGifts.find(g => g.id === selectedTangibleGift);
-      if (gift) {
-        giftName = gift.name;
-        giftValue = gift.mobiValue;
-      }
-    }
-
-    if (walletBalance < giftValue) {
+    const { giftData } = selectedGift;
+    
+    if (walletBalance < giftData.mobiValue) {
       toast({
         title: "Insufficient Funds",
-        description: `You need ${giftValue.toLocaleString()} Mobi. Your balance is ${walletBalance.toLocaleString()} Mobi.`,
+        description: `You need ${giftData.mobiValue.toLocaleString()} Mobi. Your balance is ${walletBalance.toLocaleString()} Mobi.`,
         variant: "destructive",
       });
       return;
@@ -82,14 +71,12 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
     toast({
       title: "Gift Sent! 🎁",
-      description: `You sent ${giftName} to ${userName}`,
+      description: `You sent ${giftData.name} to ${userName}`,
       className: "bg-success/10 border-success",
     });
 
-    // Reset selections
-    setSelectedSpecialGift("");
-    setSelectedClassicGift("");
-    setSelectedTangibleGift("");
+    // Clear selection
+    setSelectedGift(null);
   };
 
   const getCategoryColor = (category: string) => {
@@ -127,12 +114,61 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </div>
       </Card>
 
+      {/* Selection Indicator */}
+      {selectedGift && (
+        <Card className="p-3 bg-primary/5 border-primary">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Badge variant="default" className="text-xs shrink-0">
+                {selectedGift.type === 'special' && 'Special Digital'}
+                {selectedGift.type === 'classic' && 'Classic Digital'}
+                {selectedGift.type === 'tangible' && 'Tangible Gift'}
+              </Badge>
+              {selectedGift.giftData.icon && (
+                <span className="text-sm">{selectedGift.giftData.icon}</span>
+              )}
+              {selectedGift.type === 'tangible' && !selectedGift.giftData.icon && (
+                <Gift className="h-4 w-4 text-primary" />
+              )}
+              <span className="text-sm font-medium truncate">
+                {selectedGift.giftData.name}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-sm font-bold text-primary">
+                {selectedGift.giftData.mobiValue.toLocaleString()} Mobi
+              </span>
+              <Button
+                onClick={() => setSelectedGift(null)}
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* SECTION 2: Select a Special Digital Gift */}
       <Card className="p-4">
         <Label className="text-sm font-medium mb-3 block">
           Select a Special Digital Gift to Send...
         </Label>
-        <Select value={selectedSpecialGift} onValueChange={setSelectedSpecialGift}>
+        <Select 
+          value={selectedGift?.type === 'special' ? selectedGift.giftId : ""} 
+          onValueChange={(value) => {
+            const gift = specialDigitalGifts.find(g => g.id === value);
+            if (gift) {
+              setSelectedGift({
+                type: 'special',
+                giftId: value,
+                giftData: gift
+              });
+            }
+          }}
+        >
           <SelectTrigger className="w-full h-12">
             <SelectValue placeholder="Select..." />
           </SelectTrigger>
@@ -164,12 +200,18 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
             {classicDigitalGifts.map(gift => (
               <button
                 key={gift.id}
-                onClick={() => setSelectedClassicGift(gift.id)}
+                onClick={() => {
+                  setSelectedGift({
+                    type: 'classic',
+                    giftId: gift.id,
+                    giftData: gift
+                  });
+                }}
                 className={cn(
                   "w-full p-3 rounded-lg border-2 transition-all",
                   "flex items-center justify-between",
                   "hover:bg-muted/50 hover:shadow-md",
-                  selectedClassicGift === gift.id
+                  selectedGift?.type === 'classic' && selectedGift.giftId === gift.id
                     ? "border-primary bg-primary/5 shadow-sm"
                     : "border-border"
                 )}
@@ -231,10 +273,16 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
               {tangibleGifts.map(gift => (
                 <button
                   key={gift.id}
-                  onClick={() => setSelectedTangibleGift(gift.id)}
+                  onClick={() => {
+                    setSelectedGift({
+                      type: 'tangible',
+                      giftId: gift.id,
+                      giftData: gift
+                    });
+                  }}
                   className={cn(
                     "border-2 rounded-lg overflow-hidden transition-all hover:shadow-lg",
-                    selectedTangibleGift === gift.id
+                    selectedGift?.type === 'tangible' && selectedGift.giftId === gift.id
                       ? "border-primary shadow-md"
                       : "border-border"
                   )}
@@ -261,11 +309,14 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
       {/* SECTION 5: Send Gift Button */}
       <Button
         onClick={handleSendGift}
-        disabled={!selectedSpecialGift && !selectedClassicGift && !selectedTangibleGift}
+        disabled={!selectedGift}
         className="w-full h-12 text-base font-semibold"
       >
         <Gift className="h-5 w-5 mr-2" />
-        Send Gift
+        {selectedGift 
+          ? `Send Gift (${selectedGift.giftData.mobiValue.toLocaleString()} Mobi)`
+          : 'Send Gift'
+        }
       </Button>
 
       {/* SECTION 6: Mobi-Store Prompt */}
