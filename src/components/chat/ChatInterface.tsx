@@ -44,8 +44,8 @@ export const ChatInterface = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
       {/* Chat Header */}
-      <div className="px-4 py-2.5 border-b flex items-center gap-3 bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
-        <div className="relative">
+      <div className="px-4 py-[10px] border-b flex items-center bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
+        <div className="relative mr-[15px]">
           <Avatar className="h-10 w-10">
             <AvatarImage src={conversation.user.avatar} />
             <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
@@ -54,21 +54,21 @@ export const ChatInterface = ({
             <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
           )}
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-[#111b21] text-base">{conversation.user.name}</h3>
-          <p className="text-xs text-[#667781]">
+          <p className="text-[13px] text-[#667781]">
             {conversation.user.isOnline ? "online" : "Offline"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
-            <Video className="h-5 w-5" />
+        <div className="flex items-center">
+          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
+            <Video className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
-            <Phone className="h-5 w-5" />
+          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
+            <Phone className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
-            <MoreVertical className="h-5 w-5" />
+          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
+            <MoreVertical className="h-6 w-6" />
           </Button>
         </div>
       </div>
