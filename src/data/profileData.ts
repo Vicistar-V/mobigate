@@ -291,7 +291,150 @@ export const mockLikes: LikeEntry[] = [
   }
 ];
 
-// Mock Gifts Data
+// Special Digital Gifts (Occasion-based)
+export interface SpecialDigitalGift {
+  id: string;
+  name: string;
+  icon: string;
+  mobiValue: number;
+}
+
+export const specialDigitalGifts: SpecialDigitalGift[] = [
+  { id: "sdg1", name: "Appreciation Gift", icon: "🙏", mobiValue: 200 },
+  { id: "sdg2", name: "Anniversary Gift", icon: "💑", mobiValue: 500 },
+  { id: "sdg3", name: "Apology Gift", icon: "😔", mobiValue: 150 },
+  { id: "sdg4", name: "Birthday Gift", icon: "🎂", mobiValue: 300 },
+  { id: "sdg5", name: "Celebration Gift", icon: "🎉", mobiValue: 250 },
+  { id: "sdg6", name: "Christmas Gift", icon: "🎄", mobiValue: 400 },
+  { id: "sdg7", name: "Compassion Gift", icon: "❤️", mobiValue: 180 },
+  { id: "sdg8", name: "Congratulation Gift", icon: "🎊", mobiValue: 220 },
+  { id: "sdg9", name: "Crushing Gift", icon: "💘", mobiValue: 350 },
+  { id: "sdg10", name: "Easter Gift", icon: "🐰", mobiValue: 200 },
+  { id: "sdg11", name: "Eid Gift", icon: "🌙", mobiValue: 300 },
+  { id: "sdg12", name: "Encouragement Gift", icon: "💪", mobiValue: 150 },
+  { id: "sdg13", name: "Friendship Gift", icon: "🤝", mobiValue: 180 },
+  { id: "sdg14", name: "Get Well Soon Gift", icon: "🏥", mobiValue: 200 },
+  { id: "sdg15", name: "Good Luck Gift", icon: "🍀", mobiValue: 170 },
+  { id: "sdg16", name: "Graduation Gift", icon: "🎓", mobiValue: 400 },
+  { id: "sdg17", name: "New Year Gift", icon: "🎆", mobiValue: 350 },
+  { id: "sdg18", name: "Thank You Gift", icon: "🙌", mobiValue: 180 },
+  { id: "sdg19", name: "Valentine Gift", icon: "💖", mobiValue: 500 },
+  { id: "sdg20", name: "Wedding Gift", icon: "💒", mobiValue: 1000 },
+];
+
+// Classic Digital Gifts (Categorized)
+export interface ClassicDigitalGift {
+  id: string;
+  name: string;
+  icon: string;
+  category: string;
+  mobiValue: number;
+  description?: string;
+}
+
+export const classicDigitalGifts: ClassicDigitalGift[] = [
+  { id: "cdg1", name: "Red Rose", icon: "🌹", category: "Sweet", mobiValue: 50, description: "A symbol of love" },
+  { id: "cdg2", name: "Chocolate Bar", icon: "🍫", category: "Sweet", mobiValue: 100, description: "Sweet treat" },
+  { id: "cdg3", name: "Teddy Bear", icon: "🧸", category: "Sweet", mobiValue: 150, description: "Cuddly companion" },
+  { id: "cdg4", name: "Cupcake", icon: "🧁", category: "Sweet", mobiValue: 75, description: "Delicious dessert" },
+  { id: "cdg5", name: "Ice Cream", icon: "🍦", category: "Sweet", mobiValue: 80, description: "Cool treat" },
+  
+  { id: "cdg6", name: "Breakfast Pack", icon: "🍳", category: "Meal-Ticket", mobiValue: 1500, description: "Start the day right" },
+  { id: "cdg7", name: "Lunch Pack", icon: "🍱", category: "Meal-Ticket", mobiValue: 3500, description: "Midday feast" },
+  { id: "cdg8", name: "Dinner Pack", icon: "🍽️", category: "Meal-Ticket", mobiValue: 2500, description: "Evening delight" },
+  { id: "cdg9", name: "Snack Pack", icon: "🍿", category: "Meal-Ticket", mobiValue: 1000, description: "Quick bite" },
+  
+  { id: "cdg10", name: "Champagne", icon: "🍾", category: "Special", mobiValue: 15000, description: "Celebrate in style" },
+  { id: "cdg11", name: "Wine Bottle", icon: "🍷", category: "Special", mobiValue: 8000, description: "Fine wine" },
+  { id: "cdg12", name: "Cocktail", icon: "🍸", category: "Special", mobiValue: 5000, description: "Premium drink" },
+  
+  { id: "cdg13", name: "Perfume", icon: "💐", category: "Emotion", mobiValue: 5000, description: "Signature scent" },
+  { id: "cdg14", name: "Love Letter", icon: "💌", category: "Emotion", mobiValue: 3000, description: "Words from heart" },
+  { id: "cdg15", name: "Bouquet", icon: "💐", category: "Emotion", mobiValue: 4000, description: "Beautiful flowers" },
+  
+  { id: "cdg16", name: "Wrist Watch", icon: "⌚", category: "Premium", mobiValue: 10000, description: "Luxury timepiece" },
+  { id: "cdg17", name: "Diamond Ring", icon: "💍", category: "Premium", mobiValue: 50000, description: "Forever symbol" },
+  { id: "cdg18", name: "Gold Necklace", icon: "📿", category: "Premium", mobiValue: 35000, description: "Elegant jewelry" },
+  { id: "cdg19", name: "Designer Bag", icon: "👜", category: "Premium", mobiValue: 45000, description: "Fashion statement" },
+  
+  { id: "cdg20", name: "Mansion", icon: "🏰", category: "House", mobiValue: 500000, description: "Dream home" },
+  { id: "cdg21", name: "Villa", icon: "🏡", category: "House", mobiValue: 350000, description: "Luxury villa" },
+  { id: "cdg22", name: "Penthouse", icon: "🏢", category: "House", mobiValue: 450000, description: "Sky high living" },
+  
+  { id: "cdg23", name: "Sole Trip", icon: "✈️", category: "T-Fare", mobiValue: 10000, description: "Solo adventure" },
+  { id: "cdg24", name: "Couple Trip", icon: "🛫", category: "T-Fare", mobiValue: 20000, description: "Romantic getaway" },
+  { id: "cdg25", name: "Family Trip", icon: "🌍", category: "T-Fare", mobiValue: 35000, description: "Family vacation" },
+  
+  { id: "cdg26", name: "Sports Car", icon: "🏎️", category: "Luxury", mobiValue: 100000, description: "Speed demon" },
+  { id: "cdg27", name: "Yacht", icon: "🛥️", category: "Luxury", mobiValue: 250000, description: "Ocean luxury" },
+  { id: "cdg28", name: "Private Jet", icon: "🛩️", category: "Luxury", mobiValue: 500000, description: "Sky luxury" },
+];
+
+// Tangible Mobi-store Gifts
+export interface TangibleGift {
+  id: string;
+  name: string;
+  image: string;
+  mobiValue: number;
+  description: string;
+  category?: string;
+}
+
+export const tangibleGifts: TangibleGift[] = [
+  { 
+    id: "tg1", 
+    name: "Premium Watch", 
+    image: "/placeholder.svg", 
+    mobiValue: 25000,
+    description: "Luxury timepiece with premium materials",
+    category: "Accessories"
+  },
+  { 
+    id: "tg2", 
+    name: "Designer Handbag", 
+    image: "/placeholder.svg", 
+    mobiValue: 45000,
+    description: "Authentic designer bag in premium leather",
+    category: "Fashion"
+  },
+  { 
+    id: "tg3", 
+    name: "Wireless Earbuds", 
+    image: "/placeholder.svg", 
+    mobiValue: 8000,
+    description: "High-quality audio experience",
+    category: "Electronics"
+  },
+  { 
+    id: "tg4", 
+    name: "Perfume Set", 
+    image: "/placeholder.svg", 
+    mobiValue: 12000,
+    description: "Luxury fragrance collection",
+    category: "Beauty"
+  },
+  { 
+    id: "tg5", 
+    name: "Smart Watch", 
+    image: "/placeholder.svg", 
+    mobiValue: 35000,
+    description: "Latest technology on your wrist",
+    category: "Electronics"
+  },
+  { 
+    id: "tg6", 
+    name: "Leather Wallet", 
+    image: "/placeholder.svg", 
+    mobiValue: 6000,
+    description: "Genuine leather craftsmanship",
+    category: "Accessories"
+  },
+];
+
+// Gifts Vault (Saved items for quick gifting)
+export const giftsVault: TangibleGift[] = [];
+
+// Legacy mock gifts for backward compatibility
 export const mockGifts: Gift[] = [
   { id: "1", name: "Red Rose", mobiValue: 50, icon: "🌹" },
   { id: "2", name: "Diamond Ring", mobiValue: 5000, icon: "💍" },

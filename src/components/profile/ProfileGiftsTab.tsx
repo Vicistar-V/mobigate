@@ -1,9 +1,18 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockGifts, mockReceivedGifts } from "@/data/profileData";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  specialDigitalGifts, 
+  classicDigitalGifts, 
+  tangibleGifts, 
+  giftsVault,
+  mockReceivedGifts 
+} from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { Gift, Wallet, Heart, User, ChevronDown } from "lucide-react";
+import { Gift, Wallet, Heart, User, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import {
   Select,
@@ -12,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 interface ProfileGiftsTabProps {
   userName: string;
@@ -21,21 +30,51 @@ interface ProfileGiftsTabProps {
 
 export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const { toast } = useToast();
-  const [selectedGift, setSelectedGift] = useState<string>("");
-  const [walletBalance] = useState(1);
-  const [isReceivedOpen, setIsReceivedOpen] = useState(true);
-
-  const totalGiftsValue = mockReceivedGifts.reduce((sum, gift) => sum + gift.mobiValue, 0);
-  const totalGiftsCount = mockReceivedGifts.length;
+  const [selectedSpecialGift, setSelectedSpecialGift] = useState<string>("");
+  const [selectedClassicGift, setSelectedClassicGift] = useState<string>("");
+  const [selectedTangibleGift, setSelectedTangibleGift] = useState<string>("");
+  const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
+  const [walletBalance] = useState(50000);
 
   const handleSendGift = () => {
-    const gift = mockGifts.find(g => g.id === selectedGift);
-    if (!gift) return;
+    const selectedGiftId = selectedSpecialGift || selectedClassicGift || selectedTangibleGift;
+    
+    if (!selectedGiftId) {
+      toast({
+        title: "No Gift Selected",
+        description: "Please select a gift to send",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    if (walletBalance < gift.mobiValue) {
+    let giftName = "";
+    let giftValue = 0;
+
+    if (selectedSpecialGift) {
+      const gift = specialDigitalGifts.find(g => g.id === selectedSpecialGift);
+      if (gift) {
+        giftName = gift.name;
+        giftValue = gift.mobiValue;
+      }
+    } else if (selectedClassicGift) {
+      const gift = classicDigitalGifts.find(g => g.id === selectedClassicGift);
+      if (gift) {
+        giftName = gift.name;
+        giftValue = gift.mobiValue;
+      }
+    } else if (selectedTangibleGift) {
+      const gift = tangibleGifts.find(g => g.id === selectedTangibleGift);
+      if (gift) {
+        giftName = gift.name;
+        giftValue = gift.mobiValue;
+      }
+    }
+
+    if (walletBalance < giftValue) {
       toast({
         title: "Insufficient Funds",
-        description: `You need ${gift.mobiValue} Mobi to send this gift. Your balance is ${walletBalance} Mobi.`,
+        description: `You need ${giftValue.toLocaleString()} Mobi. Your balance is ${walletBalance.toLocaleString()} Mobi.`,
         variant: "destructive",
       });
       return;
@@ -43,10 +82,28 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
     toast({
       title: "Gift Sent! 🎁",
-      description: `You sent ${gift.name} to ${userName}`,
+      description: `You sent ${giftName} to ${userName}`,
       className: "bg-success/10 border-success",
     });
-    setSelectedGift("");
+
+    // Reset selections
+    setSelectedSpecialGift("");
+    setSelectedClassicGift("");
+    setSelectedTangibleGift("");
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      "Sweet": "bg-pink-500/10 text-pink-700 border-pink-500/20",
+      "Meal-Ticket": "bg-green-500/10 text-green-700 border-green-500/20",
+      "Special": "bg-purple-500/10 text-purple-700 border-purple-500/20",
+      "Premium": "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
+      "T-Fare": "bg-blue-500/10 text-blue-700 border-blue-500/20",
+      "Emotion": "bg-red-500/10 text-red-700 border-red-500/20",
+      "House": "bg-orange-500/10 text-orange-700 border-orange-500/20",
+      "Luxury": "bg-indigo-500/10 text-indigo-700 border-indigo-500/20",
+    };
+    return colors[category] || "bg-muted text-muted-foreground";
   };
 
   const getValueCategory = (value: number) => {
@@ -58,162 +115,225 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
   return (
     <div className="space-y-6 pb-6">
-      {/* Header Stats */}
-      <div className="space-y-1">
-        <h2 className="text-lg font-bold uppercase">
-          GIFTS FOR {userName}
-        </h2>
-        <p className="text-sm text-primary/80">
-          {totalGiftsCount} gift{totalGiftsCount !== 1 ? 's' : ''} received • Total value: {totalGiftsValue.toLocaleString()} Mobi
-        </p>
-      </div>
-
-      {/* Send Gift Section */}
-      <Card className="p-4 space-y-4">
-        <h3 className="text-base font-bold uppercase">Send {userName} a Gift</h3>
-        
-        {/* Minimalist Wallet Balance */}
+      {/* SECTION 1: Send Gift Header */}
+      <Card className="p-4 bg-gradient-to-r from-primary/5 to-primary/10">
+        <h3 className="text-base font-bold uppercase mb-2">
+          SEND {userName.toUpperCase()} A GIFT
+        </h3>
         <div className="flex items-center gap-2 text-sm">
-          <Wallet className="h-4 w-4 text-muted-foreground" />
+          <Wallet className="h-4 w-4 text-primary" />
           <span className="text-muted-foreground">Balance:</span>
-          <span className="font-semibold">{walletBalance} Mobi</span>
+          <span className="font-bold text-primary">{walletBalance.toLocaleString()} Mobi</span>
         </div>
-
-        {/* Gift Selection Dropdown */}
-        <div className="space-y-2">
-          <Select value={selectedGift} onValueChange={setSelectedGift}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a gift to send..." />
-            </SelectTrigger>
-            <SelectContent>
-              {mockGifts.map((gift) => {
-                const canAfford = walletBalance >= gift.mobiValue;
-                const category = getValueCategory(gift.mobiValue);
-                
-                return (
-                  <SelectItem 
-                    key={gift.id} 
-                    value={gift.id}
-                    disabled={!canAfford}
-                  >
-                    <div className="flex items-center justify-between gap-3 w-full">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{gift.icon}</span>
-                        <span>{gift.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={`${category.color} text-xs`}>
-                          {category.label}
-                        </Badge>
-                        <span className="text-sm font-semibold text-primary">
-                          {gift.mobiValue} Mobi
-                        </span>
-                      </div>
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Send Button */}
-        <Button 
-          onClick={handleSendGift}
-          disabled={!selectedGift}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-        >
-          <Gift className="h-4 w-4" />
-          Send Gift
-        </Button>
       </Card>
 
-      {/* Received Gifts Section - Collapsible */}
-      {mockReceivedGifts.length > 0 && (
-        <Card>
-          <Collapsible open={isReceivedOpen} onOpenChange={setIsReceivedOpen}>
-            <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-primary" />
-                <h3 className="text-base font-bold uppercase">
-                  Received Gifts ({totalGiftsCount})
-                </h3>
-              </div>
-              <ChevronDown className={`h-5 w-5 transition-transform ${isReceivedOpen ? 'rotate-180' : ''}`} />
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              <div className="p-4 pt-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockReceivedGifts.map((gift, index) => {
-                    const category = getValueCategory(gift.mobiValue);
-                    
-                    return (
-                      <Card 
-                        key={`${gift.giftId}-${index}`} 
-                        className="p-4 hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
-                      >
-                        <div className="flex gap-4">
-                          {/* Gift Icon */}
-                          <div className="flex-shrink-0">
-                            <div className="text-5xl">
-                              {gift.icon}
-                            </div>
-                          </div>
-
-                          {/* Gift Details */}
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div>
-                              <p className="font-bold text-base">{gift.giftName}</p>
-                              <p className="text-lg font-bold text-primary">
-                                {gift.mobiValue} Mobi
-                              </p>
-                            </div>
-
-                            <Badge className={`${category.color} text-xs`}>
-                              {category.label}
-                            </Badge>
-
-                            {/* Sender Info */}
-                            <div className="pt-2 border-t space-y-1">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1 bg-muted rounded-full">
-                                  <User className="h-3 w-3" />
-                                </div>
-                                <p className="text-xs font-medium text-muted-foreground">
-                                  From {gift.fromUserName}
-                                </p>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(gift.date).toLocaleDateString('en-US', { 
-                                  month: 'short', 
-                                  day: 'numeric', 
-                                  year: 'numeric' 
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    );
-                  })}
+      {/* SECTION 2: Select a Special Digital Gift */}
+      <Card className="p-4">
+        <Label className="text-sm font-medium mb-3 block">
+          Select a Special Digital Gift to Send...
+        </Label>
+        <Select value={selectedSpecialGift} onValueChange={setSelectedSpecialGift}>
+          <SelectTrigger className="w-full h-12">
+            <SelectValue placeholder="Select..." />
+          </SelectTrigger>
+          <SelectContent>
+            {specialDigitalGifts.map(gift => (
+              <SelectItem key={gift.id} value={gift.id}>
+                <div className="flex items-center justify-between gap-4 w-full">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{gift.icon}</span>
+                    <span>{gift.name}</span>
+                  </div>
+                  <span className="font-semibold text-primary">
+                    {gift.mobiValue.toLocaleString()} Mobi
+                  </span>
                 </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-      )}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Card>
 
-      {/* Empty State */}
-      {mockReceivedGifts.length === 0 && (
-        <Card className="p-12 text-center">
-          <div className="text-6xl mb-4">🎁</div>
-          <h3 className="text-lg font-bold mb-2">No Gifts Yet</h3>
-          <p className="text-sm text-muted-foreground">
-            {userName} hasn't received any gifts yet. Be the first to send one!
-          </p>
-        </Card>
-      )}
+      {/* SECTION 3: Select Classic Digital Gift - LIST VIEW */}
+      <Card className="p-4">
+        <Label className="text-sm font-medium mb-3 block">
+          Select Classic Digital Gift to Send...
+        </Label>
+        <ScrollArea className="h-[320px] pr-2">
+          <div className="space-y-2">
+            {classicDigitalGifts.map(gift => (
+              <button
+                key={gift.id}
+                onClick={() => setSelectedClassicGift(gift.id)}
+                className={cn(
+                  "w-full p-3 rounded-lg border-2 transition-all",
+                  "flex items-center justify-between",
+                  "hover:bg-muted/50 hover:shadow-md",
+                  selectedClassicGift === gift.id
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-border"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{gift.icon}</span>
+                  <div className="text-left">
+                    <p className="font-medium text-sm">{gift.name}</p>
+                    <Badge variant="outline" className={cn("text-xs mt-1", getCategoryColor(gift.category))}>
+                      {gift.category}
+                    </Badge>
+                  </div>
+                </div>
+                <span className="font-bold text-primary text-sm">
+                  {gift.mobiValue.toLocaleString()} Mobi
+                </span>
+              </button>
+            ))}
+          </div>
+        </ScrollArea>
+      </Card>
+
+      {/* SECTION 4: Select Tangible Mobi-store Gift - TABBED */}
+      <Card className="p-4">
+        <Label className="text-sm font-medium mb-3 block">
+          Select a Tangible Mobi-store Gift to Send...
+        </Label>
+        
+        <Tabs value={tangibleGiftTab} onValueChange={(v) => setTangibleGiftTab(v as any)}>
+          <TabsList className="w-full grid grid-cols-2 mb-4">
+            <TabsTrigger value="vault">Gifts Vault</TabsTrigger>
+            <TabsTrigger value="buy">Buy Gifts Items</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="vault" className="mt-0">
+            <div className="flex gap-2 mb-4">
+              <Button variant="outline" size="sm" className="flex-1 text-xs">
+                In Love
+              </Button>
+              <Button variant="outline" size="sm" className="flex-1 text-xs">
+                Buy Gifts Items
+              </Button>
+            </div>
+            {giftsVault.length === 0 && (
+              <div className="text-center py-12">
+                <Heart className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  No saved gifts in vault
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Save your favorite gifts for quick access
+                </p>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="buy" className="mt-0">
+            <div className="grid grid-cols-2 gap-3">
+              {tangibleGifts.map(gift => (
+                <button
+                  key={gift.id}
+                  onClick={() => setSelectedTangibleGift(gift.id)}
+                  className={cn(
+                    "border-2 rounded-lg overflow-hidden transition-all hover:shadow-lg",
+                    selectedTangibleGift === gift.id
+                      ? "border-primary shadow-md"
+                      : "border-border"
+                  )}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+                    <Gift className="h-12 w-12 text-pink-400" />
+                  </div>
+                  <div className="p-3 text-left bg-card">
+                    <p className="font-medium text-sm line-clamp-1">{gift.name}</p>
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                      {gift.description}
+                    </p>
+                    <p className="font-bold text-primary text-sm">
+                      {gift.mobiValue.toLocaleString()} Mobi
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </Card>
+
+      {/* SECTION 5: Send Gift Button */}
+      <Button
+        onClick={handleSendGift}
+        disabled={!selectedSpecialGift && !selectedClassicGift && !selectedTangibleGift}
+        className="w-full h-12 text-base font-semibold"
+      >
+        <Gift className="h-5 w-5 mr-2" />
+        Send Gift
+      </Button>
+
+      {/* SECTION 6: Mobi-Store Prompt */}
+      <Card className="p-4 bg-muted/30 border-dashed">
+        <p className="text-sm text-center">
+          Please{" "}
+          <Button variant="link" className="px-1 h-auto py-0 text-sm font-semibold">
+            ENTER MOBI-STORE
+            <ExternalLink className="h-3 w-3 ml-1" />
+          </Button>{" "}
+          to shop for more items
+        </p>
+      </Card>
+
+      {/* SECTION 7: Received Gifts */}
+      <Card className="p-4">
+        <h3 className="text-base font-bold uppercase mb-4">
+          RECEIVED GIFTS [{mockReceivedGifts.length}]
+        </h3>
+        
+        {mockReceivedGifts.length === 0 ? (
+          <div className="text-center py-12">
+            <Gift className="h-16 w-16 mx-auto mb-3 text-muted-foreground/30" />
+            <h4 className="text-base font-semibold mb-2">No Gifts Yet</h4>
+            <p className="text-sm text-muted-foreground">
+              {userName} hasn't received any gifts yet
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {mockReceivedGifts.map((gift, index) => {
+              const category = getValueCategory(gift.mobiValue);
+              
+              return (
+                <Card 
+                  key={`${gift.giftId}-${index}`} 
+                  className="p-3 hover:shadow-lg transition-all duration-200"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="text-4xl mb-2">{gift.icon}</div>
+                    <p className="font-bold text-sm line-clamp-1">{gift.giftName}</p>
+                    <p className="text-sm font-bold text-primary">
+                      {gift.mobiValue.toLocaleString()} Mobi
+                    </p>
+                    <Badge variant="outline" className={cn("text-xs", category.color)}>
+                      {category.label}
+                    </Badge>
+                    <div className="pt-2 border-t space-y-1">
+                      <div className="flex items-center justify-center gap-1">
+                        <User className="h-3 w-3 text-muted-foreground" />
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          {gift.fromUserName}
+                        </p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(gift.date).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </Card>
     </div>
   );
 };
