@@ -4,7 +4,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { MessageSquare, ArrowLeft } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import { ConversationsList } from "./chat/ConversationsList";
 import { ChatInterface } from "./chat/ChatInterface";
@@ -41,20 +41,11 @@ export const MessagesSheet = () => {
 
           {/* Chat Interface - Right Panel */}
           <div className={`flex-1 ${showMobileChat ? 'flex' : 'hidden'}`}>
-            {showMobileChat && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 left-4 z-10 sm:hidden"
-                onClick={() => selectConversation(null)}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            )}
             <ChatInterface
               conversation={activeConversation}
               isTyping={isTyping}
               onSendMessage={sendMessage}
+              onBack={() => selectConversation(null)}
             />
           </div>
         </div>

@@ -4,19 +4,21 @@ import { Conversation } from "@/types/chat";
 import { formatChatTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
-import { Video, Phone, MoreVertical } from "lucide-react";
+import { Video, Phone, MoreVertical, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ChatInterfaceProps {
   conversation: Conversation | undefined;
   isTyping: boolean;
   onSendMessage: (content: string) => void;
+  onBack?: () => void;
 }
 
 export const ChatInterface = ({
   conversation,
   isTyping,
   onSendMessage,
+  onBack,
 }: ChatInterfaceProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +47,11 @@ export const ChatInterface = ({
     <div className="flex-1 flex flex-col h-full bg-white">
       {/* Chat Header */}
       <div className="px-4 py-[10px] border-b flex items-center bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
+        {onBack && (
+          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] mr-2 sm:hidden" onClick={onBack}>
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+        )}
         <div className="relative mr-[15px]">
           <Avatar className="h-10 w-10">
             <AvatarImage src={conversation.user.avatar} />
