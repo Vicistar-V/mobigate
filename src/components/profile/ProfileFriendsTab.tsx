@@ -240,7 +240,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                       {buttonConfig.text}
                     </Button>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5 sm:gap-2 pr-1">
                       <Button
                         onClick={() => handleViewUser(friend.id)}
                         className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform flex-1 sm:flex-initial"
@@ -255,10 +255,10 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="hover:scale-105 transition-transform"
+                            className="hover:scale-105 transition-transform shrink-0 px-2 sm:px-3"
                           >
                             <MoreVertical className="h-4 w-4" />
-                            More
+                            <span className="hidden sm:inline">More</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-card z-50">
