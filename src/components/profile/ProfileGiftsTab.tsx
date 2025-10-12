@@ -59,8 +59,8 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const handleSendGift = () => {
     if (!selectedGift) {
       toast({
-        title: "No Gift Selected",
-        description: "Please select a gift to send",
+        title: "No Gifts Selected",
+        description: "Please select gifts to send",
         variant: "destructive",
       });
       return;
@@ -110,10 +110,10 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
   return (
     <div className="space-y-6 pb-6">
-      {/* SECTION 1: Send Gift Header */}
+      {/* SECTION 1: Send Gifts Header */}
       <Card className="p-4 bg-gradient-to-r from-primary/5 to-primary/10">
         <h3 className="text-base font-bold uppercase mb-2">
-          SEND {userName.toUpperCase()} A GIFT
+          SEND {userName.toUpperCase()} GIFTS
         </h3>
         <div className="flex items-center gap-2 text-sm">
           <Wallet className="h-4 w-4 text-primary" />
@@ -130,7 +130,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
               <Badge variant="default" className="text-xs shrink-0">
                 {selectedGift.type === 'special' && 'Special Digital'}
                 {selectedGift.type === 'classic' && 'Classic Digital'}
-                {selectedGift.type === 'tangible' && 'Tangible Gift'}
+                {selectedGift.type === 'tangible' && 'Tangible Gifts'}
               </Badge>
               {selectedGift.giftData.icon && (
                 <span className="text-sm">{selectedGift.giftData.icon}</span>
@@ -159,12 +159,12 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </Card>
       )}
 
-      {/* SECTION 2: Select a Special Digital Gift - Folder Structure */}
+      {/* SECTION 2: Select a Special Digital Gifts - Folder Structure */}
       <Collapsible open={specialGiftOpen} onOpenChange={setSpecialGiftOpen}>
         <Card>
           <CollapsibleTrigger asChild>
             <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-              <span className="text-sm font-medium">Special Digital Gift</span>
+              <span className="text-sm font-medium">Special Digital Gifts</span>
               <ChevronDown className={cn("h-4 w-4 transition-transform", specialGiftOpen && "rotate-180")} />
             </button>
           </CollapsibleTrigger>
@@ -268,12 +268,12 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </Card>
       </Collapsible>
 
-      {/* SECTION 3: Select Classic Digital Gift - LIST VIEW */}
+      {/* SECTION 3: Select Classic Digital Gifts - LIST VIEW */}
       <Collapsible open={classicGiftOpen} onOpenChange={setClassicGiftOpen}>
         <Card>
           <CollapsibleTrigger asChild>
             <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-              <span className="text-sm font-medium">Classic Digital Gift</span>
+              <span className="text-sm font-medium">Classic Digital Gifts</span>
               <ChevronDown className={cn("h-4 w-4 transition-transform", classicGiftOpen && "rotate-180")} />
             </button>
           </CollapsibleTrigger>
@@ -321,12 +321,12 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </Card>
       </Collapsible>
 
-      {/* SECTION 4: Select Tangible Mobi-store Gift - TABBED */}
+      {/* SECTION 4: Select Tangible Mobi-store Gifts - TABBED */}
       <Collapsible open={tangibleGiftOpen} onOpenChange={setTangibleGiftOpen}>
         <Card>
           <CollapsibleTrigger asChild>
             <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-              <span className="text-sm font-medium">Tangible Mobi-Store Gift</span>
+              <span className="text-sm font-medium">Tangible Mobi-Store Gifts</span>
               <ChevronDown className={cn("h-4 w-4 transition-transform", tangibleGiftOpen && "rotate-180")} />
             </button>
           </CollapsibleTrigger>
@@ -334,8 +334,8 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
             <div className="px-4 pb-4">
               <Tabs value={tangibleGiftTab} onValueChange={(v) => setTangibleGiftTab(v as any)}>
                 <TabsList className="w-full grid grid-cols-2 mb-4">
-                  <TabsTrigger value="vault">Gift Vault</TabsTrigger>
-                  <TabsTrigger value="buy">Buy Gift Items</TabsTrigger>
+                  <TabsTrigger value="vault">Gifts Vault</TabsTrigger>
+                  <TabsTrigger value="buy">Buy Gifts Items</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="vault" className="mt-0">
@@ -393,7 +393,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </Card>
       </Collapsible>
 
-      {/* SECTION 5: Send Gift Button */}
+      {/* SECTION 5: Send Gifts Button */}
       <Button
         onClick={handleSendGift}
         disabled={!selectedGift}
@@ -401,8 +401,8 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
       >
         <Gift className="h-5 w-5 mr-2" />
         {selectedGift 
-          ? `Send Gift (${selectedGift.giftData.mobiValue.toLocaleString()} Mobi)`
-          : 'Send Gift'
+          ? `Send Gifts (${selectedGift.giftData.mobiValue.toLocaleString()} Mobi)`
+          : 'Send Gifts'
         }
       </Button>
 
