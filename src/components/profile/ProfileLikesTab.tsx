@@ -66,14 +66,24 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
 
               {/* Content Section */}
               <div className="flex-1 min-w-0 space-y-2">
-                <button
-                  onClick={() => handleViewProfile(like.id, like.name)}
-                  className="text-left hover:underline focus:outline-none focus:underline group/name"
-                >
-                  <h3 className="text-base font-bold uppercase group-hover/name:text-primary transition-colors">
-                    {like.name}
-                  </h3>
-                </button>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => handleViewProfile(like.id, like.name)}
+                    className="text-left hover:underline focus:outline-none focus:underline group/name"
+                  >
+                    <h3 className="text-base font-bold uppercase group-hover/name:text-primary transition-colors">
+                      {like.name}
+                    </h3>
+                  </button>
+                  
+                  {like.isContentCreator && (
+                    <div>
+                      <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30 inline-block">
+                        Upcoming Content Creator
+                      </Badge>
+                    </div>
+                  )}
+                </div>
                 
                 {/* Stats */}
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -99,12 +109,6 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
                 <p className="text-sm text-foreground">
                   Has given {userName} <span className="font-semibold text-primary">{like.likeCount} Like{like.likeCount !== 1 ? 's' : ''}</span>
                 </p>
-                
-                {like.isContentCreator && (
-                  <Badge variant="outline" className="text-xs text-primary/70 italic border-primary/30">
-                    Upcoming Content Creator
-                  </Badge>
-                )}
 
                 {/* Action Button */}
                 <div className="pt-1">
