@@ -129,7 +129,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
             className="flex gap-4 p-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
           >
             {/* Left: Thumbnail or Icon */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-md overflow-hidden bg-muted flex items-center justify-center">
               {post.imageUrl ? (
                 <img 
                   src={post.imageUrl} 
