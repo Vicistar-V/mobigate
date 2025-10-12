@@ -239,12 +239,12 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
       {/* Content List with Ads and People Suggestions */}
       <div className="space-y-3">
         {visiblePosts.map((post, index) => {
-          // Calculate if we should show an ad after this post
-          const shouldShowAd = (index + 1) % 6 === 0 && index < visiblePosts.length - 1 && premiumAdSlots.length > 0;
-          const adSlotIndex = Math.floor((index + 1) / 6) - 1;
-          
-          // Calculate if we should show People You May Know
+          // Calculate if we should show People You May Know (every 12 posts)
           const shouldShowPeopleSuggestions = (index + 1) % 12 === 0 && index < visiblePosts.length - 1;
+          
+          // Calculate if we should show an ad after this post (every 6 posts, but NOT when people suggestions show)
+          const shouldShowAd = (index + 1) % 6 === 0 && !shouldShowPeopleSuggestions && index < visiblePosts.length - 1 && premiumAdSlots.length > 0;
+          const adSlotIndex = Math.floor((index + 1) / 6) - 1;
           
           return (
             <React.Fragment key={post.id}>
