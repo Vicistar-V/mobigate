@@ -133,15 +133,15 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
   return (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto">
       {colleagues.map((colleague) => (
-        <div key={colleague.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex items-center gap-3 flex-1">
-            <Avatar className="h-10 w-10">
+        <div key={colleague.id} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/50 rounded-lg flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Avatar className="h-10 w-10 shrink-0">
               <AvatarImage src={colleague.profileImage} alt={colleague.name} />
               <AvatarFallback>
                 <User className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
                 {colleague.isActive && (
@@ -173,11 +173,11 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={() => handleEdit(colleague)}>
+          <div className="flex gap-1 sm:gap-2 shrink-0 flex-col sm:flex-row w-full sm:w-auto">
+            <Button variant="ghost" size="sm" onClick={() => handleEdit(colleague)} className="w-full sm:w-auto">
               Edit
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => handleDelete(colleague.id)}>
+            <Button variant="ghost" size="sm" onClick={() => handleDelete(colleague.id)} className="w-full sm:w-auto">
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -185,7 +185,7 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
       ))}
 
       {(isAdding || editingId) && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 p-2 sm:p-4 border rounded-lg">
           <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
@@ -318,8 +318,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
 
           <PrivacySelector value={privacy} onChange={setPrivacy} />
 
-          <div className="flex gap-2">
-            <Button type="submit">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button type="submit" className="w-full sm:w-auto">
               <Save className="h-4 w-4 mr-2" />
               {isAdding ? "Add" : "Update"}
             </Button>
@@ -328,7 +328,7 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
               setEditingId(null);
               setSuperiority("");
               reset({});
-            }}>
+            }} className="w-full sm:w-auto">
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>

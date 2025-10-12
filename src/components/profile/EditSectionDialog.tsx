@@ -26,7 +26,7 @@ export const EditSectionDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${widthClasses[maxWidth]} max-h-[85vh] sm:max-h-[90vh] flex flex-col`}>
+      <DialogContent className={`max-w-[95vw] sm:${widthClasses[maxWidth]} max-h-[85vh] sm:max-h-[90vh] flex flex-col px-4`}>
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
