@@ -153,9 +153,6 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
       {/* SECTION 2: Select a Special Digital Gift */}
       <Card className="p-4">
-        <Label className="text-sm font-medium mb-3 block">
-          Select a Special Digital Gift to Send...
-        </Label>
         <Select 
           value={selectedGift?.type === 'special' ? selectedGift.giftId : ""} 
           onValueChange={(value) => {
@@ -170,7 +167,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
           }}
         >
           <SelectTrigger className="w-full h-12">
-            <SelectValue placeholder="Select..." />
+            <SelectValue placeholder="Special Digital Gift..." />
           </SelectTrigger>
           <SelectContent>
             {specialDigitalGifts.map(gift => (
