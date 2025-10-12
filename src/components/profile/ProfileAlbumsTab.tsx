@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Columns2, LayoutGrid } from "lucide-react";
 import { AlbumCard } from "./AlbumCard";
 import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
@@ -25,6 +27,8 @@ export const ProfileAlbumsTab = ({
 }: ProfileAlbumsTabProps) => {
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { isSystem?: boolean }) | null>(null);
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
+  const [albumsView, setAlbumsView] = useState<"normal" | "large">("normal");
+  const [visibleAlbumCount, setVisibleAlbumCount] = useState(15);
 
   // Create system albums
   const profilePicturesAlbum: Album & { isSystem: boolean } = useMemo(
@@ -195,32 +199,97 @@ export const ProfileAlbumsTab = ({
       }));
   };
 
+  const displayedAlbums = albumsView === "large" 
+    ? allAlbums.slice(0, visibleAlbumCount) 
+    : allAlbums;
+
+  const handleLoadMore = () => {
+    setVisibleAlbumCount((prev) => prev + 15);
+  };
+
+  const handleShowLess = () => {
+    setVisibleAlbumCount(15);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="space-y-8">
-      {/* Albums Carousel Section */}
+      {/* Albums Section */}
       {allAlbums.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold mb-4">Albums</h2>
-          <div className="relative -mx-4 px-4">
-            <ScrollArea className="w-full">
-              <div className="flex gap-3 pb-2">
-                {allAlbums.map((album, index) => {
-                  const shouldShowAd = (index + 1) % 4 === 0 && index < allAlbums.length - 1;
-                  const adSlotIndex = Math.floor((index + 1) / 4) - 1;
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold">Albums</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAlbumsView(albumsView === "normal" ? "large" : "normal")}
+                className="gap-1"
+              >
+                {albumsView === "normal" ? (
+                  <Columns2 className="h-4 w-4" />
+                ) : (
+                  <LayoutGrid className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Carousel View */}
+          {albumsView === "normal" && (
+            <div className="relative -mx-4 px-4">
+              <ScrollArea className="w-full">
+                <div className="flex gap-3 pb-2">
+                  {allAlbums.map((album, index) => {
+                    const shouldShowAd = (index + 1) % 4 === 0 && index < allAlbums.length - 1;
+                    const adSlotIndex = Math.floor((index + 1) / 4) - 1;
+                    
+                    return (
+                      <React.Fragment key={album.id}>
+                        <AlbumCard
+                          album={album}
+                          onClick={() => handleAlbumClick(album)}
+                          variant="carousel"
+                        />
+                        
+                        {shouldShowAd && (
+                          <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
+                            <PremiumAdRotation
+                              slotId={`albums-carousel-premium-${adSlotIndex}`}
+                              ads={getRandomAdSlot(albumsCarouselAdSlots)}
+                              context="albums-carousel"
+                            />
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </div>
+          )}
+
+          {/* Grid View */}
+          {albumsView === "large" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                {displayedAlbums.map((album, index) => {
+                  const adSlotNumber = Math.floor(index / 4);
+                  const shouldShowAd = (index + 1) % 4 === 0 && index < displayedAlbums.length - 1;
                   
                   return (
                     <React.Fragment key={album.id}>
-                      {/* Album Card */}
                       <AlbumCard
                         album={album}
                         onClick={() => handleAlbumClick(album)}
+                        variant="grid"
                       />
                       
-                      {/* Insert Premium Ad after every 4 albums */}
                       {shouldShowAd && (
-                        <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
+                        <div className="col-span-2 my-2">
                           <PremiumAdRotation
-                            slotId={`albums-carousel-premium-${adSlotIndex}`}
+                            slotId={`albums-grid-premium-${adSlotNumber}`}
                             ads={getRandomAdSlot(albumsCarouselAdSlots)}
                             context="albums-carousel"
                           />
@@ -230,9 +299,35 @@ export const ProfileAlbumsTab = ({
                   );
                 })}
               </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </div>
+
+              {/* Pagination Controls */}
+              {allAlbums.length > visibleAlbumCount && (
+                <div className="flex justify-center mt-6">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleLoadMore}
+                    className="w-full sm:w-auto"
+                  >
+                    ...more
+                  </Button>
+                </div>
+              )}
+
+              {visibleAlbumCount > 15 && allAlbums.length >= visibleAlbumCount && (
+                <div className="flex justify-center mt-2">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleShowLess}
+                    className="w-full sm:w-auto"
+                  >
+                    Less...
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

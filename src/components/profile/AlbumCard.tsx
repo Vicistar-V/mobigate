@@ -2,13 +2,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Folder, Lock, Users, Globe } from "lucide-react";
 import { Album } from "@/data/posts";
+import { cn } from "@/lib/utils";
 
 interface AlbumCardProps {
   album: Album & { isSystem?: boolean };
   onClick: () => void;
+  variant?: "carousel" | "grid";
 }
 
-export const AlbumCard = ({ album, onClick }: AlbumCardProps) => {
+export const AlbumCard = ({ album, onClick, variant = "carousel" }: AlbumCardProps) => {
   const getPrivacyIcon = () => {
     if (album.privacy === "Private") return <Lock className="h-3 w-3" />;
     if (album.privacy === "Friends") return <Users className="h-3 w-3" />;
@@ -17,7 +19,12 @@ export const AlbumCard = ({ album, onClick }: AlbumCardProps) => {
 
   return (
     <Card
-      className="flex-shrink-0 w-[160px] sm:w-[180px] lg:w-[200px] aspect-square overflow-hidden relative group cursor-pointer hover:scale-105 transition-transform duration-200"
+      className={cn(
+        "aspect-square overflow-hidden relative group cursor-pointer hover:scale-105 transition-transform duration-200",
+        variant === "carousel" 
+          ? "flex-shrink-0 w-[160px] sm:w-[180px] lg:w-[200px]" 
+          : "w-full"
+      )}
       onClick={onClick}
     >
       {/* Album Cover Image */}
