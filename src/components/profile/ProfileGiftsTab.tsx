@@ -69,7 +69,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
     if (walletBalance < giftData.mobiValue) {
       toast({
         title: "Insufficient Funds",
-        description: `You need ${giftData.mobiValue.toLocaleString()} Mobi. Your balance is ${walletBalance.toLocaleString()} Mobi.`,
+        description: `You need ${giftData.mobiValue.toLocaleString()} Mobi. Your wallet balance is ${walletBalance.toLocaleString()} Mobi.`,
         variant: "destructive",
       });
       return;
@@ -115,7 +115,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         </h3>
         <div className="flex items-center gap-2 text-sm">
           <Wallet className="h-4 w-4 text-primary" />
-          <span className="text-muted-foreground">Balance:</span>
+          <span className="text-muted-foreground">Wallet Balance:</span>
           <span className="font-bold text-primary">{walletBalance.toLocaleString()} Mobi</span>
         </div>
       </Card>
@@ -324,7 +324,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         <Card>
           <CollapsibleTrigger asChild>
             <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-              <span className="text-sm font-medium">Tangible Mobi-store Gift</span>
+              <span className="text-sm font-medium">Tangible Mobi-Store Gift</span>
               <ChevronDown className={cn("h-4 w-4 transition-transform", tangibleGiftOpen && "rotate-180")} />
             </button>
           </CollapsibleTrigger>
