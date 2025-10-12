@@ -31,7 +31,7 @@ export const MessagesSheet = () => {
       <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[80vw] p-0 overflow-hidden">
         <div className="flex h-full">
           {/* Conversations List - Left Panel */}
-          <div className={`${showMobileChat ? 'w-full sm:w-80 lg:w-96' : 'w-full'} shrink-0 transition-all`}>
+          <div className={`${showMobileChat ? 'hidden sm:block sm:w-80 lg:w-96' : 'w-full'} shrink-0 transition-all`}>
             <ConversationsList
               conversations={conversations}
               activeConversationId={activeConversationId}
