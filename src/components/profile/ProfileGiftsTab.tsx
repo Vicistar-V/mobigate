@@ -332,19 +332,11 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
             <div className="px-4 pb-4">
               <Tabs value={tangibleGiftTab} onValueChange={(v) => setTangibleGiftTab(v as any)}>
                 <TabsList className="w-full grid grid-cols-2 mb-4">
-                  <TabsTrigger value="vault">Gifts Vault</TabsTrigger>
-                  <TabsTrigger value="buy">Buy Gifts Items</TabsTrigger>
+                  <TabsTrigger value="vault">Gift Vault</TabsTrigger>
+                  <TabsTrigger value="buy">Buy Gift Items</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="vault" className="mt-0">
-                  <div className="flex gap-2 mb-4">
-                    <Button variant="outline" size="sm" className="flex-1 text-xs">
-                      In Love
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1 text-xs">
-                      Buy Gifts Items
-                    </Button>
-                  </div>
                   {giftsVault.length === 0 && (
                     <div className="text-center py-12">
                       <Heart className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
