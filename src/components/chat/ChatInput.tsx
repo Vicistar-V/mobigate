@@ -1,8 +1,6 @@
 import { useState, useRef, KeyboardEvent, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Smile, Paperclip, Send } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { ImagePlus, Paperclip, Send } from "lucide-react";
 import { toast } from "sonner";
 
 interface ChatInputProps {
@@ -12,7 +10,6 @@ interface ChatInputProps {
 
 export const ChatInput = ({ onSendMessage, disabled }: ChatInputProps) => {
   const [message, setMessage] = useState("");
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
@@ -32,10 +29,8 @@ export const ChatInput = ({ onSendMessage, disabled }: ChatInputProps) => {
     }
   };
 
-  const handleEmojiClick = (emojiData: EmojiClickData) => {
-    setMessage((prev) => prev + emojiData.emoji);
-    setShowEmojiPicker(false);
-    textareaRef.current?.focus();
+  const handleGalleryClick = () => {
+    toast.info("Gallery coming soon!");
   };
 
   const handleFileAttach = () => {
@@ -51,22 +46,16 @@ export const ChatInput = ({ onSendMessage, disabled }: ChatInputProps) => {
 
   return (
     <div className="px-4 py-2.5 border-t flex items-center gap-2 bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
-      {/* Emoji Picker */}
-      <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 shrink-0 rounded-full text-[#54656f] hover:bg-[#e9e9e9]"
-            disabled={disabled}
-          >
-            <Smile className="h-6 w-6" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent side="top" className="w-full p-0 border-0">
-          <EmojiPicker onEmojiClick={handleEmojiClick} />
-        </PopoverContent>
-      </Popover>
+      {/* Gallery Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-10 w-10 shrink-0 rounded-full text-[#54656f] hover:bg-[#e9e9e9]"
+        onClick={handleGalleryClick}
+        disabled={disabled}
+      >
+        <ImagePlus className="h-6 w-6" />
+      </Button>
 
       {/* File Attachment */}
       <Button
