@@ -167,7 +167,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
           }}
         >
           <SelectTrigger className="w-full h-12">
-            <SelectValue placeholder="Special Digital Gift..." />
+            <SelectValue placeholder="Select a Special Digital Gift to Send..." />
           </SelectTrigger>
           <SelectContent>
             {specialDigitalGifts.map(gift => (
