@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Conversation } from "@/types/chat";
 import { formatChatTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
+import { Video, Phone, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ChatInterfaceProps {
   conversation: Conversation | undefined;
@@ -41,66 +42,68 @@ export const ChatInterface = ({
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex-1 flex flex-col h-full bg-white">
       {/* Chat Header */}
-      <div className="p-4 border-b border-border bg-card flex items-center gap-3">
+      <div className="px-4 py-2.5 border-b flex items-center gap-3 bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
         <div className="relative">
           <Avatar className="h-10 w-10">
             <AvatarImage src={conversation.user.avatar} />
             <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
           </Avatar>
           {conversation.user.isOnline && (
-            <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-background rounded-full" />
+            <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
           )}
         </div>
-        <div>
-          <h3 className="font-semibold">{conversation.user.name}</h3>
-          <p className="text-xs text-muted-foreground">
-            {conversation.user.isOnline ? "Online" : "Offline"}
+        <div className="flex-1">
+          <h3 className="font-semibold text-[#111b21] text-base">{conversation.user.name}</h3>
+          <p className="text-xs text-[#667781]">
+            {conversation.user.isOnline ? "online" : "Offline"}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
+            <Video className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
+            <Phone className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
+            <MoreVertical className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        <div className="space-y-4">
-          {conversation.messages.map((message) => {
+      <div 
+        className="flex-1 p-5 overflow-y-auto flex flex-col bg-[#E5DDD5]"
+        style={{
+          backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")'
+        }}
+        ref={scrollRef}
+      >
+        {conversation.messages.map((message) => {
             const isCurrentUser = message.senderId === "current-user";
             
             return (
               <div
                 key={message.id}
                 className={cn(
-                  "flex gap-2",
-                  isCurrentUser ? "flex-row-reverse" : "flex-row"
+                  "flex mb-4 max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300",
+                  isCurrentUser ? "self-end" : "self-start"
                 )}
               >
-                {!isCurrentUser && (
-                  <Avatar className="h-8 w-8 shrink-0">
-                    <AvatarImage src={conversation.user.avatar} />
-                    <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
-                  </Avatar>
-                )}
-
                 <div
                   className={cn(
-                    "max-w-[70%] space-y-1",
-                    isCurrentUser && "flex flex-col items-end"
+                    "px-3 py-2 rounded-lg shadow-sm relative",
+                    isCurrentUser
+                      ? "bg-[#d9fdd3] rounded-br-none"
+                      : "bg-white rounded-bl-none"
                   )}
                 >
-                  <div
-                    className={cn(
-                      "rounded-2xl px-4 py-2 break-words",
-                      isCurrentUser
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    )}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground px-2">
+                  <p className="text-sm text-[#111b21] break-words mb-1">{message.content}</p>
+                  <span className="text-[11px] text-[#667781] float-right ml-2 mt-1">
                     {formatChatTime(message.timestamp)}
-                  </p>
+                  </span>
                 </div>
               </div>
             );
@@ -108,22 +111,15 @@ export const ChatInterface = ({
 
           {/* Typing Indicator */}
           {isTyping && (
-            <div className="flex gap-2">
-              <Avatar className="h-8 w-8 shrink-0">
-                <AvatarImage src={conversation.user.avatar} />
-                <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
-              </Avatar>
-              <div className="bg-muted rounded-2xl px-4 py-2">
-                <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
+            <div className="flex self-start mb-4">
+              <div className="bg-white rounded-lg rounded-bl-none shadow-sm px-3 py-2 flex items-center gap-1">
+                <span className="w-2 h-2 bg-[#9E9E9E] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-2 h-2 bg-[#9E9E9E] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-2 h-2 bg-[#9E9E9E] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           )}
-        </div>
-      </ScrollArea>
+      </div>
 
       {/* Input Area */}
       <ChatInput onSendMessage={onSendMessage} disabled={isTyping} />
