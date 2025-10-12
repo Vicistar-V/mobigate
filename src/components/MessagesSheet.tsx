@@ -28,7 +28,7 @@ export const MessagesSheet = () => {
           <MessageSquare />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[80vw] p-0 overflow-hidden">
+      <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[80vw] p-0 overflow-hidden" showClose={false}>
         <div className="flex h-full">
           {/* Conversations List - Left Panel */}
           <div className={`${showMobileChat ? 'hidden sm:block sm:w-80 lg:w-96' : 'w-full'} shrink-0 transition-all`}>
