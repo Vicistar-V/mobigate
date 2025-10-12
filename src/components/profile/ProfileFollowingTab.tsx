@@ -71,7 +71,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                     onClick={() => handleViewProfile(user.id, user.name)}
                     className="relative block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full"
                   >
-                    <Avatar className={`h-16 w-16 sm:h-20 sm:w-20 ring-2 transition-all ${
+                    <Avatar className={`h-20 w-20 sm:h-26 sm:w-26 ring-2 transition-all ${
                       user.isOnline ? 'ring-emerald-500/50' : 'ring-border'
                     }`}>
                       <AvatarImage src={user.avatar} alt={user.name} />
@@ -79,7 +79,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                     </Avatar>
                     
                     {/* Animated Online Indicator */}
-                    <div className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card transition-all ${
+                    <div className={`absolute bottom-0 right-0 h-5 w-5 rounded-full border-2 border-card transition-all ${
                       user.isOnline 
                         ? 'bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50' 
                         : 'bg-destructive'
