@@ -88,8 +88,8 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                 </div>
 
                 {/* Content Section */}
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="space-y-1">
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="space-y-0.5">
                     <button
                       onClick={() => handleViewProfile(user.id, user.name)}
                       className="text-left hover:underline focus:outline-none focus:underline group/name"
