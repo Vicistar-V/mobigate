@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
@@ -567,10 +568,24 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {schoolMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex-shrink-0">
+                      <Avatar 
+                        className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+                        onClick={() => handleUserProfileClick(mate.id)}
+                      >
+                        <AvatarImage 
+                          src={mate.linkedUserProfileImage || mate.profileImage} 
+                          alt={mate.name} 
+                        />
+                        <AvatarFallback className="text-lg font-semibold">
+                          {mate.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
                     <div 
                       onClick={() => handleUserProfileClick(mate.id)}
-                      className="flex-1 cursor-pointer"
+                      className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                       <p className="text-sm text-muted-foreground">{mate.institution}</p>
@@ -614,10 +629,24 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {classmates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex-shrink-0">
+                      <Avatar 
+                        className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+                        onClick={() => handleUserProfileClick(mate.id)}
+                      >
+                        <AvatarImage 
+                          src={mate.linkedUserProfileImage || mate.profileImage} 
+                          alt={mate.name} 
+                        />
+                        <AvatarFallback className="text-lg font-semibold">
+                          {mate.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
                     <div 
                       onClick={() => handleUserProfileClick(mate.id)}
-                      className="flex-1 cursor-pointer"
+                      className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                       <p className="text-sm text-muted-foreground">{mate.institution}</p>
@@ -661,10 +690,24 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {ageMates.map((mate, index) => (
                 <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex-shrink-0">
+                      <Avatar 
+                        className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+                        onClick={() => handleUserProfileClick(mate.id)}
+                      >
+                        <AvatarImage 
+                          src={mate.linkedUserProfileImage || mate.profileImage} 
+                          alt={mate.name} 
+                        />
+                        <AvatarFallback className="text-lg font-semibold">
+                          {mate.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
                     <div 
                       onClick={() => handleUserProfileClick(mate.id)}
-                      className="flex-1 cursor-pointer"
+                      className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                       <p className="text-sm text-muted-foreground">{mate.community}</p>
@@ -708,10 +751,24 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {workColleagues.map((colleague, index) => (
                 <div key={colleague.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex-shrink-0">
+                      <Avatar 
+                        className="h-16 w-16 sm:h-20 sm:w-20 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+                        onClick={() => handleUserProfileClick(colleague.id)}
+                      >
+                        <AvatarImage 
+                          src={colleague.linkedUserProfileImage || colleague.profileImage} 
+                          alt={colleague.name} 
+                        />
+                        <AvatarFallback className="text-lg font-semibold">
+                          {colleague.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
                     <div 
                       onClick={() => handleUserProfileClick(colleague.id)}
-                      className="flex-1 cursor-pointer"
+                      className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
                       <p className="text-sm text-muted-foreground">{colleague.workplaceName}{colleague.workplaceLocation && `, ${colleague.workplaceLocation}`}</p>
