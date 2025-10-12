@@ -348,3 +348,77 @@ export const albumsCarouselAdSlots: PremiumAdCardProps[][] = [
     },
   ],
 ];
+
+// Contents Tab Ad Pool
+export const contentsAdSlots: PremiumAdCardProps[][] = [
+  [
+    {
+      id: "contents-ad-1",
+      advertiser: { 
+        name: "ContentBoost Pro", 
+        verified: true, 
+        logo: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=100&q=80" 
+      },
+      content: {
+        headline: "Amplify Your Content Reach",
+        description: "Advanced content promotion tools. Get 50% more views on your posts.",
+        ctaText: "Start Free Trial",
+        ctaUrl: "https://example.com/contentboost",
+      },
+      media: {
+        type: "image",
+        items: [{ url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80" }],
+      },
+      layout: "standard",
+      duration: 15,
+    },
+  ],
+  [
+    {
+      id: "contents-ad-2",
+      advertiser: { 
+        name: "Creator Studio", 
+        verified: true, 
+        logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&q=80" 
+      },
+      content: {
+        headline: "Professional Content Creation Tools",
+        description: "Video editing, graphic design, and analytics - all in one platform.",
+        ctaText: "Explore Tools",
+        ctaUrl: "https://example.com/creatorstudio",
+      },
+      media: {
+        type: "carousel",
+        items: [
+          { url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80", caption: "Video Editor" },
+          { url: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80", caption: "Design Studio" },
+          { url: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80", caption: "Analytics Dashboard" },
+        ],
+      },
+      layout: "standard",
+      duration: 15,
+    },
+  ],
+  [
+    {
+      id: "contents-ad-3",
+      advertiser: { 
+        name: "MediaMaster", 
+        verified: false, 
+        logo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" 
+      },
+      content: {
+        headline: "Monetize Your Content Today",
+        description: "Turn your passion into profit. Join 50,000+ creators earning online.",
+        ctaText: "Join Now",
+        ctaUrl: "https://example.com/mediamaster",
+      },
+      media: {
+        type: "image",
+        items: [{ url: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&q=80" }],
+      },
+      layout: "compact",
+      duration: 15,
+    },
+  ],
+];

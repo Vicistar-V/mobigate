@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+import { contentsAdSlots } from "@/data/profileAds";
 
 interface ProfileContentsTabProps {
   userName: string;
@@ -89,6 +92,12 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
 
   // Fetch user's posts
   const userPosts = useMemo(() => getPostsByUserId(userId), [userId]);
+  
+  // Prepare premium ad slots for rotation
+  const premiumAdSlots = contentsAdSlots.map((ads, index) => ({
+    slotId: `contents-premium-${index}`,
+    ads: ads,
+  }));
   
   // Calculate content counts
   const contentCounts = useMemo(() => {
@@ -227,71 +236,100 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
         </div>
       </div>
 
-      {/* Content List */}
+      {/* Content List with Ads and People Suggestions */}
       <div className="space-y-3">
-        {visiblePosts.map((post) => (
-          <Card 
-            key={post.id} 
-            className="flex gap-4 p-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
-          >
-            {/* Left: Thumbnail or Icon */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-md overflow-hidden bg-muted flex items-center justify-center">
-              {post.imageUrl ? (
-                <img 
-                  src={post.imageUrl} 
-                  alt={post.title} 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                getContentTypeIcon(post.type)
+        {visiblePosts.map((post, index) => {
+          // Calculate if we should show an ad after this post
+          const shouldShowAd = (index + 1) % 6 === 0 && index < visiblePosts.length - 1 && premiumAdSlots.length > 0;
+          const adSlotIndex = Math.floor((index + 1) / 6) - 1;
+          
+          // Calculate if we should show People You May Know
+          const shouldShowPeopleSuggestions = (index + 1) % 12 === 0 && index < visiblePosts.length - 1;
+          
+          return (
+            <React.Fragment key={post.id}>
+              {/* Content Card */}
+              <Card 
+                className="flex gap-4 p-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
+              >
+                {/* Left: Thumbnail or Icon */}
+                <div className="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                  {post.imageUrl ? (
+                    <img 
+                      src={post.imageUrl} 
+                      alt={post.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    getContentTypeIcon(post.type)
+                  )}
+                </div>
+
+                {/* Right: Content Info */}
+                <div className="flex-1 min-w-0 space-y-2">
+                  {/* Title & Badge Row */}
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">
+                      {post.title}
+                    </h3>
+                    <Badge 
+                      variant="outline" 
+                      className={`flex-shrink-0 text-xs ${getContentTypeBadgeClass(post.type)}`}
+                    >
+                      {post.type}
+                    </Badge>
+                  </div>
+
+                  {/* Description (2-3 lines max) */}
+                  {post.subtitle && (
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                      {post.subtitle}
+                    </p>
+                  )}
+
+                  {/* Metadata Row */}
+                  <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground flex-wrap">
+                    <span className="flex items-center gap-1">
+                      <Eye className="h-3 w-3" />
+                      <span className="font-medium">{post.views}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Heart className="h-3 w-3" />
+                      <span className="font-medium">{post.likes}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="h-3 w-3" />
+                      <span className="font-medium">{post.comments}</span>
+                    </span>
+                    {post.fee && (
+                      <span className="ml-auto font-semibold text-emerald-600 dark:text-emerald-400">
+                        {post.fee}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Card>
+              
+              {/* Premium Ad after every 6 posts */}
+              {shouldShowAd && (
+                <div className="w-full my-4">
+                  <PremiumAdRotation
+                    slotId={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.slotId}
+                    ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
+                    context="profile"
+                  />
+                </div>
               )}
-            </div>
-
-            {/* Right: Content Info */}
-            <div className="flex-1 min-w-0 space-y-2">
-              {/* Title & Badge Row */}
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">
-                  {post.title}
-                </h3>
-                <Badge 
-                  variant="outline" 
-                  className={`flex-shrink-0 text-xs ${getContentTypeBadgeClass(post.type)}`}
-                >
-                  {post.type}
-                </Badge>
-              </div>
-
-              {/* Description (2-3 lines max) */}
-              {post.subtitle && (
-                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                  {post.subtitle}
-                </p>
+              
+              {/* People You May Know after every 12 posts */}
+              {shouldShowPeopleSuggestions && (
+                <div className="w-full my-4">
+                  <PeopleYouMayKnow />
+                </div>
               )}
-
-              {/* Metadata Row */}
-              <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground flex-wrap">
-                <span className="flex items-center gap-1">
-                  <Eye className="h-3 w-3" />
-                  <span className="font-medium">{post.views}</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <Heart className="h-3 w-3" />
-                  <span className="font-medium">{post.likes}</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <MessageCircle className="h-3 w-3" />
-                  <span className="font-medium">{post.comments}</span>
-                </span>
-                {post.fee && (
-                  <span className="ml-auto font-semibold text-emerald-600 dark:text-emerald-400">
-                    {post.fee}
-                  </span>
-                )}
-              </div>
-            </div>
-          </Card>
-        ))}
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {/* Pagination Buttons */}
