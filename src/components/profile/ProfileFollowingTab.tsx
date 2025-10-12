@@ -129,7 +129,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-row gap-2 pt-1">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     <Button
                       onClick={() => handleFollowToggle(user.id, user.name)}
                       onMouseEnter={() => setHoveredUserId(user.id)}
@@ -159,7 +159,8 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                       size="sm"
                     >
                       <Eye className="h-4 w-4" />
-                      View Profile
+                      <span className="hidden sm:inline">View Profile</span>
+                      <span className="sm:hidden">View</span>
                     </Button>
                   </div>
                 </div>
