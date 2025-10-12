@@ -31,7 +31,7 @@ export const MessagesSheet = () => {
       <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[80vw] p-0 overflow-hidden">
         <div className="flex h-full">
           {/* Conversations List - Left Panel */}
-          <div className={`w-full sm:w-80 lg:w-96 shrink-0 ${showMobileChat ? 'hidden sm:block' : 'block'}`}>
+          <div className={`${showMobileChat ? 'w-full sm:w-80 lg:w-96' : 'w-full'} shrink-0 transition-all`}>
             <ConversationsList
               conversations={conversations}
               activeConversationId={activeConversationId}
@@ -40,7 +40,7 @@ export const MessagesSheet = () => {
           </div>
 
           {/* Chat Interface - Right Panel */}
-          <div className={`flex-1 ${showMobileChat ? 'flex' : 'hidden sm:flex'}`}>
+          <div className={`flex-1 ${showMobileChat ? 'flex' : 'hidden'}`}>
             {showMobileChat && (
               <Button
                 variant="ghost"
