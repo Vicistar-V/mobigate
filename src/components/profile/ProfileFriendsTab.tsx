@@ -178,7 +178,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                     className="relative block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full"
                     aria-label={`View ${friend.name}'s profile`}
                   >
-                    <Avatar className={`h-16 w-16 sm:h-20 sm:w-20 ring-2 transition-all ${
+                    <Avatar className={`h-24 w-24 sm:h-28 sm:w-28 ring-2 transition-all ${
                       friend.isOnline ? 'ring-emerald-500/50' : 'ring-border'
                     }`}>
                       <AvatarImage src={friend.avatar} alt={friend.name} />
@@ -233,7 +233,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                     <Button
                       onClick={() => handleAddFriend(friend.id, friend.name)}
                       disabled={buttonConfig.disabled}
-                      className={`${buttonConfig.className} w-full sm:w-auto`}
+                      className={`${buttonConfig.className} w-3/5 sm:w-auto`}
                       size="sm"
                     >
                       <ButtonIcon className="h-4 w-4" />
