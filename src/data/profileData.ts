@@ -588,7 +588,7 @@ export const classicDigitalGifts: ClassicDigitalGift[] = [
   
   { id: "cdg23", name: "Sole Trip", icon: "✈️", category: "T-Fare", mobiValue: 10000, description: "Solo adventure" },
   { id: "cdg24", name: "Couple Trip", icon: "🛫", category: "T-Fare", mobiValue: 20000, description: "Romantic getaway" },
-  { id: "cdg25", name: "Family Trip", icon: "🌍", category: "T-Fare", mobiValue: 35000, description: "Family vacation" },
+  { id: "cdg25", name: "Family Trip", icon: "🌍", category: "T-Fare", mobiValue: 15000, description: "Family vacation" },
   
   { id: "cdg26", name: "Sports Car", icon: "🏎️", category: "Luxury", mobiValue: 100000, description: "Speed demon" },
   { id: "cdg27", name: "Yacht", icon: "🛥️", category: "Luxury", mobiValue: 250000, description: "Ocean luxury" },
