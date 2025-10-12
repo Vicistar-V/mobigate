@@ -273,7 +273,7 @@ export const ProfileAlbumsTab = ({
           {/* Grid View */}
           {albumsView === "large" && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {displayedAlbums.map((album, index) => {
                   const adSlotNumber = Math.floor(index / 4);
                   const shouldShowAd = (index + 1) % 4 === 0 && index < displayedAlbums.length - 1;
