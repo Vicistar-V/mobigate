@@ -86,9 +86,11 @@ export const useChat = () => {
     );
   }, []);
 
-  const selectConversation = useCallback((conversationId: string) => {
+  const selectConversation = useCallback((conversationId: string | null) => {
     setActiveConversationId(conversationId);
-    markAsRead(conversationId);
+    if (conversationId) {
+      markAsRead(conversationId);
+    }
   }, [markAsRead]);
 
   return {
