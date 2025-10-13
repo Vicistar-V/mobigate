@@ -137,11 +137,11 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply }: C
 
       {/* Attachments Preview */}
       {attachments.length > 0 && (
-        <div className="px-4 py-2 bg-white border-b border-[#e9edef] flex gap-2 overflow-x-auto">
+        <div className="px-4 py-2 bg-white border-b border-[#e9edef] flex gap-2 overflow-x-auto max-w-full">
           {attachments.map((attachment, index) => (
             <div key={index} className="relative group">
               {attachment.type === 'image' ? (
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <img
                     src={attachment.url}
                     alt={attachment.name}
@@ -157,10 +157,10 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply }: C
                   </Button>
                 </div>
               ) : (
-                <div className="relative w-40 p-2 bg-white border border-[#e9edef] rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Paperclip className="h-4 w-4 text-[#54656f]" />
-                    <span className="text-xs text-[#111b21] truncate flex-1">{attachment.name}</span>
+                <div className="relative min-w-[120px] max-w-[160px] p-2 bg-white border border-[#e9edef] rounded-lg">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Paperclip className="h-4 w-4 text-[#54656f] flex-shrink-0" />
+                    <span className="text-xs text-[#111b21] truncate">{attachment.name}</span>
                   </div>
                   <Button
                     variant="ghost"
@@ -177,7 +177,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply }: C
         </div>
       )}
 
-      <div className="px-4 py-2.5 flex items-center gap-2">
+      <div className="px-2 sm:px-4 py-2.5 flex items-center gap-1 sm:gap-2">
         {/* Hidden File Inputs */}
         <input
           ref={imageInputRef}
@@ -200,22 +200,22 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply }: C
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 shrink-0 rounded-full text-[#54656f] hover:bg-[#e9e9e9]"
+          className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-full text-[#54656f] hover:bg-[#e9e9e9]"
           onClick={handleGalleryClick}
           disabled={disabled}
         >
-          <ImagePlus className="h-6 w-6" />
+          <ImagePlus className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
 
         {/* File Attachment */}
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 shrink-0 rounded-full text-[#54656f] hover:bg-[#e9e9e9]"
+          className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-full text-[#54656f] hover:bg-[#e9e9e9]"
           onClick={handleFileAttach}
           disabled={disabled}
         >
-          <Paperclip className="h-6 w-6" />
+          <Paperclip className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
 
         {/* Message Input */}
@@ -225,7 +225,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply }: C
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
           placeholder="Type a message"
-          className="flex-1 resize-none rounded-lg px-3 py-2 text-base leading-6 bg-white border-none outline-none focus:ring-0 max-h-24 overflow-y-auto"
+          className="flex-1 min-w-0 resize-none rounded-lg px-3 py-2 text-base leading-6 bg-white border-none outline-none focus:ring-0 max-h-24 overflow-y-auto"
           rows={1}
           disabled={disabled}
           style={{ height: "auto" }}
@@ -236,9 +236,9 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply }: C
           onClick={handleSend}
           disabled={disabled || (!message.trim() && attachments.length === 0)}
           size="icon"
-          className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white"
+          className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white"
         >
-          <Send className="h-5 w-5" />
+          <Send className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </div>
     </div>

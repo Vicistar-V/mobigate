@@ -225,7 +225,7 @@ export const ChatInterface = ({
             >
               <div
                 className={cn(
-                  "flex gap-2 mb-4 max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300",
+                  "flex gap-2 mb-4 max-w-[85%] sm:max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300",
                   isCurrentUser ? "self-end" : "self-start"
                 )}
               >
@@ -240,7 +240,7 @@ export const ChatInterface = ({
                 )}
                 <div
                   className={cn(
-                    "px-3 py-2 rounded-lg shadow-sm relative group",
+                    "px-2 sm:px-3 py-2 rounded-lg shadow-sm relative group",
                     isCurrentUser ? "bg-[#d9fdd3] rounded-br-none" : "bg-white rounded-bl-none",
                     isSelected && "ring-2 ring-[#00a884]"
                   )}
@@ -263,7 +263,7 @@ export const ChatInterface = ({
                             <img
                               src={attachment.url}
                               alt={attachment.name}
-                              className="max-w-[300px] rounded-lg cursor-pointer"
+                              className="max-w-[240px] sm:max-w-[300px] w-full rounded-lg cursor-pointer"
                               onClick={() => window.open(attachment.url, '_blank')}
                             />
                           ) : (

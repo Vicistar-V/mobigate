@@ -47,7 +47,7 @@ export const MessagesSheet = () => {
           </div>
 
           {/* Chat Interface - Right Panel */}
-          <div className={`flex-1 ${showMobileChat ? 'flex' : 'hidden'}`}>
+          <div className={`flex-1 min-w-0 ${showMobileChat ? 'flex' : 'hidden'}`}>
             <ChatInterface
               conversation={activeConversation}
               isTyping={isTyping}
