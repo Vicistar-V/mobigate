@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, Image as ImageIcon, X, Send, Gift, Camera, Mic } from "lucide-react";
+import { X, Send, Gift, Camera, Mic } from "lucide-react";
 import { useRef, useState } from "react";
 import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
-import { CameraDialog } from "./CameraDialog";
-import { VoiceRecorderDialog } from "./VoiceRecorderDialog";
+import { AttachmentMenu } from "./AttachmentMenu";
+import { InlineVoiceRecorder } from "./InlineVoiceRecorder";
 import { toast } from "sonner";
 
 interface ChatInputProps {
@@ -19,8 +19,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<{ type: 'image' | 'file' | 'gift' | 'audio'; url: string; name: string; duration?: number; giftData?: any }[]>([]);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
-  const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
-  const [isVoiceRecorderOpen, setIsVoiceRecorderOpen] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -119,20 +118,11 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     setIsGiftDialogOpen(false);
   };
 
-  const handlePhotoSend = (photoData: { url: string; name: string }) => {
-    const photoAttachment = {
-      type: 'image' as const,
-      url: photoData.url,
-      name: photoData.name,
-    };
-    
-    onSendMessage(
-      `📷 Sent a photo`,
-      [photoAttachment]
-    );
-    
-    setIsCameraDialogOpen(false);
-    toast.success("Photo sent!");
+  const handleCameraClick = () => {
+    toast.info("📷 Camera feature coming soon!", {
+      description: "Take photos directly from the chat",
+      duration: 2000,
+    });
   };
 
   const formatDuration = (seconds: number) => {
@@ -154,7 +144,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
       [audioAttachment]
     );
     
-    setIsVoiceRecorderOpen(false);
+    setIsRecording(false);
     toast.success("Voice message sent!");
   };
 
@@ -175,21 +165,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         onSendGift={handleGiftSend}
       />
       
-      <CameraDialog
-        isOpen={isCameraDialogOpen}
-        onClose={() => setIsCameraDialogOpen(false)}
-        recipientName={recipientName}
-        onSendPhoto={handlePhotoSend}
-      />
-      
-      <VoiceRecorderDialog
-        isOpen={isVoiceRecorderOpen}
-        onClose={() => setIsVoiceRecorderOpen(false)}
-        recipientName={recipientName}
-        onSendAudio={handleAudioSend}
-      />
-      
-      <div className="p-3 sm:p-4 border-t border-border bg-card">
+      <div className="p-3 sm:p-4 border-t border-border bg-card relative">
         {replyTo && (
           <div className="mb-2 p-2 bg-muted/50 rounded-lg flex items-center justify-between">
             <div className="flex-1 min-w-0">
@@ -245,7 +221,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 p-2 pr-8 rounded-lg border-2 border-border bg-muted/50 relative">
-                    <Paperclip className="h-4 w-4 text-muted-foreground" />
+                    <X className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm truncate max-w-[150px]">{attachment.name}</span>
                     <button
                       onClick={() => removeAttachment(index)}
@@ -260,9 +236,18 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
           </div>
         )}
 
+        {/* Inline Voice Recorder */}
+        {isRecording && (
+          <InlineVoiceRecorder
+            onSend={handleAudioSend}
+            onCancel={() => setIsRecording(false)}
+          />
+        )}
+
         <div className="flex items-end gap-2">
           <div className="flex-1 flex items-end gap-1 sm:gap-2 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg px-2 py-1">
             <div className="flex gap-1">
+              {/* Hidden file inputs */}
               <input
                 ref={imageInputRef}
                 type="file"
@@ -271,16 +256,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 className="hidden"
                 onChange={handleImageSelect}
               />
-              <Button
-                onClick={() => imageInputRef.current?.click()}
-                variant="ghost"
-                size="icon"
-                disabled={disabled || attachments.length >= 5}
-                className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
-              >
-                <ImageIcon className="h-5 w-5" />
-              </Button>
-
               <input
                 ref={fileInputRef}
                 type="file"
@@ -288,67 +263,70 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 className="hidden"
                 onChange={handleFileSelect}
               />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="ghost"
-                size="icon"
-                disabled={disabled}
-                className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
-              >
-                <Paperclip className="h-5 w-5" />
-              </Button>
+
+              {/* Plus Button - More Tools */}
+              <AttachmentMenu
+                onImageSelect={() => imageInputRef.current?.click()}
+                onFileSelect={() => fileInputRef.current?.click()}
+                disabled={disabled || isRecording}
+              />
               
+              {/* Camera Button - Toast Only */}
               <Button
-                onClick={() => setIsCameraDialogOpen(true)}
+                onClick={handleCameraClick}
                 variant="ghost"
                 size="icon"
-                disabled={disabled}
+                disabled={disabled || isRecording}
                 className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
               >
                 <Camera className="h-5 w-5" />
               </Button>
-
-              <Button
-                onClick={() => setIsVoiceRecorderOpen(true)}
-                variant="ghost"
-                size="icon"
-                disabled={disabled}
-                className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
-              >
-                <Mic className="h-5 w-5" />
-              </Button>
               
+              {/* Gift Button */}
               <Button
                 onClick={() => setIsGiftDialogOpen(true)}
                 variant="ghost"
                 size="icon"
-                disabled={disabled}
+                disabled={disabled || isRecording}
                 className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
               >
                 <Gift className="h-5 w-5" />
               </Button>
 
+              {/* Text Input */}
               <Textarea
                 ref={textareaRef}
                 value={message}
                 onChange={handleTextareaChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Type a message..."
-                disabled={disabled}
+                disabled={disabled || isRecording}
                 className="flex-1 min-h-[40px] max-h-[120px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 py-2 px-2 text-base placeholder:text-[#667781]"
                 rows={1}
               />
             </div>
           </div>
 
-          <Button
-            onClick={handleSend}
-            disabled={disabled || (!message.trim() && attachments.length === 0)}
-            size="icon"
-            className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+          {/* Dynamic Send/Voice Button */}
+          {message.trim() || attachments.length > 0 ? (
+            <Button
+              onClick={handleSend}
+              disabled={disabled || isRecording}
+              size="icon"
+              className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setIsRecording(true)}
+              disabled={disabled || isRecording}
+              size="icon"
+              className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white"
+            >
+              <Mic className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
     </>
