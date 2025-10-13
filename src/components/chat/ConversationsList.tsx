@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,21 +54,29 @@ export const ConversationsList = ({
                 activeConversationId === conversation.id && "bg-accent"
               )}
             >
-              <div className="relative">
-                <Avatar className="h-12 w-12">
+              <Link 
+                to={`/profile/${conversation.user.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="relative shrink-0"
+              >
+                <Avatar className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity">
                   <AvatarImage src={conversation.user.avatar} />
                   <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
                 </Avatar>
                 {conversation.user.isOnline && (
                   <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-background rounded-full" />
                 )}
-              </div>
+              </Link>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <p className="text-base font-semibold truncate">
+                  <Link 
+                    to={`/profile/${conversation.user.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-base font-semibold truncate hover:text-primary transition-colors"
+                  >
                     {conversation.user.name}
-                  </p>
+                  </Link>
                   {conversation.unreadCount > 0 && (
                     <Badge variant="destructive" className="h-5 px-1.5 text-xs">
                       {conversation.unreadCount}

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart, MoreVertical, Trash2 } from "lucide-react";
@@ -19,16 +20,26 @@ interface CommentItemProps {
 export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => {
   return (
     <div className="flex gap-2 sm:gap-3 group animate-fade-in">
-      <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
-        <AvatarImage src={comment.authorProfileImage} alt={comment.author} />
-        <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
-      </Avatar>
+      <Link 
+        to={`/profile/${comment.userId || '1'}`}
+        className="shrink-0"
+      >
+        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer hover:opacity-80 transition-opacity">
+          <AvatarImage src={comment.authorProfileImage} alt={comment.author} />
+          <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+        </Avatar>
+      </Link>
 
       <div className="flex-1 space-y-0.5 sm:space-y-1">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="font-semibold text-xs sm:text-sm">{comment.author}</span>
+              <Link 
+                to={`/profile/${comment.userId || '1'}`}
+                className="font-semibold text-xs sm:text-sm hover:text-primary transition-colors"
+              >
+                {comment.author}
+              </Link>
               <span className="text-[10px] sm:text-xs text-muted-foreground">
                 {formatCommentTime(comment.timestamp)}
               </span>
