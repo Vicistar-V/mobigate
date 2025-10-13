@@ -226,6 +226,9 @@ export const ChatInterface = ({
                 <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
                   Clear Chat
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
+                  Settings
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
                   Block User
                 </DropdownMenuItem>
