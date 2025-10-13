@@ -12,9 +12,10 @@ import {
   giftsVault,
 } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { Gift, Wallet, Heart, ChevronLeft, ChevronDown } from "lucide-react";
+import { Gift, Wallet, Heart, ChevronLeft, ChevronDown, Coins, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 export type GiftSelection = {
   type: 'special' | 'classic' | 'tangible';
@@ -121,36 +122,62 @@ export const SendGiftDialog = ({
 
           {/* Selection Indicator */}
           {selectedGift && (
-            <Card className="p-3 bg-primary/5 border-primary">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <Badge variant="default" className="text-xs shrink-0">
-                    {selectedGift.type === 'special' && 'Special Digital'}
-                    {selectedGift.type === 'classic' && 'Classic Digital'}
-                    {selectedGift.type === 'tangible' && 'Tangible Gifts'}
-                  </Badge>
-                  {selectedGift.giftData.icon && (
-                    <span className="text-sm">{selectedGift.giftData.icon}</span>
+            <Card className="p-4 sm:p-5 lg:p-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent border-primary/20">
+              {/* Header: Category + Clear */}
+              <div className="flex items-center justify-between mb-3">
+                <Badge variant="default" className="text-xs font-medium">
+                  {selectedGift.type === 'special' && 'Special Digital'}
+                  {selectedGift.type === 'classic' && 'Classic Digital'}
+                  {selectedGift.type === 'tangible' && 'Tangible Gifts'}
+                </Badge>
+                
+                <Button
+                  onClick={() => setSelectedGift(null)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1"
+                >
+                  <X className="h-4 w-4" />
+                  <span className="hidden sm:inline">Clear</span>
+                </Button>
+              </div>
+
+              {/* Gift Icon */}
+              <div className="flex justify-center mb-3">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                  {selectedGift.giftData.icon ? (
+                    <span className="text-4xl sm:text-5xl">
+                      {selectedGift.giftData.icon}
+                    </span>
+                  ) : (
+                    <Gift className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
                   )}
-                  {selectedGift.type === 'tangible' && !selectedGift.giftData.icon && (
-                    <Gift className="h-4 w-4 text-primary" />
-                  )}
-                  <span className="text-sm font-medium truncate">
-                    {selectedGift.giftData.name}
-                  </span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-sm font-bold text-primary">
-                    {selectedGift.giftData.mobiValue.toLocaleString()} Mobi
-                  </span>
-                  <Button
-                    onClick={() => setSelectedGift(null)}
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2"
-                  >
-                    Clear
-                  </Button>
+              </div>
+
+              {/* Gift Name */}
+              <div className="text-center mb-3">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                  {selectedGift.giftData.name}
+                </h3>
+                {selectedGift.giftData.category && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selectedGift.giftData.category}
+                  </p>
+                )}
+              </div>
+
+              {/* Divider */}
+              <Separator className="my-3" />
+
+              {/* Price */}
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <Coins className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Price</span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-primary">
+                  {selectedGift.giftData.mobiValue.toLocaleString()} Mobi
                 </div>
               </div>
             </Card>
