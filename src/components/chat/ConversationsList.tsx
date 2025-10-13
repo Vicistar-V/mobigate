@@ -1,28 +1,44 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Conversation } from "@/types/chat";
 import { formatMessageTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
+import { ArrowLeft } from "lucide-react";
 
 interface ConversationsListProps {
   conversations: Conversation[];
   activeConversationId: string | null;
   onSelectConversation: (conversationId: string) => void;
+  onBack?: () => void;
 }
 
 export const ConversationsList = ({
   conversations,
   activeConversationId,
   onSelectConversation,
+  onBack,
 }: ConversationsListProps) => {
   return (
     <div className="flex flex-col h-full border-r border-border">
-      <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold">Messages</h2>
-        <p className="text-sm text-muted-foreground">
-          {conversations.filter((c) => c.unreadCount > 0).length} unread
-        </p>
+      <div className="p-4 border-b border-border flex items-center gap-2">
+        {onBack && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={onBack}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        )}
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg font-semibold">Messages</h2>
+          <p className="text-sm text-muted-foreground">
+            {conversations.filter((c) => c.unreadCount > 0).length} unread
+          </p>
+        </div>
       </div>
 
       <ScrollArea className="flex-1">

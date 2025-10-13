@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -10,6 +11,7 @@ import { ConversationsList } from "./chat/ConversationsList";
 import { ChatInterface } from "./chat/ChatInterface";
 
 export const MessagesSheet = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const {
     conversations,
     activeConversation,
@@ -29,7 +31,7 @@ export const MessagesSheet = () => {
   const showMobileChat = activeConversationId !== null;
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="iconLg" className="hover:bg-primary/10">
           <MessageSquare />
@@ -43,6 +45,7 @@ export const MessagesSheet = () => {
               conversations={conversations}
               activeConversationId={activeConversationId}
               onSelectConversation={selectConversation}
+              onBack={() => setIsOpen(false)}
             />
           </div>
 
