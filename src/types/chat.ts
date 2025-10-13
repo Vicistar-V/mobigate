@@ -12,9 +12,16 @@ export interface Message {
   timestamp: Date;
   isRead?: boolean;
   attachments?: {
-    type: 'image' | 'file';
+    type: 'image' | 'file' | 'gift';
     url: string;
     name: string;
+    giftData?: {
+      id: string;
+      name: string;
+      mobiValue: number;
+      icon?: string;
+      category?: string;
+    };
   }[];
   reactions?: {
     userId: string;

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Conversation, Message } from "@/types/chat";
 import { formatChatTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
-import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip } from "lucide-react";
+import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -20,7 +21,7 @@ import { toast } from "sonner";
 interface ChatInterfaceProps {
   conversation: Conversation | undefined;
   isTyping: boolean;
-  onSendMessage: (content: string, attachments?: { type: 'image' | 'file'; url: string; name: string }[]) => void;
+  onSendMessage: (content: string, attachments?: { type: 'image' | 'file' | 'gift'; url: string; name: string; giftData?: any }[]) => void;
   onEditMessage: (messageId: string, newContent: string) => void;
   onDeleteMessage: (messageId: string) => void;
   onReactToMessage: (messageId: string, emoji: string) => void;
@@ -266,6 +267,30 @@ export const ChatInterface = ({
                               className="max-w-[240px] sm:max-w-[300px] w-full rounded-lg cursor-pointer"
                               onClick={() => window.open(attachment.url, '_blank')}
                             />
+                          ) : attachment.type === 'gift' && attachment.giftData ? (
+                            <div className="p-4 rounded-lg bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20 border-2 border-pink-200 dark:border-pink-800">
+                              <div className="flex items-center gap-3">
+                                {attachment.giftData.icon && (
+                                  <span className="text-4xl">{attachment.giftData.icon}</span>
+                                )}
+                                {!attachment.giftData.icon && (
+                                  <Gift className="h-10 w-10 text-pink-500" />
+                                )}
+                                <div className="flex-1">
+                                  <p className="font-semibold text-pink-900 dark:text-pink-100">
+                                    {attachment.giftData.name}
+                                  </p>
+                                  <p className="text-sm text-pink-700 dark:text-pink-300">
+                                    {attachment.giftData.mobiValue.toLocaleString()} Mobi
+                                  </p>
+                                  {attachment.giftData.category && (
+                                    <Badge className="mt-1 text-xs bg-pink-200 dark:bg-pink-900 text-pink-800 dark:text-pink-200 border-0">
+                                      {attachment.giftData.category}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                           ) : (
                             <a
                               href={attachment.url}
@@ -354,6 +379,7 @@ export const ChatInterface = ({
         disabled={isTyping}
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
+        recipientName={conversation.user.name}
       />
 
       {/* Edit Message Dialog */}
