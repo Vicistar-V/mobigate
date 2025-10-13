@@ -833,61 +833,91 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           Click on any option to navigate to the respective page
         </p>
         <div className="space-y-3">
-          <div 
-            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border rounded-lg border-muted"
-            onClick={() => {
-              toast({ title: "Navigating to My Mobi-Shop..." });
-              navigate("/mobi-shop");
-            }}
-          >
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 p-4 border rounded-lg border-muted">
+            <div 
+              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
+              onClick={() => {
+                toast({ title: "Navigating to My Mobi-Shop..." });
+                navigate("/mobi-shop");
+              }}
+            >
               <div className="p-2 rounded-lg bg-primary/10">
                 <Store className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">My Mobi-Shop @ Mobi-Store</h4>
+                <h4 className="font-semibold text-primary hover:underline">My Mobi-Shop @ Mobi-Store</h4>
                 <p className="text-sm text-muted-foreground">Your personal online store</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-blue-600" />
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                toast({ title: "Edit My Mobi-Shop settings (Coming soon)" });
+              }}
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </div>
           
-          <div 
-            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border rounded-lg border-muted"
-            onClick={() => {
-              toast({ title: "Navigating to Mobi-Circle..." });
-              navigate("/mobi-circle");
-            }}
-          >
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 p-4 border rounded-lg border-muted">
+            <div 
+              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
+              onClick={() => {
+                toast({ title: "Navigating to Mobi-Circle..." });
+                navigate("/mobi-circle");
+              }}
+            >
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">Mobi-Circle</h4>
+                <h4 className="font-semibold text-primary hover:underline">Mobi-Circle</h4>
                 <p className="text-sm text-muted-foreground">Connect with your community</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-blue-600" />
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                toast({ title: "Edit Mobi-Circle settings (Coming soon)" });
+              }}
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </div>
           
-          <div 
-            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border rounded-lg border-muted"
-            onClick={() => {
-              toast({ title: "Navigating to Biz-Catalogue..." });
-              navigate("/biz-catalogue");
-            }}
-          >
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 p-4 border rounded-lg border-muted">
+            <div 
+              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
+              onClick={() => {
+                toast({ title: "Navigating to Biz-Catalogue..." });
+                navigate("/biz-catalogue");
+              }}
+            >
               <div className="p-2 rounded-lg bg-primary/10">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">Biz-Catalogue</h4>
+                <h4 className="font-semibold text-primary hover:underline">Biz-Catalogue</h4>
                 <p className="text-sm text-muted-foreground">Browse business offerings</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-blue-600" />
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                toast({ title: "Edit Biz-Catalogue settings (Coming soon)" });
+              }}
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </div>
         </div>
       </Card>
