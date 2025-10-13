@@ -176,24 +176,23 @@ export const ChatInterface = ({
           )}
           <Link 
             to={`/profile/${conversation.user.id}`}
-            className="relative mr-[15px] shrink-0"
+            className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors"
           >
-            <Avatar className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity">
-              <AvatarImage src={conversation.user.avatar} />
-              <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
-            </Avatar>
-            {conversation.user.isOnline && (
-              <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
-            )}
-          </Link>
-          <Link 
-            to={`/profile/${conversation.user.id}`}
-            className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
-          >
-            <h3 className="font-semibold text-[#111b21] text-lg">{conversation.user.name}</h3>
-            <p className="text-[15px] text-[#667781]">
-              {conversation.user.isOnline ? "online" : "Offline"}
-            </p>
+            <div className="relative mr-[15px] shrink-0">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={conversation.user.avatar} />
+                <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
+              </Avatar>
+              {conversation.user.isOnline && (
+                <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-[#111b21] text-lg">{conversation.user.name}</h3>
+              <p className="text-[15px] text-[#667781]">
+                {conversation.user.isOnline ? "online" : "Offline"}
+              </p>
+            </div>
           </Link>
           <div className="flex items-center">
             <Button
