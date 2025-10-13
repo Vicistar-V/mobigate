@@ -63,6 +63,7 @@ export const MessagesSheet = () => {
               onClearSelection={clearSelection}
               onDeleteSelectedMessages={deleteSelectedMessages}
               onBack={() => selectConversation(null)}
+              onCloseSheet={() => setIsOpen(false)}
             />
           </div>
         </div>

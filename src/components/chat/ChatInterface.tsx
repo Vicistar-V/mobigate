@@ -31,6 +31,7 @@ interface ChatInterfaceProps {
   onClearSelection: () => void;
   onDeleteSelectedMessages: () => void;
   onBack?: () => void;
+  onCloseSheet?: () => void;
 }
 
 export const ChatInterface = ({
@@ -45,6 +46,7 @@ export const ChatInterface = ({
   onClearSelection,
   onDeleteSelectedMessages,
   onBack,
+  onCloseSheet,
 }: ChatInterfaceProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
@@ -177,6 +179,7 @@ export const ChatInterface = ({
           <Link 
             to={`/profile/${conversation.user.id}`}
             className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors"
+            onClick={() => onCloseSheet?.()}
           >
             <div className="relative mr-[15px] shrink-0">
               <Avatar className="h-10 w-10">
