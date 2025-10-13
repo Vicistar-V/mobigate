@@ -28,6 +28,9 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/profile/:userId" element={<Profile />} />
+                <Route path="/mobi-shop" element={<NotFound />} />
+                <Route path="/mobi-circle" element={<NotFound />} />
+                <Route path="/biz-catalogue" element={<NotFound />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -4,7 +4,7 @@ import { format, parse } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield, Store, BookOpen, ExternalLink } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,7 @@ import { EditClassmatesForm, Classmate } from "./profile/EditClassmatesForm";
 import { EditAgeMatesForm, AgeMate } from "./profile/EditAgeMatesForm";
 import { EditWorkColleaguesForm, WorkColleague } from "./profile/EditWorkColleaguesForm";
 import { EditLoveFriendshipForm, LoveFriendship } from "./profile/EditLoveFriendshipForm";
-import { EditExtraSourceForm } from "./profile/EditExtraSourceForm";
+
 import { EditSocialCommunityForm, SocialCommunity } from "./profile/EditSocialCommunityForm";
 import { MateDetailDialog } from "./profile/MateDetailDialog";
 import { PrivacyBadge } from "./profile/PrivacyBadge";
@@ -108,7 +108,6 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editBasicInfoOpen, setEditBasicInfoOpen] = useState(false);
   const [editRelationshipOpen, setEditRelationshipOpen] = useState(false);
   const [editLoveFriendshipOpen, setEditLoveFriendshipOpen] = useState(false);
-  const [editExtraSourceOpen, setEditExtraSourceOpen] = useState(false);
   const [editFamilyOpen, setEditFamilyOpen] = useState(false);
   const [editSocialCommunityOpen, setEditSocialCommunityOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
@@ -835,50 +834,59 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         </p>
         <div className="space-y-3">
           <Card 
-            className="p-4 cursor-pointer hover:bg-muted/50 transition-colors border-muted"
-            onClick={() => setEditExtraSourceOpen(true)}
+            className="p-4 cursor-pointer hover:bg-primary/10 transition-colors border-muted"
+            onClick={() => {
+              toast({ title: "Navigating to My Mobi-Shop..." });
+              navigate("/mobi-shop");
+            }}
           >
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
-                <Briefcase className="h-5 w-5 text-primary" />
+                <Store className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium">My Mobi-Shop @ Mobi-Store</h4>
+                <h4 className="font-medium text-primary hover:underline">My Mobi-Shop @ Mobi-Store</h4>
                 <p className="text-sm text-muted-foreground">Your personal online store</p>
               </div>
-              <Pencil className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
           
           <Card 
-            className="p-4 cursor-pointer hover:bg-muted/50 transition-colors border-muted"
-            onClick={() => setEditExtraSourceOpen(true)}
+            className="p-4 cursor-pointer hover:bg-primary/10 transition-colors border-muted"
+            onClick={() => {
+              toast({ title: "Navigating to Mobi-Circle..." });
+              navigate("/mobi-circle");
+            }}
           >
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium">Mobi-Circle</h4>
+                <h4 className="font-medium text-primary hover:underline">Mobi-Circle</h4>
                 <p className="text-sm text-muted-foreground">Connect with your community</p>
               </div>
-              <Pencil className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
           
           <Card 
-            className="p-4 cursor-pointer hover:bg-muted/50 transition-colors border-muted"
-            onClick={() => setEditExtraSourceOpen(true)}
+            className="p-4 cursor-pointer hover:bg-primary/10 transition-colors border-muted"
+            onClick={() => {
+              toast({ title: "Navigating to Biz-Catalogue..." });
+              navigate("/biz-catalogue");
+            }}
           >
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
-                <GraduationCap className="h-5 w-5 text-primary" />
+                <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium">Biz-Catalogue</h4>
+                <h4 className="font-medium text-primary hover:underline">Biz-Catalogue</h4>
                 <p className="text-sm text-muted-foreground">Browse business offerings</p>
               </div>
-              <Pencil className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>
         </div>
@@ -1206,16 +1214,6 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         />
       </EditSectionDialog>
 
-      <EditSectionDialog
-        open={editExtraSourceOpen}
-        onOpenChange={setEditExtraSourceOpen}
-        title="Extra Source"
-        maxWidth="lg"
-      >
-        <EditExtraSourceForm
-          onClose={() => setEditExtraSourceOpen(false)}
-        />
-      </EditSectionDialog>
 
       <EditSectionDialog
         open={editBasicInfoOpen}
