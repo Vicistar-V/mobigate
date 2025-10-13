@@ -6,7 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Conversation } from "@/types/chat";
 import { formatMessageTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Settings } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface ConversationsListProps {
   conversations: Conversation[];
@@ -40,6 +41,14 @@ export const ConversationsList = ({
             {conversations.filter((c) => c.unreadCount > 0).length} unread
           </p>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 shrink-0"
+          onClick={() => toast({ title: "Coming soon" })}
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
       </div>
 
       <ScrollArea className="flex-1">
