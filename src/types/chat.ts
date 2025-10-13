@@ -12,9 +12,10 @@ export interface Message {
   timestamp: Date;
   isRead?: boolean;
   attachments?: {
-    type: 'image' | 'file' | 'gift';
+    type: 'image' | 'file' | 'gift' | 'audio';
     url: string;
     name: string;
+    duration?: number;
     giftData?: {
       id: string;
       name: string;

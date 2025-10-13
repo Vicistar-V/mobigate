@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
-import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift } from "lucide-react";
+import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -21,7 +21,7 @@ import { toast } from "sonner";
 interface ChatInterfaceProps {
   conversation: Conversation | undefined;
   isTyping: boolean;
-  onSendMessage: (content: string, attachments?: { type: 'image' | 'file' | 'gift'; url: string; name: string; giftData?: any }[]) => void;
+  onSendMessage: (content: string, attachments?: { type: 'image' | 'file' | 'gift' | 'audio'; url: string; name: string; duration?: number; giftData?: any }[]) => void;
   onEditMessage: (messageId: string, newContent: string) => void;
   onDeleteMessage: (messageId: string) => void;
   onReactToMessage: (messageId: string, emoji: string) => void;
@@ -48,6 +48,7 @@ export const ChatInterface = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
   const [replyTo, setReplyTo] = useState<{ messageId: string; content: string; senderName: string } | null>(null);
+  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const isSelectionMode = selectedMessages.size > 0;
 
   useEffect(() => {
@@ -91,6 +92,31 @@ export const ChatInterface = ({
     if (confirm("Delete this message?")) {
       onDeleteMessage(messageId);
     }
+  };
+
+  const handleAudioPlayback = (messageId: string, audioUrl: string) => {
+    const audioElement = document.getElementById(`audio-${messageId}`) as HTMLAudioElement;
+    
+    if (!audioElement) return;
+    
+    if (playingAudioId === messageId) {
+      audioElement.pause();
+      setPlayingAudioId(null);
+    } else {
+      if (playingAudioId) {
+        const currentAudio = document.getElementById(`audio-${playingAudioId}`) as HTMLAudioElement;
+        currentAudio?.pause();
+      }
+      
+      audioElement.play();
+      setPlayingAudioId(messageId);
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   if (!conversation) {
@@ -290,6 +316,45 @@ export const ChatInterface = ({
                                   )}
                                 </div>
                               </div>
+                            </div>
+                          ) : attachment.type === 'audio' ? (
+                            <div className="flex items-center gap-3 p-3 rounded-lg bg-[#f0f2f5] dark:bg-[#2a2a2a] min-w-[200px] max-w-[300px]">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white shrink-0"
+                                onClick={() => handleAudioPlayback(message.id, attachment.url)}
+                              >
+                                {playingAudioId === message.id ? (
+                                  <Pause className="h-5 w-5" />
+                                ) : (
+                                  <Play className="h-5 w-5 ml-0.5" />
+                                )}
+                              </Button>
+                              
+                              <div className="flex-1 flex items-center gap-0.5 h-8">
+                                {[...Array(15)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className="w-1 bg-[#00a884] rounded-full"
+                                    style={{
+                                      height: `${Math.random() * 24 + 8}px`,
+                                      opacity: playingAudioId === message.id ? 1 : 0.5
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                              
+                              <span className="text-xs text-[#667781] shrink-0">
+                                {attachment.duration ? formatDuration(attachment.duration) : '0:00'}
+                              </span>
+                              
+                              <audio
+                                id={`audio-${message.id}`}
+                                src={attachment.url}
+                                onEnded={() => setPlayingAudioId(null)}
+                                className="hidden"
+                              />
                             </div>
                           ) : (
                             <a
