@@ -15,8 +15,15 @@ export const MessagesSheet = () => {
     activeConversation,
     activeConversationId,
     isTyping,
+    selectedMessages,
     sendMessage,
     selectConversation,
+    editMessage,
+    deleteMessage,
+    deleteSelectedMessages,
+    reactToMessage,
+    toggleSelectMessage,
+    clearSelection,
   } = useChat();
 
   const showMobileChat = activeConversationId !== null;
@@ -45,6 +52,13 @@ export const MessagesSheet = () => {
               conversation={activeConversation}
               isTyping={isTyping}
               onSendMessage={sendMessage}
+              onEditMessage={editMessage}
+              onDeleteMessage={deleteMessage}
+              onReactToMessage={reactToMessage}
+              selectedMessages={selectedMessages}
+              onToggleSelectMessage={toggleSelectMessage}
+              onClearSelection={clearSelection}
+              onDeleteSelectedMessages={deleteSelectedMessages}
               onBack={() => selectConversation(null)}
             />
           </div>

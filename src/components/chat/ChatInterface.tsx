@@ -1,16 +1,33 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Conversation } from "@/types/chat";
+import { Conversation, Message } from "@/types/chat";
 import { formatChatTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
-import { Video, Phone, MoreVertical, ArrowLeft } from "lucide-react";
+import { MessageContextMenu } from "./MessageContextMenu";
+import { EditMessageDialog } from "./EditMessageDialog";
+import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface ChatInterfaceProps {
   conversation: Conversation | undefined;
   isTyping: boolean;
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, attachments?: { type: 'image' | 'file'; url: string; name: string }[]) => void;
+  onEditMessage: (messageId: string, newContent: string) => void;
+  onDeleteMessage: (messageId: string) => void;
+  onReactToMessage: (messageId: string, emoji: string) => void;
+  selectedMessages: Set<string>;
+  onToggleSelectMessage: (messageId: string) => void;
+  onClearSelection: () => void;
+  onDeleteSelectedMessages: () => void;
   onBack?: () => void;
 }
 
@@ -18,15 +35,62 @@ export const ChatInterface = ({
   conversation,
   isTyping,
   onSendMessage,
+  onEditMessage,
+  onDeleteMessage,
+  onReactToMessage,
+  selectedMessages,
+  onToggleSelectMessage,
+  onClearSelection,
+  onDeleteSelectedMessages,
   onBack,
 }: ChatInterfaceProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
+  const [replyTo, setReplyTo] = useState<{ messageId: string; content: string; senderName: string } | null>(null);
+  const isSelectionMode = selectedMessages.size > 0;
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [conversation?.messages, isTyping]);
+
+  const handleVideoCall = () => {
+    toast.success(`Starting video call with ${conversation?.user.name}...`);
+  };
+
+  const handleVoiceCall = () => {
+    toast.success(`Starting voice call with ${conversation?.user.name}...`);
+  };
+
+  const handleReply = (message: Message) => {
+    const senderName = message.senderId === "current-user" ? "You" : conversation?.user.name || "Unknown";
+    setReplyTo({
+      messageId: message.id,
+      content: message.content,
+      senderName,
+    });
+  };
+
+  const handleEdit = (messageId: string) => {
+    const message = conversation?.messages.find((m) => m.id === messageId);
+    if (message) {
+      setEditingMessage({ id: messageId, content: message.content });
+    }
+  };
+
+  const handleSaveEdit = (newContent: string) => {
+    if (editingMessage) {
+      onEditMessage(editingMessage.id, newContent);
+      setEditingMessage(null);
+    }
+  };
+
+  const handleDelete = (messageId: string) => {
+    if (confirm("Delete this message?")) {
+      onDeleteMessage(messageId);
+    }
+  };
 
   if (!conversation) {
     return (
@@ -45,76 +109,232 @@ export const ChatInterface = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
+      {/* Selection Mode Action Bar */}
+      {isSelectionMode && (
+        <div className="px-4 py-3 bg-[#00a884] flex items-center justify-between text-white flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-white hover:bg-white/20"
+              onClick={onClearSelection}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <span className="font-medium">{selectedMessages.size} selected</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20"
+            onClick={onDeleteSelectedMessages}
+          >
+            Delete
+          </Button>
+        </div>
+      )}
+
       {/* Chat Header */}
-      <div className="px-4 py-[10px] border-b flex items-center bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
-        {onBack && (
-          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] mr-2 sm:hidden" onClick={onBack}>
-            <ArrowLeft className="h-6 w-6" />
-          </Button>
-        )}
-        <div className="relative mr-[15px]">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={conversation.user.avatar} />
-            <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
-          </Avatar>
-          {conversation.user.isOnline && (
-            <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
+      {!isSelectionMode && (
+        <div className="px-4 py-[10px] border-b flex items-center bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
+          {onBack && (
+            <Button
+              variant="ghost"
+              className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] mr-2 sm:hidden"
+              onClick={onBack}
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
           )}
+          <div className="relative mr-[15px]">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={conversation.user.avatar} />
+              <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
+            </Avatar>
+            {conversation.user.isOnline && (
+              <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-[#111b21] text-lg">{conversation.user.name}</h3>
+            <p className="text-[15px] text-[#667781]">
+              {conversation.user.isOnline ? "online" : "Offline"}
+            </p>
+          </div>
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2"
+              onClick={handleVideoCall}
+            >
+              <Video className="h-6 w-6" />
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2"
+              onClick={handleVoiceCall}
+            >
+              <Phone className="h-6 w-6" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
+                  <MoreVertical className="h-6 w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => toast.info("View contact info")}>
+                  View Contact
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
+                  Mute Notifications
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
+                  Clear Chat
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
+                  Block User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-[#111b21] text-base">{conversation.user.name}</h3>
-          <p className="text-[13px] text-[#667781]">
-            {conversation.user.isOnline ? "online" : "Offline"}
-          </p>
-        </div>
-        <div className="flex items-center">
-          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
-            <Video className="h-6 w-6" />
-          </Button>
-          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
-            <Phone className="h-6 w-6" />
-          </Button>
-          <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
-            <MoreVertical className="h-6 w-6" />
-          </Button>
-        </div>
-      </div>
+      )}
 
       {/* Messages Area */}
-      <div 
+      <div
         className="flex-1 p-5 overflow-y-auto flex flex-col bg-[#E5DDD5]"
         style={{
-          backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")'
+          backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")',
         }}
         ref={scrollRef}
       >
         {conversation.messages.map((message) => {
-            const isCurrentUser = message.senderId === "current-user";
-            
-            return (
+          const isCurrentUser = message.senderId === "current-user";
+          const isSelected = selectedMessages.has(message.id);
+
+          return (
+            <MessageContextMenu
+              key={message.id}
+              message={message}
+              isOwnMessage={isCurrentUser}
+              onReply={handleReply}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onReact={onReactToMessage}
+            >
               <div
-                key={message.id}
                 className={cn(
-                  "flex mb-4 max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300",
+                  "flex gap-2 mb-4 max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300",
                   isCurrentUser ? "self-end" : "self-start"
                 )}
               >
+                {isSelectionMode && (
+                  <div className="flex items-center">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => onToggleSelectMessage(message.id)}
+                      className="h-5 w-5"
+                    />
+                  </div>
+                )}
                 <div
                   className={cn(
-                    "px-3 py-2 rounded-lg shadow-sm relative",
-                    isCurrentUser
-                      ? "bg-[#d9fdd3] rounded-br-none"
-                      : "bg-white rounded-bl-none"
+                    "px-3 py-2 rounded-lg shadow-sm relative group",
+                    isCurrentUser ? "bg-[#d9fdd3] rounded-br-none" : "bg-white rounded-bl-none",
+                    isSelected && "ring-2 ring-[#00a884]"
                   )}
+                  onClick={() => isSelectionMode && onToggleSelectMessage(message.id)}
                 >
-                  <p className="text-sm text-[#111b21] break-words mb-1">{message.content}</p>
-                  <span className="text-[11px] text-[#667781] float-right ml-2 mt-1">
-                    {formatChatTime(message.timestamp)}
-                  </span>
+                  {/* Reply Preview */}
+                  {message.replyTo && (
+                    <div className="mb-2 p-2 bg-black/5 rounded border-l-2 border-[#00a884]">
+                      <p className="text-xs text-[#00a884] font-medium">{message.replyTo.senderName}</p>
+                      <p className="text-xs text-[#667781] truncate">{message.replyTo.content}</p>
+                    </div>
+                  )}
+
+                  {/* Attachments */}
+                  {message.attachments && message.attachments.length > 0 && (
+                    <div className="mb-2 space-y-2">
+                      {message.attachments.map((attachment, idx) => (
+                        <div key={idx}>
+                          {attachment.type === 'image' ? (
+                            <img
+                              src={attachment.url}
+                              alt={attachment.name}
+                              className="max-w-[300px] rounded-lg cursor-pointer"
+                              onClick={() => window.open(attachment.url, '_blank')}
+                            />
+                          ) : (
+                            <a
+                              href={attachment.url}
+                              download={attachment.name}
+                              className="flex items-center gap-2 p-2 bg-black/5 rounded hover:bg-black/10"
+                            >
+                              <Paperclip className="h-4 w-4 text-[#54656f]" />
+                              <span className="text-sm text-[#111b21]">{attachment.name}</span>
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Message Content */}
+                  {message.content && (
+                    <p className="text-base text-[#111b21] break-words mb-1">{message.content}</p>
+                  )}
+
+                  {/* Reactions */}
+                  {message.reactions && message.reactions.length > 0 && (
+                    <div className="flex gap-1 mt-1 mb-1">
+                      {Array.from(new Set(message.reactions.map((r) => r.emoji))).map((emoji) => {
+                        const count = message.reactions!.filter((r) => r.emoji === emoji).length;
+                        return (
+                          <span
+                            key={emoji}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black/5 rounded-full text-xs"
+                          >
+                            {emoji} {count > 1 && count}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Message Footer */}
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-xs text-[#667781]">
+                      {formatChatTime(message.timestamp)}
+                    </span>
+                    {message.isEdited && (
+                      <span className="text-xs text-[#667781] italic">• edited</span>
+                    )}
+                    {isCurrentUser && (
+                      <span className="text-xs text-[#667781] ml-1">
+                        {message.isRead ? <CheckCheck className="h-3 w-3 text-[#00a884]" /> : <Check className="h-3 w-3" />}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Selection checkbox on hover (non-selection mode) */}
+                  {!isSelectionMode && (
+                    <div
+                      className="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleSelectMessage(message.id);
+                      }}
+                    >
+                      <Checkbox className="h-5 w-5" />
+                    </div>
+                  )}
                 </div>
               </div>
-            );
-          })}
+            </MessageContextMenu>
+          );
+        })}
 
           {/* Typing Indicator */}
           {isTyping && (
@@ -129,7 +349,20 @@ export const ChatInterface = ({
       </div>
 
       {/* Input Area */}
-      <ChatInput onSendMessage={onSendMessage} disabled={isTyping} />
+      <ChatInput
+        onSendMessage={onSendMessage}
+        disabled={isTyping}
+        replyTo={replyTo}
+        onCancelReply={() => setReplyTo(null)}
+      />
+
+      {/* Edit Message Dialog */}
+      <EditMessageDialog
+        open={editingMessage !== null}
+        onOpenChange={(open) => !open && setEditingMessage(null)}
+        initialContent={editingMessage?.content || ""}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };

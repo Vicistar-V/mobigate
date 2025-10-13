@@ -49,7 +49,7 @@ export const ConversationsList = ({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <p className="text-sm font-semibold truncate">
+                  <p className="text-base font-semibold truncate">
                     {conversation.user.name}
                   </p>
                   {conversation.unreadCount > 0 && (

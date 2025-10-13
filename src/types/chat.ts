@@ -16,6 +16,16 @@ export interface Message {
     url: string;
     name: string;
   }[];
+  reactions?: {
+    userId: string;
+    emoji: string;
+  }[];
+  isEdited?: boolean;
+  replyTo?: {
+    messageId: string;
+    content: string;
+    senderName: string;
+  };
 }
 
 export interface Conversation {
