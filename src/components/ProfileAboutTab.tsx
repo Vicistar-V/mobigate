@@ -833,8 +833,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           Click on any option to navigate to the respective page
         </p>
         <div className="space-y-3">
-          <Card 
-            className="p-4 cursor-pointer hover:bg-primary/10 transition-colors border-muted"
+          <div 
+            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border rounded-lg border-muted"
             onClick={() => {
               toast({ title: "Navigating to My Mobi-Shop..." });
               navigate("/mobi-shop");
@@ -845,15 +845,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <Store className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-primary hover:underline">My Mobi-Shop @ Mobi-Store</h4>
+                <h4 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">My Mobi-Shop @ Mobi-Store</h4>
                 <p className="text-sm text-muted-foreground">Your personal online store</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-blue-600" />
             </div>
-          </Card>
+          </div>
           
-          <Card 
-            className="p-4 cursor-pointer hover:bg-primary/10 transition-colors border-muted"
+          <div 
+            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border rounded-lg border-muted"
             onClick={() => {
               toast({ title: "Navigating to Mobi-Circle..." });
               navigate("/mobi-circle");
@@ -864,15 +864,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-primary hover:underline">Mobi-Circle</h4>
+                <h4 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">Mobi-Circle</h4>
                 <p className="text-sm text-muted-foreground">Connect with your community</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-blue-600" />
             </div>
-          </Card>
+          </div>
           
-          <Card 
-            className="p-4 cursor-pointer hover:bg-primary/10 transition-colors border-muted"
+          <div 
+            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors border rounded-lg border-muted"
             onClick={() => {
               toast({ title: "Navigating to Biz-Catalogue..." });
               navigate("/biz-catalogue");
@@ -883,12 +883,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-medium text-primary hover:underline">Biz-Catalogue</h4>
+                <h4 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">Biz-Catalogue</h4>
                 <p className="text-sm text-muted-foreground">Browse business offerings</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-4 w-4 text-blue-600" />
             </div>
-          </Card>
+          </div>
         </div>
       </Card>
 
