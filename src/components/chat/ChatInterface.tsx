@@ -477,8 +477,6 @@ export const ChatInterface = ({
               </div>
             </div>
           )}
-        </div>
-      </div>
       </div>
 
       {/* Input Area */}
