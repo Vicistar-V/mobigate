@@ -183,20 +183,7 @@ export const ChatInterface = ({
             </Button>
           )}
           
-          {/* Game Mode Exit Button */}
-          {isGameMode && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mr-3 gap-2 text-primary hover:bg-primary/10"
-              onClick={onExitQuiz}
-            >
-              <X className="h-4 w-4" />
-              Exit Game
-            </Button>
-          )}
-          
-          <Link 
+          <Link
             to={`/profile/${conversation.user.id}`}
             className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors"
             onClick={() => onCloseSheet?.()}
