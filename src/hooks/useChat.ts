@@ -1,12 +1,15 @@
 import { useState, useCallback } from "react";
-import { Message, Conversation } from "@/types/chat";
+import { Message, Conversation, QuizSession, QuizQuestion } from "@/types/chat";
 import { mockConversations } from "@/data/chatData";
+import { getRandomQuestions } from "@/data/quizData";
 
 export const useChat = () => {
   const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState<{ [key: string]: boolean }>({});
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
+  const [activeQuizSession, setActiveQuizSession] = useState<QuizSession | null>(null);
+  const [quizTimeRemaining, setQuizTimeRemaining] = useState<number>(0);
 
   const activeConversation = conversations.find(
     (conv) => conv.id === activeConversationId
@@ -207,12 +210,69 @@ export const useChat = () => {
     setSelectedMessages(new Set());
   }, []);
 
+  const startQuizGame = useCallback(() => {
+    if (!activeConversationId) return;
+    
+    const questions = getRandomQuestions(10);
+    const newSession: QuizSession = {
+      id: `quiz-${Date.now()}`,
+      conversationId: activeConversationId,
+      questions,
+      currentQuestionIndex: 0,
+      score: 0,
+      startedAt: new Date(),
+    };
+    
+    setActiveQuizSession(newSession);
+    setQuizTimeRemaining(questions[0]?.timeLimit || 15);
+  }, [activeConversationId]);
+
+  const answerQuizQuestion = useCallback((answerIndex: number) => {
+    if (!activeQuizSession) return;
+    
+    const currentQuestion = activeQuizSession.questions[activeQuizSession.currentQuestionIndex];
+    const isCorrect = answerIndex === currentQuestion.correctAnswer;
+    
+    setActiveQuizSession((prev) => {
+      if (!prev) return null;
+      
+      const newScore = isCorrect ? prev.score + currentQuestion.points : prev.score;
+      const nextIndex = prev.currentQuestionIndex + 1;
+      
+      if (nextIndex >= prev.questions.length) {
+        // Quiz completed
+        return {
+          ...prev,
+          score: newScore,
+          completedAt: new Date(),
+        };
+      }
+      
+      // Move to next question
+      const nextQuestion = prev.questions[nextIndex];
+      setQuizTimeRemaining(nextQuestion.timeLimit);
+      
+      return {
+        ...prev,
+        score: newScore,
+        currentQuestionIndex: nextIndex,
+      };
+    });
+  }, [activeQuizSession]);
+
+  const exitQuizGame = useCallback(() => {
+    setActiveQuizSession(null);
+    setQuizTimeRemaining(0);
+  }, []);
+
   return {
     conversations,
     activeConversation,
     activeConversationId,
     isTyping: activeConversationId ? isTyping[activeConversationId] : false,
     selectedMessages,
+    activeQuizSession,
+    quizTimeRemaining,
     sendMessage,
     selectConversation,
     editMessage,
@@ -221,5 +281,8 @@ export const useChat = () => {
     reactToMessage,
     toggleSelectMessage,
     clearSelection,
+    startQuizGame,
+    answerQuizQuestion,
+    exitQuizGame,
   };
 };

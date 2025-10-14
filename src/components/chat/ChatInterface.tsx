@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Conversation, Message } from "@/types/chat";
+import { Conversation, Message, QuizSession } from "@/types/chat";
 import { formatChatTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
-import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause } from "lucide-react";
+import { QuizGamePanel } from "./QuizGamePanel";
+import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -32,6 +33,11 @@ interface ChatInterfaceProps {
   onDeleteSelectedMessages: () => void;
   onBack?: () => void;
   onCloseSheet?: () => void;
+  quizSession?: QuizSession | null;
+  quizTimeRemaining?: number;
+  onStartQuiz?: () => void;
+  onAnswerQuiz?: (answerIndex: number) => void;
+  onExitQuiz?: () => void;
 }
 
 export const ChatInterface = ({
@@ -47,12 +53,18 @@ export const ChatInterface = ({
   onDeleteSelectedMessages,
   onBack,
   onCloseSheet,
+  quizSession,
+  quizTimeRemaining = 0,
+  onStartQuiz,
+  onAnswerQuiz,
+  onExitQuiz,
 }: ChatInterfaceProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
   const [replyTo, setReplyTo] = useState<{ messageId: string; content: string; senderName: string } | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const isSelectionMode = selectedMessages.size > 0;
+  const isGameMode = !!quizSession && !quizSession.completedAt;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -176,6 +188,20 @@ export const ChatInterface = ({
               <ArrowLeft className="h-6 w-6" />
             </Button>
           )}
+          
+          {/* Game Mode Exit Button */}
+          {isGameMode && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mr-3 gap-2 text-primary hover:bg-primary/10"
+              onClick={onExitQuiz}
+            >
+              <X className="h-4 w-4" />
+              Exit Game
+            </Button>
+          )}
+          
           <Link 
             to={`/profile/${conversation.user.id}`}
             className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors"
@@ -193,7 +219,16 @@ export const ChatInterface = ({
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-[#111b21] text-lg">{conversation.user.name}</h3>
               <p className="text-[15px] text-[#667781]">
-                {conversation.user.isOnline ? "online" : "Offline"}
+                {isGameMode ? (
+                  <span className="flex items-center gap-1">
+                    <Gamepad2 className="h-3 w-3" />
+                    Playing Quiz
+                  </span>
+                ) : conversation.user.isOnline ? (
+                  "online"
+                ) : (
+                  "Offline"
+                )}
               </p>
             </div>
           </Link>
@@ -240,14 +275,33 @@ export const ChatInterface = ({
         </div>
       )}
 
-      {/* Messages Area */}
-      <div
-        className="flex-1 p-5 overflow-y-auto flex flex-col bg-[#E5DDD5]"
-        style={{
-          backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")',
-        }}
-        ref={scrollRef}
-      >
+      {/* Content Area - Split Screen in Game Mode */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Quiz Game Panel - Upper Half in Game Mode */}
+        {isGameMode && quizSession && (
+          <div className="h-[45%] sm:h-[50%] border-b-2 border-border">
+            <QuizGamePanel
+              questions={quizSession.questions}
+              currentQuestionIndex={quizSession.currentQuestionIndex}
+              score={quizSession.score}
+              onAnswer={(answerIndex) => onAnswerQuiz?.(answerIndex)}
+              onExit={() => onExitQuiz?.()}
+              timeRemaining={quizTimeRemaining}
+            />
+          </div>
+        )}
+
+        {/* Messages Area - Lower Half in Game Mode, Full in Normal Mode */}
+        <div
+          className={cn(
+            "p-5 overflow-y-auto flex flex-col bg-[#E5DDD5]",
+            isGameMode ? "h-[55%] sm:h-[50%]" : "flex-1"
+          )}
+          style={{
+            backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")',
+          }}
+          ref={scrollRef}
+        >
         {conversation.messages.map((message) => {
           const isCurrentUser = message.senderId === "current-user";
           const isSelected = selectedMessages.has(message.id);
@@ -448,6 +502,7 @@ export const ChatInterface = ({
               </div>
             </div>
           )}
+        </div>
       </div>
 
       {/* Input Area */}
@@ -457,6 +512,7 @@ export const ChatInterface = ({
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
         recipientName={conversation.user.name}
+        onStartQuiz={onStartQuiz}
       />
 
       {/* Edit Message Dialog */}

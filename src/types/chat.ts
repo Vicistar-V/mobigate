@@ -44,3 +44,24 @@ export interface Conversation {
   lastMessageTime: Date;
   unreadCount: number;
 }
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  timeLimit: number;
+  points: number;
+}
+
+export interface QuizSession {
+  id: string;
+  conversationId: string;
+  questions: QuizQuestion[];
+  currentQuestionIndex: number;
+  score: number;
+  startedAt: Date;
+  completedAt?: Date;
+}

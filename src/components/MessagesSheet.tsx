@@ -18,6 +18,8 @@ export const MessagesSheet = () => {
     activeConversationId,
     isTyping,
     selectedMessages,
+    activeQuizSession,
+    quizTimeRemaining,
     sendMessage,
     selectConversation,
     editMessage,
@@ -26,6 +28,9 @@ export const MessagesSheet = () => {
     reactToMessage,
     toggleSelectMessage,
     clearSelection,
+    startQuizGame,
+    answerQuizQuestion,
+    exitQuizGame,
   } = useChat();
 
   const showMobileChat = activeConversationId !== null;
@@ -64,6 +69,11 @@ export const MessagesSheet = () => {
               onDeleteSelectedMessages={deleteSelectedMessages}
               onBack={() => selectConversation(null)}
               onCloseSheet={() => setIsOpen(false)}
+              quizSession={activeQuizSession}
+              quizTimeRemaining={quizTimeRemaining}
+              onStartQuiz={startQuizGame}
+              onAnswerQuiz={answerQuizQuestion}
+              onExitQuiz={exitQuizGame}
             />
           </div>
         </div>

@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Gift, Camera, Mic } from "lucide-react";
+import { X, Send, Camera, Mic } from "lucide-react";
 import { useRef, useState } from "react";
 import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
 import { AttachmentMenu } from "./AttachmentMenu";
 import { InlineVoiceRecorder } from "./InlineVoiceRecorder";
+import { GiftsAndGamesMenu } from "./GiftsAndGamesMenu";
 import { toast } from "sonner";
 
 interface ChatInputProps {
@@ -13,9 +14,10 @@ interface ChatInputProps {
   replyTo?: { messageId: string; content: string; senderName: string } | null;
   onCancelReply?: () => void;
   recipientName?: string;
+  onStartQuiz?: () => void;
 }
 
-export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, recipientName = "User" }: ChatInputProps) => {
+export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, recipientName = "User", onStartQuiz }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<{ type: 'image' | 'file' | 'gift' | 'audio'; url: string; name: string; duration?: number; giftData?: any }[]>([]);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
@@ -282,16 +284,11 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 <Camera className="h-5 w-5" />
               </Button>
               
-              {/* Gift Button */}
-              <Button
-                onClick={() => setIsGiftDialogOpen(true)}
-                variant="ghost"
-                size="icon"
-                disabled={disabled || isRecording}
-                className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
-              >
-                <Gift className="h-5 w-5" />
-              </Button>
+              {/* Gifts & Games Menu */}
+              <GiftsAndGamesMenu
+                onGiftClick={() => setIsGiftDialogOpen(true)}
+                onQuizClick={() => onStartQuiz?.()}
+              />
 
               {/* Text Input */}
               <Textarea
