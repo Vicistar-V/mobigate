@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Send, Camera, Mic } from "lucide-react";
 import { useRef, useState } from "react";
+import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
 import { AttachmentMenu } from "./AttachmentMenu";
 import { InlineVoiceRecorder } from "./InlineVoiceRecorder";
+import { GiftsAndGamesMenu } from "./GiftsAndGamesMenu";
 import { toast } from "sonner";
 
 interface ChatInputProps {
@@ -12,11 +14,13 @@ interface ChatInputProps {
   replyTo?: { messageId: string; content: string; senderName: string } | null;
   onCancelReply?: () => void;
   recipientName?: string;
+  onStartQuiz?: () => void;
 }
 
-export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, recipientName = "User" }: ChatInputProps) => {
+export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, recipientName = "User", onStartQuiz }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<{ type: 'image' | 'file' | 'gift' | 'audio'; url: string; name: string; duration?: number; giftData?: any }[]>([]);
+  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +102,24 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleGiftSend = (giftData: GiftSelection) => {
+    if (!giftData) return;
+    
+    const giftAttachment = {
+      type: 'gift' as const,
+      url: '',
+      name: giftData.giftData.name,
+      giftData: giftData.giftData
+    };
+    
+    onSendMessage(
+      `🎁 Sent a gift: ${giftData.giftData.name}`,
+      [giftAttachment]
+    );
+    
+    setIsGiftDialogOpen(false);
+  };
+
   const handleCameraClick = () => {
     toast.info("📷 Camera feature coming soon!", {
       description: "Take photos directly from the chat",
@@ -137,7 +159,15 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
   };
 
   return (
-    <div className="p-3 sm:p-4 border-t border-border bg-card relative">
+    <>
+      <SendGiftDialog
+        isOpen={isGiftDialogOpen}
+        onClose={() => setIsGiftDialogOpen(false)}
+        recipientName={recipientName}
+        onSendGift={handleGiftSend}
+      />
+      
+      <div className="p-3 sm:p-4 border-t border-border bg-card relative">
         {replyTo && (
           <div className="mb-2 p-2 bg-muted/50 rounded-lg flex items-center justify-between">
             <div className="flex-1 min-w-0">
@@ -253,6 +283,12 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
               >
                 <Camera className="h-5 w-5" />
               </Button>
+              
+              {/* Gifts & Games Menu */}
+              <GiftsAndGamesMenu
+                onGiftClick={() => setIsGiftDialogOpen(true)}
+                onQuizClick={() => onStartQuiz?.()}
+              />
 
               {/* Text Input */}
               <Textarea
@@ -290,5 +326,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
           )}
         </div>
       </div>
+    </>
   );
 };

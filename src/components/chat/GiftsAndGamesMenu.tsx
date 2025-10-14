@@ -6,10 +6,9 @@ import { useState } from "react";
 interface GiftsAndGamesMenuProps {
   onGiftClick: () => void;
   onQuizClick: () => void;
-  className?: string;
 }
 
-export const GiftsAndGamesMenu = ({ onGiftClick, onQuizClick, className }: GiftsAndGamesMenuProps) => {
+export const GiftsAndGamesMenu = ({ onGiftClick, onQuizClick }: GiftsAndGamesMenuProps) => {
   const [open, setOpen] = useState(false);
 
   const handleGiftClick = () => {
@@ -28,7 +27,7 @@ export const GiftsAndGamesMenu = ({ onGiftClick, onQuizClick, className }: Gifts
         <Button
           variant="ghost"
           size="icon"
-          className={className || "shrink-0 h-auto w-auto p-2 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a] rounded-full ml-2"}
+          className="shrink-0 h-9 w-9 text-muted-foreground hover:text-foreground"
           type="button"
         >
           <div className="relative">
