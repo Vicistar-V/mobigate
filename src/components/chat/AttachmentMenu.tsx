@@ -23,7 +23,7 @@ export const AttachmentMenu = ({
           variant="ghost"
           size="icon"
           disabled={disabled}
-          className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
+          className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:text-foreground"
         >
           <Plus className="h-5 w-5" />
         </Button>

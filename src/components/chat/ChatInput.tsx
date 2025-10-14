@@ -247,7 +247,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         )}
 
         <div className="flex items-end gap-2">
-          <div className="flex-1 flex items-end gap-0.5 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg px-2 py-1">
+          <div className="flex-1 flex items-end gap-0.5 px-2 py-1">
             <div className="flex gap-0">
               {/* Hidden file inputs */}
               <input
@@ -279,7 +279,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 variant="ghost"
                 size="icon"
                 disabled={disabled || isRecording}
-                className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:bg-[#e9e9e9] dark:hover:bg-[#2a2a2a]"
+                className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:text-foreground"
               >
                 <Camera className="h-5 w-5" />
               </Button>
@@ -316,7 +316,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 onKeyDown={handleKeyDown}
                 placeholder="Type a message..."
                 disabled={disabled || isRecording}
-                className="flex-1 min-h-[40px] max-h-[120px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 py-2 px-2 text-base placeholder:text-[#667781]"
+                className="flex-1 min-h-[40px] max-h-[120px] resize-none border-0 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 py-2 px-2 text-base placeholder:text-[#667781]"
                 rows={1}
               />
             </div>
