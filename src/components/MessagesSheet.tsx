@@ -9,6 +9,7 @@ import { MessageSquare } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import { ConversationsList } from "./chat/ConversationsList";
 import { ChatInterface } from "./chat/ChatInterface";
+import { QuizGamePanel } from "./chat/QuizGamePanel";
 
 export const MessagesSheet = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +35,7 @@ export const MessagesSheet = () => {
   } = useChat();
 
   const showMobileChat = activeConversationId !== null;
+  const isGameMode = !!activeQuizSession && !activeQuizSession.completedAt;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -42,8 +44,23 @@ export const MessagesSheet = () => {
           <MessageSquare />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[80vw] p-0 overflow-hidden" showClose={false}>
-        <div className="flex h-full">
+      <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[80vw] p-0 overflow-hidden flex flex-col" showClose={false}>
+        {/* Quiz Game Panel - Above Everything */}
+        {isGameMode && activeQuizSession && (
+          <div className="h-[40vh] sm:h-[45vh] border-b-2 border-border shrink-0">
+            <QuizGamePanel
+              questions={activeQuizSession.questions}
+              currentQuestionIndex={activeQuizSession.currentQuestionIndex}
+              score={activeQuizSession.score}
+              onAnswer={answerQuizQuestion}
+              onExit={exitQuizGame}
+              timeRemaining={quizTimeRemaining}
+            />
+          </div>
+        )}
+
+        {/* Chat Area - Below Quiz */}
+        <div className="flex flex-1 min-h-0">
           {/* Conversations List - Left Panel */}
           <div className={`${showMobileChat ? 'hidden sm:block sm:w-80 lg:w-96' : 'w-full'} shrink-0 transition-all`}>
             <ConversationsList
@@ -69,11 +86,9 @@ export const MessagesSheet = () => {
               onDeleteSelectedMessages={deleteSelectedMessages}
               onBack={() => selectConversation(null)}
               onCloseSheet={() => setIsOpen(false)}
-              quizSession={activeQuizSession}
-              quizTimeRemaining={quizTimeRemaining}
               onStartQuiz={startQuizGame}
-              onAnswerQuiz={answerQuizQuestion}
               onExitQuiz={exitQuizGame}
+              isGameMode={isGameMode}
             />
           </div>
         </div>

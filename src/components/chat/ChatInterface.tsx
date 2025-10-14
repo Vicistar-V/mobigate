@@ -2,13 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Conversation, Message, QuizSession } from "@/types/chat";
+import { Conversation, Message } from "@/types/chat";
 import { formatChatTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
-import { QuizGamePanel } from "./QuizGamePanel";
 import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,11 +32,9 @@ interface ChatInterfaceProps {
   onDeleteSelectedMessages: () => void;
   onBack?: () => void;
   onCloseSheet?: () => void;
-  quizSession?: QuizSession | null;
-  quizTimeRemaining?: number;
   onStartQuiz?: () => void;
-  onAnswerQuiz?: (answerIndex: number) => void;
   onExitQuiz?: () => void;
+  isGameMode?: boolean;
 }
 
 export const ChatInterface = ({
@@ -53,18 +50,15 @@ export const ChatInterface = ({
   onDeleteSelectedMessages,
   onBack,
   onCloseSheet,
-  quizSession,
-  quizTimeRemaining = 0,
   onStartQuiz,
-  onAnswerQuiz,
   onExitQuiz,
+  isGameMode = false,
 }: ChatInterfaceProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
   const [replyTo, setReplyTo] = useState<{ messageId: string; content: string; senderName: string } | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const isSelectionMode = selectedMessages.size > 0;
-  const isGameMode = !!quizSession && !quizSession.completedAt;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -275,33 +269,14 @@ export const ChatInterface = ({
         </div>
       )}
 
-      {/* Content Area - Split Screen in Game Mode */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Quiz Game Panel - Upper Half in Game Mode */}
-        {isGameMode && quizSession && (
-          <div className="h-[45%] sm:h-[50%] border-b-2 border-border">
-            <QuizGamePanel
-              questions={quizSession.questions}
-              currentQuestionIndex={quizSession.currentQuestionIndex}
-              score={quizSession.score}
-              onAnswer={(answerIndex) => onAnswerQuiz?.(answerIndex)}
-              onExit={() => onExitQuiz?.()}
-              timeRemaining={quizTimeRemaining}
-            />
-          </div>
-        )}
-
-        {/* Messages Area - Lower Half in Game Mode, Full in Normal Mode */}
-        <div
-          className={cn(
-            "p-5 overflow-y-auto flex flex-col bg-[#E5DDD5]",
-            isGameMode ? "h-[55%] sm:h-[50%]" : "flex-1"
-          )}
-          style={{
-            backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")',
-          }}
-          ref={scrollRef}
-        >
+      {/* Messages Area - Full Height */}
+      <div
+        className="flex-1 p-5 overflow-y-auto flex flex-col bg-[#E5DDD5]"
+        style={{
+          backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")',
+        }}
+        ref={scrollRef}
+      >
         {conversation.messages.map((message) => {
           const isCurrentUser = message.senderId === "current-user";
           const isSelected = selectedMessages.has(message.id);
@@ -503,6 +478,7 @@ export const ChatInterface = ({
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* Input Area */}
