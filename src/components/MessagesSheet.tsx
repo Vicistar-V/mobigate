@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -36,6 +36,33 @@ export const MessagesSheet = () => {
 
   const showMobileChat = activeConversationId !== null;
   const isGameMode = !!activeQuizSession && !activeQuizSession.completedAt;
+
+  // Listen for custom event to open chat with specific user
+  useEffect(() => {
+    const handleOpenChat = (event: CustomEvent) => {
+      const { userName } = event.detail;
+      // Find conversation by user name
+      const conversation = conversations.find(
+        conv => conv.user.name.toLowerCase().includes(userName.toLowerCase())
+      );
+      
+      if (conversation) {
+        setIsOpen(true);
+        // Small delay to ensure sheet is open before selecting conversation
+        setTimeout(() => {
+          selectConversation(conversation.id);
+        }, 100);
+      } else {
+        // If no existing conversation, just open the sheet
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener('openChatWithUser' as any, handleOpenChat);
+    return () => {
+      window.removeEventListener('openChatWithUser' as any, handleOpenChat);
+    };
+  }, [conversations, selectConversation]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

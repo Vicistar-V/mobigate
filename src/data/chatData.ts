@@ -99,6 +99,27 @@ export const mockConversations: Conversation[] = [
     lastMessageTime: new Date(Date.now() - 24 * 60 * 60 * 1000),
     unreadCount: 0,
   },
+  {
+    id: "5",
+    user: {
+      id: "user-5",
+      name: "Amaka Jane Johnson",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+      isOnline: true,
+    },
+    messages: [
+      {
+        id: "msg-7",
+        senderId: "current-user",
+        content: "Hi Amaka! How are you?",
+        timestamp: new Date(Date.now() - 5 * 60 * 1000),
+        isRead: true,
+      },
+    ],
+    lastMessage: "Hi Amaka! How are you?",
+    lastMessageTime: new Date(Date.now() - 5 * 60 * 1000),
+    unreadCount: 0,
+  },
 ];
 
 export const getConversationById = (id: string): Conversation | undefined => {

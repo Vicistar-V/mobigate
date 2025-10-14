@@ -318,11 +318,11 @@ const Profile = () => {
   };
 
   const handleChat = () => {
-    // Trigger the MessagesSheet to open
-    const messageButton = document.querySelector('[data-messages-trigger]') as HTMLElement;
-    if (messageButton) {
-      messageButton.click();
-    }
+    // Dispatch custom event to open chat with this specific user
+    const event = new CustomEvent('openChatWithUser', {
+      detail: { userName: userProfile.name }
+    });
+    window.dispatchEvent(event);
   };
 
   const handleSendGift = (giftData: GiftSelection) => {
