@@ -4,6 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { X, Globe, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { PremiumAdCarousel } from "./PremiumAdCarousel";
+import { EngagementBar } from "@/components/EngagementBar";
+import { ShareDialog } from "@/components/ShareDialog";
+import { CommentDialog } from "@/components/CommentDialog";
+import { generateShareUrl } from "@/lib/shareUtils";
 
 export interface PremiumAdMedia {
   url: string;
@@ -40,6 +44,9 @@ export const PremiumAdCard = ({
   layout,
 }: PremiumAdCardProps) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [showComments, setShowComments] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const shareUrl = generateShareUrl('ad', id);
 
   if (!isVisible) return null;
 
@@ -114,9 +121,42 @@ export const PremiumAdCard = ({
               >
                 {content.ctaText}
               </Button>
+              <EngagementBar
+                itemId={id}
+                itemType="ad"
+                initialLikes="0"
+                initialComments="0"
+                initialShares="0"
+                onComment={() => setShowComments(true)}
+                onShare={() => setShowShare(true)}
+                variant="minimal"
+                className="mt-4"
+              />
             </div>
           </div>
         </div>
+
+        <CommentDialog
+          open={showComments}
+          onOpenChange={setShowComments}
+          post={{
+            id,
+            title: content.headline,
+            subtitle: content.description,
+            author: advertiser.name,
+            authorProfileImage: advertiser.logo,
+            type: "Article",
+            imageUrl: media.items[0]?.url,
+          }}
+        />
+
+        <ShareDialog
+          open={showShare}
+          onOpenChange={setShowShare}
+          shareUrl={shareUrl}
+          title={content.headline}
+          description={content.description}
+        />
       </Card>
     );
   }
@@ -204,7 +244,39 @@ export const PremiumAdCard = ({
           >
             {content.ctaText}
           </Button>
+          <EngagementBar
+            itemId={id}
+            itemType="ad"
+            initialLikes="0"
+            initialComments="0"
+            initialShares="0"
+            onComment={() => setShowComments(true)}
+            onShare={() => setShowShare(true)}
+            className="pt-3 border-t"
+          />
         </div>
+
+        <CommentDialog
+          open={showComments}
+          onOpenChange={setShowComments}
+          post={{
+            id,
+            title: content.headline,
+            subtitle: content.description,
+            author: advertiser.name,
+            authorProfileImage: advertiser.logo,
+            type: "Article",
+            imageUrl: media.items[0]?.url,
+          }}
+        />
+
+        <ShareDialog
+          open={showShare}
+          onOpenChange={setShowShare}
+          shareUrl={shareUrl}
+          title={content.headline}
+          description={content.description}
+        />
       </Card>
     );
   }
@@ -244,6 +316,17 @@ export const PremiumAdCard = ({
           >
             {content.ctaText}
           </Button>
+          <EngagementBar
+            itemId={id}
+            itemType="ad"
+            initialLikes="0"
+            initialComments="0"
+            initialShares="0"
+            onComment={() => setShowComments(true)}
+            onShare={() => setShowShare(true)}
+            variant="compact"
+            className="mt-2"
+          />
         </div>
 
         <Button
@@ -255,6 +338,28 @@ export const PremiumAdCard = ({
           <X className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       </div>
+
+      <CommentDialog
+        open={showComments}
+        onOpenChange={setShowComments}
+        post={{
+          id,
+          title: content.headline,
+          subtitle: content.description,
+          author: advertiser.name,
+          authorProfileImage: advertiser.logo,
+          type: "Article",
+          imageUrl: media.items[0]?.url,
+        }}
+      />
+
+      <ShareDialog
+        open={showShare}
+        onOpenChange={setShowShare}
+        shareUrl={shareUrl}
+        title={content.headline}
+        description={content.description}
+      />
     </Card>
   );
 };

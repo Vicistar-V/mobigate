@@ -1,12 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, MessageSquare, Heart } from "lucide-react";
+import { Eye, MessageSquare, Heart, Share2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostOptionsMenu } from "@/components/PostOptionsMenu";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { CommentDialog } from "@/components/CommentDialog";
+import { ShareDialog } from "@/components/ShareDialog";
+import { generateShareUrl } from "@/lib/shareUtils";
 
 interface FeedPostProps {
   id?: string;
@@ -51,6 +53,8 @@ export const FeedPost = ({
   const [likeCount, setLikeCount] = useState(parseInt(likes));
   const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const shareUrl = generateShareUrl('post', id || 'unknown');
 
   const handleLike = () => {
     if (isLiked) {
@@ -159,7 +163,7 @@ export const FeedPost = ({
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -176,6 +180,16 @@ export const FeedPost = ({
                   className="h-5 w-5" 
                   fill={isLiked ? "currentColor" : "none"}
                 />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShareDialogOpen(true);
+                }}
+                className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+                aria-label="Share post"
+              >
+                <Share2 className="h-5 w-5" />
               </button>
             </div>
             {!imageUrl && (
@@ -213,6 +227,14 @@ export const FeedPost = ({
         views,
         likes: likeCount.toString(),
       }}
+    />
+
+    <ShareDialog
+      open={shareDialogOpen}
+      onOpenChange={setShareDialogOpen}
+      shareUrl={shareUrl}
+      title={title}
+      description={subtitle || description}
     />
     </>
   );
