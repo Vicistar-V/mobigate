@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Camera, Mic } from "lucide-react";
+import { X, Send, Camera, Mic, Gift, Gamepad2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
 import { AttachmentMenu } from "./AttachmentMenu";
 import { InlineVoiceRecorder } from "./InlineVoiceRecorder";
-import { GiftsAndGamesMenu } from "./GiftsAndGamesMenu";
+
 import { toast } from "sonner";
 
 interface ChatInputProps {
@@ -284,11 +284,29 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 <Camera className="h-5 w-5" />
               </Button>
               
-              {/* Gifts & Games Menu */}
-              <GiftsAndGamesMenu
-                onGiftClick={() => setIsGiftDialogOpen(true)}
-                onQuizClick={() => onStartQuiz?.()}
-              />
+              {/* Gift Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 h-9 w-9 text-muted-foreground hover:text-foreground"
+                onClick={() => setIsGiftDialogOpen(true)}
+                type="button"
+                disabled={disabled || isRecording}
+              >
+                <Gift className="h-5 w-5" />
+              </Button>
+
+              {/* Quiz Game Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 h-9 w-9 text-muted-foreground hover:text-foreground"
+                onClick={() => onStartQuiz?.()}
+                type="button"
+                disabled={disabled || isRecording}
+              >
+                <Gamepad2 className="h-5 w-5" />
+              </Button>
 
               {/* Text Input */}
               <Textarea
