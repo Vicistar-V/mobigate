@@ -320,7 +320,11 @@ const Profile = () => {
   const handleChat = () => {
     // Dispatch custom event to open chat with this specific user
     const event = new CustomEvent('openChatWithUser', {
-      detail: { userName: userProfile.name }
+      detail: { 
+        userId: 'user-5',
+        userName: userProfile.name,
+        conversationId: '5'
+      }
     });
     window.dispatchEvent(event);
   };

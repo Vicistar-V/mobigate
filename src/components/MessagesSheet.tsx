@@ -40,20 +40,32 @@ export const MessagesSheet = () => {
   // Listen for custom event to open chat with specific user
   useEffect(() => {
     const handleOpenChat = (event: CustomEvent) => {
-      const { userName } = event.detail;
-      // Find conversation by user name
-      const conversation = conversations.find(
-        conv => conv.user.name.toLowerCase().includes(userName.toLowerCase())
-      );
+      const { conversationId, userId, userName } = event.detail;
+      
+      // Try to find conversation by conversationId, userId, or userName (in that order)
+      let conversation = conversations.find(conv => conv.id === conversationId);
+      
+      if (!conversation && userId) {
+        conversation = conversations.find(conv => conv.user.id === userId);
+      }
+      
+      if (!conversation && userName) {
+        conversation = conversations.find(
+          conv => conv.user.name.toLowerCase().includes(userName.toLowerCase())
+        );
+      }
+      
+      // Fallback: if still no match, use the first conversation to show chat interface
+      if (!conversation && conversations.length > 0) {
+        conversation = conversations[0];
+      }
       
       if (conversation) {
+        // First select the conversation, then open the sheet
+        selectConversation(conversation.id);
         setIsOpen(true);
-        // Small delay to ensure sheet is open before selecting conversation
-        setTimeout(() => {
-          selectConversation(conversation.id);
-        }, 100);
       } else {
-        // If no existing conversation, just open the sheet
+        // No conversations at all, just open the sheet
         setIsOpen(true);
       }
     };
