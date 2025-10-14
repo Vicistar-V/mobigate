@@ -247,8 +247,8 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         )}
 
         <div className="flex items-end gap-2">
-          <div className="flex-1 flex items-end gap-1 sm:gap-2 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg px-2 py-1">
-            <div className="flex gap-1">
+          <div className="flex-1 flex items-end gap-0.5 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg px-2 py-1">
+            <div className="flex gap-0">
               {/* Hidden file inputs */}
               <input
                 ref={imageInputRef}
