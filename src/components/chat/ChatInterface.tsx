@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
+import { GiftsAndGamesMenu } from "./GiftsAndGamesMenu";
+import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
 import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -58,6 +60,7 @@ export const ChatInterface = ({
   const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
   const [replyTo, setReplyTo] = useState<{ messageId: string; content: string; senderName: string } | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const isSelectionMode = selectedMessages.size > 0;
 
   useEffect(() => {
@@ -126,6 +129,24 @@ export const ChatInterface = ({
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleGiftSend = (giftData: GiftSelection) => {
+    if (!giftData) return;
+    
+    const giftAttachment = {
+      type: 'gift' as const,
+      url: '',
+      name: giftData.giftData.name,
+      giftData: giftData.giftData
+    };
+    
+    onSendMessage(
+      `🎁 Sent a gift: ${giftData.giftData.name}`,
+      [giftAttachment]
+    );
+    
+    setIsGiftDialogOpen(false);
   };
 
   if (!conversation) {
@@ -228,6 +249,13 @@ export const ChatInterface = ({
             >
               <Phone className="h-6 w-6" />
             </Button>
+
+            {/* Gifts & Games Menu */}
+            <GiftsAndGamesMenu
+              onGiftClick={() => setIsGiftDialogOpen(true)}
+              onQuizClick={() => onStartQuiz?.()}
+            />
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
@@ -473,7 +501,6 @@ export const ChatInterface = ({
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
         recipientName={conversation.user.name}
-        onStartQuiz={onStartQuiz}
       />
 
       {/* Edit Message Dialog */}
@@ -482,6 +509,14 @@ export const ChatInterface = ({
         onOpenChange={(open) => !open && setEditingMessage(null)}
         initialContent={editingMessage?.content || ""}
         onSave={handleSaveEdit}
+      />
+
+      {/* Send Gift Dialog */}
+      <SendGiftDialog
+        isOpen={isGiftDialogOpen}
+        onClose={() => setIsGiftDialogOpen(false)}
+        recipientName={conversation.user.name}
+        onSendGift={handleGiftSend}
       />
     </div>
   );
