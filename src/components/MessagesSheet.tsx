@@ -40,7 +40,7 @@ export const MessagesSheet = () => {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="iconLg" className="hover:bg-primary/10">
+        <Button variant="ghost" size="iconLg" className="hover:bg-primary/10" data-messages-trigger>
           <MessageSquare />
         </Button>
       </SheetTrigger>

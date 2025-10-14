@@ -4,7 +4,7 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera, Share2, UserX, AlertCircle, Users } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -29,6 +29,14 @@ import { ProfileGiftsTab } from "@/components/profile/ProfileGiftsTab";
 import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
 import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
 import { ProfileContentsTab } from "@/components/profile/ProfileContentsTab";
+import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState<string>("status");
@@ -44,6 +52,8 @@ const Profile = () => {
   const [galleryType, setGalleryType] = useState<"wall-status" | "profile-picture" | "banner" | "post">("wall-status");
   const [isProfileLiked, setIsProfileLiked] = useState(false);
   const [visiblePostCount, setVisiblePostCount] = useState(20);
+  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
+  const [messagesSheetOpen, setMessagesSheetOpen] = useState(false);
   const { toast } = useToast();
 
   // Handle hash-based tab navigation
@@ -300,6 +310,62 @@ const Profile = () => {
     });
   };
 
+  const handleCall = () => {
+    toast({
+      title: "Voice Call",
+      description: "Voice calling feature is coming soon!",
+    });
+  };
+
+  const handleChat = () => {
+    // Trigger the MessagesSheet to open
+    const messageButton = document.querySelector('[data-messages-trigger]') as HTMLElement;
+    if (messageButton) {
+      messageButton.click();
+    }
+  };
+
+  const handleSendGift = (giftData: GiftSelection) => {
+    if (!giftData) return;
+    
+    toast({
+      title: "Gift Sent! 🎁",
+      description: `You sent ${giftData.giftData.name} to ${userProfile.name}`,
+    });
+  };
+
+  const handleShareProfile = () => {
+    const profileUrl = window.location.href;
+    navigator.clipboard.writeText(profileUrl);
+    toast({
+      title: "Profile Link Copied",
+      description: "Profile link has been copied to clipboard",
+    });
+  };
+
+  const handleBlockUser = () => {
+    toast({
+      title: "User Blocked",
+      description: `You have blocked ${userProfile.name}`,
+      variant: "destructive",
+    });
+  };
+
+  const handleReportUser = () => {
+    toast({
+      title: "Report Submitted",
+      description: `Your report about ${userProfile.name} has been submitted`,
+    });
+  };
+
+  const handleUnfriend = () => {
+    toast({
+      title: "Removed Friend",
+      description: `You are no longer friends with ${userProfile.name}`,
+      variant: "destructive",
+    });
+  };
+
   // Open media gallery for profile pictures
   const openProfilePictureGallery = () => {
     const items: MediaItem[] = profileImageHistory.map((url, index) => ({
@@ -498,7 +564,12 @@ const Profile = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-2">
-                <Button variant="default" size="sm" className="gap-2 bg-black hover:bg-black/80">
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="gap-2 bg-black hover:bg-black/80"
+                  onClick={handleCall}
+                >
                   <Phone className="h-4 w-4" />
                   Call
                 </Button>
@@ -514,17 +585,54 @@ const Profile = () => {
                   <Heart className={`h-4 w-4 ${isProfileLiked ? "fill-current" : ""}`} />
                   Like
                 </Button>
-                <Button size="sm" className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white">
+                <Button 
+                  size="sm" 
+                  className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white"
+                  onClick={handleChat}
+                >
                   <MessageCircle className="h-4 w-4" />
                   Chat
                 </Button>
-                <Button size="sm" className="gap-2 bg-purple-500 hover:bg-purple-600 text-white">
+                <Button 
+                  size="sm" 
+                  className="gap-2 bg-purple-500 hover:bg-purple-600 text-white"
+                  onClick={() => setIsGiftDialogOpen(true)}
+                >
                   <Gift className="h-4 w-4" />
                   Gift
                 </Button>
-                <Button size="icon" variant="destructive" className="rounded-full">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="destructive" className="rounded-full">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleShareProfile}>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab("friends")}>
+                      <Users className="h-4 w-4 mr-2" />
+                      View Friends
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {userProfile.isFriend && (
+                      <DropdownMenuItem onClick={handleUnfriend}>
+                        <UserX className="h-4 w-4 mr-2" />
+                        Unfriend
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={handleBlockUser}>
+                      <UserX className="h-4 w-4 mr-2" />
+                      Block User
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleReportUser} className="text-destructive">
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Report User
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Friend Status */}
@@ -738,6 +846,13 @@ const Profile = () => {
         initialIndex={galleryInitialIndex}
         showActions={galleryType === "wall-status"}
         galleryType={galleryType}
+      />
+
+      <SendGiftDialog
+        isOpen={isGiftDialogOpen}
+        onClose={() => setIsGiftDialogOpen(false)}
+        recipientName={userProfile.name}
+        onSendGift={handleSendGift}
       />
     </div>
   );
