@@ -105,9 +105,12 @@ export const FeedPost = ({
     description: subtitle || description,
     author: author,
     authorImage: authorProfileImage,
+    authorUserId: userId,
     likes: likeCount,
     comments: parseInt(comments),
+    followers: followers,
     isLiked: isLiked,
+    isOwner: isOwner,
   };
 
   return (

@@ -86,6 +86,13 @@ export const PostDetailDialog = ({
         mediaUrl={post.imageUrl}
         mediaType={post.type}
         title={post.title}
+        author={post.author}
+        authorUserId={post.userId}
+        likes={likeCount}
+        comments={parseInt(post.comments)}
+        followers={post.followers}
+        isLiked={isLiked}
+        isOwner={false}
       />
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">

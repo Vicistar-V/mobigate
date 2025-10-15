@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, UserPlus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
@@ -14,11 +14,14 @@ export interface MediaItem {
   title?: string;
   author?: string;
   authorImage?: string;
+  authorUserId?: string;
   timestamp?: string;
   description?: string;
   likes?: number;
   comments?: number;
+  followers?: string;
   isLiked?: boolean;
+  isOwner?: boolean;
 }
 
 interface MediaGalleryViewerProps {
@@ -41,6 +44,8 @@ export const MediaGalleryViewer = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -54,6 +59,10 @@ export const MediaGalleryViewer = ({
     if (currentItem) {
       setIsLiked(currentItem.isLiked || false);
       setLikeCount(currentItem.likes || 0);
+      setIsFollowing(false);
+      setFollowerCount(
+        currentItem.followers ? parseInt(currentItem.followers.replace(/[^0-9]/g, '')) || 0 : 0
+      );
     }
   }, [currentItem]);
 
@@ -93,6 +102,26 @@ export const MediaGalleryViewer = ({
 
   const handleComment = () => {
     setCommentDialogOpen(true);
+  };
+
+  const handleFollow = () => {
+    if (isFollowing) {
+      setFollowerCount(followerCount - 1);
+      setIsFollowing(false);
+    } else {
+      setFollowerCount(followerCount + 1);
+      setIsFollowing(true);
+    }
+  };
+
+  const formatFollowerCount = (count: number): string => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`;
+    }
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
   };
 
   const swipeHandlers = useSwipeable({
@@ -271,7 +300,7 @@ export const MediaGalleryViewer = ({
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
               {/* Action Buttons */}
               <div className="flex items-center gap-2 sm:gap-6">
-                {/* Like Button with "You Liked this" below */}
+                {/* Like Button */}
                 <div className="flex flex-col items-start gap-0.5">
                   <Button
                     variant="ghost"
@@ -287,6 +316,23 @@ export const MediaGalleryViewer = ({
                     <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
                   </Button>
                 </div>
+
+                {/* Follow Button */}
+                {currentItem.followers && !currentItem.isOwner && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleFollow}
+                    className={`flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 ${
+                      isFollowing
+                        ? "text-primary hover:text-primary hover:bg-primary/10"
+                        : "text-white hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
+                    <span className="text-sm sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
+                  </Button>
+                )}
 
                 {/* Comment Button */}
                 <Button

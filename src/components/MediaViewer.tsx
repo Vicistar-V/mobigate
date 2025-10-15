@@ -2,7 +2,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import { X, Heart, MessageCircle, Share2 } from "lucide-react";
+import { X, Heart, MessageCircle, Share2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -15,9 +15,13 @@ interface MediaViewerProps {
   mediaUrl?: string;
   mediaType: "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL";
   title: string;
+  author?: string;
+  authorUserId?: string;
   likes?: number;
   comments?: number;
+  followers?: string;
   isLiked?: boolean;
+  isOwner?: boolean;
   showActions?: boolean;
 }
 
@@ -27,13 +31,21 @@ export const MediaViewer = ({
   mediaUrl,
   mediaType,
   title,
+  author,
+  authorUserId,
   likes = 0,
   comments = 0,
+  followers,
   isLiked: initialIsLiked = false,
+  isOwner = false,
   showActions = true,
 }: MediaViewerProps) => {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [likeCount, setLikeCount] = useState(likes);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(
+    followers ? parseInt(followers.replace(/[^0-9]/g, '')) || 0 : 0
+  );
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -62,6 +74,26 @@ export const MediaViewer = ({
 
   const handleComment = () => {
     setCommentDialogOpen(true);
+  };
+
+  const handleFollow = () => {
+    if (isFollowing) {
+      setFollowerCount(followerCount - 1);
+      setIsFollowing(false);
+    } else {
+      setFollowerCount(followerCount + 1);
+      setIsFollowing(true);
+    }
+  };
+
+  const formatFollowerCount = (count: number): string => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`;
+    }
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
   };
 
   const swipeHandlers = useSwipeable({
@@ -197,6 +229,21 @@ export const MediaViewer = ({
                   <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
                 </Button>
               </div>
+              {followers && !isOwner && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleFollow}
+                  className={`flex-col sm:flex-row gap-1 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 h-auto ${
+                    isFollowing
+                      ? "text-primary hover:text-primary hover:bg-primary/10"
+                      : "text-white hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
+                  <span className="text-sm sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
