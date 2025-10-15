@@ -131,12 +131,12 @@ export const FeedPost = ({
       <div className="p-4 space-y-3">
         <div className="flex items-start gap-2">
           <div className="flex-1">
-            <h3 className="font-semibold text-2xl leading-tight line-clamp-2">{title}</h3>
+            <h3 className="font-semibold text-xl leading-tight line-clamp-2">{title}</h3>
             {subtitle && (
-              <p className="text-xl text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
+              <p className="text-lg text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
             )}
             {description && (
-              <p className="text-base text-muted-foreground mt-2 line-clamp-3">{description}</p>
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{description}</p>
             )}
           </div>
           {isOwner && onEdit && onDelete && (
@@ -146,11 +146,11 @@ export const FeedPost = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-lg flex-wrap">
+        <div className="flex items-center gap-2 text-base flex-wrap">
           <span className="text-emerald-600 font-medium whitespace-nowrap">Fee: {fee} Mobi</span>
           <span className="text-muted-foreground">|</span>
           <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
-            <Eye className="h-5 w-5" />
+            <Eye className="h-4 w-4" />
             <span>{views} Views</span>
           </div>
           <span className="text-muted-foreground">|</span>
@@ -161,12 +161,12 @@ export const FeedPost = ({
               setCommentDialogOpen(true);
             }}
           >
-            <MessageSquare className="h-5 w-5" />
+            <MessageSquare className="h-4 w-4" />
             <span>{comments} Comments</span>
           </button>
           <span className="text-muted-foreground">|</span>
           <div className="flex items-center gap-1 text-red-600 whitespace-nowrap">
-            <Heart className="h-5 w-5" />
+            <Heart className="h-4 w-4" />
             <span>{likeCount} Likes</span>
           </div>
         </div>
@@ -182,11 +182,11 @@ export const FeedPost = ({
               <AvatarFallback>{author.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <p className="text-xl font-medium">By {author}</p>
+              <p className="text-lg font-medium">By {author}</p>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1.5">
                   <div className={`h-2 w-2 rounded-full ${status === "Online" ? "bg-emerald-500" : "bg-red-500"}`} />
-                  <p className={`text-lg font-medium ${status === "Online" ? "text-emerald-600" : "text-red-600"}`}>
+                  <p className={`text-base font-medium ${status === "Online" ? "text-emerald-600" : "text-red-600"}`}>
                     {status}
                   </p>
                 </div>
@@ -199,7 +199,7 @@ export const FeedPost = ({
                       e.stopPropagation();
                       handleFollow();
                     }}
-                    className="gap-1.5 h-6 px-2 text-base"
+                    className="gap-1.5 h-6 px-2 text-sm"
                     aria-label={isFollowing ? "Unfollow" : "Follow"}
                   >
                     <UserPlus className="h-3 w-3" />
