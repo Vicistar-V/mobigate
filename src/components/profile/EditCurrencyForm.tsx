@@ -31,8 +31,6 @@ const formSchema = z.object({
 interface CurrencyData {
   preferredCurrency: string;
   currencySymbol: string;
-  accountSummaryPrivacy?: string;
-  accountSummaryExceptions?: string[];
   privacy?: string;
   exceptions?: string[];
 }
@@ -48,13 +46,6 @@ export const EditCurrencyForm = ({ currentData, onSave, onClose }: EditCurrencyF
     (currentData.privacy as PrivacyLevel) || "public"
   );
   const [exceptions, setExceptions] = useState<string[]>(currentData.exceptions || []);
-  
-  const [accountSummaryPrivacy, setAccountSummaryPrivacy] = useState<PrivacyLevel>(
-    (currentData.accountSummaryPrivacy as PrivacyLevel) || "only-me"
-  );
-  const [accountSummaryExceptions, setAccountSummaryExceptions] = useState<string[]>(
-    currentData.accountSummaryExceptions || []
-  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,8 +69,6 @@ export const EditCurrencyForm = ({ currentData, onSave, onClose }: EditCurrencyF
       currencySymbol: data.currencySymbol,
       privacy,
       exceptions,
-      accountSummaryPrivacy,
-      accountSummaryExceptions,
     });
     toast.success("Currency settings updated successfully");
     onClose();
@@ -131,18 +120,19 @@ export const EditCurrencyForm = ({ currentData, onSave, onClose }: EditCurrencyF
           </div>
         </Card>
 
-        <Card className="p-4 space-y-4">
-          <div>
-            <h4 className="font-medium mb-2">Account Summary Visibility</h4>
-            <FormDescription className="mb-3">
-              Control who can view your account summary (separate from currency visibility)
-            </FormDescription>
-            <PrivacySelector
-              value={accountSummaryPrivacy}
-              onChange={(value: PrivacyLevel) => setAccountSummaryPrivacy(value)}
-              exceptions={accountSummaryExceptions}
-              onExceptionsChange={setAccountSummaryExceptions}
-            />
+        <Card className="p-4 bg-muted/30 border-dashed">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-full bg-primary/10 shrink-0">
+              <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-sm mb-1">Account Summary Privacy</h4>
+              <p className="text-xs text-muted-foreground">
+                Your account summary (balance & transactions) is always private and only visible to you. No one else can view this information.
+              </p>
+            </div>
           </div>
         </Card>
 
