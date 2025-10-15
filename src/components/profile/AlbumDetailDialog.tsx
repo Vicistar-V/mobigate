@@ -51,7 +51,7 @@ export const AlbumDetailDialog = ({
               <div className="flex items-center gap-2">
                 <DialogTitle className="text-2xl">{album.name}</DialogTitle>
                 {album.isSystem && (
-                  <Badge variant="outline" className="text-sm">
+                  <Badge variant="outline" className="text-base">
                     System Album
                   </Badge>
                 )}

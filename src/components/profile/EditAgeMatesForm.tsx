@@ -129,14 +129,14 @@ export const EditAgeMatesForm = ({ currentData, onSave, onClose }: EditAgeMatesF
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                 {mate.isActive && (
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge variant="secondary" className="text-base">
                     <Check className="h-3 w-3 mr-1" />
                     Active
                   </Badge>
                 )}
               </div>
               {mate.originalName && mate.originalName !== mate.name && (
-                <p className="text-sm text-muted-foreground">Originally: {mate.originalName}</p>
+                <p className="text-base text-muted-foreground">Originally: {mate.originalName}</p>
               )}
               <p className="text-base text-muted-foreground truncate">{mate.community}</p>
               {mate.ageGrade && <p className="text-base text-muted-foreground">{mate.ageGrade}</p>}

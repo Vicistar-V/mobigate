@@ -135,14 +135,14 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-medium truncate">{friendship.name}</p>
                     {friendship.isActive && (
-                      <Badge variant="secondary" className="text-sm">
+                      <Badge variant="secondary" className="text-base">
                         <Check className="h-3 w-3 mr-1" />
                         Active
                       </Badge>
                     )}
                   </div>
                   {friendship.originalName && friendship.originalName !== friendship.name && (
-                    <p className="text-sm text-muted-foreground">Originally: {friendship.originalName}</p>
+                    <p className="text-base text-muted-foreground">Originally: {friendship.originalName}</p>
                   )}
                   <p className="text-base text-muted-foreground">{friendship.relationshipTag}</p>
                   {friendship.isActive && friendship.linkedUserId && (

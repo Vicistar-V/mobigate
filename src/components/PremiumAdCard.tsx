@@ -92,7 +92,7 @@ export const PremiumAdCard = ({
                 Sponsored
               </span>
               {advertiser.verified && (
-                <Badge variant="secondary" className="text-sm px-1.5 py-0">Verified</Badge>
+                <Badge variant="secondary" className="text-base px-1.5 py-0">Verified</Badge>
               )}
             </div>
             <Button
@@ -178,7 +178,7 @@ export const PremiumAdCard = ({
             <div className="flex items-center gap-1.5">
               <span className="font-medium text-foreground">{advertiser.name}</span>
               {advertiser.verified && (
-                <Badge variant="secondary" className="text-sm px-1.5 py-0">✓</Badge>
+                <Badge variant="secondary" className="text-base px-1.5 py-0">✓</Badge>
               )}
             </div>
             <span>·</span>

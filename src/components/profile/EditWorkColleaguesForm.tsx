@@ -145,14 +145,14 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
                 {colleague.isActive && (
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge variant="secondary" className="text-base">
                     <Check className="h-3 w-3 mr-1" />
                     Active
                   </Badge>
                 )}
               </div>
               {colleague.originalName && colleague.originalName !== colleague.name && (
-                <p className="text-sm text-muted-foreground">Originally: {colleague.originalName}</p>
+                <p className="text-base text-muted-foreground">Originally: {colleague.originalName}</p>
               )}
               <div className="flex items-center gap-2">
                 {colleague.workplaceLogo && (

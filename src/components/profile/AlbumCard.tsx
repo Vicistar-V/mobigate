@@ -59,11 +59,11 @@ export const AlbumCard = ({ album, onClick, variant = "carousel" }: AlbumCardPro
           {album.name}
         </h3>
         <div className="flex items-center justify-between">
-          <span className="text-white/80 text-sm">
+          <span className="text-white/80 text-base">
             {album.itemCount} {album.itemCount === 1 ? "item" : "items"}
           </span>
           {album.isSystem && (
-            <Badge variant="outline" className="text-sm px-1.5 py-0 bg-white/20 text-white border-white/30">
+            <Badge variant="outline" className="text-base px-1.5 py-0 bg-white/20 text-white border-white/30">
               System
             </Badge>
           )}

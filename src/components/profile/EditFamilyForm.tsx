@@ -136,14 +136,14 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-medium truncate">{member.name}</p>
                     {member.isActive && (
-                      <Badge variant="secondary" className="text-sm">
+                      <Badge variant="secondary" className="text-base">
                         <Check className="h-3 w-3 mr-1" />
                         Active
                       </Badge>
                     )}
                   </div>
                   {member.originalName && member.originalName !== member.name && (
-                    <p className="text-sm text-muted-foreground">Originally: {member.originalName}</p>
+                    <p className="text-base text-muted-foreground">Originally: {member.originalName}</p>
                   )}
                   <p className="text-base text-muted-foreground">{member.relation}</p>
                   {member.isActive && member.linkedUserId && (
