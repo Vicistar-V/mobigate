@@ -154,7 +154,7 @@ export const PeopleYouMayKnow = () => {
                       {user.name}
                     </Link>
                     {user.mutualFriends && (
-                      <p className="text-sm text-muted-foreground mt-0.5">
+                      <p className="text-base text-muted-foreground mt-0.5">
                         {user.mutualFriends} mutual
                       </p>
                     )}
@@ -163,7 +163,7 @@ export const PeopleYouMayKnow = () => {
                   <div className="space-y-1.5">
                     <Button 
                       size="sm" 
-                      className="w-full h-8 text-sm"
+                      className="w-full h-8 text-base"
                       variant={friendRequestStatus[user.id] ? "secondary" : "default"}
                       onClick={() => handleAddFriend(user.id, user.name)}
                       disabled={friendRequestStatus[user.id]}
@@ -184,7 +184,7 @@ export const PeopleYouMayKnow = () => {
                       <DropdownMenuTrigger asChild>
                         <Button 
                           size="sm" 
-                          className="w-full h-8 text-sm"
+                          className="w-full h-8 text-base"
                           variant="outline"
                         >
                           <MoreVertical className="h-3 w-3 mr-1" />
@@ -275,7 +275,7 @@ export const PeopleYouMayKnow = () => {
                     {user.name}
                   </Link>
                   {user.mutualFriends && (
-                    <p className="text-sm text-muted-foreground mt-0.5">
+                    <p className="text-base text-muted-foreground mt-0.5">
                       {user.mutualFriends} mutual
                     </p>
                   )}
@@ -284,7 +284,7 @@ export const PeopleYouMayKnow = () => {
                 <div className="space-y-1.5">
                   <Button 
                     size="sm" 
-                    className="w-full h-8 text-sm"
+                    className="w-full h-8 text-base"
                     variant={friendRequestStatus[user.id] ? "secondary" : "default"}
                     onClick={() => handleAddFriend(user.id, user.name)}
                     disabled={friendRequestStatus[user.id]}
@@ -305,7 +305,7 @@ export const PeopleYouMayKnow = () => {
                     <DropdownMenuTrigger asChild>
                       <Button 
                         size="sm" 
-                        className="w-full h-8 text-sm"
+                        className="w-full h-8 text-base"
                         variant="outline"
                       >
                         <MoreVertical className="h-3 w-3 mr-1" />

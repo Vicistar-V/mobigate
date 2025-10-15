@@ -147,26 +147,26 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                 {mate.isActive && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-sm">
                     <Check className="h-3 w-3 mr-1" />
                     Active
                   </Badge>
                 )}
               </div>
               {mate.originalName && mate.originalName !== mate.name && (
-                <p className="text-xs text-muted-foreground">Originally: {mate.originalName}</p>
+                <p className="text-sm text-muted-foreground">Originally: {mate.originalName}</p>
               )}
               <div className="flex items-center gap-2">
                 {mate.institutionLogo && (
                   <img src={mate.institutionLogo} alt="" className="h-4 w-4 object-contain" />
                 )}
-                <p className="text-sm text-muted-foreground truncate">{mate.institution}</p>
+                <p className="text-base text-muted-foreground truncate">{mate.institution}</p>
               </div>
-              {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+              {mate.period && <p className="text-base text-muted-foreground">{mate.period}</p>}
               {mate.isActive && mate.linkedUserId && (
                 <button
                   onClick={() => window.location.href = `/profile?id=${mate.linkedUserId}`}
-                  className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                  className="text-base text-primary hover:underline flex items-center gap-1 mt-1"
                 >
                   View Profile
                   <ExternalLink className="h-3 w-3" />
@@ -190,7 +190,7 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
           <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
-              <Label className="text-sm font-medium">Link to Mobigate User</Label>
+              <Label className="text-base font-medium">Link to Mobigate User</Label>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -222,8 +222,8 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
                   <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{selectedUser.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
+                  <p className="text-base font-medium truncate">{selectedUser.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
                 </div>
                 <Button
                   type="button"
@@ -255,16 +255,16 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
               value={selectedUser?.name || undefined}
               placeholder="Type manually or search above"
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Type manually or search above to link a Mobigate user
             </p>
-            {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
+            {errors.name && <p className="text-base text-destructive mt-1">{errors.name.message as string}</p>}
           </div>
 
           <div>
             <Label htmlFor="institution">School/Institution *</Label>
             <Input id="institution" {...register("institution")} />
-            {errors.institution && <p className="text-sm text-destructive mt-1">{errors.institution.message as string}</p>}
+            {errors.institution && <p className="text-base text-destructive mt-1">{errors.institution.message as string}</p>}
           </div>
 
           <div>

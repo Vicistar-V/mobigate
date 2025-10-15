@@ -136,20 +136,20 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-medium truncate">{member.name}</p>
                     {member.isActive && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-sm">
                         <Check className="h-3 w-3 mr-1" />
                         Active
                       </Badge>
                     )}
                   </div>
                   {member.originalName && member.originalName !== member.name && (
-                    <p className="text-xs text-muted-foreground">Originally: {member.originalName}</p>
+                    <p className="text-sm text-muted-foreground">Originally: {member.originalName}</p>
                   )}
-                  <p className="text-sm text-muted-foreground">{member.relation}</p>
+                  <p className="text-base text-muted-foreground">{member.relation}</p>
                   {member.isActive && member.linkedUserId && (
                     <button
                       onClick={() => window.location.href = `/profile?id=${member.linkedUserId}`}
-                      className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                      className="text-base text-primary hover:underline flex items-center gap-1 mt-1"
                     >
                       View Profile
                       <ExternalLink className="h-3 w-3" />
@@ -176,7 +176,7 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
             <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
               <div className="flex items-center gap-2">
                 <Search className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm font-medium">Link to Mobigate User</Label>
+                <Label className="text-base font-medium">Link to Mobigate User</Label>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -208,8 +208,8 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
                     <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{selectedUser.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
+                    <p className="text-base font-medium truncate">{selectedUser.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
                   </div>
                   <Button
                     type="button"
@@ -222,7 +222,7 @@ export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormP
                   </Button>
                 </div>
               )}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Link a Mobigate user or select from friends below
               </p>
             </div>

@@ -147,26 +147,26 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
                 {mate.isActive && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-sm">
                     <Check className="h-3 w-3 mr-1" />
                     Active
                   </Badge>
                 )}
               </div>
               {mate.originalName && mate.originalName !== mate.name && (
-                <p className="text-xs text-muted-foreground">Originally: {mate.originalName}</p>
+                <p className="text-sm text-muted-foreground">Originally: {mate.originalName}</p>
               )}
               <div className="flex items-center gap-2">
                 {mate.institutionLogo && (
                   <img src={mate.institutionLogo} alt="" className="h-4 w-4 object-contain" />
                 )}
-                <p className="text-sm text-muted-foreground truncate">{mate.institution}</p>
+                <p className="text-base text-muted-foreground truncate">{mate.institution}</p>
               </div>
-              {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+              {mate.period && <p className="text-base text-muted-foreground">{mate.period}</p>}
               {mate.isActive && mate.linkedUserId && (
                 <button
                   onClick={() => window.location.href = `/profile?id=${mate.linkedUserId}`}
-                  className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                  className="text-base text-primary hover:underline flex items-center gap-1 mt-1"
                 >
                   View Profile
                   <ExternalLink className="h-3 w-3" />
@@ -264,7 +264,7 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
           <div>
             <Label htmlFor="institution">School/Institution *</Label>
             <Input id="institution" {...register("institution")} />
-            {errors.institution && <p className="text-sm text-destructive mt-1">{errors.institution.message as string}</p>}
+            {errors.institution && <p className="text-base text-destructive mt-1">{errors.institution.message as string}</p>}
           </div>
 
           <div>
