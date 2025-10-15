@@ -171,8 +171,8 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         {replyTo && (
           <div className="mb-2 p-2 bg-muted/50 rounded-lg flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-muted-foreground">Replying to {replyTo.senderName}</p>
-              <p className="text-sm truncate">{replyTo.content}</p>
+              <p className="text-base text-muted-foreground">Replying to {replyTo.senderName}</p>
+              <p className="text-base truncate">{replyTo.content}</p>
             </div>
             <Button
               onClick={onCancelReply}
@@ -207,9 +207,9 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                   <div className="flex items-center gap-2 p-2 pr-8 rounded-lg border-2 border-border bg-muted/50 relative min-w-[180px]">
                     <Mic className="h-4 w-4 text-[#00a884]" />
                     <div className="flex-1">
-                      <span className="text-sm font-medium">Voice message</span>
+                      <span className="text-base font-medium">Voice message</span>
                       {attachment.duration && (
-                        <span className="text-sm text-muted-foreground ml-2">
+                        <span className="text-base text-muted-foreground ml-2">
                           {formatDuration(attachment.duration)}
                         </span>
                       )}
@@ -224,7 +224,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 ) : (
                   <div className="flex items-center gap-2 p-2 pr-8 rounded-lg border-2 border-border bg-muted/50 relative">
                     <X className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm truncate max-w-[150px]">{attachment.name}</span>
+                    <span className="text-base truncate max-w-[150px]">{attachment.name}</span>
                     <button
                       onClick={() => removeAttachment(index)}
                       className="absolute right-1 top-1/2 -translate-y-1/2 text-destructive hover:bg-destructive/10 rounded-full p-1"

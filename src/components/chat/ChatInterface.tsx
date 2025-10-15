@@ -135,7 +135,7 @@ export const ChatInterface = ({
           <p className="text-lg font-medium text-muted-foreground">
             Select a conversation
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Choose a contact to start chatting
           </p>
         </div>
@@ -304,8 +304,8 @@ export const ChatInterface = ({
                   {/* Reply Preview */}
                   {message.replyTo && (
                     <div className="mb-2 p-2 bg-black/5 rounded border-l-2 border-[#00a884]">
-                      <p className="text-sm text-[#00a884] font-medium">{message.replyTo.senderName}</p>
-                      <p className="text-sm text-[#667781] truncate">{message.replyTo.content}</p>
+                      <p className="text-base text-[#00a884] font-medium">{message.replyTo.senderName}</p>
+                      <p className="text-base text-[#667781] truncate">{message.replyTo.content}</p>
                     </div>
                   )}
 
@@ -334,11 +334,11 @@ export const ChatInterface = ({
                                   <p className="font-semibold text-pink-900 dark:text-pink-100">
                                     {attachment.giftData.name}
                                   </p>
-                                  <p className="text-sm text-pink-700 dark:text-pink-300">
+                                  <p className="text-base text-pink-700 dark:text-pink-300">
                                     {attachment.giftData.mobiValue.toLocaleString()} Mobi
                                   </p>
                                   {attachment.giftData.category && (
-                                    <Badge className="mt-1 text-sm bg-pink-200 dark:bg-pink-900 text-pink-800 dark:text-pink-200 border-0">
+                                    <Badge className="mt-1 text-base bg-pink-200 dark:bg-pink-900 text-pink-800 dark:text-pink-200 border-0">
                                       {attachment.giftData.category}
                                     </Badge>
                                   )}
@@ -373,7 +373,7 @@ export const ChatInterface = ({
                                 ))}
                               </div>
                               
-                              <span className="text-sm text-[#667781] shrink-0">
+                              <span className="text-base text-[#667781] shrink-0">
                                 {attachment.duration ? formatDuration(attachment.duration) : '0:00'}
                               </span>
                               
@@ -391,7 +391,7 @@ export const ChatInterface = ({
                               className="flex items-center gap-2 p-2 bg-black/5 rounded hover:bg-black/10"
                             >
                               <Paperclip className="h-4 w-4 text-[#54656f]" />
-                              <span className="text-sm text-[#111b21]">{attachment.name}</span>
+                              <span className="text-base text-[#111b21]">{attachment.name}</span>
                             </a>
                           )}
                         </div>
@@ -410,31 +410,31 @@ export const ChatInterface = ({
                       {Array.from(new Set(message.reactions.map((r) => r.emoji))).map((emoji) => {
                         const count = message.reactions!.filter((r) => r.emoji === emoji).length;
                         return (
-                          <span
-                            key={emoji}
-                            className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black/5 rounded-full text-sm"
-                          >
-                            {emoji} {count > 1 && count}
-                          </span>
+                           <span
+                             key={emoji}
+                             className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black/5 rounded-full text-base"
+                           >
+                             {emoji} {count > 1 && count}
+                           </span>
                         );
                       })}
                     </div>
                   )}
 
-                  {/* Message Footer */}
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-sm text-[#667781]">
-                      {formatChatTime(message.timestamp)}
-                    </span>
-                    {message.isEdited && (
-                      <span className="text-sm text-[#667781] italic">• edited</span>
-                    )}
-                    {isCurrentUser && (
-                      <span className="text-sm text-[#667781] ml-1">
-                        {message.isRead ? <CheckCheck className="h-3 w-3 text-[#00a884]" /> : <Check className="h-3 w-3" />}
-                      </span>
-                    )}
-                  </div>
+                   {/* Message Footer */}
+                   <div className="flex items-center gap-1 mt-1">
+                     <span className="text-base text-[#667781]">
+                       {formatChatTime(message.timestamp)}
+                     </span>
+                     {message.isEdited && (
+                       <span className="text-base text-[#667781] italic">• edited</span>
+                     )}
+                     {isCurrentUser && (
+                       <span className="text-base text-[#667781] ml-1">
+                         {message.isRead ? <CheckCheck className="h-3 w-3 text-[#00a884]" /> : <Check className="h-3 w-3" />}
+                       </span>
+                     )}
+                   </div>
 
                   {/* Selection checkbox on hover (non-selection mode) */}
                   {!isSelectionMode && (

@@ -45,7 +45,7 @@ export const AttachmentMenu = ({
             className="h-20 flex flex-col gap-2 hover:bg-primary/10"
           >
             <ImageIcon className="h-6 w-6 text-primary" />
-            <span className="text-sm">Photos</span>
+            <span className="text-base">Photos</span>
           </Button>
 
           {/* Files */}
@@ -58,7 +58,7 @@ export const AttachmentMenu = ({
             className="h-20 flex flex-col gap-2 hover:bg-primary/10"
           >
             <Paperclip className="h-6 w-6 text-primary" />
-            <span className="text-sm">Files</span>
+            <span className="text-base">Files</span>
           </Button>
         </div>
       </PopoverContent>

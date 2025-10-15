@@ -38,7 +38,7 @@ export const AdCard = ({ image, content, timeRemaining }: AdCardProps) => {
             <span className="text-base text-muted-foreground">Ad Space 300x250</span>
           )}
           {timeRemaining && (
-            <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-md flex items-center gap-1 text-sm">
+            <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-md flex items-center gap-1 text-base">
               <Clock className="h-3 w-3" />
               {timeRemaining}
             </div>

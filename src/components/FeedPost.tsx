@@ -199,12 +199,12 @@ export const FeedPost = ({
                       e.stopPropagation();
                       handleFollow();
                     }}
-                    className="gap-1.5 h-6 px-2 text-sm"
+                    className="gap-1.5 h-6 px-2 text-base"
                     aria-label={isFollowing ? "Unfollow" : "Follow"}
                   >
                     <UserPlus className="h-3 w-3" />
                     <span className="hidden sm:inline">{isFollowing ? "Following" : "Follow"}</span>
-                    <span className="text-sm opacity-80">({formatFollowerCount(followerCount)})</span>
+                    <span className="text-base opacity-80">({formatFollowerCount(followerCount)})</span>
                   </Button>
                 )}
               </div>
