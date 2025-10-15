@@ -50,7 +50,7 @@ export const AlbumSelector = ({ value, onChange, onCreateNew }: AlbumSelectorPro
             <div className="flex items-center gap-2">
               <Folder className="h-4 w-4" />
               <span>{album.name}</span>
-              <span className="text-sm text-muted-foreground">({album.itemCount})</span>
+              <span className="text-base text-muted-foreground">({album.itemCount})</span>
             </div>
           </SelectItem>
         ))}

@@ -134,8 +134,8 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
             <div className="flex justify-between items-start">
               <div>
                 <p className="font-medium">{location.place}</p>
-                <p className="text-sm text-muted-foreground">{location.description}</p>
-                {location.period && <p className="text-sm text-muted-foreground">{location.period}</p>}
+                <p className="text-base text-muted-foreground">{location.description}</p>
+                {location.period && <p className="text-base text-muted-foreground">{location.period}</p>}
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(location)}>

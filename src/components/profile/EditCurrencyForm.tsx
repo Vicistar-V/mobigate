@@ -128,8 +128,8 @@ export const EditCurrencyForm = ({ currentData, onSave, onClose }: EditCurrencyF
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-sm mb-1">Account Summary Privacy</h4>
-              <p className="text-xs text-muted-foreground">
+              <h4 className="font-medium text-base mb-1">Account Summary Privacy</h4>
+              <p className="text-sm text-muted-foreground">
                 Your account summary (balance & transactions) is always private and only visible to you. No one else can view this information.
               </p>
             </div>

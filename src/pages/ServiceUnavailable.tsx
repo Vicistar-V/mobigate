@@ -23,7 +23,7 @@ export default function ServiceUnavailable() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold">Service Unavailable</h1>
-                <p className="text-sm text-muted-foreground">Access Restricted</p>
+                <p className="text-base text-muted-foreground">Access Restricted</p>
               </div>
             </div>
 
@@ -39,7 +39,7 @@ export default function ServiceUnavailable() {
 
             {/* Additional Information */}
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 To learn more about service eligibility and availability in your region, 
                 please review the following resources:
               </p>
@@ -56,7 +56,7 @@ export default function ServiceUnavailable() {
                   <FileText className="h-5 w-5 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Accessibility & Terms of Service</div>
-                    <div className="text-xs text-muted-foreground">Learn about service eligibility</div>
+                    <div className="text-sm text-muted-foreground">Learn about service eligibility</div>
                   </div>
                 </Button>
 
@@ -71,7 +71,7 @@ export default function ServiceUnavailable() {
                   <Shield className="h-5 w-5 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Community Standards</div>
-                    <div className="text-xs text-muted-foreground">View our community guidelines</div>
+                    <div className="text-sm text-muted-foreground">View our community guidelines</div>
                   </div>
                 </Button>
               </div>

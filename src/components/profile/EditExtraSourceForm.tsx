@@ -41,7 +41,7 @@ export const EditExtraSourceForm = ({ onClose }: EditExtraSourceFormProps) => {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground">
         Click on any option to navigate to the respective page
       </p>
 
@@ -58,7 +58,7 @@ export const EditExtraSourceForm = ({ onClose }: EditExtraSourceFormProps) => {
               </div>
               <div className="flex-1">
                 <h4 className="font-medium">{source.title}</h4>
-                <p className="text-sm text-muted-foreground">{source.description}</p>
+                <p className="text-base text-muted-foreground">{source.description}</p>
               </div>
               <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </div>

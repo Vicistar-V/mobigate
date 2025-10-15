@@ -178,7 +178,7 @@ export function AppSidebar() {
 
         {/* USERS' MENU Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/70 uppercase tracking-widest px-3 mb-2">
+          <SidebarGroupLabel className="text-sm font-bold text-muted-foreground/70 uppercase tracking-widest px-3 mb-2">
             Users' Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>

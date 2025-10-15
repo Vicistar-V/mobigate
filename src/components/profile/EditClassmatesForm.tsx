@@ -190,7 +190,7 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
           <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
-              <Label className="text-sm font-medium">Link to Mobigate User</Label>
+              <Label className="text-base font-medium">Link to Mobigate User</Label>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -222,8 +222,8 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
                   <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{selectedUser.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
+                  <p className="text-base font-medium truncate">{selectedUser.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
                 </div>
                 <Button
                   type="button"
@@ -255,10 +255,10 @@ export const EditClassmatesForm = ({ currentData, onSave, onClose }: EditClassma
               value={selectedUser?.name || undefined}
               placeholder="Type manually or search above"
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Type manually or search above to link a Mobigate user
             </p>
-            {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
+            {errors.name && <p className="text-base text-destructive mt-1">{errors.name.message as string}</p>}
           </div>
 
           <div>

@@ -35,7 +35,7 @@ const NotFound = () => {
           </div>
 
           {/* Search suggestion */}
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-3 max-w-md mx-auto">
+          <div className="flex items-center justify-center gap-2 text-base text-muted-foreground bg-muted/50 rounded-lg px-4 py-3 max-w-md mx-auto">
             <Search className="h-4 w-4" />
             <span>Try searching or go back to the homepage</span>
           </div>

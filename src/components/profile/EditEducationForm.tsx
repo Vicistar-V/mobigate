@@ -130,10 +130,10 @@ export const EditEducationForm = ({ currentData, onSave, onClose }: EditEducatio
                 )}
                 <div>
                   <p className="font-medium">{edu.school}</p>
-                  {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
-                  {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
-                  <p className="text-sm text-muted-foreground">{edu.period}</p>
-                  {edu.extraSkills && <p className="text-sm text-muted-foreground">Skills: {edu.extraSkills}</p>}
+                  {edu.faculty && <p className="text-base text-muted-foreground">{edu.faculty}</p>}
+                  {edu.department && <p className="text-base text-muted-foreground">{edu.department}</p>}
+                  <p className="text-base text-muted-foreground">{edu.period}</p>
+                  {edu.extraSkills && <p className="text-base text-muted-foreground">Skills: {edu.extraSkills}</p>}
                 </div>
               </div>
               <div className="flex gap-1">
