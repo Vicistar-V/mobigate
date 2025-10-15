@@ -4,7 +4,7 @@ import { format, parse } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield, Store, BookOpen, ExternalLink } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield, Store, BookOpen, ExternalLink, Banknote, Eye, ArrowLeftRight, TrendingUp } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,7 @@ import { EditAgeMatesForm, AgeMate } from "./profile/EditAgeMatesForm";
 import { EditWorkColleaguesForm, WorkColleague } from "./profile/EditWorkColleaguesForm";
 import { EditLoveFriendshipForm, LoveFriendship } from "./profile/EditLoveFriendshipForm";
 import { EditRefererUrlForm } from "./profile/EditRefererUrlForm";
+import { EditCurrencyForm } from "./profile/EditCurrencyForm";
 import { EditSocialCommunityForm, SocialCommunity } from "./profile/EditSocialCommunityForm";
 import { MateDetailDialog } from "./profile/MateDetailDialog";
 import { PrivacyBadge } from "./profile/PrivacyBadge";
@@ -101,6 +102,15 @@ interface RefererUrl {
   exceptions?: string[];
 }
 
+interface CurrencyInfo {
+  preferredCurrency: string;
+  currencySymbol: string;
+  accountSummaryPrivacy?: string;
+  accountSummaryExceptions?: string[];
+  privacy?: string;
+  exceptions?: string[];
+}
+
 export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -121,6 +131,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [editAboutOpen, setEditAboutOpen] = useState(false);
   const [editRefererUrlOpen, setEditRefererUrlOpen] = useState(false);
+  const [editCurrencyOpen, setEditCurrencyOpen] = useState(false);
   
   // Detail dialog states
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -222,6 +233,16 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       url: "https://mobigate.com/profile/john-doe",
       refererName: "John Doe",
       refererId: "user-123",
+      privacy: "public",
+      exceptions: []
+    })
+  );
+  const [currency, setCurrency] = useState<CurrencyInfo>(() =>
+    loadFromStorage("profile_currency", {
+      preferredCurrency: "Nigerian Naira",
+      currencySymbol: "₦",
+      accountSummaryPrivacy: "only-me",
+      accountSummaryExceptions: [],
       privacy: "public",
       exceptions: []
     })
@@ -451,6 +472,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   useEffect(() => {
     localStorage.setItem("profile_refererUrl", JSON.stringify(refererUrl));
   }, [refererUrl]);
+
+  useEffect(() => {
+    localStorage.setItem("profile_currency", JSON.stringify(currency));
+  }, [currency]);
 
   // Helper function to format birthday based on privacy setting
   const formatBirthday = (birthday: string, birthdayPrivacy: "full" | "partial" | "hidden" = "full") => {
@@ -1234,6 +1259,115 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         </div>
       </Card>
 
+      {/* Currency */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Banknote className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Currency</h3>
+            {currency.privacy && (
+              <PrivacyBadge 
+                level={currency.privacy as PrivacyLevel} 
+                exceptionsCount={currency.exceptions?.length}
+              />
+            )}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            onClick={() => setEditCurrencyOpen(true)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <p className="font-medium text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
+            <p className="text-sm text-muted-foreground">Preferred Currency</p>
+          </div>
+          
+          <Separator />
+          
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground mb-3">Currency Tools</p>
+            
+            {/* View Account Summary Button */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-auto py-3"
+              onClick={() => {
+                toast({
+                  title: "Account Summary",
+                  description: "Account summary feature coming soon!",
+                });
+              }}
+            >
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Eye className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium">View Account Summary</p>
+                <p className="text-xs text-muted-foreground">
+                  Check your financial overview
+                </p>
+              </div>
+              {currency.accountSummaryPrivacy && (
+                <PrivacyBadge 
+                  level={currency.accountSummaryPrivacy as PrivacyLevel} 
+                  exceptionsCount={currency.accountSummaryExceptions?.length}
+                />
+              )}
+            </Button>
+            
+            {/* Currency Converter Button */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-auto py-3"
+              onClick={() => {
+                toast({
+                  title: "Currency Converter",
+                  description: "Currency converter feature coming soon!",
+                });
+              }}
+            >
+              <div className="p-2 rounded-lg bg-primary/10">
+                <ArrowLeftRight className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium">Currency Converter</p>
+                <p className="text-xs text-muted-foreground">
+                  Convert between currencies
+                </p>
+              </div>
+            </Button>
+            
+            {/* Mobi Exchange Rates Button */}
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-auto py-3"
+              onClick={() => {
+                toast({
+                  title: "Mobi Exchange Rates",
+                  description: "Exchange rates feature coming soon!",
+                });
+              }}
+            >
+              <div className="p-2 rounded-lg bg-primary/10">
+                <TrendingUp className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium">Mobi Exchange Rates</p>
+                <p className="text-xs text-muted-foreground">
+                  View current exchange rates
+                </p>
+              </div>
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       {/* About */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
@@ -1407,6 +1541,22 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             setEditRefererUrlOpen(false);
           }}
           onClose={() => setEditRefererUrlOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editCurrencyOpen}
+        onOpenChange={setEditCurrencyOpen}
+        title="Edit Currency Settings"
+        maxWidth="lg"
+      >
+        <EditCurrencyForm
+          currentData={currency}
+          onSave={(data) => {
+            setCurrency(data);
+            setEditCurrencyOpen(false);
+          }}
+          onClose={() => setEditCurrencyOpen(false)}
         />
       </EditSectionDialog>
 
