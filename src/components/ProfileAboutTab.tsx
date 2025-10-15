@@ -496,24 +496,24 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
     <div className="space-y-6">
       {/* User Category */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">User Category</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">User Category</h3>
           </div>
-          <Badge variant="secondary" className="text-xs">System Managed</Badge>
+          <Badge variant="secondary" className="text-xs shrink-0">System Managed</Badge>
         </div>
         <p className="text-sm text-muted-foreground">Verified User</p>
       </Card>
 
       {/* Designations */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Designations</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Designations</h3>
           </div>
-          <Badge variant="secondary" className="text-xs">Auto-Assigned</Badge>
+          <Badge variant="secondary" className="text-xs shrink-0">Auto-Assigned</Badge>
         </div>
         <p className="font-medium">{designations}</p>
       </Card>
@@ -559,15 +559,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Location */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <MapPin className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Location</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <MapPin className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Location</h3>
           </div>
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditLocationOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -589,15 +589,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Education */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <GraduationCap className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Education</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <GraduationCap className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Education</h3>
           </div>
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditEducationOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -879,15 +879,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Business/Career/Work */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Briefcase className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Business/Career/Work</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Briefcase className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Business/Career/Work</h3>
           </div>
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditWorkOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -909,10 +909,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Extra Source */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Briefcase className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Extra Source</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Briefcase className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Extra Source</h3>
           </div>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
@@ -1010,15 +1010,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Basic Information */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <User className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Basic Information</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <User className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Basic Information</h3>
           </div>
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditBasicInfoOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -1044,10 +1044,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Relationship */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Heart className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Relationship</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Heart className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Relationship</h3>
             {relationship.privacy && (
               <PrivacyBadge 
                 level={relationship.privacy as PrivacyLevel} 
@@ -1058,7 +1058,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditRelationshipOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -1072,15 +1072,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Love Life & Friendship */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Heart className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Love Life & Friendship</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Heart className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Love Life & Friendship</h3>
           </div>
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditLoveFriendshipOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -1110,15 +1110,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Family */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Family</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Users className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Family</h3>
           </div>
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditFamilyOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -1144,11 +1144,11 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Social Community */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Social Community</h3>
-            <Badge variant="secondary" className="text-xs px-2 py-0.5">System Managed</Badge>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Users className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Social Community</h3>
+            <Badge variant="secondary" className="text-xs px-2 py-0.5 shrink-0">System Managed</Badge>
           </div>
           <TooltipProvider>
             <Tooltip>
@@ -1156,7 +1156,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
                   onClick={() => setEditSocialCommunityOpen(true)}
                 >
                   <Shield className="h-4 w-4" />
@@ -1221,10 +1221,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Contact Information */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Phone className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Contact Information</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Phone className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Contact Information</h3>
             {contact.privacy && (
               <PrivacyBadge 
                 level={contact.privacy as PrivacyLevel} 
@@ -1235,7 +1235,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditContactOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -1261,10 +1261,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Currency */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Banknote className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Currency</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <Banknote className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">Currency</h3>
             {currency.privacy && (
               <PrivacyBadge 
                 level={currency.privacy as PrivacyLevel} 
@@ -1275,7 +1275,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditCurrencyOpen(true)}
           >
             <Pencil className="h-4 w-4" />
@@ -1370,10 +1370,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* About */}
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <User className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">About</h3>
+        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+            <User className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-lg font-semibold min-w-0">About</h3>
             {about.privacy && (
               <PrivacyBadge 
                 level={about.privacy as PrivacyLevel} 
@@ -1384,7 +1384,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <Button 
             variant="ghost" 
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
             onClick={() => setEditAboutOpen(true)}
           >
             <Pencil className="h-4 w-4" />
