@@ -105,8 +105,12 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-size: 18px;
+  }
+
   body {
-    @apply bg-background text-foreground text-xl;
+    @apply bg-background text-foreground;
   }
   
   .scrollbar-hide::-webkit-scrollbar {
