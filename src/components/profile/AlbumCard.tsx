@@ -63,7 +63,7 @@ export const AlbumCard = ({ album, onClick, variant = "carousel" }: AlbumCardPro
             {album.itemCount} {album.itemCount === 1 ? "item" : "items"}
           </span>
           {album.isSystem && (
-            <Badge variant="outline" className="text-xs px-1.5 py-0 bg-white/20 text-white border-white/30">
+            <Badge variant="outline" className="text-sm px-1.5 py-0 bg-white/20 text-white border-white/30">
               System
             </Badge>
           )}

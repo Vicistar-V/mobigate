@@ -48,7 +48,7 @@ export const CommentDialog = ({
                   className="w-full h-full object-cover"
                 />
                 <Badge
-                  className="absolute top-1 left-1 text-xs sm:text-sm px-1.5 py-0.5"
+                  className="absolute top-1 left-1 text-sm sm:text-base px-1.5 py-0.5"
                   variant="destructive"
                 >
                   {post.type}

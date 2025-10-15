@@ -125,7 +125,7 @@ export const SendGiftDialog = ({
             <Card className="p-4 sm:p-5 lg:p-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent border-primary/20">
               {/* Header: Category + Clear */}
               <div className="flex items-center justify-between mb-3">
-                <Badge variant="default" className="text-xs font-medium">
+                <Badge variant="default" className="text-sm font-medium">
                   {selectedGift.type === 'special' && 'Special Digital'}
                   {selectedGift.type === 'classic' && 'Classic Digital'}
                   {selectedGift.type === 'tangible' && 'Tangible Gifts'}
@@ -161,7 +161,7 @@ export const SendGiftDialog = ({
                   {selectedGift.giftData.name}
                 </h3>
                 {selectedGift.giftData.category && (
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {selectedGift.giftData.category}
                   </p>
                 )}
@@ -204,7 +204,7 @@ export const SendGiftDialog = ({
                             className="p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center gap-2 text-center group"
                           >
                             <span className="text-3xl">{folder.icon}</span>
-                            <span className="text-xs font-medium group-hover:text-primary transition-colors">
+                            <span className="text-sm font-medium group-hover:text-primary transition-colors">
                               {folder.name}
                             </span>
                           </button>
@@ -326,7 +326,7 @@ export const SendGiftDialog = ({
                             <span className="text-2xl">{gift.icon}</span>
                             <div className="text-left">
                               <p className="font-medium text-sm">{gift.name}</p>
-                              <Badge variant="outline" className={cn("text-xs mt-1", getCategoryColor(gift.category))}>
+                              <Badge variant="outline" className={cn("text-sm mt-1", getCategoryColor(gift.category))}>
                                 {gift.category}
                               </Badge>
                             </div>
@@ -395,7 +395,7 @@ export const SendGiftDialog = ({
                             </div>
                             <div className="p-3 text-left bg-card">
                               <p className="font-medium text-sm line-clamp-1">{gift.name}</p>
-                              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                                 {gift.description}
                               </p>
                               <p className="font-bold text-primary text-sm">

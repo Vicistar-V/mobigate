@@ -129,7 +129,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         <Card className="p-3 bg-primary/5 border-primary">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Badge variant="default" className="text-xs shrink-0">
+              <Badge variant="default" className="text-sm shrink-0">
                 {selectedGift.type === 'special' && 'Special Digital'}
                 {selectedGift.type === 'classic' && 'Classic Digital'}
                 {selectedGift.type === 'tangible' && 'Tangible Gifts'}
@@ -183,7 +183,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                         className="p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center gap-2 text-center group"
                       >
                         <span className="text-3xl">{folder.icon}</span>
-                        <span className="text-xs font-medium group-hover:text-primary transition-colors">
+                        <span className="text-sm font-medium group-hover:text-primary transition-colors">
                           {folder.name}
                         </span>
                       </button>
@@ -306,7 +306,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                         <span className="text-2xl">{gift.icon}</span>
                         <div className="text-left">
                           <p className="font-medium text-sm">{gift.name}</p>
-                          <Badge variant="outline" className={cn("text-xs mt-1", getCategoryColor(gift.category))}>
+                          <Badge variant="outline" className={cn("text-sm mt-1", getCategoryColor(gift.category))}>
                             {gift.category}
                           </Badge>
                         </div>
@@ -347,7 +347,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                       <p className="text-sm text-muted-foreground">
                         No saved gifts in vault
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         Save your favorite gifts for quick access
                       </p>
                     </div>
@@ -378,7 +378,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                         </div>
                         <div className="p-3 text-left bg-card">
                           <p className="font-medium text-sm line-clamp-1">{gift.name}</p>
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                             {gift.description}
                           </p>
                           <p className="font-bold text-primary text-sm">
@@ -435,7 +435,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
               <Heart className="h-4 w-4" />
               Received Gifts
               {mockReceivedGifts.length > 0 && (
-                <Badge variant="secondary" className="ml-1 text-xs">
+                <Badge variant="secondary" className="ml-1 text-sm">
                   {mockReceivedGifts.length}
                 </Badge>
               )}
@@ -444,7 +444,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
               <Send className="h-4 w-4" />
               Sent Gifts
               {mockSentGifts.length > 0 && (
-                <Badge variant="secondary" className="ml-1 text-xs">
+                <Badge variant="secondary" className="ml-1 text-sm">
                   {mockSentGifts.length}
                 </Badge>
               )}
@@ -477,17 +477,17 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                         <p className="text-sm font-bold text-primary">
                           {gift.mobiValue.toLocaleString()} Mobi
                         </p>
-                        <Badge variant="outline" className={cn("text-xs", category.color)}>
+                        <Badge variant="outline" className={cn("text-sm", category.color)}>
                           {category.label}
                         </Badge>
                         <div className="pt-2 border-t space-y-1">
                           <div className="flex items-center justify-center gap-1">
                             <User className="h-3 w-3 text-muted-foreground" />
-                            <p className="text-xs text-muted-foreground line-clamp-1">
+                            <p className="text-sm text-muted-foreground line-clamp-1">
                               From: {gift.fromUserName}
                             </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             {new Date(gift.date).toLocaleDateString('en-US', { 
                               month: 'short', 
                               day: 'numeric',
@@ -529,17 +529,17 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                         <p className="text-sm font-bold text-primary">
                           {gift.mobiValue.toLocaleString()} Mobi
                         </p>
-                        <Badge variant="outline" className={cn("text-xs", category.color)}>
+                        <Badge variant="outline" className={cn("text-sm", category.color)}>
                           {category.label}
                         </Badge>
                         <div className="pt-2 border-t space-y-1">
                           <div className="flex items-center justify-center gap-1">
                             <User className="h-3 w-3 text-muted-foreground" />
-                            <p className="text-xs text-muted-foreground line-clamp-1">
+                            <p className="text-sm text-muted-foreground line-clamp-1">
                               To: {gift.toUserName}
                             </p>
                           </div>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             {new Date(gift.date).toLocaleDateString('en-US', { 
                               month: 'short', 
                               day: 'numeric',

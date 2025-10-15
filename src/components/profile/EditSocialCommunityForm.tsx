@@ -128,7 +128,7 @@ export const EditSocialCommunityForm = ({
                       {community.status}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Member since {new Date(community.joinDate).toLocaleDateString('en-US', { 
                       year: 'numeric', 
                       month: 'long', 

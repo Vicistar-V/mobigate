@@ -120,7 +120,7 @@ export const ImageUploader = ({ value, onChange, type = "avatar", placeholder }:
               <Upload className="h-8 w-8 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">{placeholder || "Upload Logo"}</p>
-                <p className="text-xs text-muted-foreground">Max 2MB, PNG, JPG, WEBP</p>
+                <p className="text-sm text-muted-foreground">Max 2MB, PNG, JPG, WEBP</p>
               </div>
             </div>
           </div>

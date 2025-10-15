@@ -243,7 +243,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                   >
                     <Icon className="h-4 w-4 mr-2" />
                     <span>{filter.label}</span>
-                    <span className="ml-auto text-muted-foreground text-xs">
+                    <span className="ml-auto text-muted-foreground text-sm">
                       ({count})
                     </span>
                   </DropdownMenuItem>
@@ -292,7 +292,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                     </h3>
                     <Badge 
                       variant="outline" 
-                      className={`flex-shrink-0 text-xs ${getContentTypeBadgeClass(post.type)}`}
+                      className={`flex-shrink-0 text-sm ${getContentTypeBadgeClass(post.type)}`}
                     >
                       {post.type}
                     </Badge>
@@ -306,7 +306,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                   )}
 
                   {/* Metadata Row */}
-                  <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground flex-wrap">
+                  <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1">
                       <Eye className="h-3 w-3" />
                       <span className="font-medium">{post.views}</span>
@@ -327,7 +327,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                           e.stopPropagation();
                           handleFollowAuthor(post.userId);
                         }}
-                        className="gap-1 h-6 px-2 text-xs ml-auto"
+                        className="gap-1 h-6 px-2 text-sm ml-auto"
                         aria-label={followingAuthors.has(post.userId) ? "Unfollow" : "Follow"}
                       >
                         <UserPlus className="h-3 w-3" />

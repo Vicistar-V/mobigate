@@ -140,7 +140,7 @@ export const AllVideosGrid = ({ videos }: AllVideosGridProps) => {
                       
                       {/* Video badge */}
                       <div className="absolute top-2 left-2 z-10">
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-white flex items-center gap-1">
+                        <span className="text-sm px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-white flex items-center gap-1">
                           <Video className="h-2.5 w-2.5" />
                           Video
                         </span>

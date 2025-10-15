@@ -85,7 +85,7 @@ export const MessagesSheet = () => {
         <Button variant="ghost" size="iconLg" className="relative hover:bg-primary/10" data-messages-trigger>
           <MessageSquare />
           {totalUnreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-sm font-bold text-destructive-foreground">
               {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
             </span>
           )}
