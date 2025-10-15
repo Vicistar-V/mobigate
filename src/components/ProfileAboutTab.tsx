@@ -1308,7 +1308,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             >
               <div className="flex items-center gap-2 w-full">
                 <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-                <span className="font-semibold text-sm sm:text-base">View Account Summary</span>
+                <span className="font-semibold text-sm sm:text-base text-primary">View Account Summary</span>
               </div>
               <span className="text-xs sm:text-sm text-muted-foreground text-left">
                 Balance & transactions
@@ -1323,7 +1323,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             >
               <div className="flex items-center gap-2 w-full">
                 <ArrowRightLeft className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-                <span className="font-semibold text-sm sm:text-base">Currency Converter</span>
+                <span className="font-semibold text-sm sm:text-base text-primary">Currency Converter</span>
               </div>
               <span className="text-xs sm:text-sm text-muted-foreground text-left">
                 Convert currencies
@@ -1338,7 +1338,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             >
               <div className="flex items-center gap-2 w-full">
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-                <span className="font-semibold text-sm sm:text-base">Mobi Exchange Rates</span>
+                <span className="font-semibold text-sm sm:text-base text-primary">Mobi Exchange Rates</span>
               </div>
               <span className="text-xs sm:text-sm text-muted-foreground text-left">
                 1 Mobi = 1 Naira
