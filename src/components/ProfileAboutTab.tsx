@@ -23,7 +23,7 @@ import { EditClassmatesForm, Classmate } from "./profile/EditClassmatesForm";
 import { EditAgeMatesForm, AgeMate } from "./profile/EditAgeMatesForm";
 import { EditWorkColleaguesForm, WorkColleague } from "./profile/EditWorkColleaguesForm";
 import { EditLoveFriendshipForm, LoveFriendship } from "./profile/EditLoveFriendshipForm";
-
+import { EditRefererUrlForm } from "./profile/EditRefererUrlForm";
 import { EditSocialCommunityForm, SocialCommunity } from "./profile/EditSocialCommunityForm";
 import { MateDetailDialog } from "./profile/MateDetailDialog";
 import { PrivacyBadge } from "./profile/PrivacyBadge";
@@ -93,6 +93,14 @@ interface ContactInfo {
   exceptions?: string[];
 }
 
+interface RefererUrl {
+  url: string;
+  refererName: string;
+  refererId: string;
+  privacy?: string;
+  exceptions?: string[];
+}
+
 export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -112,6 +120,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editSocialCommunityOpen, setEditSocialCommunityOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [editAboutOpen, setEditAboutOpen] = useState(false);
+  const [editRefererUrlOpen, setEditRefererUrlOpen] = useState(false);
   
   // Detail dialog states
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -208,6 +217,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
     }
     return stored;
   });
+  const [refererUrl, setRefererUrl] = useState<RefererUrl>(() => 
+    loadFromStorage("profile_refererUrl", {
+      url: "https://mobigate.com/profile/john-doe",
+      refererName: "John Doe",
+      refererId: "user-123",
+      privacy: "public",
+      exceptions: []
+    })
+  );
   const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => 
     loadFromStorage<SchoolMate[]>("profile_schoolMates", [
       {
@@ -430,6 +448,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
     localStorage.setItem("profile_socialCommunities", JSON.stringify(socialCommunities));
   }, [socialCommunities]);
 
+  useEffect(() => {
+    localStorage.setItem("profile_refererUrl", JSON.stringify(refererUrl));
+  }, [refererUrl]);
+
   // Helper function to format birthday based on privacy setting
   const formatBirthday = (birthday: string, birthdayPrivacy: "full" | "partial" | "hidden" = "full") => {
     if (birthdayPrivacy === "hidden") return null;
@@ -469,6 +491,45 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <Badge variant="secondary" className="text-xs">Auto-Assigned</Badge>
         </div>
         <p className="font-medium">{designations}</p>
+      </Card>
+
+      {/* Referer URL */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <ExternalLink className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">Referer URL</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            {refererUrl.privacy && (
+              <PrivacyBadge 
+                level={refererUrl.privacy as PrivacyLevel} 
+                exceptionsCount={refererUrl.exceptions?.length}
+              />
+            )}
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-primary"
+              onClick={() => setEditRefererUrlOpen(true)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">Referred by:</p>
+          <Button
+            variant="link"
+            className="h-auto p-0 font-medium text-primary hover:underline"
+            onClick={() => navigate(`/profile/${refererUrl.refererId}`)}
+          >
+            {refererUrl.refererName}
+          </Button>
+          <p className="text-xs text-muted-foreground break-all">
+            {refererUrl.url}
+          </p>
+        </div>
       </Card>
 
       {/* Location */}
@@ -1330,6 +1391,22 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           currentData={about}
           onSave={setAbout}
           onClose={() => setEditAboutOpen(false)}
+        />
+      </EditSectionDialog>
+
+      <EditSectionDialog
+        open={editRefererUrlOpen}
+        onOpenChange={setEditRefererUrlOpen}
+        title="Edit Referer URL"
+        maxWidth="lg"
+      >
+        <EditRefererUrlForm
+          currentData={refererUrl}
+          onSave={(data) => {
+            setRefererUrl(data);
+            setEditRefererUrlOpen(false);
+          }}
+          onClose={() => setEditRefererUrlOpen(false)}
         />
       </EditSectionDialog>
 
