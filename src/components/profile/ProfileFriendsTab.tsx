@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { mockFriends } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Eye, Users, Heart, Clock, Check, MoreVertical, UserMinus, ThumbsUp, ThumbsDown, Gift, MessageCircle, Phone, Ban, Flag } from "lucide-react";
+import { UserPlus, Eye, Users, Heart, Clock, Check, MoreVertical, UserMinus, ThumbsUp, ThumbsDown, Gift, MessageCircle, Phone, Ban, Flag, Search } from "lucide-react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { friendsAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
@@ -126,6 +126,13 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
     });
   };
 
+  const handleFindFriends = () => {
+    toast({
+      title: "Find Friends",
+      description: "Friend discovery feature coming soon!",
+    });
+  };
+
   const getFriendButtonConfig = (status: FriendStatus = 'none') => {
     const configs = {
       'none': {
@@ -152,6 +159,16 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
 
   return (
     <div className="space-y-4 pb-6">
+      {/* Find Friends Button */}
+      <Button
+        onClick={handleFindFriends}
+        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+        size="lg"
+      >
+        <Search className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+        Find Friends
+      </Button>
+
       {/* Header */}
       <div className="space-y-1">
         <h2 className="text-lg font-bold uppercase">
