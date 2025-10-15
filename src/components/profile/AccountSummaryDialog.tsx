@@ -85,11 +85,11 @@ export const AccountSummaryDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-4 pt-12 sm:p-6 sm:pt-14">
-        <DialogHeader className="pr-14 sm:pr-16">
-          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-4 sm:p-6">
+        <DialogHeader className="pr-10 sm:pr-12">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg min-w-0">
             <Wallet className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-            <span className="truncate">Account Summary - {userName}</span>
+            <span className="truncate min-w-0">Account Summary</span>
           </DialogTitle>
         </DialogHeader>
 
