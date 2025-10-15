@@ -15,6 +15,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Gift, Wallet, Heart, User, ExternalLink, ChevronLeft, ChevronDown, Send } from "lucide-react";
 import { useState } from "react";
+import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,7 @@ type GiftSelection = {
 
 export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const { toast } = useToast();
+  const { showDialog, Dialog } = useServiceUnavailableDialog();
   const [selectedGift, setSelectedGift] = useState<GiftSelection>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
@@ -410,13 +412,20 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
       <Card className="p-4 bg-muted/30 border-dashed">
         <p className="text-sm text-center">
           Please{" "}
-          <Button variant="link" className="px-1 h-auto py-0 text-sm font-semibold">
+          <Button 
+            variant="link" 
+            className="px-1 h-auto py-0 text-sm font-semibold"
+            onClick={showDialog}
+          >
             ENTER MOBI-STORE
             <ExternalLink className="h-3 w-3 ml-1" />
           </Button>{" "}
           to shop for more items
         </p>
       </Card>
+
+      {/* Service Unavailable Dialog */}
+      <Dialog />
 
       {/* SECTION 7: Gift History - Tabbed (Received & Sent) */}
       <Card className="p-4">
