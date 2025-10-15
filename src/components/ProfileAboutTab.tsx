@@ -1304,21 +1304,25 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 });
               }}
             >
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                 <Eye className="h-4 w-4 text-primary" />
               </div>
-              <div className="flex-1 text-left">
-                <p className="font-medium">View Account Summary</p>
-                <p className="text-xs text-muted-foreground">
-                  Check your financial overview
-                </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium">View Account Summary</p>
+                    <p className="text-xs text-muted-foreground">
+                      Check your financial overview
+                    </p>
+                  </div>
+                  {currency.accountSummaryPrivacy && (
+                    <PrivacyBadge 
+                      level={currency.accountSummaryPrivacy as PrivacyLevel} 
+                      exceptionsCount={currency.accountSummaryExceptions?.length}
+                    />
+                  )}
+                </div>
               </div>
-              {currency.accountSummaryPrivacy && (
-                <PrivacyBadge 
-                  level={currency.accountSummaryPrivacy as PrivacyLevel} 
-                  exceptionsCount={currency.accountSummaryExceptions?.length}
-                />
-              )}
             </Button>
             
             {/* Currency Converter Button */}
