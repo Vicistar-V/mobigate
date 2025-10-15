@@ -164,17 +164,17 @@ export const FriendExceptionDialog = ({
                     <button
                       key={friend.id}
                       type="button"
-                      className="w-full px-3 py-2 text-left hover:bg-accent flex flex-col text-sm"
+                      className="w-full px-3 py-2 text-left hover:bg-accent flex flex-col text-base"
                       onClick={() => addCustomException(friend.id)}
                     >
                       <span className="font-medium">{friend.name}</span>
-                      <span className="text-xs text-muted-foreground">{friend.email}</span>
+                      <span className="text-sm text-muted-foreground">{friend.email}</span>
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Type a name/email and press Enter, or select from suggestions
             </p>
           </div>
@@ -210,8 +210,8 @@ export const FriendExceptionDialog = ({
                         htmlFor={`friend-${friend.id}`}
                         className="flex-1 cursor-pointer"
                       >
-                        <div className="font-medium text-sm">{friend.name}</div>
-                        <div className="text-xs text-muted-foreground">{friend.email}</div>
+                        <div className="font-medium text-base">{friend.name}</div>
+                        <div className="text-sm text-muted-foreground">{friend.email}</div>
                       </label>
                     </div>
                   ))

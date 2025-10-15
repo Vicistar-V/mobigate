@@ -31,7 +31,7 @@ export const PrivacySelector = ({ value, onChange, exceptions = [], onExceptions
   return (
     <>
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Visible to:</span>
+        <span className="text-base text-muted-foreground">Visible to:</span>
         <Select value={value} onValueChange={handlePrivacyChange}>
           <SelectTrigger className="w-[160px] h-8">
             <SelectValue />
@@ -72,7 +72,7 @@ export const PrivacySelector = ({ value, onChange, exceptions = [], onExceptions
                 <ShieldMinus className="h-3 w-3" />
                 <span>All Except</span>
                 {exceptions.length > 0 && (
-                  <span className="text-xs text-muted-foreground">({exceptions.length})</span>
+                  <span className="text-sm text-muted-foreground">({exceptions.length})</span>
                 )}
               </div>
             </SelectItem>
@@ -89,7 +89,7 @@ export const PrivacySelector = ({ value, onChange, exceptions = [], onExceptions
           <button
             type="button"
             onClick={() => setShowExceptionDialog(true)}
-            className="text-xs text-primary hover:underline"
+            className="text-sm text-primary hover:underline"
           >
             Edit ({exceptions.length})
           </button>

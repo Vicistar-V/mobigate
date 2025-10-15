@@ -51,7 +51,7 @@ export const PrivacyBadge = ({ level, exceptionsCount = 0 }: PrivacyBadgeProps) 
   };
 
   return (
-    <Badge variant="outline" className="gap-1 text-xs">
+    <Badge variant="outline" className="gap-1 text-sm">
       {getPrivacyIcon()}
       <span>{getPrivacyText()}</span>
     </Badge>
