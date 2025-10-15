@@ -95,7 +95,7 @@ export const AllVideosGrid = ({ videos }: AllVideosGridProps) => {
       <div className="text-center py-16 bg-muted/30 rounded-lg">
         <Video className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
         <p className="text-lg text-muted-foreground">No videos to display yet.</p>
-        <p className="text-sm text-muted-foreground/70 mt-2">Upload some videos to see them here!</p>
+        <p className="text-base text-muted-foreground/70 mt-2">Upload some videos to see them here!</p>
       </div>
     );
   }
@@ -140,7 +140,7 @@ export const AllVideosGrid = ({ videos }: AllVideosGridProps) => {
                       
                       {/* Video badge */}
                       <div className="absolute top-2 left-2 z-10">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-white flex items-center gap-1">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-white flex items-center gap-1">
                           <Video className="h-2.5 w-2.5" />
                           Video
                         </span>

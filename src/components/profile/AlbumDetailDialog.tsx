@@ -51,15 +51,15 @@ export const AlbumDetailDialog = ({
               <div className="flex items-center gap-2">
                 <DialogTitle className="text-2xl">{album.name}</DialogTitle>
                 {album.isSystem && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-sm">
                     System Album
                   </Badge>
                 )}
               </div>
               {album.description && (
-                <p className="text-sm text-muted-foreground">{album.description}</p>
+                <p className="text-base text-muted-foreground">{album.description}</p>
               )}
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3 text-base text-muted-foreground">
                 <span className="font-medium">{album.itemCount} items</span>
                 <span>•</span>
                 <div className="flex items-center gap-1">
@@ -102,7 +102,7 @@ export const AlbumDetailDialog = ({
                     {/* Info overlay on hover */}
                     {item.title && (
                       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p className="text-white text-xs truncate">{item.title}</p>
+                        <p className="text-white text-sm truncate">{item.title}</p>
                       </div>
                     )}
                   </div>

@@ -97,11 +97,11 @@ export const AccountSummaryDialog = ({
           {/* Balance Card */}
           <Card className="p-4 sm:p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
             <div className="space-y-2">
-              <p className="text-xs sm:text-sm text-muted-foreground">Current Balance</p>
+              <p className="text-sm sm:text-base text-muted-foreground">Current Balance</p>
               <p className="text-2xl sm:text-4xl font-bold">
                 {currencySymbol}{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 ≈ ₦{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })} Naira
               </p>
             </div>
@@ -112,7 +112,7 @@ export const AccountSummaryDialog = ({
             <Card className="p-3 sm:p-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Total Received</p>
+                  <p className="text-sm sm:text-base text-muted-foreground">Total Received</p>
                   <p className="text-lg sm:text-2xl font-bold text-emerald-600 truncate">
                     +{currencySymbol}{totalReceived.toLocaleString()}
                   </p>
@@ -124,7 +124,7 @@ export const AccountSummaryDialog = ({
             <Card className="p-3 sm:p-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Total Sent</p>
+                  <p className="text-sm sm:text-base text-muted-foreground">Total Sent</p>
                   <p className="text-lg sm:text-2xl font-bold text-red-600 truncate">
                     -{currencySymbol}{totalSent.toLocaleString()}
                   </p>
@@ -136,7 +136,7 @@ export const AccountSummaryDialog = ({
 
           {/* Recent Transactions */}
           <div>
-            <h4 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3 flex items-center gap-2">
+            <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center gap-2">
               <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
               Recent Transactions
             </h4>
@@ -158,14 +158,14 @@ export const AccountSummaryDialog = ({
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm sm:text-base font-medium truncate">
+                          <p className="text-base sm:text-lg font-medium truncate">
                             {transaction.type === "received" ? "From" : "To"}{" "}
                             {transaction.type === "received" ? transaction.from : transaction.to}
                           </p>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                          <p className="text-sm sm:text-base text-muted-foreground truncate">
                             {transaction.description}
                           </p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                             {format(transaction.date, "MMM dd, yyyy 'at' h:mm a")}
                           </p>
                         </div>
@@ -179,7 +179,7 @@ export const AccountSummaryDialog = ({
                           {transaction.type === "received" ? "+" : "-"}
                           {currencySymbol}{transaction.amount.toLocaleString()}
                         </p>
-                        <Badge variant="outline" className="text-[10px] sm:text-xs mt-1">
+                        <Badge variant="outline" className="text-xs sm:text-sm mt-1">
                           {transaction.currency}
                         </Badge>
                       </div>

@@ -97,7 +97,7 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
       <div className="text-center py-16 bg-muted/30 rounded-lg">
         <ImageIcon className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
         <p className="text-lg text-muted-foreground">No photos to display yet.</p>
-        <p className="text-sm text-muted-foreground/70 mt-2">Upload some photos to see them here!</p>
+        <p className="text-base text-muted-foreground/70 mt-2">Upload some photos to see them here!</p>
       </div>
     );
   }
@@ -135,7 +135,7 @@ export const AllPhotosGrid = ({ photos }: AllPhotosGridProps) => {
                       {/* Type badge */}
                       {photo.type !== "post" && (
                         <div className="absolute top-2 left-2 z-10">
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white">
                             {photo.type === "profile-picture" ? "Profile" : "Banner"}
                           </span>
                         </div>
