@@ -36,6 +36,9 @@ export const MessagesSheet = () => {
 
   const showMobileChat = activeConversationId !== null;
   const isGameMode = !!activeQuizSession && !activeQuizSession.completedAt;
+  
+  // Calculate total unread messages
+  const totalUnreadCount = conversations.reduce((total, conv) => total + conv.unreadCount, 0);
 
   // Listen for custom event to open chat with specific user
   useEffect(() => {
@@ -79,8 +82,13 @@ export const MessagesSheet = () => {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="iconLg" className="hover:bg-primary/10" data-messages-trigger>
+        <Button variant="ghost" size="iconLg" className="relative hover:bg-primary/10" data-messages-trigger>
           <MessageSquare />
+          {totalUnreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+              {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+            </span>
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-[95vw] lg:max-w-[80vw] p-0 overflow-hidden flex flex-col" showClose={false}>

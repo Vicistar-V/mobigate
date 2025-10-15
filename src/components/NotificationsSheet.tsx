@@ -64,7 +64,9 @@ export const NotificationsSheet = () => {
         <Button variant="ghost" size="iconLg" className="relative hover:bg-primary/10">
           <Bell />
           {unreadCount > 0 && (
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
           )}
         </Button>
       </SheetTrigger>
