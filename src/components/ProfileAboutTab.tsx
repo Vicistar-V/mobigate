@@ -1307,10 +1307,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               onClick={() => setAccountSummaryOpen(true)}
             >
               <div className="flex items-center gap-2 w-full">
-                <Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm">View Account Summary</span>
+                <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                <span className="font-semibold text-sm sm:text-base">View Account Summary</span>
               </div>
-              <span className="text-[10px] sm:text-xs text-muted-foreground text-left">
+              <span className="text-xs sm:text-sm text-muted-foreground text-left">
                 Balance & transactions
               </span>
             </Button>
@@ -1322,10 +1322,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               onClick={() => setCurrencyExchangeOpen(true)}
             >
               <div className="flex items-center gap-2 w-full">
-                <ArrowRightLeft className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm">Currency Converter</span>
+                <ArrowRightLeft className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                <span className="font-semibold text-sm sm:text-base">Currency Converter</span>
               </div>
-              <span className="text-[10px] sm:text-xs text-muted-foreground text-left">
+              <span className="text-xs sm:text-sm text-muted-foreground text-left">
                 Convert currencies
               </span>
             </Button>
@@ -1337,10 +1337,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               onClick={() => setMobiExchangeRatesOpen(true)}
             >
               <div className="flex items-center gap-2 w-full">
-                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm">Mobi Exchange Rates</span>
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                <span className="font-semibold text-sm sm:text-base">Mobi Exchange Rates</span>
               </div>
-              <span className="text-[10px] sm:text-xs text-muted-foreground text-left">
+              <span className="text-xs sm:text-sm text-muted-foreground text-left">
                 1 Mobi = 1 Naira
               </span>
             </Button>
