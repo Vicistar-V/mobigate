@@ -110,7 +110,7 @@ export const AddToCircleDialog = ({
                   onCheckedChange={() => handleToggleCircle(circle.id)}
                 />
                 <span className="text-xl">{circle.icon}</span>
-                <span className="flex-1 text-sm font-medium">{circle.name}</span>
+                <span className="flex-1 text-base font-medium">{circle.name}</span>
               </label>
             ))}
           </div>
@@ -130,7 +130,7 @@ export const AddToCircleDialog = ({
           </Button>
 
           {selectedCircles.length > 0 && (
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-base text-muted-foreground text-center">
               {selectedCircles.length} circle{selectedCircles.length > 1 ? "s" : ""} selected
             </p>
           )}

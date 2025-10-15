@@ -125,7 +125,7 @@ export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProp
               <Library className="w-6 h-6" />
               <div>
                 <p className="font-bold text-lg">View E-Library Contents Now</p>
-                <p className="text-sm opacity-90">Browse all available content</p>
+                <p className="text-base opacity-90">Browse all available content</p>
               </div>
             </div>
             <ArrowRight className="w-5 h-5" />
@@ -159,7 +159,7 @@ export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProp
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-base">
                     {option.description}
                   </CardDescription>
                 </CardContent>

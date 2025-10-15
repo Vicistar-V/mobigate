@@ -164,7 +164,7 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
                 <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </p>
           </Card>
@@ -172,7 +172,7 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
           {/* Mobi Info Note */}
           {(fromCurrency === "MOBI" || toCurrency === "MOBI") && (
             <Card className="p-2.5 sm:p-3 bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900">
-              <p className="text-[10px] sm:text-xs text-amber-800 dark:text-amber-200">
+              <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
                 💡 <strong>Mobi Rate:</strong> 1 Mobi = 1 Nigerian Naira (baseline)
               </p>
             </Card>
