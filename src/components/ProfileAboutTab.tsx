@@ -1282,93 +1282,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           </Button>
         </div>
         
-        <div className="space-y-4">
-          <div>
-            <p className="font-medium text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
-            <p className="text-sm text-muted-foreground">Preferred Currency</p>
-          </div>
-          
-          <Separator />
-          
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground mb-3">Currency Tools</p>
-            
-            {/* View Account Summary Button */}
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 h-auto py-3"
-              onClick={() => {
-                toast({
-                  title: "Account Summary",
-                  description: "Account summary feature coming soon!",
-                });
-              }}
-            >
-              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                <Eye className="h-4 w-4 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">View Account Summary</p>
-                    <p className="text-xs text-muted-foreground">
-                      Check your financial overview
-                    </p>
-                  </div>
-                  {currency.accountSummaryPrivacy && (
-                    <PrivacyBadge 
-                      level={currency.accountSummaryPrivacy as PrivacyLevel} 
-                      exceptionsCount={currency.accountSummaryExceptions?.length}
-                    />
-                  )}
-                </div>
-              </div>
-            </Button>
-            
-            {/* Currency Converter Button */}
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 h-auto py-3"
-              onClick={() => {
-                toast({
-                  title: "Currency Converter",
-                  description: "Currency converter feature coming soon!",
-                });
-              }}
-            >
-              <div className="p-2 rounded-lg bg-primary/10">
-                <ArrowLeftRight className="h-4 w-4 text-primary" />
-              </div>
-              <div className="flex-1 text-left">
-                <p className="font-medium">Currency Converter</p>
-                <p className="text-xs text-muted-foreground">
-                  Convert between currencies
-                </p>
-              </div>
-            </Button>
-            
-            {/* Mobi Exchange Rates Button */}
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 h-auto py-3"
-              onClick={() => {
-                toast({
-                  title: "Mobi Exchange Rates",
-                  description: "Exchange rates feature coming soon!",
-                });
-              }}
-            >
-              <div className="p-2 rounded-lg bg-primary/10">
-                <TrendingUp className="h-4 w-4 text-primary" />
-              </div>
-              <div className="flex-1 text-left">
-                <p className="font-medium">Mobi Exchange Rates</p>
-                <p className="text-xs text-muted-foreground">
-                  View current exchange rates
-                </p>
-              </div>
-            </Button>
-          </div>
+        <div>
+          <p className="font-medium text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
+          <p className="text-sm text-muted-foreground">Preferred Currency</p>
         </div>
       </Card>
 
