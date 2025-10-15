@@ -87,7 +87,7 @@ export const ConversationsList = ({
                     {conversation.user.name}
                   </Link>
                   {conversation.unreadCount > 0 && (
-                    <Badge variant="destructive" className="h-5 px-1.5 text-xs">
+                    <Badge variant="destructive" className="h-5 px-1.5 text-sm">
                       {conversation.unreadCount}
                     </Badge>
                   )}
@@ -95,7 +95,7 @@ export const ConversationsList = ({
                 <p className="text-sm text-muted-foreground line-clamp-1">
                   {conversation.lastMessage}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {formatMessageTime(conversation.lastMessageTime)}
                 </p>
               </div>

@@ -228,17 +228,17 @@ export const MediaGalleryViewer = ({
                     <AvatarFallback>{currentItem.author.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="text-white">
-                    <p className="text-sm sm:text-base font-semibold">{currentItem.author}</p>
+                    <p className="text-base sm:text-lg font-semibold">{currentItem.author}</p>
                     {currentItem.timestamp && (
-                      <p className="text-[10px] sm:text-xs text-white/70">{currentItem.timestamp}</p>
+                      <p className="text-xs sm:text-sm text-white/70">{currentItem.timestamp}</p>
                     )}
                   </div>
                 </>
               )}
               {!currentItem.author && (
                 <div className="text-white">
-                  <p className="text-sm sm:text-base font-semibold">{getGalleryTitle()}</p>
-                  <p className="text-[10px] sm:text-xs text-white/70">
+                  <p className="text-base sm:text-lg font-semibold">{getGalleryTitle()}</p>
+                  <p className="text-xs sm:text-sm text-white/70">
                     {currentIndex + 1} of {items.length}
                   </p>
                 </div>
@@ -291,7 +291,7 @@ export const MediaGalleryViewer = ({
             <div className="text-white mb-3 sm:mb-6">
               <h3 className="text-base sm:text-2xl font-bold mb-0.5 sm:mb-1">{currentItem.title}</h3>
               {currentItem.description && (
-                <p className="text-xs sm:text-sm text-white/80 line-clamp-2 sm:line-clamp-none">{currentItem.description}</p>
+                <p className="text-sm sm:text-base text-white/80 line-clamp-2 sm:line-clamp-none">{currentItem.description}</p>
               )}
             </div>
           )}
@@ -313,7 +313,7 @@ export const MediaGalleryViewer = ({
                     }`}
                   >
                     <Heart className={`h-5 w-5 sm:h-7 sm:w-7 ${isLiked ? "fill-current" : ""}`} />
-                    <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
+                    <span className="text-base sm:text-xl font-bold">{likeCount}</span>
                   </Button>
                 </div>
 
@@ -330,7 +330,7 @@ export const MediaGalleryViewer = ({
                     }`}
                   >
                     <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
-                    <span className="text-sm sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
+                    <span className="text-base sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
                   </Button>
                 )}
 
@@ -342,7 +342,7 @@ export const MediaGalleryViewer = ({
                   className="flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 text-white hover:text-white hover:bg-white/10"
                 >
                   <MessageCircle className="h-5 w-5 sm:h-7 sm:w-7" />
-                  <span className="text-sm sm:text-xl font-bold">{currentItem.comments || 0}</span>
+                  <span className="text-base sm:text-xl font-bold">{currentItem.comments || 0}</span>
                 </Button>
 
                 {/* Share Button */}
@@ -353,7 +353,7 @@ export const MediaGalleryViewer = ({
                   className="flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 text-white hover:text-white hover:bg-white/10"
                 >
                   <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
-                  <span className="text-sm sm:text-xl font-bold">Share</span>
+                  <span className="text-base sm:text-xl font-bold">Share</span>
                 </Button>
               </div>
 
@@ -379,7 +379,7 @@ export const MediaGalleryViewer = ({
 
                 {/* Counter for large galleries */}
                 {items.length > 20 && (
-                  <div className="text-white/80 text-xs sm:text-sm font-medium">
+                  <div className="text-white/80 text-sm sm:text-base font-medium">
                     {currentIndex + 1} / {items.length}
                   </div>
                 )}

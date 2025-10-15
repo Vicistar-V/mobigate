@@ -32,7 +32,7 @@ export const QuizGamePanel = ({
             <Trophy className="h-4 w-4 text-primary" />
             <span className="font-semibold text-sm sm:text-base">{score}</span>
           </div>
-          <div className="text-xs sm:text-sm text-muted-foreground">
+          <div className="text-sm sm:text-base text-muted-foreground">
             {currentQuestionIndex + 1}/{questions.length}
           </div>
         </div>
@@ -59,13 +59,13 @@ export const QuizGamePanel = ({
         <div className="text-center p-4 sm:p-6">
           <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🎮</div>
           <h3 className="text-lg sm:text-xl font-semibold mb-2">Quiz Game</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Quiz interface will be here
           </p>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
             Category: {currentQuestion?.category || 'General'}
           </p>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Time: {timeRemaining}s
           </p>
         </div>

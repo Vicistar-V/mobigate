@@ -58,7 +58,7 @@ export const PremiumAdCarousel = ({ items }: PremiumAdCarouselProps) => {
               {(item.caption || item.price) && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
                   {item.caption && (
-                    <p className="text-white text-xs sm:text-sm font-medium mb-1">
+                    <p className="text-white text-sm sm:text-base font-medium mb-1">
                       {item.caption}
                     </p>
                   )}
@@ -116,7 +116,7 @@ export const PremiumAdCarousel = ({ items }: PremiumAdCarouselProps) => {
 
       {/* Item Counter */}
       {items.length > 1 && (
-        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-black/60 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-black/60 text-white px-2 sm:px-3 py-1 rounded-full text-sm sm:text-base font-medium">
           {currentIndex + 1} / {items.length}
         </div>
       )}

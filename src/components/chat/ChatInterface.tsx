@@ -304,8 +304,8 @@ export const ChatInterface = ({
                   {/* Reply Preview */}
                   {message.replyTo && (
                     <div className="mb-2 p-2 bg-black/5 rounded border-l-2 border-[#00a884]">
-                      <p className="text-xs text-[#00a884] font-medium">{message.replyTo.senderName}</p>
-                      <p className="text-xs text-[#667781] truncate">{message.replyTo.content}</p>
+                      <p className="text-sm text-[#00a884] font-medium">{message.replyTo.senderName}</p>
+                      <p className="text-sm text-[#667781] truncate">{message.replyTo.content}</p>
                     </div>
                   )}
 
@@ -338,7 +338,7 @@ export const ChatInterface = ({
                                     {attachment.giftData.mobiValue.toLocaleString()} Mobi
                                   </p>
                                   {attachment.giftData.category && (
-                                    <Badge className="mt-1 text-xs bg-pink-200 dark:bg-pink-900 text-pink-800 dark:text-pink-200 border-0">
+                                    <Badge className="mt-1 text-sm bg-pink-200 dark:bg-pink-900 text-pink-800 dark:text-pink-200 border-0">
                                       {attachment.giftData.category}
                                     </Badge>
                                   )}
@@ -373,7 +373,7 @@ export const ChatInterface = ({
                                 ))}
                               </div>
                               
-                              <span className="text-xs text-[#667781] shrink-0">
+                              <span className="text-sm text-[#667781] shrink-0">
                                 {attachment.duration ? formatDuration(attachment.duration) : '0:00'}
                               </span>
                               
@@ -412,7 +412,7 @@ export const ChatInterface = ({
                         return (
                           <span
                             key={emoji}
-                            className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black/5 rounded-full text-xs"
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black/5 rounded-full text-sm"
                           >
                             {emoji} {count > 1 && count}
                           </span>
@@ -423,14 +423,14 @@ export const ChatInterface = ({
 
                   {/* Message Footer */}
                   <div className="flex items-center gap-1 mt-1">
-                    <span className="text-xs text-[#667781]">
+                    <span className="text-sm text-[#667781]">
                       {formatChatTime(message.timestamp)}
                     </span>
                     {message.isEdited && (
-                      <span className="text-xs text-[#667781] italic">• edited</span>
+                      <span className="text-sm text-[#667781] italic">• edited</span>
                     )}
                     {isCurrentUser && (
-                      <span className="text-xs text-[#667781] ml-1">
+                      <span className="text-sm text-[#667781] ml-1">
                         {message.isRead ? <CheckCheck className="h-3 w-3 text-[#00a884]" /> : <Check className="h-3 w-3" />}
                       </span>
                     )}

@@ -77,7 +77,7 @@ export const PremiumAdCard = ({
 
           {/* Header */}
           <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 flex items-center justify-between z-20">
-            <div className="flex items-center gap-2 text-white/90 text-xs sm:text-sm">
+            <div className="flex items-center gap-2 text-white/90 text-sm sm:text-base">
               {advertiser.logo && (
                 <img 
                   src={advertiser.logo} 
@@ -92,7 +92,7 @@ export const PremiumAdCard = ({
                 Sponsored
               </span>
               {advertiser.verified && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Verified</Badge>
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">Verified</Badge>
               )}
             </div>
             <Button
@@ -111,7 +111,7 @@ export const PremiumAdCard = ({
               <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold leading-tight">
                 {content.headline}
               </h2>
-              <p className="text-sm sm:text-lg md:text-xl text-white/90">
+              <p className="text-base sm:text-lg md:text-xl text-white/90">
                 {content.description}
               </p>
               <Button
@@ -167,7 +167,7 @@ export const PremiumAdCard = ({
       <Card className="w-full overflow-hidden bg-card border-2 border-primary/10 shadow-lg">
         {/* Header */}
         <div className="p-3 sm:p-4 flex items-center justify-between border-b border-border">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
             {advertiser.logo && (
               <img 
                 src={advertiser.logo} 
@@ -178,7 +178,7 @@ export const PremiumAdCard = ({
             <div className="flex items-center gap-1.5">
               <span className="font-medium text-foreground">{advertiser.name}</span>
               {advertiser.verified && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">✓</Badge>
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">✓</Badge>
               )}
             </div>
             <span>·</span>
@@ -234,13 +234,13 @@ export const PremiumAdCard = ({
             <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
               {content.headline}
             </h3>
-            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
               {content.description}
             </p>
           </div>
           <Button
             onClick={handleCTA}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-sm sm:text-base rounded-lg"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-base sm:text-lg rounded-lg"
           >
             {content.ctaText}
           </Button>
@@ -297,22 +297,22 @@ export const PremiumAdCard = ({
         {/* Content */}
         <div className="flex-1 flex flex-col justify-between min-w-0">
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
               <span className="font-medium text-foreground truncate">{advertiser.name}</span>
               <span>·</span>
               <span>Sponsored</span>
             </div>
-            <h4 className="text-sm sm:text-base font-semibold text-foreground line-clamp-2">
+            <h4 className="text-base sm:text-lg font-semibold text-foreground line-clamp-2">
               {content.headline}
             </h4>
-            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
               {content.description}
             </p>
           </div>
           <Button
             onClick={handleCTA}
             size="sm"
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs sm:text-sm mt-2"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm sm:text-base mt-2"
           >
             {content.ctaText}
           </Button>

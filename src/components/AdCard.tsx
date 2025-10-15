@@ -30,15 +30,15 @@ export const AdCard = ({ image, content, timeRemaining }: AdCardProps) => {
               />
               {content && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-3">
-                  <span className="text-white text-sm font-medium">{content}</span>
+                  <span className="text-white text-base font-medium">{content}</span>
                 </div>
               )}
             </>
           ) : (
-            <span className="text-sm text-muted-foreground">Ad Space 300x250</span>
+            <span className="text-base text-muted-foreground">Ad Space 300x250</span>
           )}
           {timeRemaining && (
-            <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-md flex items-center gap-1 text-xs">
+            <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded-md flex items-center gap-1 text-sm">
               <Clock className="h-3 w-3" />
               {timeRemaining}
             </div>

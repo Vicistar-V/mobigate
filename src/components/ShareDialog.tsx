@@ -83,9 +83,9 @@ export const ShareDialog = ({
         <div className="space-y-4">
           {/* Title and description */}
           <div className="space-y-1">
-            <p className="text-sm font-medium line-clamp-2">{title}</p>
+            <p className="text-base font-medium line-clamp-2">{title}</p>
             {description && (
-              <p className="text-xs text-muted-foreground line-clamp-1">{description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-1">{description}</p>
             )}
           </div>
 
@@ -130,7 +130,7 @@ export const ShareDialog = ({
 
           {/* Copy Link */}
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Or copy link</p>
+            <p className="text-sm text-muted-foreground">Or copy link</p>
             <div className="flex items-center gap-2">
               <input
                 type="text"

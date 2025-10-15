@@ -36,15 +36,15 @@ export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => 
             <div className="flex items-baseline gap-2 flex-wrap">
               <Link 
                 to={`/profile/${comment.userId || '1'}`}
-                className="font-semibold text-xs sm:text-sm hover:text-primary transition-colors"
+                className="font-semibold text-sm sm:text-base hover:text-primary transition-colors"
               >
                 {comment.author}
               </Link>
-              <span className="text-[10px] sm:text-xs text-muted-foreground">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 {formatCommentTime(comment.timestamp)}
               </span>
             </div>
-            <p className="text-xs sm:text-sm mt-1 whitespace-pre-wrap break-words hyphens-auto">
+            <p className="text-sm sm:text-base mt-1 whitespace-pre-wrap break-words hyphens-auto">
               {comment.content}
             </p>
           </div>
@@ -85,7 +85,7 @@ export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => 
             <Heart
               className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${comment.isLiked ? "fill-current" : ""}`}
             />
-            <span className="text-[11px] sm:text-xs font-medium">{comment.likes}</span>
+            <span className="text-xs sm:text-sm font-medium">{comment.likes}</span>
           </Button>
         </div>
       </div>

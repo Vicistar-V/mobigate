@@ -64,7 +64,7 @@ export const CommentInput = ({
           />
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 sm:justify-between">
             <span
-              className={`text-xs sm:text-sm ${
+              className={`text-sm sm:text-base ${
                 isOverLimit
                   ? "text-red-600 font-semibold"
                   : remainingChars < 50
@@ -84,10 +84,10 @@ export const CommentInput = ({
               {loading ? "Posting..." : "Post Comment"}
             </Button>
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-base text-red-600">{error}</p>}
         </div>
       </div>
-      <p className="text-[10px] sm:text-xs text-muted-foreground pl-0 sm:pl-[52px] hidden sm:block">
+      <p className="text-xs sm:text-sm text-muted-foreground pl-0 sm:pl-[52px] hidden sm:block">
         Tip: Press Ctrl+Enter (Cmd+Enter on Mac) to submit
       </p>
     </div>

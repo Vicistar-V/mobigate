@@ -171,7 +171,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         {replyTo && (
           <div className="mb-2 p-2 bg-muted/50 rounded-lg flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">Replying to {replyTo.senderName}</p>
+              <p className="text-sm text-muted-foreground">Replying to {replyTo.senderName}</p>
               <p className="text-sm truncate">{replyTo.content}</p>
             </div>
             <Button
@@ -209,7 +209,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                     <div className="flex-1">
                       <span className="text-sm font-medium">Voice message</span>
                       {attachment.duration && (
-                        <span className="text-xs text-muted-foreground ml-2">
+                        <span className="text-sm text-muted-foreground ml-2">
                           {formatDuration(attachment.duration)}
                         </span>
                       )}

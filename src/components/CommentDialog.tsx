@@ -48,7 +48,7 @@ export const CommentDialog = ({
                   className="w-full h-full object-cover"
                 />
                 <Badge
-                  className="absolute top-1 left-1 text-[10px] sm:text-xs px-1.5 py-0.5"
+                  className="absolute top-1 left-1 text-xs sm:text-sm px-1.5 py-0.5"
                   variant="destructive"
                 >
                   {post.type}
@@ -56,7 +56,7 @@ export const CommentDialog = ({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm sm:text-base line-clamp-2 mb-2">
+              <h3 className="font-semibold text-base sm:text-lg line-clamp-2 mb-2">
                 {post.title}
               </h3>
               <div className="flex items-center gap-2">
@@ -67,12 +67,12 @@ export const CommentDialog = ({
                   />
                   <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className="text-xs sm:text-sm text-muted-foreground truncate">
+                <span className="text-sm sm:text-base text-muted-foreground truncate">
                   {post.author}
                 </span>
               </div>
               {(post.views || post.likes) && (
-                <div className="flex items-center gap-3 mt-2 text-xs sm:text-sm text-muted-foreground">
+                <div className="flex items-center gap-3 mt-2 text-sm sm:text-base text-muted-foreground">
                   {post.views && (
                     <div className="flex items-center gap-1">
                       <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />

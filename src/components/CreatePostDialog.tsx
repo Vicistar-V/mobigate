@@ -131,7 +131,7 @@ export const CreatePostDialog = () => {
               <p className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
                 Create a Monetized Status Post
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Share your thoughts and earn
               </p>
             </div>
@@ -237,7 +237,7 @@ export const CreatePostDialog = () => {
                 className="hidden"
               />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Supported formats: Images, Videos, Audio, PDF (Max 20MB)
             </p>
           </div>
@@ -249,7 +249,7 @@ export const CreatePostDialog = () => {
               onChange={setSelectedAlbum}
               onCreateNew={() => setShowNewAlbumDialog(true)}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Organize your post into an album for better management
             </p>
           </div>
