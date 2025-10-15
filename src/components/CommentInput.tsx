@@ -87,7 +87,7 @@ export const CommentInput = ({
           {error && <p className="text-base text-red-600">{error}</p>}
         </div>
       </div>
-      <p className="text-xs sm:text-sm text-muted-foreground pl-0 sm:pl-[52px] hidden sm:block">
+      <p className="text-sm sm:text-base text-muted-foreground pl-0 sm:pl-[52px] hidden sm:block">
         Tip: Press Ctrl+Enter (Cmd+Enter on Mac) to submit
       </p>
     </div>

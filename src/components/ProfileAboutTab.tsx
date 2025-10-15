@@ -511,7 +511,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">User Category</h3>
           </div>
-          <Badge variant="secondary" className="text-sm shrink-0">System Managed</Badge>
+          <Badge variant="secondary" className="text-base shrink-0">System Managed</Badge>
         </div>
         <p className="text-base text-muted-foreground">Verified User</p>
       </Card>
@@ -523,7 +523,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Designations</h3>
           </div>
-          <Badge variant="secondary" className="text-sm shrink-0">Auto-Assigned</Badge>
+          <Badge variant="secondary" className="text-base shrink-0">Auto-Assigned</Badge>
         </div>
         <p className="font-medium">{designations}</p>
       </Card>
@@ -561,7 +561,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           >
             {refererUrl.refererName}
           </Button>
-          <p className="text-sm text-muted-foreground break-all">
+          <p className="text-base text-muted-foreground break-all">
             {refererUrl.url}
           </p>
         </div>
@@ -690,7 +690,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "schoolmate")}
-                      className="text-sm shrink-0 mt-2 sm:mt-0"
+                      className="text-base shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -751,7 +751,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "classmate")}
-                      className="text-sm shrink-0 mt-2 sm:mt-0"
+                      className="text-base shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -812,7 +812,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "agemate")}
-                      className="text-sm shrink-0 mt-2 sm:mt-0"
+                      className="text-base shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -873,7 +873,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(colleague, "colleague")}
-                      className="text-sm shrink-0 mt-2 sm:mt-0"
+                      className="text-base shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -925,7 +925,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <h3 className="text-lg font-semibold min-w-0">Extra Source</h3>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-base text-muted-foreground mb-4">
           Click on any option to navigate to the respective page
         </p>
         <div className="space-y-3">
@@ -941,7 +941,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-primary hover:underline">My Mobi-Shop @ Mobi-Store</h4>
-                <p className="text-sm text-muted-foreground">Your personal online store</p>
+                <p className="text-base text-muted-foreground">Your personal online store</p>
               </div>
             </div>
             <Button
@@ -969,7 +969,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-primary hover:underline">Mobi-Circle</h4>
-                <p className="text-sm text-muted-foreground">Connect with your community</p>
+                <p className="text-base text-muted-foreground">Connect with your community</p>
               </div>
             </div>
             <Button
@@ -997,7 +997,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-primary hover:underline">Biz-Catalogue</h4>
-                <p className="text-sm text-muted-foreground">Browse business offerings</p>
+                <p className="text-base text-muted-foreground">Browse business offerings</p>
               </div>
             </div>
             <Button
@@ -1155,7 +1155,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
             <Users className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Social Community</h3>
-            <Badge variant="secondary" className="text-sm px-2 py-0.5 shrink-0">System Managed</Badge>
+            <Badge variant="secondary" className="text-base px-2 py-0.5 shrink-0">System Managed</Badge>
           </div>
           <TooltipProvider>
             <Tooltip>
@@ -1193,7 +1193,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       {community.role && ` • ${community.role}`}
                       {` • ${community.status}`}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                       Member since: {new Date(community.joinDate).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long', 
@@ -1201,7 +1201,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       })}
                     </p>
                     {community.location && (
-                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <p className="text-base text-muted-foreground flex items-center gap-1 mt-1">
                         <MapPin className="h-3 w-3" />
                         {community.location}
                       </p>
@@ -1209,7 +1209,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                   </div>
                   <Badge 
                     variant={community.privacy === "public" ? "default" : community.privacy === "friends" ? "secondary" : "outline"}
-                    className="text-sm"
+                    className="text-base"
                   >
                     {community.privacy === "public" && "🌐 Public"}
                     {community.privacy === "friends" && "👥 Friends"}
@@ -1293,7 +1293,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           {/* Current Currency Display */}
           <div>
             <p className="font-medium text-base sm:text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
-            <p className="text-sm sm:text-base text-muted-foreground">Preferred Currency</p>
+            <p className="text-base sm:text-lg text-muted-foreground">Preferred Currency</p>
           </div>
 
           <Separator />
@@ -1310,7 +1310,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                 <span className="font-semibold text-base sm:text-lg text-primary">View Account Summary</span>
               </div>
-              <span className="text-sm sm:text-base text-muted-foreground text-left">
+              <span className="text-base sm:text-lg text-muted-foreground text-left">
                 Balance & transactions
               </span>
             </Button>
@@ -1325,7 +1325,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <ArrowRightLeft className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                 <span className="font-semibold text-base sm:text-lg text-primary">Currency Converter</span>
               </div>
-              <span className="text-sm sm:text-base text-muted-foreground text-left">
+              <span className="text-base sm:text-lg text-muted-foreground text-left">
                 Convert currencies
               </span>
             </Button>
@@ -1340,7 +1340,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                 <span className="font-semibold text-base sm:text-lg text-primary">Mobi Exchange Rates</span>
               </div>
-              <span className="text-sm sm:text-base text-muted-foreground text-left">
+              <span className="text-base sm:text-lg text-muted-foreground text-left">
                 1 Mobi = 1 Naira
               </span>
             </Button>
