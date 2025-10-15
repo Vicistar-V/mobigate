@@ -145,27 +145,27 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-medium">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
                 {colleague.isActive && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-sm">
                     <Check className="h-3 w-3 mr-1" />
                     Active
                   </Badge>
                 )}
               </div>
               {colleague.originalName && colleague.originalName !== colleague.name && (
-                <p className="text-xs text-muted-foreground">Originally: {colleague.originalName}</p>
+                <p className="text-sm text-muted-foreground">Originally: {colleague.originalName}</p>
               )}
               <div className="flex items-center gap-2">
                 {colleague.workplaceLogo && (
                   <img src={colleague.workplaceLogo} alt="" className="h-4 w-4 object-contain" />
                 )}
-                <p className="text-sm text-muted-foreground truncate">{colleague.workplaceName}</p>
+                <p className="text-base text-muted-foreground truncate">{colleague.workplaceName}</p>
               </div>
-              {colleague.workplaceLocation && <p className="text-sm text-muted-foreground truncate">{colleague.workplaceLocation}</p>}
-              {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
+              {colleague.workplaceLocation && <p className="text-base text-muted-foreground truncate">{colleague.workplaceLocation}</p>}
+              {colleague.position && <p className="text-base text-muted-foreground">Position: {colleague.position}</p>}
               {colleague.isActive && colleague.linkedUserId && (
                 <button
                   onClick={() => window.location.href = `/profile?id=${colleague.linkedUserId}`}
-                  className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"
+                  className="text-base text-primary hover:underline flex items-center gap-1 mt-1"
                 >
                   View Profile
                   <ExternalLink className="h-3 w-3" />
@@ -189,7 +189,7 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
           <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
-              <Label className="text-sm font-medium">Link to Mobigate User</Label>
+              <Label className="text-base font-medium">Link to Mobigate User</Label>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -221,8 +221,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
                   <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{selectedUser.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
+                  <p className="text-base font-medium truncate">{selectedUser.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{'username' in selectedUser ? selectedUser.username : ''}</p>
                 </div>
                 <Button
                   type="button"
@@ -254,16 +254,16 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
               value={selectedUser?.name || undefined}
               placeholder="Type manually or search above"
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Type manually or search above to link a Mobigate user
             </p>
-            {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message as string}</p>}
+            {errors.name && <p className="text-base text-destructive mt-1">{errors.name.message as string}</p>}
           </div>
 
           <div>
             <Label htmlFor="workplaceName">Workplace Name *</Label>
             <Input id="workplaceName" {...register("workplaceName")} />
-            {errors.workplaceName && <p className="text-sm text-destructive mt-1">{errors.workplaceName.message as string}</p>}
+            {errors.workplaceName && <p className="text-base text-destructive mt-1">{errors.workplaceName.message as string}</p>}
           </div>
 
           <div>

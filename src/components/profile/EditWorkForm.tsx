@@ -109,8 +109,8 @@ export const EditWorkForm = ({ currentData, onSave, onClose }: EditWorkFormProps
                 )}
                 <div>
                   <p className="font-medium">{workItem.workplaceName}</p>
-                  <p className="text-sm">{workItem.position}</p>
-                  <p className="text-sm text-muted-foreground">{workItem.period}</p>
+                  <p className="text-base">{workItem.position}</p>
+                  <p className="text-base text-muted-foreground">{workItem.period}</p>
                 </div>
               </div>
               <div className="flex gap-1">
