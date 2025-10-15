@@ -4,7 +4,7 @@ import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera, Share2, UserX, AlertCircle, Users } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera, Share2, UserX, AlertCircle, Users, UserPlus, UserMinus } from "lucide-react";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -54,6 +54,7 @@ const Profile = () => {
   const [visiblePostCount, setVisiblePostCount] = useState(20);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [messagesSheetOpen, setMessagesSheetOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const { toast } = useToast();
 
   // Handle hash-based tab navigation
@@ -370,6 +371,16 @@ const Profile = () => {
     });
   };
 
+  const handleToggleFollow = () => {
+    setIsFollowing(!isFollowing);
+    toast({
+      title: isFollowing ? "Unfollowed" : "Following",
+      description: isFollowing 
+        ? `You unfollowed ${userProfile.name}` 
+        : `You are now following ${userProfile.name}`,
+    });
+  };
+
   // Open media gallery for profile pictures
   const openProfilePictureGallery = () => {
     const items: MediaItem[] = profileImageHistory.map((url, index) => ({
@@ -621,11 +632,27 @@ const Profile = () => {
                       View Friends
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleToggleFollow}>
+                      {isFollowing ? (
+                        <>
+                          <UserMinus className="h-4 w-4 mr-2" />
+                          Unfollow
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Follow
+                        </>
+                      )}
+                    </DropdownMenuItem>
                     {userProfile.isFriend && (
-                      <DropdownMenuItem onClick={handleUnfriend}>
-                        <UserX className="h-4 w-4 mr-2" />
-                        Unfriend
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleUnfriend}>
+                          <UserX className="h-4 w-4 mr-2" />
+                          Unfriend
+                        </DropdownMenuItem>
+                      </>
                     )}
                     <DropdownMenuItem onClick={handleBlockUser}>
                       <UserX className="h-4 w-4 mr-2" />
