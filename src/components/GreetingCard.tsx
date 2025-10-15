@@ -22,16 +22,16 @@ export const GreetingSection = () => {
   ];
 
   const moreLinks = [
-    { label: "Followers", href: "#" },
-    { label: "Following", href: "#" },
-    { label: "Gifts", href: "#" },
-    { label: "Mobi Quiz Game", href: "#" },
-    { label: "Mobi-Store", href: "#" },
-    { label: "Mobi-Circle", href: "#" },
-    { label: "Community", href: "#" },
-    { label: "Biz-Catalogue", href: "#" },
-    { label: "E-Library", href: "#" },
-    { label: "Adverts Log", href: "#" },
+    { label: "Followers", href: "/profile/current-user#followers" },
+    { label: "Following", href: "/profile/current-user#following" },
+    { label: "Gifts", href: "/profile/current-user#gifts" },
+    { label: "Mobi Quiz Game", href: "/mobi-quiz-game" },
+    { label: "Mobi-Store", href: "/mobi-shop" },
+    { label: "Mobi-Circle", href: "/mobi-circle" },
+    { label: "Community", href: "/community" },
+    { label: "Biz-Catalogue", href: "/biz-catalogue" },
+    { label: "E-Library", href: "/profile/current-user#contents" },
+    { label: "Adverts Log", href: "/adverts-log" },
   ];
 
   return (
