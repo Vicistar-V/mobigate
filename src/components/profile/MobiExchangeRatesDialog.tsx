@@ -124,7 +124,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
                     <div className="text-right shrink-0">
                       <p className="text-base sm:text-xl font-bold">
-                        {rate.symbol}{rate.rate.toFixed(4)}
+                        {rate.symbol}{rate.code === "NGN" ? rate.rate.toFixed(2) : rate.rate.toFixed(4)}
                       </p>
                       <div className="flex items-center gap-1 justify-end">
                         {rate.change !== 0 && (
@@ -148,7 +148,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                   <Separator className="my-2" />
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 text-[10px] sm:text-sm text-muted-foreground">
-                    <span className="truncate">1 Mobi = {rate.symbol}{rate.rate.toFixed(4)} {rate.code}</span>
+                    <span className="truncate">1 Mobi = {rate.symbol}{rate.code === "NGN" ? rate.rate.toFixed(2) : rate.rate.toFixed(4)} {rate.code}</span>
                     <span className="truncate">1 {rate.code} = M{(1 / rate.rate).toFixed(2)}</span>
                   </div>
                 </Card>
