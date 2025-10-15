@@ -73,8 +73,8 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md p-4 sm:p-6">
-        <DialogHeader>
+      <DialogContent className="w-[95vw] max-w-md p-4 pt-12 sm:p-6 sm:pt-14">
+        <DialogHeader className="pr-14 sm:pr-16">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <ArrowRightLeft className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
             Currency Exchange Converter

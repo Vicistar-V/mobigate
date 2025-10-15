@@ -84,8 +84,8 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-4 sm:p-6">
-        <DialogHeader className="pr-8 sm:pr-10">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-4 pt-12 sm:p-6 sm:pt-14">
+        <DialogHeader className="pr-14 sm:pr-16">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Badge variant="default" className="text-sm sm:text-base px-2 sm:px-3 py-0.5 sm:py-1">M</Badge>
             <span>Mobi Exchange Rates</span>
