@@ -5,7 +5,7 @@ import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield, Store, BookOpen, ExternalLink, Banknote, Eye, ArrowLeftRight, TrendingUp } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield, Store, BookOpen, ExternalLink, Banknote, Eye, ArrowLeftRight, TrendingUp, Wallet, ArrowRightLeft } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,9 @@ import { EditSocialCommunityForm, SocialCommunity } from "./profile/EditSocialCo
 import { MateDetailDialog } from "./profile/MateDetailDialog";
 import { PrivacyBadge } from "./profile/PrivacyBadge";
 import { PrivacyLevel } from "@/types/privacy";
+import { AccountSummaryDialog } from "./profile/AccountSummaryDialog";
+import { CurrencyExchangeDialog } from "./profile/CurrencyExchangeDialog";
+import { MobiExchangeRatesDialog } from "./profile/MobiExchangeRatesDialog";
 
 interface ProfileAboutTabProps {
   userName: string;
@@ -132,6 +135,11 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const [editSocialCommunityOpen, setEditSocialCommunityOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [editAboutOpen, setEditAboutOpen] = useState(false);
+  
+  // Currency feature dialogs
+  const [accountSummaryOpen, setAccountSummaryOpen] = useState(false);
+  const [currencyExchangeOpen, setCurrencyExchangeOpen] = useState(false);
+  const [mobiExchangeRatesOpen, setMobiExchangeRatesOpen] = useState(false);
   const [editRefererUrlOpen, setEditRefererUrlOpen] = useState(false);
   const [editCurrencyOpen, setEditCurrencyOpen] = useState(false);
   
@@ -1259,11 +1267,11 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       </Card>
 
       {/* Currency */}
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
             <Banknote className="h-5 w-5 text-primary shrink-0" />
-            <h3 className="text-lg font-semibold min-w-0">Currency</h3>
+            <h3 className="text-base sm:text-lg font-semibold min-w-0">Currency</h3>
             {currency.privacy && (
               <PrivacyBadge 
                 level={currency.privacy as PrivacyLevel} 
@@ -1281,9 +1289,62 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           </Button>
         </div>
         
-        <div>
-          <p className="font-medium text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
-          <p className="text-sm text-muted-foreground">Preferred Currency</p>
+        <div className="space-y-4">
+          {/* Current Currency Display */}
+          <div>
+            <p className="font-medium text-base sm:text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Preferred Currency</p>
+          </div>
+
+          <Separator />
+
+          {/* Feature Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            {/* View Account Summary */}
+            <Button
+              variant="outline"
+              className="h-auto py-3 px-3 sm:px-4 flex flex-col items-start gap-1 hover:bg-primary/5 hover:border-primary transition-colors"
+              onClick={() => setAccountSummaryOpen(true)}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm">View Account Summary</span>
+              </div>
+              <span className="text-[10px] sm:text-xs text-muted-foreground text-left">
+                Balance & transactions
+              </span>
+            </Button>
+
+            {/* Currency Exchange Converter */}
+            <Button
+              variant="outline"
+              className="h-auto py-3 px-3 sm:px-4 flex flex-col items-start gap-1 hover:bg-primary/5 hover:border-primary transition-colors"
+              onClick={() => setCurrencyExchangeOpen(true)}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <ArrowRightLeft className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm">Currency Converter</span>
+              </div>
+              <span className="text-[10px] sm:text-xs text-muted-foreground text-left">
+                Convert currencies
+              </span>
+            </Button>
+
+            {/* Mobi Exchange Rates */}
+            <Button
+              variant="outline"
+              className="h-auto py-3 px-3 sm:px-4 flex flex-col items-start gap-1 hover:bg-primary/5 hover:border-primary transition-colors"
+              onClick={() => setMobiExchangeRatesOpen(true)}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm">Mobi Exchange Rates</span>
+              </div>
+              <span className="text-[10px] sm:text-xs text-muted-foreground text-left">
+                1 Mobi = 1 Naira
+              </span>
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -1536,6 +1597,24 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         onOpenChange={setDetailDialogOpen}
         mate={selectedMate}
         type={mateType}
+      />
+
+      {/* Currency Feature Dialogs */}
+      <AccountSummaryDialog
+        open={accountSummaryOpen}
+        onOpenChange={setAccountSummaryOpen}
+        userName={userName}
+        currencySymbol={currency.currencySymbol}
+      />
+
+      <CurrencyExchangeDialog
+        open={currencyExchangeOpen}
+        onOpenChange={setCurrencyExchangeOpen}
+      />
+
+      <MobiExchangeRatesDialog
+        open={mobiExchangeRatesOpen}
+        onOpenChange={setMobiExchangeRatesOpen}
       />
 
       {/* Service Unavailable Dialog */}
