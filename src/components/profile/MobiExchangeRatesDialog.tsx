@@ -85,17 +85,19 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-4 sm:p-6">
-        <DialogHeader>
-          <div className="flex items-center justify-between gap-2">
-            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Badge variant="default" className="text-sm sm:text-base px-2 sm:px-3 py-0.5 sm:py-1">M</Badge>
-              <span>Mobi Exchange Rates</span>
-            </DialogTitle>
-            <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 shrink-0">
-              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          </div>
+        <DialogHeader className="pr-8 sm:pr-10">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Badge variant="default" className="text-sm sm:text-base px-2 sm:px-3 py-0.5 sm:py-1">M</Badge>
+            <span>Mobi Exchange Rates</span>
+          </DialogTitle>
         </DialogHeader>
+        
+        {/* Refresh Button Row */}
+        <div className="flex justify-end -mt-2 sm:-mt-3">
+          <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
+            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        </div>
 
         <div className="space-y-3 sm:space-y-4">
           {/* Baseline Info */}
