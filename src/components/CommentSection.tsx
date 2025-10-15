@@ -83,7 +83,7 @@ export const CommentSection = ({ postId, className = "" }: CommentSectionProps) 
           <div className="text-center py-12">
             <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground/50 mb-4" />
             <h4 className="text-base sm:text-lg font-medium mb-2">No comments yet</h4>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Be the first to share your thoughts!
             </p>
           </div>

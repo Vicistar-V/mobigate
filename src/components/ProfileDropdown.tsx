@@ -24,8 +24,8 @@ export const ProfileDropdown = () => {
       <DropdownMenuContent align="end" className="w-56 bg-card">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">NKEMJKA PETER I.</p>
-            <p className="text-xs text-muted-foreground">peter@mobigate.com</p>
+            <p className="text-base font-medium">NKEMJKA PETER I.</p>
+            <p className="text-sm text-muted-foreground">peter@mobigate.com</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

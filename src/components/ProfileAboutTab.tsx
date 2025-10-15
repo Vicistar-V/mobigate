@@ -511,9 +511,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">User Category</h3>
           </div>
-          <Badge variant="secondary" className="text-xs shrink-0">System Managed</Badge>
+          <Badge variant="secondary" className="text-sm shrink-0">System Managed</Badge>
         </div>
-        <p className="text-sm text-muted-foreground">Verified User</p>
+        <p className="text-base text-muted-foreground">Verified User</p>
       </Card>
 
       {/* Designations */}
@@ -523,7 +523,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Designations</h3>
           </div>
-          <Badge variant="secondary" className="text-xs shrink-0">Auto-Assigned</Badge>
+          <Badge variant="secondary" className="text-sm shrink-0">Auto-Assigned</Badge>
         </div>
         <p className="font-medium">{designations}</p>
       </Card>
@@ -553,7 +553,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           </div>
         </div>
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">Referred by:</p>
+          <p className="text-base text-muted-foreground">Referred by:</p>
           <Button
             variant="link"
             className="h-auto p-0 font-medium text-primary hover:underline"
@@ -561,7 +561,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           >
             {refererUrl.refererName}
           </Button>
-          <p className="text-xs text-muted-foreground break-all">
+          <p className="text-sm text-muted-foreground break-all">
             {refererUrl.url}
           </p>
         </div>
@@ -589,8 +589,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               {index > 0 && <Separator className="mb-4" />}
               <div>
                 <p className="font-medium">{loc.place}</p>
-                <p className="text-sm text-muted-foreground">{loc.description}</p>
-                {loc.period && <p className="text-sm text-muted-foreground">{loc.period}</p>}
+                <p className="text-base text-muted-foreground">{loc.description}</p>
+                {loc.period && <p className="text-base text-muted-foreground">{loc.period}</p>}
               </div>
             </div>
           ))}
@@ -627,10 +627,10 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                     />
                   )}
                 </div>
-                {edu.faculty && <p className="text-sm text-muted-foreground">{edu.faculty}</p>}
-                {edu.department && <p className="text-sm text-muted-foreground">{edu.department}</p>}
-                <p className="text-sm text-muted-foreground">{edu.period}</p>
-                {edu.extraSkills && <p className="text-sm text-muted-foreground">Skills: {edu.extraSkills}</p>}
+                {edu.faculty && <p className="text-base text-muted-foreground">{edu.faculty}</p>}
+                {edu.department && <p className="text-base text-muted-foreground">{edu.department}</p>}
+                <p className="text-base text-muted-foreground">{edu.period}</p>
+                {edu.extraSkills && <p className="text-base text-muted-foreground">Skills: {edu.extraSkills}</p>}
               </div>
             </div>
           ))}
@@ -683,14 +683,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-                      <p className="text-sm text-muted-foreground">{mate.institution}</p>
-                      {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                      <p className="text-base text-muted-foreground">{mate.institution}</p>
+                      {mate.period && <p className="text-base text-muted-foreground">{mate.period}</p>}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "schoolmate")}
-                      className="text-xs shrink-0 mt-2 sm:mt-0"
+                      className="text-sm shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -699,7 +699,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No school mates added</p>
+            <p className="text-base text-muted-foreground">No school mates added</p>
           )}
         </div>
 
@@ -744,14 +744,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-                      <p className="text-sm text-muted-foreground">{mate.institution}</p>
-                      {mate.period && <p className="text-sm text-muted-foreground">{mate.period}</p>}
+                      <p className="text-base text-muted-foreground">{mate.institution}</p>
+                      {mate.period && <p className="text-base text-muted-foreground">{mate.period}</p>}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "classmate")}
-                      className="text-xs shrink-0 mt-2 sm:mt-0"
+                      className="text-sm shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -760,7 +760,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No classmates added</p>
+            <p className="text-base text-muted-foreground">No classmates added</p>
           )}
         </div>
 
@@ -805,14 +805,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{mate.name}{mate.nickname && ` (${mate.nickname})`}</p>
-                      <p className="text-sm text-muted-foreground">{mate.community}</p>
-                      {mate.ageGrade && <p className="text-sm text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
+                      <p className="text-base text-muted-foreground">{mate.community}</p>
+                      {mate.ageGrade && <p className="text-base text-muted-foreground">Age Grade: {mate.ageGrade}</p>}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(mate, "agemate")}
-                      className="text-xs shrink-0 mt-2 sm:mt-0"
+                      className="text-sm shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -821,7 +821,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No age mates added</p>
+            <p className="text-base text-muted-foreground">No age mates added</p>
           )}
         </div>
 
@@ -866,14 +866,14 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       className="flex-1 cursor-pointer min-w-0"
                     >
                       <p className="font-medium text-primary hover:underline">{colleague.name}{colleague.nickname && ` (${colleague.nickname})`}</p>
-                      <p className="text-sm text-muted-foreground">{colleague.workplaceName}{colleague.workplaceLocation && `, ${colleague.workplaceLocation}`}</p>
-                      {colleague.position && <p className="text-sm text-muted-foreground">Position: {colleague.position}</p>}
+                      <p className="text-base text-muted-foreground">{colleague.workplaceName}{colleague.workplaceLocation && `, ${colleague.workplaceLocation}`}</p>
+                      {colleague.position && <p className="text-base text-muted-foreground">Position: {colleague.position}</p>}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openMateDetails(colleague, "colleague")}
-                      className="text-xs shrink-0 mt-2 sm:mt-0"
+                      className="text-sm shrink-0 mt-2 sm:mt-0"
                     >
                       Details
                     </Button>
@@ -882,7 +882,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No work colleagues added</p>
+            <p className="text-base text-muted-foreground">No work colleagues added</p>
           )}
         </div>
       </Card>
@@ -907,11 +907,11 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           {work.map((workItem, index) => (
             <div key={workItem.id}>
               {index > 0 && <Separator className="mb-4" />}
-              <div>
-                <p className="font-medium">{workItem.workplaceName}</p>
-                <p className="text-sm">{workItem.position}</p>
-                <p className="text-sm text-muted-foreground">{workItem.period}</p>
-              </div>
+                <div>
+                  <p className="font-medium">{workItem.workplaceName}</p>
+                  <p className="text-base">{workItem.position}</p>
+                  <p className="text-base text-muted-foreground">{workItem.period}</p>
+                </div>
             </div>
           ))}
         </div>
@@ -1034,17 +1034,17 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         <div className="space-y-4">
           <div>
             <p className="font-medium">{basicInfo.gender}</p>
-            <p className="text-sm text-muted-foreground">Gender</p>
+            <p className="text-base text-muted-foreground">Gender</p>
           </div>
           <Separator />
           <div>
             <p className="font-medium">{new Date(basicInfo.birthday).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <p className="text-sm text-muted-foreground">Birthday</p>
+            <p className="text-base text-muted-foreground">Birthday</p>
           </div>
           <Separator />
           <div>
             <p className="font-medium">{basicInfo.languages}</p>
-            <p className="text-sm text-muted-foreground">Languages Spoken</p>
+            <p className="text-base text-muted-foreground">Languages Spoken</p>
           </div>
         </div>
       </Card>
@@ -1073,7 +1073,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         </div>
         <div>
           <p className="font-medium">{relationship.status}</p>
-          <p className="text-sm text-muted-foreground">Status</p>
+          <p className="text-base text-muted-foreground">Status</p>
         </div>
       </Card>
 
@@ -1105,12 +1105,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                   >
                     {friendship.name}
                   </p>
-                  <p className="text-sm text-muted-foreground">{friendship.relationshipTag}</p>
+                  <p className="text-base text-muted-foreground">{friendship.relationshipTag}</p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">No friendships added</p>
+            <p className="text-base text-muted-foreground">No friendships added</p>
           )}
         </div>
       </Card>
@@ -1142,7 +1142,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                 >
                   {member.name}
                 </p>
-                <p className="text-sm text-muted-foreground">{member.relation}</p>
+                <p className="text-base text-muted-foreground">{member.relation}</p>
               </div>
             </div>
           ))}
@@ -1155,7 +1155,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
             <Users className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Social Community</h3>
-            <Badge variant="secondary" className="text-xs px-2 py-0.5 shrink-0">System Managed</Badge>
+            <Badge variant="secondary" className="text-sm px-2 py-0.5 shrink-0">System Managed</Badge>
           </div>
           <TooltipProvider>
             <Tooltip>
@@ -1188,12 +1188,12 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                     >
                       {community.name}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground">
                       {community.type}
                       {community.role && ` • ${community.role}`}
                       {` • ${community.status}`}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Member since: {new Date(community.joinDate).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'long', 
@@ -1201,7 +1201,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                       })}
                     </p>
                     {community.location && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                         <MapPin className="h-3 w-3" />
                         {community.location}
                       </p>
@@ -1209,7 +1209,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                   </div>
                   <Badge 
                     variant={community.privacy === "public" ? "default" : community.privacy === "friends" ? "secondary" : "outline"}
-                    className="text-xs"
+                    className="text-sm"
                   >
                     {community.privacy === "public" && "🌐 Public"}
                     {community.privacy === "friends" && "👥 Friends"}
@@ -1219,7 +1219,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               </div>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               You haven't joined any Social Communities yet. Join Town Unions, Clubs, and Associations on Mobigate to see them here.
             </p>
           )}
@@ -1293,7 +1293,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           {/* Current Currency Display */}
           <div>
             <p className="font-medium text-base sm:text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
-            <p className="text-xs sm:text-sm text-muted-foreground">Preferred Currency</p>
+            <p className="text-sm sm:text-base text-muted-foreground">Preferred Currency</p>
           </div>
 
           <Separator />
@@ -1308,9 +1308,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             >
               <div className="flex items-center gap-2 w-full">
                 <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-                <span className="font-semibold text-sm sm:text-base text-primary">View Account Summary</span>
+                <span className="font-semibold text-base sm:text-lg text-primary">View Account Summary</span>
               </div>
-              <span className="text-xs sm:text-sm text-muted-foreground text-left">
+              <span className="text-sm sm:text-base text-muted-foreground text-left">
                 Balance & transactions
               </span>
             </Button>
@@ -1323,9 +1323,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             >
               <div className="flex items-center gap-2 w-full">
                 <ArrowRightLeft className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-                <span className="font-semibold text-sm sm:text-base text-primary">Currency Converter</span>
+                <span className="font-semibold text-base sm:text-lg text-primary">Currency Converter</span>
               </div>
-              <span className="text-xs sm:text-sm text-muted-foreground text-left">
+              <span className="text-sm sm:text-base text-muted-foreground text-left">
                 Convert currencies
               </span>
             </Button>
@@ -1338,9 +1338,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             >
               <div className="flex items-center gap-2 w-full">
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
-                <span className="font-semibold text-sm sm:text-base text-primary">Mobi Exchange Rates</span>
+                <span className="font-semibold text-base sm:text-lg text-primary">Mobi Exchange Rates</span>
               </div>
-              <span className="text-xs sm:text-sm text-muted-foreground text-left">
+              <span className="text-sm sm:text-base text-muted-foreground text-left">
                 1 Mobi = 1 Naira
               </span>
             </Button>

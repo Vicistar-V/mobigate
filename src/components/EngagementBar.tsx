@@ -107,7 +107,7 @@ export const EngagementBar = ({
             isLiked && "fill-current"
           )}
         />
-        <span className="text-xs sm:text-sm font-medium">
+        <span className="text-sm sm:text-base font-medium">
           {formatCount(likeCount)}
         </span>
       </Button>
@@ -131,7 +131,7 @@ export const EngagementBar = ({
               isFollowing && "fill-current"
             )}
           />
-          <span className="text-xs sm:text-sm font-medium">
+          <span className="text-sm sm:text-base font-medium">
             {formatCount(followerCount)}
           </span>
         </Button>
@@ -149,7 +149,7 @@ export const EngagementBar = ({
         aria-label="Comment"
       >
         <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-        <span className="text-xs sm:text-sm font-medium">
+        <span className="text-sm sm:text-base font-medium">
           {formatCount(initialComments)}
         </span>
       </Button>
@@ -166,7 +166,7 @@ export const EngagementBar = ({
         aria-label="Share"
       >
         <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
-        <span className="text-xs sm:text-sm font-medium">
+        <span className="text-sm sm:text-base font-medium">
           {formatCount(initialShares)}
         </span>
       </Button>

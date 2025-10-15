@@ -106,7 +106,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground text-lg;
+    @apply bg-background text-foreground text-xl;
   }
   
   .scrollbar-hide::-webkit-scrollbar {

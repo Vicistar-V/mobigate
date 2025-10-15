@@ -533,14 +533,14 @@ const Profile = () => {
                 <div className="mt-3">
                   <h1 className="text-4xl font-extrabold">{userProfile.name}</h1>
                   {userProfile.verified && (
-                    <p className="text-emerald-600 font-bold italic text-sm">Verified Content Creator</p>
+                    <p className="text-emerald-600 font-bold italic text-base">Verified Content Creator</p>
                   )}
                 </div>
               </div>
 
               {/* Online Indicator - Under Banner, Far Right */}
               {userProfile.status === "Online" && (
-                <div className="mt-4 bg-emerald-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">
+                <div className="mt-4 bg-emerald-500 text-white px-4 py-1.5 rounded-full text-sm font-bold">
                   Online
                 </div>
               )}
@@ -552,7 +552,7 @@ const Profile = () => {
             <div className="space-y-3">
 
               {/* Stats */}
-              <div className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <div className="text-base text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span>
                   <span className="font-bold text-foreground">{userProfile.stats.friends}</span> Friends
                 </span>
@@ -669,7 +669,7 @@ const Profile = () => {
 
               {/* Friend Status */}
               {userProfile.isFriend && (
-                <p className="text-emerald-600 font-medium">
+                <p className="text-emerald-600 font-medium text-base">
                   You are Friends with {userProfile.name}
                 </p>
               )}

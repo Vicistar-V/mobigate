@@ -51,7 +51,7 @@ export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFi
             variant={isActive ? "default" : "outline"}
             size="sm"
             onClick={() => onFilterChange(option.value)}
-            className="text-xs md:text-sm gap-1.5"
+            className="text-sm md:text-base gap-1.5"
           >
             {Icon && <Icon className="w-3 h-3" />}
             {option.label} ({option.count})
@@ -64,7 +64,7 @@ export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFi
           <Button
             variant={isMoreActive ? "default" : "outline"}
             size="sm"
-            className="text-xs md:text-sm gap-1.5"
+            className="text-sm md:text-base gap-1.5"
           >
             <MoreHorizontal className="w-3 h-3" />
             More
