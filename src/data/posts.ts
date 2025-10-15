@@ -20,6 +20,7 @@ export interface Post {
   views: string;
   comments: string;
   likes: string;
+  followers?: string;
   type: "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL";
   imageUrl?: string;
   fee?: string;
@@ -115,6 +116,7 @@ export const feedPosts: Post[] = [
     views: "6.8k",
     comments: "255",
     likes: "584",
+    followers: "5.2K",
     type: "Video",
     imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80",
     isOwner: true,
@@ -132,6 +134,7 @@ export const feedPosts: Post[] = [
     views: "5.2k",
     comments: "189",
     likes: "923",
+    followers: "8.9K",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
     albumId: "alb_1",
@@ -148,6 +151,7 @@ export const feedPosts: Post[] = [
     views: "4.1k",
     comments: "67",
     likes: "512",
+    followers: "12K",
     type: "Audio",
     imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80"
   },
@@ -162,6 +166,7 @@ export const feedPosts: Post[] = [
     views: "8k",
     comments: "875",
     likes: "1.9k",
+    followers: "5.2K",
     type: "Video",
     imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80",
     isOwner: true,
@@ -179,6 +184,7 @@ export const feedPosts: Post[] = [
     views: "11k",
     comments: "456",
     likes: "2.1k",
+    followers: "3.4K",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80",
     albumId: "alb_4",
@@ -195,6 +201,7 @@ export const feedPosts: Post[] = [
     views: "12k",
     comments: "432",
     likes: "2.3k",
+    followers: "8.9K",
     type: "Article",
     imageUrl: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80"
   },
@@ -209,6 +216,7 @@ export const feedPosts: Post[] = [
     views: "6.7k",
     comments: "123",
     likes: "845",
+    followers: "2.7K",
     type: "Audio",
     imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80"
   },
@@ -223,6 +231,7 @@ export const feedPosts: Post[] = [
     views: "9.2k",
     comments: "567",
     likes: "1.8k",
+    followers: "12K",
     type: "Video",
     imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
     albumId: "alb_3",
@@ -239,6 +248,7 @@ export const feedPosts: Post[] = [
     views: "8.5k",
     comments: "298",
     likes: "1.4k",
+    followers: "4.6K",
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80",
     albumId: "alb_8",
@@ -255,6 +265,7 @@ export const feedPosts: Post[] = [
     views: "15k",
     comments: "1.2k",
     likes: "3.4k",
+    followers: "4.6K",
     type: "Article",
     imageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80"
   },

@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal } from "lucide-react";
+import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal, UserPlus } from "lucide-react";
 import { getPostsByUserId, Post } from "@/data/posts";
 import {
   DropdownMenu,
@@ -75,6 +75,24 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const [sortBy, setSortBy] = useState<string>("recent");
   const [visibleCount, setVisibleCount] = useState<number>(15);
   const [contentFilter, setContentFilter] = useState<string>("all");
+  const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set());
+
+  const handleFollowAuthor = (authorUserId: string) => {
+    setFollowingAuthors(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(authorUserId)) {
+        newSet.delete(authorUserId);
+      } else {
+        newSet.add(authorUserId);
+      }
+      return newSet;
+    });
+  };
+
+  const formatFollowerCount = (count: string | undefined): string => {
+    if (!count) return "0";
+    return count;
+  };
 
   // Filter options configuration
   const primaryFilters = [
@@ -301,8 +319,24 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                       <MessageCircle className="h-3 w-3" />
                       <span className="font-medium">{post.comments}</span>
                     </span>
+                    {post.followers && !post.isOwner && (
+                      <Button
+                        variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFollowAuthor(post.userId);
+                        }}
+                        className="gap-1 h-6 px-2 text-xs ml-auto"
+                        aria-label={followingAuthors.has(post.userId) ? "Unfollow" : "Follow"}
+                      >
+                        <UserPlus className="h-3 w-3" />
+                        <span className="hidden sm:inline">{followingAuthors.has(post.userId) ? "Following" : "Follow"}</span>
+                        <span className="opacity-80">({formatFollowerCount(post.followers)})</span>
+                      </Button>
+                    )}
                     {post.fee && (
-                      <span className="ml-auto font-semibold text-emerald-600 dark:text-emerald-400">
+                      <span className={`font-semibold text-emerald-600 dark:text-emerald-400 ${post.followers && !post.isOwner ? '' : 'ml-auto'}`}>
                         {post.fee}
                       </span>
                     )}

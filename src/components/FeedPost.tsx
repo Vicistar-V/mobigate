@@ -1,9 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, MessageSquare, Heart, Share2 } from "lucide-react";
+import { Eye, MessageSquare, Heart, Share2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { PostOptionsMenu } from "@/components/PostOptionsMenu";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { CommentDialog } from "@/components/CommentDialog";
@@ -22,6 +23,7 @@ interface FeedPostProps {
   views: string;
   comments: string;
   likes: string;
+  followers?: string;
   type: "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL";
   imageUrl?: string;
   fee?: string;
@@ -42,6 +44,7 @@ export const FeedPost = ({
   views,
   comments,
   likes,
+  followers,
   type,
   imageUrl,
   fee = "6",
@@ -51,6 +54,10 @@ export const FeedPost = ({
 }: FeedPostProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(parseInt(likes));
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(
+    followers ? parseInt(followers.replace(/[^0-9]/g, '')) || 0 : 0
+  );
   const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -63,6 +70,25 @@ export const FeedPost = ({
       setLikeCount(likeCount + 1);
     }
     setIsLiked(!isLiked);
+  };
+
+  const handleFollow = () => {
+    if (isFollowing) {
+      setFollowerCount(followerCount - 1);
+    } else {
+      setFollowerCount(followerCount + 1);
+    }
+    setIsFollowing(!isFollowing);
+  };
+
+  const formatFollowerCount = (count: number): string => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`;
+    }
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
   };
 
   const openMediaGallery = () => {
@@ -163,6 +189,23 @@ export const FeedPost = ({
             </div>
           </Link>
           <div className="flex items-center gap-2">
+            {/* Follow Button (only show if not owner and has followers data) */}
+            {!isOwner && followers && (
+              <Button
+                variant={isFollowing ? "secondary" : "default"}
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFollow();
+                }}
+                className="gap-1.5"
+                aria-label={isFollowing ? "Unfollow" : "Follow"}
+              >
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden sm:inline">{isFollowing ? "Following" : "Follow"}</span>
+                <span className="text-xs opacity-80">({formatFollowerCount(followerCount)})</span>
+              </Button>
+            )}
             <div className="flex items-center gap-1">
               <button
                 onClick={(e) => {

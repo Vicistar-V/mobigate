@@ -7,7 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Eye, MessageSquare, Heart, Share2 } from "lucide-react";
+import { Eye, MessageSquare, Heart, Share2, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { MediaViewer } from "@/components/MediaViewer";
@@ -29,6 +29,7 @@ interface PostDetailDialogProps {
     views: string;
     comments: string;
     likes: string;
+    followers?: string;
     type: "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL";
     imageUrl?: string;
     fee?: string;
@@ -42,6 +43,10 @@ export const PostDetailDialog = ({
 }: PostDetailDialogProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(parseInt(post.likes) || 0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(
+    post.followers ? parseInt(post.followers.replace(/[^0-9]/g, '')) || 0 : 0
+  );
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
@@ -52,6 +57,25 @@ export const PostDetailDialog = ({
       setLikeCount(prev => prev + 1);
     }
     setIsLiked(!isLiked);
+  };
+
+  const handleFollow = () => {
+    if (isFollowing) {
+      setFollowerCount(followerCount - 1);
+    } else {
+      setFollowerCount(followerCount + 1);
+    }
+    setIsFollowing(!isFollowing);
+  };
+
+  const formatFollowerCount = (count: number): string => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`;
+    }
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
   };
 
   return (
@@ -155,35 +179,54 @@ export const PostDetailDialog = ({
           </div>
 
           {/* Author Section */}
-          <Link
-            to={`/profile/${post.userId}`}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-            onClick={() => onOpenChange(false)}
-          >
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={post.authorProfileImage} alt={post.author} />
-              <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-lg font-medium">By {post.author}</p>
-              <div className="flex items-center gap-1.5">
-                <div
-                  className={`h-2 w-2 rounded-full ${
-                    post.status === "Online" ? "bg-emerald-500" : "bg-red-500"
-                  }`}
-                />
-                <p
-                  className={`text-base font-medium ${
-                    post.status === "Online"
-                      ? "text-emerald-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {post.status}
-                </p>
+          <div className="flex items-center justify-between">
+            <Link
+              to={`/profile/${post.userId}`}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              onClick={() => onOpenChange(false)}
+            >
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={post.authorProfileImage} alt={post.author} />
+                <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-lg font-medium">By {post.author}</p>
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={`h-2 w-2 rounded-full ${
+                      post.status === "Online" ? "bg-emerald-500" : "bg-red-500"
+                    }`}
+                  />
+                  <p
+                    className={`text-base font-medium ${
+                      post.status === "Online"
+                        ? "text-emerald-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {post.status}
+                  </p>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+            
+            {/* Follow Button */}
+            {post.followers && (
+              <Button
+                variant={isFollowing ? "secondary" : "default"}
+                size="sm"
+                onClick={handleFollow}
+                className="gap-1.5"
+                aria-label={isFollowing ? "Unfollow" : "Follow"}
+              >
+                <UserPlus className="h-4 w-4" />
+                <span>{isFollowing ? "Following" : "Follow"}</span>
+                <Badge variant="outline" className="ml-1">
+                  {formatFollowerCount(followerCount)}
+                </Badge>
+              </Button>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
