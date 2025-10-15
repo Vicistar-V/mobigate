@@ -84,15 +84,15 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
         <div className="space-y-4 sm:space-y-6">
           {/* From Currency */}
           <Card className="p-3 sm:p-4">
-            <Label className="text-xs sm:text-sm text-muted-foreground mb-2 block">From</Label>
+            <Label className="text-sm sm:text-base text-muted-foreground mb-2 block">From</Label>
             <div className="space-y-2 sm:space-y-3">
               <Select value={fromCurrency} onValueChange={setFromCurrency}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger className="text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {currencies.map((currency) => (
-                    <SelectItem key={currency.code} value={currency.code} className="text-sm">
+                    <SelectItem key={currency.code} value={currency.code} className="text-base">
                       {currency.symbol} {currency.name} ({currency.code})
                     </SelectItem>
                   ))}
@@ -122,15 +122,15 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
 
           {/* To Currency */}
           <Card className="p-3 sm:p-4 bg-muted/50">
-            <Label className="text-xs sm:text-sm text-muted-foreground mb-2 block">To</Label>
+            <Label className="text-sm sm:text-base text-muted-foreground mb-2 block">To</Label>
             <div className="space-y-2 sm:space-y-3">
               <Select value={toCurrency} onValueChange={setToCurrency}>
-                <SelectTrigger className="text-sm">
+                <SelectTrigger className="text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {currencies.map((currency) => (
-                    <SelectItem key={currency.code} value={currency.code} className="text-sm">
+                    <SelectItem key={currency.code} value={currency.code} className="text-base">
                       {currency.symbol} {currency.name} ({currency.code})
                     </SelectItem>
                   ))}
@@ -150,8 +150,8 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
           <Card className="p-3 sm:p-4 bg-primary/5 border-primary/20">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Exchange Rate</p>
-                <p className="text-sm sm:text-base font-semibold truncate">
+                <p className="text-sm sm:text-base text-muted-foreground">Exchange Rate</p>
+                <p className="text-base sm:text-lg font-semibold truncate">
                   1 {fromCurrencyData?.symbol} {fromCurrency} = {calculateConversion("1", fromCurrency, toCurrency)} {toCurrencyData?.symbol} {toCurrency}
                 </p>
               </div>
@@ -164,7 +164,7 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
                 <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+            <p className="text-sm sm:text-base text-muted-foreground mt-2">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </p>
           </Card>
@@ -172,7 +172,7 @@ export const CurrencyExchangeDialog = ({ open, onOpenChange }: CurrencyExchangeD
           {/* Mobi Info Note */}
           {(fromCurrency === "MOBI" || toCurrency === "MOBI") && (
             <Card className="p-2.5 sm:p-3 bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900">
-              <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
+              <p className="text-sm sm:text-base text-amber-800 dark:text-amber-200">
                 💡 <strong>Mobi Rate:</strong> 1 Mobi = 1 Nigerian Naira (baseline)
               </p>
             </Card>

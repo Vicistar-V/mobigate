@@ -56,7 +56,7 @@ export default function ServiceUnavailable() {
                   <FileText className="h-5 w-5 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Accessibility & Terms of Service</div>
-                    <div className="text-sm text-muted-foreground">Learn about service eligibility</div>
+                    <div className="text-base text-muted-foreground">Learn about service eligibility</div>
                   </div>
                 </Button>
 
@@ -71,7 +71,7 @@ export default function ServiceUnavailable() {
                   <Shield className="h-5 w-5 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Community Standards</div>
-                    <div className="text-sm text-muted-foreground">View our community guidelines</div>
+                    <div className="text-base text-muted-foreground">View our community guidelines</div>
                   </div>
                 </Button>
               </div>

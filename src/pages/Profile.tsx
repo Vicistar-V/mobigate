@@ -524,7 +524,7 @@ const Profile = () => {
                   />
                   <button
                     onClick={() => setEditingProfilePicture(true)}
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium"
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/60 hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-base font-medium"
                   >
                     <Camera className="h-3 w-3 mr-1" />
                     Edit
