@@ -174,41 +174,43 @@ export const FeedPost = ({
         <div className="flex items-center justify-between pt-2 border-t">
           <Link 
             to={`/profile/${userId}`} 
-            className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1"
             onClick={(e) => e.stopPropagation()}
           >
             <Avatar className="h-10 w-10">
               <AvatarImage src={authorProfileImage} alt={author} />
               <AvatarFallback>{author.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1">
               <p className="text-lg font-medium">By {author}</p>
-              <div className="flex items-center gap-1.5">
-                <div className={`h-2 w-2 rounded-full ${status === "Online" ? "bg-emerald-500" : "bg-red-500"}`} />
-                <p className={`text-base font-medium ${status === "Online" ? "text-emerald-600" : "text-red-600"}`}>
-                  {status}
-                </p>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <div className={`h-2 w-2 rounded-full ${status === "Online" ? "bg-emerald-500" : "bg-red-500"}`} />
+                  <p className={`text-base font-medium ${status === "Online" ? "text-emerald-600" : "text-red-600"}`}>
+                    {status}
+                  </p>
+                </div>
+                {/* Follow Button - now on same line as status */}
+                {!isOwner && followers && (
+                  <Button
+                    variant={isFollowing ? "secondary" : "default"}
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFollow();
+                    }}
+                    className="gap-1.5 h-6 px-2 text-xs"
+                    aria-label={isFollowing ? "Unfollow" : "Follow"}
+                  >
+                    <UserPlus className="h-3 w-3" />
+                    <span className="hidden sm:inline">{isFollowing ? "Following" : "Follow"}</span>
+                    <span className="text-xs opacity-80">({formatFollowerCount(followerCount)})</span>
+                  </Button>
+                )}
               </div>
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            {/* Follow Button (only show if not owner and has followers data) */}
-            {!isOwner && followers && (
-              <Button
-                variant={isFollowing ? "secondary" : "default"}
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleFollow();
-                }}
-                className="gap-1.5"
-                aria-label={isFollowing ? "Unfollow" : "Follow"}
-              >
-                <UserPlus className="h-4 w-4" />
-                <span className="hidden sm:inline">{isFollowing ? "Following" : "Follow"}</span>
-                <span className="text-xs opacity-80">({formatFollowerCount(followerCount)})</span>
-              </Button>
-            )}
             <div className="flex items-center gap-1">
               <button
                 onClick={(e) => {
