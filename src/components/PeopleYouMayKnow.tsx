@@ -1,11 +1,18 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { UserPlus, Users, Grid3x3, List, Check } from "lucide-react";
+import { UserPlus, Users, Grid3x3, List, Check, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AddToCircleDialog } from "./AddToCircleDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import sarahJohnson from "@/assets/profile-sarah-johnson.jpg";
 import michaelChen from "@/assets/profile-michael-chen.jpg";
 import emilyDavis from "@/assets/profile-emily-davis.jpg";
@@ -56,6 +63,57 @@ export const PeopleYouMayKnow = () => {
 
   const handleCircleComplete = (userId: string) => {
     setAddedToCircleStatus((prev) => ({ ...prev, [userId]: true }));
+  };
+
+  const handleFollow = (userId: string, userName: string) => {
+    toast({
+      title: "Following",
+      description: `You are now following ${userName}`,
+    });
+  };
+
+  const handleLike = (userId: string, userName: string) => {
+    toast({
+      title: "Liked",
+      description: `You liked ${userName}'s profile`,
+    });
+  };
+
+  const handleChat = (userId: string, userName: string) => {
+    toast({
+      title: "Opening Chat",
+      description: `Starting conversation with ${userName}`,
+    });
+  };
+
+  const handleCall = (userId: string, userName: string) => {
+    toast({
+      title: "Calling",
+      description: `Initiating call with ${userName}`,
+    });
+  };
+
+  const handleSendGift = (userId: string, userName: string) => {
+    toast({
+      title: "Send Gift",
+      description: `Opening gift store for ${userName}`,
+    });
+  };
+
+  const handleBlock = (userId: string, userName: string) => {
+    toast({
+      title: "Blocked",
+      description: `You blocked ${userName}`,
+      variant: "destructive",
+    });
+  };
+
+  const handleReport = (userId: string, userName: string) => {
+    toast({
+      title: "Report User",
+      description: `Opening report form for ${userName}`,
+      variant: "destructive",
+    });
   };
 
   return (
@@ -122,25 +180,77 @@ export const PeopleYouMayKnow = () => {
                         </>
                       )}
                     </Button>
-                    <Button 
-                      size="sm" 
-                      className="w-full h-8 text-xs"
-                      variant={addedToCircleStatus[user.id] ? "secondary" : "outline"}
-                      onClick={() => handleAddToCircle(user.id, user.name)}
-                      disabled={addedToCircleStatus[user.id]}
-                    >
-                      {addedToCircleStatus[user.id] ? (
-                        <>
-                          <Check className="h-3 w-3 mr-1" />
-                          Added to Circle
-                        </>
-                      ) : (
-                        <>
-                          <Users className="h-3 w-3 mr-1" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          className="w-full h-8 text-xs"
+                          variant="outline"
+                        >
+                          <MoreVertical className="h-3 w-3 mr-1" />
+                          Do More
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 bg-card z-50">
+                        <DropdownMenuItem
+                          onClick={() => handleFollow(user.id, user.name)}
+                          className="cursor-pointer"
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Follow
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleLike(user.id, user.name)}
+                          className="cursor-pointer"
+                        >
+                          <ThumbsUp className="h-4 w-4 mr-2" />
+                          Like
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleChat(user.id, user.name)}
+                          className="cursor-pointer"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Chat
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleCall(user.id, user.name)}
+                          className="cursor-pointer"
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleSendGift(user.id, user.name)}
+                          className="cursor-pointer"
+                        >
+                          <Gift className="h-4 w-4 mr-2" />
+                          Send Gift
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleAddToCircle(user.id, user.name)}
+                          className="cursor-pointer"
+                        >
+                          <Users className="h-4 w-4 mr-2" />
                           Add to Circle
-                        </>
-                      )}
-                    </Button>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleBlock(user.id, user.name)}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Ban className="h-4 w-4 mr-2" />
+                          Block
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleReport(user.id, user.name)}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Flag className="h-4 w-4 mr-2" />
+                          Report
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}
@@ -191,25 +301,77 @@ export const PeopleYouMayKnow = () => {
                       </>
                     )}
                   </Button>
-                  <Button 
-                    size="sm" 
-                    className="w-full h-8 text-xs"
-                    variant={addedToCircleStatus[user.id] ? "secondary" : "outline"}
-                    onClick={() => handleAddToCircle(user.id, user.name)}
-                    disabled={addedToCircleStatus[user.id]}
-                  >
-                    {addedToCircleStatus[user.id] ? (
-                      <>
-                        <Check className="h-3 w-3 mr-1" />
-                        Added to Circle
-                      </>
-                    ) : (
-                      <>
-                        <Users className="h-3 w-3 mr-1" />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        className="w-full h-8 text-xs"
+                        variant="outline"
+                      >
+                        <MoreVertical className="h-3 w-3 mr-1" />
+                        Do More
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-card z-50">
+                      <DropdownMenuItem
+                        onClick={() => handleFollow(user.id, user.name)}
+                        className="cursor-pointer"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Follow
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleLike(user.id, user.name)}
+                        className="cursor-pointer"
+                      >
+                        <ThumbsUp className="h-4 w-4 mr-2" />
+                        Like
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleChat(user.id, user.name)}
+                        className="cursor-pointer"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Chat
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleCall(user.id, user.name)}
+                        className="cursor-pointer"
+                      >
+                        <Phone className="h-4 w-4 mr-2" />
+                        Call
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSendGift(user.id, user.name)}
+                        className="cursor-pointer"
+                      >
+                        <Gift className="h-4 w-4 mr-2" />
+                        Send Gift
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleAddToCircle(user.id, user.name)}
+                        className="cursor-pointer"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
                         Add to Circle
-                      </>
-                    )}
-                  </Button>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleBlock(user.id, user.name)}
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                      >
+                        <Ban className="h-4 w-4 mr-2" />
+                        Block
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleReport(user.id, user.name)}
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                      >
+                        <Flag className="h-4 w-4 mr-2" />
+                        Report
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             ))}

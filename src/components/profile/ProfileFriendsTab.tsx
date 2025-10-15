@@ -269,14 +269,14 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                       
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:scale-105 transition-transform shrink-0 px-2 sm:px-3"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="hidden sm:inline">More</span>
-                          </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:scale-105 transition-transform shrink-0 px-2 sm:px-3"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="hidden sm:inline">Do More</span>
+                    </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-card z-50">
                           <DropdownMenuItem
@@ -314,14 +314,6 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                           </DropdownMenuItem>
                           
                           <DropdownMenuItem
-                            onClick={() => handleSendGift(friend.id, friend.name)}
-                            className="cursor-pointer"
-                          >
-                            <Gift className="h-4 w-4 mr-2" />
-                            Send Gift
-                          </DropdownMenuItem>
-                          
-                          <DropdownMenuItem
                             onClick={() => handleChat(friend.id, friend.name)}
                             className="cursor-pointer"
                           >
@@ -335,6 +327,22 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                           >
                             <Phone className="h-4 w-4 mr-2" />
                             Call
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => handleSendGift(friend.id, friend.name)}
+                            className="cursor-pointer"
+                          >
+                            <Gift className="h-4 w-4 mr-2" />
+                            Send Gift
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => {} /* Add to Circle functionality */}
+                            className="cursor-pointer"
+                          >
+                            <Users className="h-4 w-4 mr-2" />
+                            Add to Circle
                           </DropdownMenuItem>
                           
                           <DropdownMenuSeparator />

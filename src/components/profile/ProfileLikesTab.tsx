@@ -2,13 +2,21 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { mockLikes } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, Users, Heart, UserPlus, Eye as EyeIcon } from "lucide-react";
+import { Eye, Users, Heart, UserPlus, Eye as EyeIcon, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus } from "lucide-react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { likesAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
 import React from "react";
+import { useState } from "react";
 
 interface ProfileLikesTabProps {
   userName: string;
@@ -17,11 +25,90 @@ interface ProfileLikesTabProps {
 
 export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
   const { toast } = useToast();
+  const [interactions, setInteractions] = useState<{
+    [key: string]: { isFollowing: boolean; isLiked: boolean; isBlocked: boolean };
+  }>({});
 
   const handleViewProfile = (userId: string, name: string) => {
     toast({
       title: "Viewing Profile",
       description: `Opening ${name}'s profile...`,
+    });
+  };
+
+  const handleToggleFollow = (userId: string, userName: string) => {
+    const isFollowing = interactions[userId]?.isFollowing || false;
+    setInteractions(prev => ({
+      ...prev,
+      [userId]: { ...prev[userId], isFollowing: !isFollowing }
+    }));
+    
+    toast({
+      title: isFollowing ? "Unfollowed" : "Following",
+      description: `You are ${isFollowing ? 'no longer following' : 'now following'} ${userName}`,
+    });
+  };
+
+  const handleToggleLike = (userId: string, userName: string) => {
+    const isLiked = interactions[userId]?.isLiked || false;
+    setInteractions(prev => ({
+      ...prev,
+      [userId]: { ...prev[userId], isLiked: !isLiked }
+    }));
+    
+    toast({
+      title: isLiked ? "Unliked" : "Liked",
+      description: `You ${isLiked ? 'unliked' : 'liked'} ${userName}`,
+    });
+  };
+
+  const handleChat = (userId: string, userName: string) => {
+    toast({
+      title: "Opening Chat",
+      description: `Starting conversation with ${userName}`,
+    });
+  };
+
+  const handleCall = (userId: string, userName: string) => {
+    toast({
+      title: "Calling",
+      description: `Initiating call with ${userName}`,
+    });
+  };
+
+  const handleSendGift = (userId: string, userName: string) => {
+    toast({
+      title: "Send Gift",
+      description: `Opening gift store for ${userName}`,
+    });
+  };
+
+  const handleAddToCircle = (userId: string, userName: string) => {
+    toast({
+      title: "Add to Circle",
+      description: `Opening circle selection for ${userName}`,
+    });
+  };
+
+  const handleBlock = (userId: string, userName: string) => {
+    const isBlocked = interactions[userId]?.isBlocked || false;
+    setInteractions(prev => ({
+      ...prev,
+      [userId]: { ...prev[userId], isBlocked: !isBlocked }
+    }));
+    
+    toast({
+      title: isBlocked ? "Unblocked" : "Blocked",
+      description: `You ${isBlocked ? 'unblocked' : 'blocked'} ${userName}`,
+      variant: isBlocked ? "default" : "destructive",
+    });
+  };
+
+  const handleReport = (userId: string, userName: string) => {
+    toast({
+      title: "Report User",
+      description: `Opening report form for ${userName}`,
+      variant: "destructive",
     });
   };
 
@@ -110,8 +197,8 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
                   Has given {userName} <span className="font-semibold text-primary">{like.likeCount} Like{like.likeCount !== 1 ? 's' : ''}</span>
                 </p>
 
-                {/* Action Button */}
-                <div className="pt-1">
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2 pt-1">
                   <Button
                     onClick={() => handleViewProfile(like.id, like.name)}
                     className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform"
@@ -120,6 +207,87 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
                     <Eye className="h-4 w-4" />
                     View Profile
                   </Button>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="hover:scale-105 transition-transform px-2"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Do More</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-card z-50">
+                      <DropdownMenuItem
+                        onClick={() => handleToggleFollow(like.id, like.name)}
+                        className="cursor-pointer"
+                      >
+                        {interactions[like.id]?.isFollowing ? (
+                          <>
+                            <UserMinus className="h-4 w-4 mr-2" />
+                            Unfollow
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Follow
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleToggleLike(like.id, like.name)}
+                        className="cursor-pointer"
+                      >
+                        <ThumbsUp className="h-4 w-4 mr-2" />
+                        {interactions[like.id]?.isLiked ? 'Unlike' : 'Like'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleChat(like.id, like.name)}
+                        className="cursor-pointer"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Chat
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleCall(like.id, like.name)}
+                        className="cursor-pointer"
+                      >
+                        <Phone className="h-4 w-4 mr-2" />
+                        Call
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSendGift(like.id, like.name)}
+                        className="cursor-pointer"
+                      >
+                        <Gift className="h-4 w-4 mr-2" />
+                        Send Gift
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleAddToCircle(like.id, like.name)}
+                        className="cursor-pointer"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Add to Circle
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleBlock(like.id, like.name)}
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                      >
+                        <Ban className="h-4 w-4 mr-2" />
+                        {interactions[like.id]?.isBlocked ? 'Unblock' : 'Block'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleReport(like.id, like.name)}
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                      >
+                        <Flag className="h-4 w-4 mr-2" />
+                        Report
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
