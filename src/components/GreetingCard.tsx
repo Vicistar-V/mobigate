@@ -13,8 +13,19 @@ import { Link } from "react-router-dom";
 import profilePhoto from "@/assets/profile-photo.jpg";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
+import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 
 export const GreetingSection = () => {
+  const { showDialog, Dialog } = useServiceUnavailableDialog();
+  const restrictedServices = ['/mobi-shop', '/mobi-circle', '/biz-catalogue', '/community'];
+
+  const handleLinkClick = (e: React.MouseEvent, href: string) => {
+    if (restrictedServices.includes(href)) {
+      e.preventDefault();
+      showDialog();
+    }
+  };
+
   const primaryLinks = [
     { label: "About Me", href: "/profile/current-user#about" },
     { label: "Friends", href: "/profile/current-user#friends" },
@@ -73,7 +84,11 @@ export const GreetingSection = () => {
             <DropdownMenuContent align="start" className="bg-card z-50 w-48">
               {moreLinks.map((link) => (
                 <DropdownMenuItem key={link.label} asChild className="text-xl font-medium text-primary">
-                  <Link to={link.href} className="cursor-pointer">
+                  <Link 
+                    to={link.href} 
+                    className="cursor-pointer"
+                    onClick={(e) => handleLinkClick(e, link.href)}
+                  >
                     {link.label}
                   </Link>
                 </DropdownMenuItem>
@@ -102,6 +117,9 @@ export const GreetingSection = () => {
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
+
+      {/* Service Unavailable Dialog */}
+      <Dialog />
     </div>
   );
 };

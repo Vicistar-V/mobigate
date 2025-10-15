@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal, Package } from "lucide-react";
+import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 
 interface WallStatusFiltersProps {
   activeFilter: string;
@@ -27,7 +28,16 @@ const moreFilters = [
 ];
 
 export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFiltersProps) => {
+  const { showDialog, Dialog } = useServiceUnavailableDialog();
   const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
+
+  const handleFilterClick = (value: string) => {
+    if (value === 'biz-catalogue') {
+      showDialog();
+    } else {
+      onFilterChange(value);
+    }
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -68,7 +78,7 @@ export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFi
             return (
               <DropdownMenuItem
                 key={option.value}
-                onClick={() => onFilterChange(option.value)}
+                onClick={() => handleFilterClick(option.value)}
                 className={isActive ? "bg-primary text-primary-foreground" : ""}
               >
                 <Icon className="w-4 h-4 mr-2" />
@@ -78,6 +88,9 @@ export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFi
           })}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Service Unavailable Dialog */}
+      <Dialog />
     </div>
   );
 };

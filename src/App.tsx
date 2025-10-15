@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 
@@ -28,9 +29,10 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/profile/:userId" element={<Profile />} />
-                <Route path="/mobi-shop" element={<NotFound />} />
-                <Route path="/mobi-circle" element={<NotFound />} />
-                <Route path="/biz-catalogue" element={<NotFound />} />
+                <Route path="/mobi-shop" element={<ServiceUnavailable />} />
+                <Route path="/mobi-circle" element={<ServiceUnavailable />} />
+                <Route path="/biz-catalogue" element={<ServiceUnavailable />} />
+                <Route path="/community" element={<ServiceUnavailable />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

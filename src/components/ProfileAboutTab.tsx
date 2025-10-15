@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parse } from "date-fns";
+import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -114,6 +115,7 @@ interface CurrencyInfo {
 export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { showDialog, Dialog } = useServiceUnavailableDialog();
   
   // Dialog states
   const [editLocationOpen, setEditLocationOpen] = useState(false);
@@ -923,8 +925,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <div 
               className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
               onClick={() => {
-                toast({ title: "Navigating to My Mobi-Shop..." });
-                navigate("/mobi-shop");
+                showDialog();
               }}
             >
               <div className="p-2 rounded-lg bg-primary/10">
@@ -952,8 +953,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <div 
               className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
               onClick={() => {
-                toast({ title: "Navigating to Mobi-Circle..." });
-                navigate("/mobi-circle");
+                showDialog();
               }}
             >
               <div className="p-2 rounded-lg bg-primary/10">
@@ -981,8 +981,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <div 
               className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
               onClick={() => {
-                toast({ title: "Navigating to Biz-Catalogue..." });
-                navigate("/biz-catalogue");
+                showDialog();
               }}
             >
               <div className="p-2 rounded-lg bg-primary/10">
@@ -1538,6 +1537,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         mate={selectedMate}
         type={mateType}
       />
+
+      {/* Service Unavailable Dialog */}
+      <Dialog />
     </div>
   );
 };

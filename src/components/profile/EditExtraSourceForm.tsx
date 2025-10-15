@@ -2,12 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ExternalLink, Store, Users, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 
 interface EditExtraSourceFormProps {
   onClose: () => void;
 }
 
 export const EditExtraSourceForm = ({ onClose }: EditExtraSourceFormProps) => {
+  const { showDialog, Dialog } = useServiceUnavailableDialog();
+
   const extraSources = [
     {
       id: "mobi-shop",
@@ -33,9 +36,7 @@ export const EditExtraSourceForm = ({ onClose }: EditExtraSourceFormProps) => {
   ];
 
   const handleNavigate = (link: string, title: string) => {
-    toast.info(`Navigating to ${title}...`);
-    // In a real app, this would use router navigation
-    // navigate(link);
+    showDialog();
   };
 
   return (
@@ -70,6 +71,9 @@ export const EditExtraSourceForm = ({ onClose }: EditExtraSourceFormProps) => {
           Close
         </Button>
       </div>
+
+      {/* Service Unavailable Dialog */}
+      <Dialog />
     </div>
   );
 };

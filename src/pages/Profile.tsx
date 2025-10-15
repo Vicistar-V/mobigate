@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera, Share2, UserX, AlertCircle, Users, UserPlus, UserMinus } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -817,29 +818,61 @@ const Profile = () => {
 
           <TabsContent value="community">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Social Community</h2>
-              <p className="text-muted-foreground">Your Town Unions, Clubs, Associations and other community memberships will be displayed here.</p>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Service Unavailable</AlertTitle>
+                <AlertDescription className="mt-2">
+                  You cannot use this Service now: it's either you are not eligible to use 
+                  the Service, or this Service is not yet available in your country. You can 
+                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
+                  and 'COMMUNITY STANDARDS'.
+                </AlertDescription>
+              </Alert>
             </Card>
           </TabsContent>
 
           <TabsContent value="mobi-circle">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Mobi-Circle</h2>
-              <p className="text-muted-foreground">Welcome to your Mobi-Circle community hub.</p>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Service Unavailable</AlertTitle>
+                <AlertDescription className="mt-2">
+                  You cannot use this Service now: it's either you are not eligible to use 
+                  the Service, or this Service is not yet available in your country. You can 
+                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
+                  and 'COMMUNITY STANDARDS'.
+                </AlertDescription>
+              </Alert>
             </Card>
           </TabsContent>
 
           <TabsContent value="mobi-shop">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">My Mobi-Shop @ Mobi-Store</h2>
-              <p className="text-muted-foreground">Manage your Mobi-Shop and products here.</p>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Service Unavailable</AlertTitle>
+                <AlertDescription className="mt-2">
+                  You cannot use this Service now: it's either you are not eligible to use 
+                  the Service, or this Service is not yet available in your country. You can 
+                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
+                  and 'COMMUNITY STANDARDS'.
+                </AlertDescription>
+              </Alert>
             </Card>
           </TabsContent>
 
           <TabsContent value="biz-catalogue">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Biz-Catalogue</h2>
-              <p className="text-muted-foreground">Browse and manage your business catalogue.</p>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Service Unavailable</AlertTitle>
+                <AlertDescription className="mt-2">
+                  You cannot use this Service now: it's either you are not eligible to use 
+                  the Service, or this Service is not yet available in your country. You can 
+                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
+                  and 'COMMUNITY STANDARDS'.
+                </AlertDescription>
+              </Alert>
             </Card>
           </TabsContent>
         </Tabs>
