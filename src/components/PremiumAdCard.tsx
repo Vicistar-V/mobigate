@@ -290,59 +290,66 @@ export const PremiumAdCard = ({
   // Compact layout - Smaller inline ad
   return (
     <Card className="w-full overflow-hidden bg-card border border-border">
-      <div className="flex gap-3 sm:gap-4 p-3 sm:p-4">
-        {/* Media Thumbnail */}
-        <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted">
-          <img
-            src={media.items[0]?.url}
-            alt={content.headline}
-            className="w-full h-full object-cover"
-          />
-        </div>
+      <div className="p-3 sm:p-4 space-y-3">
+        {/* Top Row: Image, Title, and Close Button */}
+        <div className="flex gap-3 items-start">
+          {/* Media Thumbnail */}
+          <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-muted">
+            <img
+              src={media.items[0]?.url}
+              alt={content.headline}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-        {/* Content */}
-        <div className="flex-1 flex flex-col justify-between min-w-0">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-sm sm:text-base text-muted-foreground">
+          {/* Title and Advertiser */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-1">
               <span className="font-medium text-foreground truncate">{advertiser.name}</span>
               <span>·</span>
               <span>Sponsored</span>
             </div>
-            <h4 className="text-base sm:text-lg font-semibold text-foreground line-clamp-2">
+            <h4 className="text-sm sm:text-base font-semibold text-foreground line-clamp-2">
               {content.headline}
             </h4>
-            <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
-              {content.description}
-            </p>
           </div>
+
+          {/* Close Button */}
           <Button
-            onClick={handleCTA}
-            size="sm"
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm sm:text-base mt-2"
+            variant="ghost"
+            size="icon"
+            onClick={handleClose}
+            className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground flex-shrink-0"
           >
-            {content.ctaText}
+            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
-          <EngagementBar
-            itemId={id}
-            itemType="ad"
-            initialLikes="0"
-            initialComments="0"
-            initialShares="0"
-            onComment={() => setShowComments(true)}
-            onShare={() => setShowShare(true)}
-            variant="compact"
-            className="mt-2"
-          />
         </div>
 
+        {/* Description */}
+        <p className="text-sm sm:text-base text-muted-foreground line-clamp-2 leading-relaxed">
+          {content.description}
+        </p>
+
+        {/* CTA Button */}
         <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleClose}
-          className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground flex-shrink-0"
+          onClick={handleCTA}
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm sm:text-base py-2.5"
         >
-          <X className="h-3 w-3 sm:h-4 sm:w-4" />
+          {content.ctaText}
         </Button>
+
+        {/* Engagement Bar */}
+        <EngagementBar
+          itemId={id}
+          itemType="ad"
+          initialLikes="0"
+          initialComments="0"
+          initialShares="0"
+          onComment={() => setShowComments(true)}
+          onShare={() => setShowShare(true)}
+          variant="compact"
+          className="pt-2 border-t"
+        />
       </div>
 
       <CommentDialog
