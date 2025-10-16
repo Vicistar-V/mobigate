@@ -529,6 +529,13 @@ const Profile = () => {
                     <Camera className="h-3 w-3 mr-1" />
                     Edit
                   </button>
+                  
+                  {/* Online Indicator - Badge on Profile Image */}
+                  {userProfile.status === "Online" && (
+                    <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold border-2 border-card">
+                      Online
+                    </div>
+                  )}
                 </div>
                 <div className="mt-3 w-full">
                   <h1 className="text-4xl font-extrabold">{userProfile.name}</h1>
@@ -537,13 +544,6 @@ const Profile = () => {
                   )}
                 </div>
               </div>
-
-              {/* Online Indicator - Absolute Position, Top Right */}
-              {userProfile.status === "Online" && (
-                <div className="absolute top-0 right-0 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
-                  Online
-                </div>
-              )}
             </div>
 
             {/* Stats and Actions Container */}
