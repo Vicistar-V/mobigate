@@ -505,15 +505,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
   return (
     <div className="space-y-6">
       {/* User Category */}
-      <Card className="p-6">
-        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
-          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+      <Card className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-            <h3 className="text-lg font-semibold flex-1 min-w-0">User Category</h3>
+            <h3 className="text-base sm:text-lg font-semibold flex-1 min-w-0">User Category</h3>
           </div>
-          <Badge variant="secondary" className="text-xs font-normal shrink-0">System Managed</Badge>
+          <Badge variant="secondary" className="text-xs font-normal shrink-0 self-start sm:self-auto">System Managed</Badge>
         </div>
-        <p className="text-base text-muted-foreground">Verified User</p>
+        <p className="text-sm sm:text-base text-muted-foreground">Verified User</p>
       </Card>
 
       {/* Designations */}
