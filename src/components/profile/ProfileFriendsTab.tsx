@@ -226,58 +226,61 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                   </button>
                   
                   {/* Enhanced Stats with Icons */}
-                  <div className="flex flex-wrap gap-x-3 gap-y-1">
-                    <div className="flex items-center gap-1.5 text-sm text-primary font-medium">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-2 sm:gap-x-3 gap-y-1">
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary font-medium">
                       <Users className="h-3.5 w-3.5 flex-shrink-0" />
                       <span>{friend.stats.friends.toLocaleString()} Friends</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-sm text-primary font-medium">
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary font-medium">
                       <Heart className="h-3.5 w-3.5 flex-shrink-0" />
                       <span>{friend.stats.likes.toLocaleString()} Likes</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-sm text-primary/80 italic">
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary/80 italic">
                       <UserPlus className="h-3.5 w-3.5 flex-shrink-0" />
                       <span>{friend.stats.followers.toLocaleString()} Followers</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-sm text-primary/80 italic">
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary/80 italic">
                       <Eye className="h-3.5 w-3.5 flex-shrink-0" />
                       <span>{friend.stats.following.toLocaleString()} Following</span>
                     </div>
                   </div>
 
                   {/* Interactive Action Buttons */}
-                  <div className="space-y-2 pt-1">
-                    <Button
-                      onClick={() => handleAddFriend(friend.id, friend.name)}
-                      disabled={buttonConfig.disabled}
-                      className={`${buttonConfig.className} w-3/5 sm:w-auto`}
-                      size="sm"
-                    >
-                      <ButtonIcon className="h-4 w-4" />
-                      {buttonConfig.text}
-                    </Button>
-                    
-                    <div className="flex gap-1.5 sm:gap-2 pr-1">
+                  <div className="flex flex-col gap-2 pt-1">
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleAddFriend(friend.id, friend.name)}
+                        disabled={buttonConfig.disabled}
+                        className={`${buttonConfig.className} flex-1`}
+                        size="sm"
+                      >
+                        <ButtonIcon className="h-4 w-4" />
+                        <span className="hidden sm:inline">{buttonConfig.text}</span>
+                        <span className="sm:hidden">{buttonConfig.text.split(' ')[0]}</span>
+                      </Button>
+                      
                       <Button
                         onClick={() => handleViewUser(friend.id)}
-                        className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform flex-1 sm:flex-initial"
+                        className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform flex-1"
                         size="sm"
                       >
                         <Eye className="h-4 w-4" />
-                        View Profile
+                        <span className="hidden sm:inline">View Profile</span>
+                        <span className="sm:hidden">View</span>
                       </Button>
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:scale-105 transition-transform shrink-0 px-2 sm:px-3"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                      <span className="hidden sm:inline">Do More</span>
-                    </Button>
-                        </DropdownMenuTrigger>
+                    </div>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:scale-105 transition-transform w-full"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                          <span>Do More</span>
+                        </Button>
+                      </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-card z-50">
                           <DropdownMenuItem
                             onClick={() => handleToggleFollow(friend.id, friend.name)}
@@ -364,7 +367,6 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
                   </div>
                 </div>
               </div>
