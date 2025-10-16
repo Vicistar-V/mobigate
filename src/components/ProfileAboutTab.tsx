@@ -926,20 +926,20 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       </Card>
 
       {/* Extra Source */}
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
             <Briefcase className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Extra Source</h3>
           </div>
         </div>
-        <p className="text-base text-muted-foreground mb-4">
+        <p className="text-sm text-muted-foreground mb-4">
           Click on any option to navigate to the respective page
         </p>
         <div className="space-y-3">
-          <div className="flex items-center gap-2 p-4 border rounded-lg border-muted">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg border-muted">
             <div 
-              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
+              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors w-full min-w-0"
               onClick={() => {
                 showDialog();
               }}
@@ -947,15 +947,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               <div className="p-2 rounded-lg bg-primary/10">
                 <Store className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-primary hover:underline">My Mobi-Shop @ Mobi-Store</h4>
-                <p className="text-base text-muted-foreground">Your personal online store</p>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-primary hover:underline break-words">My Mobi-Shop @ Mobi-Store</h4>
+                <p className="text-sm text-muted-foreground break-words">Your personal online store</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0"
+              className="self-end sm:self-auto mt-2 sm:mt-0 shrink-0"
               onClick={(e) => {
                 e.stopPropagation();
                 toast({ title: "Edit My Mobi-Shop settings (Coming soon)" });
@@ -965,9 +965,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             </Button>
           </div>
           
-          <div className="flex items-center gap-2 p-4 border rounded-lg border-muted">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg border-muted">
             <div 
-              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
+              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors w-full min-w-0"
               onClick={() => {
                 showDialog();
               }}
@@ -975,15 +975,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-primary hover:underline">Mobi-Circle</h4>
-                <p className="text-base text-muted-foreground">Connect with your community</p>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-primary hover:underline break-words">Mobi-Circle</h4>
+                <p className="text-sm text-muted-foreground break-words">Connect with your community</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0"
+              className="self-end sm:self-auto mt-2 sm:mt-0 shrink-0"
               onClick={(e) => {
                 e.stopPropagation();
                 toast({ title: "Edit Mobi-Circle settings (Coming soon)" });
@@ -993,9 +993,9 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             </Button>
           </div>
           
-          <div className="flex items-center gap-2 p-4 border rounded-lg border-muted">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg border-muted">
             <div 
-              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors"
+              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors w-full min-w-0"
               onClick={() => {
                 showDialog();
               }}
@@ -1003,15 +1003,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               <div className="p-2 rounded-lg bg-primary/10">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-primary hover:underline">Biz-Catalogue</h4>
-                <p className="text-base text-muted-foreground">Browse business offerings</p>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-primary hover:underline break-words">Biz-Catalogue</h4>
+                <p className="text-sm text-muted-foreground break-words">Browse business offerings</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0"
+              className="self-end sm:self-auto mt-2 sm:mt-0 shrink-0"
               onClick={(e) => {
                 e.stopPropagation();
                 toast({ title: "Edit Biz-Catalogue settings (Coming soon)" });
@@ -1024,7 +1024,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       </Card>
 
       {/* Basic Information */}
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
             <User className="h-5 w-5 text-primary shrink-0" />
