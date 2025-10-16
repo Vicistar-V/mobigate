@@ -268,10 +268,10 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
             <React.Fragment key={post.id}>
               {/* Content Card */}
               <Card 
-                className="flex gap-4 p-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
+                className="overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
               >
-                {/* Left: Thumbnail or Icon */}
-                <div className="w-32 h-32 sm:w-32 sm:h-32 flex-shrink-0 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                {/* Top: Full-Width Thumbnail or Icon */}
+                <div className="w-full aspect-video bg-muted flex items-center justify-center">
                   {post.imageUrl ? (
                     <img 
                       src={post.imageUrl} 
@@ -283,8 +283,8 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                   )}
                 </div>
 
-                {/* Right: Content Info */}
-                <div className="flex-1 min-w-0 space-y-2">
+                {/* Bottom: Content Info */}
+                <div className="p-4 space-y-2">
                   {/* Title */}
                   <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">
                     {post.title}
@@ -306,7 +306,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                   )}
 
                   {/* Metadata Row */}
-                  <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground flex-wrap">
+                  <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground flex-wrap pt-1">
                     <span className="flex items-center gap-1">
                       <Eye className="h-3 w-3" />
                       <span className="font-medium">{post.views}</span>
