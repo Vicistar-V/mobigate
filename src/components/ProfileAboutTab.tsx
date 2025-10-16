@@ -927,13 +927,13 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
 
       {/* Extra Source */}
       <Card className="p-4 sm:p-6">
-        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+        <div className="flex items-start sm:items-center justify-between mb-2 gap-2">
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
             <Briefcase className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Extra Source</h3>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-muted-foreground mb-3">
           Click on any option to navigate to the respective page
         </p>
         <div className="space-y-3">
