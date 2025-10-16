@@ -143,7 +143,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-3 pt-10 sm:p-6 sm:pt-14">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[75vh] p-3 pt-10 sm:p-6 sm:pt-14">
         <DialogHeader className="pr-12 sm:pr-16">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-xl">
             <Badge variant="default" className="text-sm sm:text-lg px-2 py-0.5">M</Badge>
@@ -186,7 +186,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
           </Alert>
 
           {/* Exchange Rates List */}
-          <ScrollArea className="h-[450px] sm:h-[500px] pr-2 sm:pr-4">
+          <ScrollArea className="h-[280px] sm:h-[400px] pr-2 sm:pr-4">
             <div className="space-y-2">
               {currentRates.map((rate) => (
                 <Card key={rate.id} className="p-2.5 sm:p-4 hover:bg-muted/50 transition-colors">
