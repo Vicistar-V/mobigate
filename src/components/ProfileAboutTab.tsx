@@ -1213,8 +1213,8 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
                     )}
                   </div>
                   <Badge 
-                    variant={community.privacy === "public" ? "default" : community.privacy === "friends" ? "secondary" : "outline"}
-                    className="text-base"
+                    variant="secondary"
+                    className="text-xs font-normal"
                   >
                     {community.privacy === "public" && "🌐 Public"}
                     {community.privacy === "friends" && "👥 Friends"}
