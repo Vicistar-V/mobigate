@@ -135,7 +135,7 @@ export const WallStatusCarousel = ({
                 return (
                   <React.Fragment key={`${item.title}-${index}`}>
                     <Card 
-                      className="flex-shrink-0 w-[85vw] aspect-[3/4] overflow-hidden relative group cursor-pointer"
+                      className="flex-shrink-0 w-[45vw] sm:w-[70vw] max-w-[280px] aspect-[3/4] overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
