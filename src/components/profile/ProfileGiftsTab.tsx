@@ -430,21 +430,25 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
       {/* SECTION 7: Gift History - Tabbed (Received & Sent) */}
       <Card className="p-4">
         <Tabs value={giftHistoryTab} onValueChange={(v) => setGiftHistoryTab(v as "received" | "sent")}>
-          <TabsList className="w-full grid grid-cols-2 mb-4">
-            <TabsTrigger value="received" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              Received Gifts
+          <TabsList className="w-full grid grid-cols-2 mb-4 h-auto">
+            <TabsTrigger value="received" className="flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2">
+              <div className="flex items-center gap-1.5">
+                <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="text-xs sm:text-sm">Received</span>
+              </div>
               {mockReceivedGifts.length > 0 && (
-                <Badge variant="secondary" className="ml-1 text-sm">
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">
                   {mockReceivedGifts.length}
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="sent" className="flex items-center gap-2">
-              <Send className="h-4 w-4" />
-              Sent Gifts
+            <TabsTrigger value="sent" className="flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2">
+              <div className="flex items-center gap-1.5">
+                <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="text-xs sm:text-sm">Sent</span>
+              </div>
               {mockSentGifts.length > 0 && (
-                <Badge variant="secondary" className="ml-1 text-sm">
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">
                   {mockSentGifts.length}
                 </Badge>
               )}
