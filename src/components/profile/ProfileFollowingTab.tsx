@@ -174,7 +174,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                     
                     {user.isContentCreator && (
                       <div>
-                        <Badge variant="outline" className="text-sm text-primary/70 italic border-primary/30 inline-block">
+                        <Badge variant="secondary" className="text-sm text-primary/70 italic inline-block border-0">
                           Upcoming Content Creator
                         </Badge>
                       </div>
