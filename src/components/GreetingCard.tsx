@@ -100,16 +100,15 @@ export const GreetingSection = () => {
         {/* Search Section */}
         <div className="pt-4 border-t">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search for anything on Mobigate..." 
-              className="pl-10 pr-24"
+              className="pr-12"
             />
             <Button 
-              size="sm"
-              className="absolute right-1 top-1/2 -translate-y-1/2"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
             >
-              SEARCH
+              <Search className="h-4 w-4" />
             </Button>
           </div>
         </div>
