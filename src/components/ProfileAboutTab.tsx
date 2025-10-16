@@ -509,7 +509,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
         <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
           <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-            <h3 className="text-lg font-semibold min-w-0">User Category</h3>
+            <h3 className="text-lg font-semibold flex-1 min-w-0">User Category</h3>
           </div>
           <Badge variant="secondary" className="text-xs font-normal shrink-0">System Managed</Badge>
         </div>
