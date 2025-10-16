@@ -70,26 +70,28 @@ export const NotificationsSheet = () => {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px]">
-        <SheetHeader>
-          <SheetTitle>Notifications</SheetTitle>
-          <SheetDescription>
-            You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-          </SheetDescription>
-        </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-120px)] mt-6">
-          <div className="space-y-4">
+      <SheetContent className="w-full sm:w-[440px] p-0">
+        <div className="px-6 py-6">
+          <SheetHeader>
+            <SheetTitle>Notifications</SheetTitle>
+            <SheetDescription>
+              You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+            </SheetDescription>
+          </SheetHeader>
+        </div>
+        <ScrollArea className="h-[calc(100vh-140px)] px-4">
+          <div className="space-y-3 pr-2">
             {notifications.map((notification) => (
               <div
                 key={notification.id}
                 className={cn(
-                  "flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer",
+                  "flex items-start gap-3 rounded-lg transition-colors cursor-pointer",
                   notification.isRead
-                    ? "hover:bg-accent"
-                    : "bg-primary/10 hover:bg-primary/15 border-l-4 border-primary"
+                    ? "p-3 hover:bg-accent"
+                    : "pl-2 pr-3 py-3 bg-primary/10 hover:bg-primary/15 border-l-4 border-primary"
                 )}
               >
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={notification.avatar} />
                     <AvatarFallback>{notification.user[0]}</AvatarFallback>
@@ -98,7 +100,7 @@ export const NotificationsSheet = () => {
                     <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-primary border-2 border-background rounded-full" />
                   )}
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 min-w-0 space-y-1">
                   <p className="text-base">
                     <span className={notification.isRead ? "font-semibold" : "font-bold"}>
                       {notification.user}
