@@ -540,7 +540,7 @@ const Profile = () => {
 
               {/* Online Indicator - Under Banner, Far Right */}
               {userProfile.status === "Online" && (
-                <div className="mt-4 bg-emerald-500 text-white px-4 py-1.5 rounded-full text-base font-bold">
+                <div className="mt-4 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
                   Online
                 </div>
               )}
