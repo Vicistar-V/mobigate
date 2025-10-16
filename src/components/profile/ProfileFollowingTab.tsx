@@ -173,11 +173,9 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
                     </button>
                     
                     {user.isContentCreator && (
-                      <div>
-                        <Badge variant="secondary" className="text-sm text-primary/70 italic inline-block border-0">
-                          Upcoming Content Creator
-                        </Badge>
-                      </div>
+                      <p className="text-xs text-primary/70 italic">
+                        Upcoming Content Creator
+                      </p>
                     )}
                   </div>
                   
