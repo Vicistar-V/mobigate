@@ -942,7 +942,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               showDialog();
             }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Store className="h-5 w-5 text-primary" />
               </div>
@@ -969,7 +969,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               showDialog();
             }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
               </div>
@@ -996,7 +996,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
               showDialog();
             }}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
