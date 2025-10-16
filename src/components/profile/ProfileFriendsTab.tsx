@@ -187,7 +187,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
           
           return (
             <React.Fragment key={friend.id}>
-              <div className="group p-4 flex gap-4 hover:bg-accent/5 transition-all duration-200">
+              <div className="group p-3 sm:p-4 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center sm:items-start hover:bg-accent/5 transition-all duration-200">
                 {/* Avatar Section with Status Indicator */}
                 <div className="relative flex-shrink-0">
                   <button 
@@ -195,7 +195,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                     className="relative block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full"
                     aria-label={`View ${friend.name}'s profile`}
                   >
-                    <Avatar className={`h-24 w-24 sm:h-28 sm:w-28 ring-2 transition-all ${
+                    <Avatar className={`h-20 w-20 sm:h-24 sm:w-24 ring-2 transition-all ${
                       friend.isOnline ? 'ring-emerald-500/50' : 'ring-border'
                     }`}>
                       <AvatarImage src={friend.avatar} alt={friend.name} />
@@ -204,7 +204,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                     
                     {/* Animated Online Indicator */}
                     <div 
-                      className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card transition-all ${
+                      className={`absolute bottom-0 right-0 h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-card transition-all ${
                         friend.isOnline 
                           ? 'bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50' 
                           : 'bg-destructive'
@@ -215,38 +215,42 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                 </div>
 
                 {/* Content Section */}
-                <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex-1 w-full sm:w-auto min-w-0 space-y-2.5 sm:space-y-2">
                   <button
                     onClick={() => handleViewUser(friend.id)}
-                    className="text-left hover:underline focus:outline-none focus:underline group/name"
+                    className="w-full text-center sm:text-left hover:underline focus:outline-none focus:underline group/name"
                   >
-                    <h3 className="text-base font-bold uppercase group-hover/name:text-primary transition-colors">
+                    <h3 className="text-sm sm:text-base font-bold uppercase group-hover/name:text-primary transition-colors">
                       {friend.name}
                     </h3>
                   </button>
                   
                   {/* Enhanced Stats with Icons */}
-                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-2 sm:gap-x-3 gap-y-1">
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary font-medium">
-                      <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span>{friend.stats.friends.toLocaleString()} Friends</span>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:flex sm:flex-wrap sm:gap-x-3 sm:gap-y-1">
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-1.5 text-xs text-primary font-medium">
+                      <Users className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                      <span className="hidden sm:inline">{friend.stats.friends.toLocaleString()} Friends</span>
+                      <span className="sm:hidden">{friend.stats.friends.toLocaleString()}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary font-medium">
-                      <Heart className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span>{friend.stats.likes.toLocaleString()} Likes</span>
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-1.5 text-xs text-primary font-medium">
+                      <Heart className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                      <span className="hidden sm:inline">{friend.stats.likes.toLocaleString()} Likes</span>
+                      <span className="sm:hidden">{friend.stats.likes.toLocaleString()}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary/80 italic">
-                      <UserPlus className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span>{friend.stats.followers.toLocaleString()} Followers</span>
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-1.5 text-xs text-primary/80 italic">
+                      <UserPlus className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                      <span className="hidden sm:inline">{friend.stats.followers.toLocaleString()} Followers</span>
+                      <span className="sm:hidden">{friend.stats.followers.toLocaleString()}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary/80 italic">
-                      <Eye className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span>{friend.stats.following.toLocaleString()} Following</span>
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-1.5 text-xs text-primary/80 italic">
+                      <Eye className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                      <span className="hidden sm:inline">{friend.stats.following.toLocaleString()} Following</span>
+                      <span className="sm:hidden">{friend.stats.following.toLocaleString()}</span>
                     </div>
                   </div>
 
                   {/* Interactive Action Buttons */}
-                  <div className="flex flex-col gap-2 pt-1">
+                  <div className="flex flex-col gap-1.5 w-full">
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleAddFriend(friend.id, friend.name)}
@@ -254,9 +258,8 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                         className={`${buttonConfig.className} flex-1`}
                         size="sm"
                       >
-                        <ButtonIcon className="h-4 w-4" />
-                        <span className="hidden sm:inline">{buttonConfig.text}</span>
-                        <span className="sm:hidden">{buttonConfig.text.split(' ')[0]}</span>
+                        <ButtonIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span className="text-xs sm:text-sm">{buttonConfig.text}</span>
                       </Button>
                       
                       <Button
@@ -264,9 +267,8 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                         className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform flex-1"
                         size="sm"
                       >
-                        <Eye className="h-4 w-4" />
-                        <span className="hidden sm:inline">View Profile</span>
-                        <span className="sm:hidden">View</span>
+                        <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span className="text-xs sm:text-sm">View Profile</span>
                       </Button>
                     </div>
                     
@@ -277,11 +279,11 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                           size="sm"
                           className="hover:scale-105 transition-transform w-full"
                         >
-                          <MoreVertical className="h-4 w-4" />
-                          <span>Do More</span>
+                          <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <span className="text-xs sm:text-sm">Do More</span>
                         </Button>
                       </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-card z-50">
+                        <DropdownMenuContent align="center" className="w-48 bg-card z-50">
                           <DropdownMenuItem
                             onClick={() => handleToggleFollow(friend.id, friend.name)}
                             className="cursor-pointer"
