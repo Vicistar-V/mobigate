@@ -304,12 +304,19 @@ export const PremiumAdCard = ({
 
           {/* Title and Advertiser */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-1">
-              <span className="font-medium text-foreground truncate">{advertiser.name}</span>
-              <span>·</span>
-              <span>Sponsored</span>
+            <div className="space-y-0.5 mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-foreground text-xs sm:text-sm truncate">{advertiser.name}</span>
+                {advertiser.verified && (
+                  <Badge variant="secondary" className="text-xs px-1 py-0">✓</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Globe className="h-3 w-3 flex-shrink-0" />
+                <span>Sponsored</span>
+              </div>
             </div>
-            <h4 className="text-sm sm:text-base font-semibold text-foreground line-clamp-2">
+            <h4 className="text-sm sm:text-base font-semibold text-foreground line-clamp-2 leading-snug">
               {content.headline}
             </h4>
           </div>
