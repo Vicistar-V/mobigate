@@ -17,17 +17,17 @@ export const Footer = () => {
 
   return (
     <footer className="bg-muted/50 border-t mt-auto">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         {/* First Row - Main Sections */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {/* About Us */}
           <Collapsible open={openSections.about} onOpenChange={() => toggleSection('about')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">About Us</h3>
-              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.about ? 'rotate-180' : ''}`} />
+              <h3 className="text-sm font-semibold group-hover:text-primary transition-colors">About Us</h3>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${openSections.about ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
-            <CollapsibleContent className="pt-3">
-              <p className="text-base text-muted-foreground leading-relaxed">
+            <CollapsibleContent className="pt-2">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Connect, share, and engage with a vibrant community. Build meaningful relationships and discover new opportunities.
               </p>
             </CollapsibleContent>
@@ -36,11 +36,11 @@ export const Footer = () => {
           {/* Quick Links */}
           <Collapsible open={openSections.links} onOpenChange={() => toggleSection('links')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">Quick Links</h3>
-              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.links ? 'rotate-180' : ''}`} />
+              <h3 className="text-sm font-semibold group-hover:text-primary transition-colors">Quick Links</h3>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${openSections.links ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
-            <CollapsibleContent className="pt-3">
-              <ul className="space-y-2 text-base">
+            <CollapsibleContent className="pt-2">
+              <ul className="space-y-1.5 text-xs">
                 <li>
                   <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
                     Home
@@ -73,11 +73,11 @@ export const Footer = () => {
           {/* Support */}
           <Collapsible open={openSections.support} onOpenChange={() => toggleSection('support')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">Support</h3>
-              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.support ? 'rotate-180' : ''}`} />
+              <h3 className="text-sm font-semibold group-hover:text-primary transition-colors">Support</h3>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${openSections.support ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
-            <CollapsibleContent className="pt-3">
-              <ul className="space-y-2 text-base">
+            <CollapsibleContent className="pt-2">
+              <ul className="space-y-1.5 text-xs">
                 <li>
                   <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
                     Help Center
@@ -105,25 +105,25 @@ export const Footer = () => {
           {/* Contact */}
           <Collapsible open={openSections.contact} onOpenChange={() => toggleSection('contact')}>
             <CollapsibleTrigger className="flex items-center justify-between w-full text-left group">
-              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">Contact</h3>
-              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.contact ? 'rotate-180' : ''}`} />
+              <h3 className="text-sm font-semibold group-hover:text-primary transition-colors">Contact</h3>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${openSections.contact ? 'rotate-180' : ''}`} />
             </CollapsibleTrigger>
-            <CollapsibleContent className="pt-3">
-              <ul className="space-y-2 text-base">
+            <CollapsibleContent className="pt-2">
+              <ul className="space-y-1.5 text-xs">
                 <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <MapPin className="h-3.5 w-3.5 mt-0.5 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground">
                     Lagos, Nigeria
                   </span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                   <a href="tel:+2348064089171" className="text-muted-foreground hover:text-primary transition-colors">
                     +234-806-408-9171
                   </a>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                   <a href="mailto:info@example.com" className="text-muted-foreground hover:text-primary transition-colors">
                     info@example.com
                   </a>
@@ -133,10 +133,10 @@ export const Footer = () => {
           </Collapsible>
         </div>
 
-        <Separator className="my-6" />
+        <Separator className="my-4" />
 
         {/* Second Row - Copyright and Legal Links */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-base text-muted-foreground">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-muted-foreground">
           <p>© {currentYear} Your Platform Name. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-primary transition-colors">
