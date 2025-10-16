@@ -523,7 +523,7 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Designations</h3>
           </div>
-          <Badge variant="secondary" className="text-base shrink-0">Auto-Assigned</Badge>
+          <Badge variant="secondary" className="text-xs font-normal shrink-0">Auto-Assigned</Badge>
         </div>
         <p className="font-medium">{designations}</p>
       </Card>
