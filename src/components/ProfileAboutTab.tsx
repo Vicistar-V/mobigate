@@ -517,25 +517,25 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
       </Card>
 
       {/* Designations */}
-      <Card className="p-6">
-        <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
-          <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-wrap flex-1 min-w-0">
+      <Card className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-            <h3 className="text-lg font-semibold min-w-0">Designations</h3>
+            <h3 className="text-base sm:text-lg font-semibold flex-1 min-w-0">Designations</h3>
           </div>
-          <Badge variant="secondary" className="text-xs font-normal shrink-0">Auto-Assigned</Badge>
+          <Badge variant="secondary" className="text-xs font-normal shrink-0 self-start sm:self-auto">Auto-Assigned</Badge>
         </div>
-        <p className="font-medium">{designations}</p>
+        <p className="text-sm sm:text-base font-medium">{designations}</p>
       </Card>
 
       {/* Referer URL */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <ExternalLink className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Referer URL</h3>
+      <Card className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <ExternalLink className="h-5 w-5 text-primary shrink-0" />
+            <h3 className="text-base sm:text-lg font-semibold flex-1 min-w-0">Referer URL</h3>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             {refererUrl.privacy && (
               <PrivacyBadge 
                 level={refererUrl.privacy as PrivacyLevel} 
@@ -553,15 +553,15 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           </div>
         </div>
         <div className="space-y-2">
-          <p className="text-base text-muted-foreground">Referred by:</p>
+          <p className="text-sm sm:text-base text-muted-foreground">Referred by:</p>
           <Button
             variant="link"
-            className="h-auto p-0 font-medium text-primary hover:underline"
+            className="h-auto p-0 text-sm sm:text-base font-medium text-primary hover:underline"
             onClick={() => navigate(`/profile/${refererUrl.refererId}`)}
           >
             {refererUrl.refererName}
           </Button>
-          <p className="text-base text-muted-foreground break-all">
+          <p className="text-sm sm:text-base text-muted-foreground break-all">
             {refererUrl.url}
           </p>
         </div>
