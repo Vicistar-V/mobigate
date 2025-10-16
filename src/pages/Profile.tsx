@@ -512,7 +512,7 @@ const Profile = () => {
           
           <div className="px-6 pb-6">
             {/* Profile Image and Name Row */}
-            <div className="relative flex items-start justify-between">
+            <div className="relative">
               {/* Profile Image and Name Column */}
               <div className="flex flex-col items-start -mt-20">
                 <div className="relative group">
@@ -530,7 +530,7 @@ const Profile = () => {
                     Edit
                   </button>
                 </div>
-                <div className="mt-3">
+                <div className="mt-3 w-full">
                   <h1 className="text-4xl font-extrabold">{userProfile.name}</h1>
                   {userProfile.verified && (
                     <p className="text-emerald-600 font-bold italic text-base">Verified Content Creator</p>
@@ -538,9 +538,9 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Online Indicator - Under Banner, Far Right */}
+              {/* Online Indicator - Absolute Position, Top Right */}
               {userProfile.status === "Online" && (
-                <div className="mt-4 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                <div className="absolute top-0 right-0 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
                   Online
                 </div>
               )}
