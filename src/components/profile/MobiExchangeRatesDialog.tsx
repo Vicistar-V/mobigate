@@ -317,13 +317,6 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
               )}
             </div>
           </ScrollArea>
-
-          {/* Footer Info */}
-          <Card className="p-2 bg-muted/30">
-            <p className="text-xs sm:text-sm text-muted-foreground text-center leading-tight">
-              Last updated: {lastUpdated.toLocaleString()} • Rates are indicative and may vary
-            </p>
-          </Card>
         </div>
       </DialogContent>
     </Dialog>
