@@ -173,20 +173,20 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
                 </div>
                 
                 {/* Stats */}
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  <div className="flex items-center gap-1.5 text-sm text-primary font-medium">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary font-medium">
                     <Users className="h-3.5 w-3.5 flex-shrink-0" />
                     <span>{like.stats.friends.toLocaleString()} Friends</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm text-primary font-medium">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary font-medium">
                     <Heart className="h-3.5 w-3.5 flex-shrink-0" />
                     <span>{like.stats.likes.toLocaleString()} Likes</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm text-primary/80 italic">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary/80 italic">
                     <UserPlus className="h-3.5 w-3.5 flex-shrink-0" />
                     <span>{like.stats.followers.toLocaleString()} Followers</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm text-primary/80 italic">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-primary/80 italic">
                     <EyeIcon className="h-3.5 w-3.5 flex-shrink-0" />
                     <span>{like.stats.following.toLocaleString()} Following</span>
                   </div>
