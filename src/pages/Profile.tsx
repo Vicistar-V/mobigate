@@ -619,7 +619,7 @@ const Profile = () => {
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="destructive" className="rounded-full">
+                    <Button size="sm" variant="destructive" className="rounded-full h-9 w-9 p-0">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
