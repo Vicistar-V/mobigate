@@ -271,7 +271,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                 className="overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
               >
                 {/* Top: Full-Width Thumbnail or Icon */}
-                <div className="w-full aspect-video bg-muted flex items-center justify-center">
+                <div className="w-full aspect-[4/3] sm:aspect-video bg-muted flex items-center justify-center">
                   {post.imageUrl ? (
                     <img 
                       src={post.imageUrl} 
@@ -284,39 +284,39 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                 </div>
 
                 {/* Bottom: Content Info */}
-                <div className="p-4 space-y-2">
+                <div className="p-3 sm:p-4 space-y-2.5">
                   {/* Title */}
-                  <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">
+                  <h3 className="font-semibold text-base sm:text-lg line-clamp-2 leading-snug">
                     {post.title}
                   </h3>
                   
                   {/* Badge directly under title */}
                   <Badge 
                     variant="secondary" 
-                    className="text-xs font-normal w-fit"
+                    className="text-xs font-medium w-fit"
                   >
                     {post.type}
                   </Badge>
 
                   {/* Description (2-3 lines max) */}
                   {post.subtitle && (
-                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
                       {post.subtitle}
                     </p>
                   )}
 
                   {/* Metadata Row */}
-                  <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground flex-wrap pt-1">
-                    <span className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap pt-2">
+                    <span className="flex items-center gap-1.5">
+                      <Eye className="h-4 w-4" />
                       <span className="font-medium">{post.views}</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Heart className="h-3 w-3" />
+                    <span className="flex items-center gap-1.5">
+                      <Heart className="h-4 w-4" />
                       <span className="font-medium">{post.likes}</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <MessageCircle className="h-3 w-3" />
+                    <span className="flex items-center gap-1.5">
+                      <MessageCircle className="h-4 w-4" />
                       <span className="font-medium">{post.comments}</span>
                     </span>
                     {post.followers && !post.isOwner && (
@@ -327,16 +327,16 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                           e.stopPropagation();
                           handleFollowAuthor(post.userId);
                         }}
-                        className="gap-1 h-6 px-2 text-sm ml-auto"
+                        className="gap-1.5 h-7 px-3 text-xs ml-auto"
                         aria-label={followingAuthors.has(post.userId) ? "Unfollow" : "Follow"}
                       >
-                        <UserPlus className="h-3 w-3" />
-                        <span className="hidden sm:inline">{followingAuthors.has(post.userId) ? "Following" : "Follow"}</span>
-                        <span className="opacity-80">({formatFollowerCount(post.followers)})</span>
+                        <UserPlus className="h-3.5 w-3.5" />
+                        <span>{followingAuthors.has(post.userId) ? "Following" : "Follow"}</span>
+                        <span className="opacity-75">({formatFollowerCount(post.followers)})</span>
                       </Button>
                     )}
                     {post.fee && (
-                      <span className={`font-semibold text-emerald-600 dark:text-emerald-400 ${post.followers && !post.isOwner ? '' : 'ml-auto'}`}>
+                      <span className={`font-semibold text-base text-emerald-600 dark:text-emerald-400 ${post.followers && !post.isOwner ? '' : 'ml-auto'}`}>
                         {post.fee}
                       </span>
                     )}
