@@ -166,43 +166,49 @@ export const PremiumAdCard = ({
     return (
       <Card className="w-full overflow-hidden bg-card border-2 border-primary/10 shadow-lg">
         {/* Header */}
-        <div className="p-3 sm:p-4 flex items-center justify-between border-b border-border">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
-            {advertiser.logo && (
-              <img 
-                src={advertiser.logo} 
-                alt={advertiser.name}
-                className="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover bg-muted"
-              />
-            )}
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-foreground">{advertiser.name}</span>
-              {advertiser.verified && (
-                <Badge variant="secondary" className="text-base px-1.5 py-0">✓</Badge>
+        <div className="p-3 sm:p-4 border-b border-border">
+          <div className="flex items-start gap-2 justify-between">
+            {/* Left: Advertiser Info */}
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {advertiser.logo && (
+                <img 
+                  src={advertiser.logo} 
+                  alt={advertiser.name}
+                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover bg-muted flex-shrink-0"
+                />
               )}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-semibold text-foreground text-sm sm:text-base">{advertiser.name}</span>
+                  {advertiser.verified && (
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0">✓</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  <Globe className="h-3 w-3 flex-shrink-0" />
+                  <span>Sponsored</span>
+                </div>
+              </div>
             </div>
-            <span>·</span>
-            <span className="flex items-center gap-1">
-              <Globe className="h-3 w-3" />
-              Sponsored
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
-            >
-              <AlertCircle className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            
+            {/* Right: Action Buttons */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground"
+              >
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
