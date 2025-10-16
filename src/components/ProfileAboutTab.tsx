@@ -937,88 +937,85 @@ export const ProfileAboutTab = ({ userName }: ProfileAboutTabProps) => {
           Click on any option to navigate to the respective page
         </p>
         <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg border-muted">
-            <div 
-              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors w-full min-w-0"
-              onClick={() => {
-                showDialog();
-              }}
-            >
+          <div className="flex items-center gap-3 p-3 border rounded-lg border-muted cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => {
+              showDialog();
+            }}
+          >
+            <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Store className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-primary hover:underline break-words">My Mobi-Shop @ Mobi-Store</h4>
-                <p className="text-sm text-muted-foreground break-words">Your personal online store</p>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toast({ title: "Edit My Mobi-Shop settings (Coming soon)" });
+                }}
+              >
+                <Pencil className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="self-end sm:self-auto mt-2 sm:mt-0 shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                toast({ title: "Edit My Mobi-Shop settings (Coming soon)" });
-              }}
-            >
-              <Pencil className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-primary hover:underline break-words">My Mobi-Shop @ Mobi-Store</h4>
+              <p className="text-sm text-muted-foreground break-words">Your personal online store</p>
+            </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg border-muted">
-            <div 
-              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors w-full min-w-0"
-              onClick={() => {
-                showDialog();
-              }}
-            >
+          <div className="flex items-center gap-3 p-3 border rounded-lg border-muted cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => {
+              showDialog();
+            }}
+          >
+            <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-primary hover:underline break-words">Mobi-Circle</h4>
-                <p className="text-sm text-muted-foreground break-words">Connect with your community</p>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toast({ title: "Edit Mobi-Circle settings (Coming soon)" });
+                }}
+              >
+                <Pencil className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="self-end sm:self-auto mt-2 sm:mt-0 shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                toast({ title: "Edit Mobi-Circle settings (Coming soon)" });
-              }}
-            >
-              <Pencil className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-primary hover:underline break-words">Mobi-Circle</h4>
+              <p className="text-sm text-muted-foreground break-words">Connect with your community</p>
+            </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg border-muted">
-            <div 
-              className="flex items-center gap-3 flex-1 cursor-pointer hover:bg-accent/50 p-2 rounded-lg transition-colors w-full min-w-0"
-              onClick={() => {
-                showDialog();
-              }}
-            >
+          <div className="flex items-center gap-3 p-3 border rounded-lg border-muted cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => {
+              showDialog();
+            }}
+          >
+            <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-primary hover:underline break-words">Biz-Catalogue</h4>
-                <p className="text-sm text-muted-foreground break-words">Browse business offerings</p>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toast({ title: "Edit Biz-Catalogue settings (Coming soon)" });
+                }}
+              >
+                <Pencil className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="self-end sm:self-auto mt-2 sm:mt-0 shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                toast({ title: "Edit Biz-Catalogue settings (Coming soon)" });
-              }}
-            >
-              <Pencil className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-primary hover:underline break-words">Biz-Catalogue</h4>
+              <p className="text-sm text-muted-foreground break-words">Browse business offerings</p>
+            </div>
           </div>
         </div>
       </Card>
