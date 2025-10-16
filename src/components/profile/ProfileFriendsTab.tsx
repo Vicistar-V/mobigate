@@ -197,7 +197,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
                       className="relative block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full"
                       aria-label={`View ${friend.name}'s profile`}
                     >
-                      <Avatar className={`h-20 w-20 sm:h-24 sm:w-24 ring-2 transition-all ${
+                      <Avatar className={`h-24 w-24 sm:h-28 sm:w-28 ring-2 transition-all ${
                         friend.isOnline ? 'ring-emerald-500/50' : 'ring-border'
                       }`}>
                         <AvatarImage src={friend.avatar} alt={friend.name} />
