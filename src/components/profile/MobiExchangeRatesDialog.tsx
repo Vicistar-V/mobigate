@@ -143,24 +143,24 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-4 pt-12 sm:p-6 sm:pt-14">
-        <DialogHeader className="pr-14 sm:pr-16">
-          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Badge variant="default" className="text-base sm:text-lg px-2 sm:px-3 py-0.5 sm:py-1">M</Badge>
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] p-3 pt-10 sm:p-6 sm:pt-14">
+        <DialogHeader className="pr-12 sm:pr-16">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-xl">
+            <Badge variant="default" className="text-sm sm:text-lg px-2 py-0.5">M</Badge>
             <span>Mobi Exchange Rates</span>
           </DialogTitle>
         </DialogHeader>
         
         {/* Action Buttons Row */}
-        <div className="flex justify-end gap-2 -mt-2 sm:-mt-3">
+        <div className="flex justify-end gap-2 -mt-2">
           {isEditMode ? (
             <>
-              <Button variant="ghost" size="sm" onClick={handleCancel} className="h-8">
-                <X className="h-4 w-4 mr-1" />
+              <Button variant="ghost" size="sm" onClick={handleCancel} className="h-7 text-xs sm:h-8 sm:text-sm">
+                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Cancel
               </Button>
-              <Button variant="default" size="sm" onClick={handleSave} className="h-8">
-                <Save className="h-4 w-4 mr-1" />
+              <Button variant="default" size="sm" onClick={handleSave} className="h-7 text-xs sm:h-8 sm:text-sm">
+                <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Save
               </Button>
             </>
@@ -176,77 +176,77 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
           )}
         </div>
 
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-3">
           {/* Baseline Info */}
-          <Alert className="py-2 sm:py-3">
+          <Alert className="py-2">
             <Info className="h-3 w-3 sm:h-4 sm:w-4" />
-            <AlertDescription className="text-base sm:text-lg">
+            <AlertDescription className="text-xs sm:text-sm">
               <strong>Baseline Rate:</strong> 1 Mobi (M) = 1 Nigerian Naira (₦)
             </AlertDescription>
           </Alert>
 
           {/* Exchange Rates List */}
-          <ScrollArea className="h-[450px] sm:h-[500px] pr-3 sm:pr-4">
+          <ScrollArea className="h-[450px] sm:h-[500px] pr-2 sm:pr-4">
             <div className="space-y-2">
               {currentRates.map((rate) => (
-                <Card key={rate.id} className="p-3 sm:p-4 hover:bg-muted/50 transition-colors">
+                <Card key={rate.id} className="p-2.5 sm:p-4 hover:bg-muted/50 transition-colors">
                   {isEditMode ? (
                     <div className="space-y-3">
                       <div className="flex items-start gap-2">
                         <div className="flex-1 grid grid-cols-2 gap-2">
                           <div>
-                            <label className="text-sm text-muted-foreground">Flag</label>
+                            <label className="text-xs text-muted-foreground">Flag</label>
                             <Input 
                               value={rate.flag}
                               onChange={(e) => handleRateChange(rate.id, 'flag', e.target.value)}
-                              className="h-9 text-xl"
+                              className="h-8 text-xl"
                               maxLength={2}
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted-foreground">Currency Name</label>
+                            <label className="text-xs text-muted-foreground">Currency Name</label>
                             <Input 
                               value={rate.currency}
                               onChange={(e) => handleRateChange(rate.id, 'currency', e.target.value)}
-                              className="h-9"
+                              className="h-8 text-xs"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted-foreground">Code</label>
+                            <label className="text-xs text-muted-foreground">Code</label>
                             <Input 
                               value={rate.code}
                               onChange={(e) => handleRateChange(rate.id, 'code', e.target.value.toUpperCase())}
-                              className="h-9"
+                              className="h-8 text-xs"
                               maxLength={3}
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted-foreground">Symbol</label>
+                            <label className="text-xs text-muted-foreground">Symbol</label>
                             <Input 
                               value={rate.symbol}
                               onChange={(e) => handleRateChange(rate.id, 'symbol', e.target.value)}
-                              className="h-9"
+                              className="h-8 text-xs"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted-foreground">Rate (1 Mobi =)</label>
+                            <label className="text-xs text-muted-foreground">Rate (1 Mobi =)</label>
                             <Input 
                               type="number"
                               step="0.0001"
                               value={rate.rate}
                               onChange={(e) => handleRateChange(rate.id, 'rate', parseFloat(e.target.value) || 0)}
-                              className="h-9"
+                              className="h-8 text-xs"
                               disabled={rate.code === "NGN"}
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted-foreground">Change %</label>
+                            <label className="text-xs text-muted-foreground">Change %</label>
                             <Input 
                               type="number"
                               step="0.01"
                               value={rate.change}
                               onChange={(e) => handleRateChange(rate.id, 'change', parseFloat(e.target.value) || 0)}
-                              className="h-9"
+                              className="h-8 text-xs"
                             />
                           </div>
                         </div>
@@ -255,50 +255,48 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                             variant="ghost" 
                             size="icon"
                             onClick={() => handleDeleteCurrency(rate.id)}
-                            className="h-9 w-9 text-destructive hover:text-destructive"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <span className="text-2xl sm:text-3xl shrink-0">{rate.flag}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="text-xl sm:text-3xl shrink-0">{rate.flag}</span>
                           <div className="min-w-0 flex-1">
-                            <p className="text-base sm:text-lg font-semibold truncate">{rate.currency}</p>
-                            <p className="text-base sm:text-lg text-muted-foreground">{rate.code}</p>
+                            <p className="text-sm sm:text-lg font-semibold truncate">{rate.currency}</p>
+                            <p className="text-xs sm:text-base text-muted-foreground">{rate.code}</p>
                           </div>
                         </div>
 
                         <div className="text-right shrink-0">
-                          <p className="text-lg sm:text-2xl font-bold">
+                          <p className="text-base sm:text-2xl font-bold whitespace-nowrap">
                             {rate.symbol}{rate.code === "NGN" ? rate.rate.toFixed(2) : rate.rate.toFixed(4)}
                           </p>
-                          <div className="flex items-center gap-1 justify-end">
-                            {rate.change !== 0 && (
-                              <>
-                                {rate.change > 0 ? (
-                                  <TrendingUp className="h-2 w-2 sm:h-3 sm:w-3 text-emerald-600" />
-                                ) : (
-                                  <TrendingDown className="h-2 w-2 sm:h-3 sm:w-3 text-red-600" />
-                                )}
-                                <span className={`text-sm sm:text-base font-medium ${
-                                  rate.change > 0 ? "text-emerald-600" : "text-red-600"
-                                }`}>
-                                  {rate.change > 0 ? "+" : ""}{(rate.change * 100).toFixed(2)}%
-                                </span>
-                              </>
-                            )}
-                          </div>
+                          {rate.change !== 0 && (
+                            <div className="flex items-center gap-1 justify-end">
+                              {rate.change > 0 ? (
+                                <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-emerald-600" />
+                              ) : (
+                                <TrendingDown className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-red-600" />
+                              )}
+                              <span className={`text-xs sm:text-sm font-medium ${
+                                rate.change > 0 ? "text-emerald-600" : "text-red-600"
+                              }`}>
+                                {rate.change > 0 ? "+" : ""}{(rate.change * 100).toFixed(2)}%
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
                       <Separator className="my-2" />
 
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 text-sm sm:text-base text-muted-foreground">
+                      <div className="flex flex-col gap-0.5 text-xs sm:text-sm text-muted-foreground">
                         <span className="truncate">1 Mobi = {rate.symbol}{rate.code === "NGN" ? rate.rate.toFixed(2) : rate.rate.toFixed(4)} {rate.code}</span>
                         <span className="truncate">1 {rate.code} = M{(1 / rate.rate).toFixed(2)}</span>
                       </div>
@@ -310,10 +308,10 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
               {isEditMode && (
                 <Button 
                   variant="outline" 
-                  className="w-full" 
+                  className="w-full text-xs sm:text-sm" 
                   onClick={handleAddCurrency}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-3.5 w-3.5 mr-2" />
                   Add Currency
                 </Button>
               )}
@@ -321,8 +319,8 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
           </ScrollArea>
 
           {/* Footer Info */}
-          <Card className="p-2 sm:p-3 bg-muted/30">
-            <p className="text-sm sm:text-base text-muted-foreground text-center">
+          <Card className="p-2 bg-muted/30">
+            <p className="text-xs sm:text-sm text-muted-foreground text-center leading-tight">
               Last updated: {lastUpdated.toLocaleString()} • Rates are indicative and may vary
             </p>
           </Card>
