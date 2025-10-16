@@ -285,18 +285,18 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
 
                 {/* Right: Content Info */}
                 <div className="flex-1 min-w-0 space-y-2">
-                  {/* Title & Badge Row */}
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">
-                      {post.title}
-                    </h3>
-                    <Badge 
-                      variant="outline" 
-                      className={`flex-shrink-0 text-sm ${getContentTypeBadgeClass(post.type)}`}
-                    >
-                      {post.type}
-                    </Badge>
-                  </div>
+                  {/* Title */}
+                  <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">
+                    {post.title}
+                  </h3>
+                  
+                  {/* Badge directly under title */}
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs font-normal w-fit"
+                  >
+                    {post.type}
+                  </Badge>
 
                   {/* Description (2-3 lines max) */}
                   {post.subtitle && (
