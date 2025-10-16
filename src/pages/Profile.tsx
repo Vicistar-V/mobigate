@@ -513,8 +513,8 @@ const Profile = () => {
           <div className="px-6 pb-6">
             {/* Profile Image and Name Row */}
             <div className="relative">
-              {/* Profile Image and Name Column */}
-              <div className="flex flex-col items-start -mt-20">
+              {/* Profile Image and Online Indicator Row */}
+              <div className="flex items-end gap-3 -mt-20">
                 <div className="relative group">
                   <img 
                     src={userProfile.profileImage} 
@@ -529,20 +529,21 @@ const Profile = () => {
                     <Camera className="h-3 w-3 mr-1" />
                     Edit
                   </button>
-                  
-                  {/* Online Indicator - Badge on Profile Image */}
-                  {userProfile.status === "Online" && (
-                    <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold border-2 border-card">
-                      Online
-                    </div>
-                  )}
                 </div>
-                <div className="mt-3 w-full">
-                  <h1 className="text-4xl font-extrabold">{userProfile.name}</h1>
-                  {userProfile.verified && (
-                    <p className="text-emerald-600 font-bold italic text-base">Verified Content Creator</p>
-                  )}
-                </div>
+                
+                {/* Online Indicator - Next to Profile Image */}
+                {userProfile.status === "Online" && (
+                  <div className="mb-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                    Online
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-3 w-full">
+                <h1 className="text-4xl font-extrabold">{userProfile.name}</h1>
+                {userProfile.verified && (
+                  <p className="text-emerald-600 font-bold italic text-base">Verified Content Creator</p>
+                )}
               </div>
             </div>
 
