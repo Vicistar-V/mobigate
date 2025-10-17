@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { WallStatusFilters } from "@/components/WallStatusFilters";
 import { AdRotation } from "@/components/AdRotation";
 import { PostOptionsMenu } from "@/components/PostOptionsMenu";
@@ -125,17 +125,23 @@ export const WallStatusCarousel = ({
       
       {/* Normal View - Horizontal Carousel */}
       {view === "normal" && (
-        <div className="relative -mx-4 px-4">
-          <ScrollArea className="w-full">
-            <div className="flex gap-3 pb-2">
-              {displayedItems.map((item, index) => {
-                const shouldShowAd = (index + 1) % 4 === 0 && index < displayedItems.length - 1;
-                const adSlotIndex = Math.floor((index + 1) / 4) - 1;
-                
-                return (
-                  <React.Fragment key={`${item.title}-${index}`}>
-              <Card
-                className="flex-shrink-0 w-[72vw] max-w-[400px] aspect-[16/9] overflow-hidden relative group cursor-pointer"
+        <Carousel
+          opts={{
+            align: "start",
+            loop: false,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {displayedItems.map((item, index) => {
+              const shouldShowAd = (index + 1) % 4 === 0 && index < displayedItems.length - 1;
+              const adSlotIndex = Math.floor((index + 1) / 4) - 1;
+              
+              return (
+                <React.Fragment key={`${item.title}-${index}`}>
+                  <CarouselItem className="pl-2 md:pl-4 basis-[85%] sm:basis-[60%] md:basis-[45%] lg:basis-[30%]">
+                    <Card
+                      className="h-[280px] sm:h-[320px] overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
@@ -152,34 +158,35 @@ export const WallStatusCarousel = ({
                         <p className="text-white text-sm sm:text-base font-medium truncate">{item.author}</p>
                         <p className="text-white/90 text-xs sm:text-sm truncate">{item.title}</p>
                       </div>
-{onEdit && onDelete && (
-                          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10" onClick={(e) => e.stopPropagation()}>
-                            <PostOptionsMenu 
-                              onEdit={() => onEdit(item)}
-                              onDelete={() => onDelete(item.id ?? String(index))}
-                            />
-                          </div>
-                        )}
+                      {onEdit && onDelete && (
+                        <div className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                          <PostOptionsMenu 
+                            onEdit={() => onEdit(item)}
+                            onDelete={() => onDelete(item.id ?? String(index))}
+                          />
+                        </div>
+                      )}
                     </Card>
-                    
-                    {/* Insert premium ad after every 4 posts */}
-                    {shouldShowAd && premiumAdSlots.length > 0 && (
-                      <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
-                        <PremiumAdRotation
-                          key={`premium-ad-${adSlotIndex}`}
-                          slotId={`wall-status-premium-${adSlotIndex}`}
-                          ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
-                          context="wall-status"
-                        />
-                      </div>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
+                  </CarouselItem>
+                  
+                  {/* Insert premium ad after every 4 posts */}
+                  {shouldShowAd && premiumAdSlots.length > 0 && (
+                    <CarouselItem className="pl-2 md:pl-4 basis-[90%] sm:basis-[65%] md:basis-[50%] lg:basis-[35%]">
+                      <PremiumAdRotation
+                        key={`premium-ad-${adSlotIndex}`}
+                        slotId={`wall-status-premium-${adSlotIndex}`}
+                        ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
+                        context="wall-status"
+                      />
+                    </CarouselItem>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </CarouselContent>
+          <CarouselPrevious className="hidden md:flex -left-4" />
+          <CarouselNext className="hidden md:flex -right-4" />
+        </Carousel>
       )}
       
       {/* Large View - 3-Column Vertical Grid with Ads */}
