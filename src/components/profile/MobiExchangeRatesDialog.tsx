@@ -395,10 +395,10 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                               .map(currency => (
                                 <SelectItem key={currency.code} value={currency.code} className="py-2">
                                   <div className="flex items-start gap-1.5 w-full overflow-hidden">
-                                    <span className="text-base flex-shrink-0">{currency.flag}</span>
+                                    <span className="text-lg flex-shrink-0">{currency.flag}</span>
                                     <div className="flex flex-col overflow-hidden flex-1">
-                                      <span className="font-semibold text-xs">{currency.code}</span>
-                                      <span className="text-[11px] text-muted-foreground truncate block">{currency.name}</span>
+                                      <span className="font-semibold text-sm">{currency.code}</span>
+                                      <span className="text-xs text-muted-foreground truncate block">{currency.name}</span>
                                     </div>
                                   </div>
                                 </SelectItem>
