@@ -43,6 +43,9 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRates, setEditingRates] = useState(initialExchangeRates);
   const [selectedNewCurrency, setSelectedNewCurrency] = useState<string>("");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [pendingCurrency, setPendingCurrency] = useState<string>("");
+  const [pendingMobiValue, setPendingMobiValue] = useState<string>("");
 
   const handleEdit = () => {
     setEditingRates([...exchangeRates]);
@@ -52,6 +55,9 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
   const handleCancel = () => {
     setEditingRates([...exchangeRates]);
     setSelectedNewCurrency("");
+    setShowAddForm(false);
+    setPendingCurrency("");
+    setPendingMobiValue("");
     setIsEditMode(false);
   };
 
@@ -65,6 +71,9 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
     
     setExchangeRates([...editingRates]);
     setSelectedNewCurrency("");
+    setShowAddForm(false);
+    setPendingCurrency("");
+    setPendingMobiValue("");
     setIsEditMode(false);
     toast.success("Exchange rates updated successfully");
   };
@@ -76,31 +85,50 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
     ));
   };
 
-  const handleAddCurrency = () => {
-    if (!selectedNewCurrency) {
-      toast.error("Please select a currency");
-      return;
-    }
-
+  const handleSelectCurrency = (code: string) => {
     // Check if currency already exists
-    if (editingRates.find(rate => rate.code === selectedNewCurrency)) {
+    if (editingRates.find(rate => rate.code === code)) {
       toast.error("This currency is already added");
       return;
     }
 
-    const currencyData = availableCurrencies.find(c => c.code === selectedNewCurrency);
+    setPendingCurrency(code);
+    setPendingMobiValue("");
+    setShowAddForm(true);
+    setSelectedNewCurrency("");
+  };
+
+  const handleCancelAddForm = () => {
+    setShowAddForm(false);
+    setPendingCurrency("");
+    setPendingMobiValue("");
+  };
+
+  const handleConfirmAddCurrency = () => {
+    if (!pendingCurrency) return;
+
+    const mobiValue = parseFloat(pendingMobiValue);
+    if (!mobiValue || mobiValue <= 0) {
+      toast.error("Please enter a valid Mobi value greater than 0");
+      return;
+    }
+
+    const currencyData = availableCurrencies.find(c => c.code === pendingCurrency);
     if (!currencyData) return;
 
     setEditingRates(prev => [...prev, {
-      id: selectedNewCurrency,
+      id: pendingCurrency,
       currency: currencyData.name,
       code: currencyData.code,
       symbol: currencyData.symbol,
-      mobiPerUnit: 100,
+      mobiPerUnit: mobiValue,
       flag: currencyData.flag
     }]);
-    setSelectedNewCurrency("");
+    
     toast.success(`${currencyData.name} added`);
+    setShowAddForm(false);
+    setPendingCurrency("");
+    setPendingMobiValue("");
   };
 
   const handleDeleteCurrency = (id: string) => {
@@ -237,32 +265,94 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
               <Card className="p-4 border-dashed">
                 <div className="space-y-3">
                   <p className="text-sm font-medium">Add New Currency</p>
-                  <div className="flex gap-2">
-                    <Select value={selectedNewCurrency} onValueChange={setSelectedNewCurrency}>
-                      <SelectTrigger className="h-11 flex-1">
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableCurrencies
-                          .filter(c => !currentRates.find(r => r.code === c.code))
-                          .map(currency => (
-                            <SelectItem key={currency.code} value={currency.code}>
-                              <span className="flex items-center gap-2">
-                                <span>{currency.flag}</span>
-                                <span>{currency.code} - {currency.name}</span>
-                              </span>
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    <Button 
-                      onClick={handleAddCurrency}
-                      disabled={!selectedNewCurrency}
-                      className="h-11"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Select value={selectedNewCurrency} onValueChange={handleSelectCurrency}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Select currency to add" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCurrencies
+                        .filter(c => !currentRates.find(r => r.code === c.code))
+                        .map(currency => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            <span className="flex items-center gap-2">
+                              <span>{currency.flag}</span>
+                              <span>{currency.code} - {currency.name}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Mini Form for Adding Currency */}
+                  {showAddForm && pendingCurrency && (
+                    <Card className="p-4 bg-muted/30 border-primary/30 animate-in slide-in-from-top-2">
+                      <div className="space-y-4">
+                        {/* Currency Preview (Read-only) */}
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Currency to Add</p>
+                          <div className="flex items-center gap-3 p-3 bg-background rounded-lg border">
+                            <span className="text-3xl">
+                              {availableCurrencies.find(c => c.code === pendingCurrency)?.flag}
+                            </span>
+                            <div>
+                              <p className="font-semibold text-base">
+                                {availableCurrencies.find(c => c.code === pendingCurrency)?.code}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {availableCurrencies.find(c => c.code === pendingCurrency)?.name}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mobi Value Input */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-muted-foreground block">
+                            1 {availableCurrencies.find(c => c.code === pendingCurrency)?.symbol} equals how many Mobi?
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground">
+                              M
+                            </span>
+                            <Input 
+                              type="number" 
+                              step="0.01" 
+                              min="0.01"
+                              value={pendingMobiValue} 
+                              onChange={e => setPendingMobiValue(e.target.value)} 
+                              className="h-12 pl-8 text-lg font-semibold"
+                              placeholder="Enter value"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleConfirmAddCurrency();
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            onClick={handleCancelAddForm}
+                            className="flex-1 h-11"
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleConfirmAddCurrency}
+                            disabled={!pendingMobiValue || parseFloat(pendingMobiValue) <= 0}
+                            className="flex-1 h-11"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Currency
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
                 </div>
               </Card>
             )}
