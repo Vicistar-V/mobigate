@@ -99,21 +99,19 @@ export const AccountSummaryDialog = ({
         <div className="space-y-3 sm:space-y-4">
           {/* Balance Card */}
           <Card className="p-4 sm:p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <div className="space-y-3 sm:space-y-4">
-              <p className="text-base sm:text-lg font-semibold">Current Balance</p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-base sm:text-lg text-muted-foreground">Mobi Wallet:</span>
-                  <span className="text-xl sm:text-2xl font-bold">
-                    {mobiBalance.toLocaleString()} Mobi
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-base sm:text-lg text-muted-foreground">Credit Wallet:</span>
-                  <span className="text-xl sm:text-2xl font-bold">
-                    ₦{creditBalance.toLocaleString()}
-                  </span>
-                </div>
+            <div className="space-y-3">
+              <p className="text-base sm:text-lg font-semibold mb-3">Current Balance</p>
+              <div className="flex items-center justify-between">
+                <span className="text-base sm:text-lg">Mobi Wallet:</span>
+                <span className="text-lg sm:text-xl font-bold">
+                  {mobiBalance.toLocaleString()} Mobi
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-base sm:text-lg">Credit Wallet:</span>
+                <span className="text-lg sm:text-xl font-bold">
+                  ₦{creditBalance.toLocaleString()}
+                </span>
               </div>
             </div>
           </Card>
