@@ -28,10 +28,13 @@ export const GreetingSection = () => {
     label: "Friends",
     href: "/profile/current-user#friends"
   }, {
-    label: "Albums",
-    href: "/profile/current-user#albums"
+    label: "Invite",
+    href: "/invite"
   }];
   const moreLinks = [{
+    label: "Albums",
+    href: "/profile/current-user#albums"
+  }, {
     label: "Followers",
     href: "/profile/current-user#followers"
   }, {
@@ -77,9 +80,9 @@ export const GreetingSection = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 pt-2 border-t">
-          {primaryLinks.map(link => <span key={link.label}>
-              <Link to={link.href} className="text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide">
+        <div className="flex flex-nowrap items-center gap-1 pt-2 border-t overflow-x-auto scrollbar-hide">
+          {primaryLinks.map(link => <span key={link.label} className="flex items-center flex-shrink-0">
+              <Link to={link.href} className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap" onClick={e => handleLinkClick(e, link.href)}>
                 {link.label}
               </Link>
               <span className="text-muted-foreground px-1.5">|</span>
@@ -87,13 +90,13 @@ export const GreetingSection = () => {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide inline-flex items-center gap-1">
+              <button className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide inline-flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
                 <MoreHorizontal className="h-4 w-4" />
                 More
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-card z-50 w-48">
-              {moreLinks.map(link => <DropdownMenuItem key={link.label} asChild className="text-xl font-medium text-primary">
+              {moreLinks.map(link => <DropdownMenuItem key={link.label} asChild className="text-base font-medium text-primary">
                   <Link to={link.href} className="cursor-pointer" onClick={e => handleLinkClick(e, link.href)}>
                     {link.label}
                   </Link>
