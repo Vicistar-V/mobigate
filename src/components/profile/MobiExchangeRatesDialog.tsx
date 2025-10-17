@@ -196,7 +196,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                             1 {rate.symbol} equals how many Mobi?
                           </label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground pointer-events-none">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground">
                               M
                             </span>
                             <Input 
@@ -204,22 +204,9 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                               step="0.01" 
                               min="0.01"
                               value={rate.mobiPerUnit || 0} 
-                              onChange={e => {
-                                const value = e.target.value;
-                                // Only allow positive numbers
-                                if (value === '' || parseFloat(value) >= 0) {
-                                  handleRateChange(rate.id, value);
-                                }
-                              }}
-                              onKeyDown={e => {
-                                // Prevent minus sign and other non-numeric keys except decimal
-                                if (e.key === '-' || e.key === 'e' || e.key === 'E') {
-                                  e.preventDefault();
-                                }
-                              }}
+                              onChange={e => handleRateChange(rate.id, e.target.value)} 
                               className="h-12 pl-8 text-lg font-semibold"
                               placeholder="0.00"
-                              readOnly={false}
                             />
                           </div>
                         </div>
