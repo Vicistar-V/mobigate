@@ -163,7 +163,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
       <div className="flex gap-2">
         <Button
           onClick={handleFindFriends}
-          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 text-xs sm:text-sm md:text-base shadow-md hover:shadow-lg transition-all"
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 px-2 sm:px-4 text-xs sm:text-sm md:text-base shadow-md hover:shadow-lg transition-all"
           size="lg"
         >
           <Search className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -171,7 +171,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
         </Button>
         <Button
           onClick={() => toast({ title: "Invite Friend", description: "Invite feature coming soon!" })}
-          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 text-xs sm:text-sm md:text-base shadow-md hover:shadow-lg transition-all"
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 px-2 sm:px-4 text-xs sm:text-sm md:text-base shadow-md hover:shadow-lg transition-all"
           size="lg"
         >
           <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />
