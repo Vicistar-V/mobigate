@@ -60,7 +60,7 @@ export const AccountSummaryDialog = ({
 
           {/* Summary Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <Card className="p-3 sm:p-4">
+            <Card className="p-3 sm:p-4 border-blue-200 dark:border-blue-800/30">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">Total Received</p>
@@ -77,7 +77,7 @@ export const AccountSummaryDialog = ({
               </div>
             </Card>
 
-            <Card className="p-3 sm:p-4">
+            <Card className="p-3 sm:p-4 border-red-200 dark:border-red-800/30">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-base sm:text-lg font-semibold text-red-600">Total Spent</p>
