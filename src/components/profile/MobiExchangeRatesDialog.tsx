@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Edit, Plus, Save, X, Trash2, Info } from "lucide-react";
+import { Edit, Plus, Save, X, Trash2, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const initialExchangeRates = [
   { id: "NGN", currency: "Nigerian Naira", code: "NGN", symbol: "₦", mobiPerUnit: 1.00, flag: "🇳🇬" },
@@ -256,21 +257,6 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
           </div>
         </DialogHeader>
 
-        {/* Baseline Info Banner */}
-        <div className="px-4 pt-4 flex-shrink-0">
-          <Card className="p-3 bg-primary/5 border-primary/20">
-            <div className="flex items-start gap-2">
-              <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-semibold text-primary mb-1">Exchange Rates Info</p>
-                <p className="text-muted-foreground">
-                  Set how many Mobi each currency is worth
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
         {/* Scrollable Content */}
         <ScrollArea className="flex-1 px-4">
           <div className="py-4 space-y-3 pb-4">
@@ -356,149 +342,136 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
         {/* Fixed Bottom: Add Currency Sections (Edit Mode Only) */}
         {isEditMode && (
-          <div className="border-t bg-background flex-shrink-0">
-            <div className="p-4 space-y-3">
+          <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0">
+            <div className="p-3 space-y-2">
               {/* Add Existing Currency - Collapsible */}
-              <Card className="border-dashed">
-                <button
-                  onClick={() => setShowExistingForm(!showExistingForm)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-                >
-                  <p className="text-sm font-medium">Add Existing Currency</p>
-                  <Plus className={`h-4 w-4 transition-transform ${showExistingForm ? 'rotate-45' : ''}`} />
-                </button>
-                
-                {showExistingForm && (
-                  <div className="px-4 pb-4">
-                    <div className="flex gap-2">
-                      <Select value={selectedNewCurrency} onValueChange={setSelectedNewCurrency}>
-                        <SelectTrigger className="h-11 flex-1">
-                          <SelectValue placeholder="Select currency">
-                            {selectedNewCurrency && (
-                              <span className="truncate">
-                                {availableCurrencies.find(c => c.code === selectedNewCurrency)?.flag}{" "}
-                                {selectedNewCurrency}
-                              </span>
-                            )}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="w-[240px]">
-                          {availableCurrencies
-                            .filter(c => !currentRates.find(r => r.code === c.code))
-                            .map(currency => (
-                              <SelectItem key={currency.code} value={currency.code} className="py-3">
-                                <div className="flex items-start gap-2 w-full overflow-hidden">
-                                  <span className="text-xl flex-shrink-0">{currency.flag}</span>
-                                  <div className="flex flex-col overflow-hidden flex-1">
-                                    <span className="font-semibold text-sm">{currency.code}</span>
-                                    <span className="text-xs text-muted-foreground truncate block">{currency.name}</span>
+              <Collapsible open={showExistingForm} onOpenChange={setShowExistingForm}>
+                <Card className="border-dashed">
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
+                      <span className="text-sm font-medium">Add Existing</span>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${showExistingForm ? 'rotate-180' : ''}`} />
+                    </button>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent>
+                    <div className="px-3 pb-3 pt-1">
+                      <div className="flex gap-2">
+                        <Select value={selectedNewCurrency} onValueChange={setSelectedNewCurrency}>
+                          <SelectTrigger className="h-10 flex-1">
+                            <SelectValue placeholder="Select">
+                              {selectedNewCurrency && (
+                                <span className="truncate">
+                                  {availableCurrencies.find(c => c.code === selectedNewCurrency)?.flag}{" "}
+                                  {selectedNewCurrency}
+                                </span>
+                              )}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="w-[240px]">
+                            {availableCurrencies
+                              .filter(c => !currentRates.find(r => r.code === c.code))
+                              .map(currency => (
+                                <SelectItem key={currency.code} value={currency.code} className="py-2.5">
+                                  <div className="flex items-start gap-2 w-full overflow-hidden">
+                                    <span className="text-lg flex-shrink-0">{currency.flag}</span>
+                                    <div className="flex flex-col overflow-hidden flex-1">
+                                      <span className="font-semibold text-xs">{currency.code}</span>
+                                      <span className="text-[10px] text-muted-foreground truncate block">{currency.name}</span>
+                                    </div>
                                   </div>
-                                </div>
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                      <Button 
-                        onClick={handleAddCurrency}
-                        disabled={!selectedNewCurrency}
-                        className="h-11 flex-shrink-0"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <Button 
+                          onClick={handleAddCurrency}
+                          disabled={!selectedNewCurrency}
+                          size="sm"
+                          className="h-10 px-3"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </Card>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
 
               {/* Add Custom Currency - Collapsible */}
-              <Card className="border-dashed border-2">
-                <button
-                  onClick={() => setShowCustomForm(!showCustomForm)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-accent/50 transition-colors"
-                >
-                  <p className="text-sm font-medium">Add Custom Currency</p>
-                  <Plus className={`h-4 w-4 transition-transform ${showCustomForm ? 'rotate-45' : ''}`} />
-                </button>
+              <Collapsible open={showCustomForm} onOpenChange={setShowCustomForm}>
+                <Card className="border-dashed">
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
+                      <span className="text-sm font-medium">Add Custom</span>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${showCustomForm ? 'rotate-180' : ''}`} />
+                    </button>
+                  </CollapsibleTrigger>
 
-                {showCustomForm && (
-                  <div className="px-4 pb-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Currency Name *</label>
+                  <CollapsibleContent>
+                    <div className="px-3 pb-3 pt-1 space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <Input
-                          placeholder="e.g., Bitcoin"
+                          placeholder="Name"
                           value={customCurrency.name}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, name: e.target.value }))}
-                          className="h-11"
+                          className="h-9 text-sm"
                         />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Code *</label>
                         <Input
-                          placeholder="e.g., BTC"
+                          placeholder="Code"
                           value={customCurrency.code}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
                           maxLength={5}
-                          className="h-11"
+                          className="h-9 text-sm"
                         />
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Symbol *</label>
+                      <div className="grid grid-cols-2 gap-2">
                         <Input
-                          placeholder="e.g., ₿"
+                          placeholder="Symbol"
                           value={customCurrency.symbol}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, symbol: e.target.value }))}
-                          className="h-11"
+                          className="h-9 text-sm"
                         />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Flag/Emoji</label>
                         <Input
-                          placeholder="e.g., 🪙"
+                          placeholder="Flag"
                           value={customCurrency.flag}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, flag: e.target.value }))}
                           maxLength={4}
-                          className="h-11"
+                          className="h-9 text-sm"
                         />
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-muted-foreground">
-                        1 {customCurrency.symbol || "unit"} = how many Mobi? *
-                      </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground pointer-events-none">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">
                           M
                         </span>
                         <Input
                           type="number"
                           step="0.01"
                           min="0.01"
+                          placeholder="Mobi rate"
                           value={customCurrency.mobiPerUnit}
                           onChange={e => {
                             const value = parseFloat(e.target.value) || 0;
                             setCustomCurrency(prev => ({ ...prev, mobiPerUnit: value }));
                           }}
-                          className="h-12 pl-8 text-lg font-semibold"
-                          placeholder="100.00"
+                          className="h-9 pl-7 text-sm"
                         />
                       </div>
-                    </div>
 
-                    <Button 
-                      className="w-full h-11"
-                      onClick={handleAddCustomCurrency}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Custom Currency
-                    </Button>
-                  </div>
-                )}
-              </Card>
+                      <Button 
+                        size="sm"
+                        className="w-full h-9"
+                        onClick={handleAddCustomCurrency}
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                        Add
+                      </Button>
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
             </div>
           </div>
         )}
