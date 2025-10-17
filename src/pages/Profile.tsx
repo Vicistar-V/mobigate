@@ -425,12 +425,15 @@ const Profile = () => {
       type: post.type,
       author: post.author,
       authorImage: post.authorImage,
+      authorUserId: post.userId,
       title: post.title,
       description: post.description,
       timestamp: post.timestamp,
       likes: post.likes,
       comments: post.comments,
+      followers: post.followers,
       isLiked: post.isLiked,
+      isOwner: true, // All wall status posts on this profile belong to the owner
     }));
     const initialIndex = wallStatusPosts.findIndex(p => p.id === initialPost.id);
     setGalleryItems(items);
