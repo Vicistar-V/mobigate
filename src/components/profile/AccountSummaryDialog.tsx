@@ -31,9 +31,12 @@ export const AccountSummaryDialog = ({
   currencySymbol 
 }: AccountSummaryDialogProps) => {
   // Mock data - in production, this would come from backend
-  const balance = 15750.50;
-  const totalSent = 8240.00;
-  const totalReceived = 24000.50;
+  const mobiBalance = 100000;
+  const creditBalance = 100000;
+  const mobiReceived = 150000;
+  const creditReceived = 150000;
+  const mobiSpent = 50000;
+  const creditSpent = 50000;
   
   const recentTransactions: Transaction[] = [
     {
@@ -96,38 +99,56 @@ export const AccountSummaryDialog = ({
         <div className="space-y-3 sm:space-y-4">
           {/* Balance Card */}
           <Card className="p-4 sm:p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <div className="space-y-2">
-              <p className="text-base sm:text-lg text-muted-foreground">Current Balance</p>
-              <p className="text-2xl sm:text-4xl font-bold">
-                {currencySymbol}{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </p>
-              <p className="text-base sm:text-lg text-muted-foreground">
-                ≈ ₦{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })} Naira
-              </p>
+            <div className="space-y-3 sm:space-y-4">
+              <p className="text-base sm:text-lg font-semibold">Current Balance</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-base sm:text-lg text-muted-foreground">Mobi Wallet:</span>
+                  <span className="text-xl sm:text-2xl font-bold">
+                    {mobiBalance.toLocaleString()} Mobi
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-base sm:text-lg text-muted-foreground">Credit Wallet:</span>
+                  <span className="text-xl sm:text-2xl font-bold">
+                    ₦{creditBalance.toLocaleString()}
+                  </span>
+                </div>
+              </div>
             </div>
           </Card>
 
           {/* Summary Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Card className="p-3 sm:p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-base sm:text-lg text-muted-foreground">Total Received</p>
-                  <p className="text-lg sm:text-2xl font-bold text-emerald-600 truncate">
-                    +{currencySymbol}{totalReceived.toLocaleString()}
-                  </p>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-base sm:text-lg font-semibold text-emerald-600">Total Received</p>
+                  <div className="space-y-1">
+                    <p className="text-sm sm:text-base">
+                      Mobi Wallet: <span className="font-bold">{mobiReceived.toLocaleString()} Mobi</span>
+                    </p>
+                    <p className="text-sm sm:text-base">
+                      Credit Wallet: <span className="font-bold">₦{creditReceived.toLocaleString()}</span>
+                    </p>
+                  </div>
                 </div>
                 <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-600 shrink-0" />
               </div>
             </Card>
 
             <Card className="p-3 sm:p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-base sm:text-lg text-muted-foreground">Total Sent</p>
-                  <p className="text-lg sm:text-2xl font-bold text-red-600 truncate">
-                    -{currencySymbol}{totalSent.toLocaleString()}
-                  </p>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-base sm:text-lg font-semibold text-red-600">Total Spent</p>
+                  <div className="space-y-1">
+                    <p className="text-sm sm:text-base">
+                      Mobi Wallet: <span className="font-bold">{mobiSpent.toLocaleString()} Mobi</span>
+                    </p>
+                    <p className="text-sm sm:text-base">
+                      Credit Wallet: <span className="font-bold">₦{creditSpent.toLocaleString()}</span>
+                    </p>
+                  </div>
                 </div>
                 <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 shrink-0" />
               </div>
