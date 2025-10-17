@@ -235,8 +235,21 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-md h-[90vh] p-0 gap-0 flex flex-col">
         {/* Fixed Header */}
-        <DialogHeader className="px-3 py-3 border-b flex-shrink-0">
-          <div className="flex items-center justify-between gap-2">
+        <DialogHeader className="flex-shrink-0 border-b">
+          {/* Close button row */}
+          <div className="flex justify-end px-3 pt-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => onOpenChange(false)} 
+              className="h-7 w-7"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          {/* Title and actions row */}
+          <div className="flex items-center justify-between gap-2 px-3 pb-3">
             <DialogTitle className="text-base font-semibold">Exchange Rates</DialogTitle>
             {isEditMode ? (
               <div className="flex gap-1.5">
