@@ -16,21 +16,85 @@ const initialExchangeRates = [
   { id: "GHS", currency: "Ghanaian Cedi", code: "GHS", symbol: "₵", mobiPerUnit: 52.63, flag: "🇬🇭" },
   { id: "ZAR", currency: "South African Rand", code: "ZAR", symbol: "R", mobiPerUnit: 45.45, flag: "🇿🇦" },
   { id: "KES", currency: "Kenyan Shilling", code: "KES", symbol: "KSh", mobiPerUnit: 6.25, flag: "🇰🇪" },
-  { id: "JPY", currency: "Japanese Yen", code: "JPY", symbol: "¥", mobiPerUnit: 5.56, flag: "🇯🇵" }
+  { id: "JPY", currency: "Japanese Yen", code: "JPY", symbol: "¥", mobiPerUnit: 5.56, flag: "🇯🇵" },
+  { id: "CNY", currency: "Chinese Yuan", code: "CNY", symbol: "¥", mobiPerUnit: 115.74, flag: "🇨🇳" },
+  { id: "INR", currency: "Indian Rupee", code: "INR", symbol: "₹", mobiPerUnit: 10.00, flag: "🇮🇳" },
+  { id: "CAD", currency: "Canadian Dollar", code: "CAD", symbol: "C$", mobiPerUnit: 614.04, flag: "🇨🇦" },
+  { id: "AUD", currency: "Australian Dollar", code: "AUD", symbol: "A$", mobiPerUnit: 543.48, flag: "🇦🇺" },
+  { id: "AED", currency: "UAE Dirham", code: "AED", symbol: "د.إ", mobiPerUnit: 226.76, flag: "🇦🇪" },
+  { id: "SAR", currency: "Saudi Riyal", code: "SAR", symbol: "﷼", mobiPerUnit: 222.22, flag: "🇸🇦" },
+  { id: "EGP", currency: "Egyptian Pound", code: "EGP", symbol: "£", mobiPerUnit: 16.95, flag: "🇪🇬" },
+  { id: "BRL", currency: "Brazilian Real", code: "BRL", symbol: "R$", mobiPerUnit: 166.67, flag: "🇧🇷" },
+  { id: "MXN", currency: "Mexican Peso", code: "MXN", symbol: "$", mobiPerUnit: 48.78, flag: "🇲🇽" },
+  { id: "CHF", currency: "Swiss Franc", code: "CHF", symbol: "Fr", mobiPerUnit: 934.58, flag: "🇨🇭" },
+  { id: "SGD", currency: "Singapore Dollar", code: "SGD", symbol: "S$", mobiPerUnit: 617.28, flag: "🇸🇬" },
+  { id: "THB", currency: "Thai Baht", code: "THB", symbol: "฿", mobiPerUnit: 24.39, flag: "🇹🇭" }
 ];
 
 const availableCurrencies = [
+  // Americas
   { code: "USD", name: "US Dollar", symbol: "$", flag: "🇺🇸" },
+  { code: "CAD", name: "Canadian Dollar", symbol: "C$", flag: "🇨🇦" },
+  { code: "MXN", name: "Mexican Peso", symbol: "$", flag: "🇲🇽" },
+  { code: "BRL", name: "Brazilian Real", symbol: "R$", flag: "🇧🇷" },
+  { code: "ARS", name: "Argentine Peso", symbol: "$", flag: "🇦🇷" },
+  { code: "CLP", name: "Chilean Peso", symbol: "$", flag: "🇨🇱" },
+  { code: "COP", name: "Colombian Peso", symbol: "$", flag: "🇨🇴" },
+  { code: "PEN", name: "Peruvian Sol", symbol: "S/", flag: "🇵🇪" },
+  
+  // Europe
   { code: "EUR", name: "Euro", symbol: "€", flag: "🇪🇺" },
   { code: "GBP", name: "British Pound", symbol: "£", flag: "🇬🇧" },
+  { code: "CHF", name: "Swiss Franc", symbol: "Fr", flag: "🇨🇭" },
+  { code: "SEK", name: "Swedish Krona", symbol: "kr", flag: "🇸🇪" },
+  { code: "NOK", name: "Norwegian Krone", symbol: "kr", flag: "🇳🇴" },
+  { code: "DKK", name: "Danish Krone", symbol: "kr", flag: "🇩🇰" },
+  { code: "PLN", name: "Polish Zloty", symbol: "zł", flag: "🇵🇱" },
+  { code: "CZK", name: "Czech Koruna", symbol: "Kč", flag: "🇨🇿" },
+  { code: "HUF", name: "Hungarian Forint", symbol: "Ft", flag: "🇭🇺" },
+  { code: "RON", name: "Romanian Leu", symbol: "lei", flag: "🇷🇴" },
+  { code: "TRY", name: "Turkish Lira", symbol: "₺", flag: "🇹🇷" },
+  
+  // Asia
+  { code: "CNY", name: "Chinese Yuan", symbol: "¥", flag: "🇨🇳" },
+  { code: "JPY", name: "Japanese Yen", symbol: "¥", flag: "🇯🇵" },
+  { code: "INR", name: "Indian Rupee", symbol: "₹", flag: "🇮🇳" },
+  { code: "KRW", name: "South Korean Won", symbol: "₩", flag: "🇰🇷" },
+  { code: "SGD", name: "Singapore Dollar", symbol: "S$", flag: "🇸🇬" },
+  { code: "HKD", name: "Hong Kong Dollar", symbol: "HK$", flag: "🇭🇰" },
+  { code: "THB", name: "Thai Baht", symbol: "฿", flag: "🇹🇭" },
+  { code: "MYR", name: "Malaysian Ringgit", symbol: "RM", flag: "🇲🇾" },
+  { code: "PHP", name: "Philippine Peso", symbol: "₱", flag: "🇵🇭" },
+  { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp", flag: "🇮🇩" },
+  { code: "VND", name: "Vietnamese Dong", symbol: "₫", flag: "🇻🇳" },
+  { code: "PKR", name: "Pakistani Rupee", symbol: "₨", flag: "🇵🇰" },
+  { code: "BDT", name: "Bangladeshi Taka", symbol: "৳", flag: "🇧🇩" },
+  
+  // Middle East
+  { code: "AED", name: "UAE Dirham", symbol: "د.إ", flag: "🇦🇪" },
+  { code: "SAR", name: "Saudi Riyal", symbol: "﷼", flag: "🇸🇦" },
+  { code: "QAR", name: "Qatari Riyal", symbol: "﷼", flag: "🇶🇦" },
+  { code: "KWD", name: "Kuwaiti Dinar", symbol: "د.ك", flag: "🇰🇼" },
+  { code: "BHD", name: "Bahraini Dinar", symbol: ".د.ب", flag: "🇧🇭" },
+  { code: "OMR", name: "Omani Rial", symbol: "﷼", flag: "🇴🇲" },
+  { code: "JOD", name: "Jordanian Dinar", symbol: "د.ا", flag: "🇯🇴" },
+  { code: "ILS", name: "Israeli Shekel", symbol: "₪", flag: "🇮🇱" },
+  
+  // Africa
   { code: "GHS", name: "Ghanaian Cedi", symbol: "₵", flag: "🇬🇭" },
   { code: "ZAR", name: "South African Rand", symbol: "R", flag: "🇿🇦" },
   { code: "KES", name: "Kenyan Shilling", symbol: "KSh", flag: "🇰🇪" },
-  { code: "JPY", name: "Japanese Yen", symbol: "¥", flag: "🇯🇵" },
-  { code: "CNY", name: "Chinese Yuan", symbol: "¥", flag: "🇨🇳" },
-  { code: "INR", name: "Indian Rupee", symbol: "₹", flag: "🇮🇳" },
-  { code: "CAD", name: "Canadian Dollar", symbol: "C$", flag: "🇨🇦" },
+  { code: "EGP", name: "Egyptian Pound", symbol: "£", flag: "🇪🇬" },
+  { code: "TZS", name: "Tanzanian Shilling", symbol: "TSh", flag: "🇹🇿" },
+  { code: "UGX", name: "Ugandan Shilling", symbol: "USh", flag: "🇺🇬" },
+  { code: "MAD", name: "Moroccan Dirham", symbol: "د.م.", flag: "🇲🇦" },
+  { code: "XOF", name: "West African CFA Franc", symbol: "Fr", flag: "🌍" },
+  { code: "XAF", name: "Central African CFA Franc", symbol: "Fr", flag: "🌍" },
+  { code: "ETB", name: "Ethiopian Birr", symbol: "Br", flag: "🇪🇹" },
+  
+  // Oceania
   { code: "AUD", name: "Australian Dollar", symbol: "A$", flag: "🇦🇺" },
+  { code: "NZD", name: "New Zealand Dollar", symbol: "NZ$", flag: "🇳🇿" },
 ];
 
 interface MobiExchangeRatesDialogProps {
