@@ -159,15 +159,25 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
 
   return (
     <div className="space-y-4 pb-6">
-      {/* Find Friends Button */}
-      <Button
-        onClick={handleFindFriends}
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
-        size="lg"
-      >
-        <Search className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-        Find Friends
-      </Button>
+      {/* Find & Invite Friends Buttons */}
+      <div className="flex gap-2">
+        <Button
+          onClick={handleFindFriends}
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+          size="lg"
+        >
+          <Search className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+          Find Friend
+        </Button>
+        <Button
+          onClick={() => toast({ title: "Invite Friend", description: "Invite feature coming soon!" })}
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+          size="lg"
+        >
+          <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+          Invite Friend
+        </Button>
+      </div>
 
       {/* Header */}
       <div className="space-y-1">
