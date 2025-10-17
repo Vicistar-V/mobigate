@@ -131,7 +131,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
   const handleSave = () => {
     // Validate all rates are > 0
-    const invalidRates = editingRates.filter(rate => rate.id !== "NGN" && (rate.mobiPerUnit || 0) <= 0);
+    const invalidRates = editingRates.filter(rate => (rate.mobiPerUnit || 0) <= 0);
     if (invalidRates.length > 0) {
       toast.error("All exchange rates must be greater than 0");
       return;
@@ -258,9 +258,9 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
             <div className="flex items-start gap-2">
               <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-semibold text-primary mb-1">Baseline Currency</p>
+                <p className="font-semibold text-primary mb-1">Exchange Rates Info</p>
                 <p className="text-muted-foreground">
-                  1 ₦ = 1 Mobi (cannot be changed)
+                  Set how many Mobi each currency is worth
                 </p>
               </div>
             </div>
@@ -270,96 +270,83 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
         {/* Scrollable Content */}
         <ScrollArea className="flex-1 px-4">
           <div className="py-4 space-y-3">
-            {currentRates.map(rate => {
-              const isNaira = rate.id === "NGN";
-              
-              return (
-                <Card key={rate.id} className={`p-4 ${isNaira ? 'bg-muted/30 border-2' : ''}`}>
-                  {isEditMode ? (
-                    // Edit Mode
-                    <div className="space-y-3">
-                      {/* Currency Header (Read-only) */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-3xl">{rate.flag}</span>
-                          <div>
-                            <p className="font-semibold text-base">{rate.code}</p>
-                            <p className="text-xs text-muted-foreground">{rate.currency}</p>
-                          </div>
-                        </div>
-                        {!isNaira && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleDeleteCurrency(rate.id)} 
-                            className="h-9 w-9 text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-
-                      {/* Rate Input */}
-                      {isNaira ? (
-                        <div className="bg-muted/50 rounded-lg p-3 border-2 border-dashed">
-                          <p className="text-sm text-muted-foreground text-center">
-                            Locked at <span className="font-semibold text-foreground">1 ₦ = 1 Mobi</span>
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <label className="text-xs font-medium text-muted-foreground block">
-                            1 {rate.symbol} equals how many Mobi?
-                          </label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground pointer-events-none">
-                              M
-                            </span>
-                            <Input 
-                              type="number" 
-                              step="0.01" 
-                              min="0.01"
-                              value={rate.mobiPerUnit || 0} 
-                              onChange={e => {
-                                const value = e.target.value;
-                                // Only allow positive numbers
-                                if (value === '' || parseFloat(value) >= 0) {
-                                  handleRateChange(rate.id, value);
-                                }
-                              }}
-                              onKeyDown={e => {
-                                // Prevent minus sign and other non-numeric keys except decimal
-                                if (e.key === '-' || e.key === 'e' || e.key === 'E') {
-                                  e.preventDefault();
-                                }
-                              }}
-                              className="h-12 pl-8 text-lg font-semibold"
-                              placeholder="0.00"
-                              readOnly={false}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    // View Mode
+            {currentRates.map(rate => (
+              <Card key={rate.id} className="p-4">
+                {isEditMode ? (
+                  // Edit Mode
+                  <div className="space-y-3">
+                    {/* Currency Header (Read-only) */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-4xl">{rate.flag}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl">{rate.flag}</span>
                         <div>
                           <p className="font-semibold text-base">{rate.code}</p>
                           <p className="text-xs text-muted-foreground">{rate.currency}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground mb-0.5">1 {rate.symbol} =</p>
-                        <p className="text-2xl font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
+                      {rate.id !== "NGN" && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleDeleteCurrency(rate.id)} 
+                          className="h-9 w-9 text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Rate Input */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground block">
+                        1 {rate.symbol} equals how many Mobi?
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground pointer-events-none">
+                          M
+                        </span>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          min="0.01"
+                          value={rate.mobiPerUnit || 0} 
+                          onChange={e => {
+                            const value = e.target.value;
+                            // Only allow positive numbers
+                            if (value === '' || parseFloat(value) >= 0) {
+                              handleRateChange(rate.id, value);
+                            }
+                          }}
+                          onKeyDown={e => {
+                            // Prevent minus sign and other non-numeric keys except decimal
+                            if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                              e.preventDefault();
+                            }
+                          }}
+                          className="h-12 pl-8 text-lg font-semibold"
+                          placeholder="0.00"
+                        />
                       </div>
                     </div>
-                  )}
-                </Card>
-              );
-            })}
+                  </div>
+                ) : (
+                  // View Mode
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-4xl">{rate.flag}</span>
+                      <div>
+                        <p className="font-semibold text-base">{rate.code}</p>
+                        <p className="text-xs text-muted-foreground">{rate.currency}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground mb-0.5">1 {rate.symbol} =</p>
+                      <p className="text-2xl font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            ))}
             
             {/* Add Currency Section (Edit Mode Only) */}
             {isEditMode && (
