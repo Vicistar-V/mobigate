@@ -143,8 +143,8 @@ export const AccountSummaryDialog = ({
             <ScrollArea className="h-[250px] sm:h-[300px] pr-3 sm:pr-4">
               <div className="space-y-2 sm:space-y-3">
                 {recentTransactions.map((transaction) => (
-                  <Card key={transaction.id} className="p-3 sm:p-4">
-                    <div className="flex items-start justify-between gap-3">
+                <Card key={transaction.id} className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                       <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
                         <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${
                           transaction.type === "received" 
@@ -170,7 +170,7 @@ export const AccountSummaryDialog = ({
                           </p>
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
+                      <div className="flex items-center justify-between sm:flex-col sm:items-end sm:text-right shrink-0 mt-2 sm:mt-0 pl-9 sm:pl-0">
                         <p className={`text-base sm:text-lg font-semibold ${
                           transaction.type === "received" 
                             ? "text-emerald-600" 
@@ -179,7 +179,7 @@ export const AccountSummaryDialog = ({
                           {transaction.type === "received" ? "+" : "-"}
                           {currencySymbol}{transaction.amount.toLocaleString()}
                         </p>
-                        <Badge variant="outline" className="text-sm sm:text-base mt-1">
+                        <Badge variant="outline" className="text-sm sm:text-base sm:mt-1">
                           {transaction.currency}
                         </Badge>
                       </div>
