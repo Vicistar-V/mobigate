@@ -260,6 +260,13 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
         {/* Scrollable Content */}
         <ScrollArea className="flex-1 px-4">
           <div className="py-4 space-y-3 pb-4">
+            {/* Minimalist Info Section */}
+            <div className="px-3 py-2 rounded-lg bg-muted/30 border border-border/50">
+              <p className="text-xs text-muted-foreground">
+                Set exchange rates: 1 currency unit = X Mobi
+              </p>
+            </div>
+
             {currentRates.map(rate => (
               <Card key={rate.id} className="p-4">
                 {isEditMode ? (
