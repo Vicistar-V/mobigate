@@ -350,7 +350,10 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
           <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0">
             <div className="p-2.5 space-y-2">
               {/* Add Existing Currency - Collapsible */}
-              <Collapsible open={showExistingForm} onOpenChange={setShowExistingForm}>
+              <Collapsible open={showExistingForm} onOpenChange={(open) => {
+                setShowExistingForm(open);
+                if (open) setShowCustomForm(false);
+              }}>
                 <Card className="border-dashed">
                   <CollapsibleTrigger asChild>
                     <button className="w-full px-2.5 py-2 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
@@ -404,7 +407,10 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
               </Collapsible>
 
               {/* Add Custom Currency - Collapsible */}
-              <Collapsible open={showCustomForm} onOpenChange={setShowCustomForm}>
+              <Collapsible open={showCustomForm} onOpenChange={(open) => {
+                setShowCustomForm(open);
+                if (open) setShowExistingForm(false);
+              }}>
                 <Card className="border-dashed">
                   <CollapsibleTrigger asChild>
                     <button className="w-full px-2.5 py-2 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
