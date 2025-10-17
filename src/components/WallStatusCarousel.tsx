@@ -134,8 +134,8 @@ export const WallStatusCarousel = ({
                 
                 return (
                   <React.Fragment key={`${item.title}-${index}`}>
-                    <Card 
-                      className="flex-shrink-0 w-[72vw] max-w-[400px] aspect-[15/14] overflow-hidden relative group cursor-pointer"
+              <Card
+                className="flex-shrink-0 w-[72vw] max-w-[400px] aspect-[16/9] overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
@@ -195,7 +195,7 @@ export const WallStatusCarousel = ({
                     className="overflow-hidden relative group cursor-pointer"
                     onClick={() => openDetails(item)}
                   >
-                    <div className="aspect-[15/14]">
+                    <div className="aspect-[16/9] relative overflow-hidden">
                       {item.imageUrl && (
                         <img 
                           src={item.imageUrl} 
@@ -247,7 +247,7 @@ export const WallStatusCarousel = ({
                         className="overflow-hidden relative group cursor-pointer"
                         onClick={() => openDetails(item)}
                       >
-                        <div className="aspect-[15/14]">
+                        <div className="aspect-[16/9] relative overflow-hidden">
                           {item.imageUrl && (
                             <img 
                               src={item.imageUrl} 
@@ -331,7 +331,7 @@ export const WallStatusCarousel = ({
                   className="overflow-hidden relative group cursor-pointer"
                   onClick={() => openDetails(item)}
                 >
-                  <div className="aspect-[15/14]">
+                  <div className="aspect-[16/9] relative overflow-hidden">
                     {item.imageUrl && (
                       <img 
                         src={item.imageUrl} 
