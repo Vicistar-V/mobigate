@@ -125,9 +125,9 @@ export const WallStatusCarousel = ({
       
       {/* Normal View - Horizontal Carousel */}
       {view === "normal" && (
-        <div className="relative -mx-4 px-4 h-[38vh] sm:h-[34vh] md:h-[32vh]">
-          <ScrollArea className="w-full h-full">
-            <div className="flex gap-3 pb-2 h-full items-stretch">
+        <div className="relative -mx-4 px-4 max-h-[40vh]">
+          <ScrollArea className="w-full">
+            <div className="flex gap-3 pb-2">
               {displayedItems.map((item, index) => {
                 const shouldShowAd = (index + 1) % 4 === 0 && index < displayedItems.length - 1;
                 const adSlotIndex = Math.floor((index + 1) / 4) - 1;
@@ -135,7 +135,7 @@ export const WallStatusCarousel = ({
                 return (
                   <React.Fragment key={`${item.title}-${index}`}>
                     <Card 
-                      className="flex-shrink-0 w-[72vw] max-w-[400px] h-full overflow-hidden relative group cursor-pointer"
+                      className="flex-shrink-0 w-[72vw] sm:w-[95vw] h-full overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
@@ -164,7 +164,7 @@ export const WallStatusCarousel = ({
                     
                     {/* Insert premium ad after every 4 posts */}
                     {shouldShowAd && premiumAdSlots.length > 0 && (
-                      <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px] h-full">
+                      <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
                         <PremiumAdRotation
                           key={`premium-ad-${adSlotIndex}`}
                           slotId={`wall-status-premium-${adSlotIndex}`}
@@ -195,9 +195,9 @@ export const WallStatusCarousel = ({
                     className="overflow-hidden relative group cursor-pointer"
                     onClick={() => openDetails(item)}
                   >
-                    <div className="aspect-[15/14]">
+                    <div className="aspect-[12/7] w-full h-auto">
                       {item.imageUrl && (
-                        <img 
+                        <img
                           src={item.imageUrl} 
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -247,9 +247,9 @@ export const WallStatusCarousel = ({
                         className="overflow-hidden relative group cursor-pointer"
                         onClick={() => openDetails(item)}
                       >
-                        <div className="aspect-[15/14]">
+                        <div className="aspect-[12/7] w-full h-auto">
                           {item.imageUrl && (
-                            <img 
+                            <img
                               src={item.imageUrl} 
                               alt={item.title}
                               className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -331,9 +331,9 @@ export const WallStatusCarousel = ({
                   className="overflow-hidden relative group cursor-pointer"
                   onClick={() => openDetails(item)}
                 >
-                  <div className="aspect-[15/14]">
+                  <div className="aspect-[12/7] w-full h-auto">
                     {item.imageUrl && (
-                      <img 
+                      <img
                         src={item.imageUrl} 
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
