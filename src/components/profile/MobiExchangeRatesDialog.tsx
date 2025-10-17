@@ -157,7 +157,7 @@ export const MobiExchangeRatesDialog = ({
 
         <div className="space-y-3">
           {/* Baseline Info */}
-          <Alert className="py-2">
+          <Alert className="py-2 max-w-lg">
             <Info className="h-3 w-3 sm:h-4 sm:w-4" />
             <AlertDescription className="text-xs sm:text-sm">
               <strong>Baseline Rate:</strong> 1 Mobi (M) = 1 Nigerian Naira (₦)
