@@ -175,7 +175,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
           size="lg"
         >
           <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />
-          <span className="ml-1.5 sm:ml-2">Invite</span>
+          <span className="ml-1.5 sm:ml-2">Invite People</span>
         </Button>
       </div>
 
