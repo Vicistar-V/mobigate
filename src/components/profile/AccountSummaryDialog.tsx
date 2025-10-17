@@ -1,21 +1,9 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft, Calendar } from "lucide-react";
-import { format } from "date-fns";
-
-interface Transaction {
-  id: string;
-  type: "sent" | "received";
-  amount: number;
-  currency: string;
-  to?: string;
-  from?: string;
-  date: Date;
-  description: string;
-}
+import { Wallet, TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import { RecentTransactionsDialog } from "./RecentTransactionsDialog";
 
 interface AccountSummaryDialogProps {
   open: boolean;
@@ -30,6 +18,8 @@ export const AccountSummaryDialog = ({
   userName,
   currencySymbol 
 }: AccountSummaryDialogProps) => {
+  const [showTransactions, setShowTransactions] = useState(false);
+  
   // Mock data - in production, this would come from backend
   const mobiBalance = 100000;
   const creditBalance = 100000;
@@ -37,54 +27,6 @@ export const AccountSummaryDialog = ({
   const creditReceived = 150000;
   const mobiSpent = 50000;
   const creditSpent = 50000;
-  
-  const recentTransactions: Transaction[] = [
-    {
-      id: "1",
-      type: "received",
-      amount: 5000,
-      currency: "Mobi",
-      from: "Sarah Johnson",
-      date: new Date(2025, 9, 14),
-      description: "Gift payment"
-    },
-    {
-      id: "2",
-      type: "sent",
-      amount: 2500,
-      currency: "Mobi",
-      to: "Michael Chen",
-      date: new Date(2025, 9, 13),
-      description: "Service payment"
-    },
-    {
-      id: "3",
-      type: "received",
-      amount: 1200,
-      currency: "Mobi",
-      from: "Emily Davis",
-      date: new Date(2025, 9, 12),
-      description: "Refund"
-    },
-    {
-      id: "4",
-      type: "sent",
-      amount: 3500,
-      currency: "Mobi",
-      to: "James Wilson",
-      date: new Date(2025, 9, 11),
-      description: "Purchase"
-    },
-    {
-      id: "5",
-      type: "received",
-      amount: 7500,
-      currency: "Mobi",
-      from: "Lisa Anderson",
-      date: new Date(2025, 9, 10),
-      description: "Consulting fee"
-    },
-  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -153,63 +95,23 @@ export const AccountSummaryDialog = ({
             </Card>
           </div>
 
-          {/* Recent Transactions */}
-          <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center gap-2">
-              <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-              Recent Transactions
-            </h4>
-            <ScrollArea className="h-[250px] sm:h-[300px] pr-3 sm:pr-4">
-              <div className="space-y-2 sm:space-y-3">
-                {recentTransactions.map((transaction) => (
-                <Card key={transaction.id} className="p-3 sm:p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                      <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
-                        <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${
-                          transaction.type === "received" 
-                            ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30" 
-                            : "bg-red-100 text-red-600 dark:bg-red-900/30"
-                        }`}>
-                          {transaction.type === "received" ? (
-                            <ArrowDownLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-                          ) : (
-                            <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-base sm:text-lg font-medium truncate">
-                            {transaction.type === "received" ? "From" : "To"}{" "}
-                            {transaction.type === "received" ? transaction.from : transaction.to}
-                          </p>
-                          <p className="text-base sm:text-lg text-muted-foreground truncate">
-                            {transaction.description}
-                          </p>
-                          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                            {format(transaction.date, "MMM dd, yyyy 'at' h:mm a")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between sm:flex-col sm:items-end sm:text-right shrink-0 mt-2 sm:mt-0 pl-9 sm:pl-0">
-                        <p className={`text-base sm:text-lg font-semibold ${
-                          transaction.type === "received" 
-                            ? "text-emerald-600" 
-                            : "text-red-600"
-                        }`}>
-                          {transaction.type === "received" ? "+" : "-"}
-                          {currencySymbol}{transaction.amount.toLocaleString()}
-                        </p>
-                        <Badge variant="outline" className="text-sm sm:text-base sm:mt-1">
-                          {transaction.currency}
-                        </Badge>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
+          {/* Recent Transactions Button */}
+          <Button 
+            variant="outline" 
+            className="w-full justify-start gap-2"
+            onClick={() => setShowTransactions(true)}
+          >
+            <Calendar className="h-4 w-4" />
+            View Recent Transactions
+          </Button>
         </div>
       </DialogContent>
+
+      <RecentTransactionsDialog 
+        open={showTransactions}
+        onOpenChange={setShowTransactions}
+        currencySymbol={currencySymbol}
+      />
     </Dialog>
   );
 };
