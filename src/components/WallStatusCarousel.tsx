@@ -125,7 +125,7 @@ export const WallStatusCarousel = ({
       
       {/* Normal View - Horizontal Carousel */}
       {view === "normal" && (
-        <div className="relative -mx-4 px-4">
+        <div className="relative -mx-4 px-4 max-h-[40vh]">
           <ScrollArea className="w-full">
             <div className="flex gap-3 pb-2">
               {displayedItems.map((item, index) => {
