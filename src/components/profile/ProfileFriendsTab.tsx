@@ -160,22 +160,22 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   return (
     <div className="space-y-4 pb-6">
       {/* Find & Invite Friends Buttons */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Button
           onClick={handleFindFriends}
-          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 text-xs sm:text-sm md:text-base shadow-md hover:shadow-lg transition-all"
           size="lg"
         >
-          <Search className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-          Find Friend
+          <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="ml-1.5 sm:ml-2">Find Friend</span>
         </Button>
         <Button
           onClick={() => toast({ title: "Invite Friend", description: "Invite feature coming soon!" })}
-          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-md hover:shadow-lg transition-all"
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 text-xs sm:text-sm md:text-base shadow-md hover:shadow-lg transition-all"
           size="lg"
         >
-          <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-          Invite Friend
+          <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="ml-1.5 sm:ml-2">Invite Friend</span>
         </Button>
       </div>
 
