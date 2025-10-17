@@ -370,7 +370,14 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                     <div className="flex gap-2">
                       <Select value={selectedNewCurrency} onValueChange={setSelectedNewCurrency}>
                         <SelectTrigger className="h-11 flex-1">
-                          <SelectValue placeholder="Select currency" />
+                          <SelectValue placeholder="Select currency">
+                            {selectedNewCurrency && (
+                              <span className="truncate">
+                                {availableCurrencies.find(c => c.code === selectedNewCurrency)?.flag}{" "}
+                                {selectedNewCurrency}
+                              </span>
+                            )}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="w-[240px]">
                           {availableCurrencies
@@ -391,7 +398,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                       <Button 
                         onClick={handleAddCurrency}
                         disabled={!selectedNewCurrency}
-                        className="h-11"
+                        className="h-11 flex-shrink-0"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
