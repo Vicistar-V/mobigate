@@ -178,7 +178,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
         <div className="space-y-3">
           {/* Baseline Info */}
-          <Alert className="py-2 px-3">
+          <Alert className="py-2">
             <div className="flex items-start gap-2">
               <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <AlertDescription className="text-xs sm:text-sm flex-1">
