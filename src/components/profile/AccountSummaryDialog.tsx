@@ -95,15 +95,30 @@ export const AccountSummaryDialog = ({
             </Card>
           </div>
 
-          {/* Recent Transactions Button */}
-          <Button 
-            variant="link" 
-            className="w-full justify-start gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 px-0"
+          {/* Recent Transactions Card Button */}
+          <Card 
+            className="p-4 hover:bg-accent/50 cursor-pointer transition-colors border-blue-200 dark:border-blue-800/50"
             onClick={() => setShowTransactions(true)}
           >
-            <Calendar className="h-4 w-4" />
-            View Recent Transactions
-          </Button>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                  <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-base font-medium text-blue-600 dark:text-blue-400">
+                  View Recent Transactions
+                </span>
+              </div>
+              <svg 
+                className="h-5 w-5 text-blue-600 dark:text-blue-400" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Card>
         </div>
       </DialogContent>
 
