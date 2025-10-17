@@ -102,15 +102,16 @@ export const AccountSummaryDialog = ({
             <div className="space-y-2">
               <p className="text-base sm:text-lg font-semibold mb-2">Current Balance</p>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-base sm:text-lg">Wallet:</span>
-                <div className="text-right">
-                  <p className="text-lg sm:text-xl font-bold">
-                    {mobiBalance.toLocaleString()} Mobi
-                  </p>
-                  <p className="text-base sm:text-lg font-semibold text-muted-foreground">
-                    ₦{creditBalance.toLocaleString()}
-                  </p>
-                </div>
+                <span className="text-base sm:text-lg">Mobi Wallet:</span>
+                <span className="text-lg sm:text-xl font-bold">
+                  {mobiBalance.toLocaleString()} Mobi
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-base sm:text-lg">Credit Wallet:</span>
+                <span className="text-lg sm:text-xl font-bold">
+                  ₦{creditBalance.toLocaleString()}
+                </span>
               </div>
             </div>
           </Card>
@@ -121,9 +122,13 @@ export const AccountSummaryDialog = ({
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-base sm:text-lg font-semibold text-emerald-600">Total Received</p>
-                  <div className="text-right">
-                    <p className="text-base sm:text-lg font-bold">{mobiReceived.toLocaleString()} Mobi</p>
-                    <p className="text-sm sm:text-base text-muted-foreground">₦{creditReceived.toLocaleString()}</p>
+                  <div className="space-y-1">
+                    <p className="text-sm sm:text-base">
+                      Mobi Wallet: <span className="font-bold">{mobiReceived.toLocaleString()} Mobi</span>
+                    </p>
+                    <p className="text-sm sm:text-base">
+                      Credit Wallet: <span className="font-bold">₦{creditReceived.toLocaleString()}</span>
+                    </p>
                   </div>
                 </div>
                 <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-600 shrink-0" />
@@ -134,9 +139,13 @@ export const AccountSummaryDialog = ({
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-base sm:text-lg font-semibold text-red-600">Total Spent</p>
-                  <div className="text-right">
-                    <p className="text-base sm:text-lg font-bold">{mobiSpent.toLocaleString()} Mobi</p>
-                    <p className="text-sm sm:text-base text-muted-foreground">₦{creditSpent.toLocaleString()}</p>
+                  <div className="space-y-1">
+                    <p className="text-sm sm:text-base">
+                      Mobi Wallet: <span className="font-bold">{mobiSpent.toLocaleString()} Mobi</span>
+                    </p>
+                    <p className="text-sm sm:text-base">
+                      Credit Wallet: <span className="font-bold">₦{creditSpent.toLocaleString()}</span>
+                    </p>
                   </div>
                 </div>
                 <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 shrink-0" />
