@@ -195,9 +195,9 @@ export const WallStatusCarousel = ({
                     className="overflow-hidden relative group cursor-pointer"
                     onClick={() => openDetails(item)}
                   >
-                    <div className="aspect-[12/7]">
+                    <div className="aspect-[12/7] w-full h-auto">
                       {item.imageUrl && (
-                        <img 
+                        <img
                           src={item.imageUrl} 
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -247,9 +247,9 @@ export const WallStatusCarousel = ({
                         className="overflow-hidden relative group cursor-pointer"
                         onClick={() => openDetails(item)}
                       >
-                        <div className="aspect-[12/7]">
+                        <div className="aspect-[12/7] w-full h-auto">
                           {item.imageUrl && (
-                            <img 
+                            <img
                               src={item.imageUrl} 
                               alt={item.title}
                               className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -331,9 +331,9 @@ export const WallStatusCarousel = ({
                   className="overflow-hidden relative group cursor-pointer"
                   onClick={() => openDetails(item)}
                 >
-                  <div className="aspect-[12/7]">
+                  <div className="aspect-[12/7] w-full h-auto">
                     {item.imageUrl && (
-                      <img 
+                      <img
                         src={item.imageUrl} 
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
