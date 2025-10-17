@@ -275,7 +275,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
           <div className="py-3 space-y-2.5 pb-3">
             {/* Minimalist Info Section */}
             <div className="px-2.5 py-1.5 rounded-md bg-muted/30 border border-border/50">
-              <p className="text-[11px] text-muted-foreground leading-snug">
+              <p className="text-xs text-muted-foreground leading-snug">
                 Set exchange rates: 1 currency unit = X Mobi
               </p>
             </div>
@@ -291,7 +291,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                         <span className="text-2xl">{rate.flag}</span>
                         <div>
                           <p className="font-semibold text-sm leading-tight">{rate.code}</p>
-                          <p className="text-[10px] text-muted-foreground leading-tight">{rate.currency}</p>
+                          <p className="text-xs text-muted-foreground leading-tight">{rate.currency}</p>
                         </div>
                       </div>
                       {rate.id !== "NGN" && (
@@ -308,7 +308,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
                     {/* Rate Input */}
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-medium text-muted-foreground block">
+                      <label className="text-xs font-medium text-muted-foreground block">
                         1 {rate.symbol} = how many Mobi?
                       </label>
                       <div className="relative">
@@ -344,11 +344,11 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                       <span className="text-3xl">{rate.flag}</span>
                       <div>
                         <p className="font-semibold text-sm leading-tight">{rate.code}</p>
-                        <p className="text-[10px] text-muted-foreground leading-tight">{rate.currency}</p>
+                        <p className="text-xs text-muted-foreground leading-tight">{rate.currency}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] text-muted-foreground mb-0.5">1 {rate.symbol} =</p>
+                      <p className="text-xs text-muted-foreground mb-0.5">1 {rate.symbol} =</p>
                       <p className="text-base font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
                     </div>
                   </div>
@@ -397,8 +397,8 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                                   <div className="flex items-start gap-1.5 w-full overflow-hidden">
                                     <span className="text-base flex-shrink-0">{currency.flag}</span>
                                     <div className="flex flex-col overflow-hidden flex-1">
-                                      <span className="font-semibold text-[11px]">{currency.code}</span>
-                                      <span className="text-[9px] text-muted-foreground truncate block">{currency.name}</span>
+                                      <span className="font-semibold text-xs">{currency.code}</span>
+                                      <span className="text-[11px] text-muted-foreground truncate block">{currency.name}</span>
                                     </div>
                                   </div>
                                 </SelectItem>
