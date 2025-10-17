@@ -144,7 +144,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                         <Input 
                           type="number" 
                           step="0.01" 
-                          value={rate.mobiPerUnit} 
+                          value={rate.mobiPerUnit || 0} 
                           onChange={e => handleRateChange(rate.id, 'mobiPerUnit', parseFloat(e.target.value) || 0)} 
                           className="h-10 pr-12"
                           placeholder="Rate"
@@ -167,7 +167,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">1 {rate.symbol} =</p>
-                      <p className="text-xl font-bold">M{rate.mobiPerUnit.toFixed(2)}</p>
+                      <p className="text-xl font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
                     </div>
                   </div>
                 )}
