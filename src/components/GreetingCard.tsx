@@ -91,8 +91,7 @@ export const GreetingSection = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide inline-flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
-                <MoreHorizontal className="h-4 w-4" />
-                More
+                <MoreHorizontal className="h-5 w-5" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-card z-50 w-48">
