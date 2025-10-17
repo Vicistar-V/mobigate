@@ -72,7 +72,7 @@ export const GreetingSection = () => {
           </Avatar>
           <div className="flex-1 space-y-2">
             <p className="text-lg text-destructive font-semibold">Good Evening</p>
-            <h2 className="text-3xl font-bold">NKEMJKA PETER IPR3EC.</h2>
+            <h2 className="text-3xl font-bold">NKEMJKA PETER IPREC</h2>
             <p className="text-base text-muted-foreground">Oct 5, 2025, 5:30pm</p>
           </div>
         </div>
