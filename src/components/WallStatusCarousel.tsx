@@ -141,7 +141,7 @@ export const WallStatusCarousel = ({
                 <React.Fragment key={`${item.title}-${index}`}>
                   <CarouselItem className="pl-2 md:pl-4 basis-[85%] sm:basis-[60%] md:basis-[45%] lg:basis-[30%]">
                     <Card
-                      className="h-[85vh] overflow-hidden relative group cursor-pointer"
+                      className="h-[65vh] overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
