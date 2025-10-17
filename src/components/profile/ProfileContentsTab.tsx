@@ -14,7 +14,6 @@ import {
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { contentsAdSlots } from "@/data/profileAds";
-import { PostDetailDialog } from "@/components/PostDetailDialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProfileContentsTabProps {
@@ -79,8 +78,6 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set());
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
   const { toast } = useToast();
 
   const handleFollowAuthor = (authorUserId: string) => {
@@ -114,12 +111,6 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
       }
       return newSet;
     });
-  };
-
-  const handleOpenComments = (post: Post, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedPost(post);
-    setDetailOpen(true);
   };
 
   const formatFollowerCount = (count: string | undefined): string => {
@@ -355,15 +346,10 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                       <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
                       <span className="font-medium">{post.likes}</span>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleOpenComments(post, e)}
-                      className="flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent hover:text-blue-500 transition-colors"
-                    >
+                    <span className="flex items-center gap-1.5">
                       <MessageCircle className="h-4 w-4" />
                       <span className="font-medium">{post.comments}</span>
-                    </Button>
+                    </span>
                     {post.followers && !post.isOwner && (
                       <Button
                         variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
@@ -435,15 +421,6 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
             </Button>
           )}
         </div>
-      )}
-
-      {/* Post Detail Dialog */}
-      {selectedPost && (
-        <PostDetailDialog
-          open={detailOpen}
-          onOpenChange={setDetailOpen}
-          post={selectedPost}
-        />
       )}
     </div>
   );
