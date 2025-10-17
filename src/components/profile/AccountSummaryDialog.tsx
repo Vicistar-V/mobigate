@@ -97,11 +97,11 @@ export const AccountSummaryDialog = ({
 
           {/* Recent Transactions Card Button */}
           <Card 
-            className="p-3 hover:bg-muted/90 cursor-pointer transition-all duration-200 bg-gradient-to-r from-muted to-muted/70 border-muted"
+            className="p-3 hover:bg-accent/80 cursor-pointer transition-all duration-200 bg-gradient-to-r from-accent to-accent/70 border-accent"
             onClick={() => setShowTransactions(true)}
           >
             <div className="flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Calendar className="h-4 w-4 text-foreground" />
               <span className="text-sm font-medium text-foreground">
                 Recent Transactions
               </span>
