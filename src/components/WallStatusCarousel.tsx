@@ -177,6 +177,7 @@ export const WallStatusCarousel = ({
                         slotId={`wall-status-premium-${adSlotIndex}`}
                         ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
                         context="wall-status"
+                        className="h-[65vh]"
                       />
                     </CarouselItem>
                   )}
@@ -309,6 +310,7 @@ export const WallStatusCarousel = ({
                           slotId={`wall-status-grid-premium-${adSlotIndex}`}
                           ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
                           context="wall-status"
+                          className="h-[65vh]"
                         />
                       </div>
                     )}
@@ -389,6 +391,7 @@ export const WallStatusCarousel = ({
                       slotId={`wall-status-grid-premium-${adSlotIndex}`}
                       ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
                       context="wall-status"
+                      className="h-[65vh]"
                     />
                   </div>
                 );

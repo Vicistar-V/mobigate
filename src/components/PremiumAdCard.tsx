@@ -63,8 +63,8 @@ export const PremiumAdCard = ({
   // Fullscreen layout - High impact, takes 80-100vh
   if (layout === 'fullscreen') {
     return (
-      <Card className="relative w-full overflow-hidden bg-card border-2 border-primary/20 shadow-xl">
-        <div className="relative h-[80vh] sm:h-[70vh]">
+      <Card className="relative w-full h-full overflow-hidden bg-card border-2 border-primary/20 shadow-xl">
+        <div className="relative h-full">
           {/* Background Image */}
           <img
             src={media.items[0]?.url}
@@ -164,9 +164,9 @@ export const PremiumAdCard = ({
   // Standard layout - Main feed ad format
   if (layout === 'standard') {
     return (
-      <Card className="w-full overflow-hidden bg-card border-2 border-primary/10 shadow-lg">
+      <Card className="w-full h-full overflow-hidden bg-card border-2 border-primary/10 shadow-lg flex flex-col">
         {/* Header */}
-        <div className="p-3 sm:p-4 border-b border-border">
+        <div className="p-3 sm:p-4 border-b border-border flex-shrink-0">
           <div className="flex items-start gap-2 justify-between">
             {/* Left: Advertiser Info */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -213,29 +213,31 @@ export const PremiumAdCard = ({
         </div>
 
         {/* Media Content */}
-        {media.type === 'carousel' ? (
-          <PremiumAdCarousel items={media.items} />
-        ) : media.type === 'video' ? (
-          <div className="relative aspect-video bg-black">
-            <video
-              src={media.items[0]?.url}
-              controls
-              className="w-full h-full"
-              poster={media.items[0]?.url}
-            />
-          </div>
-        ) : (
-          <div className="relative aspect-video sm:aspect-[16/9]">
-            <img
-              src={media.items[0]?.url}
-              alt={content.headline}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
+        <div className="flex-1 min-h-0">
+          {media.type === 'carousel' ? (
+            <PremiumAdCarousel items={media.items} />
+          ) : media.type === 'video' ? (
+            <div className="relative h-full bg-black">
+              <video
+                src={media.items[0]?.url}
+                controls
+                className="w-full h-full object-contain"
+                poster={media.items[0]?.url}
+              />
+            </div>
+          ) : (
+            <div className="relative h-full">
+              <img
+                src={media.items[0]?.url}
+                alt={content.headline}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
 
         {/* Content Footer */}
-        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 flex-shrink-0">
           <div className="space-y-1.5 sm:space-y-2">
             <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
               {content.headline}
@@ -289,8 +291,8 @@ export const PremiumAdCard = ({
 
   // Compact layout - Smaller inline ad
   return (
-    <Card className="w-full overflow-hidden bg-card border border-border">
-      <div className="p-3 sm:p-4 space-y-3">
+    <Card className="w-full h-full overflow-hidden bg-card border border-border flex flex-col">
+      <div className="p-3 sm:p-4 space-y-3 flex-1">
         {/* Top Row: Image, Title, and Close Button */}
         <div className="flex gap-3 items-start">
           {/* Media Thumbnail */}

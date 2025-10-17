@@ -6,13 +6,15 @@ interface PremiumAdRotationProps {
   ads: PremiumAdCardProps[];
   defaultDuration?: number;
   context?: 'feed' | 'wall-status' | 'profile' | 'albums-carousel';
+  className?: string;
 }
 
 export const PremiumAdRotation = ({ 
   slotId, 
   ads, 
   defaultDuration = 15,
-  context = 'feed'
+  context = 'feed',
+  className = ''
 }: PremiumAdRotationProps) => {
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -47,8 +49,10 @@ export const PremiumAdRotation = ({
   }
 
   return (
-    <div className="w-full" data-slot-id={slotId} data-context={context}>
-      <PremiumAdCard {...currentAd} />
+    <div className={`w-full ${className}`} data-slot-id={slotId} data-context={context}>
+      <div className="h-full">
+        <PremiumAdCard {...currentAd} />
+      </div>
     </div>
   );
 };
