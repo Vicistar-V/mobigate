@@ -1726,6 +1726,11 @@ export interface WallStatusPost {
   likes: number;
   comments: number;
   isLiked?: boolean;
+  followers?: string;
+  userId?: string;
+  status?: "Online" | "Offline";
+  views?: string;
+  fee?: string;
 }
 
 export const wallStatusPosts: WallStatusPost[] = [
@@ -1740,7 +1745,11 @@ export const wallStatusPosts: WallStatusPost[] = [
     description: "Captured this beautiful moment during sunset. Nature never fails to amaze! 🌅",
     likes: 1248,
     comments: 89,
-    isLiked: false
+    isLiked: false,
+    followers: "15.2K",
+    userId: "1",
+    status: "Online",
+    views: "25.4K"
   },
   {
     id: "wall_2",
@@ -1753,7 +1762,11 @@ export const wallStatusPosts: WallStatusPost[] = [
     description: "Exploring the city's hidden gems. Every corner tells a story.",
     likes: 892,
     comments: 56,
-    isLiked: true
+    isLiked: true,
+    followers: "15.2K",
+    userId: "1",
+    status: "Online",
+    views: "18.9K"
   },
   {
     id: "wall_3",
@@ -1766,7 +1779,11 @@ export const wallStatusPosts: WallStatusPost[] = [
     description: "Starting the day right ☕️✨",
     likes: 2156,
     comments: 143,
-    isLiked: true
+    isLiked: true,
+    followers: "15.2K",
+    userId: "1",
+    status: "Online",
+    views: "42.1K"
   },
   {
     id: "wall_4",
@@ -1779,7 +1796,11 @@ export const wallStatusPosts: WallStatusPost[] = [
     description: "When nature paints the perfect picture 🎨🌿",
     likes: 1567,
     comments: 98,
-    isLiked: false
+    isLiked: false,
+    followers: "15.2K",
+    userId: "1",
+    status: "Offline",
+    views: "31.5K"
   },
   {
     id: "wall_5",
@@ -1792,7 +1813,11 @@ export const wallStatusPosts: WallStatusPost[] = [
     description: "Making memories that last forever! 📸",
     likes: 3421,
     comments: 234,
-    isLiked: true
+    isLiked: true,
+    followers: "15.2K",
+    userId: "1",
+    status: "Online",
+    views: "67.8K"
   },
   {
     id: "wall_6",

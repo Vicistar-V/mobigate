@@ -19,6 +19,17 @@ interface Post {
   author: string;
   type: string;
   isOwner?: boolean;
+  authorImage?: string;
+  authorProfileImage?: string;
+  timestamp?: string;
+  description?: string;
+  likes?: number | string;
+  comments?: number | string;
+  followers?: string;
+  userId?: string;
+  status?: "Online" | "Offline";
+  views?: string;
+  fee?: string;
 }
 
 interface AdSlot {
@@ -90,7 +101,11 @@ export const WallStatusCarousel = ({
     if (onItemClick) {
       onItemClick(post);
     } else {
-      setSelectedPost(post);
+      setSelectedPost({
+        ...post,
+        imageUrl: post.imageUrl,
+        authorProfileImage: post.authorImage,
+      });
       setDetailOpen(true);
     }
   };
