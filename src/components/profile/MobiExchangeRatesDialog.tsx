@@ -178,11 +178,16 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
         <div className="space-y-3">
           {/* Baseline Info */}
-          <Alert className="py-2">
-            <Info className="h-3 w-3 sm:h-4 sm:w-4" />
-            <AlertDescription className="text-xs sm:text-sm">
-              <strong>Baseline Rate:</strong> 1 Mobi (M) = 1 Nigerian Naira (₦)
-            </AlertDescription>
+          <Alert className="py-2 px-3">
+            <div className="flex items-start gap-2">
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <AlertDescription className="text-xs sm:text-sm flex-1">
+                <div className="flex flex-col gap-0.5">
+                  <strong className="block">Baseline Rate:</strong>
+                  <span className="block">1 Mobi (M) = 1 Nigerian Naira (₦)</span>
+                </div>
+              </AlertDescription>
+            </div>
           </Alert>
 
           {/* Exchange Rates List */}
