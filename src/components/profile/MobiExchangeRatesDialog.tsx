@@ -3,75 +3,66 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TrendingUp, TrendingDown, RefreshCw, Info, Edit, Plus, Trash2, Save, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Edit, Plus, Trash2, Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+
 const initialExchangeRates = [{
   id: "NGN",
   currency: "Nigerian Naira",
   code: "NGN",
   symbol: "₦",
-  rate: 1.00,
-  change: 0,
+  mobiPerUnit: 1.00,
   flag: "🇳🇬"
 }, {
   id: "USD",
   currency: "US Dollar",
   code: "USD",
   symbol: "$",
-  rate: 0.0012,
-  change: 0.02,
+  mobiPerUnit: 833.33,
   flag: "🇺🇸"
 }, {
   id: "EUR",
   currency: "Euro",
   code: "EUR",
   symbol: "€",
-  rate: 0.0011,
-  change: -0.01,
+  mobiPerUnit: 909.09,
   flag: "🇪🇺"
 }, {
   id: "GBP",
   currency: "British Pound",
   code: "GBP",
   symbol: "£",
-  rate: 0.00095,
-  change: 0.015,
+  mobiPerUnit: 1052.63,
   flag: "🇬🇧"
 }, {
   id: "GHS",
   currency: "Ghanaian Cedi",
   code: "GHS",
   symbol: "₵",
-  rate: 0.019,
-  change: -0.005,
+  mobiPerUnit: 52.63,
   flag: "🇬🇭"
 }, {
   id: "ZAR",
   currency: "South African Rand",
   code: "ZAR",
   symbol: "R",
-  rate: 0.022,
-  change: 0.008,
+  mobiPerUnit: 45.45,
   flag: "🇿🇦"
 }, {
   id: "KES",
   currency: "Kenyan Shilling",
   code: "KES",
   symbol: "KSh",
-  rate: 0.16,
-  change: 0.012,
+  mobiPerUnit: 6.25,
   flag: "🇰🇪"
 }, {
   id: "JPY",
   currency: "Japanese Yen",
   code: "JPY",
   symbol: "¥",
-  rate: 0.18,
-  change: -0.02,
+  mobiPerUnit: 5.56,
   flag: "🇯🇵"
 }];
 interface MobiExchangeRatesDialogProps {
@@ -112,8 +103,7 @@ export const MobiExchangeRatesDialog = ({
       currency: "New Currency",
       code: "XXX",
       symbol: "$",
-      rate: 0.01,
-      change: 0,
+      mobiPerUnit: 100,
       flag: "🌍"
     }]);
   };
@@ -145,14 +135,9 @@ export const MobiExchangeRatesDialog = ({
                 <Save className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Save
               </Button>
-            </> : <>
-              <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
-                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleEdit} className="h-7 w-7 sm:h-8 sm:w-8">
+            </> : <Button variant="ghost" size="icon" onClick={handleEdit} className="h-7 w-7 sm:h-8 sm:w-8">
                 <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-            </>}
+              </Button>}
         </div>
 
         <div className="space-y-3">
@@ -164,69 +149,46 @@ export const MobiExchangeRatesDialog = ({
           {/* Exchange Rates List */}
           <ScrollArea className="h-[280px] sm:h-[400px] pr-2 sm:pr-4">
             <div className="space-y-2">
-              {currentRates.map(rate => <Card key={rate.id} className="p-2.5 sm:p-4 hover:bg-muted/50 transition-colors">
-                  {isEditMode ? <div className="space-y-3">
-                      <div className="flex items-start gap-2">
-                        <div className="flex-1 grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs text-muted-foreground">Flag</label>
-                            <Input value={rate.flag} onChange={e => handleRateChange(rate.id, 'flag', e.target.value)} className="h-8 text-xl" maxLength={2} />
-                          </div>
-                          <div>
-                            <label className="text-xs text-muted-foreground">Currency Name</label>
-                            <Input value={rate.currency} onChange={e => handleRateChange(rate.id, 'currency', e.target.value)} className="h-8 text-xs" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-muted-foreground">Code</label>
-                            <Input value={rate.code} onChange={e => handleRateChange(rate.id, 'code', e.target.value.toUpperCase())} className="h-8 text-xs" maxLength={3} />
-                          </div>
-                          <div>
-                            <label className="text-xs text-muted-foreground">Symbol</label>
-                            <Input value={rate.symbol} onChange={e => handleRateChange(rate.id, 'symbol', e.target.value)} className="h-8 text-xs" />
-                          </div>
-                          <div>
-                            <label className="text-xs text-muted-foreground">Rate (1 Mobi =)</label>
-                            <Input type="number" step="0.0001" value={rate.rate} onChange={e => handleRateChange(rate.id, 'rate', parseFloat(e.target.value) || 0)} className="h-8 text-xs" disabled={rate.code === "NGN"} />
-                          </div>
-                          <div>
-                            <label className="text-xs text-muted-foreground">Change %</label>
-                            <Input type="number" step="0.01" value={rate.change} onChange={e => handleRateChange(rate.id, 'change', parseFloat(e.target.value) || 0)} className="h-8 text-xs" />
-                          </div>
+              {currentRates.map(rate => <Card key={rate.id} className="p-3 sm:p-4">
+                  {isEditMode ? <div className="flex items-start gap-2">
+                      <div className="flex-1 grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground">Flag</label>
+                          <Input value={rate.flag} onChange={e => handleRateChange(rate.id, 'flag', e.target.value)} className="h-9 text-xl" maxLength={2} />
                         </div>
-                        {rate.code !== "NGN" && <Button variant="ghost" size="icon" onClick={() => handleDeleteCurrency(rate.id)} className="h-8 w-8 text-destructive hover:text-destructive">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>}
-                      </div>
-                    </div> : <>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="text-xl sm:text-3xl shrink-0">{rate.flag}</span>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm sm:text-lg font-semibold truncate">{rate.currency}</p>
-                            <p className="text-xs sm:text-base text-muted-foreground">{rate.code}</p>
-                          </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">Currency Name</label>
+                          <Input value={rate.currency} onChange={e => handleRateChange(rate.id, 'currency', e.target.value)} className="h-9 text-sm" />
                         </div>
-
-                        <div className="text-right shrink-0">
-                          <p className="text-base sm:text-2xl font-bold whitespace-nowrap">
-                            {rate.symbol}{rate.code === "NGN" ? rate.rate.toFixed(2) : rate.rate.toFixed(4)}
-                          </p>
-                          {rate.change !== 0 && <div className="flex items-center gap-1 justify-end">
-                              {rate.change > 0 ? <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-emerald-600" /> : <TrendingDown className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-red-600" />}
-                              <span className={`text-xs sm:text-sm font-medium ${rate.change > 0 ? "text-emerald-600" : "text-red-600"}`}>
-                                {rate.change > 0 ? "+" : ""}{(rate.change * 100).toFixed(2)}%
-                              </span>
-                            </div>}
+                        <div>
+                          <label className="text-xs text-muted-foreground">Code</label>
+                          <Input value={rate.code} onChange={e => handleRateChange(rate.id, 'code', e.target.value.toUpperCase())} className="h-9 text-sm" maxLength={3} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">Symbol</label>
+                          <Input value={rate.symbol} onChange={e => handleRateChange(rate.id, 'symbol', e.target.value)} className="h-9 text-sm" />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-xs text-muted-foreground">Mobi per 1 {rate.code}</label>
+                          <Input type="number" step="0.01" value={rate.mobiPerUnit} onChange={e => handleRateChange(rate.id, 'mobiPerUnit', parseFloat(e.target.value) || 0)} className="h-9 text-sm" disabled={rate.code === "NGN"} />
                         </div>
                       </div>
-
-                      <Separator className="my-2" />
-
-                      <div className="flex flex-col gap-0.5 text-xs sm:text-sm text-muted-foreground">
-                        <span className="truncate">1 Mobi = {rate.symbol}{rate.code === "NGN" ? rate.rate.toFixed(2) : rate.rate.toFixed(4)} {rate.code}</span>
-                        <span className="truncate">1 {rate.code} = M{(1 / rate.rate).toFixed(2)}</span>
+                      {rate.code !== "NGN" && <Button variant="ghost" size="icon" onClick={() => handleDeleteCurrency(rate.id)} className="h-9 w-9 text-destructive hover:text-destructive shrink-0">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>}
+                    </div> : <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl sm:text-3xl">{rate.flag}</span>
+                        <div>
+                          <p className="text-sm sm:text-base font-medium">{rate.code}</p>
+                          <p className="text-xs text-muted-foreground">{rate.currency}</p>
+                        </div>
                       </div>
-                    </>}
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">1 {rate.symbol} =</p>
+                        <p className="text-lg sm:text-xl font-bold">M{rate.mobiPerUnit.toFixed(2)}</p>
+                      </div>
+                    </div>}
                 </Card>)}
               
               {isEditMode && <Button variant="outline" className="w-full text-xs sm:text-sm" onClick={handleAddCurrency}>
