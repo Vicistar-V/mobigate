@@ -67,7 +67,7 @@ export const GreetingSection = () => {
   }];
   return <div className="space-y-4">
       {/* Greeting Card */}
-      <Card className="p-6 space-y-4 hover:shadow-md transition-shadow">
+      <Card className="p-6 space-y-4 hover:shadow-md transition-shadow px-[18px]">
         <div className="flex items-start gap-4">
           <Avatar className="h-20 w-20 border-2 border-primary/20">
             <AvatarImage src={profilePhoto} alt="Profile" />
