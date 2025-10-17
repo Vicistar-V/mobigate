@@ -341,7 +341,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground mb-0.5">1 {rate.symbol} =</p>
-                      <p className="text-2xl font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
+                      <p className="text-lg font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
                     </div>
                   </div>
                 )}
