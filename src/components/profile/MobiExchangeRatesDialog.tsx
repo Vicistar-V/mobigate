@@ -235,22 +235,22 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-md h-[90vh] p-0 gap-0 flex flex-col">
         {/* Fixed Header */}
-        <DialogHeader className="p-4 pb-3 border-b flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold">Exchange Rates</DialogTitle>
+        <DialogHeader className="px-3 py-3 border-b flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <DialogTitle className="text-base font-semibold">Exchange Rates</DialogTitle>
             {isEditMode ? (
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCancel} className="h-9">
-                  <X className="h-4 w-4" />
+              <div className="flex gap-1.5">
+                <Button variant="ghost" size="sm" onClick={handleCancel} className="h-8 px-2">
+                  <X className="h-3.5 w-3.5" />
                 </Button>
-                <Button size="sm" onClick={handleSave} className="h-9">
-                  <Save className="h-4 w-4 mr-1" />
+                <Button size="sm" onClick={handleSave} className="h-8 px-3 text-xs">
+                  <Save className="h-3.5 w-3.5 mr-1" />
                   Save
                 </Button>
               </div>
             ) : (
-              <Button variant="ghost" size="sm" onClick={handleEdit} className="h-9">
-                <Edit className="h-4 w-4 mr-1" />
+              <Button variant="ghost" size="sm" onClick={handleEdit} className="h-8 px-3 text-xs">
+                <Edit className="h-3.5 w-3.5 mr-1" />
                 Edit
               </Button>
             )}
@@ -258,27 +258,27 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
         </DialogHeader>
 
         {/* Scrollable Content */}
-        <ScrollArea className="flex-1 px-4">
-          <div className="py-4 space-y-3 pb-4">
+        <ScrollArea className="flex-1 px-3">
+          <div className="py-3 space-y-2.5 pb-3">
             {/* Minimalist Info Section */}
-            <div className="px-3 py-2 rounded-lg bg-muted/30 border border-border/50">
-              <p className="text-xs text-muted-foreground">
+            <div className="px-2.5 py-1.5 rounded-md bg-muted/30 border border-border/50">
+              <p className="text-[11px] text-muted-foreground leading-snug">
                 Set exchange rates: 1 currency unit = X Mobi
               </p>
             </div>
 
             {currentRates.map(rate => (
-              <Card key={rate.id} className="p-4">
+              <Card key={rate.id} className="p-3">
                 {isEditMode ? (
                   // Edit Mode
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {/* Currency Header (Read-only) */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-3xl">{rate.flag}</span>
+                        <span className="text-2xl">{rate.flag}</span>
                         <div>
-                          <p className="font-semibold text-base">{rate.code}</p>
-                          <p className="text-xs text-muted-foreground">{rate.currency}</p>
+                          <p className="font-semibold text-sm leading-tight">{rate.code}</p>
+                          <p className="text-[10px] text-muted-foreground leading-tight">{rate.currency}</p>
                         </div>
                       </div>
                       {rate.id !== "NGN" && (
@@ -286,20 +286,20 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                           variant="ghost" 
                           size="icon" 
                           onClick={() => handleDeleteCurrency(rate.id)} 
-                          className="h-9 w-9 text-destructive hover:bg-destructive/10"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
 
                     {/* Rate Input */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-muted-foreground block">
-                        1 {rate.symbol} equals how many Mobi?
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-medium text-muted-foreground block">
+                        1 {rate.symbol} = how many Mobi?
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground pointer-events-none">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground pointer-events-none">
                           M
                         </span>
                         <Input 
@@ -309,18 +309,16 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                           value={rate.mobiPerUnit || 0} 
                           onChange={e => {
                             const value = e.target.value;
-                            // Only allow positive numbers
                             if (value === '' || parseFloat(value) >= 0) {
                               handleRateChange(rate.id, value);
                             }
                           }}
                           onKeyDown={e => {
-                            // Prevent minus sign and other non-numeric keys except decimal
                             if (e.key === '-' || e.key === 'e' || e.key === 'E') {
                               e.preventDefault();
                             }
                           }}
-                          className="h-12 pl-8 text-lg font-semibold"
+                          className="h-10 pl-7 text-base font-semibold"
                           placeholder="0.00"
                         />
                       </div>
@@ -329,16 +327,16 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                 ) : (
                   // View Mode
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-4xl">{rate.flag}</span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-3xl">{rate.flag}</span>
                       <div>
-                        <p className="font-semibold text-base">{rate.code}</p>
-                        <p className="text-xs text-muted-foreground">{rate.currency}</p>
+                        <p className="font-semibold text-sm leading-tight">{rate.code}</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{rate.currency}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground mb-0.5">1 {rate.symbol} =</p>
-                      <p className="text-lg font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
+                      <p className="text-[10px] text-muted-foreground mb-0.5">1 {rate.symbol} =</p>
+                      <p className="text-base font-bold">M{(rate.mobiPerUnit || 0).toFixed(2)}</p>
                     </div>
                   </div>
                 )}
@@ -350,22 +348,22 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
         {/* Fixed Bottom: Add Currency Sections (Edit Mode Only) */}
         {isEditMode && (
           <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0">
-            <div className="p-3 space-y-2">
+            <div className="p-2.5 space-y-2">
               {/* Add Existing Currency - Collapsible */}
               <Collapsible open={showExistingForm} onOpenChange={setShowExistingForm}>
                 <Card className="border-dashed">
                   <CollapsibleTrigger asChild>
-                    <button className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
-                      <span className="text-sm font-medium">Add Existing</span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${showExistingForm ? 'rotate-180' : ''}`} />
+                    <button className="w-full px-2.5 py-2 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
+                      <span className="text-xs font-medium">Add Existing</span>
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showExistingForm ? 'rotate-180' : ''}`} />
                     </button>
                   </CollapsibleTrigger>
                   
                   <CollapsibleContent>
-                    <div className="px-3 pb-3 pt-1">
-                      <div className="flex gap-2">
+                    <div className="px-2.5 pb-2.5 pt-0.5">
+                      <div className="flex gap-1.5">
                         <Select value={selectedNewCurrency} onValueChange={setSelectedNewCurrency}>
-                          <SelectTrigger className="h-10 flex-1">
+                          <SelectTrigger className="h-9 flex-1 text-xs">
                             <SelectValue placeholder="Select">
                               {selectedNewCurrency && (
                                 <span className="truncate">
@@ -375,16 +373,16 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                               )}
                             </SelectValue>
                           </SelectTrigger>
-                          <SelectContent className="w-[240px]">
+                          <SelectContent className="w-[220px]">
                             {availableCurrencies
                               .filter(c => !currentRates.find(r => r.code === c.code))
                               .map(currency => (
-                                <SelectItem key={currency.code} value={currency.code} className="py-2.5">
-                                  <div className="flex items-start gap-2 w-full overflow-hidden">
-                                    <span className="text-lg flex-shrink-0">{currency.flag}</span>
+                                <SelectItem key={currency.code} value={currency.code} className="py-2">
+                                  <div className="flex items-start gap-1.5 w-full overflow-hidden">
+                                    <span className="text-base flex-shrink-0">{currency.flag}</span>
                                     <div className="flex flex-col overflow-hidden flex-1">
-                                      <span className="font-semibold text-xs">{currency.code}</span>
-                                      <span className="text-[10px] text-muted-foreground truncate block">{currency.name}</span>
+                                      <span className="font-semibold text-[11px]">{currency.code}</span>
+                                      <span className="text-[9px] text-muted-foreground truncate block">{currency.name}</span>
                                     </div>
                                   </div>
                                 </SelectItem>
@@ -395,9 +393,9 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                           onClick={handleAddCurrency}
                           disabled={!selectedNewCurrency}
                           size="sm"
-                          className="h-10 px-3"
+                          className="h-9 px-2.5"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </div>
@@ -409,48 +407,48 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
               <Collapsible open={showCustomForm} onOpenChange={setShowCustomForm}>
                 <Card className="border-dashed">
                   <CollapsibleTrigger asChild>
-                    <button className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
-                      <span className="text-sm font-medium">Add Custom</span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${showCustomForm ? 'rotate-180' : ''}`} />
+                    <button className="w-full px-2.5 py-2 flex items-center justify-between hover:bg-accent/50 transition-colors rounded-lg">
+                      <span className="text-xs font-medium">Add Custom</span>
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showCustomForm ? 'rotate-180' : ''}`} />
                     </button>
                   </CollapsibleTrigger>
 
                   <CollapsibleContent>
-                    <div className="px-3 pb-3 pt-1 space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
+                    <div className="px-2.5 pb-2.5 pt-0.5 space-y-1.5">
+                      <div className="grid grid-cols-2 gap-1.5">
                         <Input
                           placeholder="Name"
                           value={customCurrency.name}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, name: e.target.value }))}
-                          className="h-9 text-sm"
+                          className="h-8 text-xs"
                         />
                         <Input
                           placeholder="Code"
                           value={customCurrency.code}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
                           maxLength={5}
-                          className="h-9 text-sm"
+                          className="h-8 text-xs"
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-1.5">
                         <Input
                           placeholder="Symbol"
                           value={customCurrency.symbol}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, symbol: e.target.value }))}
-                          className="h-9 text-sm"
+                          className="h-8 text-xs"
                         />
                         <Input
                           placeholder="Flag"
                           value={customCurrency.flag}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, flag: e.target.value }))}
                           maxLength={4}
-                          className="h-9 text-sm"
+                          className="h-8 text-xs"
                         />
                       </div>
 
                       <div className="relative">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
                           M
                         </span>
                         <Input
@@ -463,16 +461,16 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                             const value = parseFloat(e.target.value) || 0;
                             setCustomCurrency(prev => ({ ...prev, mobiPerUnit: value }));
                           }}
-                          className="h-9 pl-7 text-sm"
+                          className="h-8 pl-6 text-xs"
                         />
                       </div>
 
                       <Button 
                         size="sm"
-                        className="w-full h-9"
+                        className="w-full h-8 text-xs"
                         onClick={handleAddCustomCurrency}
                       >
-                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                        <Plus className="h-3 w-3 mr-1" />
                         Add
                       </Button>
                     </div>
