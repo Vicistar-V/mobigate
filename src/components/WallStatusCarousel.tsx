@@ -135,14 +135,14 @@ export const WallStatusCarousel = ({
                 return (
                   <React.Fragment key={`${item.title}-${index}`}>
                     <Card 
-                      className="flex-shrink-0 w-[72vw] sm:w-[95vw] aspect-[12/7] overflow-hidden relative group cursor-pointer"
+                      className="flex-shrink-0 w-[72vw] sm:w-[95vw] aspect-[12/7] h-auto overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
                         <img 
                           src={item.imageUrl} 
                           alt={item.title}
-                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          className="w-full h-auto object-cover transition-transform group-hover:scale-105"
                         />
                       )}
                       <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-xs sm:text-sm px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
