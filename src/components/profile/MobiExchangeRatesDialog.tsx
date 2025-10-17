@@ -436,13 +436,13 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                     <div className="px-2.5 pb-2.5 pt-0.5 space-y-1.5">
                       <div className="grid grid-cols-2 gap-1.5">
                         <Input
-                          placeholder="e.g., Bitcoin"
+                          placeholder="Name"
                           value={customCurrency.name}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, name: e.target.value }))}
                           className="h-8 text-xs"
                         />
                         <Input
-                          placeholder="e.g., BTC"
+                          placeholder="Code"
                           value={customCurrency.code}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
                           maxLength={5}
@@ -452,13 +452,13 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
 
                       <div className="grid grid-cols-2 gap-1.5">
                         <Input
-                          placeholder="e.g., ₿"
+                          placeholder="Symbol"
                           value={customCurrency.symbol}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, symbol: e.target.value }))}
                           className="h-8 text-xs"
                         />
                         <Input
-                          placeholder="e.g., 🪙"
+                          placeholder="Flag"
                           value={customCurrency.flag}
                           onChange={e => setCustomCurrency(prev => ({ ...prev, flag: e.target.value }))}
                           maxLength={4}
@@ -474,7 +474,7 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                           type="number"
                           step="0.01"
                           min="0.01"
-                          placeholder="e.g., 50000"
+                          placeholder="Mobi rate"
                           value={customCurrency.mobiPerUnit}
                           onChange={e => {
                             const value = parseFloat(e.target.value) || 0;
