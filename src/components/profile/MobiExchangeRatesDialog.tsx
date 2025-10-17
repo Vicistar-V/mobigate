@@ -107,6 +107,14 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRates, setEditingRates] = useState(initialExchangeRates);
   const [selectedNewCurrency, setSelectedNewCurrency] = useState<string>("");
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customCurrency, setCustomCurrency] = useState({
+    name: "",
+    code: "",
+    symbol: "",
+    flag: "",
+    mobiPerUnit: 100
+  });
 
   const handleEdit = () => {
     setEditingRates([...exchangeRates]);
@@ -116,6 +124,8 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
   const handleCancel = () => {
     setEditingRates([...exchangeRates]);
     setSelectedNewCurrency("");
+    setShowCustomForm(false);
+    setCustomCurrency({ name: "", code: "", symbol: "", flag: "", mobiPerUnit: 100 });
     setIsEditMode(false);
   };
 
@@ -129,6 +139,8 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
     
     setExchangeRates([...editingRates]);
     setSelectedNewCurrency("");
+    setShowCustomForm(false);
+    setCustomCurrency({ name: "", code: "", symbol: "", flag: "", mobiPerUnit: 100 });
     setIsEditMode(false);
     toast.success("Exchange rates updated successfully");
   };
@@ -170,6 +182,46 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
   const handleDeleteCurrency = (id: string) => {
     setEditingRates(prev => prev.filter(rate => rate.id !== id));
     toast.success("Currency removed");
+  };
+
+  const handleAddCustomCurrency = () => {
+    // Validate custom currency fields
+    if (!customCurrency.name.trim()) {
+      toast.error("Currency name is required");
+      return;
+    }
+    if (!customCurrency.code.trim() || customCurrency.code.length < 2) {
+      toast.error("Currency code is required (min 2 characters)");
+      return;
+    }
+    if (!customCurrency.symbol.trim()) {
+      toast.error("Currency symbol is required");
+      return;
+    }
+    if (customCurrency.mobiPerUnit <= 0) {
+      toast.error("Mobi rate must be greater than 0");
+      return;
+    }
+
+    // Check if code already exists
+    const codeUpper = customCurrency.code.toUpperCase();
+    if (editingRates.find(rate => rate.code === codeUpper)) {
+      toast.error("This currency code already exists");
+      return;
+    }
+
+    setEditingRates(prev => [...prev, {
+      id: codeUpper,
+      currency: customCurrency.name.trim(),
+      code: codeUpper,
+      symbol: customCurrency.symbol.trim(),
+      mobiPerUnit: customCurrency.mobiPerUnit,
+      flag: customCurrency.flag.trim() || "🌐"
+    }]);
+    
+    setCustomCurrency({ name: "", code: "", symbol: "", flag: "", mobiPerUnit: 100 });
+    setShowCustomForm(false);
+    toast.success(`${customCurrency.name} added successfully`);
   };
 
   const currentRates = isEditMode ? editingRates : exchangeRates;
@@ -311,37 +363,149 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
             
             {/* Add Currency Section (Edit Mode Only) */}
             {isEditMode && (
-              <Card className="p-4 border-dashed">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium">Add New Currency</p>
-                  <div className="flex gap-2">
-                    <Select value={selectedNewCurrency} onValueChange={setSelectedNewCurrency}>
-                      <SelectTrigger className="h-11 flex-1">
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableCurrencies
-                          .filter(c => !currentRates.find(r => r.code === c.code))
-                          .map(currency => (
-                            <SelectItem key={currency.code} value={currency.code}>
-                              <span className="flex items-center gap-2">
-                                <span>{currency.flag}</span>
-                                <span>{currency.code} - {currency.name}</span>
-                              </span>
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    <Button 
-                      onClick={handleAddCurrency}
-                      disabled={!selectedNewCurrency}
-                      className="h-11"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+              <>
+                <Card className="p-4 border-dashed">
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Add Existing Currency</p>
+                    <div className="flex gap-2">
+                      <Select value={selectedNewCurrency} onValueChange={setSelectedNewCurrency}>
+                        <SelectTrigger className="h-11 flex-1">
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableCurrencies
+                            .filter(c => !currentRates.find(r => r.code === c.code))
+                            .map(currency => (
+                              <SelectItem key={currency.code} value={currency.code}>
+                                <span className="flex items-center gap-2">
+                                  <span>{currency.flag}</span>
+                                  <span>{currency.code} - {currency.name}</span>
+                                </span>
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <Button 
+                        onClick={handleAddCurrency}
+                        disabled={!selectedNewCurrency}
+                        className="h-11"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+
+                {/* Custom Currency Section */}
+                <Card className="p-4 border-dashed border-2">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium">Add Custom Currency</p>
+                      {showCustomForm && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => {
+                            setShowCustomForm(false);
+                            setCustomCurrency({ name: "", code: "", symbol: "", flag: "", mobiPerUnit: 100 });
+                          }}
+                          className="h-8"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    {!showCustomForm ? (
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-11"
+                        onClick={() => setShowCustomForm(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Custom Currency
+                      </Button>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <label className="text-xs font-medium text-muted-foreground">Currency Name *</label>
+                            <Input
+                              placeholder="e.g., Bitcoin"
+                              value={customCurrency.name}
+                              onChange={e => setCustomCurrency(prev => ({ ...prev, name: e.target.value }))}
+                              className="h-11"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-medium text-muted-foreground">Code *</label>
+                            <Input
+                              placeholder="e.g., BTC"
+                              value={customCurrency.code}
+                              onChange={e => setCustomCurrency(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+                              maxLength={5}
+                              className="h-11"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <label className="text-xs font-medium text-muted-foreground">Symbol *</label>
+                            <Input
+                              placeholder="e.g., ₿"
+                              value={customCurrency.symbol}
+                              onChange={e => setCustomCurrency(prev => ({ ...prev, symbol: e.target.value }))}
+                              className="h-11"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-medium text-muted-foreground">Flag/Emoji</label>
+                            <Input
+                              placeholder="e.g., 🪙"
+                              value={customCurrency.flag}
+                              onChange={e => setCustomCurrency(prev => ({ ...prev, flag: e.target.value }))}
+                              maxLength={4}
+                              className="h-11"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-muted-foreground">
+                            1 {customCurrency.symbol || "unit"} = how many Mobi? *
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground pointer-events-none">
+                              M
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              value={customCurrency.mobiPerUnit}
+                              onChange={e => {
+                                const value = parseFloat(e.target.value) || 0;
+                                setCustomCurrency(prev => ({ ...prev, mobiPerUnit: value }));
+                              }}
+                              className="h-12 pl-8 text-lg font-semibold"
+                              placeholder="100.00"
+                            />
+                          </div>
+                        </div>
+
+                        <Button 
+                          className="w-full h-11"
+                          onClick={handleAddCustomCurrency}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Custom Currency
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </>
             )}
           </div>
         </ScrollArea>
