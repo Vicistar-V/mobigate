@@ -372,15 +372,18 @@ export const MobiExchangeRatesDialog = ({ open, onOpenChange }: MobiExchangeRate
                         <SelectTrigger className="h-11 flex-1">
                           <SelectValue placeholder="Select currency" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-w-[280px]">
                           {availableCurrencies
                             .filter(c => !currentRates.find(r => r.code === c.code))
                             .map(currency => (
-                              <SelectItem key={currency.code} value={currency.code}>
-                                <span className="flex items-center gap-2">
-                                  <span>{currency.flag}</span>
-                                  <span>{currency.code} - {currency.name}</span>
-                                </span>
+                              <SelectItem key={currency.code} value={currency.code} className="py-3">
+                                <div className="flex items-start gap-2 min-w-0">
+                                  <span className="text-xl flex-shrink-0">{currency.flag}</span>
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <span className="font-semibold text-sm">{currency.code}</span>
+                                    <span className="text-xs text-muted-foreground truncate">{currency.name}</span>
+                                  </div>
+                                </div>
                               </SelectItem>
                             ))}
                         </SelectContent>
