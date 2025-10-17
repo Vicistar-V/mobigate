@@ -97,8 +97,8 @@ export const AccountSummaryDialog = ({
 
           {/* Recent Transactions Button */}
           <Button 
-            variant="outline" 
-            className="w-full justify-start gap-2"
+            variant="link" 
+            className="w-full justify-start gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 px-0"
             onClick={() => setShowTransactions(true)}
           >
             <Calendar className="h-4 w-4" />
