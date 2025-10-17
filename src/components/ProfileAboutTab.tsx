@@ -668,7 +668,7 @@ export const ProfileAboutTab = ({
           {ageMates.length > 0 ? <div className="space-y-3">
               {ageMates.map((mate, index) => <div key={mate.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-3 rounded-md hover:bg-muted/50 transition-colors">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       <div className="flex-shrink-0">
                         <Avatar className="h-14 w-14 sm:h-16 sm:w-16 ring-2 ring-border cursor-pointer hover:ring-primary transition-all" onClick={() => handleUserProfileClick(mate.id)}>
@@ -706,7 +706,7 @@ export const ProfileAboutTab = ({
           {workColleagues.length > 0 ? <div className="space-y-3">
               {workColleagues.map((colleague, index) => <div key={colleague.id}>
                   {index > 0 && <Separator className="mb-3" />}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-3 rounded-md hover:bg-muted/50 transition-colors">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       <div className="flex-shrink-0">
                         <Avatar className="h-14 w-14 sm:h-16 sm:w-16 ring-2 ring-border cursor-pointer hover:ring-primary transition-all" onClick={() => handleUserProfileClick(colleague.id)}>
