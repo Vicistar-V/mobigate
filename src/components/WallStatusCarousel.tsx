@@ -125,7 +125,7 @@ export const WallStatusCarousel = ({
       
       {/* Normal View - Horizontal Carousel */}
       {view === "normal" && (
-        <div className="relative -mx-4 px-4 max-h-[40vh]">
+        <div className="relative -mx-4 px-4">
           <ScrollArea className="w-full">
             <div className="flex gap-3 pb-2">
               {displayedItems.map((item, index) => {
@@ -135,7 +135,7 @@ export const WallStatusCarousel = ({
                 return (
                   <React.Fragment key={`${item.title}-${index}`}>
                     <Card 
-                      className="flex-shrink-0 w-[72vw] sm:w-[95vw] h-full overflow-hidden relative group cursor-pointer"
+                      className="flex-shrink-0 w-[72vw] max-w-[400px] aspect-[15/14] overflow-hidden relative group cursor-pointer"
                       onClick={() => openDetails(item)}
                     >
                       {item.imageUrl && (
@@ -195,9 +195,9 @@ export const WallStatusCarousel = ({
                     className="overflow-hidden relative group cursor-pointer"
                     onClick={() => openDetails(item)}
                   >
-                    <div className="aspect-[12/7] w-full h-auto">
+                    <div className="aspect-[15/14]">
                       {item.imageUrl && (
-                        <img
+                        <img 
                           src={item.imageUrl} 
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -247,9 +247,9 @@ export const WallStatusCarousel = ({
                         className="overflow-hidden relative group cursor-pointer"
                         onClick={() => openDetails(item)}
                       >
-                        <div className="aspect-[12/7] w-full h-auto">
+                        <div className="aspect-[15/14]">
                           {item.imageUrl && (
-                            <img
+                            <img 
                               src={item.imageUrl} 
                               alt={item.title}
                               className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -331,9 +331,9 @@ export const WallStatusCarousel = ({
                   className="overflow-hidden relative group cursor-pointer"
                   onClick={() => openDetails(item)}
                 >
-                  <div className="aspect-[12/7] w-full h-auto">
+                  <div className="aspect-[15/14]">
                     {item.imageUrl && (
-                      <img
+                      <img 
                         src={item.imageUrl} 
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
