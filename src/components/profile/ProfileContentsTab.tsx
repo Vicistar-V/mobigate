@@ -14,6 +14,8 @@ import {
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { contentsAdSlots } from "@/data/profileAds";
+import { PostDetailDialog } from "@/components/PostDetailDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileContentsTabProps {
   userName: string;
@@ -76,6 +78,10 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const [visibleCount, setVisibleCount] = useState<number>(15);
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set());
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleFollowAuthor = (authorUserId: string) => {
     setFollowingAuthors(prev => {
@@ -87,6 +93,33 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
       }
       return newSet;
     });
+  };
+
+  const handleLike = (postId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+        toast({
+          title: "Removed like",
+          description: "Post unliked successfully",
+        });
+      } else {
+        newSet.add(postId);
+        toast({
+          title: "Liked!",
+          description: "Post liked successfully",
+        });
+      }
+      return newSet;
+    });
+  };
+
+  const handleOpenComments = (post: Post, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPost(post);
+    setDetailOpen(true);
   };
 
   const formatFollowerCount = (count: string | undefined): string => {
@@ -311,14 +344,26 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                       <Eye className="h-4 w-4" />
                       <span className="font-medium">{post.views}</span>
                     </span>
-                    <span className="flex items-center gap-1.5">
-                      <Heart className="h-4 w-4" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleLike(post.id, e)}
+                      className={`flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors ${
+                        likedPosts.has(post.id) ? 'text-red-500 hover:text-red-600' : ''
+                      }`}
+                    >
+                      <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
                       <span className="font-medium">{post.likes}</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleOpenComments(post, e)}
+                      className="flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent hover:text-blue-500 transition-colors"
+                    >
                       <MessageCircle className="h-4 w-4" />
                       <span className="font-medium">{post.comments}</span>
-                    </span>
+                    </Button>
                     {post.followers && !post.isOwner && (
                       <Button
                         variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
@@ -390,6 +435,15 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
             </Button>
           )}
         </div>
+      )}
+
+      {/* Post Detail Dialog */}
+      {selectedPost && (
+        <PostDetailDialog
+          open={detailOpen}
+          onOpenChange={setDetailOpen}
+          post={selectedPost}
+        />
       )}
     </div>
   );
