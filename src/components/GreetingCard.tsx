@@ -87,7 +87,7 @@ export const GreetingSection = () => {
                   Friends
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-card z-50 w-48">
+              <DropdownMenuContent align="start" side="bottom" sideOffset={5} className="bg-card z-50 w-48">
                 <DropdownMenuItem asChild className="text-base font-medium text-primary">
                   <Link to="/profile/current-user#friends" className="cursor-pointer">
                     Friends
@@ -98,7 +98,7 @@ export const GreetingSection = () => {
                   <DropdownMenuSubTrigger className="text-base font-medium text-primary">
                     Friend Requests
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-card z-50">
+                  <DropdownMenuSubContent className="bg-card z-50 w-48">
                     <DropdownMenuItem asChild className="text-base font-medium text-primary">
                       <Link to="/friends/requests/received" className="cursor-pointer">
                         Received Requests
