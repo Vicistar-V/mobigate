@@ -94,24 +94,18 @@ export const GreetingSection = () => {
                   </Link>
                 </DropdownMenuItem>
                 
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="text-base font-medium text-primary">
+                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                  <Link to="/friends/requests/received" className="cursor-pointer">
                     Friend Requests
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-card z-50 w-48">
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/friends/requests/received" className="cursor-pointer">
-                        Received Requests
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/friends/requests/sent" className="cursor-pointer">
-                        Sent Requests
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-
+                  </Link>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                  <Link to="/friends/find" className="cursor-pointer">
+                    Find Friends
+                  </Link>
+                </DropdownMenuItem>
+                
                 <DropdownMenuItem asChild className="text-base font-medium text-primary">
                   <Link to="/friends/invite" className="cursor-pointer">
                     Invite People
@@ -119,8 +113,8 @@ export const GreetingSection = () => {
                 </DropdownMenuItem>
                 
                 <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                  <Link to="/friends/find" className="cursor-pointer">
-                    Find Friends
+                  <Link to="/friends/referred" className="cursor-pointer">
+                    Referred Friends
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
