@@ -96,7 +96,13 @@ export const GreetingSection = () => {
                 
                 <DropdownMenuItem asChild className="text-base font-medium text-primary">
                   <Link to="/friends/requests/received" className="cursor-pointer">
-                    Friend Requests
+                    Received Requests
+                  </Link>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                  <Link to="/friends/requests/sent" className="cursor-pointer">
+                    Sent Requests
                   </Link>
                 </DropdownMenuItem>
                 
