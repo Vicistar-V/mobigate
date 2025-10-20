@@ -99,13 +99,14 @@ export const GreetingSection = () => {
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem 
-                      className="text-base font-medium text-primary cursor-pointer"
+                      className="text-base font-medium text-primary cursor-pointer flex justify-between items-center"
                       onSelect={(e) => {
                         e.preventDefault();
                         setFriendsMenuView('requests');
                       }}
                     >
                       Friend Requests
+                      <span className="ml-auto">&gt;</span>
                     </DropdownMenuItem>
                     
                     <DropdownMenuItem asChild className="text-base font-medium text-primary">
