@@ -87,33 +87,36 @@ export const PremiumAdCard = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
 
           {/* Header */}
-          <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 flex items-center justify-between z-20">
-            <div className="flex items-center gap-2 text-white/90 text-sm sm:text-base">
-              {advertiser.logo && (
-                <img 
-                  src={advertiser.logo} 
-                  alt={advertiser.name}
-                  className="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover bg-white"
-                />
-              )}
-              <span className="font-medium">{advertiser.name}</span>
-              <span>·</span>
-              <span className="flex items-center gap-1">
-                <Globe className="h-3 w-3" />
-                Sponsored
-              </span>
-              {advertiser.verified && (
-                <Badge variant="secondary" className="text-base px-1.5 py-0">Verified</Badge>
-              )}
+          <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-20">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 text-white/90 text-xs sm:text-sm min-w-0 flex-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  {advertiser.logo && (
+                    <img 
+                      src={advertiser.logo} 
+                      alt={advertiser.name}
+                      className="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover bg-white flex-shrink-0"
+                    />
+                  )}
+                  <span className="font-medium truncate">{advertiser.name}</span>
+                  {advertiser.verified && (
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0 flex-shrink-0">✓</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-xs sm:text-sm pl-8 sm:pl-0">
+                  <Globe className="h-3 w-3 flex-shrink-0" />
+                  <span>Sponsored</span>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex-shrink-0"
+              >
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-black/40 hover:bg-black/60 text-white"
-            >
-              <X className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
           </div>
 
           {/* Content - Centered */}
