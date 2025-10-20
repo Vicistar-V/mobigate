@@ -662,12 +662,12 @@ export default function SubmitAdvert() {
 
                 {/* Catchment/Target Markets */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <Label className="text-sm">
                       Catchment/Target Markets
                       <InfoTooltip content="Distribute your ad exposure across different geographic and interest segments. Must total 100%." />
                     </Label>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 justify-between sm:justify-end">
                       <Button
                         type="button"
                         variant="outline"
