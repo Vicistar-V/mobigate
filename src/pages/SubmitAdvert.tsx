@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle } from "lucide-react";
+import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { 
@@ -147,6 +147,7 @@ export default function SubmitAdvert() {
   const [launchDate, setLaunchDate] = useState<Date>();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [agreed, setAgreed] = useState(false);
+  const [catchmentLocked, setCatchmentLocked] = useState(false);
 
   // Update type when displayMode or multipleCount changes
   useEffect(() => {
@@ -226,9 +227,20 @@ export default function SubmitAdvert() {
   }, [category, displayMode, multipleCount, type, size, dpdPackage, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
+    if (catchmentLocked) return;
     setCatchmentMarket(prev => ({
       ...prev,
       [field]: value[0]
+    }));
+  };
+
+  const updateCatchmentMarketInput = (field: keyof typeof catchmentMarket, value: string) => {
+    if (catchmentLocked) return;
+    const numValue = parseInt(value) || 0;
+    const clampedValue = Math.max(0, Math.min(100, numValue));
+    setCatchmentMarket(prev => ({
+      ...prev,
+      [field]: clampedValue
     }));
   };
 
@@ -650,16 +662,32 @@ export default function SubmitAdvert() {
 
                 {/* Catchment/Target Markets */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <Label className="text-sm">
                       Catchment/Target Markets
                       <InfoTooltip content="Distribute your ad exposure across different geographic and interest segments. Must total 100%." />
                     </Label>
-                    <div className={cn(
-                      "text-xs font-medium px-2 py-0.5 rounded",
-                      catchmentTotal === 100 ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
-                    )}>
-                      Total: {catchmentTotal}%
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCatchmentLocked(!catchmentLocked)}
+                        className="h-7 px-2"
+                      >
+                        {catchmentLocked ? (
+                          <Lock className="h-3 w-3 mr-1" />
+                        ) : (
+                          <Unlock className="h-3 w-3 mr-1" />
+                        )}
+                        <span className="text-xs">{catchmentLocked ? "Locked" : "Unlocked"}</span>
+                      </Button>
+                      <div className={cn(
+                        "text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap",
+                        catchmentTotal === 100 ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
+                      )}>
+                        Total: {catchmentTotal}%
+                      </div>
                     </div>
                   </div>
                   
@@ -674,9 +702,20 @@ export default function SubmitAdvert() {
                       { key: "others" as const, label: "Others", defaultValue: 10 },
                     ].map(({ key, label }) => (
                       <div key={key} className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor={key} className="text-xs sm:text-sm">{label}</Label>
-                          <span className="text-xs sm:text-sm font-medium">{catchmentMarket[key]}%</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <Label htmlFor={key} className="text-xs sm:text-sm flex-shrink-0">{label}</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={catchmentMarket[key]}
+                              onChange={(e) => updateCatchmentMarketInput(key, e.target.value)}
+                              disabled={catchmentLocked}
+                              className="w-16 h-7 text-xs text-right"
+                            />
+                            <span className="text-xs font-medium">%</span>
+                          </div>
                         </div>
                         <Slider
                           id={key}
@@ -685,6 +724,7 @@ export default function SubmitAdvert() {
                           max={100}
                           step={1}
                           className="flex-1"
+                          disabled={catchmentLocked}
                         />
                       </div>
                     ))}
