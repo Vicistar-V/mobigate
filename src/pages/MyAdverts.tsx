@@ -191,7 +191,7 @@ export default function MyAdverts() {
           </div>
 
           {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+          <div className="grid grid-cols-1 gap-3 pt-2 border-t sm:grid-cols-2">
             <div className="flex items-center gap-2 text-sm">
               <Zap className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">DPD:</span>
