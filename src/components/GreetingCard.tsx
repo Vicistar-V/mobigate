@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal } from "lucide-react";
+import { Search, MoreHorizontal, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import profilePhoto from "@/assets/profile-photo.jpg";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
+import { useState } from "react";
 export const GreetingSection = () => {
+  const [friendsMenuView, setFriendsMenuView] = useState<'main' | 'requests'>('main');
   const {
     showDialog,
     Dialog
@@ -24,17 +26,8 @@ export const GreetingSection = () => {
   const primaryLinks = [{
     label: "About Me",
     href: "/profile/current-user#about"
-  }, {
-    label: "Friends",
-    href: "/profile/current-user#friends"
-  }, {
-    label: "Invite",
-    href: "/invite"
   }];
   const moreLinks = [{
-    label: "Albums",
-    href: "/profile/current-user#albums"
-  }, {
     label: "Followers",
     href: "/profile/current-user#followers"
   }, {
@@ -75,7 +68,7 @@ export const GreetingSection = () => {
           </Avatar>
           <div className="flex-1 space-y-2">
             <p className="text-lg text-destructive font-semibold">Good Evening</p>
-            <h2 className="text-3xl font-bold">About</h2>
+            <h2 className="text-3xl font-bold">NKEMJKA PETER IPREC</h2>
             <p className="text-base text-muted-foreground">Oct 5, 2025, 5:30pm</p>
           </div>
         </div>
@@ -87,6 +80,91 @@ export const GreetingSection = () => {
               </Link>
               <span className="text-muted-foreground px-1.5">|</span>
             </span>)}
+          
+          {/* Friends Dropdown */}
+          <span className="flex items-center flex-shrink-0">
+            <DropdownMenu onOpenChange={(open) => !open && setFriendsMenuView('main')}>
+              <DropdownMenuTrigger asChild>
+                <button className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap">
+                  Friends
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" side="bottom" sideOffset={5} className="bg-card z-50 w-48">
+                {friendsMenuView === 'main' ? (
+                  <>
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/profile/current-user#friends" className="cursor-pointer">
+                        Friends
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      className="text-base font-medium text-primary cursor-pointer flex justify-between items-center"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setFriendsMenuView('requests');
+                      }}
+                    >
+                      Friend Requests
+                      <span className="ml-auto">&gt;</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/find" className="cursor-pointer">
+                        Find Friends
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/invite" className="cursor-pointer">
+                        Invite People
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/referred" className="cursor-pointer">
+                        Referred Friends
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem 
+                      className="text-base font-medium text-primary cursor-pointer"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setFriendsMenuView('main');
+                      }}
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/requests/received" className="cursor-pointer">
+                        Received Requests
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/requests/sent" className="cursor-pointer">
+                        Sent Requests
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <span className="text-muted-foreground px-1.5">|</span>
+          </span>
+          
+          {/* Albums Link */}
+          <span className="flex items-center flex-shrink-0">
+            <Link to="/profile/current-user#albums" className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap">
+              Albums
+            </Link>
+            <span className="text-muted-foreground px-1.5">|</span>
+          </span>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
