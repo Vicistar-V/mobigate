@@ -372,7 +372,7 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-1">
-                  <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
+                  <SidebarMenuSub className="ml-2 border-l-2 border-primary/20 pl-1">
                     {applicationSettings.items.map(subItem => {
                       const subIsExpanded = expandedItems.includes(`${applicationSettings.title}-${subItem.title}`);
                       
@@ -388,7 +388,7 @@ export function AppSidebar() {
                             </SidebarMenuSubButton>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="mt-1">
-                            <SidebarMenuSub className="ml-4 border-l-2 border-primary/10 pl-2">
+                            <SidebarMenuSub className="ml-2 border-l-2 border-primary/10 pl-1">
                               {subItem.items.map(nestedItem => (
                                 <SidebarMenuSubItem key={nestedItem.title}>
                                   <NavLink to={nestedItem.url}>
@@ -436,7 +436,7 @@ export function AppSidebar() {
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-1">
-                          <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
+                          <SidebarMenuSub className="ml-2 border-l-2 border-primary/20 pl-1">
                             {item.items.map(subItem => {
                               const subIsExpanded = expandedItems.includes(`${item.title}-${subItem.title}`);
                               
@@ -457,7 +457,7 @@ export function AppSidebar() {
                                       </SidebarMenuSubButton>
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="mt-1">
-                                      <SidebarMenuSub className="ml-4 border-l-2 border-primary/10 pl-2">
+                                      <SidebarMenuSub className="ml-2 border-l-2 border-primary/10 pl-1">
                                         {nestedItems.map(nestedItem => (
                                           <SidebarMenuSubItem key={nestedItem.title}>
                                             <NavLink to={nestedItem.url}>
