@@ -388,7 +388,7 @@ export function AppSidebar() {
                             </SidebarMenuSubButton>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="mt-1">
-                            <SidebarMenuSub className="ml-2 border-l-2 border-primary/10 pl-1">
+                            <SidebarMenuSub className="ml-1 border-l-2 border-primary/10 pl-0.5">
                               {subItem.items.map(nestedItem => (
                                 <SidebarMenuSubItem key={nestedItem.title}>
                                   <NavLink to={nestedItem.url}>
