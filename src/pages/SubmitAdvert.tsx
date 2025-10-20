@@ -479,14 +479,14 @@ export default function SubmitAdvert() {
         <div className="max-w-5xl mx-auto">
           {/* Main Form */}
           <div className="space-y-4 sm:space-y-6">
-            <Card>
+            <Card className="overflow-visible">
               <CardHeader className="space-y-1 sm:space-y-1.5">
                 <CardTitle className="text-xl sm:text-2xl">Create Premium Advert</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
                   Fill in the details below to create your advertising campaign
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 sm:space-y-5">
+              <CardContent className="space-y-4 sm:space-y-5 overflow-visible">
                 {/* Category Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="category" className="text-sm">
