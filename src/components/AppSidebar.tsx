@@ -15,6 +15,13 @@ const superadminMenuItems = [
     url: "/"
   },
   {
+    title: "App Settings",
+    icon: Settings,
+    items: [
+      { title: "All Settings", url: "/superadmin/settings/all" }
+    ]
+  },
+  {
     title: "Manage Quiz",
     icon: Gamepad2,
     items: [
@@ -23,13 +30,6 @@ const superadminMenuItems = [
       { title: "Set Questions", url: "/superadmin/quiz/set-questions" },
       { title: "Manage Questions", url: "/superadmin/quiz/manage-questions" },
       { title: "Monitor All Quiz", url: "/superadmin/quiz/monitor" }
-    ]
-  },
-  {
-    title: "App Settings",
-    icon: Settings,
-    items: [
-      { title: "All Settings", url: "/superadmin/settings/all" }
     ]
   },
   {
@@ -94,6 +94,31 @@ const superadminMenuItems = [
       { title: "View/Manage All Adverts", url: "/superadmin/adverts/manage" },
       { title: "Upload/Manage Promotional Ads", url: "/superadmin/adverts/promotional" }
     ]
+  },
+  {
+    title: "Manage Communities",
+    icon: Users,
+    url: "/superadmin/communities"
+  },
+  {
+    title: "Manage Mobi Circles",
+    icon: UserPlus,
+    url: "/superadmin/mobi-circles"
+  },
+  {
+    title: "Manage Biz-catalogue",
+    icon: Store,
+    url: "/superadmin/biz-catalogue"
+  },
+  {
+    title: "Manage FundRaiser",
+    icon: TrendingUp,
+    url: "/superadmin/fundraiser"
+  },
+  {
+    title: "Manage Others",
+    icon: ListChecks,
+    url: "/superadmin/others"
   }
 ];
 
