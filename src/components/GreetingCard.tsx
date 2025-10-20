@@ -24,7 +24,7 @@ export const GreetingSection = () => {
     }
   };
   const primaryLinks = [{
-    label: "About Me",
+    label: "About",
     href: "/profile/current-user#about"
   }];
   const moreLinks = [{
