@@ -221,6 +221,10 @@ export const PremiumAdCard = ({
               <video
                 src={media.items[0]?.url}
                 controls
+                autoPlay
+                loop
+                muted
+                playsInline
                 className="w-full h-full object-contain"
                 poster={media.items[0]?.url}
               />
