@@ -40,7 +40,7 @@ export function MultipleCountCard({ count, selected, category, onSelect, index }
     <Card
       className={cn(
         "p-2 sm:p-3 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md",
-        index % 2 === 0 && "bg-muted/60",
+        index % 2 === 0 && "bg-muted",
         selected && "border-primary border-2 bg-primary/5 shadow-lg"
       )}
       onClick={onSelect}
