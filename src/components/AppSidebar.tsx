@@ -1,4 +1,4 @@
-import { LayoutDashboard, Wallet, Gamepad2, TrendingUp, BookOpen, Store, Users, UserPlus, MessageSquare, Megaphone, Download, FolderOpen, ShieldCheck, RefreshCw, LogOut, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Settings, Wallet, Gamepad2, TrendingUp, BookOpen, Store, Users, UserPlus, MessageSquare, Megaphone, Download, FolderOpen, ShieldCheck, RefreshCw, LogOut, ChevronRight } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import mobigateIcon from "@/assets/mobigate-icon.svg";
@@ -7,6 +7,19 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 const menuItems = [{
+  title: "Application Settings",
+  icon: Settings,
+  items: [{
+    title: "General Settings",
+    url: "/settings/general"
+  }, {
+    title: "Privacy Settings",
+    url: "/settings/privacy"
+  }, {
+    title: "Notification Settings",
+    url: "/settings/notifications"
+  }]
+}, {
   title: "Wallet Menu",
   icon: Wallet,
   items: [{
