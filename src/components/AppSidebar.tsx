@@ -86,7 +86,7 @@ const superadminMenuItems = [
     icon: Megaphone,
     items: [
       { title: "Set Ad Slot Rate", url: "/application/all_settings.php#advert_slot_fee" },
-      { title: "View/Manage All Adverts", url: "/application/adverts_management.php" },
+      { title: "View/Manage All Adverts", url: "/my-adverts" },
       { title: "Upload/Manage Promotional Ads", url: "/application/upload_manage_promotional_ad.php" }
     ]
   }
@@ -160,8 +160,8 @@ const menuItems = [{
   title: "Advertisements",
   icon: Megaphone,
   items: [
-    { title: "Submit Advert", url: "/application/submit_manage_advert.php" },
-    { title: "View/Manage My Adverts", url: "/application/submit_manage_advert.php" }
+    { title: "Submit Advert", url: "/submit-advert" },
+    { title: "View/Manage My Adverts", url: "/my-adverts" }
   ]
 }, {
   title: "Funds Management",

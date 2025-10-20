@@ -122,10 +122,10 @@ export default function SubmitAdvert() {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const [category, setCategory] = useState<AdvertCategory | "">("");
-  const [type, setType] = useState<AdvertType | "">("");
-  const [size, setSize] = useState<AdvertSize | "">("");
-  const [dpdPackage, setDpdPackage] = useState<DPDPackageId | "">("");
+  const [category, setCategory] = useState<AdvertCategory | undefined>();
+  const [type, setType] = useState<AdvertType | undefined>();
+  const [size, setSize] = useState<AdvertSize | undefined>();
+  const [dpdPackage, setDpdPackage] = useState<DPDPackageId | undefined>();
   const [extendedExposureTime, setExtendedExposureTime] = useState("");
   const [recurrentAfter, setRecurrentAfter] = useState("");
   const [recurrentEvery, setRecurrentEvery] = useState("");
@@ -411,7 +411,7 @@ export default function SubmitAdvert() {
                     Select Category *
                     <InfoTooltip content="Choose between static image ads or dynamic video ads" />
                   </Label>
-                  <Select value={category} onValueChange={(v) => setCategory(v as AdvertCategory)}>
+                  <Select value={category || ""} onValueChange={(v) => setCategory(v as AdvertCategory)}>
                     <SelectTrigger id="category">
                       <SelectValue placeholder="Choose advert category" />
                     </SelectTrigger>
@@ -431,7 +431,7 @@ export default function SubmitAdvert() {
                     Select Display Type *
                     <InfoTooltip content="Single display shows one ad. Multiple displays show multiple ads in rotation." />
                   </Label>
-                  <Select value={type} onValueChange={(v) => setType(v as AdvertType)}>
+                  <Select value={type || ""} onValueChange={(v) => setType(v as AdvertType)}>
                     <SelectTrigger id="type">
                       <SelectValue placeholder="Choose display type" />
                     </SelectTrigger>
@@ -451,7 +451,7 @@ export default function SubmitAdvert() {
                     Select Advert Size *
                     <InfoTooltip content="Choose the display size based on screen dimensions" />
                   </Label>
-                  <Select value={size} onValueChange={(v) => setSize(v as AdvertSize)}>
+                  <Select value={size || ""} onValueChange={(v) => setSize(v as AdvertSize)}>
                     <SelectTrigger id="size">
                       <SelectValue placeholder="Choose advert size" />
                     </SelectTrigger>
@@ -471,7 +471,7 @@ export default function SubmitAdvert() {
                     Select Daily Display Package (DPD) *
                     <InfoTooltip content="DPD determines how many times your ad will be shown per day. Higher DPD means more exposure." />
                   </Label>
-                  <Select value={dpdPackage} onValueChange={(v) => setDpdPackage(v as DPDPackageId)}>
+                  <Select value={dpdPackage || ""} onValueChange={(v) => setDpdPackage(v as DPDPackageId)}>
                     <SelectTrigger id="dpd">
                       <SelectValue placeholder="Choose DPD package" />
                     </SelectTrigger>
