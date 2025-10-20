@@ -2,12 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
+
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -34,7 +34,7 @@ const App = () => (
                 <Route path="/biz-catalogue" element={<ServiceUnavailable />} />
                 <Route path="/community" element={<ServiceUnavailable />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
           </div>
