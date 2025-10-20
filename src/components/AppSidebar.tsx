@@ -393,9 +393,9 @@ export function AppSidebar() {
                                 <SidebarMenuSubItem key={nestedItem.title}>
                                   <NavLink to={nestedItem.url}>
                                     {({ isActive }) => (
-                                      <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
-                                        <span className="whitespace-normal break-words leading-tight">{nestedItem.title}</span>
-                                      </SidebarMenuSubButton>
+                                       <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs h-auto min-h-[1.75rem] py-1.5", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                         <span className="flex-1 whitespace-normal break-words leading-tight text-left">{nestedItem.title}</span>
+                                       </SidebarMenuSubButton>
                                     )}
                                   </NavLink>
                                 </SidebarMenuSubItem>
@@ -480,9 +480,9 @@ export function AppSidebar() {
                               return <SidebarMenuSubItem key={regularItem.title}>
                                 <NavLink to={regularItem.url}>
                                   {({ isActive }) => (
-                                    <SidebarMenuSubButton className={cn("transition-all duration-200", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
-                                      <span>{regularItem.title}</span>
-                                    </SidebarMenuSubButton>
+                                     <SidebarMenuSubButton className={cn("transition-all duration-200 h-auto min-h-[1.75rem] py-1.5", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                       <span className="flex-1 whitespace-normal break-words leading-tight text-left">{regularItem.title}</span>
+                                     </SidebarMenuSubButton>
                                   )}
                                 </NavLink>
                               </SidebarMenuSubItem>;
