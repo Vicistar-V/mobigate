@@ -25,13 +25,10 @@ export const GreetingSection = () => {
     label: "About Me",
     href: "/profile/current-user#about"
   }, {
-    label: "Invite",
-    href: "/invite"
-  }];
-  const moreLinks = [{
     label: "Albums",
     href: "/profile/current-user#albums"
-  }, {
+  }];
+  const moreLinks = [{
     label: "Followers",
     href: "/profile/current-user#followers"
   }, {
