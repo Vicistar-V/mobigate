@@ -1,5 +1,6 @@
 import { LayoutDashboard, Settings, Wallet, Gamepad2, TrendingUp, BookOpen, Store, Users, UserPlus, MessageSquare, Megaphone, Download, FolderOpen, ShieldCheck, RefreshCw, LogOut, ChevronRight, Image, CreditCard, DollarSign, Globe, Library, Heart, Gift, Ticket, ArrowLeftRight, Building2, FileText, UserCheck, Lock, ToggleLeft, MessageCircle, Search, Eye, Ban, AlertTriangle, DollarSign as DollarIcon, Repeat, UserCog, ListChecks } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import mobigateIcon from "@/assets/mobigate-icon.svg";
 import mobigateLogo from "@/assets/mobigate-logo.svg";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
@@ -261,15 +262,24 @@ export function AppSidebar() {
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-1">
                           <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
-                            {item.items.map(subItem => (
-                              <SidebarMenuSubItem key={subItem.title}>
-                                <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
-                                  <a href={subItem.url}>
-                                    <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
-                                  </a>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
+                            {item.items.map(subItem => {
+                              const isInternalRoute = subItem.url.startsWith('/') && !subItem.url.includes('.php');
+                              return (
+                                <SidebarMenuSubItem key={subItem.title}>
+                                  <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
+                                    {isInternalRoute ? (
+                                      <Link to={subItem.url}>
+                                        <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+                                      </Link>
+                                    ) : (
+                                      <a href={subItem.url}>
+                                        <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+                                      </a>
+                                    )}
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
                           </SidebarMenuSub>
                       </CollapsibleContent>
                     </SidebarMenuItem>
@@ -306,15 +316,24 @@ export function AppSidebar() {
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-1">
                           <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
-                            {item.items.map(subItem => (
-                              <SidebarMenuSubItem key={subItem.title}>
-                                <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
-                                  <a href={subItem.url}>
-                                    <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
-                                  </a>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
+                            {item.items.map(subItem => {
+                              const isInternalRoute = subItem.url.startsWith('/') && !subItem.url.includes('.php');
+                              return (
+                                <SidebarMenuSubItem key={subItem.title}>
+                                  <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
+                                    {isInternalRoute ? (
+                                      <Link to={subItem.url}>
+                                        <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+                                      </Link>
+                                    ) : (
+                                      <a href={subItem.url}>
+                                        <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+                                      </a>
+                                    )}
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
                           </SidebarMenuSub>
                         </CollapsibleContent>
                       </SidebarMenuItem>
