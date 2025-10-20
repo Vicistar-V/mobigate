@@ -170,7 +170,7 @@ export function AppSidebar() {
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
                               <item.icon className="h-4 w-4" />
                             </div>
-                            <span className="font-medium">{item.title}</span>
+                            <span className="font-medium flex-1 whitespace-normal break-words leading-tight">{item.title}</span>
                             <ChevronRight className={cn("ml-auto h-4 w-4 transition-transform duration-200", isExpanded && "rotate-90")} />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
