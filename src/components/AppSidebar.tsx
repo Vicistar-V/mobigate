@@ -1,4 +1,4 @@
-import { LayoutDashboard, Settings, Wallet, Gamepad2, TrendingUp, BookOpen, Store, Users, UserPlus, MessageSquare, Megaphone, Download, FolderOpen, ShieldCheck, RefreshCw, LogOut, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Settings, Wallet, Gamepad2, TrendingUp, BookOpen, Store, Users, UserPlus, MessageSquare, Megaphone, Download, FolderOpen, ShieldCheck, RefreshCw, LogOut, ChevronRight, Image, CreditCard, DollarSign, Globe, Library, Heart, Gift, Ticket, ArrowLeftRight, Building2, FileText, UserCheck, Lock, ToggleLeft, MessageCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import mobigateIcon from "@/assets/mobigate-icon.svg";
@@ -10,14 +10,204 @@ const menuItems = [{
   title: "Application Settings",
   icon: Settings,
   items: [{
-    title: "General Settings",
-    url: "/settings/general"
+    title: "Logo Settings",
+    icon: Image,
+    items: [{
+      title: "Upload Your Main Logo",
+      url: "/settings/logo/main"
+    }, {
+      title: "Upload Dashboard Logo",
+      url: "/settings/logo/dashboard"
+    }]
   }, {
-    title: "Privacy Settings",
-    url: "/settings/privacy"
+    title: "Bank & Payment",
+    icon: CreditCard,
+    items: [{
+      title: "Set Your Company Bank Details",
+      url: "/settings/bank/details"
+    }, {
+      title: "Set Your Paystack Gateway Live Key",
+      url: "/settings/bank/paystack"
+    }]
   }, {
-    title: "Notification Settings",
-    url: "/settings/notifications"
+    title: "Amount Limits",
+    icon: DollarSign,
+    items: [{
+      title: "Set Maximum Withdrawal Amount",
+      url: "/settings/limits/max-withdrawal"
+    }, {
+      title: "Set Maximum Transfer Amount",
+      url: "/settings/limits/max-transfer"
+    }, {
+      title: "Set Minimum Transfer Amount",
+      url: "/settings/limits/min-transfer"
+    }, {
+      title: "Set Minimum Account Balance",
+      url: "/settings/limits/min-balance"
+    }, {
+      title: "Set Minimum Funding Amount",
+      url: "/settings/limits/min-funding"
+    }]
+  }, {
+    title: "Site Settings",
+    icon: Globe,
+    items: [{
+      title: "Set Site Title",
+      url: "/settings/site/title"
+    }, {
+      title: "Set Site Footer",
+      url: "/settings/site/footer"
+    }, {
+      title: "Set User Support Details",
+      url: "/settings/site/support"
+    }]
+  }, {
+    title: "e-Library Settings",
+    icon: Library,
+    items: [{
+      title: "Set Minimum e-Library Access Fee",
+      url: "/settings/elibrary/min-access-fee"
+    }, {
+      title: "Set e-Library Content Fee",
+      url: "/settings/elibrary/content-fee"
+    }, {
+      title: "Set e-Library Income Sharing System (Percentage)",
+      url: "/settings/elibrary/income-sharing"
+    }, {
+      title: "Set Personalized e-Library Content Duration",
+      url: "/settings/elibrary/content-duration"
+    }, {
+      title: "Set Minimum Active e-Library Contents for the title of \"Content Creator\"",
+      url: "/settings/elibrary/min-content-creator"
+    }]
+  }, {
+    title: "Fee Settings",
+    icon: Heart,
+    items: [{
+      title: "Set Fee for Liking a content",
+      url: "/settings/fees/like-fee"
+    }, {
+      title: "Set Content Like Fee Sharing Formular",
+      url: "/settings/fees/like-sharing"
+    }, {
+      title: "Set Fee for following another user",
+      url: "/settings/fees/follow-fee"
+    }, {
+      title: "Set Follow Fee Sharing Formular",
+      url: "/settings/fees/follow-sharing"
+    }]
+  }, {
+    title: "Gifts & Currencies",
+    icon: Gift,
+    items: [{
+      title: "Create Digital Gifts",
+      url: "/settings/gifts/create"
+    }, {
+      title: "Manage All Digital Gifts",
+      url: "/settings/gifts/manage"
+    }, {
+      title: "Create and Manage Currencies",
+      url: "/settings/currencies/manage"
+    }, {
+      title: "Funding Currency",
+      url: "/settings/currencies/funding"
+    }]
+  }, {
+    title: "Voucher Settings",
+    icon: Ticket,
+    items: [{
+      title: "Create Voucher Denomination",
+      url: "/settings/voucher/denomination"
+    }, {
+      title: "Set Voucher Amount for Each Currency",
+      url: "/settings/voucher/amounts"
+    }]
+  }, {
+    title: "Transfer Settings",
+    icon: ArrowLeftRight,
+    items: [{
+      title: "Switch Credit Transfer ON or OFF",
+      url: "/settings/transfer/toggle"
+    }, {
+      title: "Create transfer amount range for transfer charge",
+      url: "/settings/transfer/charge-range"
+    }]
+  }, {
+    title: "Merchant Settings",
+    icon: Building2,
+    items: [{
+      title: "Set Merchant Application Fee",
+      url: "/settings/merchant/application-fee"
+    }, {
+      title: "Set Minimum Wallet Balance for Merchant Application",
+      url: "/settings/merchant/min-wallet"
+    }, {
+      title: "Set Minimum Days of Account Opening Before Merchant Application",
+      url: "/settings/merchant/min-days"
+    }, {
+      title: "Set Merchant Initial Voucher Deposit Balance",
+      url: "/settings/merchant/initial-deposit"
+    }, {
+      title: "Other Merchant Application Eligibility Terms and Conditions",
+      url: "/settings/merchant/eligibility"
+    }, {
+      title: "Set Corporate Merchants Application Terms and Conditions",
+      url: "/settings/merchant/corporate-terms"
+    }, {
+      title: "Set Commission (in %) for Merchants on every voucher sold to users and recharged",
+      url: "/settings/merchant/commission"
+    }]
+  }, {
+    title: "Advertisement",
+    icon: Megaphone,
+    items: [{
+      title: "Set Advertisement Slot Rate",
+      url: "/settings/ads/slot-rate"
+    }]
+  }, {
+    title: "Quiz",
+    icon: Gamepad2,
+    items: [{
+      title: "Set Quiz Terms and Conditions",
+      url: "/settings/quiz/terms"
+    }]
+  }, {
+    title: "Friends Invitation",
+    icon: UserCheck,
+    items: [{
+      title: "Set Friends Invitation Text",
+      url: "/settings/invitation/text"
+    }, {
+      title: "Upload Friends Invitation Whatsapp Logo",
+      url: "/settings/invitation/whatsapp-logo"
+    }]
+  }, {
+    title: "Privacy & Security",
+    icon: Lock,
+    items: [{
+      title: "Default Privacy Settings",
+      url: "/settings/privacy/defaults"
+    }, {
+      title: "Set Default Penalty Notification Text",
+      url: "/settings/privacy/penalty-text"
+    }]
+  }, {
+    title: "System Controls",
+    icon: ToggleLeft,
+    items: [{
+      title: "Switch Withdrawal ON or OFF",
+      url: "/settings/system/withdrawal-toggle"
+    }, {
+      title: "Switch Credit Transfer ON or OFF",
+      url: "/settings/system/transfer-toggle"
+    }]
+  }, {
+    title: "Status Content",
+    icon: MessageCircle,
+    items: [{
+      title: "Set status content posting and viewing fees",
+      url: "/settings/status/fees"
+    }]
   }]
 }, {
   title: "Wallet Menu",
@@ -189,15 +379,52 @@ export function AppSidebar() {
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-1">
                           <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
-                            {item.items.map(subItem => <SidebarMenuSubItem key={subItem.title}>
+                            {item.items.map(subItem => {
+                              const subIsExpanded = expandedItems.includes(`${item.title}-${subItem.title}`);
+                              
+                              // Nested expandable items
+                              if (subItem.items) {
+                                return <Collapsible key={subItem.title} open={subIsExpanded} onOpenChange={() => toggleExpand(`${item.title}-${subItem.title}`)}>
+                                  <SidebarMenuSubItem>
+                                    <CollapsibleTrigger asChild>
+                                      <SidebarMenuSubButton className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2rem] py-1.5">
+                                        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+                                          <subItem.icon className="h-3 w-3" />
+                                        </div>
+                                        <span className="flex-1 whitespace-normal break-words leading-tight text-left text-sm">{subItem.title}</span>
+                                        <ChevronRight className={cn("ml-auto h-3 w-3 transition-transform duration-200 shrink-0", subIsExpanded && "rotate-90")} />
+                                      </SidebarMenuSubButton>
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent className="mt-1">
+                                      <SidebarMenuSub className="ml-4 border-l-2 border-primary/10 pl-2">
+                                        {subItem.items.map(nestedItem => (
+                                          <SidebarMenuSubItem key={nestedItem.title}>
+                                            <NavLink to={nestedItem.url}>
+                                              {({ isActive }) => (
+                                                <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                                  <span className="whitespace-normal break-words leading-tight">{nestedItem.title}</span>
+                                                </SidebarMenuSubButton>
+                                              )}
+                                            </NavLink>
+                                          </SidebarMenuSubItem>
+                                        ))}
+                                      </SidebarMenuSub>
+                                    </CollapsibleContent>
+                                  </SidebarMenuSubItem>
+                                </Collapsible>;
+                              }
+                              
+                              // Regular sub-items
+                              return <SidebarMenuSubItem key={subItem.title}>
                                 <NavLink to={subItem.url}>
-                                  {({
-                              isActive
-                            }) => <SidebarMenuSubButton className={cn("transition-all duration-200", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                  {({ isActive }) => (
+                                    <SidebarMenuSubButton className={cn("transition-all duration-200", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
                                       <span>{subItem.title}</span>
-                                    </SidebarMenuSubButton>}
+                                    </SidebarMenuSubButton>
+                                  )}
                                 </NavLink>
-                              </SidebarMenuSubItem>)}
+                              </SidebarMenuSubItem>;
+                            })}
                           </SidebarMenuSub>
                         </CollapsibleContent>
                       </SidebarMenuItem>
