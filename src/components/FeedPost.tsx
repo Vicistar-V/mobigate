@@ -196,6 +196,7 @@ export const FeedPost = ({
                     variant={isFollowing ? "secondary" : "default"}
                     size="sm"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleFollow();
                     }}
