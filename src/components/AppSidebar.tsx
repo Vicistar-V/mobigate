@@ -212,8 +212,28 @@ export function AppSidebar() {
     open
   } = useSidebar();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  
   const toggleExpand = (title: string) => {
-    setExpandedItems(prev => prev.includes(title) ? prev.filter(item => item !== title) : [...prev, title]);
+    setExpandedItems(prev => {
+      if (prev.includes(title)) {
+        // Close this item and all its children
+        return prev.filter(item => !item.startsWith(title));
+      } else {
+        // Close other items at the same level, keep children of other parents
+        const level = title.split('-').length;
+        const filtered = prev.filter(item => {
+          const itemLevel = item.split('-').length;
+          // Keep items that are children of this item's ancestors
+          if (level > 1) {
+            const parentPrefix = title.substring(0, title.lastIndexOf('-'));
+            return item.startsWith(parentPrefix + '-') && itemLevel > level;
+          }
+          // For top level, only keep nested children
+          return itemLevel > 1 && prev.some(p => p !== item && item.startsWith(p + '-'));
+        });
+        return [...filtered, title];
+      }
+    });
   };
   return <Sidebar collapsible="icon" className="border-r border-border/50 bg-gradient-to-b from-card to-muted/30">
       <SidebarHeader className="border-b border-border/50 px-4 py-4">
