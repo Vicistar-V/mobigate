@@ -21,38 +21,38 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
   return (
     <Card
       className={cn(
-        "p-6 cursor-pointer transition-all hover:border-primary/50",
+        "p-3 sm:p-4 cursor-pointer transition-all hover:border-primary/50",
         selected && "border-primary border-2 bg-primary/5"
       )}
       onClick={onSelect}
     >
-      <div className="flex flex-col items-center text-center space-y-3">
+      <div className="flex items-start gap-3">
         <div className={cn(
-          "w-16 h-16 rounded-full flex items-center justify-center",
+          "w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0",
           selected ? "bg-primary text-primary-foreground" : "bg-muted"
         )}>
           {isSingle ? (
-            <ImageIcon className="h-8 w-8" />
+            <ImageIcon className="h-5 w-5 sm:h-6 sm:w-6" />
           ) : (
-            <Images className="h-8 w-8" />
+            <Images className="h-5 w-5 sm:h-6 sm:w-6" />
           )}
         </div>
         
-        <div>
-          <h3 className="font-semibold text-lg">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm sm:text-base">
             {isSingle ? "Single Display" : "Multiple Displays"}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {isSingle ? "One advert display" : "2-10 adverts in rotation"}
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {isSingle ? "One advert" : "2-10 adverts"}
           </p>
-        </div>
 
-        <div className="pt-2 border-t w-full">
-          <p className="text-sm font-medium">24-Month Setup Fee:</p>
-          <p className="text-primary font-semibold mt-1">
-            {category === "pictorial" ? pictorialPrice : videoPrice}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">{mobiPrice}</p>
+          <div className="mt-2 pt-2 border-t">
+            <p className="text-xs font-medium text-muted-foreground">Setup Fee:</p>
+            <p className="text-primary font-semibold text-sm mt-0.5">
+              {category === "pictorial" ? pictorialPrice : videoPrice}
+            </p>
+            <p className="text-xs text-muted-foreground">{mobiPrice}</p>
+          </div>
         </div>
       </div>
     </Card>

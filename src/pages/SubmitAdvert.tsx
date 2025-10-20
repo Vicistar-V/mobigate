@@ -463,21 +463,21 @@ export default function SubmitAdvert() {
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Form */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Create Premium Advert</CardTitle>
-                <CardDescription>
+              <CardHeader className="space-y-1 sm:space-y-1.5">
+                <CardTitle className="text-xl sm:text-2xl">Create Premium Advert</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Fill in the details below to create your advertising campaign
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-5">
                 {/* Category Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="category">
+                  <Label htmlFor="category" className="text-sm">
                     Select Category *
                     <InfoTooltip content="Choose between static image ads or dynamic video ads" />
                   </Label>
@@ -497,12 +497,12 @@ export default function SubmitAdvert() {
 
                 {/* Display Mode Selection */}
                 {category && (
-                  <div className="space-y-3">
-                    <Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm">
                       Select Display Mode *
                       <InfoTooltip content="Choose whether you want a single advert or multiple adverts rotating in sequence" />
                     </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <DisplayModeCard
                         mode="single"
                         selected={displayMode === "single"}
@@ -524,12 +524,12 @@ export default function SubmitAdvert() {
 
                 {/* Multiple Display Count Selection */}
                 {category && displayMode === "multiple" && (
-                  <div className="space-y-3">
-                    <Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm">
                       Select Number of Displays *
                       <InfoTooltip content="Choose how many different adverts will rotate in your campaign" />
                     </Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                       {([2, 3, 4, 5, 6, 7, 8, 9, 10] as MultipleDisplayCount[]).map((count) => (
                         <MultipleCountCard
                           key={count}
@@ -545,7 +545,7 @@ export default function SubmitAdvert() {
 
                 {/* Size Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="size">
+                  <Label htmlFor="size" className="text-sm">
                     Select Advert Size *
                     <InfoTooltip content="Choose the display size based on screen dimensions" />
                   </Label>
@@ -565,7 +565,7 @@ export default function SubmitAdvert() {
 
                 {/* DPD Package Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="dpd">
+                  <Label htmlFor="dpd" className="text-sm">
                     Select Daily Display Package (DPD) *
                     <InfoTooltip content="DPD determines how many times your ad will be shown per day. Higher DPD means more exposure." />
                   </Label>
@@ -587,7 +587,7 @@ export default function SubmitAdvert() {
 
                 {/* Extended Exposure Duration */}
                 <div className="space-y-2">
-                  <Label htmlFor="extended">
+                  <Label htmlFor="extended" className="text-sm">
                     Extended Exposure Duration (Optional)
                     <InfoTooltip content="Keep your ad visible for longer periods. Default exposure is 2-10 minutes." />
                   </Label>
@@ -607,7 +607,7 @@ export default function SubmitAdvert() {
 
                 {/* Recurrent Exposure - After */}
                 <div className="space-y-2">
-                  <Label htmlFor="recurrent-after">
+                  <Label htmlFor="recurrent-after" className="text-sm">
                     Recurrent Exposure - Repeat After (Optional)
                     <InfoTooltip content="Show the ad again after a specific time period from the last display" />
                   </Label>
@@ -627,7 +627,7 @@ export default function SubmitAdvert() {
 
                 {/* Recurrent Exposure - Every */}
                 <div className="space-y-2">
-                  <Label htmlFor="recurrent-every">
+                  <Label htmlFor="recurrent-every" className="text-sm">
                     Recurrent Exposure - Repeat Every (Optional)
                     <InfoTooltip content="Continuously repeat the ad at regular intervals" />
                   </Label>
@@ -648,21 +648,21 @@ export default function SubmitAdvert() {
                 <Separator />
 
                 {/* Catchment/Target Markets */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label>
+                    <Label className="text-sm">
                       Catchment/Target Markets
                       <InfoTooltip content="Distribute your ad exposure across different geographic and interest segments. Must total 100%." />
                     </Label>
                     <div className={cn(
-                      "text-sm font-medium px-2 py-1 rounded",
+                      "text-xs font-medium px-2 py-0.5 rounded",
                       catchmentTotal === 100 ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
                     )}>
                       Total: {catchmentTotal}%
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-4 p-4 rounded-lg bg-muted/50">
+                  <div className="grid grid-cols-1 gap-3 p-3 rounded-lg bg-muted/50">
                     {[
                       { key: "ownCity" as const, label: "Own City", defaultValue: 20 },
                       { key: "ownState" as const, label: "Own State", defaultValue: 25 },
@@ -672,10 +672,10 @@ export default function SubmitAdvert() {
                       { key: "random" as const, label: "Random", defaultValue: 5 },
                       { key: "others" as const, label: "Others", defaultValue: 10 },
                     ].map(({ key, label }) => (
-                      <div key={key} className="space-y-2">
+                      <div key={key} className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <Label htmlFor={key} className="text-sm">{label}</Label>
-                          <span className="text-sm font-medium">{catchmentMarket[key]}%</span>
+                          <Label htmlFor={key} className="text-xs sm:text-sm">{label}</Label>
+                          <span className="text-xs sm:text-sm font-medium">{catchmentMarket[key]}%</span>
                         </div>
                         <Slider
                           id={key}
@@ -690,8 +690,8 @@ export default function SubmitAdvert() {
                   </div>
 
                   {catchmentTotal !== 100 && (
-                    <div className="flex items-center gap-2 text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-destructive">
+                      <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>Percentages must total exactly 100%</span>
                     </div>
                   )}
@@ -701,7 +701,7 @@ export default function SubmitAdvert() {
 
                 {/* Launch Date */}
                 <div className="space-y-2">
-                  <Label>
+                  <Label className="text-sm">
                     Launch Date (Optional)
                     <InfoTooltip content="Select when you want your ad campaign to start. Leave empty to start immediately upon approval." />
                   </Label>
@@ -733,14 +733,14 @@ export default function SubmitAdvert() {
                 <Separator />
 
                 {/* File Upload */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <Label htmlFor="file-upload">
+                    <Label htmlFor="file-upload" className="text-sm">
                       Upload Advert Material *
                       <InfoTooltip content={`Upload ${getRequiredFiles()} ${category === "video" ? "video" : "image"} file(s) for your ${displayMode === "single" ? "single" : `${multipleCount}-in-1 multiple`} display type.`} />
                     </Label>
                     {type && (
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                         Required: {getRequiredFiles()} file(s) for {displayMode === "single" ? "Single Display" : `${multipleCount}-in-1 Multiple Display`}
                       </p>
                     )}
@@ -801,19 +801,22 @@ export default function SubmitAdvert() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3">
                   <Button
                     variant="outline"
                     onClick={handleSaveDraft}
                     className="flex-1"
+                    size="sm"
                   >
                     <Save className="mr-2 h-4 w-4" />
-                    Save Draft
+                    <span className="hidden sm:inline">Save Draft</span>
+                    <span className="sm:hidden">Save</span>
                   </Button>
                   <Button
                     variant="outline"
                     onClick={handlePreview}
                     className="flex-1"
+                    size="sm"
                   >
                     <Eye className="mr-2 h-4 w-4" />
                     Preview
@@ -822,8 +825,9 @@ export default function SubmitAdvert() {
                     onClick={handlePublish}
                     disabled={isSubmitting}
                     className="flex-1"
+                    size="sm"
                   >
-                    Publish Now
+                    {isSubmitting ? "Publishing..." : "Publish Now"}
                   </Button>
                 </div>
               </CardContent>

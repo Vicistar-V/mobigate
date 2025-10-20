@@ -38,26 +38,26 @@ export function MultipleCountCard({ count, selected, category, onSelect }: Multi
   return (
     <Card
       className={cn(
-        "p-4 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md",
+        "p-2 sm:p-3 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md",
         selected && "border-primary border-2 bg-primary/5 shadow-lg"
       )}
       onClick={onSelect}
     >
-      <div className="flex flex-col space-y-2">
-        <div className="flex items-center justify-between">
-          <h4 className="font-semibold text-base">{count}-in-1 Multiple</h4>
-          {selected && <Badge variant="default">Selected</Badge>}
+      <div className="flex flex-col space-y-1.5">
+        <div className="flex items-center justify-between gap-1">
+          <h4 className="font-semibold text-xs sm:text-sm">{count}-in-1</h4>
+          {selected && <Badge variant="default" className="text-xs py-0 px-1.5 h-5">✓</Badge>}
         </div>
         
-        <p className="text-xs text-muted-foreground">
-          Upload {count} different adverts
+        <p className="text-xs text-muted-foreground line-clamp-1">
+          {count} adverts
         </p>
 
-        <div className="pt-2 border-t">
-          <p className="text-xs text-muted-foreground">24-Month Setup Fee:</p>
-          <div className="flex items-baseline gap-2 mt-1">
-            <p className="text-primary font-bold text-lg">{formatCurrency(nairaFee)}</p>
-            <p className="text-xs text-muted-foreground">/ {formatMobi(mobiFee)}</p>
+        <div className="pt-1.5 border-t">
+          <p className="text-xs text-muted-foreground">Setup:</p>
+          <div className="flex flex-col gap-0.5 mt-0.5">
+            <p className="text-primary font-bold text-sm sm:text-base">{formatCurrency(nairaFee)}</p>
+            <p className="text-xs text-muted-foreground">{formatMobi(mobiFee)}</p>
           </div>
         </div>
       </div>
