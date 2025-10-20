@@ -246,13 +246,15 @@ export default function MyAdverts() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="all">All ({adverts.length})</TabsTrigger>
-          <TabsTrigger value="active">Active ({filterAdverts("active").length})</TabsTrigger>
-          <TabsTrigger value="pending">Pending ({filterAdverts("pending").length})</TabsTrigger>
-          <TabsTrigger value="paused">Paused ({filterAdverts("paused").length})</TabsTrigger>
-          <TabsTrigger value="expired">Expired ({filterAdverts("expired").length})</TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="all">All ({adverts.length})</TabsTrigger>
+            <TabsTrigger value="active">Active ({filterAdverts("active").length})</TabsTrigger>
+            <TabsTrigger value="pending">Pending ({filterAdverts("pending").length})</TabsTrigger>
+            <TabsTrigger value="paused">Paused ({filterAdverts("paused").length})</TabsTrigger>
+            <TabsTrigger value="expired">Expired ({filterAdverts("expired").length})</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value={activeTab} className="space-y-4">
           {filteredAdverts.length === 0 ? (
