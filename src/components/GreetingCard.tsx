@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 import { Search, MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 import profilePhoto from "@/assets/profile-photo.jpg";
@@ -24,9 +24,6 @@ export const GreetingSection = () => {
   const primaryLinks = [{
     label: "About Me",
     href: "/profile/current-user#about"
-  }, {
-    label: "Friends",
-    href: "/profile/current-user#friends"
   }, {
     label: "Invite",
     href: "/invite"
@@ -87,6 +84,55 @@ export const GreetingSection = () => {
               </Link>
               <span className="text-muted-foreground px-1.5">|</span>
             </span>)}
+          
+          {/* Friends Dropdown */}
+          <span className="flex items-center flex-shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap">
+                  Friends
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-card z-50 w-48">
+                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                  <Link to="/profile/current-user#friends" className="cursor-pointer">
+                    Friends
+                  </Link>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="text-base font-medium text-primary">
+                    Friend Requests
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="bg-card z-50">
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/requests/received" className="cursor-pointer">
+                        Received Requests
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/requests/sent" className="cursor-pointer">
+                        Sent Requests
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+
+                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                  <Link to="/friends/invite" className="cursor-pointer">
+                    Invite People
+                  </Link>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                  <Link to="/friends/find" className="cursor-pointer">
+                    Find Friends
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <span className="text-muted-foreground px-1.5">|</span>
+          </span>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
