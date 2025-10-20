@@ -7,7 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
-
+import SubmitAdvert from "./pages/SubmitAdvert";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -29,6 +29,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/profile/:userId" element={<Profile />} />
+                <Route path="/submit-advert" element={<SubmitAdvert />} />
                 <Route path="/mobi-shop" element={<ServiceUnavailable />} />
                 <Route path="/mobi-circle" element={<ServiceUnavailable />} />
                 <Route path="/biz-catalogue" element={<ServiceUnavailable />} />
