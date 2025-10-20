@@ -4,17 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { AdvertPricing } from "@/types/advert";
 import { formatCurrency, formatMobi } from "@/lib/advertPricing";
 import { Zap, TrendingUp } from "lucide-react";
-
 interface AdvertPricingCardProps {
   pricing: AdvertPricing;
   walletBalance?: number;
 }
-
-export const AdvertPricingCard = ({ pricing, walletBalance = 500000 }: AdvertPricingCardProps) => {
+export const AdvertPricingCard = ({
+  pricing,
+  walletBalance = 500000
+}: AdvertPricingCardProps) => {
   const hasInsufficientFunds = walletBalance < pricing.totalCost;
-
-  return (
-    <Card>
+  return <Card className="sticky top-4">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Cost Breakdown</CardTitle>
@@ -39,38 +38,30 @@ export const AdvertPricingCard = ({ pricing, walletBalance = 500000 }: AdvertPri
         </div>
 
         {/* Optional Charges */}
-        {(pricing.extendedExposureCost > 0 || pricing.recurrentAfterCost > 0 || pricing.recurrentEveryCost > 0) && (
-          <>
+        {(pricing.extendedExposureCost > 0 || pricing.recurrentAfterCost > 0 || pricing.recurrentEveryCost > 0) && <>
             <Separator />
             <div className="space-y-2">
-              {pricing.extendedExposureCost > 0 && (
-                <div className="flex items-center justify-between text-sm">
+              {pricing.extendedExposureCost > 0 && <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Extended Exposure</span>
                   <span className="font-medium text-primary">+{formatCurrency(pricing.extendedExposureCost)}</span>
-                </div>
-              )}
-              {pricing.recurrentAfterCost > 0 && (
-                <div className="flex items-center justify-between text-sm">
+                </div>}
+              {pricing.recurrentAfterCost > 0 && <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Recurrent After</span>
                   <span className="font-medium text-primary">+{formatCurrency(pricing.recurrentAfterCost)}</span>
-                </div>
-              )}
-              {pricing.recurrentEveryCost > 0 && (
-                <div className="flex items-center justify-between text-sm">
+                </div>}
+              {pricing.recurrentEveryCost > 0 && <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Recurrent Every</span>
                   <span className="font-medium text-primary">+{formatCurrency(pricing.recurrentEveryCost)}</span>
-                </div>
-              )}
+                </div>}
             </div>
-          </>
-        )}
+          </>}
 
         <Separator />
 
         {/* Total */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-semibold">Total Cost</span>
+            <span className="font-semibold">Total Cost@Setup</span>
             <div className="text-right">
               <div className="font-bold text-lg">{formatCurrency(pricing.totalCost)}</div>
               <div className="text-xs text-muted-foreground">{formatMobi(pricing.totalCostMobi)}</div>
@@ -85,14 +76,12 @@ export const AdvertPricingCard = ({ pricing, walletBalance = 500000 }: AdvertPri
             </span>
           </div>
 
-          {hasInsufficientFunds && (
-            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+          {hasInsufficientFunds && <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-sm text-destructive font-medium">Insufficient funds</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Please fund your wallet to continue
               </p>
-            </div>
-          )}
+            </div>}
         </div>
 
         <Separator />
@@ -117,6 +106,5 @@ export const AdvertPricingCard = ({ pricing, walletBalance = 500000 }: AdvertPri
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
