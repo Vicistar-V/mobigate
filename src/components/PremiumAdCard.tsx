@@ -65,12 +65,23 @@ export const PremiumAdCard = ({
     return (
       <Card className="relative w-full h-full overflow-hidden bg-card border-2 border-primary/20 shadow-xl">
         <div className="relative h-full">
-          {/* Background Image */}
-          <img
-            src={media.items[0]?.url}
-            alt={content.headline}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+          {/* Background Media */}
+          {media.type === 'video' ? (
+            <video
+              src={media.items[0]?.url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <img
+              src={media.items[0]?.url}
+              alt={content.headline}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
           
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
@@ -301,11 +312,22 @@ export const PremiumAdCard = ({
         <div className="flex gap-3 items-start">
           {/* Media Thumbnail */}
           <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-muted">
-            <img
-              src={media.items[0]?.url}
-              alt={content.headline}
-              className="w-full h-full object-cover"
-            />
+            {media.type === 'video' ? (
+              <video
+                src={media.items[0]?.url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src={media.items[0]?.url}
+                alt={content.headline}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
 
           {/* Title and Advertiser */}
