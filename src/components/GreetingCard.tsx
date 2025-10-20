@@ -73,7 +73,7 @@ export const GreetingSection = () => {
           </div>
         </div>
 
-        <div className="flex flex-nowrap items-center gap-1 pt-2 border-t overflow-x-auto scrollbar-hide">
+        <div className="flex flex-nowrap items-center pt-2 border-t overflow-x-auto scrollbar-hide">
           {primaryLinks.map(link => <span key={link.label} className="flex items-center flex-shrink-0">
               <Link to={link.href} className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap" onClick={e => handleLinkClick(e, link.href)}>
                 {link.label}
