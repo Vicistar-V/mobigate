@@ -14,6 +14,7 @@ import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 import { initializeMockData } from "./data/mockAdvertData";
+import { startAdvertSimulator } from "./lib/advertSimulator";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => {
   // Initialize mock data on app load
   useEffect(() => {
     initializeMockData();
+    startAdvertSimulator();
   }, []);
 
   return (

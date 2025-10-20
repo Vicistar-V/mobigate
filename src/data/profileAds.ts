@@ -1,4 +1,5 @@
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
+import { mergeAdvertPools } from "@/lib/advertIntegration";
 
 // Friends List Ad Pool
 export const friendsAdSlots: PremiumAdCardProps[][] = [
@@ -422,3 +423,13 @@ export const contentsAdSlots: PremiumAdCardProps[][] = [
     },
   ],
 ];
+
+// Export functions to get merged ad pools with user-submitted adverts
+export const getFriendsAdsWithUserAdverts = () => mergeAdvertPools(friendsAdSlots);
+export const getFollowersAdsWithUserAdverts = () => mergeAdvertPools(followersAdSlots);
+export const getFollowingAdsWithUserAdverts = () => mergeAdvertPools(followingAdSlots);
+export const getLikesAdsWithUserAdverts = () => mergeAdvertPools(likesAdSlots);
+export const getAlbumPhotosAdsWithUserAdverts = () => mergeAdvertPools(albumPhotosAdSlots);
+export const getAlbumVideosAdsWithUserAdverts = () => mergeAdvertPools(albumVideosAdSlots);
+export const getAlbumsCarouselAdsWithUserAdverts = () => mergeAdvertPools(albumsCarouselAdSlots);
+export const getContentsAdsWithUserAdverts = () => mergeAdvertPools(contentsAdSlots);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { PremiumAdCard, PremiumAdCardProps } from "./PremiumAdCard";
+import { trackImpression } from "@/lib/advertSimulator";
 
 interface PremiumAdRotationProps {
   slotId: string;
@@ -25,7 +26,12 @@ export const PremiumAdRotation = ({
   useEffect(() => {
     // Initialize time remaining (convert to seconds if needed)
     setTimeRemaining(adDuration);
-  }, [currentAdIndex, adDuration]);
+    
+    // Track impression when ad is shown
+    if (currentAd?.id && currentAd.id.startsWith("ad-")) {
+      trackImpression(currentAd.id);
+    }
+  }, [currentAdIndex, adDuration, currentAd?.id]);
 
   useEffect(() => {
     if (ads.length === 0) return;

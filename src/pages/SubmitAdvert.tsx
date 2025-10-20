@@ -22,6 +22,7 @@ import { calculateAdvertPricing } from "@/lib/advertPricing";
 import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "@/lib/advertStorage";
 import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
 import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
+import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
 
 const advertCategories = [
   { value: "pictorial" as AdvertCategory, label: "Pictorial/Photo Ads" },
@@ -145,6 +146,7 @@ export default function SubmitAdvert() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Load draft on mount
   useEffect(() => {
@@ -366,6 +368,18 @@ export default function SubmitAdvert() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePreview = () => {
+    if (!category || !type || !size || uploadedFiles.length === 0) {
+      toast({
+        title: "Cannot Preview",
+        description: "Please select category, type, size, and upload at least one file to preview.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowPreview(true);
   };
 
   const pricing = category && type && dpdPackage ? calculateAdvertPricing(
@@ -713,6 +727,14 @@ export default function SubmitAdvert() {
                     Save Draft
                   </Button>
                   <Button
+                    variant="outline"
+                    onClick={handlePreview}
+                    className="flex-1"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Preview
+                  </Button>
+                  <Button
                     onClick={handlePublish}
                     disabled={isSubmitting}
                     className="flex-1"
@@ -745,6 +767,27 @@ export default function SubmitAdvert() {
         </div>
       </main>
       <Footer />
+      
+      {/* Preview Dialog */}
+      {category && type && size && uploadedFiles.length > 0 && (
+        <AdvertPreviewDialog
+          open={showPreview}
+          onOpenChange={setShowPreview}
+          formData={{
+            category,
+            type,
+            size,
+            dpdPackage: dpdPackage || "basic",
+            extendedExposure: extendedExposureTime,
+            recurrentAfter,
+            recurrentEvery,
+            catchmentMarket,
+            launchDate,
+            files: uploadedFiles,
+            agreed,
+          }}
+        />
+      )}
     </div>
   );
 }
