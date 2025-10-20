@@ -68,6 +68,14 @@ export const AdvertPricingCard = ({
             </div>
           </div>
 
+          <div className="flex items-center justify-between pt-2">
+            <span className="font-semibold">Total Recurrent Cost</span>
+            <div className="text-right">
+              <div className="font-bold text-lg">{formatCurrency(pricing.totalCost - pricing.setupFee)}</div>
+              <div className="text-xs text-muted-foreground">{formatMobi((pricing.totalCost - pricing.setupFee) / 100)}</div>
+            </div>
+          </div>
+
           {/* Wallet Balance */}
           <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
             <span className="text-sm text-muted-foreground">Your Wallet Balance</span>
