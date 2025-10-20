@@ -231,12 +231,12 @@ export default function MyAdverts() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">My Adverts</h1>
-          <p className="text-muted-foreground mt-1">Manage and track your advertising campaigns</p>
+      <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">My Adverts</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Manage and track your advertising campaigns</p>
         </div>
-        <Button onClick={() => navigate("/submit-advert")}>
+        <Button onClick={() => navigate("/submit-advert")} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Create New Advert
         </Button>
