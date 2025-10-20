@@ -796,8 +796,8 @@ export default function SubmitAdvert() {
                     htmlFor="agree"
                     className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    I agree to the terms and conditions and confirm that my advert material
-                    complies with advertising guidelines *
+                    I agree to the Terms and Conditions and confirm that my Advert Material
+                    complies with Advertising Guidelines *
                   </label>
                 </div>
 
