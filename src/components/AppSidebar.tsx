@@ -6,6 +6,7 @@ import mobigateLogo from "@/assets/mobigate-logo.svg";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Superadmin Menu Items
 const superadminMenuItems = [
@@ -185,9 +186,17 @@ const menuItems = [{
 }];
 export function AppSidebar() {
   const {
-    open
+    open,
+    setOpenMobile
   } = useSidebar();
+  const isMobile = useIsMobile();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
   
   const toggleExpand = (title: string) => {
     setExpandedItems(prev => {
@@ -227,7 +236,7 @@ export function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Dashboard" className="group relative overflow-hidden transition-all duration-200 hover:bg-accent/50">
-                <a href="/application/index.php">
+                <a href="/application/index.php" onClick={handleLinkClick}>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
                     <LayoutDashboard className="h-4 w-4" />
                   </div>
@@ -268,11 +277,11 @@ export function AppSidebar() {
                                 <SidebarMenuSubItem key={subItem.title}>
                                   <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
                                     {isInternalRoute ? (
-                                      <Link to={subItem.url}>
+                                      <Link to={subItem.url} onClick={handleLinkClick}>
                                         <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
                                       </Link>
                                     ) : (
-                                      <a href={subItem.url}>
+                                      <a href={subItem.url} onClick={handleLinkClick}>
                                         <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
                                       </a>
                                     )}
@@ -322,11 +331,11 @@ export function AppSidebar() {
                                 <SidebarMenuSubItem key={subItem.title}>
                                   <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
                                     {isInternalRoute ? (
-                                      <Link to={subItem.url}>
+                                      <Link to={subItem.url} onClick={handleLinkClick}>
                                         <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
                                       </Link>
                                     ) : (
-                                      <a href={subItem.url}>
+                                      <a href={subItem.url} onClick={handleLinkClick}>
                                         <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
                                       </a>
                                     )}
@@ -345,7 +354,7 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title} className="group transition-all duration-200 hover:bg-accent/50">
-                      <a href={item.url!}>
+                      <a href={item.url!} onClick={handleLinkClick}>
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
                           <item.icon className="h-4 w-4" />
                         </div>
@@ -365,7 +374,7 @@ export function AppSidebar() {
         <SidebarMenu className="space-y-1">
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Reload" className="group hover:bg-accent/50 transition-all duration-200">
-              <a href="/application/all_notifications.php">
+              <a href="/application/all_notifications.php" onClick={handleLinkClick}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted-foreground/10 text-muted-foreground group-hover:bg-muted-foreground/20">
                   <RefreshCw className="h-4 w-4" />
                 </div>
@@ -375,7 +384,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Sign Out" className="group hover:bg-destructive/10 text-destructive transition-all duration-200">
-              <a href="/application/logout.php">
+              <a href="/application/logout.php" onClick={handleLinkClick}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive group-hover:bg-destructive/20">
                   <LogOut className="h-4 w-4" />
                 </div>
