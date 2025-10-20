@@ -393,7 +393,7 @@ export function AppSidebar() {
                                 <SidebarMenuSubItem key={nestedItem.title}>
                                   <NavLink to={nestedItem.url}>
                                     {({ isActive }) => (
-                                       <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs h-auto min-h-[1.75rem] py-1.5 [&>span]:!whitespace-normal [&>span]:!overflow-visible", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                       <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
                                          <span className="flex-1 whitespace-normal break-words leading-tight text-left">{nestedItem.title}</span>
                                        </SidebarMenuSubButton>
                                     )}
@@ -462,7 +462,7 @@ export function AppSidebar() {
                                           <SidebarMenuSubItem key={nestedItem.title}>
                                             <NavLink to={nestedItem.url}>
                                               {({ isActive }) => (
-                                                 <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs h-auto min-h-[1.75rem] py-1.5 [&>span]:!whitespace-normal [&>span]:!overflow-visible", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                                 <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
                                                    <span className="flex-1 whitespace-normal break-words leading-tight text-left">{nestedItem.title}</span>
                                                  </SidebarMenuSubButton>
                                               )}
@@ -480,7 +480,7 @@ export function AppSidebar() {
                               return <SidebarMenuSubItem key={regularItem.title}>
                                 <NavLink to={regularItem.url}>
                                   {({ isActive }) => (
-                                     <SidebarMenuSubButton className={cn("transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span]:!whitespace-normal [&>span]:!overflow-visible", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                     <SidebarMenuSubButton className={cn("transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
                                        <span className="flex-1 whitespace-normal break-words leading-tight text-left">{regularItem.title}</span>
                                      </SidebarMenuSubButton>
                                   )}
