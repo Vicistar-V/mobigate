@@ -204,7 +204,7 @@ export const FeedPost = ({
                   >
                     <UserPlus className="h-3 w-3" />
                     <span className="hidden sm:inline">{isFollowing ? "Following" : "Follow"}</span>
-                    <span className="text-base opacity-80">({formatFollowerCount(followerCount)})</span>
+                    <span className="text-base opacity-80" onClick={(e) => e.stopPropagation()}>({formatFollowerCount(followerCount)})</span>
                   </Button>
                 )}
               </div>
