@@ -806,27 +806,27 @@ export default function SubmitAdvert() {
                   <Button
                     variant="outline"
                     onClick={handleSaveDraft}
-                    className="flex-1 h-14 px-6"
-                    size="lg"
+                    className="flex-1"
+                    size="xl"
                   >
-                    <Save className="mr-2 h-4 w-4" />
+                    <Save className="mr-2" />
                     <span className="hidden sm:inline">Save Draft</span>
                     <span className="sm:hidden">Save</span>
                   </Button>
                   <Button
                     variant="outline"
                     onClick={handlePreview}
-                    className="flex-1 h-14 px-6"
-                    size="lg"
+                    className="flex-1"
+                    size="xl"
                   >
-                    <Eye className="mr-2 h-4 w-4" />
+                    <Eye className="mr-2" />
                     Preview
                   </Button>
                   <Button
                     onClick={handlePublish}
                     disabled={isSubmitting}
-                    className="flex-1 h-14 px-6"
-                    size="lg"
+                    className="flex-1"
+                    size="xl"
                   >
                     {isSubmitting ? "Publishing..." : "Publish Now"}
                   </Button>
