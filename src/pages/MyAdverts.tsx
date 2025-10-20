@@ -118,9 +118,9 @@ export default function MyAdverts() {
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <CardTitle className="text-lg">
                   {advert.category === "pictorial" ? "Image Advert" : "Video Advert"}
                 </CardTitle>
@@ -128,11 +128,11 @@ export default function MyAdverts() {
                   {getStatusLabel(advert.status)}
                 </Badge>
               </div>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 {advert.type.replace("-", " ").replace("multiple", "Multiple")} • {advert.size} • {advert.dpdPackage}
               </CardDescription>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 self-end sm:self-auto">
               {canPause && (
                 <Button
                   variant="outline"
