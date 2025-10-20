@@ -24,9 +24,6 @@ export const GreetingSection = () => {
   const primaryLinks = [{
     label: "About Me",
     href: "/profile/current-user#about"
-  }, {
-    label: "Albums",
-    href: "/profile/current-user#albums"
   }];
   const moreLinks = [{
     label: "Followers",
@@ -128,6 +125,14 @@ export const GreetingSection = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <span className="text-muted-foreground px-1.5">|</span>
+          </span>
+          
+          {/* Albums Link */}
+          <span className="flex items-center flex-shrink-0">
+            <Link to="/profile/current-user#albums" className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap">
+              Albums
+            </Link>
             <span className="text-muted-foreground px-1.5">|</span>
           </span>
           
