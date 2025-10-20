@@ -17,12 +17,24 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { AdvertCategory, AdvertType, AdvertSize, DPDPackageId } from "@/types/advert";
-import { calculateAdvertPricing } from "@/lib/advertPricing";
+import { 
+  AdvertCategory, 
+  AdvertType, 
+  AdvertSize, 
+  DPDPackageId,
+  DisplayMode,
+  MultipleDisplayCount,
+  getAdvertType,
+  getDisplayMode,
+  getMultipleCount
+} from "@/types/advert";
+import { calculateAdvertPricing, getRequiredFileCount } from "@/lib/advertPricing";
 import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "@/lib/advertStorage";
 import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
 import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
+import { DisplayModeCard } from "@/components/advert/DisplayModeCard";
+import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
 
 const advertCategories = [
   { value: "pictorial" as AdvertCategory, label: "Pictorial/Photo Ads" },
@@ -124,6 +136,8 @@ export default function SubmitAdvert() {
   const navigate = useNavigate();
   
   const [category, setCategory] = useState<AdvertCategory | undefined>();
+  const [displayMode, setDisplayMode] = useState<DisplayMode | undefined>();
+  const [multipleCount, setMultipleCount] = useState<MultipleDisplayCount | undefined>();
   const [type, setType] = useState<AdvertType | undefined>();
   const [size, setSize] = useState<AdvertSize | undefined>();
   const [dpdPackage, setDpdPackage] = useState<DPDPackageId | undefined>();
@@ -133,6 +147,14 @@ export default function SubmitAdvert() {
   const [launchDate, setLaunchDate] = useState<Date>();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [agreed, setAgreed] = useState(false);
+
+  // Update type when displayMode or multipleCount changes
+  useEffect(() => {
+    if (displayMode) {
+      const newType = getAdvertType(displayMode, multipleCount);
+      setType(newType);
+    }
+  }, [displayMode, multipleCount]);
 
   // Catchment market percentages
   const [catchmentMarket, setCatchmentMarket] = useState({
@@ -153,7 +175,13 @@ export default function SubmitAdvert() {
     const draft = loadAdvertDraft();
     if (draft) {
       if (draft.category) setCategory(draft.category as AdvertCategory);
-      if (draft.type) setType(draft.type as AdvertType);
+      if (draft.type) {
+        const loadedType = draft.type as AdvertType;
+        setType(loadedType);
+        setDisplayMode(getDisplayMode(loadedType));
+        const count = getMultipleCount(loadedType);
+        if (count) setMultipleCount(count);
+      }
       if (draft.size) setSize(draft.size as AdvertSize);
       if (draft.dpdPackage) setDpdPackage(draft.dpdPackage as DPDPackageId);
       if (draft.extendedExposure) setExtendedExposureTime(draft.extendedExposure);
@@ -174,24 +202,28 @@ export default function SubmitAdvert() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (category || type || size || dpdPackage) {
-        saveAdvertDraft({
-          category,
-          type,
-          size,
-          dpdPackage,
-          extendedExposure: extendedExposureTime,
-          recurrentAfter,
-          recurrentEvery,
-          launchDate,
-          catchmentMarket,
-          agreed,
-          files: []
-        });
+        if (displayMode && type) {
+          saveAdvertDraft({
+            category,
+            displayMode,
+            multipleCount,
+            type,
+            size,
+            dpdPackage,
+            extendedExposure: extendedExposureTime,
+            recurrentAfter,
+            recurrentEvery,
+            launchDate,
+            catchmentMarket,
+            agreed,
+            files: []
+          });
+        }
       }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [category, type, size, dpdPackage, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed]);
+  }, [category, displayMode, multipleCount, type, size, dpdPackage, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
     setCatchmentMarket(prev => ({
@@ -203,11 +235,11 @@ export default function SubmitAdvert() {
   const catchmentTotal = Object.values(catchmentMarket).reduce((a, b) => a + b, 0);
 
   const getRequiredFiles = () => {
-    const typeObj = advertTypes.find(t => t.value === type);
-    return typeObj?.requiredFiles || 1;
+    if (!type) return 1;
+    return getRequiredFileCount(type);
   };
 
-  const isMultipleDisplay = type && type !== "single";
+  const isMultipleDisplay = displayMode === "multiple";
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -232,24 +264,28 @@ export default function SubmitAdvert() {
   };
 
   const handleSaveDraft = () => {
-    saveAdvertDraft({
-      category,
-      type,
-      size,
-      dpdPackage,
-      extendedExposure: extendedExposureTime,
-      recurrentAfter,
-      recurrentEvery,
-      launchDate,
-      catchmentMarket,
-      agreed,
-      files: []
-    });
-    
-    toast({
-      title: "Draft saved",
-      description: "Your advert draft has been saved successfully.",
-    });
+    if (displayMode && type) {
+      saveAdvertDraft({
+        category,
+        displayMode,
+        multipleCount,
+        type,
+        size,
+        dpdPackage,
+        extendedExposure: extendedExposureTime,
+        recurrentAfter,
+        recurrentEvery,
+        launchDate,
+        catchmentMarket,
+        agreed,
+        files: []
+      });
+      
+      toast({
+        title: "Draft saved",
+        description: "Your advert draft has been saved successfully.",
+      });
+    }
   };
 
   const validateForm = () => {
@@ -262,10 +298,28 @@ export default function SubmitAdvert() {
       return false;
     }
 
+    if (!displayMode) {
+      toast({
+        title: "Validation Error",
+        description: "Please select display mode (Single or Multiple)",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (displayMode === "multiple" && !multipleCount) {
+      toast({
+        title: "Validation Error",
+        description: "Please select the number of multiple displays",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     if (!type) {
       toast({
         title: "Validation Error",
-        description: "Please select display type",
+        description: "Display type could not be determined",
         variant: "destructive",
       });
       return false;
@@ -338,6 +392,8 @@ export default function SubmitAdvert() {
       const advert = saveAdvert(
         {
           category: category as AdvertCategory,
+          displayMode: displayMode as DisplayMode,
+          multipleCount,
           type: type as AdvertType,
           size: size as AdvertSize,
           dpdPackage: dpdPackage as DPDPackageId,
@@ -439,25 +495,53 @@ export default function SubmitAdvert() {
                   </Select>
                 </div>
 
-                {/* Type Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="type">
-                    Select Display Type *
-                    <InfoTooltip content="Single display shows one ad. Multiple displays show multiple ads in rotation." />
-                  </Label>
-                  <Select value={type || ""} onValueChange={(v) => setType(v as AdvertType)}>
-                    <SelectTrigger id="type">
-                      <SelectValue placeholder="Choose display type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {advertTypes.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {t.label}
-                        </SelectItem>
+                {/* Display Mode Selection */}
+                {category && (
+                  <div className="space-y-3">
+                    <Label>
+                      Select Display Mode *
+                      <InfoTooltip content="Choose whether you want a single advert or multiple adverts rotating in sequence" />
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <DisplayModeCard
+                        mode="single"
+                        selected={displayMode === "single"}
+                        category={category}
+                        onSelect={() => {
+                          setDisplayMode("single");
+                          setMultipleCount(undefined);
+                        }}
+                      />
+                      <DisplayModeCard
+                        mode="multiple"
+                        selected={displayMode === "multiple"}
+                        category={category}
+                        onSelect={() => setDisplayMode("multiple")}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Multiple Display Count Selection */}
+                {category && displayMode === "multiple" && (
+                  <div className="space-y-3">
+                    <Label>
+                      Select Number of Displays *
+                      <InfoTooltip content="Choose how many different adverts will rotate in your campaign" />
+                    </Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      {([2, 3, 4, 5, 6, 7, 8, 9, 10] as MultipleDisplayCount[]).map((count) => (
+                        <MultipleCountCard
+                          key={count}
+                          count={count}
+                          selected={multipleCount === count}
+                          category={category}
+                          onSelect={() => setMultipleCount(count)}
+                        />
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Size Selection */}
                 <div className="space-y-2">
@@ -653,11 +737,11 @@ export default function SubmitAdvert() {
                   <div>
                     <Label htmlFor="file-upload">
                       Upload Advert Material *
-                      <InfoTooltip content={`Upload ${getRequiredFiles()} ${category === "video" ? "video" : "image"} file(s) for your ${type || "selected"} display type.`} />
+                      <InfoTooltip content={`Upload ${getRequiredFiles()} ${category === "video" ? "video" : "image"} file(s) for your ${displayMode === "single" ? "single" : `${multipleCount}-in-1 multiple`} display type.`} />
                     </Label>
                     {type && (
                       <p className="text-sm text-muted-foreground mt-1">
-                        Required: {getRequiredFiles()} file(s) for {type.replace("-", " ").replace("multiple", "Multiple")} display
+                        Required: {getRequiredFiles()} file(s) for {displayMode === "single" ? "Single Display" : `${multipleCount}-in-1 Multiple Display`}
                       </p>
                     )}
                   </div>
@@ -769,12 +853,14 @@ export default function SubmitAdvert() {
       <Footer />
       
       {/* Preview Dialog */}
-      {category && type && size && uploadedFiles.length > 0 && (
+      {category && displayMode && type && size && uploadedFiles.length > 0 && (
         <AdvertPreviewDialog
           open={showPreview}
           onOpenChange={setShowPreview}
           formData={{
             category,
+            displayMode,
+            multipleCount,
             type,
             size,
             dpdPackage: dpdPackage || "basic",

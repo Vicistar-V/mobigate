@@ -167,3 +167,21 @@ export function formatMobi(amount: number): string {
     minimumFractionDigits: 0,
   }).format(amount) + " Mobi";
 }
+
+/**
+ * Get setup fee description for display
+ */
+export function getSetupFeeDescription(category: AdvertCategory, type: AdvertType): string {
+  const setupFee = SETUP_FEES[category][type];
+  const typeLabel = type === "single" ? "Single Display" : `${type.replace("multiple-", "")}-in-1 Multiple Display`;
+  return `${typeLabel} Setup Fee (${category === "pictorial" ? "Pictorial" : "Video"})`;
+}
+
+/**
+ * Get required file count based on advert type
+ */
+export function getRequiredFileCount(type: AdvertType): number {
+  if (type === "single") return 1;
+  const match = type.match(/multiple-(\d+)/);
+  return match ? parseInt(match[1]) : 1;
+}

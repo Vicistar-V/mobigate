@@ -1,5 +1,9 @@
 export type AdvertCategory = "pictorial" | "video";
 
+export type DisplayMode = "single" | "multiple";
+
+export type MultipleDisplayCount = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+
 export type AdvertType = 
   | "single" 
   | "multiple-2" 
@@ -11,6 +15,24 @@ export type AdvertType =
   | "multiple-8" 
   | "multiple-9" 
   | "multiple-10";
+
+// Helper function to convert display mode + count to AdvertType
+export function getAdvertType(mode: DisplayMode, count?: MultipleDisplayCount): AdvertType {
+  if (mode === "single") return "single";
+  return `multiple-${count}` as AdvertType;
+}
+
+// Helper function to extract display mode from AdvertType
+export function getDisplayMode(type: AdvertType): DisplayMode {
+  return type === "single" ? "single" : "multiple";
+}
+
+// Helper function to extract multiple count from AdvertType
+export function getMultipleCount(type: AdvertType): MultipleDisplayCount | undefined {
+  if (type === "single") return undefined;
+  const match = type.match(/multiple-(\d+)/);
+  return match ? parseInt(match[1]) as MultipleDisplayCount : undefined;
+}
 
 export type AdvertSize = 
   | "2x3" 
@@ -62,6 +84,8 @@ export interface CatchmentMarket {
 
 export interface AdvertFormData {
   category: AdvertCategory;
+  displayMode: DisplayMode;
+  multipleCount?: MultipleDisplayCount;
   type: AdvertType;
   size: AdvertSize;
   dpdPackage: DPDPackageId;
