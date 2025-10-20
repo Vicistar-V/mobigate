@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 import { Search, MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 import profilePhoto from "@/assets/profile-photo.jpg";
@@ -94,13 +94,15 @@ export const GreetingSection = () => {
                   </Link>
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                <DropdownMenuLabel className="text-base font-medium text-primary">
+                  Friend Requests
+                </DropdownMenuLabel>
+                <DropdownMenuItem asChild className="text-base font-medium text-primary pl-8">
                   <Link to="/friends/requests/received" className="cursor-pointer">
                     Received Requests
                   </Link>
                 </DropdownMenuItem>
-                
-                <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                <DropdownMenuItem asChild className="text-base font-medium text-primary pl-8">
                   <Link to="/friends/requests/sent" className="cursor-pointer">
                     Sent Requests
                   </Link>
