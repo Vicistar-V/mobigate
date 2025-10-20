@@ -10,87 +10,102 @@ const menuItems = [{
   title: "Wallet Menu",
   icon: Wallet,
   items: [{
-    title: "My Wallet",
-    url: "/wallet"
+    title: "Fund Your Wallet",
+    url: "/wallet/fund"
   }, {
-    title: "Top Up",
-    url: "/wallet/topup"
+    title: "Wallet Funding History",
+    url: "/wallet/history"
   }, {
-    title: "Withdraw",
-    url: "/wallet/withdraw"
+    title: "My Financial Summary",
+    url: "/wallet/summary"
   }]
 }, {
   title: "Quiz Game",
   icon: Gamepad2,
   items: [{
-    title: "Play Quiz",
+    title: "Play Quiz Game",
     url: "/quiz"
-  }, {
-    title: "Leaderboard",
-    url: "/quiz/leaderboard"
   }]
 }, {
   title: "Earnings Reports",
   icon: TrendingUp,
   items: [{
-    title: "View Reports",
-    url: "/earnings"
+    title: "Content Access Earnings",
+    url: "/earnings/content-access"
   }, {
-    title: "Monthly Stats",
-    url: "/earnings/monthly"
+    title: "Content \"Likes\" Earnings",
+    url: "/earnings/likes"
+  }, {
+    title: "\"Follow\" Earnings",
+    url: "/earnings/follow"
+  }, {
+    title: "Gifts Income and Expenditure",
+    url: "/earnings/gifts"
   }]
 }, {
   title: "e-Library Menu",
   icon: BookOpen,
   items: [{
-    title: "Browse Library",
+    title: "Visit e-Library",
     url: "/library"
   }, {
-    title: "My Books",
-    url: "/library/mybooks"
+    title: "Submit/Manage My e-Library Content",
+    url: "/library/manage"
   }]
 }, {
   title: "Merchants Menu",
   icon: Store,
   items: [{
-    title: "Browse Merchants",
-    url: "/merchants"
-  }, {
-    title: "My Shop",
-    url: "/merchants/myshop"
+    title: "Do Account Verification before applying",
+    url: "/merchants/verification"
   }]
 }, {
   title: "Friendship Menu",
   icon: Users,
   items: [{
-    title: "My Friends",
-    url: "/friends"
+    title: "Find Friends",
+    url: "/friends/find"
   }, {
-    title: "Friend Requests",
-    url: "/friends/requests"
+    title: "Invite Friends",
+    url: "/friends/invite"
+  }, {
+    title: "View My 1 Friends",
+    url: "/friends"
   }]
 }, {
   title: "Followers/Following",
   icon: UserPlus,
-  url: "/followers"
+  items: [{
+    title: "My Followers",
+    url: "/followers"
+  }]
 }, {
   title: "Messages/Chats",
   icon: MessageSquare,
-  url: "/messages"
+  items: [{
+    title: "Chat Friends",
+    url: "/messages/friends"
+  }, {
+    title: "Chat Followers(1 )",
+    url: "/messages/followers"
+  }, {
+    title: "View All Chats",
+    url: "/messages"
+  }]
 }, {
   title: "Advertisements",
   icon: Megaphone,
   items: [{
-    title: "Browse Ads",
-    url: "/ads"
-  }, {
-    title: "Create Ad",
-    url: "/ads/create"
+    title: "Submit Advert",
+    url: "/ads/submit"
   }]
 }, {
   title: "Funds Management",
   icon: Download,
-  url: "/funds"
+  items: [{
+    title: "Do Account Verification",
+    url: "/funds/verification"
+  }]
 }, {
   title: "Account Statement",
   icon: FolderOpen,
