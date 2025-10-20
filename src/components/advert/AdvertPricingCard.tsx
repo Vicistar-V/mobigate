@@ -14,7 +14,7 @@ export const AdvertPricingCard = ({ pricing, walletBalance = 500000 }: AdvertPri
   const hasInsufficientFunds = walletBalance < pricing.totalCost;
 
   return (
-    <Card className="sticky top-4">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Cost Breakdown</CardTitle>
