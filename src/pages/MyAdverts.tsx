@@ -171,21 +171,21 @@ export default function MyAdverts() {
           </div>
 
           {/* Statistics */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold">{advert.statistics.impressions.toLocaleString()}</div>
+              <div className="text-xl sm:text-2xl font-bold">{advert.statistics.impressions.toLocaleString()}</div>
               <div className="text-xs text-muted-foreground">Impressions</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{advert.statistics.clicks.toLocaleString()}</div>
+              <div className="text-xl sm:text-2xl font-bold">{advert.statistics.clicks.toLocaleString()}</div>
               <div className="text-xs text-muted-foreground">Clicks</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{advert.statistics.views.toLocaleString()}</div>
+              <div className="text-xl sm:text-2xl font-bold">{advert.statistics.views.toLocaleString()}</div>
               <div className="text-xs text-muted-foreground">Views</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{advert.statistics.displayedToday}</div>
+              <div className="text-xl sm:text-2xl font-bold">{advert.statistics.displayedToday}</div>
               <div className="text-xs text-muted-foreground">Today</div>
             </div>
           </div>
