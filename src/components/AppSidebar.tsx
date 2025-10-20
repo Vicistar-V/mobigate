@@ -257,7 +257,6 @@ export function AppSidebar() {
                       <LayoutDashboard className="h-4 w-4" />
                     </div>
                     <span className="font-medium">Dashboard</span>
-                    {isActive && open && <div className="absolute right-0 top-0 h-full w-1 bg-primary-foreground rounded-l-full" />}
                   </SidebarMenuButton>
                 )}
               </NavLink>
