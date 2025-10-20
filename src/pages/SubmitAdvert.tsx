@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,444 +8,741 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, Eye } from "lucide-react";
+import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { AdvertCategory, AdvertType, AdvertSize, DPDPackageId } from "@/types/advert";
+import { calculateAdvertPricing } from "@/lib/advertPricing";
+import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "@/lib/advertStorage";
+import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
+import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 
 const advertCategories = [
-  { value: "pictorial", label: "Pictorial/Photo Ads" },
-  { value: "video", label: "Videos/Dynamic Ads" }
+  { value: "pictorial" as AdvertCategory, label: "Pictorial/Photo Ads" },
+  { value: "video" as AdvertCategory, label: "Videos/Dynamic Ads" }
 ];
 
 const advertTypes = [
-  { value: "single", label: "Single Display" },
-  { value: "multiple-2", label: "2-in-1 Multiple Displays" },
-  { value: "multiple-3", label: "3-in-1 Multiple Displays" },
-  { value: "multiple-4", label: "4-in-1 Multiple Displays" },
-  { value: "multiple-5", label: "5-in-1 Multiple Displays" },
-  { value: "multiple-6", label: "6-in-1 Multiple Displays" },
-  { value: "multiple-7", label: "7-in-1 Multiple Displays" },
-  { value: "multiple-8", label: "8-in-1 Multiple Displays" },
-  { value: "multiple-9", label: "9-in-1 Multiple Displays" },
-  { value: "multiple-10", label: "10-in-1 Multiple Displays" }
+  { value: "single" as AdvertType, label: "Single Display", requiredFiles: 1 },
+  { value: "multiple-2" as AdvertType, label: "2-in-1 Multiple Displays", requiredFiles: 2 },
+  { value: "multiple-3" as AdvertType, label: "3-in-1 Multiple Displays", requiredFiles: 3 },
+  { value: "multiple-4" as AdvertType, label: "4-in-1 Multiple Displays", requiredFiles: 4 },
+  { value: "multiple-5" as AdvertType, label: "5-in-1 Multiple Displays", requiredFiles: 5 },
+  { value: "multiple-6" as AdvertType, label: "6-in-1 Multiple Displays", requiredFiles: 6 },
+  { value: "multiple-7" as AdvertType, label: "7-in-1 Multiple Displays", requiredFiles: 7 },
+  { value: "multiple-8" as AdvertType, label: "8-in-1 Multiple Displays", requiredFiles: 8 },
+  { value: "multiple-9" as AdvertType, label: "9-in-1 Multiple Displays", requiredFiles: 9 },
+  { value: "multiple-10" as AdvertType, label: "10-in-1 Multiple Displays", requiredFiles: 10 }
 ];
 
 const advertSizes = [
-  { value: "2x3", label: "2x3 - 1/5 Screen Height x Half Screen Width" },
-  { value: "2x6", label: "2x6 - 1/5 Screen Height x Full Screen Width" },
-  { value: "2.5x3", label: "2.5x3 - Quarter Screen Height x Half Screen Width" },
-  { value: "2.5x6", label: "2.5x6 - Quarter Screen Height x Full Screen Width" },
-  { value: "3.5x3", label: "3.5x3 - 1/3 Screen Height x Half Screen Width" },
-  { value: "3.5x6", label: "3.5x6 - 1/3 Screen Height x Full Screen Width" },
-  { value: "5x6", label: "5x6 - Half Screen Height x Full Screen Width" },
-  { value: "6.5x3", label: "6.5x3 - 2/3 Screen Height x Half Screen Width" },
-  { value: "6.5x6", label: "6.5x6 - 2/3 Screen Height x Full Screen Width" },
-  { value: "10x6", label: "10x6 - Full Screen Height x Full Screen Width" }
+  { value: "2x3" as AdvertSize, label: "2x3 - 1/5 Screen Height x Half Screen Width" },
+  { value: "2x6" as AdvertSize, label: "2x6 - 1/5 Screen Height x Full Screen Width" },
+  { value: "2.5x3" as AdvertSize, label: "2.5x3 - Quarter Screen Height x Half Screen Width" },
+  { value: "2.5x6" as AdvertSize, label: "2.5x6 - Quarter Screen Height x Full Screen Width" },
+  { value: "3.5x3" as AdvertSize, label: "3.5x3 - 1/3 Screen Height x Half Screen Width" },
+  { value: "3.5x6" as AdvertSize, label: "3.5x6 - 1/3 Screen Height x Full Screen Width" },
+  { value: "5x6" as AdvertSize, label: "5x6 - Half Screen Height x Full Screen Width" },
+  { value: "6.5x3" as AdvertSize, label: "6.5x3 - 2/3 Screen Height x Half Screen Width" },
+  { value: "6.5x6" as AdvertSize, label: "6.5x6 - 2/3 Screen Height x Full Screen Width" },
+  { value: "10x6" as AdvertSize, label: "10x6 - Full Screen Height x Full Screen Width" }
 ];
 
 const dpdPackages = [
-  { value: "basic", label: "Basic: 100 DPD @ N1.5k/1,500 Mobi", dpd: 100, price: 1500 },
-  { value: "standard", label: "Standard: 200 DPD @ N2.5k/2,500 Mobi", dpd: 200, price: 2500 },
-  { value: "professional", label: "Professional: 300 DPD @ N5k/5,000 Mobi", dpd: 300, price: 5000 },
-  { value: "business", label: "Business: 400 DPD @ N7.5k/7,500 Mobi", dpd: 400, price: 7500 },
-  { value: "enterprise", label: "Enterprise: 500 DPD @ N10k/10,000 Mobi", dpd: 500, price: 10000 },
-  { value: "entrepreneur", label: "Entrepreneur: 600 DPD @ N12.5k/12,500 Mobi", dpd: 600, price: 12500 },
-  { value: "deluxe", label: "Deluxe: 700 DPD @ N15k/15,000 Mobi", dpd: 700, price: 15000 },
-  { value: "deluxe-super", label: "Deluxe Super: 800 DPD @ N17.5k/17,500 Mobi", dpd: 800, price: 17500 },
-  { value: "deluxe-super-plus", label: "Deluxe Super Plus: 900 DPD @ N20k/20,000 Mobi", dpd: 900, price: 20000 },
-  { value: "deluxe-silver", label: "Deluxe Silver: 1,000 DPD @ N22.5k/22,500 Mobi", dpd: 1000, price: 22500 },
-  { value: "deluxe-bronze", label: "Deluxe Bronze: 1,200 DPD @ N25k/25,000 Mobi", dpd: 1200, price: 25000 },
-  { value: "deluxe-gold", label: "Deluxe Gold: 1,400 DPD @ N27.5k/27,500 Mobi", dpd: 1400, price: 27500 },
-  { value: "deluxe-gold-plus", label: "Deluxe Gold Plus: 1,600 DPD @ N30k/30,000 Mobi", dpd: 1600, price: 30000 },
-  { value: "deluxe-diamond", label: "Deluxe Diamond: 1,800 DPD @ N32.5k/32,500 Mobi", dpd: 1800, price: 32500 },
-  { value: "deluxe-diamond-plus", label: "Deluxe Diamond Plus: 2,000 DPD @ N35k/35,000 Mobi", dpd: 2000, price: 35000 },
-  { value: "deluxe-platinum", label: "Deluxe Platinum: 2,500 DPD @ N40k/40,000 Mobi", dpd: 2500, price: 40000 },
-  { value: "deluxe-platinum-plus", label: "Deluxe Platinum Plus: 3,000 DPD @ N45k/45,000 Mobi", dpd: 3000, price: 45000 },
-  { value: "bumper-gold", label: "Bumper Gold: 3,500 DPD @ N50k/50,000 Mobi", dpd: 3500, price: 50000 },
-  { value: "bumper-diamond", label: "Bumper Diamond: 4,000 DPD @ N55k/55,000 Mobi", dpd: 4000, price: 55000 },
-  { value: "bumper-platinum", label: "Bumper Platinum: 4,500 DPD @ N60k/60,000 Mobi", dpd: 4500, price: 60000 },
-  { value: "bumper-infinity", label: "Bumper Infinity: 5,000 DPD @ N65k/65,000 Mobi", dpd: 5000, price: 65000 },
-  { value: "unlimited", label: "Unlimited: Unlimited DPD @ N100k/100,000 Mobi", dpd: -1, price: 100000 }
+  { value: "basic" as DPDPackageId, label: "Basic: 100 DPD @ ₦1.5k" },
+  { value: "standard" as DPDPackageId, label: "Standard: 200 DPD @ ₦2.5k" },
+  { value: "professional" as DPDPackageId, label: "Professional: 300 DPD @ ₦5k" },
+  { value: "business" as DPDPackageId, label: "Business: 400 DPD @ ₦7.5k" },
+  { value: "enterprise" as DPDPackageId, label: "Enterprise: 500 DPD @ ₦10k" },
+  { value: "entrepreneur" as DPDPackageId, label: "Entrepreneur: 600 DPD @ ₦12.5k" },
+  { value: "deluxe" as DPDPackageId, label: "Deluxe: 700 DPD @ ₦15k" },
+  { value: "deluxe-super" as DPDPackageId, label: "Deluxe Super: 800 DPD @ ₦17.5k" },
+  { value: "deluxe-super-plus" as DPDPackageId, label: "Deluxe Super Plus: 900 DPD @ ₦20k" },
+  { value: "deluxe-silver" as DPDPackageId, label: "Deluxe Silver: 1,000 DPD @ ₦22.5k" },
+  { value: "deluxe-bronze" as DPDPackageId, label: "Deluxe Bronze: 1,200 DPD @ ₦25k" },
+  { value: "deluxe-gold" as DPDPackageId, label: "Deluxe Gold: 1,400 DPD @ ₦27.5k" },
+  { value: "deluxe-gold-plus" as DPDPackageId, label: "Deluxe Gold Plus: 1,600 DPD @ ₦30k" },
+  { value: "deluxe-diamond" as DPDPackageId, label: "Deluxe Diamond: 1,800 DPD @ ₦32.5k" },
+  { value: "deluxe-diamond-plus" as DPDPackageId, label: "Deluxe Diamond Plus: 2,000 DPD @ ₦35k" },
+  { value: "deluxe-platinum" as DPDPackageId, label: "Deluxe Platinum: 2,500 DPD @ ₦40k" },
+  { value: "deluxe-platinum-plus" as DPDPackageId, label: "Deluxe Platinum Plus: 3,000 DPD @ ₦45k" },
+  { value: "bumper-gold" as DPDPackageId, label: "Bumper Gold: 3,500 DPD @ ₦50k" },
+  { value: "bumper-diamond" as DPDPackageId, label: "Bumper Diamond: 4,000 DPD @ ₦55k" },
+  { value: "bumper-platinum" as DPDPackageId, label: "Bumper Platinum: 4,500 DPD @ ₦60k" },
+  { value: "bumper-infinity" as DPDPackageId, label: "Bumper Infinity: 5,000 DPD @ ₦65k" },
+  { value: "unlimited" as DPDPackageId, label: "Unlimited: Unlimited DPD @ ₦100k" }
 ];
 
 const extendedExposure = [
-  { value: "1", label: "Extra 1 minute @ Additional 12%", minutes: 1, charge: 12 },
-  { value: "2", label: "Extra 2 minutes @ Additional 14%", minutes: 2, charge: 14 },
-  { value: "3", label: "Extra 3 minutes @ Additional 16%", minutes: 3, charge: 16 },
-  { value: "4", label: "Extra 4 minutes @ Additional 18%", minutes: 4, charge: 18 },
-  { value: "5", label: "Extra 5 minutes @ Additional 20%", minutes: 5, charge: 20 },
-  { value: "6", label: "Extra 6 minutes @ Additional 22%", minutes: 6, charge: 22 },
-  { value: "7", label: "Extra 7 minutes @ Additional 24%", minutes: 7, charge: 24 },
-  { value: "8", label: "Extra 8 minutes @ Additional 26%", minutes: 8, charge: 26 },
-  { value: "9", label: "Extra 9 minutes @ Additional 28%", minutes: 9, charge: 28 },
-  { value: "10", label: "Extra 10 minutes @ Additional 30%", minutes: 10, charge: 30 }
+  { value: "extra-1", label: "Extra 1 minute @ Additional 12%" },
+  { value: "extra-2", label: "Extra 2 minutes @ Additional 14%" },
+  { value: "extra-3", label: "Extra 3 minutes @ Additional 16%" },
+  { value: "extra-4", label: "Extra 4 minutes @ Additional 18%" },
+  { value: "extra-5", label: "Extra 5 minutes @ Additional 20%" },
+  { value: "extra-6", label: "Extra 6 minutes @ Additional 22%" },
+  { value: "extra-7", label: "Extra 7 minutes @ Additional 24%" },
+  { value: "extra-8", label: "Extra 8 minutes @ Additional 26%" },
+  { value: "extra-9", label: "Extra 9 minutes @ Additional 28%" },
+  { value: "extra-10", label: "Extra 10 minutes @ Additional 30%" }
 ];
 
 const recurrentExposureAfter = [
-  { value: "10m", label: "Repeat after 10 minutes @ Additional 10%", time: "10 minutes", charge: 10 },
-  { value: "30m", label: "Repeat after 30 minutes @ Additional 10%", time: "30 minutes", charge: 10 },
-  { value: "1h", label: "Repeat after 1 hour @ Additional 10%", time: "1 hour", charge: 10 },
-  { value: "3h", label: "Repeat after 3 hours @ Additional 10%", time: "3 hours", charge: 10 },
-  { value: "6h", label: "Repeat after 6 hours @ Additional 10%", time: "6 hours", charge: 10 },
-  { value: "12h", label: "Repeat after 12 hours @ Additional 10%", time: "12 hours", charge: 10 },
-  { value: "18h", label: "Repeat after 18 hours @ Additional 10%", time: "18 hours", charge: 10 },
-  { value: "24h", label: "Repeat after 24 hours @ Additional 10%", time: "24 hours", charge: 10 }
+  { value: "after-10m", label: "Repeat after 10 minutes @ Additional 10%" },
+  { value: "after-30m", label: "Repeat after 30 minutes @ Additional 10%" },
+  { value: "after-1h", label: "Repeat after 1 hour @ Additional 10%" },
+  { value: "after-3h", label: "Repeat after 3 hours @ Additional 10%" },
+  { value: "after-6h", label: "Repeat after 6 hours @ Additional 10%" },
+  { value: "after-12h", label: "Repeat after 12 hours @ Additional 10%" },
+  { value: "after-18h", label: "Repeat after 18 hours @ Additional 10%" },
+  { value: "after-24h", label: "Repeat after 24 hours @ Additional 10%" }
 ];
 
 const recurrentExposureEvery = [
-  { value: "10m", label: "Repeat every 10 minutes @ Additional 35%", time: "10 minutes", charge: 35 },
-  { value: "30m", label: "Repeat every 30 minutes @ Additional 30%", time: "30 minutes", charge: 30 },
-  { value: "1h", label: "Repeat every 1 hour @ Additional 25%", time: "1 hour", charge: 25 },
-  { value: "3h", label: "Repeat every 3 hours @ Additional 20%", time: "3 hours", charge: 20 },
-  { value: "6h", label: "Repeat every 6 hours @ Additional 15%", time: "6 hours", charge: 15 },
-  { value: "12h", label: "Repeat every 12 hours @ Additional 12%", time: "12 hours", charge: 12 },
-  { value: "18h", label: "Repeat every 18 hours @ Additional 10%", time: "18 hours", charge: 10 },
-  { value: "24h", label: "Repeat every 24 hours @ Additional 9%", time: "24 hours", charge: 9 },
-  { value: "30h", label: "Repeat every 30 hours @ Additional 8%", time: "30 hours", charge: 8 },
-  { value: "36h", label: "Repeat every 36 hours @ Additional 7%", time: "36 hours", charge: 7 },
-  { value: "42h", label: "Repeat every 42 hours @ Additional 6%", time: "42 hours", charge: 6 },
-  { value: "48h", label: "Repeat every 48 hours @ Additional 5%", time: "48 hours", charge: 5 }
+  { value: "every-10m", label: "Repeat every 10 minutes @ Additional 35%" },
+  { value: "every-30m", label: "Repeat every 30 minutes @ Additional 30%" },
+  { value: "every-1h", label: "Repeat every 1 hour @ Additional 25%" },
+  { value: "every-3h", label: "Repeat every 3 hours @ Additional 20%" },
+  { value: "every-6h", label: "Repeat every 6 hours @ Additional 15%" },
+  { value: "every-12h", label: "Repeat every 12 hours @ Additional 12%" },
+  { value: "every-18h", label: "Repeat every 18 hours @ Additional 10%" },
+  { value: "every-24h", label: "Repeat every 24 hours @ Additional 9%" },
+  { value: "every-30h", label: "Repeat every 30 hours @ Additional 8%" },
+  { value: "every-36h", label: "Repeat every 36 hours @ Additional 7%" },
+  { value: "every-42h", label: "Repeat every 42 hours @ Additional 6%" },
+  { value: "every-48h", label: "Repeat every 48 hours @ Additional 5%" }
 ];
 
 export default function SubmitAdvert() {
   const { toast } = useToast();
-  const [category, setCategory] = useState("");
-  const [type, setType] = useState("");
-  const [size, setSize] = useState("");
-  const [dpdPackage, setDpdPackage] = useState("");
+  const navigate = useNavigate();
+  
+  const [category, setCategory] = useState<AdvertCategory | "">("");
+  const [type, setType] = useState<AdvertType | "">("");
+  const [size, setSize] = useState<AdvertSize | "">("");
+  const [dpdPackage, setDpdPackage] = useState<DPDPackageId | "">("");
   const [extendedExposureTime, setExtendedExposureTime] = useState("");
   const [recurrentAfter, setRecurrentAfter] = useState("");
   const [recurrentEvery, setRecurrentEvery] = useState("");
   const [launchDate, setLaunchDate] = useState<Date>();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [agreed, setAgreed] = useState(false);
 
   // Catchment market percentages
-  const [ownCity, setOwnCity] = useState(20);
-  const [ownState, setOwnState] = useState(25);
-  const [ownCountry, setOwnCountry] = useState(25);
-  const [foreignCountries, setForeignCountries] = useState(10);
-  const [popularSearches, setPopularSearches] = useState(5);
-  const [random, setRandom] = useState(5);
-  const [others, setOthers] = useState(10);
+  const [catchmentMarket, setCatchmentMarket] = useState({
+    ownCity: 20,
+    ownState: 25,
+    ownCountry: 25,
+    foreignCountries: 10,
+    popularSearches: 5,
+    random: 5,
+    others: 10
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load draft on mount
+  useEffect(() => {
+    const draft = loadAdvertDraft();
+    if (draft) {
+      if (draft.category) setCategory(draft.category as AdvertCategory);
+      if (draft.type) setType(draft.type as AdvertType);
+      if (draft.size) setSize(draft.size as AdvertSize);
+      if (draft.dpdPackage) setDpdPackage(draft.dpdPackage as DPDPackageId);
+      if (draft.extendedExposure) setExtendedExposureTime(draft.extendedExposure);
+      if (draft.recurrentAfter) setRecurrentAfter(draft.recurrentAfter);
+      if (draft.recurrentEvery) setRecurrentEvery(draft.recurrentEvery);
+      if (draft.launchDate) setLaunchDate(new Date(draft.launchDate));
+      if (draft.catchmentMarket) setCatchmentMarket(draft.catchmentMarket);
+      if (draft.agreed) setAgreed(draft.agreed);
+      
+      toast({
+        title: "Draft loaded",
+        description: "Your previous draft has been restored.",
+      });
+    }
+  }, []);
+
+  // Auto-save draft
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (category || type || size || dpdPackage) {
+        saveAdvertDraft({
+          category,
+          type,
+          size,
+          dpdPackage,
+          extendedExposure: extendedExposureTime,
+          recurrentAfter,
+          recurrentEvery,
+          launchDate,
+          catchmentMarket,
+          agreed,
+          files: []
+        });
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [category, type, size, dpdPackage, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed]);
+
+  const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
+    setCatchmentMarket(prev => ({
+      ...prev,
+      [field]: value[0]
+    }));
+  };
+
+  const catchmentTotal = Object.values(catchmentMarket).reduce((a, b) => a + b, 0);
+
+  const getRequiredFiles = () => {
+    const typeObj = advertTypes.find(t => t.value === type);
+    return typeObj?.requiredFiles || 1;
+  };
+
+  const isMultipleDisplay = type && type !== "single";
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setUploadedFiles(Array.from(e.target.files));
+      const files = Array.from(e.target.files);
+      const requiredFiles = getRequiredFiles();
+      
+      if (files.length > requiredFiles) {
+        toast({
+          title: "Too many files",
+          description: `Please select exactly ${requiredFiles} file(s) for ${type} display.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setUploadedFiles(files);
     }
   };
 
-  const handlePreview = () => {
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSaveDraft = () => {
+    saveAdvertDraft({
+      category,
+      type,
+      size,
+      dpdPackage,
+      extendedExposure: extendedExposureTime,
+      recurrentAfter,
+      recurrentEvery,
+      launchDate,
+      catchmentMarket,
+      agreed,
+      files: []
+    });
+    
     toast({
-      title: "Preview",
-      description: "Opening advert preview...",
+      title: "Draft saved",
+      description: "Your advert draft has been saved successfully.",
     });
   };
 
-  const handlePublish = () => {
-    if (!category || !type || !size || !dpdPackage) {
+  const validateForm = () => {
+    if (!category) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: "Validation Error",
+        description: "Please select an advert category",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
-    toast({
-      title: "Success",
-      description: "Your advert has been submitted for admin approval",
-    });
+    if (!type) {
+      toast({
+        title: "Validation Error",
+        description: "Please select display type",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!size) {
+      toast({
+        title: "Validation Error",
+        description: "Please select advert size",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!dpdPackage) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a DPD package",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const requiredFiles = getRequiredFiles();
+    if (uploadedFiles.length !== requiredFiles) {
+      toast({
+        title: "Validation Error",
+        description: `Please upload exactly ${requiredFiles} file(s) for ${type} display`,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (catchmentTotal !== 100) {
+      toast({
+        title: "Validation Error",
+        description: `Catchment market percentages must total 100% (current: ${catchmentTotal}%)`,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!agreed) {
+      toast({
+        title: "Validation Error",
+        description: "Please agree to the terms and conditions",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
   };
 
+  const handlePublish = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const pricing = calculateAdvertPricing(
+        category as AdvertCategory,
+        type as AdvertType,
+        dpdPackage as DPDPackageId,
+        extendedExposureTime,
+        recurrentAfter,
+        recurrentEvery
+      );
+
+      const advert = saveAdvert(
+        {
+          category: category as AdvertCategory,
+          type: type as AdvertType,
+          size: size as AdvertSize,
+          dpdPackage: dpdPackage as DPDPackageId,
+          extendedExposure: extendedExposureTime,
+          recurrentAfter,
+          recurrentEvery,
+          catchmentMarket,
+          launchDate,
+          files: uploadedFiles,
+          agreed
+        },
+        pricing
+      );
+
+      toast({
+        title: "Success!",
+        description: "Your advert has been submitted for review. You'll be notified once it's approved.",
+      });
+
+      // Navigate to My Adverts page
+      navigate("/my-adverts");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit advert. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const pricing = category && type && dpdPackage ? calculateAdvertPricing(
+    category as AdvertCategory,
+    type as AdvertType,
+    dpdPackage as DPDPackageId,
+    extendedExposureTime,
+    recurrentAfter,
+    recurrentEvery
+  ) : null;
+
+  const InfoTooltip = ({ content }: { content: string }) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info className="h-4 w-4 text-muted-foreground cursor-help inline-block ml-1" />
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p className="text-sm">{content}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Advert Subscription & Sign-Up Form</CardTitle>
-            <CardDescription>
-              Create and manage your premium advertisements
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Category Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Select Category *</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Choose advert category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {advertCategories.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Type Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="type">Select Type *</Label>
-              <Select value={type} onValueChange={setType}>
-                <SelectTrigger id="type">
-                  <SelectValue placeholder="Choose display type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {advertTypes.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Size Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="size">Select Size *</Label>
-              <Select value={size} onValueChange={setSize}>
-                <SelectTrigger id="size">
-                  <SelectValue placeholder="Choose advert size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {advertSizes.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
-                      {s.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* DPD Package Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="dpd">Select Daily Display Number (DPD) *</Label>
-              <Select value={dpdPackage} onValueChange={setDpdPackage}>
-                <SelectTrigger id="dpd">
-                  <SelectValue placeholder="Choose DPD package" />
-                </SelectTrigger>
-                <SelectContent>
-                  {dpdPackages.map((pkg) => (
-                    <SelectItem key={pkg.value} value={pkg.value}>
-                      {pkg.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Extended Exposure Duration */}
-            <div className="space-y-2">
-              <Label htmlFor="extended">Extended Exposure Duration (Optional)</Label>
-              <Select value={extendedExposureTime} onValueChange={setExtendedExposureTime}>
-                <SelectTrigger id="extended">
-                  <SelectValue placeholder="Select extended exposure time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {extendedExposure.map((ext) => (
-                    <SelectItem key={ext.value} value={ext.value}>
-                      {ext.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Recurrent Exposure - After */}
-            <div className="space-y-2">
-              <Label htmlFor="recurrent-after">Recurrent Exposure - Repeat After (Optional)</Label>
-              <Select value={recurrentAfter} onValueChange={setRecurrentAfter}>
-                <SelectTrigger id="recurrent-after">
-                  <SelectValue placeholder="Select when to repeat" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recurrentExposureAfter.map((rec) => (
-                    <SelectItem key={rec.value} value={rec.value}>
-                      {rec.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Recurrent Exposure - Every */}
-            <div className="space-y-2">
-              <Label htmlFor="recurrent-every">Recurrent Exposure - Repeat Every (Optional)</Label>
-              <Select value={recurrentEvery} onValueChange={setRecurrentEvery}>
-                <SelectTrigger id="recurrent-every">
-                  <SelectValue placeholder="Select repeat frequency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recurrentExposureEvery.map((rec) => (
-                    <SelectItem key={rec.value} value={rec.value}>
-                      {rec.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Catchment/Target Markets */}
-            <div className="space-y-4">
-              <Label>Catchment/Target Markets</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Form */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">Create Premium Advert</CardTitle>
+                <CardDescription>
+                  Fill in the details below to create your advertising campaign
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Category Selection */}
                 <div className="space-y-2">
-                  <Label htmlFor="own-city" className="text-sm">Own City: {ownCity}%</Label>
-                  <Input
-                    id="own-city"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={ownCity}
-                    onChange={(e) => setOwnCity(Number(e.target.value))}
-                  />
+                  <Label htmlFor="category">
+                    Select Category *
+                    <InfoTooltip content="Choose between static image ads or dynamic video ads" />
+                  </Label>
+                  <Select value={category} onValueChange={(v) => setCategory(v as AdvertCategory)}>
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Choose advert category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {advertCategories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="own-state" className="text-sm">Own State: {ownState}%</Label>
-                  <Input
-                    id="own-state"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={ownState}
-                    onChange={(e) => setOwnState(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="own-country" className="text-sm">Own Country: {ownCountry}%</Label>
-                  <Input
-                    id="own-country"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={ownCountry}
-                    onChange={(e) => setOwnCountry(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="foreign" className="text-sm">Foreign Countries: {foreignCountries}%</Label>
-                  <Input
-                    id="foreign"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={foreignCountries}
-                    onChange={(e) => setForeignCountries(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="popular" className="text-sm">Popular Searches: {popularSearches}%</Label>
-                  <Input
-                    id="popular"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={popularSearches}
-                    onChange={(e) => setPopularSearches(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="random" className="text-sm">Random: {random}%</Label>
-                  <Input
-                    id="random"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={random}
-                    onChange={(e) => setRandom(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="others" className="text-sm">Others: {others}%</Label>
-                  <Input
-                    id="others"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={others}
-                    onChange={(e) => setOthers(Number(e.target.value))}
-                  />
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Total: {ownCity + ownState + ownCountry + foreignCountries + popularSearches + random + others}%
-              </p>
-            </div>
 
-            {/* Launch Date */}
-            <div className="space-y-2">
-              <Label>Launch Ad On</Label>
-              <Popover>
-                <PopoverTrigger asChild>
+                {/* Type Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="type">
+                    Select Display Type *
+                    <InfoTooltip content="Single display shows one ad. Multiple displays show multiple ads in rotation." />
+                  </Label>
+                  <Select value={type} onValueChange={(v) => setType(v as AdvertType)}>
+                    <SelectTrigger id="type">
+                      <SelectValue placeholder="Choose display type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {advertTypes.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Size Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="size">
+                    Select Advert Size *
+                    <InfoTooltip content="Choose the display size based on screen dimensions" />
+                  </Label>
+                  <Select value={size} onValueChange={(v) => setSize(v as AdvertSize)}>
+                    <SelectTrigger id="size">
+                      <SelectValue placeholder="Choose advert size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {advertSizes.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* DPD Package Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="dpd">
+                    Select Daily Display Package (DPD) *
+                    <InfoTooltip content="DPD determines how many times your ad will be shown per day. Higher DPD means more exposure." />
+                  </Label>
+                  <Select value={dpdPackage} onValueChange={(v) => setDpdPackage(v as DPDPackageId)}>
+                    <SelectTrigger id="dpd">
+                      <SelectValue placeholder="Choose DPD package" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {dpdPackages.map((pkg) => (
+                        <SelectItem key={pkg.value} value={pkg.value}>
+                          {pkg.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                {/* Extended Exposure Duration */}
+                <div className="space-y-2">
+                  <Label htmlFor="extended">
+                    Extended Exposure Duration (Optional)
+                    <InfoTooltip content="Keep your ad visible for longer periods. Default exposure is 2-10 minutes." />
+                  </Label>
+                  <Select value={extendedExposureTime} onValueChange={setExtendedExposureTime}>
+                    <SelectTrigger id="extended">
+                      <SelectValue placeholder="Select extended exposure time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {extendedExposure.map((ext) => (
+                        <SelectItem key={ext.value} value={ext.value}>
+                          {ext.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Recurrent Exposure - After */}
+                <div className="space-y-2">
+                  <Label htmlFor="recurrent-after">
+                    Recurrent Exposure - Repeat After (Optional)
+                    <InfoTooltip content="Show the ad again after a specific time period from the last display" />
+                  </Label>
+                  <Select value={recurrentAfter} onValueChange={setRecurrentAfter}>
+                    <SelectTrigger id="recurrent-after">
+                      <SelectValue placeholder="Select when to repeat" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recurrentExposureAfter.map((rec) => (
+                        <SelectItem key={rec.value} value={rec.value}>
+                          {rec.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Recurrent Exposure - Every */}
+                <div className="space-y-2">
+                  <Label htmlFor="recurrent-every">
+                    Recurrent Exposure - Repeat Every (Optional)
+                    <InfoTooltip content="Continuously repeat the ad at regular intervals" />
+                  </Label>
+                  <Select value={recurrentEvery} onValueChange={setRecurrentEvery}>
+                    <SelectTrigger id="recurrent-every">
+                      <SelectValue placeholder="Select repeat frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recurrentExposureEvery.map((rec) => (
+                        <SelectItem key={rec.value} value={rec.value}>
+                          {rec.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                {/* Catchment/Target Markets */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>
+                      Catchment/Target Markets
+                      <InfoTooltip content="Distribute your ad exposure across different geographic and interest segments. Must total 100%." />
+                    </Label>
+                    <div className={cn(
+                      "text-sm font-medium px-2 py-1 rounded",
+                      catchmentTotal === 100 ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
+                    )}>
+                      Total: {catchmentTotal}%
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-4 p-4 rounded-lg bg-muted/50">
+                    {[
+                      { key: "ownCity" as const, label: "Own City", defaultValue: 20 },
+                      { key: "ownState" as const, label: "Own State", defaultValue: 25 },
+                      { key: "ownCountry" as const, label: "Own Country", defaultValue: 25 },
+                      { key: "foreignCountries" as const, label: "Foreign Countries", defaultValue: 10 },
+                      { key: "popularSearches" as const, label: "Popular Searches", defaultValue: 5 },
+                      { key: "random" as const, label: "Random", defaultValue: 5 },
+                      { key: "others" as const, label: "Others", defaultValue: 10 },
+                    ].map(({ key, label }) => (
+                      <div key={key} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor={key} className="text-sm">{label}</Label>
+                          <span className="text-sm font-medium">{catchmentMarket[key]}%</span>
+                        </div>
+                        <Slider
+                          id={key}
+                          value={[catchmentMarket[key]]}
+                          onValueChange={(value) => updateCatchmentMarket(key, value)}
+                          max={100}
+                          step={1}
+                          className="flex-1"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {catchmentTotal !== 100 && (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>Percentages must total exactly 100%</span>
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Launch Date */}
+                <div className="space-y-2">
+                  <Label>
+                    Launch Date (Optional)
+                    <InfoTooltip content="Select when you want your ad campaign to start. Leave empty to start immediately upon approval." />
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !launchDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {launchDate ? format(launchDate, "PPP") : "Pick a launch date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={launchDate}
+                        onSelect={setLaunchDate}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <Separator />
+
+                {/* File Upload */}
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="file-upload">
+                      Upload Advert Material *
+                      <InfoTooltip content={`Upload ${getRequiredFiles()} ${category === "video" ? "video" : "image"} file(s) for your ${type || "selected"} display type.`} />
+                    </Label>
+                    {type && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Required: {getRequiredFiles()} file(s) for {type.replace("-", " ").replace("multiple", "Multiple")} display
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="file-upload"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
+                        <p className="mb-2 text-sm text-muted-foreground">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {category === "video" ? "MP4, AVI, MOV" : "PNG, JPG, GIF"} (MAX. 20MB each)
+                        </p>
+                      </div>
+                      <Input
+                        id="file-upload"
+                        type="file"
+                        className="hidden"
+                        accept={category === "video" ? "video/*" : "image/*"}
+                        multiple={isMultipleDisplay}
+                        onChange={handleFileUpload}
+                      />
+                    </label>
+                  </div>
+
+                  {/* File Preview */}
+                  {uploadedFiles.length > 0 && (
+                    <FilePreviewGrid
+                      files={uploadedFiles}
+                      onRemove={handleRemoveFile}
+                      maxFiles={getRequiredFiles()}
+                      isMultiple={isMultipleDisplay}
+                    />
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Terms Agreement */}
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="agree"
+                    checked={agreed}
+                    onCheckedChange={(checked) => setAgreed(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="agree"
+                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I agree to the terms and conditions and confirm that my advert material
+                    complies with advertising guidelines *
+                  </label>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
                   <Button
                     variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !launchDate && "text-muted-foreground"
-                    )}
+                    onClick={handleSaveDraft}
+                    className="flex-1"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {launchDate ? format(launchDate, "PPP") : "Pick a date"}
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Draft
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={launchDate}
-                    onSelect={setLaunchDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+                  <Button
+                    onClick={handlePublish}
+                    disabled={isSubmitting}
+                    className="flex-1"
+                  >
+                    Publish Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* File Upload */}
-            <div className="space-y-2">
-              <Label htmlFor="upload">Upload Advert Material *</Label>
-              <div className="flex items-center gap-4">
-                <Input
-                  id="upload"
-                  type="file"
-                  multiple
-                  accept={category === "video" ? "video/*" : "image/*"}
-                  onChange={handleFileUpload}
-                  className="flex-1"
-                />
-                <Upload className="h-5 w-5 text-muted-foreground" />
-              </div>
-              {uploadedFiles.length > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {uploadedFiles.length} file(s) selected
-                </p>
-              )}
-            </div>
-
-            {/* Agreement */}
-            <div className="flex items-center space-x-2">
-              <Checkbox id="agree" />
-              <Label htmlFor="agree" className="text-sm">
-                I agree to the terms and conditions. My advert will be previewed and approved by the Admin before going live.
-              </Label>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-4">
-              <Button variant="outline" className="flex-1" onClick={handlePreview}>
-                <Eye className="mr-2 h-4 w-4" />
-                Preview
-              </Button>
-              <Button className="flex-1" onClick={handlePublish}>
-                Publish Now
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Pricing Card (Sidebar) */}
+          <div className="lg:col-span-1">
+            {pricing ? (
+              <AdvertPricingCard pricing={pricing} walletBalance={500000} />
+            ) : (
+              <Card className="sticky top-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">Cost Breakdown</CardTitle>
+                  <CardDescription>Select options to see pricing</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Choose category, type, and DPD package to calculate your advert cost.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </main>
       <Footer />
     </div>
