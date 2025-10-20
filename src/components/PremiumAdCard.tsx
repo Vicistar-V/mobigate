@@ -117,32 +117,35 @@ export const PremiumAdCard = ({
           </div>
 
           {/* Content - Centered */}
-          <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 z-10">
-            <div className="max-w-2xl text-center text-white space-y-3 sm:space-y-4">
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold leading-tight">
-                {content.headline}
-              </h2>
-              <p className="text-base sm:text-lg md:text-xl text-white/90">
-                {content.description}
-              </p>
+          <div className="absolute inset-0 flex items-center justify-center px-4 py-6 sm:p-8 z-10">
+            <div className="w-full max-w-2xl text-center text-white">
+              <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight px-2">
+                  {content.headline}
+                </h2>
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 leading-relaxed px-2">
+                  {content.description}
+                </p>
+              </div>
               <Button
                 onClick={handleCTA}
                 size="lg"
-                className="mt-4 sm:mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-bold rounded-xl"
+                className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
               >
                 {content.ctaText}
               </Button>
-              <EngagementBar
-                itemId={id}
-                itemType="ad"
-                initialLikes="0"
-                initialComments="0"
-                initialShares="0"
-                onComment={() => setShowComments(true)}
-                onShare={() => setShowShare(true)}
-                variant="minimal"
-                className="mt-4"
-              />
+              <div className="mt-4 sm:mt-6">
+                <EngagementBar
+                  itemId={id}
+                  itemType="ad"
+                  initialLikes="0"
+                  initialComments="0"
+                  initialShares="0"
+                  onComment={() => setShowComments(true)}
+                  onShare={() => setShowShare(true)}
+                  variant="minimal"
+                />
+              </div>
             </div>
           </div>
         </div>
