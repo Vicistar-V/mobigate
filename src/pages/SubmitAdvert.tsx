@@ -476,9 +476,9 @@ export default function SubmitAdvert() {
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="max-w-5xl mx-auto">
           {/* Main Form */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Card>
               <CardHeader className="space-y-1 sm:space-y-1.5">
                 <CardTitle className="text-xl sm:text-2xl">Create Premium Advert</CardTitle>
@@ -825,6 +825,25 @@ export default function SubmitAdvert() {
 
                 <Separator />
 
+                {/* Cost Breakdown */}
+                {pricing ? (
+                  <AdvertPricingCard pricing={pricing} walletBalance={500000} />
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Cost Breakdown</CardTitle>
+                      <CardDescription>Select options to see pricing</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        Choose category, type, and DPD package to calculate your advert cost.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <Separator />
+
                 {/* Terms Agreement */}
                 <div className="flex items-start space-x-2">
                   <Checkbox
@@ -873,25 +892,6 @@ export default function SubmitAdvert() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Pricing Card (Sidebar) */}
-          <div className="lg:col-span-1">
-            {pricing ? (
-              <AdvertPricingCard pricing={pricing} walletBalance={500000} />
-            ) : (
-              <Card className="sticky top-4">
-                <CardHeader>
-                  <CardTitle className="text-lg">Cost Breakdown</CardTitle>
-                  <CardDescription>Select options to see pricing</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Choose category, type, and DPD package to calculate your advert cost.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </main>
