@@ -2,14 +2,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Search, MoreHorizontal, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import profilePhoto from "@/assets/profile-photo.jpg";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
+import { useState } from "react";
 export const GreetingSection = () => {
+  const [friendsMenuView, setFriendsMenuView] = useState<'main' | 'requests'>('main');
   const {
     showDialog,
     Dialog
@@ -81,54 +83,75 @@ export const GreetingSection = () => {
           
           {/* Friends Dropdown */}
           <span className="flex items-center flex-shrink-0">
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={(open) => !open && setFriendsMenuView('main')}>
               <DropdownMenuTrigger asChild>
                 <button className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap">
                   Friends
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" side="bottom" sideOffset={5} className="bg-card z-50 w-48">
-                <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                  <Link to="/profile/current-user#friends" className="cursor-pointer">
-                    Friends
-                  </Link>
-                </DropdownMenuItem>
-                
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="text-base font-medium text-primary">
-                    Friend Requests
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-card z-50 w-48">
+                {friendsMenuView === 'main' ? (
+                  <>
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/profile/current-user#friends" className="cursor-pointer">
+                        Friends
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      className="text-base font-medium text-primary cursor-pointer"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setFriendsMenuView('requests');
+                      }}
+                    >
+                      Friend Requests
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/find" className="cursor-pointer">
+                        Find Friends
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/invite" className="cursor-pointer">
+                        Invite People
+                      </Link>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/referred" className="cursor-pointer">
+                        Referred Friends
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem 
+                      className="text-base font-medium text-primary cursor-pointer"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setFriendsMenuView('main');
+                      }}
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </DropdownMenuItem>
+                    
                     <DropdownMenuItem asChild className="text-base font-medium text-primary">
                       <Link to="/friends/requests/received" className="cursor-pointer">
                         Received Requests
                       </Link>
                     </DropdownMenuItem>
+                    
                     <DropdownMenuItem asChild className="text-base font-medium text-primary">
                       <Link to="/friends/requests/sent" className="cursor-pointer">
                         Sent Requests
                       </Link>
                     </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                
-                <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                  <Link to="/friends/find" className="cursor-pointer">
-                    Find Friends
-                  </Link>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                  <Link to="/friends/invite" className="cursor-pointer">
-                    Invite People
-                  </Link>
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                  <Link to="/friends/referred" className="cursor-pointer">
-                    Referred Friends
-                  </Link>
-                </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
             <span className="text-muted-foreground px-1.5">|</span>
