@@ -166,12 +166,12 @@ export function AppSidebar() {
                 return <Collapsible key={item.title} open={isExpanded} onOpenChange={() => toggleExpand(item.title)}>
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
-                          <SidebarMenuButton tooltip={item.title} className="group hover:bg-accent/50 transition-all duration-200">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+                          <SidebarMenuButton tooltip={item.title} className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2.5rem] py-2">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
                               <item.icon className="h-4 w-4" />
                             </div>
-                            <span className="font-medium">{item.title}</span>
-                            <ChevronRight className={cn("ml-auto h-4 w-4 transition-transform duration-200", isExpanded && "rotate-90")} />
+                            <span className="font-medium flex-1 whitespace-normal break-words leading-tight text-left">{item.title}</span>
+                            <ChevronRight className={cn("ml-auto h-4 w-4 transition-transform duration-200 shrink-0", isExpanded && "rotate-90")} />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-1">
