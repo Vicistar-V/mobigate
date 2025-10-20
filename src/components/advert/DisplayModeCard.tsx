@@ -21,25 +21,25 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
   return (
     <Card
       className={cn(
-        "p-3 sm:p-4 cursor-pointer transition-all hover:border-primary/50",
+        "p-3 cursor-pointer transition-all hover:border-primary/50",
         selected && "border-primary border-2 bg-primary/5"
       )}
       onClick={onSelect}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex flex-col items-center text-center gap-2">
         <div className={cn(
-          "w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shrink-0",
+          "w-10 h-10 rounded-lg flex items-center justify-center",
           selected ? "bg-primary text-primary-foreground" : "bg-muted"
         )}>
           {isSingle ? (
-            <ImageIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            <ImageIcon className="h-5 w-5" />
           ) : (
-            <Images className="h-5 w-5 sm:h-6 sm:w-6" />
+            <Images className="h-5 w-5" />
           )}
         </div>
         
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm sm:text-base">
+        <div className="w-full">
+          <h3 className="font-semibold text-sm">
             {isSingle ? "Single Display" : "Multiple Displays"}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
