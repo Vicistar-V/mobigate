@@ -6,7 +6,8 @@ import mobigateLogo from "@/assets/mobigate-logo.svg";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-const menuItems = [{
+
+const applicationSettings = {
   title: "Application Settings",
   icon: Settings,
   items: [{
@@ -209,7 +210,9 @@ const menuItems = [{
       url: "/settings/status/fees"
     }]
   }]
-}, {
+};
+
+const menuItems = [{
   title: "Wallet Menu",
   icon: Wallet,
   items: [{
@@ -354,6 +357,61 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
+        {/* Application Settings Section */}
+        <SidebarGroup className="mb-2">
+          <SidebarMenu>
+            <Collapsible open={expandedItems.includes(applicationSettings.title)} onOpenChange={() => toggleExpand(applicationSettings.title)}>
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton tooltip={applicationSettings.title} className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2.5rem] py-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+                      <applicationSettings.icon className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium flex-1 whitespace-normal break-words leading-tight text-left">{applicationSettings.title}</span>
+                    <ChevronRight className={cn("ml-auto h-4 w-4 transition-transform duration-200 shrink-0", expandedItems.includes(applicationSettings.title) && "rotate-90")} />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-1">
+                  <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
+                    {applicationSettings.items.map(subItem => {
+                      const subIsExpanded = expandedItems.includes(`${applicationSettings.title}-${subItem.title}`);
+                      
+                      return <Collapsible key={subItem.title} open={subIsExpanded} onOpenChange={() => toggleExpand(`${applicationSettings.title}-${subItem.title}`)}>
+                        <SidebarMenuSubItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuSubButton className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2rem] py-1.5">
+                              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+                                <subItem.icon className="h-3 w-3" />
+                              </div>
+                              <span className="flex-1 whitespace-normal break-words leading-tight text-left text-sm">{subItem.title}</span>
+                              <ChevronRight className={cn("ml-auto h-3 w-3 transition-transform duration-200 shrink-0", subIsExpanded && "rotate-90")} />
+                            </SidebarMenuSubButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-1">
+                            <SidebarMenuSub className="ml-4 border-l-2 border-primary/10 pl-2">
+                              {subItem.items.map(nestedItem => (
+                                <SidebarMenuSubItem key={nestedItem.title}>
+                                  <NavLink to={nestedItem.url}>
+                                    {({ isActive }) => (
+                                      <SidebarMenuSubButton className={cn("transition-all duration-200 text-xs", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
+                                        <span className="whitespace-normal break-words leading-tight">{nestedItem.title}</span>
+                                      </SidebarMenuSubButton>
+                                    )}
+                                  </NavLink>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuSubItem>
+                      </Collapsible>;
+                    })}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
+
         {/* USERS' MENU Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-base font-bold text-muted-foreground/70 uppercase tracking-widest px-3 mb-2">
@@ -382,14 +440,17 @@ export function AppSidebar() {
                             {item.items.map(subItem => {
                               const subIsExpanded = expandedItems.includes(`${item.title}-${subItem.title}`);
                               
-                              // Nested expandable items
-                              if (subItem.items) {
+                              // Nested expandable items (with icon and items properties)
+                              if ('items' in subItem && subItem.items && 'icon' in subItem && subItem.icon) {
+                                const SubIcon = subItem.icon as any;
+                                const nestedItems = subItem.items as { title: string; url: string }[];
+                                
                                 return <Collapsible key={subItem.title} open={subIsExpanded} onOpenChange={() => toggleExpand(`${item.title}-${subItem.title}`)}>
                                   <SidebarMenuSubItem>
                                     <CollapsibleTrigger asChild>
                                       <SidebarMenuSubButton className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2rem] py-1.5">
                                         <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
-                                          <subItem.icon className="h-3 w-3" />
+                                          <SubIcon className="h-3 w-3" />
                                         </div>
                                         <span className="flex-1 whitespace-normal break-words leading-tight text-left text-sm">{subItem.title}</span>
                                         <ChevronRight className={cn("ml-auto h-3 w-3 transition-transform duration-200 shrink-0", subIsExpanded && "rotate-90")} />
@@ -397,7 +458,7 @@ export function AppSidebar() {
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="mt-1">
                                       <SidebarMenuSub className="ml-4 border-l-2 border-primary/10 pl-2">
-                                        {subItem.items.map(nestedItem => (
+                                        {nestedItems.map(nestedItem => (
                                           <SidebarMenuSubItem key={nestedItem.title}>
                                             <NavLink to={nestedItem.url}>
                                               {({ isActive }) => (
@@ -414,12 +475,13 @@ export function AppSidebar() {
                                 </Collapsible>;
                               }
                               
-                              // Regular sub-items
-                              return <SidebarMenuSubItem key={subItem.title}>
-                                <NavLink to={subItem.url}>
+                              // Regular sub-items (simple title and url)
+                              const regularItem = subItem as { title: string; url: string };
+                              return <SidebarMenuSubItem key={regularItem.title}>
+                                <NavLink to={regularItem.url}>
                                   {({ isActive }) => (
                                     <SidebarMenuSubButton className={cn("transition-all duration-200", isActive ? "bg-primary/10 text-primary font-medium border-l-2 border-primary" : "hover:bg-accent/30")}>
-                                      <span>{subItem.title}</span>
+                                      <span>{regularItem.title}</span>
                                     </SidebarMenuSubButton>
                                   )}
                                 </NavLink>
