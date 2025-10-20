@@ -827,19 +827,14 @@ export default function SubmitAdvert() {
 
                 {/* Cost Breakdown */}
                 {pricing ? (
-                  <AdvertPricingCard pricing={pricing} walletBalance={500000} />
+                  <AdvertPricingCard pricing={pricing} walletBalance={500000} variant="inline" />
                 ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Cost Breakdown</CardTitle>
-                      <CardDescription>Select options to see pricing</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Choose category, type, and DPD package to calculate your advert cost.
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Cost Breakdown</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Choose category, type, and DPD package to calculate your advert cost.
+                    </p>
+                  </div>
                 )}
 
                 <Separator />
