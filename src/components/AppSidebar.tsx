@@ -225,14 +225,14 @@ export function AppSidebar() {
         <SidebarGroup className="mb-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <a href="/application/index.php">
-                <SidebarMenuButton tooltip="Dashboard" className="group relative overflow-hidden transition-all duration-200 hover:bg-accent/50">
+              <SidebarMenuButton asChild tooltip="Dashboard" className="group relative overflow-hidden transition-all duration-200 hover:bg-accent/50">
+                <a href="/application/index.php">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
                     <LayoutDashboard className="h-4 w-4" />
                   </div>
                   <span className="font-medium">Dashboard</span>
-                </SidebarMenuButton>
-              </a>
+                </a>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -260,17 +260,17 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-1">
-                        <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
-                          {item.items.map(subItem => (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <a href={subItem.url}>
-                                <SidebarMenuSubButton className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
-                                  <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+                          <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
+                            {item.items.map(subItem => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
+                                  <a href={subItem.url}>
+                                    <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+                                  </a>
                                 </SidebarMenuSubButton>
-                              </a>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
                       </CollapsibleContent>
                     </SidebarMenuItem>
                   </Collapsible>
@@ -308,11 +308,11 @@ export function AppSidebar() {
                           <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
                             {item.items.map(subItem => (
                               <SidebarMenuSubItem key={subItem.title}>
-                                <a href={subItem.url}>
-                                  <SidebarMenuSubButton className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
+                                <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
+                                  <a href={subItem.url}>
                                     <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
-                                  </SidebarMenuSubButton>
-                                </a>
+                                  </a>
+                                </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             ))}
                           </SidebarMenuSub>
@@ -325,14 +325,14 @@ export function AppSidebar() {
                 // Items without sub-menu
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <a href={item.url!}>
-                      <SidebarMenuButton tooltip={item.title} className="group transition-all duration-200 hover:bg-accent/50">
+                    <SidebarMenuButton asChild tooltip={item.title} className="group transition-all duration-200 hover:bg-accent/50">
+                      <a href={item.url!}>
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
                           <item.icon className="h-4 w-4" />
                         </div>
                         <span className="font-medium">{item.title}</span>
-                      </SidebarMenuButton>
-                    </a>
+                      </a>
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
               })}
@@ -345,24 +345,24 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-border/50 px-3 py-3 bg-muted/30">
         <SidebarMenu className="space-y-1">
           <SidebarMenuItem>
-            <a href="/application/all_notifications.php">
-              <SidebarMenuButton tooltip="Reload" className="group hover:bg-accent/50 transition-all duration-200">
+            <SidebarMenuButton asChild tooltip="Reload" className="group hover:bg-accent/50 transition-all duration-200">
+              <a href="/application/all_notifications.php">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted-foreground/10 text-muted-foreground group-hover:bg-muted-foreground/20">
                   <RefreshCw className="h-4 w-4" />
                 </div>
                 <span className="font-medium">Reload</span>
-              </SidebarMenuButton>
-            </a>
+              </a>
+            </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <a href="/application/logout.php">
-              <SidebarMenuButton tooltip="Sign Out" className="group hover:bg-destructive/10 text-destructive transition-all duration-200">
+            <SidebarMenuButton asChild tooltip="Sign Out" className="group hover:bg-destructive/10 text-destructive transition-all duration-200">
+              <a href="/application/logout.php">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive group-hover:bg-destructive/20">
                   <LogOut className="h-4 w-4" />
                 </div>
                 <span className="font-medium">Sign Out</span>
-              </SidebarMenuButton>
-            </a>
+              </a>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
