@@ -868,7 +868,7 @@ export default function SubmitAdvert() {
                   <Button
                     variant="outline"
                     onClick={handleSaveDraft}
-                    className="flex-1 h-14 px-6"
+                    className="flex-1 h-14 px-6 py-4"
                     size="lg"
                   >
                     <Save className="mr-2 h-4 w-4" />
@@ -878,7 +878,7 @@ export default function SubmitAdvert() {
                   <Button
                     variant="outline"
                     onClick={handlePreview}
-                    className="flex-1 h-14 px-6"
+                    className="flex-1 h-14 px-6 py-4"
                     size="lg"
                   >
                     <Eye className="mr-2 h-4 w-4" />
@@ -887,7 +887,7 @@ export default function SubmitAdvert() {
                   <Button
                     onClick={handlePublish}
                     disabled={isSubmitting}
-                    className="flex-1 h-14 px-6"
+                    className="flex-1 h-14 px-6 py-4"
                     size="lg"
                   >
                     {isSubmitting ? "Publishing..." : "Publish Now"}
