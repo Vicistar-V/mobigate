@@ -567,7 +567,7 @@ export default function SubmitAdvert() {
                 {/* DPD Package Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="dpd" className="text-sm">
-                    Select Daily Display Package (DPD) *
+                    Select Display Per Day Package (DPD) *
                     <InfoTooltip content="DPD determines how many times your ad will be shown per day. Higher DPD means more exposure." />
                   </Label>
                   <Select value={dpdPackage || ""} onValueChange={(v) => setDpdPackage(v as DPDPackageId)}>
