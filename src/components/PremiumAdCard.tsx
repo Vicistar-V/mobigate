@@ -89,18 +89,24 @@ export const PremiumAdCard = ({
           {/* Header */}
           <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-20">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-2 text-white/90 text-xs sm:text-sm min-w-0 flex-1">
-                {advertiser.logo && (
-                  <img 
-                    src={advertiser.logo} 
-                    alt={advertiser.name}
-                    className="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover bg-white flex-shrink-0"
-                  />
-                )}
-                <span className="font-medium truncate">{advertiser.name}</span>
-                {advertiser.verified && (
-                  <Badge variant="secondary" className="text-xs px-1.5 py-0 flex-shrink-0">✓</Badge>
-                )}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 text-white/90 text-xs sm:text-sm min-w-0 flex-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  {advertiser.logo && (
+                    <img 
+                      src={advertiser.logo} 
+                      alt={advertiser.name}
+                      className="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover bg-white flex-shrink-0"
+                    />
+                  )}
+                  <span className="font-medium truncate">{advertiser.name}</span>
+                  {advertiser.verified && (
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0 flex-shrink-0">✓</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-xs sm:text-sm pl-8 sm:pl-0">
+                  <Globe className="h-3 w-3 flex-shrink-0" />
+                  <span>Sponsored</span>
+                </div>
               </div>
               <Button
                 variant="ghost"
