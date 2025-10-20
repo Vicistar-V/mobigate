@@ -483,7 +483,7 @@ export default function SubmitAdvert() {
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
-      <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
         <div className="max-w-5xl mx-auto">
           {/* Main Form */}
           <div className="space-y-4 sm:space-y-6">
