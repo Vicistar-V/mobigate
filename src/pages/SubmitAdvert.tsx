@@ -147,7 +147,10 @@ export default function SubmitAdvert() {
   const [launchDate, setLaunchDate] = useState<Date>();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [agreed, setAgreed] = useState(false);
-  const [catchmentLocked, setCatchmentLocked] = useState(false);
+  const [catchmentLocked, setCatchmentLocked] = useState(() => {
+    const saved = localStorage.getItem('advert-catchment-locked');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   // Update type when displayMode or multipleCount changes
   useEffect(() => {
@@ -170,6 +173,11 @@ export default function SubmitAdvert() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Persist catchment lock state
+  useEffect(() => {
+    localStorage.setItem('advert-catchment-locked', JSON.stringify(catchmentLocked));
+  }, [catchmentLocked]);
 
   // Load draft on mount
   useEffect(() => {
