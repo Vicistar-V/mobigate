@@ -8,6 +8,7 @@ interface MultipleCountCardProps {
   selected: boolean;
   category: "pictorial" | "video";
   onSelect: () => void;
+  index: number;
 }
 
 const SETUP_FEES: Record<MultipleDisplayCount, { pictorial: number; video: number }> = {
@@ -22,7 +23,7 @@ const SETUP_FEES: Record<MultipleDisplayCount, { pictorial: number; video: numbe
   10: { pictorial: 200000, video: 300000 },
 };
 
-export function MultipleCountCard({ count, selected, category, onSelect }: MultipleCountCardProps) {
+export function MultipleCountCard({ count, selected, category, onSelect, index }: MultipleCountCardProps) {
   const fees = SETUP_FEES[count];
   const nairaFee = category === "pictorial" ? fees.pictorial : fees.video;
   const mobiFee = nairaFee; // 1:1 ratio
@@ -39,6 +40,7 @@ export function MultipleCountCard({ count, selected, category, onSelect }: Multi
     <Card
       className={cn(
         "p-2 sm:p-3 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md",
+        index % 2 === 0 && "bg-muted/30",
         selected && "border-primary border-2 bg-primary/5 shadow-lg"
       )}
       onClick={onSelect}
