@@ -234,7 +234,7 @@ export function AppSidebar() {
         {/* SUPERADMIN MENU Section */}
         <SidebarGroup className="mb-4">
           <SidebarGroupLabel className="text-base font-bold text-muted-foreground/70 uppercase tracking-widest px-3 mb-2">
-            Superadmin Menu
+            Admin Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
