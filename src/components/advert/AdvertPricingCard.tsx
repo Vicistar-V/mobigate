@@ -98,19 +98,19 @@ export const AdvertPricingCard = ({
       <Separator />
 
       {/* Display Info */}
-      <div className="space-y-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
-        <div className="flex items-center gap-2 text-sm font-medium text-primary">
-          <TrendingUp className="h-4 w-4" />
+      <div className="space-y-3 p-3 sm:p-4 rounded-lg bg-primary/5 border border-primary/10">
+        <div className="flex items-center gap-2 text-sm sm:text-base font-medium text-primary">
+          <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
           Display Performance
         </div>
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Frequency</span>
-            <span className="font-medium">{pricing.displayFrequency}</span>
+        <div className="grid grid-cols-1 gap-2 sm:gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 p-2 sm:p-0 rounded bg-background/50 sm:bg-transparent">
+            <span className="text-xs sm:text-sm text-muted-foreground">Frequency</span>
+            <span className="font-medium text-sm sm:text-base">{pricing.displayFrequency}</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Daily Reach</span>
-            <span className="font-medium">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 p-2 sm:p-0 rounded bg-background/50 sm:bg-transparent">
+            <span className="text-xs sm:text-sm text-muted-foreground">Daily Reach</span>
+            <span className="font-medium text-sm sm:text-base">
               {pricing.displayPerDay === Infinity ? "Unlimited" : `${pricing.displayPerDay.toLocaleString()} views`}
             </span>
           </div>
