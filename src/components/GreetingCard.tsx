@@ -94,19 +94,23 @@ export const GreetingSection = () => {
                   </Link>
                 </DropdownMenuItem>
                 
-                <DropdownMenuLabel className="text-base font-medium text-primary">
-                  Friend Requests
-                </DropdownMenuLabel>
-                <DropdownMenuItem asChild className="text-base font-medium text-primary pl-8">
-                  <Link to="/friends/requests/received" className="cursor-pointer">
-                    Received Requests
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="text-base font-medium text-primary pl-8">
-                  <Link to="/friends/requests/sent" className="cursor-pointer">
-                    Sent Requests
-                  </Link>
-                </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="text-base font-medium text-primary">
+                    Friend Requests
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="bg-card z-50 w-48">
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/requests/received" className="cursor-pointer">
+                        Received Requests
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                      <Link to="/friends/requests/sent" className="cursor-pointer">
+                        Sent Requests
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
                 
                 <DropdownMenuItem asChild className="text-base font-medium text-primary">
                   <Link to="/friends/find" className="cursor-pointer">
