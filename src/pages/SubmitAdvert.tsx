@@ -482,7 +482,7 @@ export default function SubmitAdvert() {
             <Card className="overflow-visible">
               <CardHeader className="space-y-1 sm:space-y-1.5">
                 <CardTitle className="text-xl sm:text-2xl">Create Premium Advert</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
+                <CardDescription className="text-sm sm:text-base">
                   Fill in the details below to create your advertising campaign
                 </CardDescription>
               </CardHeader>
