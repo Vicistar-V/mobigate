@@ -10,11 +10,6 @@ import { cn } from "@/lib/utils";
 // Superadmin Menu Items
 const superadminMenuItems = [
   {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    url: "/"
-  },
-  {
     title: "App Settings",
     icon: Settings,
     items: [
@@ -231,7 +226,26 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-4">
-        {/* SUPERADMIN MENU Section */}
+        {/* Dashboard Section - Standalone */}
+        <SidebarGroup className="mb-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <NavLink to="/" end>
+                {({ isActive }) => (
+                  <SidebarMenuButton tooltip="Dashboard" className={cn("group relative overflow-hidden transition-all duration-200", isActive ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md hover:shadow-lg" : "hover:bg-accent/50")}>
+                    <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg transition-colors", isActive ? "bg-primary text-primary-foreground shadow-md" : "bg-primary/10 text-primary group-hover:bg-primary/20")}>
+                      <LayoutDashboard className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium">Dashboard</span>
+                    {isActive && open && <div className="absolute right-0 top-0 h-full w-1 bg-primary-foreground rounded-l-full" />}
+                  </SidebarMenuButton>
+                )}
+              </NavLink>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* ADMIN MENU Section */}
         <SidebarGroup className="mb-4">
           <SidebarGroupLabel className="text-base font-bold text-muted-foreground/70 uppercase tracking-widest px-3 mb-2">
             Admin Menu
@@ -275,17 +289,16 @@ export function AppSidebar() {
                   );
                 }
 
-                // Items without sub-menu (like Dashboard)
+                // Items without sub-menu
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <NavLink to={item.url!} end>
+                    <NavLink to={item.url!}>
                       {({ isActive }) => (
-                        <SidebarMenuButton tooltip={item.title} className={cn("group relative overflow-hidden transition-all duration-200", isActive ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md hover:shadow-lg" : "hover:bg-accent/50")}>
+                        <SidebarMenuButton tooltip={item.title} className={cn("group transition-all duration-200", isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-accent/50")}>
                           <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg transition-colors", isActive ? "bg-primary text-primary-foreground shadow-md" : "bg-primary/10 text-primary group-hover:bg-primary/20")}>
                             <item.icon className="h-4 w-4" />
                           </div>
                           <span className="font-medium">{item.title}</span>
-                          {isActive && open && <div className="absolute right-0 top-0 h-full w-1 bg-primary-foreground rounded-l-full" />}
                         </SidebarMenuButton>
                       )}
                     </NavLink>
