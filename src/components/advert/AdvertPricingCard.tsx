@@ -69,7 +69,7 @@ export const AdvertPricingCard = ({
         <>
           <Separator />
           <div className="space-y-2">
-            <div className="text-sm font-semibold text-primary mb-1">Additional Costs</div>
+            <div className="text-sm font-semibold text-primary mb-1">Optional Cost</div>
             {pricing.extendedExposureCost > 0 && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground ml-2">Extended Exposure ({pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''})</span>
