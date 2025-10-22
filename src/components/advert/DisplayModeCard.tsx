@@ -1,5 +1,6 @@
 import { DisplayMode } from "@/types/advert";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ImageIcon, Images } from "lucide-react";
 
@@ -47,11 +48,14 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
           </p>
 
           <div className="mt-2 pt-2 border-t">
-            <p className="text-xs font-medium text-muted-foreground">Setup Fee:</p>
+            <p className="text-xs font-medium text-muted-foreground">Base Setup:</p>
             <p className="text-primary font-semibold text-sm mt-0.5">
               {category === "pictorial" ? pictorialPrice : videoPrice}
             </p>
             <p className="text-xs text-muted-foreground">{mobiPrice}</p>
+            <Badge variant="outline" className="text-xs mt-1">
+              + Size Fee (0-{isSingle ? "10" : "20"}%)
+            </Badge>
           </div>
         </div>
       </div>

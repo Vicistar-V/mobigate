@@ -1,4 +1,4 @@
-import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing, AccreditedAdvertiserTier } from "@/types/advert";
+import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing, AccreditedAdvertiserTier, AdvertSize } from "@/types/advert";
 import { calculateAllDiscounts, applyDiscounts } from "./advertDiscounts";
 
 export type { AdvertPricing };
@@ -99,9 +99,38 @@ const RECURRENT_EVERY_CHARGES: Record<string, number> = {
   "every-48h": 0.05,
 };
 
+// Size multipliers for SINGLE adverts (as decimal)
+const SIZE_MULTIPLIERS_SINGLE: Record<AdvertSize, number> = {
+  "2x3": 0.00,   // 0% - FREE
+  "2x6": 0.02,   // 2%
+  "2.5x3": 0.00, // 0% - FREE
+  "2.5x6": 0.00, // 0% - FREE
+  "3.5x3": 0.01, // 1%
+  "3.5x6": 0.03, // 3%
+  "5x6": 0.05,   // 5%
+  "6.5x3": 0.065,// 6.5%
+  "6.5x6": 0.07, // 7%
+  "10x6": 0.10,  // 10%
+};
+
+// Size multipliers for MULTIPLE adverts (as decimal)
+const SIZE_MULTIPLIERS_MULTIPLE: Record<AdvertSize, number> = {
+  "2x3": 0.03,   // 3%
+  "2x6": 0.07,   // 7%
+  "2.5x3": 0.03, // 3%
+  "2.5x6": 0.05, // 5%
+  "3.5x3": 0.06, // 6%
+  "3.5x6": 0.07, // 7%
+  "5x6": 0.12,   // 12%
+  "6.5x3": 0.12, // 12%
+  "6.5x6": 0.15, // 15%
+  "10x6": 0.20,  // 20%
+};
+
 export function calculateAdvertPricing(
   category: AdvertCategory,
   type: AdvertType,
+  size: AdvertSize,
   dpdPackage: DPDPackageId,
   extendedExposure?: string,
   recurrentAfter?: string,
@@ -109,15 +138,30 @@ export function calculateAdvertPricing(
   accreditedTier?: AccreditedAdvertiserTier | null,
   activeAdvertCount: number = 0
 ): AdvertPricing {
-  // Get setup fee
-  const setupFee = SETUP_FEES[category][type];
+  // Get base setup fee (before size adjustment)
+  const baseSetupFee = SETUP_FEES[category][type];
 
   // Get DPD package info
   const dpdInfo = DPD_PACKAGES[dpdPackage];
   const dpdCost = dpdInfo.price;
 
-  // Calculate base cost (setup + DPD)
-  const baseCost = setupFee + dpdCost;
+  // Calculate base cost (setup + DPD before size adjustment)
+  const baseCostBeforeSize = baseSetupFee + dpdCost;
+
+  // Determine if single or multiple advert
+  const isSingle = type === "single";
+  const sizeMultiplier = isSingle 
+    ? SIZE_MULTIPLIERS_SINGLE[size] 
+    : SIZE_MULTIPLIERS_MULTIPLE[size];
+
+  // Calculate size fee (applies to both setup + DPD)
+  const sizeFee = Math.round(baseCostBeforeSize * sizeMultiplier);
+
+  // Calculate final setup fee (proportional part of size fee)
+  const setupFee = baseSetupFee + Math.round(sizeFee * (baseSetupFee / baseCostBeforeSize));
+
+  // Calculate base cost after size adjustment
+  const baseCost = baseCostBeforeSize + sizeFee;
 
   // Calculate extended exposure cost
   let extendedExposureCost = 0;
@@ -142,6 +186,9 @@ export function calculateAdvertPricing(
 
   // Base pricing without discounts
   const basePricing: AdvertPricing = {
+    baseSetupFee,
+    sizeMultiplier,
+    sizeFee,
     setupFee,
     dpdCost,
     extendedExposureCost,
@@ -197,4 +244,28 @@ export function getRequiredFileCount(type: AdvertType): number {
   if (type === "single") return 1;
   const match = type.match(/multiple-(\d+)/);
   return match ? parseInt(match[1]) : 1;
+}
+
+/**
+ * Get size multiplier for display mode/type
+ */
+export function getSizeMultiplier(type: AdvertType, size: AdvertSize): number {
+  const isSingle = type === "single";
+  return isSingle 
+    ? SIZE_MULTIPLIERS_SINGLE[size] 
+    : SIZE_MULTIPLIERS_MULTIPLE[size];
+}
+
+/**
+ * Get size fee description for display
+ */
+export function getSizeFeeDescription(type: AdvertType, size: AdvertSize): string {
+  const multiplier = getSizeMultiplier(type, size);
+  const percentage = (multiplier * 100).toFixed(1).replace(/\.0$/, '');
+  
+  if (multiplier === 0) {
+    return "FREE (0% Size Fee)";
+  }
+  
+  return `+${percentage}% Size Fee`;
 }

@@ -115,6 +115,9 @@ export interface AdvertDiscount {
 }
 
 export interface AdvertPricing {
+  baseSetupFee?: number;
+  sizeMultiplier?: number;
+  sizeFee?: number;
   setupFee: number;
   dpdCost: number;
   extendedExposureCost: number;
@@ -124,7 +127,9 @@ export interface AdvertPricing {
   totalCostMobi: number;
   displayPerDay: number;
   displayFrequency: string;
-  // Discount fields
+  discounts?: AdvertDiscount[];
+  discountedTotal?: number;
+  discountedTotalMobi?: number;
   appliedDiscounts?: AdvertDiscount[];
   totalDiscount?: number;
   subtotalBeforeDiscount?: number;

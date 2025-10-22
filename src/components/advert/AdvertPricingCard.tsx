@@ -22,9 +22,23 @@ export const AdvertPricingCard = ({
     <>
       {/* Base Costs */}
       <div className="space-y-2">
+        {pricing.baseSetupFee !== undefined && pricing.sizeFee !== undefined && pricing.sizeFee > 0 && (
+          <>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Base Setup Fee</span>
+              <span className="font-medium">{formatCurrency(pricing.baseSetupFee)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                Size Fee ({pricing.sizeMultiplier ? (pricing.sizeMultiplier * 100).toFixed(1).replace(/\.0$/, '') : '0'}%)
+              </span>
+              <span className="font-medium text-primary">+{formatCurrency(pricing.sizeFee)}</span>
+            </div>
+          </>
+        )}
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Setup Fee (24 months)</span>
-          <span className="font-medium">{formatCurrency(pricing.setupFee)}</span>
+          <span className="text-muted-foreground">Setup Fee Total (24 months)</span>
+          <span className="font-semibold">{formatCurrency(pricing.setupFee)}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">DPD Package</span>

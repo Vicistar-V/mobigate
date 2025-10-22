@@ -29,7 +29,7 @@ import {
   getDisplayMode,
   getMultipleCount
 } from "@/types/advert";
-import { calculateAdvertPricing, getRequiredFileCount } from "@/lib/advertPricing";
+import { calculateAdvertPricing, getRequiredFileCount, getSizeFeeDescription } from "@/lib/advertPricing";
 import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "@/lib/advertStorage";
 import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
 import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
@@ -416,6 +416,7 @@ export default function SubmitAdvert() {
       const pricing = calculateAdvertPricing(
         category as AdvertCategory,
         type as AdvertType,
+        size as AdvertSize,
         dpdPackage as DPDPackageId,
         extendedExposureTime,
         recurrentAfter,
@@ -473,9 +474,10 @@ export default function SubmitAdvert() {
     setShowPreview(true);
   };
 
-  const pricing = category && type && dpdPackage ? calculateAdvertPricing(
+  const pricing = category && type && size && dpdPackage ? calculateAdvertPricing(
     category as AdvertCategory,
     type as AdvertType,
+    size as AdvertSize,
     dpdPackage as DPDPackageId,
     extendedExposureTime,
     recurrentAfter,
@@ -607,6 +609,13 @@ export default function SubmitAdvert() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {size && type && (
+                    <div className="mt-2 p-2 bg-primary/5 rounded-md border border-primary/20">
+                      <p className="text-sm font-medium text-primary">
+                        {getSizeFeeDescription(type, size)}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* DPD Package Selection */}
