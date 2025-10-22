@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AdvertPricing } from "@/types/advert";
 import { formatCurrency, formatMobi } from "@/lib/advertPricing";
-import { Zap, TrendingUp, Sparkles } from "lucide-react";
+import { Zap, TrendingUp, Sparkles, Calendar } from "lucide-react";
 interface AdvertPricingCardProps {
   pricing: AdvertPricing;
   walletBalance?: number;
@@ -45,7 +45,7 @@ export const AdvertPricingCard = ({
 
       <Separator />
 
-      {/* Subscription DPD Section */}
+      {/* Subscription DPD Section - WITHOUT discount */}
       <div className="space-y-2">
         <div className="text-sm font-semibold text-primary mb-1">Subscription DPD Cost</div>
         <div className="flex items-center justify-between text-sm">
@@ -56,19 +56,11 @@ export const AdvertPricingCard = ({
           <span className="text-muted-foreground ml-2">
             Duration: {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''}
           </span>
-          <span className="font-medium">{formatCurrency(pricing.monthlyDpdCost * pricing.subscriptionMonths)}</span>
+          <span className="font-medium">× {pricing.subscriptionMonths}</span>
         </div>
-        {pricing.subscriptionDiscount > 0 && (
-          <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
-            <span className="ml-2">
-              Subscription Discount ({(pricing.subscriptionDiscount * 100).toFixed(0)}%)
-            </span>
-            <span className="font-medium">-{formatCurrency(pricing.subscriptionDiscountAmount)}</span>
-          </div>
-        )}
         <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
-          <span>Total DPD Cost</span>
-          <span className="text-primary">{formatCurrency(pricing.totalDpdCost)}</span>
+          <span>Total DPD Cost (before discount)</span>
+          <span className="text-primary">{formatCurrency(pricing.monthlyDpdCost * pricing.subscriptionMonths)}</span>
         </div>
       </div>
 
@@ -77,38 +69,105 @@ export const AdvertPricingCard = ({
         <>
           <Separator />
           <div className="space-y-2">
-            <div className="text-sm font-semibold text-primary mb-1">Additional Costs (Total for {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''})</div>
+            <div className="text-sm font-semibold text-primary mb-1">Additional Costs</div>
             {pricing.extendedExposureCost > 0 && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground ml-2">Extended Exposure</span>
+                <span className="text-muted-foreground ml-2">Extended Exposure ({pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''})</span>
                 <span className="font-medium text-primary">+{formatCurrency(pricing.extendedExposureCost)}</span>
               </div>
             )}
             {pricing.recurrentAfterCost > 0 && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground ml-2">Recurrent After</span>
+                <span className="text-muted-foreground ml-2">Recurrent After ({pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''})</span>
                 <span className="font-medium text-primary">+{formatCurrency(pricing.recurrentAfterCost)}</span>
               </div>
             )}
             {pricing.recurrentEveryCost > 0 && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground ml-2">Recurrent Every</span>
+                <span className="text-muted-foreground ml-2">Recurrent Every ({pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''})</span>
                 <span className="font-medium text-primary">+{formatCurrency(pricing.recurrentEveryCost)}</span>
               </div>
             )}
+            <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
+              <span>Total Additional Costs</span>
+              <span className="text-primary">
+                {formatCurrency(pricing.extendedExposureCost + pricing.recurrentAfterCost + pricing.recurrentEveryCost)}
+              </span>
+            </div>
           </div>
         </>
       )}
 
       <Separator />
 
-      {/* Discounts Section */}
+      {/* NEW: Recurrent Total Amount */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-base font-bold">
+          <span>Recurrent Total Amount</span>
+          <span className="text-primary">
+            {formatCurrency((pricing.monthlyDpdCost * pricing.subscriptionMonths) + 
+                          pricing.extendedExposureCost + 
+                          pricing.recurrentAfterCost + 
+                          pricing.recurrentEveryCost)}
+          </span>
+        </div>
+        <div className="text-xs text-muted-foreground text-center p-2 bg-muted/20 rounded">
+          Total monthly subscription costs for {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* NEW: Subscription Volume Discount Section */}
+      {pricing.subscriptionDiscount > 0 && (
+        <>
+          <div className="space-y-2 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-blue-600" />
+              <span className="font-semibold text-sm text-blue-600">Subscription Volume Discount</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Subscription Volume</span>
+              <span className="font-medium">
+                {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''} 
+                {' '}({pricing.subscriptionMonths * 30} days)
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t border-blue-500/20">
+              <span className="text-blue-600">
+                Less: Volume Discount ({(pricing.subscriptionDiscount * 100).toFixed(0)}%)
+              </span>
+              <span className="font-bold text-blue-600">
+                -{formatCurrency(pricing.subscriptionDiscountAmount)}
+              </span>
+            </div>
+          </div>
+          <Separator />
+        </>
+      )}
+
+      {/* Subtotal after subscription discount */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm font-semibold">
+          <span>Subtotal (After Subscription Discount)</span>
+          <span className="text-primary">
+            {formatCurrency(pricing.setupFee + pricing.totalDpdCost + 
+                          pricing.extendedExposureCost + 
+                          pricing.recurrentAfterCost + 
+                          pricing.recurrentEveryCost)}
+          </span>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Other Discounts (Accredited + Volume) */}
       {hasDiscounts && (
         <>
           <div className="space-y-2 p-3 rounded-lg bg-green-500/5 border border-green-500/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="h-4 w-4 text-green-600" />
-              <span className="font-semibold text-sm text-green-600">Discounts Applied</span>
+              <span className="font-semibold text-sm text-green-600">Other Discounts Applied</span>
             </div>
             {pricing.appliedDiscounts?.map((discount, index) => (
               <div key={index} className="flex items-center justify-between text-sm">
