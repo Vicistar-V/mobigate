@@ -18,6 +18,8 @@ export function DisplayModeCarousel({
   const [currentIndex, setCurrentIndex] = useState(
     modes.indexOf(displayMode)
   );
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => {
@@ -36,8 +38,24 @@ export function DisplayModeCarousel({
   };
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => goToNext(),
-    onSwipedRight: () => goToPrevious(),
+    onSwiping: (eventData) => {
+      setIsDragging(true);
+      setDragOffset(eventData.deltaX);
+    },
+    onSwipedLeft: () => {
+      setIsDragging(false);
+      setDragOffset(0);
+      goToNext();
+    },
+    onSwipedRight: () => {
+      setIsDragging(false);
+      setDragOffset(0);
+      goToPrevious();
+    },
+    onTap: () => {
+      setIsDragging(false);
+      setDragOffset(0);
+    },
     trackMouse: false,
     preventScrollOnSwipe: true,
     delta: 50,
@@ -52,9 +70,9 @@ export function DisplayModeCarousel({
       >
         {/* Cards Container */}
         <div
-          className="flex transition-transform duration-300 ease-out gap-4 pl-4"
+          className={`flex gap-4 pl-4 ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
           style={{
-            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 16}px))`,
+            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 16}px + ${dragOffset}px))`,
           }}
         >
           {modes.map((mode) => (
