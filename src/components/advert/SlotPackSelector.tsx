@@ -37,7 +37,7 @@ export function SlotPackSelector({ selectedPackId, onSelectPack }: SlotPackSelec
         >
           <CarouselContent className="ml-0">
             {SLOT_PACKS.map((pack) => (
-              <CarouselItem key={pack.id} className="pl-0 basis-[90%]">
+              <CarouselItem key={pack.id} className="pl-0 basis-[85%]">
                 <Card
                   className={`cursor-pointer transition-all hover:shadow-lg ${
                     selectedPackId === pack.id
