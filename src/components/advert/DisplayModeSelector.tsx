@@ -33,7 +33,7 @@ export function DisplayModeSelector({
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {modes.map((mode) => (
-            <CarouselItem key={mode} className="pl-2 md:pl-4 basis-[85%]">
+            <CarouselItem key={mode} className="pl-2 md:pl-4 basis-[85%] flex">
               <DisplayModeCard
                 mode={mode}
                 selected={displayMode === mode}
@@ -48,7 +48,7 @@ export function DisplayModeSelector({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:auto-rows-fr">
       {modes.map((mode) => (
         <DisplayModeCard
           key={mode}

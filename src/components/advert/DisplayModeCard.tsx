@@ -36,12 +36,12 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
   return (
     <Card
       className={cn(
-        "p-3 cursor-pointer transition-all hover:border-primary/50",
+        "p-3 cursor-pointer transition-all hover:border-primary/50 h-full",
         selected && "border-primary border-2 bg-primary/5"
       )}
       onClick={onSelect}
     >
-      <div className="flex flex-col items-center text-center gap-2">
+      <div className="flex flex-col items-center text-center gap-2 h-full">
         <div className={cn(
           "w-10 h-10 rounded-lg flex items-center justify-center",
           selected ? "bg-primary text-primary-foreground" : "bg-muted"
