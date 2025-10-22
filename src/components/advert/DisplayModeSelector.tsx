@@ -31,7 +31,7 @@ export function DisplayModeSelector({
         }}
         className="w-full"
       >
-        <CarouselContent>
+        <CarouselContent className="gap-0">
           {modes.map((mode) => (
             <CarouselItem key={mode} className="basis-[85%] flex">
               <DisplayModeCard
