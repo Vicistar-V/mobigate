@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSwipeable } from "react-swipeable";
 import { DisplayModeCard } from "./DisplayModeCard";
 import { DisplayMode, AdvertCategory } from "@/types/advert";
@@ -15,11 +15,26 @@ export function DisplayModeCarousel({
   onSelectMode,
 }: DisplayModeCarouselProps) {
   const modes: DisplayMode[] = ["single", "multiple", "rollout"];
+  const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(
     modes.indexOf(displayMode)
   );
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [cardWidth, setCardWidth] = useState(0);
+
+  useEffect(() => {
+    const updateCardWidth = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        setCardWidth(containerWidth * 0.85); // 85% of container width
+      }
+    };
+
+    updateCardWidth();
+    window.addEventListener('resize', updateCardWidth);
+    return () => window.removeEventListener('resize', updateCardWidth);
+  }, []);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => {
@@ -67,12 +82,13 @@ export function DisplayModeCarousel({
       <div
         {...swipeHandlers}
         className="relative overflow-hidden"
+        ref={containerRef}
       >
         {/* Cards Container */}
         <div
-          className={`flex gap-4 pl-4 ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
+          className={`flex gap-4 pl-4 pr-4 ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
           style={{
-            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 16}px + ${dragOffset}px))`,
+            transform: `translateX(calc(-${currentIndex * (cardWidth + 16)}px + ${dragOffset}px))`,
           }}
         >
           {modes.map((mode) => (
