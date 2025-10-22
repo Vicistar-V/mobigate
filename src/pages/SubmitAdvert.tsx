@@ -862,6 +862,7 @@ export default function SubmitAdvert() {
                           count={count}
                           selected={multipleCount === count}
                           category={category}
+                          displayMode={displayMode!}
                           onSelect={() => setMultipleCount(count)}
                           index={index}
                         />
