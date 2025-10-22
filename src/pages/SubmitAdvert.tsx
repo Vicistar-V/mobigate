@@ -333,7 +333,7 @@ export default function SubmitAdvert() {
     return getRequiredFileCount(type);
   };
 
-  const isMultipleDisplay = displayMode === "multiple";
+  const isMultipleDisplay = displayMode === "multiple" || displayMode === "rollout";
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -402,7 +402,7 @@ export default function SubmitAdvert() {
       return false;
     }
 
-    if (displayMode === "multiple" && !multipleCount) {
+    if ((displayMode === "multiple" || displayMode === "rollout") && !multipleCount) {
       toast({
         title: "Validation Error",
         description: "Please select the number of multiple displays",
@@ -797,7 +797,7 @@ export default function SubmitAdvert() {
                       Select Display Mode *
                       <InfoTooltip content="Choose whether you want a single advert or multiple adverts rotating in sequence" />
                     </Label>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       <DisplayModeCard
                         mode="single"
                         selected={displayMode === "single"}
@@ -813,12 +813,18 @@ export default function SubmitAdvert() {
                         category={category}
                         onSelect={() => setDisplayMode("multiple")}
                       />
+                      <DisplayModeCard
+                        mode="rollout"
+                        selected={displayMode === "rollout"}
+                        category={category}
+                        onSelect={() => setDisplayMode("rollout")}
+                      />
                     </div>
                   </div>
                 )}
 
                 {/* Multiple Display Count Selection */}
-                {category && displayMode === "multiple" && (
+                {category && (displayMode === "multiple" || displayMode === "rollout") && (
                   <div className="space-y-2">
                     <Label className="text-sm">
                       Select Number of Displays *

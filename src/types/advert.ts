@@ -1,6 +1,6 @@
 export type AdvertCategory = "pictorial" | "video";
 
-export type DisplayMode = "single" | "multiple";
+export type DisplayMode = "single" | "multiple" | "rollout";
 
 export type MultipleDisplayCount = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
@@ -26,7 +26,10 @@ export function getAdvertType(mode: DisplayMode, count?: MultipleDisplayCount): 
 
 // Helper function to extract display mode from AdvertType
 export function getDisplayMode(type: AdvertType): DisplayMode {
-  return type === "single" ? "single" : "multiple";
+  if (type === "single") return "single";
+  // For now, we return "multiple" for all multiple-X types
+  // Rollout mode will be distinguished by additional metadata
+  return "multiple";
 }
 
 // Helper function to extract multiple count from AdvertType

@@ -13,6 +13,8 @@ interface DisplayModeCardProps {
 
 export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayModeCardProps) {
   const isSingle = mode === "single";
+  const isRollout = mode === "rollout";
+  
   const pictorialPrice = isSingle ? "₦30,000" : "Starting from ₦40,000";
   const videoPrice = isSingle ? "₦45,000" : "Starting from ₦60,000";
   const mobiPrice = isSingle 
@@ -41,7 +43,7 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
         
         <div className="w-full">
           <h3 className="font-semibold text-sm">
-            {isSingle ? "Single Display" : "Multiple Displays"}
+            {isSingle ? "Single Display" : isRollout ? "Multiple Roll-out Display" : "Multiple Bundled Display"}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {isSingle ? "One advert" : "2-10 adverts"}
