@@ -742,6 +742,7 @@ export default function SubmitAdvert() {
                             value={catchmentMarket.ageRange?.min || 28}
                             onChange={(e) => {
                               const value = Math.max(18, Math.min(parseInt(e.target.value) || 28, catchmentMarket.ageRange?.max || 78));
+                              if (catchmentLocked) return;
                               setCatchmentMarket(prev => ({
                                 ...prev,
                                 ageRange: { min: value, max: prev.ageRange?.max || 78 }
@@ -761,6 +762,7 @@ export default function SubmitAdvert() {
                             value={catchmentMarket.ageRange?.max || 78}
                             onChange={(e) => {
                               const value = Math.max(catchmentMarket.ageRange?.min || 28, Math.min(parseInt(e.target.value) || 78, 100));
+                              if (catchmentLocked) return;
                               setCatchmentMarket(prev => ({
                                 ...prev,
                                 ageRange: { min: prev.ageRange?.min || 28, max: value }
