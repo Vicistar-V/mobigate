@@ -24,6 +24,7 @@ import {
   DPDPackageId,
   DisplayMode,
   MultipleDisplayCount,
+  CatchmentMarket,
   getAdvertType,
   getDisplayMode,
   getMultipleCount
@@ -166,15 +167,19 @@ export default function SubmitAdvert() {
     }
   }, [displayMode, multipleCount]);
 
-  // Catchment market percentages
-  const [catchmentMarket, setCatchmentMarket] = useState({
+  // Catchment market percentages and age range
+  const [catchmentMarket, setCatchmentMarket] = useState<CatchmentMarket>({
     ownCity: 20,
     ownState: 25,
     ownCountry: 25,
     foreignCountries: 10,
     popularSearches: 5,
     random: 5,
-    others: 10
+    others: 10,
+    ageRange: {
+      min: 28,
+      max: 78
+    }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -258,7 +263,9 @@ export default function SubmitAdvert() {
     }));
   };
 
-  const catchmentTotal = Object.values(catchmentMarket).reduce((a, b) => a + b, 0);
+  const catchmentTotal = Object.entries(catchmentMarket)
+    .filter(([key]) => key !== 'ageRange')
+    .reduce((sum, [, value]) => sum + (value as number), 0);
 
   const getRequiredFiles = () => {
     if (!type) return 1;
@@ -713,6 +720,57 @@ export default function SubmitAdvert() {
                         catchmentTotal === 100 ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
                       )}>
                         Total: {catchmentTotal}%
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Age Range */}
+                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                    <Label className="text-sm font-semibold mb-3 block">
+                      Age Range
+                      <InfoTooltip content="Target your ads to specific age groups. Select minimum and maximum age." />
+                    </Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <Label htmlFor="min-age" className="text-xs mb-1 block">Minimum Age</Label>
+                          <Input
+                            id="min-age"
+                            type="number"
+                            min="18"
+                            max={catchmentMarket.ageRange?.max || 78}
+                            value={catchmentMarket.ageRange?.min || 28}
+                            onChange={(e) => {
+                              const value = Math.max(18, Math.min(parseInt(e.target.value) || 28, catchmentMarket.ageRange?.max || 78));
+                              setCatchmentMarket(prev => ({
+                                ...prev,
+                                ageRange: { min: value, max: prev.ageRange?.max || 78 }
+                              }));
+                            }}
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label htmlFor="max-age" className="text-xs mb-1 block">Maximum Age</Label>
+                          <Input
+                            id="max-age"
+                            type="number"
+                            min={catchmentMarket.ageRange?.min || 28}
+                            max="100"
+                            value={catchmentMarket.ageRange?.max || 78}
+                            onChange={(e) => {
+                              const value = Math.max(catchmentMarket.ageRange?.min || 28, Math.min(parseInt(e.target.value) || 78, 100));
+                              setCatchmentMarket(prev => ({
+                                ...prev,
+                                ageRange: { min: prev.ageRange?.min || 28, max: value }
+                              }));
+                            }}
+                            className="h-9"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground text-center">
+                        Targeting ages {catchmentMarket.ageRange?.min || 28} - {catchmentMarket.ageRange?.max || 78}
                       </div>
                     </div>
                   </div>

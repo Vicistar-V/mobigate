@@ -80,6 +80,10 @@ export interface CatchmentMarket {
   popularSearches: number;
   random: number;
   others: number;
+  ageRange?: {
+    min: number;
+    max: number;
+  };
 }
 
 export interface AdvertFormData {
