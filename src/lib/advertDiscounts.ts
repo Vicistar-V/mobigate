@@ -79,20 +79,20 @@ export function applyDiscounts(
       ...pricing,
       appliedDiscounts: [],
       totalDiscount: 0,
-      subtotalBeforeDiscount: pricing.totalCost,
-      finalAmountPayable: pricing.totalCost,
-      finalAmountPayableMobi: pricing.totalCostMobi,
+      subtotalBeforeDiscount: pricing.totalSubscriptionCost,
+      finalAmountPayable: pricing.totalSubscriptionCost,
+      finalAmountPayableMobi: pricing.totalSubscriptionCost,
     };
   }
 
   const totalDiscount = discounts.reduce((sum, discount) => sum + discount.amount, 0);
-  const finalAmount = pricing.totalCost - totalDiscount;
+  const finalAmount = pricing.totalSubscriptionCost - totalDiscount;
 
   return {
     ...pricing,
     appliedDiscounts: discounts,
     totalDiscount,
-    subtotalBeforeDiscount: pricing.totalCost,
+    subtotalBeforeDiscount: pricing.totalSubscriptionCost,
     finalAmountPayable: Math.max(0, finalAmount),
     finalAmountPayableMobi: Math.max(0, finalAmount),
   };
