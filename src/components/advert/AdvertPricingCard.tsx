@@ -38,7 +38,7 @@ export const AdvertPricingCard = ({
           </>
         )}
         <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
-          <span>Setup Fee Total</span>
+          <span>Total Setup Fee</span>
           <span className="text-primary">{formatCurrency(pricing.setupFee)}</span>
         </div>
       </div>
