@@ -15,7 +15,7 @@ const ACCREDITED_DISCOUNTS: Record<AccreditedAdvertiserTier, { percentage: numbe
  * Volume Discount Tiers
  * Based on number of active adverts
  */
-const VOLUME_DISCOUNTS = [
+export const VOLUME_DISCOUNTS = [
   { minAdverts: 21, percentage: 25 },
   { minAdverts: 11, percentage: 20 },
   { minAdverts: 7, percentage: 15 },

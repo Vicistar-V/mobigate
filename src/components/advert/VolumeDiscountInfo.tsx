@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TrendingUp, Info } from "lucide-react";
-import { getNextVolumeDiscountTier } from "@/lib/advertDiscounts";
+import { getNextVolumeDiscountTier, VOLUME_DISCOUNTS } from "@/lib/advertDiscounts";
 
 interface VolumeDiscountInfoProps {
   activeAdvertCount: number;
@@ -32,11 +32,14 @@ export const VolumeDiscountInfo = ({
                   <TooltipContent className="max-w-xs">
                     <p className="font-semibold mb-2">Volume Discount Tiers</p>
                     <ul className="text-xs space-y-1">
-                      <li>• 2-3 adverts: 5% discount</li>
-                      <li>• 4-6 adverts: 10% discount</li>
-                      <li>• 7-10 adverts: 15% discount</li>
-                      <li>• 11-20 adverts: 20% discount</li>
-                      <li>• 21+ adverts: 25% discount</li>
+                      {VOLUME_DISCOUNTS.map((tier, index) => {
+                        const nextTier = VOLUME_DISCOUNTS[index + 1];
+                        const label = nextTier 
+                          ? `${tier.minAdverts}-${nextTier.minAdverts - 1} adverts: ${tier.percentage}% discount`
+                          : `${tier.minAdverts}+ adverts: ${tier.percentage}% discount`;
+                        
+                        return <li key={tier.minAdverts}>• {label}</li>;
+                      })}
                     </ul>
                   </TooltipContent>
                 </Tooltip>
