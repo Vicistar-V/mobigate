@@ -31,9 +31,9 @@ export function DisplayModeSelector({
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent>
           {modes.map((mode) => (
-            <CarouselItem key={mode} className="pl-0 basis-[85%] flex">
+            <CarouselItem key={mode} className="basis-[85%] flex">
               <DisplayModeCard
                 mode={mode}
                 selected={displayMode === mode}
