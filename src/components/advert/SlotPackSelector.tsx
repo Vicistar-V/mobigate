@@ -44,10 +44,12 @@ export function SlotPackSelector({ selectedPackId, onSelectPack }: SlotPackSelec
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Badge className="bg-green-500 hover:bg-green-600 text-white">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  {pack.discountPercentage}% Discount
-                </Badge>
+                {pack.discountPercentage > 0 && (
+                  <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    {pack.discountPercentage}% Discount
+                  </Badge>
+                )}
                 
                 {pack.id !== "entry" && (
                   <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
