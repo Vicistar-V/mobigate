@@ -2,6 +2,14 @@ import { SlotPack, SlotPackId } from "@/types/advert";
 
 export const SLOT_PACKS: SlotPack[] = [
   {
+    id: "entry",
+    name: "Entry Slot Pack",
+    minSlots: 1,
+    maxSlots: 2,
+    discountPercentage: 10,
+    description: "Perfect for testing - 1-2 adverts with 10% discount"
+  },
+  {
     id: "basic",
     name: "Basic Slot Pack",
     minSlots: 3,

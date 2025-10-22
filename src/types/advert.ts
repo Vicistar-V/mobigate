@@ -174,7 +174,7 @@ export interface AdvertStatistics {
 }
 
 // Slot Pack types
-export type SlotPackId = "basic" | "standard" | "business" | "enterprise";
+export type SlotPackId = "entry" | "basic" | "standard" | "business" | "enterprise";
 
 export interface SlotPack {
   id: SlotPackId;
