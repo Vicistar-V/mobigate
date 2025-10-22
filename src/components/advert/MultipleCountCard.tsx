@@ -29,11 +29,11 @@ export function MultipleCountCard({ count, selected, category, onSelect, index }
   const mobiFee = nairaFee; // 1:1 ratio
 
   const formatCurrency = (amount: number) => {
-    return `₦${(amount / 1000).toFixed(0)}K`;
+    return `₦${amount.toLocaleString('en-NG')}`;
   };
 
   const formatMobi = (amount: number) => {
-    return `${(amount / 1000).toFixed(0)}K Mobi`;
+    return `${amount.toLocaleString('en-NG')} Mobi`;
   };
 
   return (
