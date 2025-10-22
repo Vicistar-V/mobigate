@@ -1,11 +1,7 @@
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DisplayModeCard } from "./DisplayModeCard";
+import { DisplayModeCarousel } from "./DisplayModeCarousel";
 import { DisplayMode, AdvertCategory } from "@/types/advert";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 
 interface DisplayModeSelectorProps {
   category: AdvertCategory;
@@ -20,32 +16,17 @@ export function DisplayModeSelector({
 }: DisplayModeSelectorProps) {
   const isMobile = useIsMobile();
 
-  const modes: DisplayMode[] = ["single", "multiple", "rollout"];
-
   if (isMobile) {
     return (
-      <Carousel
-        opts={{
-          align: "center",
-          loop: false,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="gap-0">
-          {modes.map((mode) => (
-            <CarouselItem key={mode} className="basis-[85%] flex">
-              <DisplayModeCard
-                mode={mode}
-                selected={displayMode === mode}
-                category={category}
-                onSelect={() => onSelectMode(mode)}
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+      <DisplayModeCarousel
+        category={category}
+        displayMode={displayMode}
+        onSelectMode={onSelectMode}
+      />
     );
   }
+
+  const modes: DisplayMode[] = ["single", "multiple", "rollout"];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:auto-rows-fr">
