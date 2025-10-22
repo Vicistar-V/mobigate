@@ -5,6 +5,50 @@
 import { ContactMethod } from "@/types/advert";
 
 /**
+ * Validates an email address
+ * @param email The email to validate
+ * @returns true if valid or empty, false otherwise
+ */
+export function validateEmail(email: string): boolean {
+  if (!email || email.trim().length === 0) return true; // Optional field
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim());
+}
+
+/**
+ * Validates a URL
+ * @param url The URL to validate
+ * @returns true if valid or empty, false otherwise
+ */
+export function validateWebsiteUrl(url: string): boolean {
+  if (!url || url.trim().length === 0) return true; // Optional field
+  
+  try {
+    const urlObj = new URL(url.trim());
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Formats a URL to ensure it has a protocol
+ * @param url The URL to format
+ * @returns Formatted URL with protocol
+ */
+export function formatWebsiteUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  
+  return `https://${trimmed}`;
+}
+
+/**
  * Validates a phone number (basic validation)
  * @param phone The phone number to validate
  * @returns true if valid, false otherwise

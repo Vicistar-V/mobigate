@@ -119,6 +119,8 @@ export interface AdvertFormData {
   agreed: boolean;
   contactPhone?: string;
   contactMethod?: ContactMethod;
+  contactEmail?: string;
+  websiteUrl?: string;
 }
 
 export type DiscountType = "accredited_advertiser" | "volume_based" | "promotional" | "custom";
@@ -231,6 +233,8 @@ export interface SavedAdvert {
   slotNumber?: number; // Position in the pack
   contactPhone?: string;
   contactMethod?: ContactMethod;
+  contactEmail?: string;
+  websiteUrl?: string;
 }
 
 export interface DPDPackage {

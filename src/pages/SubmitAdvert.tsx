@@ -191,6 +191,8 @@ export default function SubmitAdvert() {
   const [agreed, setAgreed] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
   const [contactMethod, setContactMethod] = useState<"whatsapp" | "call">("whatsapp");
+  const [contactEmail, setContactEmail] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [catchmentLocked, setCatchmentLocked] = useState(() => {
     const saved = localStorage.getItem('advert-catchment-locked');
     return saved ? JSON.parse(saved) : false;
@@ -290,6 +292,8 @@ export default function SubmitAdvert() {
         if (draft.agreed) setAgreed(draft.agreed);
         if (draft.contactPhone) setContactPhone(draft.contactPhone);
         if (draft.contactMethod) setContactMethod(draft.contactMethod);
+        if (draft.contactEmail) setContactEmail(draft.contactEmail);
+        if (draft.websiteUrl) setWebsiteUrl(draft.websiteUrl);
       }
     }
   }, [packDraft]);
@@ -315,14 +319,16 @@ export default function SubmitAdvert() {
             agreed,
             files: [],
             contactPhone: contactPhone || undefined,
-            contactMethod: contactPhone ? contactMethod : undefined
+            contactMethod: contactPhone ? contactMethod : undefined,
+            contactEmail: contactEmail || undefined,
+            websiteUrl: websiteUrl || undefined
           });
         }
       }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod]);
+  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
     if (catchmentLocked) return;
@@ -650,7 +656,9 @@ export default function SubmitAdvert() {
       files: uploadedFiles,
       agreed,
       contactPhone: contactPhone || undefined,
-      contactMethod: contactPhone ? contactMethod : undefined
+      contactMethod: contactPhone ? contactMethod : undefined,
+      contactEmail: contactEmail || undefined,
+      websiteUrl: websiteUrl || undefined
     };
 
     // Add or update slot
@@ -1217,21 +1225,22 @@ export default function SubmitAdvert() {
                   <div>
                     <Label className="text-sm">
                       Contact Information (Optional)
-                      <InfoTooltip content="Provide your phone number so customers can contact you directly via WhatsApp or phone call from your advert." />
+                      <InfoTooltip content="Add ways for customers to contact you directly from your advert - all fields are optional." />
                     </Label>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Add your contact details to make it easy for customers to reach you
+                      Provide contact details to make it easy for customers to reach you
                     </p>
                   </div>
 
-                  <div className="space-y-3">
-                    {/* Contact Method Selection */}
+                  <div className="space-y-4">
+                    {/* Phone Number with Method Selection */}
                     <div className="space-y-2">
-                      <Label className="text-xs">Contact Method</Label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <Label className="text-xs font-medium">Phone Number (Optional)</Label>
+                      <div className="grid grid-cols-2 gap-2 mb-2">
                         <Button
                           type="button"
                           variant={contactMethod === "whatsapp" ? "default" : "outline"}
+                          size="sm"
                           className="w-full"
                           onClick={() => setContactMethod("whatsapp")}
                         >
@@ -1243,29 +1252,20 @@ export default function SubmitAdvert() {
                         <Button
                           type="button"
                           variant={contactMethod === "call" ? "default" : "outline"}
+                          size="sm"
                           className="w-full"
                           onClick={() => setContactMethod("call")}
                         >
-                          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                          </svg>
+                          <Phone className="mr-2 h-4 w-4" />
                           Phone Call
                         </Button>
                       </div>
-                    </div>
-
-                    {/* Phone Number Input */}
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-phone" className="text-xs">
-                        Phone Number
-                      </Label>
                       <Input
                         id="contact-phone"
                         type="tel"
                         placeholder="+234 XXX XXX XXXX"
                         value={contactPhone}
                         onChange={(e) => {
-                          // Remove non-numeric characters except + and spaces
                           const cleaned = e.target.value.replace(/[^\d\s+]/g, '');
                           setContactPhone(cleaned);
                         }}
@@ -1274,10 +1274,58 @@ export default function SubmitAdvert() {
                       />
                       {contactPhone && (
                         <p className="text-xs text-muted-foreground">
-                          Customers will be able to {contactMethod === "whatsapp" ? "message you on WhatsApp" : "call you directly"} using this number
+                          Customers can {contactMethod === "whatsapp" ? "message you on WhatsApp" : "call you directly"}
                         </p>
                       )}
                     </div>
+
+                    {/* Email Address */}
+                    <div className="space-y-2">
+                      <Label htmlFor="contact-email" className="text-xs font-medium">
+                        Email Address (Optional)
+                      </Label>
+                      <Input
+                        id="contact-email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        maxLength={100}
+                      />
+                      {contactEmail && (
+                        <p className="text-xs text-muted-foreground">
+                          Customers can send you emails directly
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Website URL */}
+                    <div className="space-y-2">
+                      <Label htmlFor="website-url" className="text-xs font-medium">
+                        Website URL (Optional)
+                      </Label>
+                      <Input
+                        id="website-url"
+                        type="url"
+                        placeholder="https://yourwebsite.com"
+                        value={websiteUrl}
+                        onChange={(e) => setWebsiteUrl(e.target.value)}
+                        maxLength={200}
+                      />
+                      {websiteUrl && (
+                        <p className="text-xs text-muted-foreground">
+                          Customers can visit your website
+                        </p>
+                      )}
+                    </div>
+
+                    {(contactPhone || contactEmail || websiteUrl) && (
+                      <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                        <p className="text-xs text-muted-foreground">
+                          ✓ Contact buttons will appear on your advert for customers to reach you easily
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
