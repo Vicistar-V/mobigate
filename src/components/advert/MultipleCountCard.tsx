@@ -82,9 +82,9 @@ export function MultipleCountCard({ count, selected, category, displayMode, onSe
           <div className="flex flex-col gap-0.5 mt-0.5">
             <p className="text-primary font-bold text-sm sm:text-base">{formatCurrency(nairaFee)}</p>
             <p className="text-xs text-muted-foreground">{formatMobi(mobiFee)}</p>
-            <Badge variant="secondary" className="text-xs mt-1">
+            <span className="text-xs mt-1 text-muted-foreground">
               {displayMode === "rollout" ? "+ Size Fee (20-30%)" : "+ Size Fee (3-20%)"}
-            </Badge>
+            </span>
           </div>
         </div>
       </div>
