@@ -196,6 +196,20 @@ export default function SubmitAdvert() {
     }
   });
 
+  // Local state for age range inputs (allows free typing)
+  const [ageInputs, setAgeInputs] = useState({
+    min: (catchmentMarket.ageRange?.min || 28).toString(),
+    max: (catchmentMarket.ageRange?.max || 78).toString()
+  });
+
+  // Sync age inputs with catchmentMarket changes
+  useEffect(() => {
+    setAgeInputs({
+      min: (catchmentMarket.ageRange?.min || 28).toString(),
+      max: (catchmentMarket.ageRange?.max || 78).toString()
+    });
+  }, [catchmentMarket.ageRange?.min, catchmentMarket.ageRange?.max]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -807,15 +821,21 @@ export default function SubmitAdvert() {
                           <Input
                             id="min-age"
                             type="number"
-                            min="18"
-                            max={catchmentMarket.ageRange?.max || 78}
-                            value={catchmentMarket.ageRange?.min || 28}
+                            value={ageInputs.min}
                             onChange={(e) => {
-                              const value = Math.max(18, Math.min(parseInt(e.target.value) || 28, catchmentMarket.ageRange?.max || 78));
                               if (catchmentLocked) return;
+                              setAgeInputs(prev => ({ ...prev, min: e.target.value }));
+                            }}
+                            onBlur={(e) => {
+                              if (catchmentLocked) return;
+                              const value = parseInt(e.target.value) || 28;
+                              const maxAge = catchmentMarket.ageRange?.max || 78;
+                              const validMin = Math.max(18, Math.min(value, maxAge - 1));
+                              
+                              setAgeInputs(prev => ({ ...prev, min: validMin.toString() }));
                               setCatchmentMarket(prev => ({
                                 ...prev,
-                                ageRange: { min: value, max: prev.ageRange?.max || 78 }
+                                ageRange: { min: validMin, max: prev.ageRange?.max || 78 }
                               }));
                             }}
                             disabled={catchmentLocked}
@@ -827,15 +847,21 @@ export default function SubmitAdvert() {
                           <Input
                             id="max-age"
                             type="number"
-                            min={catchmentMarket.ageRange?.min || 28}
-                            max="100"
-                            value={catchmentMarket.ageRange?.max || 78}
+                            value={ageInputs.max}
                             onChange={(e) => {
-                              const value = Math.max(catchmentMarket.ageRange?.min || 28, Math.min(parseInt(e.target.value) || 78, 100));
                               if (catchmentLocked) return;
+                              setAgeInputs(prev => ({ ...prev, max: e.target.value }));
+                            }}
+                            onBlur={(e) => {
+                              if (catchmentLocked) return;
+                              const value = parseInt(e.target.value) || 78;
+                              const minAge = catchmentMarket.ageRange?.min || 28;
+                              const validMax = Math.min(100, Math.max(value, minAge + 1));
+                              
+                              setAgeInputs(prev => ({ ...prev, max: validMax.toString() }));
                               setCatchmentMarket(prev => ({
                                 ...prev,
-                                ageRange: { min: prev.ageRange?.min || 28, max: value }
+                                ageRange: { min: prev.ageRange?.min || 28, max: validMax }
                               }));
                             }}
                             disabled={catchmentLocked}
