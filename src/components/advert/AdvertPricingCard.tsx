@@ -89,7 +89,7 @@ export const AdvertPricingCard = ({
               </div>
             )}
             <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
-              <span>Total Additional Costs</span>
+              <span>Total Optional Cost</span>
               <span className="text-primary">
                 {formatCurrency(pricing.extendedExposureCost + pricing.recurrentAfterCost + pricing.recurrentEveryCost)}
               </span>
