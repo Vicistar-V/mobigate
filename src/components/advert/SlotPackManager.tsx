@@ -104,9 +104,9 @@ export function SlotPackManager({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 pt-4 border-t">
+        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
           <Button
-            className="flex-1"
+            className="flex-1 w-full sm:w-auto"
             variant="outline"
             onClick={onAddSlot}
             disabled={!canAddMore}
@@ -115,7 +115,7 @@ export function SlotPackManager({
             Add Another Slot ({filledSlots}/{pack.maxSlots})
           </Button>
           <Button
-            className="flex-1"
+            className="flex-1 w-full sm:w-auto"
             onClick={onPublishPack}
             disabled={!canPublish}
           >
