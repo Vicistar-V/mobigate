@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock } from "lucide-react";
+import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { 
@@ -29,7 +29,10 @@ import {
   SubscriptionDuration,
   getAdvertType,
   getDisplayMode,
-  getMultipleCount
+  getMultipleCount,
+  SlotPackId,
+  SlotPackDraft,
+  AdvertFormData
 } from "@/types/advert";
 import { calculateAdvertPricing, getRequiredFileCount, getSizeFeeDescription } from "@/lib/advertPricing";
 import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "@/lib/advertStorage";
@@ -41,6 +44,19 @@ import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
 import { VolumeDiscountInfo } from "@/components/advert/VolumeDiscountInfo";
 import { getUserDiscountProfile } from "@/data/discountData";
+import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
+import { SlotPackManager } from "@/components/advert/SlotPackManager";
+import { SlotPackSummary } from "@/components/advert/SlotPackSummary";
+import { 
+  createNewPackDraft, 
+  loadPackDraft, 
+  addSlotToPack, 
+  updateSlotInPack, 
+  deleteSlotFromPack,
+  canPublishPack,
+  clearPackDraft
+} from "@/lib/slotPackStorage";
+import { validateSlotCount } from "@/data/slotPacks";
 
 const advertCategories = [
   { value: "pictorial" as AdvertCategory, label: "Pictorial/Photo Ads" },
@@ -213,39 +229,49 @@ export default function SubmitAdvert() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+  // Load pack draft on mount
+  useEffect(() => {
+    const draft = loadPackDraft();
+    if (draft) {
+      setPackDraft(draft);
+      setCurrentStep("fill-slot");
+      toast({
+        title: "Pack draft loaded",
+        description: `Your ${draft.slots.length}-slot draft has been restored.`,
+      });
+    }
+  }, []);
+
   // Persist catchment lock state
   useEffect(() => {
     localStorage.setItem('advert-catchment-locked', JSON.stringify(catchmentLocked));
   }, [catchmentLocked]);
 
-  // Load draft on mount
+  // Load old draft on mount (for backward compatibility)
   useEffect(() => {
-    const draft = loadAdvertDraft();
-    if (draft) {
-      if (draft.category) setCategory(draft.category as AdvertCategory);
-      if (draft.type) {
-        const loadedType = draft.type as AdvertType;
-        setType(loadedType);
-        setDisplayMode(getDisplayMode(loadedType));
-        const count = getMultipleCount(loadedType);
-        if (count) setMultipleCount(count);
+    if (!packDraft) {
+      const draft = loadAdvertDraft();
+      if (draft) {
+        if (draft.category) setCategory(draft.category as AdvertCategory);
+        if (draft.type) {
+          const loadedType = draft.type as AdvertType;
+          setType(loadedType);
+          setDisplayMode(getDisplayMode(loadedType));
+          const count = getMultipleCount(loadedType);
+          if (count) setMultipleCount(count);
+        }
+        if (draft.size) setSize(draft.size as AdvertSize);
+        if (draft.dpdPackage) setDpdPackage(draft.dpdPackage as DPDPackageId);
+        if (draft.subscriptionMonths) setSubscriptionMonths(draft.subscriptionMonths as SubscriptionDuration);
+        if (draft.extendedExposure) setExtendedExposureTime(draft.extendedExposure);
+        if (draft.recurrentAfter) setRecurrentAfter(draft.recurrentAfter);
+        if (draft.recurrentEvery) setRecurrentEvery(draft.recurrentEvery);
+        if (draft.launchDate) setLaunchDate(new Date(draft.launchDate));
+        if (draft.catchmentMarket) setCatchmentMarket(draft.catchmentMarket);
+        if (draft.agreed) setAgreed(draft.agreed);
       }
-      if (draft.size) setSize(draft.size as AdvertSize);
-      if (draft.dpdPackage) setDpdPackage(draft.dpdPackage as DPDPackageId);
-      if (draft.subscriptionMonths) setSubscriptionMonths(draft.subscriptionMonths as SubscriptionDuration);
-      if (draft.extendedExposure) setExtendedExposureTime(draft.extendedExposure);
-      if (draft.recurrentAfter) setRecurrentAfter(draft.recurrentAfter);
-      if (draft.recurrentEvery) setRecurrentEvery(draft.recurrentEvery);
-      if (draft.launchDate) setLaunchDate(new Date(draft.launchDate));
-      if (draft.catchmentMarket) setCatchmentMarket(draft.catchmentMarket);
-      if (draft.agreed) setAgreed(draft.agreed);
-      
-      toast({
-        title: "Draft loaded",
-        description: "Your previous draft has been restored.",
-      });
     }
-  }, []);
+  }, [packDraft]);
 
   // Auto-save draft
   useEffect(() => {
@@ -533,29 +559,217 @@ export default function SubmitAdvert() {
     </TooltipProvider>
   );
 
+  // Pack system handlers
+  const handlePackSelection = (packId: SlotPackId) => {
+    const newDraft = createNewPackDraft(packId);
+    setPackDraft(newDraft);
+    setCurrentStep("fill-slot");
+    resetSlotForm();
+  };
+
+  const resetSlotForm = () => {
+    setCategory(null);
+    setDisplayMode("single");
+    setMultipleCount(undefined);
+    setType("single");
+    setSize(null);
+    setDpdPackage(null);
+    setSubscriptionMonths(1);
+    setExtendedExposureTime("");
+    setRecurrentAfter("");
+    setRecurrentEvery("");
+    setLaunchDate(undefined);
+    setUploadedFiles([]);
+    setAgreed(false);
+    setEditingSlotId(null);
+  };
+
+  const handleAddSlot = () => {
+    if (!packDraft || !pricing) return;
+
+    // Validate slot count
+    const validation = validateSlotCount(packDraft.packId, packDraft.slots.length + 1);
+    if (!validation.isValid) {
+      if (validation.needsUpgrade) {
+        toast({
+          title: "Pack limit reached",
+          description: validation.message,
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    // Create form data
+    const formData: AdvertFormData = {
+      category: category!,
+      displayMode,
+      multipleCount,
+      type: type!,
+      size: size!,
+      dpdPackage: dpdPackage!,
+      subscriptionMonths,
+      extendedExposure: extendedExposureTime,
+      recurrentAfter,
+      recurrentEvery,
+      catchmentMarket,
+      launchDate,
+      files: uploadedFiles,
+      agreed
+    };
+
+    // Add or update slot
+    let updatedDraft;
+    if (editingSlotId) {
+      updatedDraft = updateSlotInPack(packDraft, editingSlotId, formData, pricing);
+      toast({
+        title: "Slot updated",
+        description: `Slot has been updated successfully.`,
+      });
+    } else {
+      updatedDraft = addSlotToPack(packDraft, formData, pricing);
+      toast({
+        title: "Slot added",
+        description: `Slot ${updatedDraft.slots.length} added to your pack.`,
+      });
+    }
+
+    setPackDraft(updatedDraft);
+    resetSlotForm();
+  };
+
+  const handleEditSlot = (slotId: string) => {
+    if (!packDraft) return;
+
+    const slot = packDraft.slots.find(s => s.id === slotId);
+    if (!slot) return;
+
+    setEditingSlotId(slotId);
+    setCategory(slot.formData.category);
+    setDisplayMode(slot.formData.displayMode);
+    setMultipleCount(slot.formData.multipleCount);
+    setType(slot.formData.type);
+    setSize(slot.formData.size);
+    setDpdPackage(slot.formData.dpdPackage);
+    setSubscriptionMonths(slot.formData.subscriptionMonths);
+    setExtendedExposureTime(slot.formData.extendedExposure || "");
+    setRecurrentAfter(slot.formData.recurrentAfter || "");
+    setRecurrentEvery(slot.formData.recurrentEvery || "");
+    setLaunchDate(slot.formData.launchDate);
+    setCatchmentMarket(slot.formData.catchmentMarket);
+    setUploadedFiles(slot.formData.files);
+    setAgreed(slot.formData.agreed);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteSlot = (slotId: string) => {
+    if (!packDraft) return;
+
+    const updatedDraft = deleteSlotFromPack(packDraft, slotId);
+    setPackDraft(updatedDraft);
+    
+    if (editingSlotId === slotId) {
+      resetSlotForm();
+    }
+
+    toast({
+      title: "Slot removed",
+      description: `Slot has been removed from your pack.`,
+    });
+  };
+
+  const handlePublishPack = () => {
+    if (!packDraft || !canPublishPack(packDraft)) {
+      toast({
+        title: "Cannot publish",
+        description: "Please meet the minimum slot requirement for your pack.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    setTimeout(() => {
+      // Save all slots as individual adverts
+      packDraft.slots.forEach((slot, index) => {
+        saveAdvert({
+          ...slot.formData,
+          packId: packDraft.id,
+          slotNumber: index + 1
+        });
+      });
+
+      clearPackDraft();
+      setIsSubmitting(false);
+
+      toast({
+        title: "Pack published successfully!",
+        description: `Your ${packDraft.slots.length}-slot pack has been submitted for approval.`,
+      });
+
+      navigate("/my-adverts");
+    }, 1500);
+  };
+
+  const handleBackToPacks = () => {
+    if (packDraft && packDraft.slots.length > 0) {
+      const confirm = window.confirm("Are you sure you want to go back? Your current pack will be saved.");
+      if (!confirm) return;
+    }
+    setCurrentStep("select-pack");
+    setPackDraft(null);
+    resetSlotForm();
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
-        <div className="max-w-5xl mx-auto">
-          {/* Main Form */}
-          <div className="space-y-4 sm:space-y-6">
-            <Card className="overflow-visible">
-              <CardHeader className="space-y-1 sm:space-y-1.5">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div>
-                    <CardTitle className="text-xl sm:text-2xl">Create Premium Advert</CardTitle>
-                    <CardDescription className="text-sm sm:text-base">
-                      Fill in the details below to create your advertising campaign
-                    </CardDescription>
+        {/* Step 1: Pack Selection */}
+        {currentStep === "select-pack" && (
+          <div className="max-w-6xl mx-auto">
+            <SlotPackSelector
+              selectedPackId={packDraft?.packId}
+              onSelectPack={handlePackSelection}
+            />
+          </div>
+        )}
+
+        {/* Step 2: Fill Slots */}
+        {currentStep === "fill-slot" && packDraft && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left: Slot Form */}
+            <div className="lg:col-span-2 space-y-4">
+              <Button
+                variant="outline"
+                onClick={handleBackToPacks}
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Pack Selection
+              </Button>
+
+              <Card className="overflow-visible">
+                <CardHeader className="space-y-1 sm:space-y-1.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <CardTitle className="text-xl sm:text-2xl">
+                        {editingSlotId ? "Edit Slot" : `Create Slot ${packDraft.slots.length + 1}`}
+                      </CardTitle>
+                      <CardDescription className="text-sm sm:text-base">
+                        Fill in the details for this advert slot
+                      </CardDescription>
+                    </div>
+                    <AccreditedAdvertiserBadge 
+                      tier={userProfile.accreditedTier} 
+                      totalCampaigns={userProfile.totalCampaigns}
+                    />
                   </div>
-                  <AccreditedAdvertiserBadge 
-                    tier={userProfile.accreditedTier} 
-                    totalCampaigns={userProfile.totalCampaigns}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4 sm:space-y-5 overflow-visible">
+                </CardHeader>
+                <CardContent className="space-y-4 sm:space-y-5 overflow-visible">
+                  {/* ... keep existing form fields ... */}
                 {/* Category Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="category" className="text-sm">
@@ -1047,40 +1261,45 @@ export default function SubmitAdvert() {
                   </label>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-3">
-                  <Button
-                    variant="outline"
-                    onClick={handleSaveDraft}
-                    className="flex-1 h-14 px-6 py-4"
-                    size="lg"
-                  >
-                    <Save className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Save Draft</span>
-                    <span className="sm:hidden">Save</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handlePreview}
-                    className="flex-1 h-14 px-6 py-4"
-                    size="lg"
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    Preview
-                  </Button>
-                  <Button
-                    onClick={handlePublish}
-                    disabled={isSubmitting}
-                    className="flex-1 h-14 px-6 py-4"
-                    size="lg"
-                  >
-                    {isSubmitting ? "Publishing..." : "Publish Now"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-3">
+                    <Button
+                      variant="outline"
+                      onClick={resetSlotForm}
+                      className="flex-1 h-14 px-6 py-4"
+                      size="lg"
+                    >
+                      Reset Form
+                    </Button>
+                    <Button
+                      onClick={handleAddSlot}
+                      disabled={!category || !type || !size || !dpdPackage || uploadedFiles.length === 0 || !agreed}
+                      className="flex-1 h-14 px-6 py-4"
+                      size="lg"
+                    >
+                      {editingSlotId ? "Update Slot" : "Add to Pack"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right: Pack Manager & Summary */}
+            <div className="space-y-4">
+              <SlotPackManager
+                packDraft={packDraft}
+                onAddSlot={() => {
+                  if (!editingSlotId) resetSlotForm();
+                }}
+                onEditSlot={handleEditSlot}
+                onDeleteSlot={handleDeleteSlot}
+                onPublishPack={handlePublishPack}
+                canPublish={canPublishPack(packDraft)}
+              />
+              <SlotPackSummary packDraft={packDraft} />
+            </div>
           </div>
-        </div>
+        )}
       </main>
       <Footer />
       

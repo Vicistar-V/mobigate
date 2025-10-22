@@ -155,6 +155,41 @@ export interface AdvertStatistics {
   displayedToday: number;
 }
 
+// Slot Pack types
+export type SlotPackId = "basic" | "standard" | "business" | "enterprise";
+
+export interface SlotPack {
+  id: SlotPackId;
+  name: string;
+  minSlots: number;
+  maxSlots: number;
+  discountPercentage: number;
+  description: string;
+}
+
+export interface AdvertSlot {
+  id: string;
+  slotNumber: number;
+  formData: AdvertFormData;
+  pricing: AdvertPricing;
+  status: "empty" | "filled" | "editing";
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SlotPackDraft {
+  id: string;
+  userId: string;
+  packId: SlotPackId;
+  slots: AdvertSlot[];
+  status: "draft" | "ready" | "submitted";
+  createdAt: Date;
+  updatedAt: Date;
+  packDiscount?: AdvertDiscount;
+  totalPackCost?: number;
+  totalPackCostMobi?: number;
+}
+
 export interface SavedAdvert {
   id: string;
   userId: string;
@@ -176,6 +211,8 @@ export interface SavedAdvert {
   approvedAt?: Date;
   expiresAt?: Date;
   rejectedReason?: string;
+  packId?: string; // Reference to SlotPackDraft if part of a pack
+  slotNumber?: number; // Position in the pack
 }
 
 export interface DPDPackage {

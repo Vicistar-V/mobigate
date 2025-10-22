@@ -136,3 +136,24 @@ export function getNextVolumeDiscountTier(currentAdvertCount: number): { minAdve
 export function getAccreditedTierRequirements(tier: AccreditedAdvertiserTier): { percentage: number; minCampaigns: number } {
   return ACCREDITED_DISCOUNTS[tier];
 }
+
+/**
+ * Calculate pack discount based on pack ID
+ */
+export function calculatePackDiscount(
+  packId: string,
+  totalCost: number,
+  packDiscountPercentage: number
+): AdvertDiscount | null {
+  if (!packId || packDiscountPercentage <= 0) return null;
+
+  const amount = totalCost * (packDiscountPercentage / 100);
+
+  return {
+    type: "promotional",
+    name: `Slot Pack Discount`,
+    percentage: packDiscountPercentage,
+    amount,
+    description: `${packDiscountPercentage}% discount for slot pack bundle`
+  };
+}
