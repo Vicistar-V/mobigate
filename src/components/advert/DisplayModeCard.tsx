@@ -67,7 +67,7 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
               {category === "pictorial" ? pictorialPrice : videoPrice}
             </p>
             <p className="text-xs text-muted-foreground">{mobiPrice}</p>
-            <Badge variant="outline" className="text-xs mt-1">
+            <Badge variant="secondary" className="text-xs mt-1">
               {isRollout ? "+ Size Fee (12-20%)" : `+ Size Fee (0-${isSingle ? "10" : "20"}%)`}
             </Badge>
             {isRollout && (
