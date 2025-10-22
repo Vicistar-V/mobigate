@@ -20,52 +20,79 @@ export const AdvertPricingCard = ({
 
   const content = (
     <>
-      {/* Base Costs */}
+      {/* Setup Fee Section */}
       <div className="space-y-2">
+        <div className="text-sm font-semibold text-primary mb-1">One-Time Setup Fee</div>
         {pricing.baseSetupFee !== undefined && pricing.sizeFee !== undefined && pricing.sizeFee > 0 && (
           <>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Base Setup Fee</span>
+              <span className="text-muted-foreground ml-2">Base Setup</span>
               <span className="font-medium">{formatCurrency(pricing.baseSetupFee)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
+              <span className="text-muted-foreground ml-2">
                 Size Fee ({pricing.sizeMultiplier ? (pricing.sizeMultiplier * 100).toFixed(1).replace(/\.0$/, '') : '0'}%)
               </span>
               <span className="font-medium text-primary">+{formatCurrency(pricing.sizeFee)}</span>
             </div>
           </>
         )}
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Setup Fee Total (24 months)</span>
-          <span className="font-semibold">{formatCurrency(pricing.setupFee)}</span>
-        </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">DPD Package</span>
-          <span className="font-medium">{formatCurrency(pricing.dpdCost)}</span>
+        <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
+          <span>Setup Fee Total</span>
+          <span className="text-primary">{formatCurrency(pricing.setupFee)}</span>
         </div>
       </div>
 
-      {/* Optional Charges */}
+      <Separator />
+
+      {/* Subscription DPD Section */}
+      <div className="space-y-2">
+        <div className="text-sm font-semibold text-primary mb-1">Subscription DPD Cost</div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground ml-2">Monthly DPD Cost</span>
+          <span className="font-medium">{formatCurrency(pricing.monthlyDpdCost)}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground ml-2">
+            Duration: {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''}
+          </span>
+          <span className="font-medium">{formatCurrency(pricing.monthlyDpdCost * pricing.subscriptionMonths)}</span>
+        </div>
+        {pricing.subscriptionDiscount > 0 && (
+          <div className="flex items-center justify-between text-sm text-green-600 dark:text-green-400">
+            <span className="ml-2">
+              Subscription Discount ({(pricing.subscriptionDiscount * 100).toFixed(0)}%)
+            </span>
+            <span className="font-medium">-{formatCurrency(pricing.subscriptionDiscountAmount)}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
+          <span>Total DPD Cost</span>
+          <span className="text-primary">{formatCurrency(pricing.totalDpdCost)}</span>
+        </div>
+      </div>
+
+      {/* Optional Charges for Subscription Period */}
       {(pricing.extendedExposureCost > 0 || pricing.recurrentAfterCost > 0 || pricing.recurrentEveryCost > 0) && (
         <>
           <Separator />
           <div className="space-y-2">
+            <div className="text-sm font-semibold text-primary mb-1">Additional Costs (Total for {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''})</div>
             {pricing.extendedExposureCost > 0 && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Extended Exposure</span>
+                <span className="text-muted-foreground ml-2">Extended Exposure</span>
                 <span className="font-medium text-primary">+{formatCurrency(pricing.extendedExposureCost)}</span>
               </div>
             )}
             {pricing.recurrentAfterCost > 0 && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Recurrent After</span>
+                <span className="text-muted-foreground ml-2">Recurrent After</span>
                 <span className="font-medium text-primary">+{formatCurrency(pricing.recurrentAfterCost)}</span>
               </div>
             )}
             {pricing.recurrentEveryCost > 0 && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Recurrent Every</span>
+                <span className="text-muted-foreground ml-2">Recurrent Every</span>
                 <span className="font-medium text-primary">+{formatCurrency(pricing.recurrentEveryCost)}</span>
               </div>
             )}
@@ -96,7 +123,7 @@ export const AdvertPricingCard = ({
         </>
       )}
 
-      {/* Total */}
+      {/* Total Subscription Cost */}
       <div className="space-y-3">
         {hasDiscounts && (
           <div className="flex items-center justify-between text-sm">
@@ -107,15 +134,15 @@ export const AdvertPricingCard = ({
 
         {hasDiscounts && (
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Total Discount</span>
+            <span className="text-muted-foreground">Additional Discount</span>
             <span className="font-bold text-green-600">-{formatCurrency(pricing.totalDiscount!)}</span>
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <span className="font-semibold">{hasDiscounts ? "Final Amount Payable" : "Total Cost@Setup"}</span>
+          <span className="font-semibold text-lg">{hasDiscounts ? "Total Subscription Cost" : "Total Subscription Cost"}</span>
           <div className="text-right">
-            <div className={`font-bold text-lg ${hasDiscounts ? "text-green-600" : ""}`}>
+            <div className={`font-bold text-xl ${hasDiscounts ? "text-green-600" : "text-primary"}`}>
               {formatCurrency(finalAmount)}
             </div>
             <div className="text-xs text-muted-foreground">
@@ -124,22 +151,17 @@ export const AdvertPricingCard = ({
           </div>
         </div>
 
+        <div className="text-xs text-center text-muted-foreground p-2 bg-muted/30 rounded">
+          For {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''} ({pricing.subscriptionMonths * 30} days)
+        </div>
+
         {hasDiscounts && (
           <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
             <p className="text-sm font-medium text-green-600 text-center">
-              🎉 You're saving {formatCurrency(pricing.totalDiscount!)} (
-              {Math.round((pricing.totalDiscount! / pricing.subtotalBeforeDiscount!) * 100)}%)
+              🎉 Total savings: {formatCurrency((pricing.subscriptionDiscountAmount || 0) + (pricing.totalDiscount || 0))}
             </p>
           </div>
         )}
-
-        <div className="flex items-center justify-between pt-2">
-          <span className="font-semibold">Total Recurrent Cost</span>
-          <div className="text-right">
-            <div className="font-bold text-lg">{formatCurrency(finalAmount - pricing.setupFee)}</div>
-            <div className="text-xs text-muted-foreground">{formatMobi((finalAmount - pricing.setupFee))}</div>
-          </div>
-        </div>
 
         {/* Wallet Balance */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">

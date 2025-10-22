@@ -4,6 +4,8 @@ export type DisplayMode = "single" | "multiple";
 
 export type MultipleDisplayCount = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
+export type SubscriptionDuration = 1 | 3 | 4 | 6 | 9 | 12 | 18 | 24;
+
 export type AdvertType = 
   | "single" 
   | "multiple-2" 
@@ -93,6 +95,7 @@ export interface AdvertFormData {
   type: AdvertType;
   size: AdvertSize;
   dpdPackage: DPDPackageId;
+  subscriptionMonths: SubscriptionDuration;
   extendedExposure?: string;
   recurrentAfter?: string;
   recurrentEvery?: string;
@@ -119,12 +122,18 @@ export interface AdvertPricing {
   sizeMultiplier?: number;
   sizeFee?: number;
   setupFee: number;
+  subscriptionMonths: number;
+  monthlyDpdCost: number;
+  subscriptionDiscount: number;
+  subscriptionDiscountAmount: number;
+  totalDpdCost: number;
   dpdCost: number;
   extendedExposureCost: number;
   recurrentAfterCost: number;
   recurrentEveryCost: number;
   totalCost: number;
   totalCostMobi: number;
+  totalSubscriptionCost: number;
   displayPerDay: number;
   displayFrequency: string;
   discounts?: AdvertDiscount[];

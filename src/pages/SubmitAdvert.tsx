@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,6 +26,7 @@ import {
   DisplayMode,
   MultipleDisplayCount,
   CatchmentMarket,
+  SubscriptionDuration,
   getAdvertType,
   getDisplayMode,
   getMultipleCount
@@ -135,6 +137,17 @@ const recurrentExposureEvery = [
   { value: "every-48h", label: "Repeat every 48 hours @ Additional 5%" }
 ];
 
+const subscriptionDurations = [
+  { value: 1 as SubscriptionDuration, label: "1 Month (30 Days)", discount: 0 },
+  { value: 3 as SubscriptionDuration, label: "3 Months (90 Days)", discount: 0 },
+  { value: 4 as SubscriptionDuration, label: "4 Months (120 Days)", discount: 0 },
+  { value: 6 as SubscriptionDuration, label: "6 Months (180 Days)", discount: 5 },
+  { value: 9 as SubscriptionDuration, label: "9 Months (270 Days)", discount: 7 },
+  { value: 12 as SubscriptionDuration, label: "12 Months (360 Days)", discount: 10 },
+  { value: 18 as SubscriptionDuration, label: "18 Months (540 Days)", discount: 12 },
+  { value: 24 as SubscriptionDuration, label: "24 Months (720 Days)", discount: 15 },
+];
+
 export default function SubmitAdvert() {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -148,6 +161,7 @@ export default function SubmitAdvert() {
   const [type, setType] = useState<AdvertType | undefined>();
   const [size, setSize] = useState<AdvertSize | undefined>();
   const [dpdPackage, setDpdPackage] = useState<DPDPackageId | undefined>();
+  const [subscriptionMonths, setSubscriptionMonths] = useState<SubscriptionDuration>(1);
   const [extendedExposureTime, setExtendedExposureTime] = useState("");
   const [recurrentAfter, setRecurrentAfter] = useState("");
   const [recurrentEvery, setRecurrentEvery] = useState("");
@@ -204,6 +218,7 @@ export default function SubmitAdvert() {
       }
       if (draft.size) setSize(draft.size as AdvertSize);
       if (draft.dpdPackage) setDpdPackage(draft.dpdPackage as DPDPackageId);
+      if (draft.subscriptionMonths) setSubscriptionMonths(draft.subscriptionMonths as SubscriptionDuration);
       if (draft.extendedExposure) setExtendedExposureTime(draft.extendedExposure);
       if (draft.recurrentAfter) setRecurrentAfter(draft.recurrentAfter);
       if (draft.recurrentEvery) setRecurrentEvery(draft.recurrentEvery);
@@ -230,6 +245,7 @@ export default function SubmitAdvert() {
             type,
             size,
             dpdPackage,
+            subscriptionMonths,
             extendedExposure: extendedExposureTime,
             recurrentAfter,
             recurrentEvery,
@@ -243,7 +259,7 @@ export default function SubmitAdvert() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [category, displayMode, multipleCount, type, size, dpdPackage, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed]);
+  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
     if (catchmentLocked) return;
@@ -305,6 +321,7 @@ export default function SubmitAdvert() {
         type,
         size,
         dpdPackage,
+        subscriptionMonths,
         extendedExposure: extendedExposureTime,
         recurrentAfter,
         recurrentEvery,
@@ -418,6 +435,7 @@ export default function SubmitAdvert() {
         type as AdvertType,
         size as AdvertSize,
         dpdPackage as DPDPackageId,
+        subscriptionMonths,
         extendedExposureTime,
         recurrentAfter,
         recurrentEvery,
@@ -433,6 +451,7 @@ export default function SubmitAdvert() {
           type: type as AdvertType,
           size: size as AdvertSize,
           dpdPackage: dpdPackage as DPDPackageId,
+          subscriptionMonths,
           extendedExposure: extendedExposureTime,
           recurrentAfter,
           recurrentEvery,
@@ -479,6 +498,7 @@ export default function SubmitAdvert() {
     type as AdvertType,
     size as AdvertSize,
     dpdPackage as DPDPackageId,
+    subscriptionMonths,
     extendedExposureTime,
     recurrentAfter,
     recurrentEvery,
@@ -636,6 +656,47 @@ export default function SubmitAdvert() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Subscription Duration Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="subscription" className="text-sm">
+                    Subscription Duration *
+                    <InfoTooltip content="Choose your subscription length. Longer subscriptions get discounts on DPD costs!" />
+                  </Label>
+                  <Select 
+                    value={subscriptionMonths.toString()} 
+                    onValueChange={(v) => setSubscriptionMonths(parseInt(v) as SubscriptionDuration)}
+                  >
+                    <SelectTrigger id="subscription">
+                      <SelectValue placeholder="Choose subscription duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subscriptionDurations.map((duration) => (
+                        <SelectItem key={duration.value} value={duration.value.toString()}>
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <span>{duration.label}</span>
+                            {duration.discount > 0 && (
+                              <Badge variant="secondary" className="ml-2 text-xs">
+                                Save {duration.discount}%
+                              </Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {subscriptionMonths > 1 && (
+                    <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-md border border-green-200 dark:border-green-800">
+                      <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                        🎉 You're saving {subscriptionDurations.find(d => d.value === subscriptionMonths)?.discount}% on DPD costs!
+                      </p>
+                      <p className="text-xs text-green-600 dark:text-green-300 mt-1">
+                        Total days: {subscriptionMonths * 30} days
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
@@ -1009,6 +1070,7 @@ export default function SubmitAdvert() {
             type,
             size,
             dpdPackage: dpdPackage || "basic",
+            subscriptionMonths,
             extendedExposure: extendedExposureTime,
             recurrentAfter,
             recurrentEvery,

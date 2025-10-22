@@ -1,4 +1,4 @@
-import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing, AccreditedAdvertiserTier, AdvertSize } from "@/types/advert";
+import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing, AccreditedAdvertiserTier, AdvertSize, SubscriptionDuration } from "@/types/advert";
 import { calculateAllDiscounts, applyDiscounts } from "./advertDiscounts";
 
 export type { AdvertPricing };
@@ -127,11 +127,24 @@ const SIZE_MULTIPLIERS_MULTIPLE: Record<AdvertSize, number> = {
   "10x6": 0.20,  // 20%
 };
 
+// Subscription volume discounts (applies to DPD cost only)
+const SUBSCRIPTION_DISCOUNTS: Record<SubscriptionDuration, number> = {
+  1: 0.00,   // 0% - 30 days
+  3: 0.00,   // 0% - 90 days
+  4: 0.00,   // 0% - 120 days
+  6: 0.05,   // 5% - 180 days
+  9: 0.07,   // 7% - 270 days
+  12: 0.10,  // 10% - 360 days
+  18: 0.12,  // 12% - 540 days
+  24: 0.15,  // 15% - 720 days
+};
+
 export function calculateAdvertPricing(
   category: AdvertCategory,
   type: AdvertType,
   size: AdvertSize,
   dpdPackage: DPDPackageId,
+  subscriptionMonths: SubscriptionDuration,
   extendedExposure?: string,
   recurrentAfter?: string,
   recurrentEvery?: string,
@@ -143,10 +156,10 @@ export function calculateAdvertPricing(
 
   // Get DPD package info
   const dpdInfo = DPD_PACKAGES[dpdPackage];
-  const dpdCost = dpdInfo.price;
+  const monthlyDpdCost = dpdInfo.price;
 
   // Calculate base cost (setup + DPD before size adjustment)
-  const baseCostBeforeSize = baseSetupFee + dpdCost;
+  const baseCostBeforeSize = baseSetupFee + monthlyDpdCost;
 
   // Determine if single or multiple advert
   const isSingle = type === "single";
@@ -157,52 +170,68 @@ export function calculateAdvertPricing(
   // Calculate size fee (applies to both setup + DPD)
   const sizeFee = Math.round(baseCostBeforeSize * sizeMultiplier);
 
-  // Calculate final setup fee (proportional part of size fee)
+  // Calculate final setup fee (proportional part of size fee) - ONE-TIME
   const setupFee = baseSetupFee + Math.round(sizeFee * (baseSetupFee / baseCostBeforeSize));
 
-  // Calculate base cost after size adjustment
-  const baseCost = baseCostBeforeSize + sizeFee;
+  // Calculate subscription discount (applies ONLY to DPD cost)
+  const subscriptionDiscountRate = SUBSCRIPTION_DISCOUNTS[subscriptionMonths];
+  const subscriptionDiscountAmount = Math.round(monthlyDpdCost * subscriptionMonths * subscriptionDiscountRate);
+  
+  // Calculate total DPD cost after subscription discount
+  const totalDpdCost = Math.round((monthlyDpdCost * subscriptionMonths) - subscriptionDiscountAmount);
 
-  // Calculate extended exposure cost
-  let extendedExposureCost = 0;
-  if (extendedExposure && EXTENDED_EXPOSURE_CHARGES[extendedExposure]) {
-    extendedExposureCost = baseCost * EXTENDED_EXPOSURE_CHARGES[extendedExposure];
-  }
+  // Calculate monthly base cost for optional charges (setup + DPD after size adjustment)
+  const monthlyBaseCost = baseCostBeforeSize + sizeFee;
 
-  // Calculate recurrent after cost
-  let recurrentAfterCost = 0;
-  if (recurrentAfter && RECURRENT_AFTER_CHARGES[recurrentAfter]) {
-    recurrentAfterCost = baseCost * RECURRENT_AFTER_CHARGES[recurrentAfter];
-  }
+  // Calculate monthly optional costs
+  const monthlyExtendedExposureCost = extendedExposure && EXTENDED_EXPOSURE_CHARGES[extendedExposure]
+    ? Math.round(monthlyBaseCost * EXTENDED_EXPOSURE_CHARGES[extendedExposure])
+    : 0;
 
-  // Calculate recurrent every cost
-  let recurrentEveryCost = 0;
-  if (recurrentEvery && RECURRENT_EVERY_CHARGES[recurrentEvery]) {
-    recurrentEveryCost = baseCost * RECURRENT_EVERY_CHARGES[recurrentEvery];
-  }
+  const monthlyRecurrentAfterCost = recurrentAfter && RECURRENT_AFTER_CHARGES[recurrentAfter]
+    ? Math.round(monthlyBaseCost * RECURRENT_AFTER_CHARGES[recurrentAfter])
+    : 0;
 
-  // Total cost
-  const totalCost = baseCost + extendedExposureCost + recurrentAfterCost + recurrentEveryCost;
+  const monthlyRecurrentEveryCost = recurrentEvery && RECURRENT_EVERY_CHARGES[recurrentEvery]
+    ? Math.round(monthlyBaseCost * RECURRENT_EVERY_CHARGES[recurrentEvery])
+    : 0;
 
-  // Base pricing without discounts
+  // Total optional costs for entire subscription period
+  const totalExtendedExposureCost = monthlyExtendedExposureCost * subscriptionMonths;
+  const totalRecurrentAfterCost = monthlyRecurrentAfterCost * subscriptionMonths;
+  const totalRecurrentEveryCost = monthlyRecurrentEveryCost * subscriptionMonths;
+
+  // Total subscription cost (setup is one-time)
+  const totalSubscriptionCost = setupFee + totalDpdCost + totalExtendedExposureCost + totalRecurrentAfterCost + totalRecurrentEveryCost;
+
+  // For backward compatibility, keep totalCost (monthly equivalent)
+  const totalCost = monthlyBaseCost + monthlyExtendedExposureCost + monthlyRecurrentAfterCost + monthlyRecurrentEveryCost;
+
+  // Base pricing without additional discounts
   const basePricing: AdvertPricing = {
     baseSetupFee,
     sizeMultiplier,
     sizeFee,
     setupFee,
-    dpdCost,
-    extendedExposureCost,
-    recurrentAfterCost,
-    recurrentEveryCost,
+    subscriptionMonths,
+    monthlyDpdCost,
+    subscriptionDiscount: subscriptionDiscountRate,
+    subscriptionDiscountAmount,
+    totalDpdCost,
+    dpdCost: monthlyDpdCost, // Keep for compatibility
+    extendedExposureCost: totalExtendedExposureCost,
+    recurrentAfterCost: totalRecurrentAfterCost,
+    recurrentEveryCost: totalRecurrentEveryCost,
     totalCost,
-    totalCostMobi: totalCost, // 1 Naira = 1 Mobi in this system
+    totalCostMobi: totalCost,
+    totalSubscriptionCost,
     displayPerDay: dpdInfo.dpd,
     displayFrequency: dpdInfo.frequency,
   };
 
-  // Calculate and apply discounts
+  // Calculate and apply additional discounts (accredited, volume)
   const discounts = calculateAllDiscounts(
-    totalCost,
+    totalSubscriptionCost,
     accreditedTier || null,
     activeAdvertCount
   );
@@ -268,4 +297,16 @@ export function getSizeFeeDescription(type: AdvertType, size: AdvertSize): strin
   }
   
   return `+${percentage}% Size Fee`;
+}
+
+/**
+ * Get subscription information
+ */
+export function getSubscriptionInfo(months: SubscriptionDuration) {
+  return {
+    months,
+    days: months * 30,
+    discount: SUBSCRIPTION_DISCOUNTS[months],
+    discountLabel: `${(SUBSCRIPTION_DISCOUNTS[months] * 100).toFixed(0)}%`
+  };
 }
