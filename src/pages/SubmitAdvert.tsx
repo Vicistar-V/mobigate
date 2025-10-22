@@ -747,6 +747,7 @@ export default function SubmitAdvert() {
                                 ageRange: { min: value, max: prev.ageRange?.max || 78 }
                               }));
                             }}
+                            disabled={catchmentLocked}
                             className="h-9"
                           />
                         </div>
@@ -765,6 +766,7 @@ export default function SubmitAdvert() {
                                 ageRange: { min: prev.ageRange?.min || 28, max: value }
                               }));
                             }}
+                            disabled={catchmentLocked}
                             className="h-9"
                           />
                         </div>
