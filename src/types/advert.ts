@@ -98,6 +98,18 @@ export interface AdvertFormData {
   agreed: boolean;
 }
 
+export type DiscountType = "accredited_advertiser" | "volume_based" | "promotional" | "custom";
+
+export type AccreditedAdvertiserTier = "bronze" | "silver" | "gold" | "platinum";
+
+export interface AdvertDiscount {
+  type: DiscountType;
+  name: string;
+  percentage: number;
+  amount: number;
+  description?: string;
+}
+
 export interface AdvertPricing {
   setupFee: number;
   dpdCost: number;
@@ -108,6 +120,12 @@ export interface AdvertPricing {
   totalCostMobi: number;
   displayPerDay: number;
   displayFrequency: string;
+  // Discount fields
+  appliedDiscounts?: AdvertDiscount[];
+  totalDiscount?: number;
+  subtotalBeforeDiscount?: number;
+  finalAmountPayable?: number;
+  finalAmountPayableMobi?: number;
 }
 
 export interface AdvertStatistics {

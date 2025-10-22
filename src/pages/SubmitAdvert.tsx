@@ -35,6 +35,9 @@ import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
 import { DisplayModeCard } from "@/components/advert/DisplayModeCard";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
+import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
+import { VolumeDiscountInfo } from "@/components/advert/VolumeDiscountInfo";
+import { getUserDiscountProfile } from "@/data/discountData";
 
 const advertCategories = [
   { value: "pictorial" as AdvertCategory, label: "Pictorial/Photo Ads" },
@@ -68,28 +71,28 @@ const advertSizes = [
 ];
 
 const dpdPackages = [
-  { value: "basic" as DPDPackageId, label: "Basic: 100 DPD @ ₦1.5k" },
-  { value: "standard" as DPDPackageId, label: "Standard: 200 DPD @ ₦2.5k" },
-  { value: "professional" as DPDPackageId, label: "Professional: 300 DPD @ ₦5k" },
-  { value: "business" as DPDPackageId, label: "Business: 400 DPD @ ₦7.5k" },
-  { value: "enterprise" as DPDPackageId, label: "Enterprise: 500 DPD @ ₦10k" },
-  { value: "entrepreneur" as DPDPackageId, label: "Entrepreneur: 600 DPD @ ₦12.5k" },
-  { value: "deluxe" as DPDPackageId, label: "Deluxe: 700 DPD @ ₦15k" },
-  { value: "deluxe-super" as DPDPackageId, label: "Deluxe Super: 800 DPD @ ₦17.5k" },
-  { value: "deluxe-super-plus" as DPDPackageId, label: "Deluxe Super Plus: 900 DPD @ ₦20k" },
-  { value: "deluxe-silver" as DPDPackageId, label: "Deluxe Silver: 1,000 DPD @ ₦22.5k" },
-  { value: "deluxe-bronze" as DPDPackageId, label: "Deluxe Bronze: 1,200 DPD @ ₦25k" },
-  { value: "deluxe-gold" as DPDPackageId, label: "Deluxe Gold: 1,400 DPD @ ₦27.5k" },
-  { value: "deluxe-gold-plus" as DPDPackageId, label: "Deluxe Gold Plus: 1,600 DPD @ ₦30k" },
-  { value: "deluxe-diamond" as DPDPackageId, label: "Deluxe Diamond: 1,800 DPD @ ₦32.5k" },
-  { value: "deluxe-diamond-plus" as DPDPackageId, label: "Deluxe Diamond Plus: 2,000 DPD @ ₦35k" },
-  { value: "deluxe-platinum" as DPDPackageId, label: "Deluxe Platinum: 2,500 DPD @ ₦40k" },
-  { value: "deluxe-platinum-plus" as DPDPackageId, label: "Deluxe Platinum Plus: 3,000 DPD @ ₦45k" },
-  { value: "bumper-gold" as DPDPackageId, label: "Bumper Gold: 3,500 DPD @ ₦50k" },
-  { value: "bumper-diamond" as DPDPackageId, label: "Bumper Diamond: 4,000 DPD @ ₦55k" },
-  { value: "bumper-platinum" as DPDPackageId, label: "Bumper Platinum: 4,500 DPD @ ₦60k" },
-  { value: "bumper-infinity" as DPDPackageId, label: "Bumper Infinity: 5,000 DPD @ ₦65k" },
-  { value: "unlimited" as DPDPackageId, label: "Unlimited: Unlimited DPD @ ₦100k" }
+  { value: "basic" as DPDPackageId, label: "Basic: 1,000 DPD @ ₦10k" },
+  { value: "standard" as DPDPackageId, label: "Standard: 2,000 DPD @ ₦20k" },
+  { value: "professional" as DPDPackageId, label: "Professional: 3,000 DPD @ ₦30k" },
+  { value: "business" as DPDPackageId, label: "Business: 4,000 DPD @ ₦40k" },
+  { value: "enterprise" as DPDPackageId, label: "Enterprise: 5,000 DPD @ ₦50k" },
+  { value: "entrepreneur" as DPDPackageId, label: "Entrepreneur: 6,000 DPD @ ₦60k" },
+  { value: "deluxe" as DPDPackageId, label: "Deluxe: 7,000 DPD @ ₦70k" },
+  { value: "deluxe-super" as DPDPackageId, label: "Deluxe Super: 8,000 DPD @ ₦80k" },
+  { value: "deluxe-super-plus" as DPDPackageId, label: "Deluxe Super Plus: 9,000 DPD @ ₦90k" },
+  { value: "deluxe-silver" as DPDPackageId, label: "Deluxe Silver: 10,000 DPD @ ₦100k" },
+  { value: "deluxe-bronze" as DPDPackageId, label: "Deluxe Bronze: 12,000 DPD @ ₦120k" },
+  { value: "deluxe-gold" as DPDPackageId, label: "Deluxe Gold: 14,000 DPD @ ₦140k" },
+  { value: "deluxe-gold-plus" as DPDPackageId, label: "Deluxe Gold Plus: 16,000 DPD @ ₦160k" },
+  { value: "deluxe-diamond" as DPDPackageId, label: "Deluxe Diamond: 18,000 DPD @ ₦180k" },
+  { value: "deluxe-diamond-plus" as DPDPackageId, label: "Deluxe Diamond Plus: 20,000 DPD @ ₦200k" },
+  { value: "deluxe-platinum" as DPDPackageId, label: "Deluxe Platinum: 25,000 DPD @ ₦250k" },
+  { value: "deluxe-platinum-plus" as DPDPackageId, label: "Deluxe Platinum Plus: 30,000 DPD @ ₦300k" },
+  { value: "bumper-gold" as DPDPackageId, label: "Bumper Gold: 35,000 DPD @ ₦350k" },
+  { value: "bumper-diamond" as DPDPackageId, label: "Bumper Diamond: 40,000 DPD @ ₦400k" },
+  { value: "bumper-platinum" as DPDPackageId, label: "Bumper Platinum: 45,000 DPD @ ₦450k" },
+  { value: "bumper-infinity" as DPDPackageId, label: "Bumper Infinity: 50,000 DPD @ ₦500k" },
+  { value: "unlimited" as DPDPackageId, label: "Unlimited: Unlimited DPD @ ₦600k" }
 ];
 
 const extendedExposure = [
@@ -134,6 +137,9 @@ const recurrentExposureEvery = [
 export default function SubmitAdvert() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Get user discount profile (mock data for now)
+  const userProfile = getUserDiscountProfile("current-user");
   
   const [category, setCategory] = useState<AdvertCategory | undefined>();
   const [displayMode, setDisplayMode] = useState<DisplayMode | undefined>();
@@ -406,7 +412,9 @@ export default function SubmitAdvert() {
         dpdPackage as DPDPackageId,
         extendedExposureTime,
         recurrentAfter,
-        recurrentEvery
+        recurrentEvery,
+        userProfile.accreditedTier,
+        userProfile.activeAdverts
       );
 
       const advert = saveAdvert(
@@ -464,7 +472,9 @@ export default function SubmitAdvert() {
     dpdPackage as DPDPackageId,
     extendedExposureTime,
     recurrentAfter,
-    recurrentEvery
+    recurrentEvery,
+    userProfile.accreditedTier,
+    userProfile.activeAdverts
   ) : null;
 
   const InfoTooltip = ({ content }: { content: string }) => (
@@ -489,10 +499,18 @@ export default function SubmitAdvert() {
           <div className="space-y-4 sm:space-y-6">
             <Card className="overflow-visible">
               <CardHeader className="space-y-1 sm:space-y-1.5">
-                <CardTitle className="text-xl sm:text-2xl">Create Premium Advert</CardTitle>
-                <CardDescription className="text-sm sm:text-base">
-                  Fill in the details below to create your advertising campaign
-                </CardDescription>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <CardTitle className="text-xl sm:text-2xl">Create Premium Advert</CardTitle>
+                    <CardDescription className="text-sm sm:text-base">
+                      Fill in the details below to create your advertising campaign
+                    </CardDescription>
+                  </div>
+                  <AccreditedAdvertiserBadge 
+                    tier={userProfile.accreditedTier} 
+                    totalCampaigns={userProfile.totalCampaigns}
+                  />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-5 overflow-visible">
                 {/* Category Selection */}
@@ -832,6 +850,14 @@ export default function SubmitAdvert() {
                 </div>
 
                 <Separator />
+
+                {/* Discount Information */}
+                {userProfile.activeAdverts > 0 && (
+                  <VolumeDiscountInfo 
+                    activeAdvertCount={userProfile.activeAdverts}
+                    currentDiscountPercentage={pricing?.appliedDiscounts?.find(d => d.type === "volume_based")?.percentage}
+                  />
+                )}
 
                 {/* Cost Breakdown */}
                 {pricing ? (

@@ -1,4 +1,5 @@
-import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing } from "@/types/advert";
+import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing, AccreditedAdvertiserTier } from "@/types/advert";
+import { calculateAllDiscounts, applyDiscounts } from "./advertDiscounts";
 
 export type { AdvertPricing };
 
@@ -104,7 +105,9 @@ export function calculateAdvertPricing(
   dpdPackage: DPDPackageId,
   extendedExposure?: string,
   recurrentAfter?: string,
-  recurrentEvery?: string
+  recurrentEvery?: string,
+  accreditedTier?: AccreditedAdvertiserTier | null,
+  activeAdvertCount: number = 0
 ): AdvertPricing {
   // Get setup fee
   const setupFee = SETUP_FEES[category][type];
@@ -137,7 +140,8 @@ export function calculateAdvertPricing(
   // Total cost
   const totalCost = baseCost + extendedExposureCost + recurrentAfterCost + recurrentEveryCost;
 
-  return {
+  // Base pricing without discounts
+  const basePricing: AdvertPricing = {
     setupFee,
     dpdCost,
     extendedExposureCost,
@@ -148,6 +152,15 @@ export function calculateAdvertPricing(
     displayPerDay: dpdInfo.dpd,
     displayFrequency: dpdInfo.frequency,
   };
+
+  // Calculate and apply discounts
+  const discounts = calculateAllDiscounts(
+    totalCost,
+    accreditedTier || null,
+    activeAdvertCount
+  );
+
+  return applyDiscounts(basePricing, discounts);
 }
 
 export function getDPDPackageInfo(packageId: DPDPackageId) {

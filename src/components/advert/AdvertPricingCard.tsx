@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AdvertPricing } from "@/types/advert";
 import { formatCurrency, formatMobi } from "@/lib/advertPricing";
-import { Zap, TrendingUp } from "lucide-react";
+import { Zap, TrendingUp, Sparkles } from "lucide-react";
 interface AdvertPricingCardProps {
   pricing: AdvertPricing;
   walletBalance?: number;
@@ -14,7 +14,9 @@ export const AdvertPricingCard = ({
   walletBalance = 500000,
   variant = "card"
 }: AdvertPricingCardProps) => {
-  const hasInsufficientFunds = walletBalance < pricing.totalCost;
+  const finalAmount = pricing.finalAmountPayable ?? pricing.totalCost;
+  const hasInsufficientFunds = walletBalance < finalAmount;
+  const hasDiscounts = (pricing.appliedDiscounts?.length ?? 0) > 0;
 
   const content = (
     <>
@@ -59,21 +61,69 @@ export const AdvertPricingCard = ({
 
       <Separator />
 
+      {/* Discounts Section */}
+      {hasDiscounts && (
+        <>
+          <div className="space-y-2 p-3 rounded-lg bg-green-500/5 border border-green-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-green-600" />
+              <span className="font-semibold text-sm text-green-600">Discounts Applied</span>
+            </div>
+            {pricing.appliedDiscounts?.map((discount, index) => (
+              <div key={index} className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{discount.name}</span>
+                <span className="font-medium text-green-600">
+                  -{formatCurrency(discount.amount)} ({discount.percentage}%)
+                </span>
+              </div>
+            ))}
+          </div>
+          <Separator />
+        </>
+      )}
+
       {/* Total */}
       <div className="space-y-3">
+        {hasDiscounts && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-medium line-through">{formatCurrency(pricing.subtotalBeforeDiscount!)}</span>
+          </div>
+        )}
+
+        {hasDiscounts && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Total Discount</span>
+            <span className="font-bold text-green-600">-{formatCurrency(pricing.totalDiscount!)}</span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
-          <span className="font-semibold">Total Cost@Setup</span>
+          <span className="font-semibold">{hasDiscounts ? "Final Amount Payable" : "Total Cost@Setup"}</span>
           <div className="text-right">
-            <div className="font-bold text-lg">{formatCurrency(pricing.totalCost)}</div>
-            <div className="text-xs text-muted-foreground">{formatMobi(pricing.totalCostMobi)}</div>
+            <div className={`font-bold text-lg ${hasDiscounts ? "text-green-600" : ""}`}>
+              {formatCurrency(finalAmount)}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {formatMobi(pricing.finalAmountPayableMobi ?? pricing.totalCostMobi)}
+            </div>
           </div>
         </div>
+
+        {hasDiscounts && (
+          <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+            <p className="text-sm font-medium text-green-600 text-center">
+              🎉 You're saving {formatCurrency(pricing.totalDiscount!)} (
+              {Math.round((pricing.totalDiscount! / pricing.subtotalBeforeDiscount!) * 100)}%)
+            </p>
+          </div>
+        )}
 
         <div className="flex items-center justify-between pt-2">
           <span className="font-semibold">Total Recurrent Cost</span>
           <div className="text-right">
-            <div className="font-bold text-lg">{formatCurrency(pricing.totalCost - pricing.setupFee)}</div>
-            <div className="text-xs text-muted-foreground">{formatMobi((pricing.totalCost - pricing.setupFee) / 100)}</div>
+            <div className="font-bold text-lg">{formatCurrency(finalAmount - pricing.setupFee)}</div>
+            <div className="text-xs text-muted-foreground">{formatMobi((finalAmount - pricing.setupFee))}</div>
           </div>
         </div>
 
