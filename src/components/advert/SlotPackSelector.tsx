@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, TrendingUp } from "lucide-react";
+import { Check, TrendingUp, Award } from "lucide-react";
 import { SLOT_PACKS } from "@/data/slotPacks";
 import { SlotPackId } from "@/types/advert";
 
@@ -43,10 +43,19 @@ export function SlotPackSelector({ selectedPackId, onSelectPack }: SlotPackSelec
                 )}
               </div>
 
-              <Badge className="bg-green-500 hover:bg-green-600 text-white">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                {pack.discountPercentage}% Discount
-              </Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  {pack.discountPercentage}% Discount
+                </Badge>
+                
+                {pack.id !== "entry" && (
+                  <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
+                    <Award className="h-3 w-3 mr-1" />
+                    Accredited Only
+                  </Badge>
+                )}
+              </div>
 
               <p className="text-sm text-muted-foreground">
                 {pack.description}
