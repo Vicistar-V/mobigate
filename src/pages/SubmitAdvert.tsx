@@ -34,7 +34,7 @@ import {
   SlotPackDraft,
   AdvertFormData
 } from "@/types/advert";
-import { calculateAdvertPricing, getRequiredFileCount, getSizeFeeDescription } from "@/lib/advertPricing";
+import { calculateAdvertPricing, getRequiredFileCount, getSizeFeeDescription, getAllowedSizes } from "@/lib/advertPricing";
 import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "@/lib/advertStorage";
 import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
 import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
@@ -199,6 +199,18 @@ export default function SubmitAdvert() {
     if (displayMode) {
       const newType = getAdvertType(displayMode, multipleCount);
       setType(newType);
+      
+      // Reset size if it's not allowed for the new display mode
+      if (size && displayMode === "rollout") {
+        const allowedSizes = getAllowedSizes(displayMode);
+        if (!allowedSizes.includes(size)) {
+          setSize(undefined);
+          toast({
+            title: "Size reset",
+            description: "Roll-out displays only support 5x6, 6.5x6, and 10x6 sizes.",
+          });
+        }
+      }
     }
   }, [displayMode, multipleCount]);
 
@@ -424,6 +436,16 @@ export default function SubmitAdvert() {
       toast({
         title: "Validation Error",
         description: "Please select advert size",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate roll-out size restrictions
+    if (displayMode === "rollout" && !["5x6", "6.5x6", "10x6"].includes(size)) {
+      toast({
+        title: "Validation Error",
+        description: "Roll-out displays only support 5x6, 6.5x6, and 10x6 sizes",
         variant: "destructive",
       });
       return false;
@@ -851,16 +873,34 @@ export default function SubmitAdvert() {
                     Select Advert Size *
                     <InfoTooltip content="Choose the display size based on screen dimensions" />
                   </Label>
+                  {displayMode === "rollout" && (
+                    <div className="mb-2 p-2 bg-warning/10 rounded-md border border-warning/20">
+                      <p className="text-sm text-warning-foreground">
+                        <AlertCircle className="h-4 w-4 inline-block mr-1" />
+                        Roll-out displays only support: 5x6, 6.5x6, and 10x6 sizes
+                      </p>
+                    </div>
+                  )}
                   <Select value={size || ""} onValueChange={(v) => setSize(v as AdvertSize)}>
                     <SelectTrigger id="size">
                       <SelectValue placeholder="Choose advert size" />
                     </SelectTrigger>
                     <SelectContent>
-                      {advertSizes.map((s) => (
-                        <SelectItem key={s.value} value={s.value}>
-                          {s.label}
-                        </SelectItem>
-                      ))}
+                      {advertSizes
+                        .filter((s) => {
+                          if (displayMode === "rollout") {
+                            return ["5x6", "6.5x6", "10x6"].includes(s.value);
+                          }
+                          return true;
+                        })
+                        .map((s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                            {displayMode === "rollout" && s.value === "5x6" && " @ 12% Size Fee"}
+                            {displayMode === "rollout" && s.value === "6.5x6" && " @ 15% Size Fee"}
+                            {displayMode === "rollout" && s.value === "10x6" && " @ 20% Size Fee"}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   {size && type && (

@@ -16,26 +16,35 @@ export type AdvertType =
   | "multiple-7" 
   | "multiple-8" 
   | "multiple-9" 
-  | "multiple-10";
+  | "multiple-10"
+  | "rollout-2"
+  | "rollout-3"
+  | "rollout-4"
+  | "rollout-5"
+  | "rollout-6"
+  | "rollout-7"
+  | "rollout-8"
+  | "rollout-9"
+  | "rollout-10";
 
 // Helper function to convert display mode + count to AdvertType
 export function getAdvertType(mode: DisplayMode, count?: MultipleDisplayCount): AdvertType {
   if (mode === "single") return "single";
+  if (mode === "rollout" && count) return `rollout-${count}` as AdvertType;
   return `multiple-${count}` as AdvertType;
 }
 
 // Helper function to extract display mode from AdvertType
 export function getDisplayMode(type: AdvertType): DisplayMode {
   if (type === "single") return "single";
-  // For now, we return "multiple" for all multiple-X types
-  // Rollout mode will be distinguished by additional metadata
+  if (type.startsWith("rollout-")) return "rollout";
   return "multiple";
 }
 
 // Helper function to extract multiple count from AdvertType
 export function getMultipleCount(type: AdvertType): MultipleDisplayCount | undefined {
   if (type === "single") return undefined;
-  const match = type.match(/multiple-(\d+)/);
+  const match = type.match(/(?:multiple|rollout)-(\d+)/);
   return match ? parseInt(match[1]) as MultipleDisplayCount : undefined;
 }
 

@@ -1,4 +1,4 @@
-import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing, AccreditedAdvertiserTier, AdvertSize, SubscriptionDuration } from "@/types/advert";
+import { AdvertCategory, AdvertType, DPDPackageId, AdvertPricing, AccreditedAdvertiserTier, AdvertSize, SubscriptionDuration, DisplayMode } from "@/types/advert";
 import { calculateAllDiscounts, applyDiscounts } from "./advertDiscounts";
 
 export type { AdvertPricing };
@@ -28,6 +28,32 @@ const SETUP_FEES = {
     "multiple-8": 240000,
     "multiple-9": 270000,
     "multiple-10": 300000,
+  },
+};
+
+// Roll-out setup fees (flat amounts for both pictorial and video)
+const SETUP_FEES_ROLLOUT = {
+  pictorial: {
+    "rollout-2": 70000,
+    "rollout-3": 100000,
+    "rollout-4": 140000,
+    "rollout-5": 160000,
+    "rollout-6": 180000,
+    "rollout-7": 200000,
+    "rollout-8": 220000,
+    "rollout-9": 240000,
+    "rollout-10": 260000,
+  },
+  video: {
+    "rollout-2": 70000,
+    "rollout-3": 100000,
+    "rollout-4": 140000,
+    "rollout-5": 160000,
+    "rollout-6": 180000,
+    "rollout-7": 200000,
+    "rollout-8": 220000,
+    "rollout-9": 240000,
+    "rollout-10": 260000,
   },
 };
 
@@ -127,6 +153,20 @@ const SIZE_MULTIPLIERS_MULTIPLE: Record<AdvertSize, number> = {
   "10x6": 0.20,  // 20%
 };
 
+// Size multipliers for ROLLOUT adverts (only 3 sizes allowed)
+const SIZE_MULTIPLIERS_ROLLOUT: Record<AdvertSize, number> = {
+  "2x3": 0,      // Not allowed
+  "2x6": 0,      // Not allowed
+  "2.5x3": 0,    // Not allowed
+  "2.5x6": 0,    // Not allowed
+  "3.5x3": 0,    // Not allowed
+  "3.5x6": 0,    // Not allowed
+  "5x6": 0.12,   // 12%
+  "6.5x3": 0,    // Not allowed
+  "6.5x6": 0.15, // 15%
+  "10x6": 0.20,  // 20%
+};
+
 // Subscription volume discounts (applies to DPD cost only)
 const SUBSCRIPTION_DISCOUNTS: Record<SubscriptionDuration, number> = {
   1: 0.00,   // 0% - 30 days
@@ -151,8 +191,13 @@ export function calculateAdvertPricing(
   accreditedTier?: AccreditedAdvertiserTier | null,
   activeAdvertCount: number = 0
 ): AdvertPricing {
+  // Determine if rollout display
+  const isRollout = type.startsWith("rollout-");
+  
   // Get base setup fee (before size adjustment)
-  const baseSetupFee = SETUP_FEES[category][type];
+  const baseSetupFee = isRollout 
+    ? SETUP_FEES_ROLLOUT[category][type as keyof typeof SETUP_FEES_ROLLOUT['pictorial']]
+    : SETUP_FEES[category][type as keyof typeof SETUP_FEES['pictorial']];
 
   // Get DPD package info
   const dpdInfo = DPD_PACKAGES[dpdPackage];
@@ -161,11 +206,17 @@ export function calculateAdvertPricing(
   // Calculate base cost (setup + DPD before size adjustment)
   const baseCostBeforeSize = baseSetupFee + monthlyDpdCost;
 
-  // Determine if single or multiple advert
+  // Determine size multiplier based on display type
   const isSingle = type === "single";
-  const sizeMultiplier = isSingle 
-    ? SIZE_MULTIPLIERS_SINGLE[size] 
-    : SIZE_MULTIPLIERS_MULTIPLE[size];
+  let sizeMultiplier: number;
+  
+  if (isSingle) {
+    sizeMultiplier = SIZE_MULTIPLIERS_SINGLE[size];
+  } else if (isRollout) {
+    sizeMultiplier = SIZE_MULTIPLIERS_ROLLOUT[size];
+  } else {
+    sizeMultiplier = SIZE_MULTIPLIERS_MULTIPLE[size];
+  }
 
   // Calculate size fee (applies to both setup + DPD)
   const sizeFee = Math.round(baseCostBeforeSize * sizeMultiplier);
@@ -261,8 +312,20 @@ export function formatMobi(amount: number): string {
  * Get setup fee description for display
  */
 export function getSetupFeeDescription(category: AdvertCategory, type: AdvertType): string {
-  const setupFee = SETUP_FEES[category][type];
-  const typeLabel = type === "single" ? "Single Display" : `${type.replace("multiple-", "")}-in-1 Multiple Display`;
+  const isRollout = type.startsWith("rollout-");
+  const setupFee = isRollout 
+    ? SETUP_FEES_ROLLOUT[category][type as keyof typeof SETUP_FEES_ROLLOUT['pictorial']]
+    : SETUP_FEES[category][type as keyof typeof SETUP_FEES['pictorial']];
+  
+  let typeLabel: string;
+  if (type === "single") {
+    typeLabel = "Single Display";
+  } else if (isRollout) {
+    typeLabel = `${type.replace("rollout-", "")}-in-1 Roll-out Display`;
+  } else {
+    typeLabel = `${type.replace("multiple-", "")}-in-1 Multiple Display`;
+  }
+  
   return `${typeLabel} Setup Fee (${category === "pictorial" ? "Pictorial" : "Video"})`;
 }
 
@@ -271,7 +334,7 @@ export function getSetupFeeDescription(category: AdvertCategory, type: AdvertTyp
  */
 export function getRequiredFileCount(type: AdvertType): number {
   if (type === "single") return 1;
-  const match = type.match(/multiple-(\d+)/);
+  const match = type.match(/(?:multiple|rollout)-(\d+)/);
   return match ? parseInt(match[1]) : 1;
 }
 
@@ -280,9 +343,22 @@ export function getRequiredFileCount(type: AdvertType): number {
  */
 export function getSizeMultiplier(type: AdvertType, size: AdvertSize): number {
   const isSingle = type === "single";
-  return isSingle 
-    ? SIZE_MULTIPLIERS_SINGLE[size] 
-    : SIZE_MULTIPLIERS_MULTIPLE[size];
+  const isRollout = type.startsWith("rollout-");
+  
+  if (isSingle) return SIZE_MULTIPLIERS_SINGLE[size];
+  if (isRollout) return SIZE_MULTIPLIERS_ROLLOUT[size];
+  return SIZE_MULTIPLIERS_MULTIPLE[size];
+}
+
+/**
+ * Get allowed sizes for a display mode
+ */
+export function getAllowedSizes(mode: DisplayMode): AdvertSize[] {
+  if (mode === "rollout") {
+    return ["5x6", "6.5x6", "10x6"];
+  }
+  // All sizes allowed for single and multiple bundled
+  return ["2x3", "2x6", "2.5x3", "2.5x6", "3.5x3", "3.5x6", "5x6", "6.5x3", "6.5x6", "10x6"];
 }
 
 /**

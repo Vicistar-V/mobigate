@@ -15,11 +15,23 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
   const isSingle = mode === "single";
   const isRollout = mode === "rollout";
   
-  const pictorialPrice = isSingle ? "₦30,000" : "Starting from ₦40,000";
-  const videoPrice = isSingle ? "₦45,000" : "Starting from ₦60,000";
-  const mobiPrice = isSingle 
-    ? (category === "pictorial" ? "30,000 Mobi" : "45,000 Mobi")
-    : (category === "pictorial" ? "Starting from 40,000 Mobi" : "Starting from 60,000 Mobi");
+  let pictorialPrice: string;
+  let videoPrice: string;
+  let mobiPrice: string;
+  
+  if (isSingle) {
+    pictorialPrice = "₦30,000";
+    videoPrice = "₦45,000";
+    mobiPrice = category === "pictorial" ? "30,000 Mobi" : "45,000 Mobi";
+  } else if (isRollout) {
+    pictorialPrice = "Starting from ₦70,000";
+    videoPrice = "Starting from ₦70,000";
+    mobiPrice = "Starting from 70,000 Mobi";
+  } else {
+    pictorialPrice = "Starting from ₦40,000";
+    videoPrice = "Starting from ₦60,000";
+    mobiPrice = category === "pictorial" ? "Starting from 40,000 Mobi" : "Starting from 60,000 Mobi";
+  }
 
   return (
     <Card
@@ -56,8 +68,13 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
             </p>
             <p className="text-xs text-muted-foreground">{mobiPrice}</p>
             <Badge variant="outline" className="text-xs mt-1">
-              + Size Fee (0-{isSingle ? "10" : "20"}%)
+              {isRollout ? "+ Size Fee (12-20%)" : `+ Size Fee (0-${isSingle ? "10" : "20"}%)`}
             </Badge>
+            {isRollout && (
+              <p className="text-xs text-warning-foreground mt-1">
+                Only 5x6, 6.5x6, 10x6 sizes
+              </p>
+            )}
           </div>
         </div>
       </div>
