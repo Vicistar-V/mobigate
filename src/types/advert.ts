@@ -100,6 +100,8 @@ export interface CatchmentMarket {
   };
 }
 
+export type ContactMethod = "whatsapp" | "call";
+
 export interface AdvertFormData {
   category: AdvertCategory;
   displayMode: DisplayMode;
@@ -115,6 +117,8 @@ export interface AdvertFormData {
   launchDate?: Date;
   files: File[];
   agreed: boolean;
+  contactPhone?: string;
+  contactMethod?: ContactMethod;
 }
 
 export type DiscountType = "accredited_advertiser" | "volume_based" | "promotional" | "custom";
@@ -225,6 +229,8 @@ export interface SavedAdvert {
   rejectedReason?: string;
   packId?: string; // Reference to SlotPackDraft if part of a pack
   slotNumber?: number; // Position in the pack
+  contactPhone?: string;
+  contactMethod?: ContactMethod;
 }
 
 export interface DPDPackage {
