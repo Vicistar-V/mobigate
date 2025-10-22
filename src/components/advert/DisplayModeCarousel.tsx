@@ -20,11 +20,19 @@ export function DisplayModeCarousel({
   );
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? modes.length - 1 : prev - 1));
+    setCurrentIndex((prev) => {
+      const newIndex = prev === 0 ? modes.length - 1 : prev - 1;
+      onSelectMode(modes[newIndex]);
+      return newIndex;
+    });
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev === modes.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => {
+      const newIndex = prev === modes.length - 1 ? 0 : prev + 1;
+      onSelectMode(modes[newIndex]);
+      return newIndex;
+    });
   };
 
   const swipeHandlers = useSwipeable({
