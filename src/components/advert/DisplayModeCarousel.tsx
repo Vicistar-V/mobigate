@@ -52,15 +52,17 @@ export function DisplayModeCarousel({
       >
         {/* Cards Container */}
         <div
-          className="flex transition-transform duration-300 ease-out gap-4 pl-4"
+          className="flex transition-transform duration-500 ease-out pl-[7.5%]"
           style={{
-            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 16}px))`,
+            transform: `translateX(-${currentIndex * 92.5}%)`,
+            gap: '16px'
           }}
         >
           {modes.map((mode) => (
             <div
               key={mode}
-              className="min-w-[85%] flex-shrink-0"
+              className="flex-shrink-0"
+              style={{ width: '85%' }}
             >
               <DisplayModeCard
                 mode={mode}
