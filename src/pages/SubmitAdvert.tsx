@@ -171,6 +171,11 @@ export default function SubmitAdvert() {
   // Get user discount profile (mock data for now)
   const userProfile = getUserDiscountProfile("current-user");
   
+  // Pack system state
+  const [currentStep, setCurrentStep] = useState<"select-pack" | "fill-slot">("select-pack");
+  const [packDraft, setPackDraft] = useState<SlotPackDraft | null>(null);
+  const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
+  
   const [category, setCategory] = useState<AdvertCategory | undefined>();
   const [displayMode, setDisplayMode] = useState<DisplayMode | undefined>();
   const [multipleCount, setMultipleCount] = useState<MultipleDisplayCount | undefined>();
@@ -694,11 +699,7 @@ export default function SubmitAdvert() {
     setTimeout(() => {
       // Save all slots as individual adverts
       packDraft.slots.forEach((slot, index) => {
-        saveAdvert({
-          ...slot.formData,
-          packId: packDraft.id,
-          slotNumber: index + 1
-        });
+        saveAdvert(slot.formData, slot.pricing);
       });
 
       clearPackDraft();
@@ -769,7 +770,6 @@ export default function SubmitAdvert() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4 sm:space-y-5 overflow-visible">
-                  {/* ... keep existing form fields ... */}
                 {/* Category Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="category" className="text-sm">
