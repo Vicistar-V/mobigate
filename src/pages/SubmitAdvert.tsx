@@ -39,7 +39,7 @@ import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "
 import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
 import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
-import { DisplayModeCard } from "@/components/advert/DisplayModeCard";
+import { DisplayModeSelector } from "@/components/advert/DisplayModeSelector";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
 import { VolumeDiscountInfo } from "@/components/advert/VolumeDiscountInfo";
@@ -819,29 +819,16 @@ export default function SubmitAdvert() {
                       Select Display Mode *
                       <InfoTooltip content="Choose whether you want a single advert or multiple adverts rotating in sequence" />
                     </Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-                      <DisplayModeCard
-                        mode="single"
-                        selected={displayMode === "single"}
-                        category={category}
-                        onSelect={() => {
-                          setDisplayMode("single");
+                    <DisplayModeSelector
+                      category={category}
+                      displayMode={displayMode}
+                      onSelectMode={(mode) => {
+                        setDisplayMode(mode);
+                        if (mode === "single") {
                           setMultipleCount(undefined);
-                        }}
-                      />
-                      <DisplayModeCard
-                        mode="multiple"
-                        selected={displayMode === "multiple"}
-                        category={category}
-                        onSelect={() => setDisplayMode("multiple")}
-                      />
-                      <DisplayModeCard
-                        mode="rollout"
-                        selected={displayMode === "rollout"}
-                        category={category}
-                        onSelect={() => setDisplayMode("rollout")}
-                      />
-                    </div>
+                        }
+                      }}
+                    />
                   </div>
                 )}
 
