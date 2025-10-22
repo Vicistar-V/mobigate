@@ -40,13 +40,13 @@ export function DisplayModeCarousel({
       {/* Carousel Container */}
       <div
         {...swipeHandlers}
-        className="relative overflow-hidden px-4"
+        className="relative overflow-hidden"
       >
         {/* Cards Container */}
         <div
-          className="flex transition-transform duration-300 ease-out gap-4"
+          className="flex transition-transform duration-300 ease-out gap-4 pl-4"
           style={{
-            transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 16}px))`,
+            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 16}px))`,
           }}
         >
           {modes.map((mode) => (
