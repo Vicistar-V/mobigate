@@ -42,7 +42,6 @@ import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
 import { DisplayModeSelector } from "@/components/advert/DisplayModeSelector";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
-import { VolumeDiscountInfo } from "@/components/advert/VolumeDiscountInfo";
 import { getUserDiscountProfile } from "@/data/discountData";
 import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
 import { SlotPackManager } from "@/components/advert/SlotPackManager";
@@ -1471,14 +1470,6 @@ export default function SubmitAdvert() {
                 </div>
 
                 <Separator />
-
-                {/* Discount Information - Only show for accredited users */}
-                {userType === "accredited" && userProfile.activeAdverts > 0 && (
-                  <VolumeDiscountInfo 
-                    activeAdvertCount={userProfile.activeAdverts}
-                    currentDiscountPercentage={pricing?.appliedDiscounts?.find(d => d.type === "volume_based")?.percentage}
-                  />
-                )}
 
                 {/* Cost Breakdown */}
                 {pricing ? (
