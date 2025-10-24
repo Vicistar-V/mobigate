@@ -922,7 +922,7 @@ export default function SubmitAdvert() {
             <SlotPackSelector
               selectedPackId={packDraft?.packId}
               onSelectPack={handlePackSelection}
-              excludeEntry={true}
+              excludeEntry={false}
             />
           </div>
         )}
