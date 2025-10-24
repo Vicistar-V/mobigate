@@ -1,10 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PremiumAdCard, PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { AdvertFormData } from "@/types/advert";
-import { Maximize, Square, Minimize2, FileText, Image as ImageIcon, Video, Info } from "lucide-react";
+import { Maximize, Square, Minimize2, FileText, Image as ImageIcon, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdvertPreviewDialogProps {
@@ -60,16 +59,6 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
             View how your advert will appear
           </p>
         </DialogHeader>
-
-        {/* Important Notice */}
-        <Alert className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
-          <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <AlertDescription className="text-xs sm:text-sm text-blue-900 dark:text-blue-100">
-            <strong>Important:</strong> Please ensure your advert material fits properly within the preview. 
-            If your images or videos appear distorted or don't fit well, please edit or resize them to match 
-            the selected advert size specifications before submitting.
-          </AlertDescription>
-        </Alert>
 
         <div className="space-y-3 sm:space-y-4">
           {/* Layout Controls - Mobile Optimized */}
