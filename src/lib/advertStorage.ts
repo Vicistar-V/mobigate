@@ -187,3 +187,28 @@ export function updateAdvertStatistics(
     throw error;
   }
 }
+
+export function updateAdvertMedia(
+  advertId: string,
+  newFiles: File[]
+): void {
+  try {
+    const adverts = loadAllAdverts();
+    const index = adverts.findIndex(ad => ad.id === advertId);
+
+    if (index === -1) {
+      throw new Error("Advert not found");
+    }
+
+    // Convert new files to URLs
+    const fileUrls = newFiles.map(file => URL.createObjectURL(file));
+
+    adverts[index].fileUrls = fileUrls;
+    adverts[index].updatedAt = new Date();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(adverts));
+  } catch (error) {
+    console.error("Failed to update media:", error);
+    throw error;
+  }
+}
