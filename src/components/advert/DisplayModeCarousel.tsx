@@ -66,19 +66,19 @@ export function DisplayModeCarousel({
       {/* Carousel Container */}
       <div
         {...swipeHandlers}
-        className="relative overflow-hidden"
+        className="relative overflow-hidden flex justify-center"
       >
         {/* Cards Container */}
         <div
           className={`flex gap-4 ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
           style={{
-            transform: `translateX(calc(50vw - 50% - ${currentIndex * 100}% - ${currentIndex * 16}px + ${dragOffset}px))`,
+            transform: `translateX(calc(-${currentIndex * 85}vw - ${currentIndex * 16}px + ${dragOffset}px))`,
           }}
         >
-          {modes.map((mode) => (
+          {modes.map((mode, index) => (
             <div
               key={mode}
-              className="flex-shrink-0 max-w-[85%]"
+              className="flex-shrink-0 w-[85vw] max-w-[400px] flex justify-center"
             >
               <DisplayModeCard
                 mode={mode}
