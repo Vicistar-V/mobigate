@@ -193,6 +193,7 @@ export default function SubmitAdvert() {
     originalStatus: string;
     rejectionReason?: string;
   } | null>(null);
+  const [editBannerExpanded, setEditBannerExpanded] = useState(false);
   
   // Draft detection state (for manual loading)
   const [hasDraftAvailable, setHasDraftAvailable] = useState(false);
@@ -1148,9 +1149,22 @@ export default function SubmitAdvert() {
                     <p className="text-xs font-medium text-yellow-900 dark:text-yellow-100 mb-1">
                       Original Rejection Reason:
                     </p>
-                    <p className="text-xs text-yellow-800 dark:text-yellow-200 leading-relaxed line-clamp-3">
+                    <p className={cn(
+                      "text-xs text-yellow-800 dark:text-yellow-200 leading-relaxed",
+                      !editBannerExpanded && "line-clamp-3"
+                    )}>
                       {editBanner.rejectionReason}
                     </p>
+                    {editBanner.rejectionReason.length > 150 && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 mt-1 text-yellow-900 dark:text-yellow-100 hover:text-yellow-700 dark:hover:text-yellow-300 text-xs"
+                        onClick={() => setEditBannerExpanded(!editBannerExpanded)}
+                      >
+                        {editBannerExpanded ? "Show Less" : "View More"} →
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
