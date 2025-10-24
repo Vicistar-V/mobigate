@@ -1803,11 +1803,11 @@ export default function SubmitAdvert() {
                   <div>
                     <Label htmlFor="file-upload" className="text-sm">
                       Upload Advert Material *
-                      <InfoTooltip content={`Upload ${getRequiredFiles()} ${category === "video" ? "video" : "image"} file(s) for your ${displayMode === "single" ? "single" : `${multipleCount}-in-1 multiple`} display type.`} />
+                      <InfoTooltip content={`Upload ${getRequiredFiles()} ${category === "video" ? "video" : "image"} file(s) for your ${displayMode === "single" ? "single" : multipleCount ? `${multipleCount}-in-1 multiple` : "multiple"} display type.`} />
                     </Label>
                     {type && (
                       <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                        Required: {getRequiredFiles()} file(s) for {displayMode === "single" ? "Single Display" : `${multipleCount}-in-1 Multiple Display`}
+                        Required: {getRequiredFiles()} file(s) for {displayMode === "single" ? "Single Display" : multipleCount ? `${multipleCount}-in-1 Multiple Display` : "Multiple Display"}
                       </p>
                     )}
                   </div>
