@@ -356,7 +356,16 @@ export default function SubmitAdvert() {
           setWebsiteUrl(advertToEdit.websiteUrl);
         }
         
-        // Skip user type selection and pack selection for edit mode
+        // Ensure form step is visible by creating an entry pack draft
+        try {
+          const draft = createNewPackDraft("entry");
+          setPackDraft(draft);
+        } catch (e) {
+          // Fallback: if createNewPackDraft fails for any reason, keep a minimal draft-like object
+          setPackDraft((prev) => prev ?? ({ id: 'entry-mock', userId: 'user-123', packId: 'entry' as any, slots: [], status: 'draft', createdAt: new Date(), updatedAt: new Date() } as any));
+        }
+        
+        // Skip user type selection and show form
         setUserType("individual");
         setCurrentStep("fill-slot");
         
