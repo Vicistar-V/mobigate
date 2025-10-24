@@ -48,6 +48,8 @@ import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
 import { SlotPackManager } from "@/components/advert/SlotPackManager";
 import { SlotPackSummary } from "@/components/advert/SlotPackSummary";
 import { UserTypeSelector } from "@/components/advert/UserTypeSelector";
+import { AccreditationVerification } from "@/components/advert/AccreditationVerification";
+import { AccreditationTier } from "@/lib/accreditationUtils";
 import { 
   createNewPackDraft, 
   loadPackDraft, 
@@ -173,8 +175,11 @@ export default function SubmitAdvert() {
   const userProfile = getUserDiscountProfile("current-user");
   
   // Pack system state
-  const [currentStep, setCurrentStep] = useState<"select-user-type" | "select-pack" | "fill-slot">("select-user-type");
+  const [currentStep, setCurrentStep] = useState<"select-user-type" | "verify-accreditation" | "select-pack" | "fill-slot">("select-user-type");
   const [userType, setUserType] = useState<"individual" | "accredited" | undefined>();
+  const [isAccredited, setIsAccredited] = useState(false);
+  const [accreditationCode, setAccreditationCode] = useState("");
+  const [accreditationTier, setAccreditationTier] = useState<AccreditationTier | undefined>();
   const [packDraft, setPackDraft] = useState<SlotPackDraft | null>(null);
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
   
@@ -608,16 +613,29 @@ export default function SubmitAdvert() {
   // Pack system handlers
   const handleUserTypeSelection = (type: "individual" | "accredited") => {
     setUserType(type);
+    
     if (type === "individual") {
-      // Auto-create entry pack for individual users
+      // Individual users get a single-slot pack
       const newDraft = createNewPackDraft("entry");
       setPackDraft(newDraft);
       setCurrentStep("fill-slot");
       resetSlotForm();
     } else {
-      // Accredited users go to pack selection
-      setCurrentStep("select-pack");
+      // Accredited users must verify their accreditation code first
+      setCurrentStep("verify-accreditation");
     }
+  };
+
+  const handleAccreditationVerified = (code: string, tier: AccreditationTier) => {
+    setIsAccredited(true);
+    setAccreditationCode(code);
+    setAccreditationTier(tier);
+    setCurrentStep("select-pack");
+    
+    toast({
+      title: "Accreditation verified!",
+      description: `Welcome ${tier.charAt(0).toUpperCase() + tier.slice(1)} tier advertiser. You can now access slot packs.`,
+    });
   };
 
   const handlePackSelection = (packId: SlotPackId) => {
@@ -819,7 +837,15 @@ export default function SubmitAdvert() {
           </div>
         )}
 
-        {/* Step 2: Pack Selection (Accredited Only) */}
+        {/* Step 2: Accreditation Verification (Accredited Only) */}
+        {currentStep === "verify-accreditation" && (
+          <AccreditationVerification
+            onVerified={handleAccreditationVerified}
+            onBack={handleBackToUserTypeSelection}
+          />
+        )}
+
+        {/* Step 3: Pack Selection (Accredited Only) */}
         {currentStep === "select-pack" && (
           <div className="max-w-6xl mx-auto space-y-4">
             <Button
@@ -838,7 +864,7 @@ export default function SubmitAdvert() {
           </div>
         )}
 
-        {/* Step 3: Fill Slots */}
+        {/* Step 4: Fill Slots */}
         {currentStep === "fill-slot" && packDraft && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Slot Form */}
