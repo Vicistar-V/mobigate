@@ -42,7 +42,7 @@ const MOCK_USER_PROFILES: Record<string, UserDiscountProfile> = {
     userId: "current-user",
     accreditedTier: "gold",
     totalCampaigns: 280,
-    activeAdverts: 8,
+    activeAdverts: 0,
     successfulCampaigns: 270,
   },
 };
