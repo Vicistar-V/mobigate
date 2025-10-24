@@ -217,7 +217,7 @@ export default function AdminManageAdverts() {
   const handleReject = (advert: SavedAdvert) => {
     setSelectedAdvert(advert);
     // Pre-fill with default rejection template
-    setRejectionReason("ADVERT SUBSCRIPTION REJECTED!\n\nSorry, your Advert Subscription placement was rejected by our System. It's either your Advert material did not follow our Community Standards, or appropriate Specifications were not maintained. Click below for more clarification.\n\nPlease correct the very issues raised, and Submit again. Enjoy the world of Mobigate ...your World!");
+    setRejectionReason("Sorry, your Advert Subscription placement was rejected by our System. It's either your Advert material did not follow our Community Standards, or appropriate Specifications were not maintained. Click below for more clarification.\n\nPlease correct the very issues raised, and Submit again. Enjoy the world of Mobigate ...your World!");
     setRejectDialogOpen(true);
   };
 
@@ -305,7 +305,7 @@ export default function AdminManageAdverts() {
     setBulkAction(action);
     if (action === "reject") {
       // Pre-fill with default rejection template for bulk actions
-      setRejectionReason("ADVERT SUBSCRIPTION REJECTED!\n\nSorry, your Advert Subscription placement was rejected by our System. It's either your Advert material did not follow our Community Standards, or appropriate Specifications were not maintained. Click below for more clarification.\n\nPlease correct the very issues raised, and Submit again. Enjoy the world of Mobigate ...your World!");
+      setRejectionReason("Sorry, your Advert Subscription placement was rejected by our System. It's either your Advert material did not follow our Community Standards, or appropriate Specifications were not maintained. Click below for more clarification.\n\nPlease correct the very issues raised, and Submit again. Enjoy the world of Mobigate ...your World!");
     }
     setBulkActionDialogOpen(true);
   };
