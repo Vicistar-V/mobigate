@@ -70,9 +70,9 @@ export function DisplayModeCarousel({
       >
         {/* Cards Container */}
         <div
-          className={`flex gap-4 pl-4 ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
+          className={`flex gap-4 ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
           style={{
-            transform: `translateX(calc(-${currentIndex * 85}% - ${currentIndex * 16}px + ${dragOffset}px))`,
+            transform: `translateX(calc(50% - 42.5% - ${currentIndex * 85}% - ${currentIndex * 16}px + ${dragOffset}px))`,
           }}
         >
           {modes.map((mode) => (
