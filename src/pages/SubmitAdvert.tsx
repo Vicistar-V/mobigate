@@ -860,21 +860,26 @@ export default function SubmitAdvert() {
   };
 
   const handleAddSlot = () => {
-    const forceScrollToTop = () => {
-      try {
-        // Fallback to instant scroll to avoid being blocked by global CSS overrides
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-        // Also reset common scrolling roots
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-        // Try to scroll likely containers as well
-        const candidates = document.querySelectorAll<HTMLElement>('main, [data-scroll-root], .scroll-area, .overflow-auto, .overflow-y-auto');
-        candidates.forEach((el) => {
-          if (el.scrollTop > 0) {
-            el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-          }
-        });
-      } catch {}
+    const smoothScrollToTop = () => {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        try {
+          // Try smooth scroll on window
+          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+          // Also scroll document roots
+          document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+          // Check for scroll containers that might need scrolling
+          const candidates = document.querySelectorAll<HTMLElement>('main, [data-scroll-root], .scroll-area, .overflow-auto, .overflow-y-auto');
+          candidates.forEach((el) => {
+            if (el.scrollTop > 0) {
+              el.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+            }
+          });
+        } catch {
+          // Fallback to instant scroll if smooth fails
+          window.scrollTo({ top: 0, left: 0 });
+        }
+      });
     };
     console.log('🎯 handleAddSlot called', { packDraft: !!packDraft, pricing: !!pricing });
     
@@ -960,7 +965,7 @@ export default function SubmitAdvert() {
         description: `Slot has been updated successfully.`,
       });
       // Scroll to top immediately after update
-      forceScrollToTop();
+      smoothScrollToTop();
     } else {
       updatedDraft = addSlotToPack(packDraft, formData, pricing);
       console.log('✅ Slot added', { totalSlots: updatedDraft.slots.length });
@@ -969,7 +974,7 @@ export default function SubmitAdvert() {
         description: `Slot ${updatedDraft.slots.length} added to your pack.`,
       });
       // Scroll to top immediately after adding slot
-      forceScrollToTop();
+      smoothScrollToTop();
     }
 
     setPackDraft(updatedDraft);
