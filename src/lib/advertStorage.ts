@@ -139,6 +139,8 @@ export function updateAdvertStatus(
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 24);
       adverts[index].expiresAt = expiresAt;
+      // Set standard approval message
+      adverts[index].approvedReason = "Congratulations! Your advertisement has been reviewed and approved by our team. Your advert meets all our quality standards and guidelines. It is now active and will begin displaying to your target audience according to your selected DPD package and catchment market settings. Thank you for advertising with us!";
     }
 
     if (status === "rejected" && rejectedReason) {
@@ -210,6 +212,7 @@ export function updateAdvertMedia(
     adverts[index].status = "pending";
     adverts[index].approvedAt = undefined;
     adverts[index].rejectedReason = undefined;
+    adverts[index].approvedReason = undefined;
     adverts[index].expiresAt = undefined;
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(adverts));

@@ -21,6 +21,7 @@ export const mockAdverts: SavedAdvert[] = [
     launchDate: new Date("2025-02-01"),
     fileUrls: ["https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop"],
     status: "active",
+    approvedReason: "Congratulations! Your advertisement has been reviewed and approved by our team. Your advert meets all our quality standards and guidelines. It is now active and will begin displaying to your target audience according to your selected DPD package and catchment market settings. Thank you for advertising with us!",
     pricing: {
       setupFee: 30000,
       subscriptionMonths: 1,
@@ -125,6 +126,7 @@ export const mockAdverts: SavedAdvert[] = [
       "https://images.unsplash.com/photo-1533750516457-a7f992034fec?w=800&auto=format&fit=crop"
     ],
     status: "paused",
+    approvedReason: "Congratulations! Your advertisement has been reviewed and approved by our team. Your advert meets all our quality standards and guidelines. It is now active and will begin displaying to your target audience according to your selected DPD package and catchment market settings. Thank you for advertising with us!",
     pricing: {
       setupFee: 40000,
       subscriptionMonths: 1,

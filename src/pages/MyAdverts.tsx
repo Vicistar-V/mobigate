@@ -59,6 +59,8 @@ export default function MyAdverts() {
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
   const [rejectionReasonDialogOpen, setRejectionReasonDialogOpen] = useState(false);
   const [selectedRejectionReason, setSelectedRejectionReason] = useState<string>("");
+  const [approvalReasonDialogOpen, setApprovalReasonDialogOpen] = useState(false);
+  const [selectedApprovalReason, setSelectedApprovalReason] = useState<string>("");
 
   useEffect(() => {
     loadAdverts();
@@ -343,6 +345,27 @@ export default function MyAdverts() {
               </Button>
             </div>
           )}
+
+          {/* Approved Reason */}
+          {(advert.status === "approved" || advert.status === "active") && advert.approvedReason && (
+            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="text-sm text-primary font-medium mb-1">Approval Message</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {advert.approvedReason}
+              </p>
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 mt-1 text-primary hover:text-primary/80 text-xs"
+                onClick={() => {
+                  setSelectedApprovalReason(advert.approvedReason || "");
+                  setApprovalReasonDialogOpen(true);
+                }}
+              >
+                View More →
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -371,6 +394,8 @@ export default function MyAdverts() {
             <TabsTrigger value="all">All ({adverts.length})</TabsTrigger>
             <TabsTrigger value="active">Active ({filterAdverts("active").length})</TabsTrigger>
             <TabsTrigger value="pending">Pending ({filterAdverts("pending").length})</TabsTrigger>
+            <TabsTrigger value="approved">Approved ({filterAdverts("approved").length})</TabsTrigger>
+            <TabsTrigger value="rejected">Rejected ({filterAdverts("rejected").length})</TabsTrigger>
             <TabsTrigger value="paused">Paused ({filterAdverts("paused").length})</TabsTrigger>
             <TabsTrigger value="expired">Expired ({filterAdverts("expired").length})</TabsTrigger>
           </TabsList>
@@ -495,6 +520,41 @@ export default function MyAdverts() {
                 className="w-full sm:w-auto"
               >
                 Update Advert
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Approval Reason Dialog */}
+      <Dialog open={approvalReasonDialogOpen} onOpenChange={setApprovalReasonDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                <Eye className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-primary">Approval Message</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your advert has been approved
+                </p>
+              </div>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-muted/50 border border-border">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {selectedApprovalReason}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setApprovalReasonDialogOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                Close
               </Button>
             </div>
           </div>

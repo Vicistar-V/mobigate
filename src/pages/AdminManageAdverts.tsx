@@ -484,6 +484,19 @@ export default function AdminManageAdverts() {
             </div>
           )}
 
+          {/* Approved Reason */}
+          {(advert.status === "approved" || advert.status === "active") && advert.approvedReason && (
+            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-primary font-medium">Approval Message</p>
+                  <p className="text-xs text-muted-foreground mt-1">{advert.approvedReason}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Separator />
 
           {/* Admin Action Buttons */}

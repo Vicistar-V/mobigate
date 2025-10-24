@@ -231,6 +231,7 @@ export interface SavedAdvert {
   approvedAt?: Date;
   expiresAt?: Date;
   rejectedReason?: string;
+  approvedReason?: string;
   packId?: string; // Reference to SlotPackDraft if part of a pack
   slotNumber?: number; // Position in the pack
   contactPhone?: string;
