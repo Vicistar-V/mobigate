@@ -137,15 +137,6 @@ export function AccreditationVerification({ onVerified, onBack }: AccreditationV
                 Contact our support team to become an accredited advertiser and unlock exclusive benefits.
               </AlertDescription>
             </Alert>
-
-            {/* Testing codes hint - remove in production */}
-            <Alert className="bg-muted border-dashed">
-              <AlertDescription className="text-xs">
-                <strong>For testing, try:</strong>
-                <br />
-                GOLD-2024-MOBIGATE, SILVER-2024-ADVERTISER, BRONZE-2024-STARTER, or PLATINUM-2024-PREMIUM
-              </AlertDescription>
-            </Alert>
           </CardContent>
         </Card>
       </div>
