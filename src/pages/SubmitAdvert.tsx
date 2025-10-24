@@ -943,6 +943,8 @@ export default function SubmitAdvert() {
         title: "Slot updated",
         description: `Slot has been updated successfully.`,
       });
+      // Scroll to top immediately after update
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       updatedDraft = addSlotToPack(packDraft, formData, pricing);
       console.log('✅ Slot added', { totalSlots: updatedDraft.slots.length });
@@ -950,14 +952,13 @@ export default function SubmitAdvert() {
         title: "Slot added",
         description: `Slot ${updatedDraft.slots.length} added to your pack.`,
       });
+      // Scroll to top immediately after adding slot
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     setPackDraft(updatedDraft);
     console.log('🔄 Pack draft updated, resetting form');
     resetSlotForm();
-    
-    // Scroll to top for next slot
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleEditSlot = (slotId: string) => {
