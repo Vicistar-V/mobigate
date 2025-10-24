@@ -2014,6 +2014,10 @@ export default function SubmitAdvert() {
             launchDate,
             files: uploadedFiles,
             agreed,
+            contactPhone: contactPhone || undefined,
+            contactMethod: contactPhone ? contactMethod : undefined,
+            contactEmail: contactEmail || undefined,
+            websiteUrl: websiteUrl || undefined,
           }}
         />
       )}
