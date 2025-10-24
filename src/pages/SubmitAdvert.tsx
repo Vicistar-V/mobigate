@@ -48,6 +48,7 @@ import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
 import { SlotPackManager } from "@/components/advert/SlotPackManager";
 import { SlotPackSummary } from "@/components/advert/SlotPackSummary";
 import { UserTypeSelector } from "@/components/advert/UserTypeSelector";
+import { getSlotPack, validateSlotCount } from "@/data/slotPacks";
 import { AccreditationVerification } from "@/components/advert/AccreditationVerification";
 import { AccreditationTier } from "@/lib/accreditationUtils";
 import { 
@@ -59,7 +60,6 @@ import {
   canPublishPack,
   clearPackDraft
 } from "@/lib/slotPackStorage";
-import { validateSlotCount } from "@/data/slotPacks";
 
 const advertCategories = [
   { value: "pictorial" as AdvertCategory, label: "Pictorial/Photo Ads" },
@@ -978,8 +978,17 @@ export default function SubmitAdvert() {
     }
 
     setPackDraft(updatedDraft);
-    console.log('🔄 Pack draft updated, resetting form');
-    resetSlotForm();
+    
+    // Check if we've reached the max slots - if so, don't show form anymore
+    const pack = getSlotPack(updatedDraft.packId);
+    const reachedMax = pack && updatedDraft.slots.length >= pack.maxSlots;
+    
+    if (!reachedMax) {
+      console.log('🔄 Pack draft updated, resetting form');
+      resetSlotForm();
+    } else {
+      console.log('🎯 Max slots reached, hiding form');
+    }
   };
 
   const handleEditSlot = (slotId: string) => {
