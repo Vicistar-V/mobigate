@@ -28,7 +28,7 @@ export function AccreditationVerification({ onVerified, onBack }: AccreditationV
 
   const handleVerify = async () => {
     if (!code.trim()) {
-      setError("Please enter your accreditation code");
+      setError("Please enter your Accreditation Code");
       return;
     }
 
@@ -132,9 +132,24 @@ export function AccreditationVerification({ onVerified, onBack }: AccreditationV
 
             <Alert>
               <AlertDescription className="text-sm">
-                <strong>Don't have a code?</strong>
+                <strong>Don't have an Accreditation Code?</strong>
                 <br />
-                Contact our support team to become an accredited advertiser and unlock exclusive benefits.
+                Contact our{" "}
+                <a 
+                  href="mailto:support@mobigate.com" 
+                  className="text-primary hover:text-primary/80 underline font-medium"
+                >
+                  Support Team
+                </a>{" "}
+                to become an{" "}
+                <a 
+                  href="#" 
+                  onClick={(e) => { e.preventDefault(); /* Add accreditation info modal/page */ }}
+                  className="text-primary hover:text-primary/80 font-medium"
+                >
+                  Accredited Advertiser
+                </a>{" "}
+                and unlock exclusive benefits.
               </AlertDescription>
             </Alert>
           </CardContent>

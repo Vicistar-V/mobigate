@@ -16,7 +16,7 @@ export function SlotPackSelector({ selectedPackId, onSelectPack, excludeEntry }:
       <div>
         <h2 className="text-2xl font-bold mb-2">Choose Your Slot Pack</h2>
         <p className="text-muted-foreground">
-          Select a pack to create multiple adverts with additional discounts
+          Select a pack to create multiple Adverts with additional discounts
         </p>
       </div>
 

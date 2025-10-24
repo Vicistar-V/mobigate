@@ -7,7 +7,7 @@ export const SLOT_PACKS: SlotPack[] = [
     minSlots: 1,
     maxSlots: 2,
     discountPercentage: 0,
-    description: "Perfect for testing - 1-2 adverts at full price"
+    description: "Perfect for testing - 1-2 Adverts at full price"
   },
   {
     id: "basic",
@@ -15,7 +15,7 @@ export const SLOT_PACKS: SlotPack[] = [
     minSlots: 3,
     maxSlots: 4,
     discountPercentage: 20,
-    description: "Perfect for small campaigns - 3-4 adverts with 20% discount"
+    description: "Perfect for small campaigns - 3-4 Adverts with 20% discount"
   },
   {
     id: "standard",
@@ -23,7 +23,7 @@ export const SLOT_PACKS: SlotPack[] = [
     minSlots: 5,
     maxSlots: 7,
     discountPercentage: 25,
-    description: "Popular choice - 5-7 adverts with 25% discount"
+    description: "Popular choice - 5-7 Adverts with 25% discount"
   },
   {
     id: "business",
@@ -31,7 +31,7 @@ export const SLOT_PACKS: SlotPack[] = [
     minSlots: 8,
     maxSlots: 10,
     discountPercentage: 30,
-    description: "For growing businesses - 8-10 adverts with 30% discount"
+    description: "For growing businesses - 8-10 Adverts with 30% discount"
   },
   {
     id: "enterprise",
@@ -39,7 +39,7 @@ export const SLOT_PACKS: SlotPack[] = [
     minSlots: 11,
     maxSlots: 15,
     discountPercentage: 35,
-    description: "Maximum impact - 11-15 adverts with 35% discount"
+    description: "Maximum impact - 11-15 Adverts with 35% discount"
   }
 ];
 
