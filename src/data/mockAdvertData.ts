@@ -154,6 +154,53 @@ export const mockAdverts: SavedAdvert[] = [
     updatedAt: new Date("2025-01-18"),
     approvedAt: new Date("2025-01-06"),
     expiresAt: new Date("2027-01-06")
+  },
+  {
+    id: "ad-demo-4",
+    userId: "user-123",
+    category: "video",
+    type: "single",
+    size: "10x6",
+    dpdPackage: "professional",
+    catchmentMarket: {
+      ownCity: 30,
+      ownState: 25,
+      ownCountry: 20,
+      foreignCountries: 10,
+      popularSearches: 5,
+      random: 5,
+      others: 5
+    },
+    launchDate: new Date("2025-02-15"),
+    fileUrls: ["https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&auto=format&fit=crop"],
+    status: "rejected",
+    rejectedReason: "Your advertisement has been rejected due to the following reasons: The video content contains copyrighted material that was not properly licensed. Additionally, the promotional claims made in the video could not be verified and may be misleading to viewers. Please ensure all content is original or properly licensed, and that all product claims are accurate and verifiable. If you wish to resubmit, please address these issues and provide documentation for any claims made. You may also need to update the video to remove any copyrighted music or imagery.",
+    pricing: {
+      setupFee: 50000,
+      subscriptionMonths: 1,
+      monthlyDpdCost: 5000,
+      subscriptionDiscount: 0,
+      subscriptionDiscountAmount: 0,
+      totalDpdCost: 5000,
+      dpdCost: 5000,
+      extendedExposureCost: 0,
+      recurrentAfterCost: 0,
+      recurrentEveryCost: 0,
+      totalCost: 55000,
+      totalCostMobi: 55000,
+      totalSubscriptionCost: 55000,
+      displayPerDay: 300,
+      displayFrequency: "1 Display per 5 Minutes"
+    },
+    statistics: {
+      impressions: 0,
+      clicks: 0,
+      views: 0,
+      revenue: 0,
+      displayedToday: 0
+    },
+    createdAt: new Date("2025-01-22"),
+    updatedAt: new Date("2025-01-23")
   }
 ];
 
