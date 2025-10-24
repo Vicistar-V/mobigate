@@ -704,7 +704,7 @@ export default function SubmitAdvert() {
     }
     console.log('✅ Validation passed, continuing...');
 
-    // Validate slot count - only add +1 if adding NEW slot, not when editing
+    // Validate slot count - only check MAXIMUM when adding, minimum is checked at publish
     const slotCountToValidate = editingSlotId 
       ? packDraft.slots.length 
       : packDraft.slots.length + 1;
@@ -718,10 +718,11 @@ export default function SubmitAdvert() {
     const validation = validateSlotCount(packDraft.packId, slotCountToValidate);
     console.log('Slot count validation result:', validation);
     
-    if (!validation.isValid) {
-      console.log('❌ Slot count validation failed:', validation.message);
+    // Only block if exceeding MAXIMUM (not minimum - that's checked at publish time)
+    if (!validation.isValid && validation.needsUpgrade) {
+      console.log('❌ Maximum slot count exceeded');
       toast({
-        title: validation.needsUpgrade ? "Pack limit reached" : "Validation Error",
+        title: "Pack limit reached",
         description: validation.message,
         variant: "destructive",
       });
