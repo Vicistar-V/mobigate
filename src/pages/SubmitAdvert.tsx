@@ -47,6 +47,7 @@ import { getUserDiscountProfile } from "@/data/discountData";
 import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
 import { SlotPackManager } from "@/components/advert/SlotPackManager";
 import { SlotPackSummary } from "@/components/advert/SlotPackSummary";
+import { UserTypeSelector } from "@/components/advert/UserTypeSelector";
 import { 
   createNewPackDraft, 
   loadPackDraft, 
@@ -172,7 +173,8 @@ export default function SubmitAdvert() {
   const userProfile = getUserDiscountProfile("current-user");
   
   // Pack system state
-  const [currentStep, setCurrentStep] = useState<"select-pack" | "fill-slot">("select-pack");
+  const [currentStep, setCurrentStep] = useState<"select-user-type" | "select-pack" | "fill-slot">("select-user-type");
+  const [userType, setUserType] = useState<"individual" | "accredited" | undefined>();
   const [packDraft, setPackDraft] = useState<SlotPackDraft | null>(null);
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
   
@@ -255,6 +257,7 @@ export default function SubmitAdvert() {
     const draft = loadPackDraft();
     if (draft) {
       setPackDraft(draft);
+      setUserType(draft.packId === "entry" ? "individual" : "accredited");
       setCurrentStep("fill-slot");
       toast({
         title: "Pack draft loaded",
@@ -599,6 +602,20 @@ export default function SubmitAdvert() {
   );
 
   // Pack system handlers
+  const handleUserTypeSelection = (type: "individual" | "accredited") => {
+    setUserType(type);
+    if (type === "individual") {
+      // Auto-create entry pack for individual users
+      const newDraft = createNewPackDraft("entry");
+      setPackDraft(newDraft);
+      setCurrentStep("fill-slot");
+      resetSlotForm();
+    } else {
+      // Accredited users go to pack selection
+      setCurrentStep("select-pack");
+    }
+  };
+
   const handlePackSelection = (packId: SlotPackId) => {
     const newDraft = createNewPackDraft(packId);
     setPackDraft(newDraft);
@@ -757,7 +774,13 @@ export default function SubmitAdvert() {
       const confirm = window.confirm("Are you sure you want to go back? Your current pack will be saved.");
       if (!confirm) return;
     }
-    setCurrentStep("select-pack");
+    
+    if (userType === "individual") {
+      setCurrentStep("select-user-type");
+    } else {
+      setCurrentStep("select-pack");
+    }
+    
     setPackDraft(null);
     resetSlotForm();
   };
@@ -766,17 +789,28 @@ export default function SubmitAdvert() {
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
-        {/* Step 1: Pack Selection */}
+        {/* Step 1: User Type Selection */}
+        {currentStep === "select-user-type" && (
+          <div className="max-w-5xl mx-auto">
+            <UserTypeSelector
+              selectedType={userType}
+              onSelectType={handleUserTypeSelection}
+            />
+          </div>
+        )}
+
+        {/* Step 2: Pack Selection (Accredited Only) */}
         {currentStep === "select-pack" && (
           <div className="max-w-6xl mx-auto">
             <SlotPackSelector
               selectedPackId={packDraft?.packId}
               onSelectPack={handlePackSelection}
+              excludeEntry={true}
             />
           </div>
         )}
 
-        {/* Step 2: Fill Slots */}
+        {/* Step 3: Fill Slots */}
         {currentStep === "fill-slot" && packDraft && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Slot Form */}
@@ -787,7 +821,7 @@ export default function SubmitAdvert() {
                 className="mb-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Pack Selection
+                Back to {userType === "individual" ? "User Type Selection" : "Pack Selection"}
               </Button>
 
               <Card className="overflow-visible">
@@ -1432,32 +1466,59 @@ export default function SubmitAdvert() {
                     >
                       Reset Form
                     </Button>
-                    <Button
-                      onClick={handleAddSlot}
-                      disabled={!category || !type || !size || !dpdPackage || uploadedFiles.length === 0 || !agreed}
-                      className="flex-1 h-14 px-6 py-4"
-                      size="lg"
-                    >
-                      {editingSlotId ? "Update Slot" : "Add to Pack"}
-                    </Button>
+                    {userType === "individual" ? (
+                      <Button
+                        onClick={handlePublish}
+                        disabled={!category || !type || !size || !dpdPackage || uploadedFiles.length === 0 || !agreed || isSubmitting}
+                        className="flex-1 h-14 px-6 py-4"
+                        size="lg"
+                      >
+                        {isSubmitting ? "Publishing..." : "Publish Advertisement"}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleAddSlot}
+                        disabled={!category || !type || !size || !dpdPackage || uploadedFiles.length === 0 || !agreed}
+                        className="flex-1 h-14 px-6 py-4"
+                        size="lg"
+                      >
+                        {editingSlotId ? "Update Slot" : "Add to Pack"}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Right: Pack Manager & Summary */}
+            {/* Right: Pack Manager & Summary or Pricing (based on user type) */}
             <div className="space-y-4">
-              <SlotPackManager
-                packDraft={packDraft}
-                onAddSlot={() => {
-                  if (!editingSlotId) resetSlotForm();
-                }}
-                onEditSlot={handleEditSlot}
-                onDeleteSlot={handleDeleteSlot}
-                onPublishPack={handlePublishPack}
-                canPublish={canPublishPack(packDraft)}
-              />
-              <SlotPackSummary packDraft={packDraft} />
+              {userType === "accredited" ? (
+                <>
+                  <SlotPackManager
+                    packDraft={packDraft}
+                    onAddSlot={() => {
+                      if (!editingSlotId) resetSlotForm();
+                    }}
+                    onEditSlot={handleEditSlot}
+                    onDeleteSlot={handleDeleteSlot}
+                    onPublishPack={handlePublishPack}
+                    canPublish={canPublishPack(packDraft)}
+                  />
+                  <SlotPackSummary packDraft={packDraft} />
+                </>
+              ) : (
+                pricing && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Your Advertisement</CardTitle>
+                      <CardDescription>Individual advert pricing</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <AdvertPricingCard pricing={pricing} walletBalance={500000} variant="card" />
+                    </CardContent>
+                  </Card>
+                )
+              )}
             </div>
           </div>
         )}

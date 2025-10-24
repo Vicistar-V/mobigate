@@ -13,9 +13,10 @@ import {
 interface SlotPackSelectorProps {
   selectedPackId?: SlotPackId;
   onSelectPack: (packId: SlotPackId) => void;
+  excludeEntry?: boolean;
 }
 
-export function SlotPackSelector({ selectedPackId, onSelectPack }: SlotPackSelectorProps) {
+export function SlotPackSelector({ selectedPackId, onSelectPack, excludeEntry }: SlotPackSelectorProps) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
@@ -36,7 +37,7 @@ export function SlotPackSelector({ selectedPackId, onSelectPack }: SlotPackSelec
           className="w-full"
         >
           <CarouselContent className="ml-0">
-            {SLOT_PACKS.map((pack) => (
+            {SLOT_PACKS.filter(pack => !excludeEntry || pack.id !== "entry").map((pack) => (
               <CarouselItem key={pack.id} className="pl-0 basis-[85%]">
                 <Card
                   className={`cursor-pointer transition-all hover:shadow-lg ${
@@ -103,7 +104,7 @@ export function SlotPackSelector({ selectedPackId, onSelectPack }: SlotPackSelec
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {SLOT_PACKS.map((pack) => (
+        {SLOT_PACKS.filter(pack => !excludeEntry || pack.id !== "entry").map((pack) => (
           <Card
             key={pack.id}
             className={`cursor-pointer transition-all hover:shadow-lg ${
