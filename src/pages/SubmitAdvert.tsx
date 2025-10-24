@@ -1148,7 +1148,7 @@ export default function SubmitAdvert() {
                     <p className="text-xs font-medium text-yellow-900 dark:text-yellow-100 mb-1">
                       Original Rejection Reason:
                     </p>
-                    <p className="text-xs text-yellow-800 dark:text-yellow-200 leading-relaxed">
+                    <p className="text-xs text-yellow-800 dark:text-yellow-200 leading-relaxed line-clamp-3">
                       {editBanner.rejectionReason}
                     </p>
                   </div>
