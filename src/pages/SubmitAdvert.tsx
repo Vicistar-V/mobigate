@@ -860,6 +860,22 @@ export default function SubmitAdvert() {
   };
 
   const handleAddSlot = () => {
+    const forceScrollToTop = () => {
+      try {
+        // Fallback to instant scroll to avoid being blocked by global CSS overrides
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        // Also reset common scrolling roots
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        // Try to scroll likely containers as well
+        const candidates = document.querySelectorAll<HTMLElement>('main, [data-scroll-root], .scroll-area, .overflow-auto, .overflow-y-auto');
+        candidates.forEach((el) => {
+          if (el.scrollTop > 0) {
+            el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          }
+        });
+      } catch {}
+    };
     console.log('🎯 handleAddSlot called', { packDraft: !!packDraft, pricing: !!pricing });
     
     if (!packDraft || !pricing) {
@@ -944,7 +960,7 @@ export default function SubmitAdvert() {
         description: `Slot has been updated successfully.`,
       });
       // Scroll to top immediately after update
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      forceScrollToTop();
     } else {
       updatedDraft = addSlotToPack(packDraft, formData, pricing);
       console.log('✅ Slot added', { totalSlots: updatedDraft.slots.length });
@@ -953,7 +969,7 @@ export default function SubmitAdvert() {
         description: `Slot ${updatedDraft.slots.length} added to your pack.`,
       });
       // Scroll to top immediately after adding slot
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      forceScrollToTop();
     }
 
     setPackDraft(updatedDraft);
