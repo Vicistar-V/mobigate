@@ -15,7 +15,7 @@ export function UserTypeSelector({ selectedType, onSelectType }: UserTypeSelecto
     {
       type: "individual" as UserType,
       icon: User,
-      title: "Individual Advertisement",
+      title: "Individual Advertiser",
       description: "Create a single advertisement quickly and easily",
       badge: "Quick Start",
       badgeClass: "bg-blue-500 hover:bg-blue-600 text-white"
@@ -23,7 +23,7 @@ export function UserTypeSelector({ selectedType, onSelectType }: UserTypeSelecto
     {
       type: "accredited" as UserType,
       icon: Award,
-      title: "Accredited Users",
+      title: "Accredited Advertiser",
       description: "Access slot packs with volume discounts and premium features",
       badge: "20-35% Discount",
       badgeClass: "bg-green-500 hover:bg-green-600 text-white"
