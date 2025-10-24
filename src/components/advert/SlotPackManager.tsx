@@ -30,6 +30,11 @@ export function SlotPackManager({
   const progress = (filledSlots / pack.minSlots) * 100;
   const canAddMore = filledSlots < pack.maxSlots;
 
+  const handleAddSlot = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    onAddSlot();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -108,7 +113,7 @@ export function SlotPackManager({
           <Button
             className="flex-1 w-full sm:w-auto"
             variant="outline"
-            onClick={onAddSlot}
+            onClick={handleAddSlot}
             disabled={!canAddMore}
           >
             <Plus className="h-4 w-4 mr-2" />
