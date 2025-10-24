@@ -63,7 +63,7 @@ export function MultipleCountCard({ count, selected, category, displayMode, onSe
     <Card
       className={cn(
         "p-2 sm:p-3 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md",
-        index % 2 === 0 && "bg-accent/10",
+        Math.floor(index / 2) % 2 === index % 2 && "bg-accent/10",
         selected && "border-primary border-2 bg-primary/5 shadow-lg"
       )}
       onClick={onSelect}
