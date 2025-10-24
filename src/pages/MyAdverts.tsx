@@ -501,8 +501,7 @@ export default function MyAdverts() {
                 <X className="h-5 w-5 text-destructive" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-destructive">Rejection Reason</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground">
                   Your advert was rejected by the admin
                 </p>
               </div>
@@ -546,8 +545,7 @@ export default function MyAdverts() {
                 <Eye className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-primary">Approval Message</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground">
                   Your advert has been approved
                 </p>
               </div>
