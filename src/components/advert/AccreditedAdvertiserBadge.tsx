@@ -18,30 +18,7 @@ const TIER_COLORS: Record<AccreditedAdvertiserTier, string> = {
 
 export const AccreditedAdvertiserBadge = ({ tier, totalCampaigns }: AccreditedAdvertiserBadgeProps) => {
   if (!tier) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant="outline" className="gap-1 cursor-help">
-              <Info className="h-3 w-3" />
-              Not Accredited
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs">
-            <p className="font-semibold mb-2">Become an Accredited Advertiser</p>
-            <p className="text-sm text-muted-foreground mb-2">
-              Complete successful campaigns to unlock discount tiers:
-            </p>
-            <ul className="text-xs space-y-1">
-              <li>• Bronze (5%): 50+ campaigns</li>
-              <li>• Silver (10%): 100+ campaigns</li>
-              <li>• Gold (15%): 250+ campaigns</li>
-              <li>• Platinum (20%): 500+ campaigns</li>
-            </ul>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
+    return null;
   }
 
   const requirements = getAccreditedTierRequirements(tier);
