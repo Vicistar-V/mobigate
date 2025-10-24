@@ -61,7 +61,7 @@ export function DisplayModeCard({ mode, selected, category, onSelect }: DisplayM
             {isSingle ? "One advert" : "2-10 adverts"}
           </p>
 
-          <div className="mt-2 pt-2 border-t">
+          <div className="mt-2 border-t">
             <p className="text-xs font-medium text-muted-foreground">Base Setup:</p>
             <p className="text-primary font-semibold text-sm mt-0.5">
               {category === "pictorial" ? pictorialPrice : videoPrice}
