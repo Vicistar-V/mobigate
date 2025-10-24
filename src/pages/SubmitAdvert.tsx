@@ -389,104 +389,124 @@ export default function SubmitAdvert() {
     }
   };
 
-  const validateForm = () => {
+  const validateSlotForm = (showToast: boolean = true): boolean => {
+    // Category validation
     if (!category) {
-      toast({
-        title: "Validation Error",
-        description: "Please select an advert category",
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: "Please select an advert category", variant: "destructive" });
       return false;
     }
 
+    // Display Mode validation
     if (!displayMode) {
-      toast({
-        title: "Validation Error",
-        description: "Please select display mode (Single or Multiple)",
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: "Please select display mode (Single or Multiple)", variant: "destructive" });
       return false;
     }
 
+    // Multiple Count validation (for multiple/rollout displays)
     if ((displayMode === "multiple" || displayMode === "rollout") && !multipleCount) {
-      toast({
-        title: "Validation Error",
-        description: "Please select the number of multiple displays",
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: "Please select the number of multiple displays", variant: "destructive" });
       return false;
     }
 
+    // Type validation
     if (!type) {
-      toast({
-        title: "Validation Error",
-        description: "Display type could not be determined",
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: "Display type could not be determined", variant: "destructive" });
       return false;
     }
 
+    // Size validation
     if (!size) {
-      toast({
-        title: "Validation Error",
-        description: "Please select advert size",
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: "Please select advert size", variant: "destructive" });
       return false;
     }
 
-    // Validate roll-out size restrictions
+    // Roll-out size restrictions
     if (displayMode === "rollout" && !["5x6", "6.5x6", "10x6"].includes(size)) {
-      toast({
-        title: "Validation Error",
-        description: "Roll-out displays only support 5x6, 6.5x6, and 10x6 sizes",
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: "Roll-out displays only support 5x6, 6.5x6, and 10x6 sizes", variant: "destructive" });
       return false;
     }
 
+    // DPD Package validation
     if (!dpdPackage) {
-      toast({
-        title: "Validation Error",
-        description: "Please select a DPD package",
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: "Please select a DPD package", variant: "destructive" });
       return false;
     }
 
+    // Subscription months validation
+    if (!subscriptionMonths || subscriptionMonths < 1) {
+      if (showToast) toast({ title: "Validation Error", description: "Please select a valid subscription duration", variant: "destructive" });
+      return false;
+    }
+
+    // File upload validation
     const requiredFiles = getRequiredFiles();
     if (uploadedFiles.length !== requiredFiles) {
-      toast({
-        title: "Validation Error",
-        description: `Please upload exactly ${requiredFiles} file(s) for ${type} display`,
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: `Please upload exactly ${requiredFiles} file(s) for ${type} display`, variant: "destructive" });
       return false;
     }
 
+    // Catchment market validation
     if (catchmentTotal !== 100) {
-      toast({
-        title: "Validation Error",
-        description: `Catchment market percentages must total 100% (current: ${catchmentTotal}%)`,
-        variant: "destructive",
-      });
+      if (showToast) toast({ title: "Validation Error", description: `Catchment market percentages must total 100% (current: ${catchmentTotal}%)`, variant: "destructive" });
       return false;
     }
 
-    if (!agreed) {
-      toast({
-        title: "Validation Error",
-        description: "Please agree to the terms and conditions",
-        variant: "destructive",
-      });
+    // Age range validation
+    const minAge = catchmentMarket.ageRange?.min || 0;
+    const maxAge = catchmentMarket.ageRange?.max || 0;
+    if (minAge < 18 || minAge > 100) {
+      if (showToast) toast({ title: "Validation Error", description: "Minimum age must be between 18 and 100", variant: "destructive" });
       return false;
+    }
+    if (maxAge < 18 || maxAge > 100) {
+      if (showToast) toast({ title: "Validation Error", description: "Maximum age must be between 18 and 100", variant: "destructive" });
+      return false;
+    }
+    if (minAge >= maxAge) {
+      if (showToast) toast({ title: "Validation Error", description: "Minimum age must be less than maximum age", variant: "destructive" });
+      return false;
+    }
+
+    // Terms agreement validation
+    if (!agreed) {
+      if (showToast) toast({ title: "Validation Error", description: "Please agree to the terms and conditions", variant: "destructive" });
+      return false;
+    }
+
+    // Optional fields validation (if provided, must be valid)
+    if (contactPhone && contactPhone.trim().length > 0) {
+      const phoneDigits = contactPhone.replace(/\D/g, '');
+      if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+        if (showToast) toast({ title: "Validation Error", description: "Phone number must contain 10-15 digits", variant: "destructive" });
+        return false;
+      }
+    }
+
+    if (contactEmail && contactEmail.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contactEmail)) {
+        if (showToast) toast({ title: "Validation Error", description: "Please enter a valid email address", variant: "destructive" });
+        return false;
+      }
+    }
+
+    if (websiteUrl && websiteUrl.trim().length > 0) {
+      try {
+        new URL(websiteUrl);
+        if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+          throw new Error('Invalid protocol');
+        }
+      } catch {
+        if (showToast) toast({ title: "Validation Error", description: "Please enter a valid website URL (must start with http:// or https://)", variant: "destructive" });
+        return false;
+      }
     }
 
     return true;
   };
 
   const handlePublish = async () => {
-    if (!validateForm()) return;
+    if (!validateSlotForm()) return;
 
     setIsSubmitting(true);
 
@@ -638,6 +658,11 @@ export default function SubmitAdvert() {
 
   const handleAddSlot = () => {
     if (!packDraft || !pricing) return;
+
+    // Validate form before adding slot
+    if (!validateSlotForm()) {
+      return;
+    }
 
     // Validate slot count - only add +1 if adding NEW slot, not when editing
     const slotCountToValidate = editingSlotId 
@@ -1565,6 +1590,16 @@ export default function SubmitAdvert() {
                   </label>
                 </div>
 
+                {/* Validation Status Alert */}
+                {!validateSlotForm(false) && (
+                  <Alert variant="destructive" className="animate-in fade-in">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Please complete all required fields before {userType === "individual" ? "publishing" : "adding to pack"}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-3 pt-3">
                     <Button
@@ -1578,7 +1613,18 @@ export default function SubmitAdvert() {
                     {userType === "individual" ? (
                       <Button
                         onClick={handlePublish}
-                        disabled={!category || !type || !size || !dpdPackage || uploadedFiles.length === 0 || !agreed || isSubmitting}
+                        disabled={
+                          !category || 
+                          !displayMode ||
+                          ((displayMode === "multiple" || displayMode === "rollout") && !multipleCount) ||
+                          !type || 
+                          !size || 
+                          !dpdPackage || 
+                          uploadedFiles.length === 0 || 
+                          catchmentTotal !== 100 ||
+                          !agreed || 
+                          isSubmitting
+                        }
                         className="flex-1 h-14 px-6 py-4"
                         size="lg"
                       >
@@ -1587,7 +1633,17 @@ export default function SubmitAdvert() {
                     ) : (
                       <Button
                         onClick={handleAddSlot}
-                        disabled={!category || !type || !size || !dpdPackage || uploadedFiles.length === 0 || !agreed}
+                        disabled={
+                          !category || 
+                          !displayMode ||
+                          ((displayMode === "multiple" || displayMode === "rollout") && !multipleCount) ||
+                          !type || 
+                          !size || 
+                          !dpdPackage || 
+                          uploadedFiles.length === 0 || 
+                          catchmentTotal !== 100 ||
+                          !agreed
+                        }
                         className="flex-1 h-14 px-6 py-4"
                         size="lg"
                       >
