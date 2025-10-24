@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock, ArrowLeft, Phone } from "lucide-react";
@@ -182,6 +183,10 @@ export default function SubmitAdvert() {
   const [packDraft, setPackDraft] = useState<SlotPackDraft | null>(null);
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
   
+  // Draft detection state (for manual loading)
+  const [hasDraftAvailable, setHasDraftAvailable] = useState(false);
+  const [draftType, setDraftType] = useState<'pack' | 'individual' | null>(null);
+  
   const [category, setCategory] = useState<AdvertCategory | undefined>();
   const [displayMode, setDisplayMode] = useState<DisplayMode | undefined>();
   const [multipleCount, setMultipleCount] = useState<MultipleDisplayCount | undefined>();
@@ -256,17 +261,17 @@ export default function SubmitAdvert() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  // Load pack draft on mount
+  // Check for existing drafts on mount (without loading them)
   useEffect(() => {
-    const draft = loadPackDraft();
-    if (draft) {
-      setPackDraft(draft);
-      setUserType(draft.packId === "entry" ? "individual" : "accredited");
-      setCurrentStep("fill-slot");
-      toast({
-        title: "Pack draft loaded",
-        description: `Your ${draft.slots.length}-slot draft has been restored.`,
-      });
+    const packDraft = loadPackDraft();
+    const individualDraft = loadAdvertDraft();
+    
+    if (packDraft) {
+      setHasDraftAvailable(true);
+      setDraftType('pack');
+    } else if (individualDraft) {
+      setHasDraftAvailable(true);
+      setDraftType('individual');
     }
   }, []);
 
@@ -274,36 +279,6 @@ export default function SubmitAdvert() {
   useEffect(() => {
     localStorage.setItem('advert-catchment-locked', JSON.stringify(catchmentLocked));
   }, [catchmentLocked]);
-
-  // Load old draft on mount (for backward compatibility)
-  useEffect(() => {
-    if (!packDraft) {
-      const draft = loadAdvertDraft();
-      if (draft) {
-        if (draft.category) setCategory(draft.category as AdvertCategory);
-        if (draft.type) {
-          const loadedType = draft.type as AdvertType;
-          setType(loadedType);
-          setDisplayMode(getDisplayMode(loadedType));
-          const count = getMultipleCount(loadedType);
-          if (count) setMultipleCount(count);
-        }
-        if (draft.size) setSize(draft.size as AdvertSize);
-        if (draft.dpdPackage) setDpdPackage(draft.dpdPackage as DPDPackageId);
-        if (draft.subscriptionMonths) setSubscriptionMonths(draft.subscriptionMonths as SubscriptionDuration);
-        if (draft.extendedExposure) setExtendedExposureTime(draft.extendedExposure);
-        if (draft.recurrentAfter) setRecurrentAfter(draft.recurrentAfter);
-        if (draft.recurrentEvery) setRecurrentEvery(draft.recurrentEvery);
-        if (draft.launchDate) setLaunchDate(new Date(draft.launchDate));
-        if (draft.catchmentMarket) setCatchmentMarket(draft.catchmentMarket);
-        if (draft.agreed) setAgreed(draft.agreed);
-        if (draft.contactPhone) setContactPhone(draft.contactPhone);
-        if (draft.contactMethod) setContactMethod(draft.contactMethod);
-        if (draft.contactEmail) setContactEmail(draft.contactEmail);
-        if (draft.websiteUrl) setWebsiteUrl(draft.websiteUrl);
-      }
-    }
-  }, [packDraft]);
 
   // Auto-save draft
   useEffect(() => {
@@ -822,13 +797,102 @@ export default function SubmitAdvert() {
     resetSlotForm();
   };
 
+  const handleLoadDraft = () => {
+    if (draftType === 'pack') {
+      const draft = loadPackDraft();
+      if (draft) {
+        setPackDraft(draft);
+        setUserType(draft.packId === "entry" ? "individual" : "accredited");
+        setCurrentStep("fill-slot");
+        setHasDraftAvailable(false);
+        toast({
+          title: "Pack draft loaded",
+          description: `Your ${draft.slots.length}-slot draft has been restored.`,
+        });
+      }
+    } else if (draftType === 'individual') {
+      const draft = loadAdvertDraft();
+      if (draft) {
+        if (draft.category) setCategory(draft.category as AdvertCategory);
+        if (draft.type) {
+          const loadedType = draft.type as AdvertType;
+          setType(loadedType);
+          setDisplayMode(getDisplayMode(loadedType));
+          const count = getMultipleCount(loadedType);
+          if (count) setMultipleCount(count);
+        }
+        if (draft.size) setSize(draft.size as AdvertSize);
+        if (draft.dpdPackage) setDpdPackage(draft.dpdPackage as DPDPackageId);
+        if (draft.subscriptionMonths) setSubscriptionMonths(draft.subscriptionMonths as SubscriptionDuration);
+        if (draft.extendedExposure) setExtendedExposureTime(draft.extendedExposure);
+        if (draft.recurrentAfter) setRecurrentAfter(draft.recurrentAfter);
+        if (draft.recurrentEvery) setRecurrentEvery(draft.recurrentEvery);
+        if (draft.launchDate) setLaunchDate(new Date(draft.launchDate));
+        if (draft.catchmentMarket) setCatchmentMarket(draft.catchmentMarket);
+        if (draft.agreed) setAgreed(draft.agreed);
+        if (draft.contactPhone) setContactPhone(draft.contactPhone);
+        if (draft.contactMethod) setContactMethod(draft.contactMethod);
+        if (draft.contactEmail) setContactEmail(draft.contactEmail);
+        if (draft.websiteUrl) setWebsiteUrl(draft.websiteUrl);
+        
+        setUserType("individual");
+        setCurrentStep("fill-slot");
+        setHasDraftAvailable(false);
+        
+        toast({
+          title: "Draft loaded",
+          description: "Your saved advert has been restored.",
+        });
+      }
+    }
+  };
+
+  const handleDiscardDraft = () => {
+    if (draftType === 'pack') {
+      clearPackDraft();
+    } else if (draftType === 'individual') {
+      clearAdvertDraft();
+    }
+    
+    setHasDraftAvailable(false);
+    setDraftType(null);
+    
+    toast({
+      title: "Draft discarded",
+      description: "Starting fresh with a new advert.",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
         {/* Step 1: User Type Selection */}
         {currentStep === "select-user-type" && (
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto space-y-6">
+            {/* Draft Available Alert */}
+            {hasDraftAvailable && (
+              <Alert className="border-primary/50 bg-primary/5">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between flex-1 gap-4">
+                  <div>
+                    <h4 className="font-semibold">You have an unfinished {draftType === 'pack' ? 'pack' : 'advert'} draft</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Would you like to continue where you left off or start fresh?
+                    </p>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button variant="outline" size="sm" onClick={handleDiscardDraft}>
+                      Start Fresh
+                    </Button>
+                    <Button size="sm" onClick={handleLoadDraft}>
+                      Continue Draft
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <UserTypeSelector
               selectedType={userType}
               onSelectType={handleUserTypeSelection}
