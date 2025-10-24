@@ -23,23 +23,30 @@ export const AdvertPricingCard = ({
       {/* Setup Fee Section */}
       <div className="space-y-2">
         <div className="text-sm font-semibold text-primary mb-1">One-Time Setup Fee</div>
-        {pricing.baseSetupFee !== undefined && pricing.sizeFee !== undefined && pricing.sizeFee > 0 && (
+        {pricing.baseSetupFee !== undefined && (
           <>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground ml-2">Base Setup</span>
+              <span className="text-muted-foreground ml-2">Base Setup Cost</span>
               <span className="font-medium">{formatCurrency(pricing.baseSetupFee)}</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground ml-2">
-                Size Fee ({pricing.sizeMultiplier ? (pricing.sizeMultiplier * 100).toFixed(1).replace(/\.0$/, '') : '0'}%)
-              </span>
-              <span className="font-medium text-primary">+{formatCurrency(pricing.sizeFee)}</span>
-            </div>
+            {pricing.sizeMultiplier !== undefined && pricing.sizeMultiplier > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground ml-2">
+                  Size Fee on Setup ({(pricing.sizeMultiplier * 100).toFixed(1).replace(/\.0$/, '')}%)
+                </span>
+                <span className="font-medium text-primary">
+                  +{formatCurrency(pricing.setupFee - pricing.baseSetupFee)}
+                </span>
+              </div>
+            )}
           </>
         )}
         <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
           <span>Total Setup Fee</span>
           <span className="text-primary">{formatCurrency(pricing.setupFee)}</span>
+        </div>
+        <div className="text-xs text-muted-foreground text-center p-2 bg-muted/20 rounded">
+          One-time payment, not recurring
         </div>
       </div>
 
@@ -49,9 +56,19 @@ export const AdvertPricingCard = ({
       <div className="space-y-2">
         <div className="text-sm font-semibold text-primary mb-1">Subscription DPD Cost</div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground ml-2">Monthly DPD Cost</span>
+          <span className="text-muted-foreground ml-2">Base Monthly DPD Cost</span>
           <span className="font-medium">{formatCurrency(pricing.monthlyDpdCost)}</span>
         </div>
+        {pricing.sizeMultiplier !== undefined && pricing.sizeMultiplier > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground ml-2">
+              Size Fee on DPD ({(pricing.sizeMultiplier * 100).toFixed(1).replace(/\.0$/, '')}%)
+            </span>
+            <span className="font-medium text-primary">
+              +{formatCurrency(Math.round(pricing.monthlyDpdCost * pricing.sizeMultiplier))}
+            </span>
+          </div>
+        )}
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground ml-2">
             Duration: {pricing.subscriptionMonths} month{pricing.subscriptionMonths > 1 ? 's' : ''}
@@ -60,7 +77,9 @@ export const AdvertPricingCard = ({
         </div>
         <div className="flex items-center justify-between text-sm font-semibold pt-1 border-t">
           <span>Total DPD Cost (before discount)</span>
-          <span className="text-primary">{formatCurrency(pricing.monthlyDpdCost * pricing.subscriptionMonths)}</span>
+          <span className="text-primary">
+            {formatCurrency((pricing.monthlyDpdCost + Math.round(pricing.monthlyDpdCost * (pricing.sizeMultiplier || 0))) * pricing.subscriptionMonths)}
+          </span>
         </div>
       </div>
 
