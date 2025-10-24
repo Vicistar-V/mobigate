@@ -57,6 +57,8 @@ export default function MyAdverts() {
   const [previewMedia, setPreviewMedia] = useState<{ url: string; type: string } | null>(null);
   const [changeMediaDialogOpen, setChangeMediaDialogOpen] = useState(false);
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
+  const [rejectionReasonDialogOpen, setRejectionReasonDialogOpen] = useState(false);
+  const [selectedRejectionReason, setSelectedRejectionReason] = useState<string>("");
 
   useEffect(() => {
     loadAdverts();
@@ -324,8 +326,21 @@ export default function MyAdverts() {
           {/* Rejected Reason */}
           {advert.status === "rejected" && advert.rejectedReason && (
             <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-              <p className="text-sm text-destructive font-medium">Rejection Reason</p>
-              <p className="text-xs text-muted-foreground mt-1">{advert.rejectedReason}</p>
+              <p className="text-sm text-destructive font-medium mb-1">Rejection Reason</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {advert.rejectedReason}
+              </p>
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 mt-1 text-destructive hover:text-destructive/80 text-xs"
+                onClick={() => {
+                  setSelectedRejectionReason(advert.rejectedReason || "");
+                  setRejectionReasonDialogOpen(true);
+                }}
+              >
+                View More →
+              </Button>
             </div>
           )}
         </CardContent>
@@ -437,6 +452,52 @@ export default function MyAdverts() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Rejection Reason Dialog */}
+      <Dialog open={rejectionReasonDialogOpen} onOpenChange={setRejectionReasonDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-full bg-destructive/10">
+                <X className="h-5 w-5 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-destructive">Rejection Reason</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your advert was rejected by the admin
+                </p>
+              </div>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-muted/50 border border-border">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {selectedRejectionReason}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setRejectionReasonDialogOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setRejectionReasonDialogOpen(false);
+                  if (selectedAdvert) {
+                    handleOpenChangeMedia(selectedAdvert);
+                  }
+                }}
+                className="w-full sm:w-auto"
+              >
+                Update Advert
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
