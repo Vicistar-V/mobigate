@@ -390,50 +390,72 @@ export default function SubmitAdvert() {
   };
 
   const validateSlotForm = (showToast: boolean = true): boolean => {
+    console.log('🔍 Validating form...', {
+      category,
+      displayMode,
+      multipleCount,
+      type,
+      size,
+      dpdPackage,
+      subscriptionMonths,
+      uploadedFiles: uploadedFiles.length,
+      catchmentTotal,
+      agreed,
+      ageRange: catchmentMarket.ageRange
+    });
+
     // Category validation
     if (!category) {
+      console.log('❌ Validation failed: No category');
       if (showToast) toast({ title: "Validation Error", description: "Please select an advert category", variant: "destructive" });
       return false;
     }
 
     // Display Mode validation
     if (!displayMode) {
+      console.log('❌ Validation failed: No displayMode');
       if (showToast) toast({ title: "Validation Error", description: "Please select display mode (Single or Multiple)", variant: "destructive" });
       return false;
     }
 
     // Multiple Count validation (for multiple/rollout displays)
     if ((displayMode === "multiple" || displayMode === "rollout") && !multipleCount) {
+      console.log('❌ Validation failed: Multiple/rollout needs multipleCount');
       if (showToast) toast({ title: "Validation Error", description: "Please select the number of multiple displays", variant: "destructive" });
       return false;
     }
 
     // Type validation
     if (!type) {
+      console.log('❌ Validation failed: No type');
       if (showToast) toast({ title: "Validation Error", description: "Display type could not be determined", variant: "destructive" });
       return false;
     }
 
     // Size validation
     if (!size) {
+      console.log('❌ Validation failed: No size');
       if (showToast) toast({ title: "Validation Error", description: "Please select advert size", variant: "destructive" });
       return false;
     }
 
     // Roll-out size restrictions
     if (displayMode === "rollout" && !["5x6", "6.5x6", "10x6"].includes(size)) {
+      console.log('❌ Validation failed: Invalid rollout size');
       if (showToast) toast({ title: "Validation Error", description: "Roll-out displays only support 5x6, 6.5x6, and 10x6 sizes", variant: "destructive" });
       return false;
     }
 
     // DPD Package validation
     if (!dpdPackage) {
+      console.log('❌ Validation failed: No DPD package');
       if (showToast) toast({ title: "Validation Error", description: "Please select a DPD package", variant: "destructive" });
       return false;
     }
 
     // Subscription months validation
     if (!subscriptionMonths || subscriptionMonths < 1) {
+      console.log('❌ Validation failed: Invalid subscription months', subscriptionMonths);
       if (showToast) toast({ title: "Validation Error", description: "Please select a valid subscription duration", variant: "destructive" });
       return false;
     }
@@ -441,12 +463,14 @@ export default function SubmitAdvert() {
     // File upload validation
     const requiredFiles = getRequiredFiles();
     if (uploadedFiles.length !== requiredFiles) {
+      console.log('❌ Validation failed: File count mismatch', { required: requiredFiles, uploaded: uploadedFiles.length });
       if (showToast) toast({ title: "Validation Error", description: `Please upload exactly ${requiredFiles} file(s) for ${type} display`, variant: "destructive" });
       return false;
     }
 
     // Catchment market validation
     if (catchmentTotal !== 100) {
+      console.log('❌ Validation failed: Catchment total not 100%', catchmentTotal);
       if (showToast) toast({ title: "Validation Error", description: `Catchment market percentages must total 100% (current: ${catchmentTotal}%)`, variant: "destructive" });
       return false;
     }
@@ -455,20 +479,24 @@ export default function SubmitAdvert() {
     const minAge = catchmentMarket.ageRange?.min || 0;
     const maxAge = catchmentMarket.ageRange?.max || 0;
     if (minAge < 18 || minAge > 100) {
+      console.log('❌ Validation failed: Invalid min age', minAge);
       if (showToast) toast({ title: "Validation Error", description: "Minimum age must be between 18 and 100", variant: "destructive" });
       return false;
     }
     if (maxAge < 18 || maxAge > 100) {
+      console.log('❌ Validation failed: Invalid max age', maxAge);
       if (showToast) toast({ title: "Validation Error", description: "Maximum age must be between 18 and 100", variant: "destructive" });
       return false;
     }
     if (minAge >= maxAge) {
+      console.log('❌ Validation failed: Min age >= max age', { minAge, maxAge });
       if (showToast) toast({ title: "Validation Error", description: "Minimum age must be less than maximum age", variant: "destructive" });
       return false;
     }
 
     // Terms agreement validation
     if (!agreed) {
+      console.log('❌ Validation failed: Terms not agreed');
       if (showToast) toast({ title: "Validation Error", description: "Please agree to the terms and conditions", variant: "destructive" });
       return false;
     }
@@ -477,6 +505,7 @@ export default function SubmitAdvert() {
     if (contactPhone && contactPhone.trim().length > 0) {
       const phoneDigits = contactPhone.replace(/\D/g, '');
       if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+        console.log('❌ Validation failed: Invalid phone', { phone: contactPhone, digits: phoneDigits.length });
         if (showToast) toast({ title: "Validation Error", description: "Phone number must contain 10-15 digits", variant: "destructive" });
         return false;
       }
@@ -485,6 +514,7 @@ export default function SubmitAdvert() {
     if (contactEmail && contactEmail.trim().length > 0) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(contactEmail)) {
+        console.log('❌ Validation failed: Invalid email', contactEmail);
         if (showToast) toast({ title: "Validation Error", description: "Please enter a valid email address", variant: "destructive" });
         return false;
       }
@@ -497,11 +527,13 @@ export default function SubmitAdvert() {
           throw new Error('Invalid protocol');
         }
       } catch {
+        console.log('❌ Validation failed: Invalid URL', websiteUrl);
         if (showToast) toast({ title: "Validation Error", description: "Please enter a valid website URL (must start with http:// or https://)", variant: "destructive" });
         return false;
       }
     }
 
+    console.log('✅ Validation passed!');
     return true;
   };
 
@@ -657,12 +689,20 @@ export default function SubmitAdvert() {
   };
 
   const handleAddSlot = () => {
-    if (!packDraft || !pricing) return;
-
-    // Validate form before adding slot
-    if (!validateSlotForm()) {
+    console.log('🎯 handleAddSlot called', { packDraft: !!packDraft, pricing: !!pricing });
+    
+    if (!packDraft || !pricing) {
+      console.log('❌ Missing packDraft or pricing', { packDraft: !!packDraft, pricing: !!pricing });
       return;
     }
+
+    // Validate form before adding slot
+    console.log('⏳ Running validation...');
+    if (!validateSlotForm()) {
+      console.log('❌ Validation failed, not adding slot');
+      return;
+    }
+    console.log('✅ Validation passed, continuing...');
 
     // Validate slot count - only add +1 if adding NEW slot, not when editing
     const slotCountToValidate = editingSlotId 
