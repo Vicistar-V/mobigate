@@ -25,24 +25,25 @@ const SETUP_FEES_MULTIPLE: Record<MultipleDisplayCount, { pictorial: number; vid
   15: { pictorial: 250000, video: 350000 },
 };
 
-const SETUP_FEES_ROLLOUT: Record<MultipleDisplayCount, number> = {
-  2: 70000,
-  3: 100000,
-  4: 140000,
-  5: 160000,
-  6: 180000,
-  7: 200000,
-  8: 220000,
-  9: 240000,
-  10: 260000,
-  15: 300000,
+const SETUP_FEES_ROLLOUT: Record<MultipleDisplayCount, { pictorial: number; video: number }> = {
+  2: { pictorial: 70000, video: 70000 },
+  3: { pictorial: 100000, video: 100000 },
+  4: { pictorial: 140000, video: 140000 },
+  5: { pictorial: 160000, video: 160000 },
+  6: { pictorial: 180000, video: 180000 },
+  7: { pictorial: 200000, video: 200000 },
+  8: { pictorial: 220000, video: 220000 },
+  9: { pictorial: 240000, video: 240000 },
+  10: { pictorial: 260000, video: 260000 },
+  15: { pictorial: 300000, video: 380000 },
 };
 
 export function MultipleCountCard({ count, selected, category, displayMode, onSelect, index }: MultipleCountCardProps) {
   let nairaFee: number;
   
   if (displayMode === "rollout") {
-    nairaFee = SETUP_FEES_ROLLOUT[count];
+    const fees = SETUP_FEES_ROLLOUT[count];
+    nairaFee = category === "pictorial" ? fees.pictorial : fees.video;
   } else {
     const fees = SETUP_FEES_MULTIPLE[count];
     nairaFee = category === "pictorial" ? fees.pictorial : fees.video;

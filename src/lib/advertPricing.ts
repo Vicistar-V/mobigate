@@ -57,7 +57,7 @@ const SETUP_FEES_ROLLOUT = {
     "rollout-8": 220000,
     "rollout-9": 240000,
     "rollout-10": 260000,
-    "rollout-15": 300000,
+    "rollout-15": 380000,
   },
 };
 
