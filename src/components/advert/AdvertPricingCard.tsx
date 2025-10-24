@@ -137,7 +137,23 @@ export const AdvertPricingCard = ({
 
       <Separator />
 
-      {/* NEW: Subscription Volume Discount Section */}
+      {/* Subtotal before subscription discount */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-base font-bold">
+          <span>Subtotal (Before Subscription Discount)</span>
+          <span className="text-primary">
+            {formatCurrency(pricing.setupFee + 
+                          (pricing.monthlyDpdCost * pricing.subscriptionMonths) + 
+                          pricing.extendedExposureCost + 
+                          pricing.recurrentAfterCost + 
+                          pricing.recurrentEveryCost)}
+          </span>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Subscription Volume Discount Section */}
       {pricing.subscriptionDiscount > 0 && (
         <>
           <div className="space-y-2 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
@@ -164,19 +180,6 @@ export const AdvertPricingCard = ({
           <Separator />
         </>
       )}
-
-      {/* Subtotal after subscription discount */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm font-semibold">
-          <span>Subtotal (After Subscription Discount)</span>
-          <span className="text-primary">
-            {formatCurrency(pricing.setupFee + pricing.totalDpdCost + 
-                          pricing.extendedExposureCost + 
-                          pricing.recurrentAfterCost + 
-                          pricing.recurrentEveryCost)}
-          </span>
-        </div>
-      </div>
 
       <Separator />
 
