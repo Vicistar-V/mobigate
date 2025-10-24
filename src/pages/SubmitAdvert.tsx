@@ -174,6 +174,9 @@ export default function SubmitAdvert() {
   // Get user discount profile (mock data for now)
   const userProfile = getUserDiscountProfile("current-user");
   
+  // Wallet balance (hardcoded for now)
+  const walletBalance = 500000;
+  
   // Pack system state
   const [currentStep, setCurrentStep] = useState<"select-user-type" | "verify-accreditation" | "select-pack" | "fill-slot">("select-user-type");
   const [userType, setUserType] = useState<"individual" | "accredited" | undefined>();
@@ -558,6 +561,12 @@ export default function SubmitAdvert() {
         userType === "individual" ? 0 : userProfile.activeAdverts
       );
 
+      // Check wallet balance
+      if (!checkSufficientBalance(pricing)) {
+        setIsSubmitting(false);
+        return;
+      }
+
       const advert = saveAdvert(
         {
           category: category as AdvertCategory,
@@ -688,6 +697,22 @@ export default function SubmitAdvert() {
     setEditingSlotId(null);
   };
 
+  // Check if user has sufficient balance
+  const checkSufficientBalance = (pricing: any): boolean => {
+    const finalAmount = pricing.finalAmountPayable ?? pricing.totalCost;
+    
+    if (walletBalance < finalAmount) {
+      toast({
+        title: "Insufficient Funds",
+        description: `You need ₦${finalAmount.toLocaleString()} but your wallet balance is ₦${walletBalance.toLocaleString()}. Please fund your wallet to continue.`,
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleAddSlot = () => {
     console.log('🎯 handleAddSlot called', { packDraft: !!packDraft, pricing: !!pricing });
     
@@ -703,6 +728,14 @@ export default function SubmitAdvert() {
       return;
     }
     console.log('✅ Validation passed, continuing...');
+
+    // Check wallet balance
+    console.log('💰 Checking wallet balance...');
+    if (!checkSufficientBalance(pricing)) {
+      console.log('❌ Insufficient balance');
+      return;
+    }
+    console.log('✅ Balance sufficient');
 
     // Validate slot count - only check MAXIMUM when adding, minimum is checked at publish
     const slotCountToValidate = editingSlotId 
@@ -1620,7 +1653,7 @@ export default function SubmitAdvert() {
 
                 {/* Cost Breakdown */}
                 {pricing ? (
-                  <AdvertPricingCard pricing={pricing} walletBalance={500000} variant="inline" />
+                  <AdvertPricingCard pricing={pricing} walletBalance={walletBalance} variant="inline" />
                 ) : (
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Cost Breakdown</h3>
@@ -1737,7 +1770,7 @@ export default function SubmitAdvert() {
                       <CardDescription>Individual advert pricing</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <AdvertPricingCard pricing={pricing} walletBalance={500000} variant="card" />
+                      <AdvertPricingCard pricing={pricing} walletBalance={walletBalance} variant="card" />
                     </CardContent>
                   </Card>
                 )
