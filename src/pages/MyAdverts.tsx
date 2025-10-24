@@ -178,7 +178,7 @@ export default function MyAdverts() {
       updateAdvertMedia(selectedAdvert.id, newMediaFiles);
       toast({
         title: "Media updated",
-        description: "Your advert media has been successfully updated.",
+        description: "Your advert has been updated and sent for admin re-approval.",
       });
       loadAdverts();
       setChangeMediaDialogOpen(false);

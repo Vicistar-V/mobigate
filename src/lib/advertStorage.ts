@@ -205,6 +205,12 @@ export function updateAdvertMedia(
 
     adverts[index].fileUrls = fileUrls;
     adverts[index].updatedAt = new Date();
+    
+    // Reset status to pending for admin re-approval
+    adverts[index].status = "pending";
+    adverts[index].approvedAt = undefined;
+    adverts[index].rejectedReason = undefined;
+    adverts[index].expiresAt = undefined;
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(adverts));
   } catch (error) {
