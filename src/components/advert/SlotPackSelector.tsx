@@ -3,12 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Check, TrendingUp, Award } from "lucide-react";
 import { SLOT_PACKS } from "@/data/slotPacks";
 import { SlotPackId } from "@/types/advert";
-import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 
 interface SlotPackSelectorProps {
   selectedPackId?: SlotPackId;
@@ -17,83 +11,6 @@ interface SlotPackSelectorProps {
 }
 
 export function SlotPackSelector({ selectedPackId, onSelectPack, excludeEntry }: SlotPackSelectorProps) {
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return (
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Choose Your Slot Pack</h2>
-          <p className="text-muted-foreground">
-            Select a pack to create multiple adverts with additional discounts
-          </p>
-        </div>
-
-        <Carousel
-          opts={{
-            align: "center",
-            loop: false,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="ml-0">
-            {SLOT_PACKS.filter(pack => !excludeEntry || pack.id !== "entry").map((pack) => (
-              <CarouselItem key={pack.id} className="pl-0 basis-[85%]">
-                <Card
-                  className={`cursor-pointer transition-all hover:shadow-lg ${
-                    selectedPackId === pack.id
-                      ? "ring-2 ring-primary shadow-lg"
-                      : "hover:border-primary/50"
-                  }`}
-                  onClick={() => onSelectPack(pack.id)}
-                >
-                  <CardContent className="p-6 space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-bold text-lg">{pack.name}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          [{pack.minSlots}-{pack.maxSlots} Slots]
-                        </p>
-                      </div>
-                      {selectedPackId === pack.id && (
-                        <Check className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {pack.discountPercentage > 0 && (
-                        <Badge className="bg-green-500 hover:bg-green-600 text-white">
-                          <TrendingUp className="h-3 w-3 mr-1" />
-                          {pack.discountPercentage}% Discount
-                        </Badge>
-                      )}
-                      
-                      {pack.id !== "entry" && (
-                        <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
-                          <Award className="h-3 w-3 mr-1" />
-                          Accredited Only
-                        </Badge>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-muted-foreground">
-                      {pack.description}
-                    </p>
-
-                    <div className="pt-2 border-t text-xs text-muted-foreground">
-                      <p>• Min: {pack.minSlots} slots required</p>
-                      <p>• Max: {pack.maxSlots} slots allowed</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div>
