@@ -709,19 +709,29 @@ export default function SubmitAdvert() {
       ? packDraft.slots.length 
       : packDraft.slots.length + 1;
     
+    console.log('🔢 Validating slot count...', { 
+      packId: packDraft.packId, 
+      slotCountToValidate,
+      editingSlotId 
+    });
+    
     const validation = validateSlotCount(packDraft.packId, slotCountToValidate);
+    console.log('Slot count validation result:', validation);
+    
     if (!validation.isValid) {
-      if (validation.needsUpgrade) {
-        toast({
-          title: "Pack limit reached",
-          description: validation.message,
-          variant: "destructive",
-        });
-      }
+      console.log('❌ Slot count validation failed:', validation.message);
+      toast({
+        title: validation.needsUpgrade ? "Pack limit reached" : "Validation Error",
+        description: validation.message,
+        variant: "destructive",
+      });
       return;
     }
+    
+    console.log('✅ Slot count valid, creating form data...');
 
     // Create form data
+    console.log('📋 Creating form data...');
     const formData: AdvertFormData = {
       category: category!,
       displayMode,
@@ -744,15 +754,18 @@ export default function SubmitAdvert() {
     };
 
     // Add or update slot
+    console.log('💾 Adding/updating slot...', { editingSlotId });
     let updatedDraft;
     if (editingSlotId) {
       updatedDraft = updateSlotInPack(packDraft, editingSlotId, formData, pricing);
+      console.log('✅ Slot updated');
       toast({
         title: "Slot updated",
         description: `Slot has been updated successfully.`,
       });
     } else {
       updatedDraft = addSlotToPack(packDraft, formData, pricing);
+      console.log('✅ Slot added', { totalSlots: updatedDraft.slots.length });
       toast({
         title: "Slot added",
         description: `Slot ${updatedDraft.slots.length} added to your pack.`,
@@ -760,6 +773,7 @@ export default function SubmitAdvert() {
     }
 
     setPackDraft(updatedDraft);
+    console.log('🔄 Pack draft updated, resetting form');
     resetSlotForm();
   };
 
