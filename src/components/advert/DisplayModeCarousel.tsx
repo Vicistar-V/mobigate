@@ -72,13 +72,13 @@ export function DisplayModeCarousel({
         <div
           className={`flex gap-4 ${!isDragging ? 'transition-transform duration-300 ease-out' : ''}`}
           style={{
-            transform: `translateX(calc(50% - 42.5% - ${currentIndex * 85}% - ${currentIndex * 16}px + ${dragOffset}px))`,
+            transform: `translateX(calc(50vw - 50% - ${currentIndex * 100}% - ${currentIndex * 16}px + ${dragOffset}px))`,
           }}
         >
           {modes.map((mode) => (
             <div
               key={mode}
-              className="min-w-[85%] flex-shrink-0"
+              className="flex-shrink-0 max-w-[85%]"
             >
               <DisplayModeCard
                 mode={mode}
