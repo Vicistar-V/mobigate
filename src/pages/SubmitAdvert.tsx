@@ -785,6 +785,18 @@ export default function SubmitAdvert() {
     resetSlotForm();
   };
 
+  const handleBackToUserTypeSelection = () => {
+    if (packDraft && packDraft.slots.length > 0) {
+      const confirm = window.confirm("Are you sure you want to go back? Any unsaved progress will be lost.");
+      if (!confirm) return;
+    }
+    
+    setCurrentStep("select-user-type");
+    setPackDraft(null);
+    setUserType(undefined);
+    resetSlotForm();
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
@@ -801,7 +813,15 @@ export default function SubmitAdvert() {
 
         {/* Step 2: Pack Selection (Accredited Only) */}
         {currentStep === "select-pack" && (
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto space-y-4">
+            <Button
+              variant="outline"
+              onClick={handleBackToUserTypeSelection}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to User Type Selection
+            </Button>
             <SlotPackSelector
               selectedPackId={packDraft?.packId}
               onSelectPack={handlePackSelection}
