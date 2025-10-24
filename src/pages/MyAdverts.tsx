@@ -15,10 +15,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { loadUserAdverts, deleteAdvert, updateAdvertStatus } from "@/lib/advertStorage";
 import { SavedAdvert } from "@/types/advert";
 import { formatCurrency } from "@/lib/advertPricing";
-import { Plus, Eye, Trash2, Play, Pause, BarChart3, Calendar, Zap } from "lucide-react";
+import { Plus, Eye, Trash2, Play, Pause, BarChart3, Calendar, Zap, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const getStatusColor = (status: SavedAdvert["status"]) => {
@@ -50,6 +51,7 @@ export default function MyAdverts() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAdvert, setSelectedAdvert] = useState<SavedAdvert | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [previewMedia, setPreviewMedia] = useState<{ url: string; type: string } | null>(null);
 
   useEffect(() => {
     loadAdverts();
@@ -160,12 +162,24 @@ export default function MyAdverts() {
           {/* Preview Images */}
           <div className="grid grid-cols-4 gap-2">
             {advert.fileUrls.slice(0, 4).map((url, index) => (
-              <div key={index} className="aspect-video bg-muted rounded overflow-hidden">
+              <div 
+                key={index} 
+                className="aspect-video bg-muted rounded overflow-hidden cursor-pointer hover:opacity-80 transition-opacity relative group"
+                onClick={() => setPreviewMedia({ url, type: advert.category })}
+              >
                 <img
                   src={url}
                   alt={`Preview ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
+                {advert.category === "video" && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                    <Play className="h-8 w-8 text-white" fill="white" />
+                  </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Eye className="h-6 w-6 text-white drop-shadow-lg" />
+                </div>
               </div>
             ))}
           </div>
@@ -302,6 +316,38 @@ export default function MyAdverts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Media Preview Dialog */}
+      <Dialog open={!!previewMedia} onOpenChange={() => setPreviewMedia(null)}>
+        <DialogContent className="max-w-4xl p-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 z-50 rounded-full bg-background/80 backdrop-blur-sm"
+            onClick={() => setPreviewMedia(null)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          {previewMedia && (
+            <div className="w-full">
+              {previewMedia.type === "video" ? (
+                <video
+                  src={previewMedia.url}
+                  controls
+                  autoPlay
+                  className="w-full h-auto max-h-[80vh]"
+                />
+              ) : (
+                <img
+                  src={previewMedia.url}
+                  alt="Preview"
+                  className="w-full h-auto max-h-[80vh] object-contain"
+                />
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       </div>
     </>
   );
