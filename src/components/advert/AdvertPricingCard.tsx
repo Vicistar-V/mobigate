@@ -253,12 +253,15 @@ export const AdvertPricingCard = ({
         </div>
 
         {hasInsufficientFunds && (
-          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-            <p className="text-sm text-destructive font-medium">Insufficient funds</p>
+          <a 
+            href="/application/buy_coins.php" 
+            className="block p-3 rounded-lg bg-destructive/10 border border-destructive/20 hover:bg-destructive/20 transition-colors cursor-pointer"
+          >
+            <p className="text-sm text-destructive font-medium">Insufficient funds on wallet</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Please fund your wallet to continue
+              <span className="underline hover:text-foreground transition-colors">Click here</span> to fund your wallet to continue
             </p>
-          </div>
+          </a>
         )}
       </div>
 
