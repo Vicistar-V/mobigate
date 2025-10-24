@@ -265,12 +265,10 @@ export const PremiumAdCard = ({
             </h3>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
               {content.description}
-            </p>
-            <div className="mt-2 p-2 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-              <p className="text-xs text-blue-900 dark:text-blue-100 leading-snug">
+              <span className="block mt-2 text-xs text-blue-600 dark:text-blue-400">
                 <strong>Note:</strong> Ensure your advert material fits properly. Edit or resize images/videos if distorted before submitting.
-              </p>
-            </div>
+              </span>
+            </p>
           </div>
           <Button
             onClick={handleCTA}
