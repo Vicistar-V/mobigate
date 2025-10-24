@@ -647,8 +647,12 @@ export default function SubmitAdvert() {
   const handleAddSlot = () => {
     if (!packDraft || !pricing) return;
 
-    // Validate slot count
-    const validation = validateSlotCount(packDraft.packId, packDraft.slots.length + 1);
+    // Validate slot count - only add +1 if adding NEW slot, not when editing
+    const slotCountToValidate = editingSlotId 
+      ? packDraft.slots.length 
+      : packDraft.slots.length + 1;
+    
+    const validation = validateSlotCount(packDraft.packId, slotCountToValidate);
     if (!validation.isValid) {
       if (validation.needsUpgrade) {
         toast({
