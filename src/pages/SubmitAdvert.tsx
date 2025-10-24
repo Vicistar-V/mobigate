@@ -1123,7 +1123,7 @@ export default function SubmitAdvert() {
                       <InfoTooltip content="Choose how many different adverts will rotate in your campaign" />
                     </Label>
                     <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
-                      {([2, 3, 4, 5, 6, 7, 8, 9, 10] as MultipleDisplayCount[]).map((count, index) => (
+                      {([2, 3, 4, 5, 6, 7, 8, 9, 10, 15] as MultipleDisplayCount[]).map((count, index) => (
                         <MultipleCountCard
                           key={count}
                           count={count}
