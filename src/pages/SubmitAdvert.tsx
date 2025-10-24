@@ -1701,6 +1701,19 @@ export default function SubmitAdvert() {
                     >
                       Reset Form
                     </Button>
+                    
+                    {/* Preview Button */}
+                    <Button
+                      variant="outline"
+                      onClick={handlePreview}
+                      disabled={!category || !type || !size || uploadedFiles.length === 0}
+                      className="flex-1 h-14 px-6 py-4"
+                      size="lg"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Preview
+                    </Button>
+                    
                     {userType === "individual" ? (
                       <Button
                         onClick={handlePublish}
