@@ -7,7 +7,7 @@ export const SLOT_PACKS: SlotPack[] = [
     minSlots: 1,
     maxSlots: 2,
     discountPercentage: 0,
-    description: "Perfect for testing - 1-2 Adverts at full price"
+    description: "Start small - 1-2 Adverts at full price"
   },
   {
     id: "basic",
