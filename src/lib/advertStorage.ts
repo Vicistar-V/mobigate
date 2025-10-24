@@ -221,3 +221,51 @@ export function updateAdvertMedia(
     throw error;
   }
 }
+
+// Temporary storage for advert edit data
+const EDIT_ADVERT_KEY = "mobigate_edit_advert_temp";
+
+export function storeAdvertForEdit(advert: SavedAdvert): string {
+  const editId = `edit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const editData = {
+    editId,
+    advert,
+    expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutes TTL
+  };
+  localStorage.setItem(EDIT_ADVERT_KEY, JSON.stringify(editData));
+  return editId;
+}
+
+export function loadAdvertForEdit(editId: string): SavedAdvert | null {
+  try {
+    const data = localStorage.getItem(EDIT_ADVERT_KEY);
+    if (!data) return null;
+
+    const editData = JSON.parse(data);
+    
+    // Check expiration
+    if (editData.expiresAt < Date.now()) {
+      localStorage.removeItem(EDIT_ADVERT_KEY);
+      return null;
+    }
+
+    // Verify edit ID matches
+    if (editData.editId !== editId) return null;
+
+    return {
+      ...editData.advert,
+      launchDate: new Date(editData.advert.launchDate),
+      createdAt: new Date(editData.advert.createdAt),
+      updatedAt: new Date(editData.advert.updatedAt),
+      approvedAt: editData.advert.approvedAt ? new Date(editData.advert.approvedAt) : undefined,
+      expiresAt: editData.advert.expiresAt ? new Date(editData.advert.expiresAt) : undefined,
+    };
+  } catch (error) {
+    console.error("Failed to load advert for edit:", error);
+    return null;
+  }
+}
+
+export function clearAdvertEditData(): void {
+  localStorage.removeItem(EDIT_ADVERT_KEY);
+}

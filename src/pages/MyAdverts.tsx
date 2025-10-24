@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { loadUserAdverts, deleteAdvert, updateAdvertStatus, updateAdvertMedia } from "@/lib/advertStorage";
+import { loadUserAdverts, deleteAdvert, updateAdvertStatus, updateAdvertMedia, storeAdvertForEdit } from "@/lib/advertStorage";
 import { SavedAdvert, getMultipleCount } from "@/types/advert";
 import { formatCurrency } from "@/lib/advertPricing";
 import { Plus, Eye, Trash2, Play, Pause, BarChart3, Calendar, Zap, X, Upload, Image as ImageIcon } from "lucide-react";
@@ -197,6 +197,17 @@ export default function MyAdverts() {
     }
   };
 
+  const handleUpdateAdvert = (advert: SavedAdvert) => {
+    // Store the advert data temporarily
+    const editId = storeAdvertForEdit(advert);
+    
+    // Navigate to submit page with edit parameter
+    navigate(`/submit-advert?edit=${editId}`);
+    
+    // Close the dialog
+    setRejectionReasonDialogOpen(false);
+  };
+
   const AdvertCard = ({ advert }: { advert: SavedAdvert }) => {
     const canPause = advert.status === "active" || advert.status === "paused";
     const daysUntilExpiry = advert.expiresAt
@@ -337,6 +348,7 @@ export default function MyAdverts() {
                 size="sm"
                 className="h-auto p-0 mt-1 text-destructive hover:text-destructive/80 text-xs"
                 onClick={() => {
+                  setSelectedAdvert(advert);
                   setSelectedRejectionReason(advert.rejectedReason || "");
                   setRejectionReasonDialogOpen(true);
                 }}
@@ -512,9 +524,8 @@ export default function MyAdverts() {
               </Button>
               <Button
                 onClick={() => {
-                  setRejectionReasonDialogOpen(false);
                   if (selectedAdvert) {
-                    handleOpenChangeMedia(selectedAdvert);
+                    handleUpdateAdvert(selectedAdvert);
                   }
                 }}
                 className="w-full sm:w-auto"

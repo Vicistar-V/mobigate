@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock, ArrowLeft, Phone } from "lucide-react";
+import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock, ArrowLeft, Phone, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { 
@@ -36,7 +36,7 @@ import {
   AdvertFormData
 } from "@/types/advert";
 import { calculateAdvertPricing, getRequiredFileCount, getSizeFeeDescription, getAllowedSizes } from "@/lib/advertPricing";
-import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft } from "@/lib/advertStorage";
+import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft, loadAdvertForEdit, clearAdvertEditData } from "@/lib/advertStorage";
 import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
 import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
@@ -186,6 +186,14 @@ export default function SubmitAdvert() {
   const [packDraft, setPackDraft] = useState<SlotPackDraft | null>(null);
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
   
+  // Edit mode state
+  const [editMode, setEditMode] = useState(false);
+  const [editingAdvertId, setEditingAdvertId] = useState<string | null>(null);
+  const [editBanner, setEditBanner] = useState<{
+    originalStatus: string;
+    rejectionReason?: string;
+  } | null>(null);
+  
   // Draft detection state (for manual loading)
   const [hasDraftAvailable, setHasDraftAvailable] = useState(false);
   const [draftType, setDraftType] = useState<'pack' | 'individual' | null>(null);
@@ -283,8 +291,98 @@ export default function SubmitAdvert() {
     localStorage.setItem('advert-catchment-locked', JSON.stringify(catchmentLocked));
   }, [catchmentLocked]);
 
+  // Check for edit mode from URL parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    
+    if (editId) {
+      const advertToEdit = loadAdvertForEdit(editId);
+      
+      if (advertToEdit) {
+        setEditMode(true);
+        setEditingAdvertId(advertToEdit.id);
+        
+        // Store rejection reason if exists for banner display
+        if (advertToEdit.status === 'rejected' && advertToEdit.rejectedReason) {
+          setEditBanner({
+            originalStatus: 'rejected',
+            rejectionReason: advertToEdit.rejectedReason
+          });
+        }
+        
+        // Pre-populate all form fields
+        setCategory(advertToEdit.category);
+        
+        // Derive display mode and count from type
+        const derivedDisplayMode = getDisplayMode(advertToEdit.type);
+        const derivedMultipleCount = getMultipleCount(advertToEdit.type);
+        
+        setDisplayMode(derivedDisplayMode);
+        setMultipleCount(derivedMultipleCount);
+        setType(advertToEdit.type);
+        setSize(advertToEdit.size);
+        setDpdPackage(advertToEdit.dpdPackage);
+        setSubscriptionMonths(advertToEdit.pricing.subscriptionMonths as SubscriptionDuration);
+        
+        // Extended exposure settings
+        if (advertToEdit.extendedExposure) {
+          setExtendedExposureTime(advertToEdit.extendedExposure);
+        }
+        if (advertToEdit.recurrentAfter) {
+          setRecurrentAfter(advertToEdit.recurrentAfter);
+        }
+        if (advertToEdit.recurrentEvery) {
+          setRecurrentEvery(advertToEdit.recurrentEvery);
+        }
+        
+        // Catchment market
+        setCatchmentMarket(advertToEdit.catchmentMarket);
+        
+        // Launch date
+        setLaunchDate(advertToEdit.launchDate);
+        
+        // Contact details
+        if (advertToEdit.contactPhone) {
+          setContactPhone(advertToEdit.contactPhone);
+        }
+        if (advertToEdit.contactMethod) {
+          setContactMethod(advertToEdit.contactMethod);
+        }
+        if (advertToEdit.contactEmail) {
+          setContactEmail(advertToEdit.contactEmail);
+        }
+        if (advertToEdit.websiteUrl) {
+          setWebsiteUrl(advertToEdit.websiteUrl);
+        }
+        
+        // Skip user type selection and pack selection for edit mode
+        setUserType("individual");
+        setCurrentStep("fill-slot");
+        
+        // Show toast notification
+        toast({
+          title: "Editing Advert",
+          description: "Make your changes and resubmit for review.",
+        });
+        
+        // Clear the temporary edit data
+        clearAdvertEditData();
+      } else {
+        toast({
+          title: "Edit session expired",
+          description: "Please try again from My Adverts page.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, []);
+
   // Auto-save draft
   useEffect(() => {
+    // Don't auto-save in edit mode
+    if (editMode) return;
+    
     const timer = setTimeout(() => {
       if (category || type || size || dpdPackage) {
         if (displayMode && type) {
@@ -313,7 +411,7 @@ export default function SubmitAdvert() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl]);
+  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl, editMode]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
     if (catchmentLocked) return;
@@ -567,30 +665,68 @@ export default function SubmitAdvert() {
         return;
       }
 
-      const advert = saveAdvert(
-        {
-          category: category as AdvertCategory,
-          displayMode: displayMode as DisplayMode,
-          multipleCount,
-          type: type as AdvertType,
-          size: size as AdvertSize,
-          dpdPackage: dpdPackage as DPDPackageId,
-          subscriptionMonths,
-          extendedExposure: extendedExposureTime,
-          recurrentAfter,
-          recurrentEvery,
-          catchmentMarket,
-          launchDate,
-          files: uploadedFiles,
-          agreed
-        },
-        pricing
-      );
+      if (editMode && editingAdvertId) {
+        // Update existing advert by updating media
+        // This resets status to pending and clears old approval/rejection data
+        const updatedAdvert = saveAdvert(
+          {
+            category: category as AdvertCategory,
+            displayMode: displayMode as DisplayMode,
+            multipleCount,
+            type: type as AdvertType,
+            size: size as AdvertSize,
+            dpdPackage: dpdPackage as DPDPackageId,
+            subscriptionMonths,
+            extendedExposure: extendedExposureTime,
+            recurrentAfter,
+            recurrentEvery,
+            catchmentMarket,
+            launchDate,
+            files: uploadedFiles,
+            agreed,
+            contactPhone: contactPhone || undefined,
+            contactMethod: contactPhone ? contactMethod : undefined,
+            contactEmail: contactEmail || undefined,
+            websiteUrl: websiteUrl || undefined
+          },
+          pricing
+        );
+        
+        toast({
+          title: "Advert Updated!",
+          description: "Your advert has been resubmitted for review.",
+        });
+      } else {
+        // Create new advert
+        const advert = saveAdvert(
+          {
+            category: category as AdvertCategory,
+            displayMode: displayMode as DisplayMode,
+            multipleCount,
+            type: type as AdvertType,
+            size: size as AdvertSize,
+            dpdPackage: dpdPackage as DPDPackageId,
+            subscriptionMonths,
+            extendedExposure: extendedExposureTime,
+            recurrentAfter,
+            recurrentEvery,
+            catchmentMarket,
+            launchDate,
+            files: uploadedFiles,
+            agreed,
+            contactPhone: contactPhone || undefined,
+            contactMethod: contactPhone ? contactMethod : undefined,
+            contactEmail: contactEmail || undefined,
+            websiteUrl: websiteUrl || undefined
+          },
+          pricing
+        );
 
-      toast({
-        title: "Success!",
-        description: "Your advert has been submitted for review. You'll be notified once it's approved.",
-      });
+        toast({
+          title: "Success!",
+          description: "Your advert has been submitted for review. You'll be notified once it's approved.",
+        });
+      }
 
       // Navigate to My Adverts page
       navigate("/my-adverts");
@@ -982,6 +1118,46 @@ export default function SubmitAdvert() {
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
+      
+      {/* Edit Mode Banner */}
+      {editMode && editBanner && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800">
+          <div className="container mx-auto py-4 px-4 max-w-7xl">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div>
+                  <p className="font-semibold text-yellow-900 dark:text-yellow-100">
+                    Editing Previously Rejected Advert
+                  </p>
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+                    This advert was rejected. Please address the issues below before resubmitting.
+                  </p>
+                </div>
+                {editBanner.rejectionReason && (
+                  <div className="p-3 rounded-lg bg-white/50 dark:bg-black/20 border border-yellow-300 dark:border-yellow-700">
+                    <p className="text-xs font-medium text-yellow-900 dark:text-yellow-100 mb-1">
+                      Original Rejection Reason:
+                    </p>
+                    <p className="text-xs text-yellow-800 dark:text-yellow-200 leading-relaxed">
+                      {editBanner.rejectionReason}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 flex-shrink-0"
+                onClick={() => setEditBanner(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
         {/* Step 1: User Type Selection */}
         {currentStep === "select-user-type" && (
@@ -1732,7 +1908,7 @@ export default function SubmitAdvert() {
                         className="flex-1 h-14 px-6 py-4"
                         size="lg"
                       >
-                        {isSubmitting ? "Publishing..." : "Publish Advertisement"}
+                        {isSubmitting ? (editMode ? "Resubmitting..." : "Publishing...") : (editMode ? "Resubmit Advertisement" : "Publish Advertisement")}
                       </Button>
                     ) : (
                       <Button
