@@ -140,7 +140,7 @@ export function updateAdvertStatus(
       expiresAt.setMonth(expiresAt.getMonth() + 24);
       adverts[index].expiresAt = expiresAt;
       // Set standard approval message
-      adverts[index].approvedReason = "Congratulations! Your advertisement has been reviewed and approved by our team. Your advert meets all our quality standards and guidelines. It is now active and will begin displaying to your target audience according to your selected DPD package and catchment market settings. Thank you for advertising with us!";
+      adverts[index].approvedReason = "ADVERT APPROVAL.\n\nCongratulations! \nYour Advertisement Subscription was successful and approved. You are welcome to enjoy the World of Mobigate ...your World!";
     }
 
     if (status === "rejected" && rejectedReason) {

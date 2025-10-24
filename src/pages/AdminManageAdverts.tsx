@@ -216,7 +216,8 @@ export default function AdminManageAdverts() {
 
   const handleReject = (advert: SavedAdvert) => {
     setSelectedAdvert(advert);
-    setRejectionReason("");
+    // Pre-fill with default rejection template
+    setRejectionReason("ADVERT SUBSCRIPTION REJECTED!\n\nSorry, your Advert Subscription placement was rejected by our System. It's either your Advert material did not follow our Community Standards, or appropriate Specifications were not maintained. Click below for more clarification.\n\nPlease correct the very issues raised, and Submit again. Enjoy the world of Mobigate ...your World!");
     setRejectDialogOpen(true);
   };
 
@@ -303,7 +304,8 @@ export default function AdminManageAdverts() {
     }
     setBulkAction(action);
     if (action === "reject") {
-      setRejectionReason("");
+      // Pre-fill with default rejection template for bulk actions
+      setRejectionReason("ADVERT SUBSCRIPTION REJECTED!\n\nSorry, your Advert Subscription placement was rejected by our System. It's either your Advert material did not follow our Community Standards, or appropriate Specifications were not maintained. Click below for more clarification.\n\nPlease correct the very issues raised, and Submit again. Enjoy the world of Mobigate ...your World!");
     }
     setBulkActionDialogOpen(true);
   };
@@ -809,11 +811,15 @@ export default function AdminManageAdverts() {
                 <Label htmlFor="rejection-reason">Rejection Reason *</Label>
                 <Textarea
                   id="rejection-reason"
-                  placeholder="e.g., Content violates community guidelines..."
+                  placeholder="Edit the template or write your own rejection reason..."
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  rows={4}
+                  rows={8}
+                  className="font-sans"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Template pre-filled. You can edit, delete, or send as-is.
+                </p>
               </div>
             </div>
             <div className="flex justify-end gap-3">
@@ -867,11 +873,15 @@ export default function AdminManageAdverts() {
                   <Label htmlFor="bulk-rejection-reason">Rejection Reason *</Label>
                   <Textarea
                     id="bulk-rejection-reason"
-                    placeholder="e.g., Bulk rejection due to policy update..."
+                    placeholder="Edit the template or write your own rejection reason..."
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
-                    rows={4}
+                    rows={8}
+                    className="font-sans"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Template pre-filled. You can edit, delete, or send as-is.
+                  </p>
                 </div>
               </div>
             )}
