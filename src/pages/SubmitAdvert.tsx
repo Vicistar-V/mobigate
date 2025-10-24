@@ -776,6 +776,9 @@ export default function SubmitAdvert() {
     setPackDraft(updatedDraft);
     console.log('🔄 Pack draft updated, resetting form');
     resetSlotForm();
+    
+    // Scroll to top for next slot
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleEditSlot = (slotId: string) => {
