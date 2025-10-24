@@ -16,6 +16,7 @@ const SETUP_FEES = {
     "multiple-8": 160000,
     "multiple-9": 180000,
     "multiple-10": 200000,
+    "multiple-15": 250000,
   },
   video: {
     single: 45000,
@@ -28,6 +29,7 @@ const SETUP_FEES = {
     "multiple-8": 240000,
     "multiple-9": 270000,
     "multiple-10": 300000,
+    "multiple-15": 350000,
   },
 };
 
@@ -43,6 +45,7 @@ const SETUP_FEES_ROLLOUT = {
     "rollout-8": 220000,
     "rollout-9": 240000,
     "rollout-10": 260000,
+    "rollout-15": 300000,
   },
   video: {
     "rollout-2": 70000,
@@ -54,6 +57,7 @@ const SETUP_FEES_ROLLOUT = {
     "rollout-8": 220000,
     "rollout-9": 240000,
     "rollout-10": 260000,
+    "rollout-15": 300000,
   },
 };
 

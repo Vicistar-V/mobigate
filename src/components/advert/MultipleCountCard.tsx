@@ -22,6 +22,7 @@ const SETUP_FEES_MULTIPLE: Record<MultipleDisplayCount, { pictorial: number; vid
   8: { pictorial: 160000, video: 240000 },
   9: { pictorial: 180000, video: 270000 },
   10: { pictorial: 200000, video: 300000 },
+  15: { pictorial: 250000, video: 350000 },
 };
 
 const SETUP_FEES_ROLLOUT: Record<MultipleDisplayCount, number> = {
@@ -34,6 +35,7 @@ const SETUP_FEES_ROLLOUT: Record<MultipleDisplayCount, number> = {
   8: 220000,
   9: 240000,
   10: 260000,
+  15: 300000,
 };
 
 export function MultipleCountCard({ count, selected, category, displayMode, onSelect, index }: MultipleCountCardProps) {

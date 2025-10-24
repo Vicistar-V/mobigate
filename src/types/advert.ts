@@ -2,7 +2,7 @@ export type AdvertCategory = "pictorial" | "video";
 
 export type DisplayMode = "single" | "multiple" | "rollout";
 
-export type MultipleDisplayCount = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type MultipleDisplayCount = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 15;
 
 export type SubscriptionDuration = 1 | 3 | 4 | 6 | 9 | 12 | 18 | 24;
 
@@ -17,6 +17,7 @@ export type AdvertType =
   | "multiple-8" 
   | "multiple-9" 
   | "multiple-10"
+  | "multiple-15"
   | "rollout-2"
   | "rollout-3"
   | "rollout-4"
@@ -25,7 +26,8 @@ export type AdvertType =
   | "rollout-7"
   | "rollout-8"
   | "rollout-9"
-  | "rollout-10";
+  | "rollout-10"
+  | "rollout-15";
 
 // Helper function to convert display mode + count to AdvertType
 export function getAdvertType(mode: DisplayMode, count?: MultipleDisplayCount): AdvertType {
