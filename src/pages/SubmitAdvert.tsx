@@ -521,8 +521,10 @@ export default function SubmitAdvert() {
         extendedExposureTime,
         recurrentAfter,
         recurrentEvery,
-        userProfile.accreditedTier,
-        userProfile.activeAdverts
+        // Disable accredited discount for individual users
+        userType === "individual" ? null : userProfile.accreditedTier,
+        // Disable volume discount for individual users
+        userType === "individual" ? 0 : userProfile.activeAdverts
       );
 
       const advert = saveAdvert(
@@ -584,8 +586,10 @@ export default function SubmitAdvert() {
     extendedExposureTime,
     recurrentAfter,
     recurrentEvery,
-    userProfile.accreditedTier,
-    userProfile.activeAdverts
+    // Disable accredited discount for individual users
+    userType === "individual" ? null : userProfile.accreditedTier,
+    // Disable volume discount for individual users
+    userType === "individual" ? 0 : userProfile.activeAdverts
   ) : null;
 
   const InfoTooltip = ({ content }: { content: string }) => (
@@ -1438,8 +1442,8 @@ export default function SubmitAdvert() {
 
                 <Separator />
 
-                {/* Discount Information */}
-                {userProfile.activeAdverts > 0 && (
+                {/* Discount Information - Only show for accredited users */}
+                {userType === "accredited" && userProfile.activeAdverts > 0 && (
                   <VolumeDiscountInfo 
                     activeAdvertCount={userProfile.activeAdverts}
                     currentDiscountPercentage={pricing?.appliedDiscounts?.find(d => d.type === "volume_based")?.percentage}
