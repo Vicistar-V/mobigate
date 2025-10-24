@@ -175,7 +175,7 @@ export default function SubmitAdvert() {
   const userProfile = getUserDiscountProfile("current-user");
   
   // Wallet balance (hardcoded for now)
-  const walletBalance = 500000;
+  const walletBalance = 2000000;
   
   // Pack system state
   const [currentStep, setCurrentStep] = useState<"select-user-type" | "verify-accreditation" | "select-pack" | "fill-slot">("select-user-type");
