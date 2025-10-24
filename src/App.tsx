@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import SubmitAdvert from "./pages/SubmitAdvert";
 import MyAdverts from "./pages/MyAdverts";
+import AdminManageAdverts from "./pages/AdminManageAdverts";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -42,6 +43,7 @@ const App = () => {
                   <Route path="/profile/:userId" element={<Profile />} />
                   <Route path="/submit-advert" element={<SubmitAdvert />} />
                   <Route path="/my-adverts" element={<MyAdverts />} />
+                  <Route path="/admin/manage-adverts" element={<AdminManageAdverts />} />
                   <Route path="/mobi-shop" element={<ServiceUnavailable />} />
                   <Route path="/mobi-circle" element={<ServiceUnavailable />} />
                   <Route path="/biz-catalogue" element={<ServiceUnavailable />} />
