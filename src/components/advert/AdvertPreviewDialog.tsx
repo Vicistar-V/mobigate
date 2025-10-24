@@ -42,6 +42,12 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
     },
     layout,
     duration: 15,
+    contactDetails: (formData.contactPhone || formData.contactEmail || formData.websiteUrl) ? {
+      phone: formData.contactPhone,
+      phoneMethod: formData.contactMethod,
+      email: formData.contactEmail,
+      website: formData.websiteUrl,
+    } : undefined,
   };
 
   const layoutConfig = {

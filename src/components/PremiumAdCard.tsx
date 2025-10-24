@@ -34,6 +34,12 @@ export interface PremiumAdCardProps {
   };
   layout: 'fullscreen' | 'standard' | 'compact';
   duration?: number;
+  contactDetails?: {
+    phone?: string;
+    phoneMethod?: 'whatsapp' | 'call';
+    email?: string;
+    website?: string;
+  };
 }
 
 export const PremiumAdCard = ({
@@ -42,6 +48,7 @@ export const PremiumAdCard = ({
   content,
   media,
   layout,
+  contactDetails,
 }: PremiumAdCardProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [showComments, setShowComments] = useState(false);
@@ -57,6 +64,28 @@ export const PremiumAdCard = ({
   const handleCTA = () => {
     if (content.ctaUrl) {
       window.open(content.ctaUrl, '_blank');
+    }
+  };
+
+  const handleContactPhone = () => {
+    if (!contactDetails?.phone) return;
+    const cleanPhone = contactDetails.phone.replace(/\s+/g, '');
+    if (contactDetails.phoneMethod === 'whatsapp') {
+      window.open(`https://wa.me/${cleanPhone}`, '_blank');
+    } else {
+      window.location.href = `tel:${cleanPhone}`;
+    }
+  };
+
+  const handleContactEmail = () => {
+    if (contactDetails?.email) {
+      window.location.href = `mailto:${contactDetails.email}`;
+    }
+  };
+
+  const handleContactWebsite = () => {
+    if (contactDetails?.website) {
+      window.open(contactDetails.website, '_blank');
     }
   };
 
@@ -130,13 +159,45 @@ export const PremiumAdCard = ({
                   {content.description}
                 </p>
               </div>
-              <Button
-                onClick={handleCTA}
-                size="lg"
-                className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
-              >
-                {content.ctaText}
-              </Button>
+              {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
+                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
+                  {contactDetails.phone && (
+                    <Button
+                      onClick={handleContactPhone}
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    >
+                      {contactDetails.phoneMethod === 'whatsapp' ? '💬 WhatsApp' : '📞 Call'}
+                    </Button>
+                  )}
+                  {contactDetails.email && (
+                    <Button
+                      onClick={handleContactEmail}
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    >
+                      ✉️ Email
+                    </Button>
+                  )}
+                  {contactDetails.website && (
+                    <Button
+                      onClick={handleContactWebsite}
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    >
+                      🌐 Website
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <Button
+                  onClick={handleCTA}
+                  size="lg"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                >
+                  {content.ctaText}
+                </Button>
+              )}
               <div className="mt-4 sm:mt-6">
                 <EngagementBar
                   itemId={id}
@@ -270,12 +331,41 @@ export const PremiumAdCard = ({
               </span>
             </p>
           </div>
-          <Button
-            onClick={handleCTA}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-base sm:text-lg rounded-lg"
-          >
-            {content.ctaText}
-          </Button>
+          {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
+            <div className="flex flex-wrap gap-2">
+              {contactDetails.phone && (
+                <Button
+                  onClick={handleContactPhone}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-sm sm:text-base rounded-lg"
+                >
+                  {contactDetails.phoneMethod === 'whatsapp' ? '💬 WhatsApp' : '📞 Call'}
+                </Button>
+              )}
+              {contactDetails.email && (
+                <Button
+                  onClick={handleContactEmail}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-sm sm:text-base rounded-lg"
+                >
+                  ✉️ Email
+                </Button>
+              )}
+              {contactDetails.website && (
+                <Button
+                  onClick={handleContactWebsite}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-sm sm:text-base rounded-lg"
+                >
+                  🌐 Website
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Button
+              onClick={handleCTA}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-base sm:text-lg rounded-lg"
+            >
+              {content.ctaText}
+            </Button>
+          )}
           <EngagementBar
             itemId={id}
             itemType="ad"
@@ -374,13 +464,42 @@ export const PremiumAdCard = ({
           {content.description}
         </p>
 
-        {/* CTA Button */}
-        <Button
-          onClick={handleCTA}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm sm:text-base py-2.5"
-        >
-          {content.ctaText}
-        </Button>
+        {/* CTA Button(s) */}
+        {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
+          <div className="flex flex-wrap gap-1.5">
+            {contactDetails.phone && (
+              <Button
+                onClick={handleContactPhone}
+                className="flex-1 min-w-[80px] bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs sm:text-sm py-2.5"
+              >
+                {contactDetails.phoneMethod === 'whatsapp' ? '💬' : '📞'}
+              </Button>
+            )}
+            {contactDetails.email && (
+              <Button
+                onClick={handleContactEmail}
+                className="flex-1 min-w-[80px] bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs sm:text-sm py-2.5"
+              >
+                ✉️
+              </Button>
+            )}
+            {contactDetails.website && (
+              <Button
+                onClick={handleContactWebsite}
+                className="flex-1 min-w-[80px] bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs sm:text-sm py-2.5"
+              >
+                🌐
+              </Button>
+            )}
+          </div>
+        ) : (
+          <Button
+            onClick={handleCTA}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm sm:text-base py-2.5"
+          >
+            {content.ctaText}
+          </Button>
+        )}
 
         {/* Engagement Bar */}
         <EngagementBar
