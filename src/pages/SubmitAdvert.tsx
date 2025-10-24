@@ -873,19 +873,19 @@ export default function SubmitAdvert() {
             {/* Draft Available Alert */}
             {hasDraftAvailable && (
               <Alert className="border-primary/50 bg-primary/5">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="flex items-center justify-between flex-1 gap-4">
-                  <div>
-                    <h4 className="font-semibold">You have an unfinished {draftType === 'pack' ? 'pack' : 'advert'} draft</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Would you like to continue where you left off or start fresh?
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between flex-1 gap-3 sm:gap-4">
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-sm sm:text-base">Unfinished {draftType === 'pack' ? 'pack' : 'advert'} draft</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Continue or start fresh?
                     </p>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <Button variant="outline" size="sm" onClick={handleDiscardDraft}>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <Button variant="outline" size="sm" onClick={handleDiscardDraft} className="w-full sm:w-auto">
                       Start Fresh
                     </Button>
-                    <Button size="sm" onClick={handleLoadDraft}>
+                    <Button size="sm" onClick={handleLoadDraft} className="w-full sm:w-auto">
                       Continue Draft
                     </Button>
                   </div>
