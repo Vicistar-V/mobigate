@@ -143,6 +143,18 @@ const menuItems = [{
     { title: "View My 17 Friends", url: "/application/my_friends.php" }
   ]
 }, {
+  title: "My Social Communities",
+  icon: Building2,
+  url: "#"
+}, {
+  title: "My Circles",
+  icon: Users,
+  url: "#"
+}, {
+  title: "Find Love",
+  icon: Heart,
+  url: "#"
+}, {
   title: "Followers/Following",
   icon: UserPlus,
   items: [
