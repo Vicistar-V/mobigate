@@ -1524,7 +1524,10 @@ export default function SubmitAdvert() {
                     Recurrent Exposure - Repeat After (Optional)
                     <InfoTooltip content="Show the ad again after a specific time period from the last display" />
                   </Label>
-                  <Select value={recurrentAfter} onValueChange={setRecurrentAfter}>
+                  <Select value={recurrentAfter} onValueChange={(value) => {
+                    setRecurrentAfter(value);
+                    if (value) setRecurrentEvery("");
+                  }}>
                     <SelectTrigger id="recurrent-after">
                       <SelectValue placeholder="Select when to repeat" />
                     </SelectTrigger>
@@ -1544,7 +1547,10 @@ export default function SubmitAdvert() {
                     Recurrent Exposure - Repeat Every (Optional)
                     <InfoTooltip content="Continuously repeat the ad at regular intervals" />
                   </Label>
-                  <Select value={recurrentEvery} onValueChange={setRecurrentEvery}>
+                  <Select value={recurrentEvery} onValueChange={(value) => {
+                    setRecurrentEvery(value);
+                    if (value) setRecurrentAfter("");
+                  }}>
                     <SelectTrigger id="recurrent-every">
                       <SelectValue placeholder="Select repeat frequency" />
                     </SelectTrigger>
