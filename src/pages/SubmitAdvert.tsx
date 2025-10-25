@@ -217,6 +217,7 @@ export default function SubmitAdvert() {
   const [contactEmail, setContactEmail] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [advertiserName, setAdvertiserName] = useState("");
+  const [advertDescription, setAdvertDescription] = useState("");
   const [catchmentLocked, setCatchmentLocked] = useState(() => {
     const saved = localStorage.getItem('advert-catchment-locked');
     return saved ? JSON.parse(saved) : false;
@@ -360,6 +361,9 @@ export default function SubmitAdvert() {
         if (advertToEdit.advertiserName) {
           setAdvertiserName(advertToEdit.advertiserName);
         }
+        if (advertToEdit.advertDescription) {
+          setAdvertDescription(advertToEdit.advertDescription);
+        }
         
         // Ensure form step is visible by creating an entry pack draft
         try {
@@ -419,14 +423,15 @@ export default function SubmitAdvert() {
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
-            advertiserName: advertiserName || undefined
+            advertiserName: advertiserName || undefined,
+            advertDescription: advertDescription || undefined
           });
         }
       }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl, editMode]);
+  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl, advertiserName, advertDescription, editMode]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
     if (catchmentLocked) return;
@@ -702,7 +707,9 @@ export default function SubmitAdvert() {
             contactPhone: contactPhone || undefined,
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
-            websiteUrl: websiteUrl || undefined
+            websiteUrl: websiteUrl || undefined,
+            advertiserName: advertiserName || undefined,
+            advertDescription: advertDescription || undefined
           },
           pricing
         );
@@ -732,7 +739,9 @@ export default function SubmitAdvert() {
             contactPhone: contactPhone || undefined,
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
-            websiteUrl: websiteUrl || undefined
+            websiteUrl: websiteUrl || undefined,
+            advertiserName: advertiserName || undefined,
+            advertDescription: advertDescription || undefined
           },
           pricing
         );
@@ -956,7 +965,9 @@ export default function SubmitAdvert() {
       contactPhone: contactPhone || undefined,
       contactMethod: contactPhone ? contactMethod : undefined,
       contactEmail: contactEmail || undefined,
-      websiteUrl: websiteUrl || undefined
+      websiteUrl: websiteUrl || undefined,
+      advertiserName: advertiserName || undefined,
+      advertDescription: advertDescription || undefined
     };
 
     // Add or update slot
@@ -1742,26 +1753,6 @@ export default function SubmitAdvert() {
                   </div>
 
                   <div className="space-y-4">
-                    {/* Advertiser/Business Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="advertiser-name" className="text-xs font-medium">
-                        Advertiser's/Business Name (Optional)
-                      </Label>
-                      <Input
-                        id="advertiser-name"
-                        type="text"
-                        placeholder="Your Business or Brand Name"
-                        value={advertiserName}
-                        onChange={(e) => setAdvertiserName(e.target.value)}
-                        maxLength={50}
-                      />
-                      {advertiserName && (
-                        <p className="text-xs text-muted-foreground">
-                          This name will appear on your advert
-                        </p>
-                      )}
-                    </div>
-
                     {/* Phone Number with Method Selection */}
                     <div className="space-y-2">
                       <Label className="text-xs font-medium">Phone Number (Optional)</Label>
@@ -1907,6 +1898,73 @@ export default function SubmitAdvert() {
                       maxFiles={getRequiredFiles()}
                       isMultiple={isMultipleDisplay}
                     />
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Brand & Content Information */}
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-semibold">
+                      Brand & Content Information
+                      <InfoTooltip content="Add your business name and optional text description that will appear on your advert" />
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Help customers identify your brand and understand your offering
+                    </p>
+                  </div>
+
+                  {/* Advertiser/Business Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="advertiser-name" className="text-xs font-medium">
+                      Advertiser's/Business Name (Optional)
+                    </Label>
+                    <Input
+                      id="advertiser-name"
+                      type="text"
+                      placeholder="Your Business or Brand Name"
+                      value={advertiserName}
+                      onChange={(e) => setAdvertiserName(e.target.value)}
+                      maxLength={50}
+                    />
+                    {advertiserName && (
+                      <p className="text-xs text-muted-foreground">
+                        This name will appear prominently on your advert
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Advert Description */}
+                  <div className="space-y-2">
+                    <Label htmlFor="advert-description" className="text-xs font-medium">
+                      Advert Text Description (Optional)
+                    </Label>
+                    <textarea
+                      id="advert-description"
+                      placeholder="Enter a brief description of your product, service, or offer (e.g., 'Premium quality shoes at 30% off!', 'Expert legal services - Free consultation')"
+                      value={advertDescription}
+                      onChange={(e) => setAdvertDescription(e.target.value)}
+                      maxLength={200}
+                      rows={4}
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">
+                        Add compelling text to grab attention
+                      </p>
+                      <span className="text-xs text-muted-foreground">
+                        {advertDescription.length}/200
+                      </span>
+                    </div>
+                  </div>
+
+                  {(advertiserName || advertDescription) && (
+                    <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        ✓ Your brand name and description will be displayed on your advert
+                      </p>
+                    </div>
                   )}
                 </div>
 
@@ -2085,6 +2143,8 @@ export default function SubmitAdvert() {
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
+            advertiserName: advertiserName || undefined,
+            advertDescription: advertDescription || undefined,
           }}
         />
       )}

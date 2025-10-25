@@ -25,7 +25,7 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
     },
     content: {
       headline: `${formData.category === "pictorial" ? "📸" : "🎬"} ${formData.type} Display Preview`,
-      description: `This is how your ${formData.size} advert will appear to viewers`,
+      description: formData.advertDescription || `This is how your ${formData.size} advert will appear to viewers`,
       ctaText: "Learn More",
       ctaUrl: "#",
     },

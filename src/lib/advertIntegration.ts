@@ -23,7 +23,7 @@ export function convertSavedAdvertToPremiumAd(advert: SavedAdvert): PremiumAdCar
     },
     content: {
       headline: `${advert.category === "pictorial" ? "📸" : "🎬"} Premium ${advert.type} Display`,
-      description: `Reach ${advert.pricing.displayPerDay} displays per day with ${advert.pricing.displayFrequency} frequency`,
+      description: advert.advertDescription || `Reach ${advert.pricing.displayPerDay} displays per day with ${advert.pricing.displayFrequency} frequency`,
       ctaText: "Learn More",
       ctaUrl: "#",
     },
