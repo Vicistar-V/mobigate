@@ -67,6 +67,13 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
         </DialogHeader>
 
         <div className="space-y-3 sm:space-y-4">
+          {/* Preview Container - Mobile Optimized */}
+          <div className="flex justify-center p-2 sm:p-4 lg:p-6 bg-gradient-to-br from-accent/5 to-accent/10 rounded-lg border min-h-[300px] sm:min-h-[400px] lg:min-h-[450px]">
+            <div className="w-full max-w-full sm:max-w-xl lg:max-w-3xl transition-all duration-300">
+              <PremiumAdCard {...previewAd} />
+            </div>
+          </div>
+
           {/* Layout Controls - Mobile Optimized */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 p-2 sm:p-3 bg-muted/50 rounded-lg border">
             <span className="text-xs sm:text-sm font-medium text-muted-foreground">Layout:</span>
@@ -93,13 +100,6 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
                   </Button>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Preview Container - Mobile Optimized */}
-          <div className="flex justify-center p-2 sm:p-4 lg:p-6 bg-gradient-to-br from-accent/5 to-accent/10 rounded-lg border min-h-[300px] sm:min-h-[400px] lg:min-h-[450px]">
-            <div className="w-full max-w-full sm:max-w-xl lg:max-w-3xl transition-all duration-300">
-              <PremiumAdCard {...previewAd} />
             </div>
           </div>
 
