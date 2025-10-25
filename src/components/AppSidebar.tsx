@@ -137,8 +137,24 @@ const menuItems: MenuItem[] = [{
   title: "Merchants Menu",
   icon: Store,
   items: [
-    { title: "Apply as Individual Merchant", url: "#" },
-    { title: "Apply as Corporate Merchant", url: "#" }
+    { title: "Buy Vouchers", url: "#" },
+    { 
+      title: "View Merchants",
+      url: "#",
+      items: [
+        { title: "By Countries", url: "#" },
+        { title: "By States/Provinces", url: "#" },
+        { title: "By Cities/Counties", url: "#" }
+      ]
+    },
+    { 
+      title: "Apply a Merchant Account",
+      url: "#",
+      items: [
+        { title: "Individual Merchant Account", url: "#" },
+        { title: "Corporate Merchant Account", url: "#" }
+      ]
+    }
   ]
 }, {
   title: "Friendship Menu",
