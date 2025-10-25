@@ -139,8 +139,8 @@ const menuItems = [{
   items: [
     { title: "Find Friends", url: "/application/find_friends.php" },
     { title: "Invite Friends", url: "#" },
-    { title: "2 Sent Requests", url: "/application/manage_sent_friends_requests.php" },
-    { title: "View My 17 Friends", url: "/application/my_friends.php" }
+    { title: "Sent Requests", url: "/application/manage_sent_friends_requests.php" },
+    { title: "View My Friends", url: "/application/my_friends.php" }
   ]
 }, {
   title: "My Social Communities",
