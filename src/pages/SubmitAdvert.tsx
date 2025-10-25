@@ -983,6 +983,7 @@ export default function SubmitAdvert() {
     }
 
     setPackDraft(updatedDraft);
+    setEditingSlotId(null); // Clear editing state
     
     // Check if we've reached the max slots - if so, don't show form anymore
     const pack = getSlotPack(updatedDraft.packId);
@@ -993,6 +994,10 @@ export default function SubmitAdvert() {
       resetSlotForm();
     } else {
       console.log('🎯 Max slots reached, hiding form');
+      toast({
+        title: "Pack Complete!",
+        description: `You've reached the maximum of ${pack.maxSlots} slots. Ready to publish!`,
+      });
     }
   };
 
@@ -1281,8 +1286,9 @@ export default function SubmitAdvert() {
         {/* Step 4: Fill Slots */}
         {currentStep === "fill-slot" && packDraft && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Slot Form */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* Left: Slot Form - Only show if not at max OR editing */}
+            {(packDraft.slots.length < getSlotPack(packDraft.packId)!.maxSlots || editingSlotId) && (
+              <div className="lg:col-span-2 space-y-4">
               <Button
                 variant="outline"
                 onClick={handleBackToPacks}
@@ -2013,9 +2019,15 @@ export default function SubmitAdvert() {
                 </CardContent>
               </Card>
             </div>
+            )}
 
             {/* Right: Pack Manager & Summary or Pricing (based on user type) */}
-            <div className="space-y-4">
+            <div className={cn(
+              "space-y-4",
+              packDraft.slots.length >= getSlotPack(packDraft.packId)!.maxSlots && !editingSlotId 
+                ? "lg:col-span-3" 
+                : ""
+            )}>
               {userType === "accredited" ? (
                 <>
                   <SlotPackManager

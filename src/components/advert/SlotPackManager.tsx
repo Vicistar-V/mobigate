@@ -110,22 +110,24 @@ export function SlotPackManager({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
-          <Button
-            className="flex-1 w-full sm:w-auto"
-            variant="outline"
-            onClick={handleAddSlot}
-            disabled={!canAddMore}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Another Slot ({filledSlots}/{pack.maxSlots})
-          </Button>
+          {canAddMore && (
+            <Button
+              className="flex-1 w-full sm:w-auto"
+              variant="outline"
+              onClick={handleAddSlot}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Another Slot ({filledSlots}/{pack.maxSlots})
+            </Button>
+          )}
           <Button
             className="flex-1 w-full sm:w-auto"
             onClick={onPublishPack}
             disabled={!canPublish}
+            size={filledSlots >= pack.minSlots ? "lg" : "default"}
           >
             <CheckCircle className="h-4 w-4 mr-2" />
-            Publish Pack
+            Publish Pack ({filledSlots} slot{filledSlots !== 1 ? 's' : ''})
           </Button>
         </div>
       </CardContent>
