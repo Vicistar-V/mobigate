@@ -162,6 +162,7 @@ const menuItems = [{
   title: "Advertisements",
   icon: Megaphone,
   items: [
+    { title: "Advert Subscription Rates", url: "#" },
     { title: "Submit Advert", url: "/submit-advert" },
     { title: "View/Manage My Adverts", url: "/my-adverts" }
   ]
