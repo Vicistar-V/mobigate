@@ -142,13 +142,23 @@ const menuItems: MenuItem[] = [{
       title: "View Merchants",
       url: "#",
       items: [
-        { title: "By Countries", url: "#" },
-        { title: "By States/Provinces", url: "#" },
-        { title: "By Cities/Counties", url: "#" }
+        { 
+          title: "By Countries", 
+          url: "#",
+          items: [
+            { 
+              title: "By States/Provinces", 
+              url: "#",
+              items: [
+                { title: "By Cities/Counties", url: "#" }
+              ]
+            }
+          ]
+        }
       ]
     },
     { 
-      title: "Apply a Merchant Account",
+      title: "Apply for a Merchant Account",
       url: "#",
       items: [
         { title: "Individual Merchant Account", url: "#" },
