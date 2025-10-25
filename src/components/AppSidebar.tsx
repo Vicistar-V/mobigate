@@ -94,8 +94,15 @@ const superadminMenuItems = [
   }
 ];
 
-// Users' Menu Items
-const menuItems = [{
+// Users' Menu Items with nested structure support
+interface MenuItem {
+  title: string;
+  icon?: any;
+  url?: string;
+  items?: MenuItem[];
+}
+
+const menuItems: MenuItem[] = [{
   title: "Wallet Menu",
   icon: Wallet,
   items: [
@@ -174,9 +181,24 @@ const menuItems = [{
   title: "Advertisements",
   icon: Megaphone,
   items: [
+    { title: "Submit Adverts", url: "/submit-advert" },
+    { title: "View/Manage Adverts", url: "/my-adverts" },
     { title: "Advert Subscription Rates", url: "#" },
-    { title: "Submit Advert", url: "/submit-advert" },
-    { title: "View/Manage My Adverts", url: "/my-adverts" }
+    { 
+      title: "Accredited Advertisers", 
+      url: "#",
+      items: [
+        { title: "Application", url: "#" },
+        { 
+          title: "View Accredited Advertisers",
+          url: "#",
+          items: [
+            { title: "By Countries", url: "#" },
+            { title: "By States/Provinces", url: "#" }
+          ]
+        }
+      ]
+    }
   ]
 }, {
   title: "Funds Management",
@@ -337,9 +359,91 @@ export function AppSidebar() {
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-1">
-                          <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
+                         <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
                             {item.items.map(subItem => {
                               const isInternalRoute = subItem.url.startsWith('/') && !subItem.url.includes('.php');
+                              const subItemKey = `${item.title}-${subItem.title}`;
+                              const isSubExpanded = expandedItems.includes(subItemKey);
+                              
+                              // Check if subItem has nested items
+                              if (subItem.items && subItem.items.length > 0) {
+                                return (
+                                  <Collapsible key={subItem.title} open={isSubExpanded} onOpenChange={() => toggleExpand(subItemKey)}>
+                                    <SidebarMenuSubItem>
+                                      <CollapsibleTrigger asChild>
+                                        <SidebarMenuSubButton className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 hover:bg-accent/30">
+                                          <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+                                          <ChevronRight className={cn("ml-auto h-3 w-3 transition-transform duration-200 shrink-0", isSubExpanded && "rotate-90")} />
+                                        </SidebarMenuSubButton>
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent className="mt-1">
+                                        <SidebarMenuSub className="ml-4 border-l-2 border-primary/20 pl-2">
+                                          {subItem.items.map(nestedItem => {
+                                            const isNestedInternalRoute = nestedItem.url.startsWith('/') && !nestedItem.url.includes('.php');
+                                            const nestedItemKey = `${subItemKey}-${nestedItem.title}`;
+                                            const isNestedExpanded = expandedItems.includes(nestedItemKey);
+                                            
+                                            // Check if nestedItem has more nested items
+                                            if (nestedItem.items && nestedItem.items.length > 0) {
+                                              return (
+                                                <Collapsible key={nestedItem.title} open={isNestedExpanded} onOpenChange={() => toggleExpand(nestedItemKey)}>
+                                                  <SidebarMenuSubItem>
+                                                    <CollapsibleTrigger asChild>
+                                                      <SidebarMenuSubButton className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 hover:bg-accent/30">
+                                                        <span className="flex-1 whitespace-normal break-words leading-tight text-left">{nestedItem.title}</span>
+                                                        <ChevronRight className={cn("ml-auto h-3 w-3 transition-transform duration-200 shrink-0", isNestedExpanded && "rotate-90")} />
+                                                      </SidebarMenuSubButton>
+                                                    </CollapsibleTrigger>
+                                                    <CollapsibleContent className="mt-1">
+                                                      <SidebarMenuSub className="ml-4 border-l-2 border-primary/20 pl-2">
+                                                        {nestedItem.items.map(deepItem => {
+                                                          const isDeepInternalRoute = deepItem.url.startsWith('/') && !deepItem.url.includes('.php');
+                                                          return (
+                                                            <SidebarMenuSubItem key={deepItem.title}>
+                                                              <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 hover:bg-accent/30">
+                                                                {isDeepInternalRoute ? (
+                                                                  <Link to={deepItem.url} onClick={handleLinkClick}>
+                                                                    <span className="flex-1 whitespace-normal break-words leading-tight text-left">{deepItem.title}</span>
+                                                                  </Link>
+                                                                ) : (
+                                                                  <a href={deepItem.url} onClick={handleLinkClick}>
+                                                                    <span className="flex-1 whitespace-normal break-words leading-tight text-left">{deepItem.title}</span>
+                                                                  </a>
+                                                                )}
+                                                              </SidebarMenuSubButton>
+                                                            </SidebarMenuSubItem>
+                                                          );
+                                                        })}
+                                                      </SidebarMenuSub>
+                                                    </CollapsibleContent>
+                                                  </SidebarMenuSubItem>
+                                                </Collapsible>
+                                              );
+                                            }
+                                            
+                                            return (
+                                              <SidebarMenuSubItem key={nestedItem.title}>
+                                                <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 hover:bg-accent/30">
+                                                  {isNestedInternalRoute ? (
+                                                    <Link to={nestedItem.url} onClick={handleLinkClick}>
+                                                      <span className="flex-1 whitespace-normal break-words leading-tight text-left">{nestedItem.title}</span>
+                                                    </Link>
+                                                  ) : (
+                                                    <a href={nestedItem.url} onClick={handleLinkClick}>
+                                                      <span className="flex-1 whitespace-normal break-words leading-tight text-left">{nestedItem.title}</span>
+                                                    </a>
+                                                  )}
+                                                </SidebarMenuSubButton>
+                                              </SidebarMenuSubItem>
+                                            );
+                                          })}
+                                        </SidebarMenuSub>
+                                      </CollapsibleContent>
+                                    </SidebarMenuSubItem>
+                                  </Collapsible>
+                                );
+                              }
+                              
                               return (
                                 <SidebarMenuSubItem key={subItem.title}>
                                   <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 [&>span:last-child]:!whitespace-normal [&>span:last-child]:!overflow-visible [&>span:last-child]:!text-clip hover:bg-accent/30">
