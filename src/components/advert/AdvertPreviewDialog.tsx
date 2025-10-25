@@ -19,7 +19,7 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
   const previewAd: PremiumAdCardProps = {
     id: "preview-ad",
     advertiser: {
-      name: "Your Business",
+      name: formData.advertiserName || "Your Business",
       logo: "/placeholder.svg",
       verified: true,
     },

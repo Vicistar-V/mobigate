@@ -68,6 +68,7 @@ export function saveAdvert(
       contactMethod: formData.contactMethod,
       contactEmail: formData.contactEmail,
       websiteUrl: formData.websiteUrl,
+      advertiserName: formData.advertiserName,
     };
 
     // Get existing adverts

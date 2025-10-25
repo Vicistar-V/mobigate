@@ -216,6 +216,7 @@ export default function SubmitAdvert() {
   const [contactMethod, setContactMethod] = useState<"whatsapp" | "call">("whatsapp");
   const [contactEmail, setContactEmail] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [advertiserName, setAdvertiserName] = useState("");
   const [catchmentLocked, setCatchmentLocked] = useState(() => {
     const saved = localStorage.getItem('advert-catchment-locked');
     return saved ? JSON.parse(saved) : false;
@@ -356,6 +357,9 @@ export default function SubmitAdvert() {
         if (advertToEdit.websiteUrl) {
           setWebsiteUrl(advertToEdit.websiteUrl);
         }
+        if (advertToEdit.advertiserName) {
+          setAdvertiserName(advertToEdit.advertiserName);
+        }
         
         // Ensure form step is visible by creating an entry pack draft
         try {
@@ -414,7 +418,8 @@ export default function SubmitAdvert() {
             contactPhone: contactPhone || undefined,
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
-            websiteUrl: websiteUrl || undefined
+            websiteUrl: websiteUrl || undefined,
+            advertiserName: advertiserName || undefined
           });
         }
       }
@@ -1731,6 +1736,26 @@ export default function SubmitAdvert() {
                   </div>
 
                   <div className="space-y-4">
+                    {/* Advertiser/Business Name */}
+                    <div className="space-y-2">
+                      <Label htmlFor="advertiser-name" className="text-xs font-medium">
+                        Advertiser's/Business Name (Optional)
+                      </Label>
+                      <Input
+                        id="advertiser-name"
+                        type="text"
+                        placeholder="Your Business or Brand Name"
+                        value={advertiserName}
+                        onChange={(e) => setAdvertiserName(e.target.value)}
+                        maxLength={50}
+                      />
+                      {advertiserName && (
+                        <p className="text-xs text-muted-foreground">
+                          This name will appear on your advert
+                        </p>
+                      )}
+                    </div>
+
                     {/* Phone Number with Method Selection */}
                     <div className="space-y-2">
                       <Label className="text-xs font-medium">Phone Number (Optional)</Label>

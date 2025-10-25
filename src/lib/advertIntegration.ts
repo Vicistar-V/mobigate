@@ -17,7 +17,7 @@ export function convertSavedAdvertToPremiumAd(advert: SavedAdvert): PremiumAdCar
   return {
     id: advert.id,
     advertiser: {
-      name: "Premium Advertiser",
+      name: advert.advertiserName || "Premium Advertiser",
       logo: "/placeholder.svg",
       verified: true,
     },

@@ -123,6 +123,7 @@ export interface AdvertFormData {
   contactMethod?: ContactMethod;
   contactEmail?: string;
   websiteUrl?: string;
+  advertiserName?: string;
 }
 
 export type DiscountType = "accredited_advertiser" | "volume_based" | "promotional" | "custom";
@@ -238,6 +239,7 @@ export interface SavedAdvert {
   contactMethod?: ContactMethod;
   contactEmail?: string;
   websiteUrl?: string;
+  advertiserName?: string;
 }
 
 export interface DPDPackage {
