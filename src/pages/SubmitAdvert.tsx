@@ -2242,7 +2242,9 @@ export default function SubmitAdvert() {
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
             advertiserName: advertiserName || undefined,
+            advertHeadline: advertHeadline || undefined,
             advertDescription: advertDescription || undefined,
+            advertCTAText: advertCTAText || undefined,
           }}
         />
       )}
