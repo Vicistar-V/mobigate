@@ -15,6 +15,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { contentsAdSlots } from "@/data/profileAds";
 import { useToast } from "@/hooks/use-toast";
+import { PostDetailDialog } from "@/components/PostDetailDialog";
 
 interface ProfileContentsTabProps {
   userName: string;
@@ -78,6 +79,8 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set());
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleFollowAuthor = (authorUserId: string) => {
@@ -116,6 +119,11 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const formatFollowerCount = (count: string | undefined): string => {
     if (!count) return "0";
     return count;
+  };
+
+  const handlePostClick = (post: Post) => {
+    setSelectedPost(post);
+    setIsPostDialogOpen(true);
   };
 
   // Filter options configuration
@@ -293,6 +301,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
               {/* Content Card */}
               <Card 
                 className="overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
+                onClick={() => handlePostClick(post)}
               >
                 {/* Top: Full-Width Thumbnail or Icon */}
                 <div className="w-full aspect-[4/3] sm:aspect-video bg-muted flex items-center justify-center">
@@ -421,6 +430,31 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
             </Button>
           )}
         </div>
+      )}
+
+      {/* Post Detail Dialog */}
+      {selectedPost && (
+        <PostDetailDialog
+          open={isPostDialogOpen}
+          onOpenChange={setIsPostDialogOpen}
+          post={{
+            id: selectedPost.id,
+            title: selectedPost.title,
+            subtitle: selectedPost.subtitle,
+            description: selectedPost.subtitle,
+            author: selectedPost.author,
+            authorProfileImage: selectedPost.authorProfileImage,
+            userId: selectedPost.userId,
+            status: selectedPost.status,
+            views: selectedPost.views,
+            comments: selectedPost.comments,
+            likes: selectedPost.likes,
+            followers: selectedPost.followers,
+            type: selectedPost.type,
+            imageUrl: selectedPost.imageUrl,
+            fee: selectedPost.fee,
+          }}
+        />
       )}
     </div>
   );
