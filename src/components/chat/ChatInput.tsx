@@ -50,21 +50,26 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    console.log('[ChatInput] Image upload started:', files.length, 'file(s)');
     toast.info(`Processing ${files.length} photo(s)...`);
     
     const newAttachments: typeof attachments = [];
     let processedCount = 0;
+    const totalFiles = Math.min(files.length, 5);
 
-    for (let i = 0; i < files.length && i < 5; i++) {
+    for (let i = 0; i < totalFiles; i++) {
       const file = files[i];
+      console.log(`[ChatInput] Processing file ${i + 1}:`, file.name, file.type, file.size);
       
       if (file.size > 10 * 1024 * 1024) {
+        console.error('[ChatInput] File too large:', file.name);
         toast.error(`${file.name} exceeds 10MB limit`);
         processedCount++;
         continue;
       }
 
       if (!file.type.startsWith('image/')) {
+        console.error('[ChatInput] Not an image:', file.name, file.type);
         toast.error(`${file.name} is not an image`);
         processedCount++;
         continue;
@@ -72,6 +77,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
 
       const reader = new FileReader();
       reader.onload = (e) => {
+        console.log('[ChatInput] File read success:', file.name);
         const url = e.target?.result as string;
         newAttachments.push({
           type: 'image' as const,
@@ -80,18 +86,39 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         });
         
         processedCount++;
-        if (processedCount === Math.min(files.length, 5)) {
+        console.log(`[ChatInput] Progress: ${processedCount}/${totalFiles}, newAttachments:`, newAttachments.length);
+        
+        if (processedCount === totalFiles) {
+          console.log('[ChatInput] All files processed, updating state');
           setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
           if (newAttachments.length > 0) {
+            toast.success(`${newAttachments.length} photo(s) added!`);
+          } else {
+            toast.warning('No valid images to add');
+          }
+        }
+      };
+      reader.onerror = (error) => {
+        console.error('[ChatInput] FileReader error:', file.name, error);
+        toast.error(`Failed to read ${file.name}`);
+        processedCount++;
+        
+        if (processedCount === totalFiles) {
+          console.log('[ChatInput] All files processed (with errors)');
+          if (newAttachments.length > 0) {
+            setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
             toast.success(`${newAttachments.length} photo(s) added!`);
           }
         }
       };
-      reader.onerror = () => {
-        toast.error(`Failed to read ${file.name}`);
+      
+      try {
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('[ChatInput] Exception reading file:', file.name, error);
+        toast.error(`Error reading ${file.name}`);
         processedCount++;
-      };
-      reader.readAsDataURL(file);
+      }
     }
 
     e.target.value = "";
