@@ -262,22 +262,11 @@ export function AppSidebar() {
   const toggleExpand = (title: string) => {
     setExpandedItems(prev => {
       if (prev.includes(title)) {
-        // Close this item and all its children
-        return prev.filter(item => !item.startsWith(title));
+        // Close this item AND all its descendants
+        return prev.filter(item => !item.startsWith(title) && item !== title);
       } else {
-        // Close other items at the same level, keep children of other parents
-        const level = title.split('-').length;
-        const filtered = prev.filter(item => {
-          const itemLevel = item.split('-').length;
-          // Keep items that are children of this item's ancestors
-          if (level > 1) {
-            const parentPrefix = title.substring(0, title.lastIndexOf('-'));
-            return item.startsWith(parentPrefix + '-') && itemLevel > level;
-          }
-          // For top level, only keep nested children
-          return itemLevel > 1 && prev.some(p => p !== item && item.startsWith(p + '-'));
-        });
-        return [...filtered, title];
+        // Just add this item to the expanded list
+        return [...prev, title];
       }
     });
   };
