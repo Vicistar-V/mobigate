@@ -355,10 +355,18 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                       <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
                       <span className="font-medium">{post.likes}</span>
                     </Button>
-                    <span className="flex items-center gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePostClick(post);
+                      }}
+                      className="flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors"
+                    >
                       <MessageCircle className="h-4 w-4" />
                       <span className="font-medium">{post.comments}</span>
-                    </span>
+                    </Button>
                     {post.followers && !post.isOwner && (
                       <Button
                         variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
