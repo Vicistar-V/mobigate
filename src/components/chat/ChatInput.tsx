@@ -51,7 +51,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     if (!files || files.length === 0) return;
 
     console.log('[ChatInput] Image upload started:', files.length, 'file(s)');
-    toast.info(`Processing ${files.length} photo(s)...`);
     
     const newAttachments: typeof attachments = [];
     let processedCount = 0;
@@ -63,14 +62,12 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
       
       if (file.size > 10 * 1024 * 1024) {
         console.error('[ChatInput] File too large:', file.name);
-        toast.error(`${file.name} exceeds 10MB limit`);
         processedCount++;
         continue;
       }
 
       if (!file.type.startsWith('image/')) {
         console.error('[ChatInput] Not an image:', file.name, file.type);
-        toast.error(`${file.name} is not an image`);
         processedCount++;
         continue;
       }
@@ -91,23 +88,16 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         if (processedCount === totalFiles) {
           console.log('[ChatInput] All files processed, updating state');
           setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-          if (newAttachments.length > 0) {
-            toast.success(`${newAttachments.length} photo(s) added!`);
-          } else {
-            toast.warning('No valid images to add');
-          }
         }
       };
       reader.onerror = (error) => {
         console.error('[ChatInput] FileReader error:', file.name, error);
-        toast.error(`Failed to read ${file.name}`);
         processedCount++;
         
         if (processedCount === totalFiles) {
           console.log('[ChatInput] All files processed (with errors)');
           if (newAttachments.length > 0) {
             setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-            toast.success(`${newAttachments.length} photo(s) added!`);
           }
         }
       };
@@ -116,7 +106,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         reader.readAsDataURL(file);
       } catch (error) {
         console.error('[ChatInput] Exception reading file:', file.name, error);
-        toast.error(`Error reading ${file.name}`);
         processedCount++;
       }
     }
@@ -132,7 +121,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > 50 * 1024 * 1024) {
-        toast.error(`${file.name} exceeds 50MB limit`);
         continue;
       }
 
@@ -145,7 +133,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
 
     if (newAttachments.length > 0) {
       setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-      toast.success(`${newAttachments.length} file(s) added!`);
     }
     e.target.value = "";
   };
@@ -181,7 +168,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     if (!file) return;
     
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Photo exceeds 10MB limit");
       return;
     }
 
@@ -193,7 +179,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
         url,
         name: file.name,
       }].slice(0, 5));
-      toast.success("Photo captured!");
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -202,8 +187,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
   const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
-    toast.info("Processing video...");
     
     const newAttachments: typeof attachments = [];
 
@@ -211,12 +194,10 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
       const file = files[i];
       
       if (file.size > 100 * 1024 * 1024) {
-        toast.error(`${file.name} exceeds 100MB limit`);
         continue;
       }
 
       if (!file.type.startsWith('video/')) {
-        toast.error(`${file.name} is not a video`);
         continue;
       }
 
@@ -229,7 +210,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
 
     if (newAttachments.length > 0) {
       setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-      toast.success(`${newAttachments.length} video(s) added!`);
     }
 
     e.target.value = "";
@@ -255,7 +235,6 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     );
     
     setIsRecording(false);
-    toast.success("Voice message sent!");
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
