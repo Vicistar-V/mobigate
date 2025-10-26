@@ -55,6 +55,7 @@ export const PremiumAdCard = ({
   const [isVisible, setIsVisible] = useState(true);
   const [showComments, setShowComments] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const shareUrl = generateShareUrl('ad', id);
 
   if (!isVisible) return null;
@@ -120,7 +121,7 @@ export const PremiumAdCard = ({
           {/* Header */}
           <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-20">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 text-white/90 text-xs sm:text-sm min-w-0 flex-1">
+              <div className="flex flex-col gap-1 text-white/90 text-xs sm:text-sm min-w-0 flex-1">
                 <div className="flex items-center gap-2 min-w-0">
                   {advertiser.logo && (
                     <img 
@@ -130,11 +131,8 @@ export const PremiumAdCard = ({
                     />
                   )}
                   <span className="font-medium truncate">{advertiser.name}</span>
-                  {advertiser.verified && (
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0 flex-shrink-0">✓</Badge>
-                  )}
                 </div>
-                <div className="flex items-center gap-1 text-xs sm:text-sm pl-8 sm:pl-0">
+                <div className="flex items-center gap-1 text-xs sm:text-sm pl-8">
                   <Globe className="h-3 w-3 flex-shrink-0" />
                   <span>Sponsored</span>
                 </div>
@@ -260,9 +258,6 @@ export const PremiumAdCard = ({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-semibold text-foreground text-sm sm:text-base">{advertiser.name}</span>
-                  {advertiser.verified && (
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0">✓</Badge>
-                  )}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mt-0.5">
                   <Globe className="h-3 w-3 flex-shrink-0" />
@@ -326,14 +321,24 @@ export const PremiumAdCard = ({
             <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
               {content.headline}
             </h3>
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              {content.description}
+            <div className="relative">
+              <p className={`text-base sm:text-lg text-muted-foreground leading-relaxed ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>
+                {content.description}
+              </p>
+              {content.description.length > 100 && (
+                <button
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  className="text-primary hover:text-primary/80 text-sm font-medium mt-1 inline-flex items-center"
+                >
+                  {isDescriptionExpanded ? 'Show less' : '...More'}
+                </button>
+              )}
               {isPreviewMode && (
                 <span className="block mt-2 text-xs text-blue-600 dark:text-blue-400">
                   <strong>Note:</strong> Ensure your advert material fits properly. Edit or resize images/videos if distorted before submitting.
                 </span>
               )}
-            </p>
+            </div>
           </div>
           {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
             <div className="flex flex-wrap gap-2">
@@ -438,9 +443,6 @@ export const PremiumAdCard = ({
             <div className="space-y-0.5 mb-1.5">
               <div className="flex items-center gap-1.5">
                 <span className="font-semibold text-foreground text-xs sm:text-sm truncate">{advertiser.name}</span>
-                {advertiser.verified && (
-                  <Badge variant="secondary" className="text-xs px-1 py-0">✓</Badge>
-                )}
               </div>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Globe className="h-3 w-3 flex-shrink-0" />
@@ -464,9 +466,19 @@ export const PremiumAdCard = ({
         </div>
 
         {/* Description */}
-        <p className="text-sm sm:text-base text-muted-foreground line-clamp-2 leading-relaxed">
-          {content.description}
-        </p>
+        <div className="relative">
+          <p className={`text-sm sm:text-base text-muted-foreground leading-relaxed ${!isDescriptionExpanded ? 'line-clamp-2' : ''}`}>
+            {content.description}
+          </p>
+          {content.description.length > 80 && (
+            <button
+              onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+              className="text-primary hover:text-primary/80 text-xs font-medium mt-0.5"
+            >
+              {isDescriptionExpanded ? 'Less' : '...More'}
+            </button>
+          )}
+        </div>
 
         {/* CTA Button(s) */}
         {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
