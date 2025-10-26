@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal, UserPlus } from "lucide-react";
+import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal, UserPlus, Share2 } from "lucide-react";
 import { getPostsByUserId, Post } from "@/data/posts";
 import {
   DropdownMenu,
@@ -15,6 +15,10 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { contentsAdSlots } from "@/data/profileAds";
 import { useToast } from "@/hooks/use-toast";
+import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
+import { CommentDialog } from "@/components/CommentDialog";
+import { ShareDialog } from "@/components/ShareDialog";
+import { generateShareUrl } from "@/lib/shareUtils";
 
 interface ProfileContentsTabProps {
   userName: string;
@@ -79,6 +83,21 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set());
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  
+  // Media Gallery states
+  const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
+  const [galleryItems, setGalleryItems] = useState<MediaItem[]>([]);
+  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
+  
+  // Comment Dialog states
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [selectedPostForComment, setSelectedPostForComment] = useState<Post | null>(null);
+  
+  // Share Dialog states
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [shareTitle, setShareTitle] = useState("");
+  const [shareDescription, setShareDescription] = useState("");
 
   const handleFollowAuthor = (authorUserId: string) => {
     setFollowingAuthors(prev => {
@@ -116,6 +135,44 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const formatFollowerCount = (count: string | undefined): string => {
     if (!count) return "0";
     return count;
+  };
+
+  // Open media gallery when clicking on card or image
+  const openMediaGallery = (post: Post, index: number) => {
+    // Convert visible posts to MediaItem format
+    const items: MediaItem[] = visiblePosts.map((p) => ({
+      id: p.id,
+      url: p.imageUrl || "",
+      type: p.type.toLowerCase() === "video" ? "video" : p.type.toLowerCase() === "audio" ? "audio" : "photo",
+      title: p.title,
+      description: p.subtitle,
+      author: p.author,
+      authorImage: p.authorProfileImage,
+      authorUserId: p.userId,
+      likes: parseInt(p.likes.replace(/[^0-9]/g, '')) || 0,
+      comments: parseInt(p.comments.replace(/[^0-9]/g, '')) || 0,
+      followers: p.followers,
+      isLiked: likedPosts.has(p.id),
+      isOwner: p.isOwner,
+    }));
+    
+    setGalleryItems(items);
+    setGalleryInitialIndex(index);
+    setMediaGalleryOpen(true);
+  };
+
+  // Open comment dialog when clicking comment count
+  const openCommentDialog = (post: Post) => {
+    setSelectedPostForComment(post);
+    setCommentDialogOpen(true);
+  };
+
+  // Open share dialog
+  const openShareDialog = (post: Post) => {
+    setShareUrl(generateShareUrl('post', post.id));
+    setShareTitle(post.title);
+    setShareDescription(post.subtitle || "");
+    setShareDialogOpen(true);
   };
 
   // Filter options configuration
@@ -293,6 +350,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
               {/* Content Card */}
               <Card 
                 className="overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
+                onClick={() => openMediaGallery(post, index)}
               >
                 {/* Top: Full-Width Thumbnail or Icon */}
                 <div className="w-full aspect-[4/3] sm:aspect-video bg-muted flex items-center justify-center">
@@ -346,10 +404,27 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
                       <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
                       <span className="font-medium">{post.likes}</span>
                     </Button>
-                    <span className="flex items-center gap-1.5">
+                    <button
+                      className="flex items-center gap-1.5 hover:underline transition-all"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openCommentDialog(post);
+                      }}
+                    >
                       <MessageCircle className="h-4 w-4" />
                       <span className="font-medium">{post.comments}</span>
-                    </span>
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openShareDialog(post);
+                      }}
+                      className="flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
                     {post.followers && !post.isOwner && (
                       <Button
                         variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
@@ -422,6 +497,44 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
           )}
         </div>
       )}
+
+      {/* Media Gallery Viewer */}
+      <MediaGalleryViewer
+        open={mediaGalleryOpen}
+        onOpenChange={setMediaGalleryOpen}
+        items={galleryItems}
+        initialIndex={galleryInitialIndex}
+        showActions={true}
+        galleryType="post"
+      />
+
+      {/* Comment Dialog */}
+      {selectedPostForComment && (
+        <CommentDialog
+          open={commentDialogOpen}
+          onOpenChange={setCommentDialogOpen}
+          post={{
+            id: selectedPostForComment.id,
+            title: selectedPostForComment.title,
+            subtitle: selectedPostForComment.subtitle,
+            author: selectedPostForComment.author,
+            authorProfileImage: selectedPostForComment.authorProfileImage,
+            type: selectedPostForComment.type,
+            imageUrl: selectedPostForComment.imageUrl,
+            views: selectedPostForComment.views,
+            likes: selectedPostForComment.likes,
+          }}
+        />
+      )}
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        shareUrl={shareUrl}
+        title={shareTitle}
+        description={shareDescription}
+      />
     </div>
   );
 };
