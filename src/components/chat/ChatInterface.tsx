@@ -22,7 +22,7 @@ import { toast } from "sonner";
 interface ChatInterfaceProps {
   conversation: Conversation | undefined;
   isTyping: boolean;
-  onSendMessage: (content: string, attachments?: { type: 'image' | 'file' | 'gift' | 'audio'; url: string; name: string; duration?: number; giftData?: any }[]) => void;
+  onSendMessage: (content: string, attachments?: { type: 'image' | 'file' | 'gift' | 'audio' | 'video'; url: string; name: string; duration?: number; giftData?: any }[]) => void;
   onEditMessage: (messageId: string, newContent: string) => void;
   onDeleteMessage: (messageId: string) => void;
   onReactToMessage: (messageId: string, emoji: string) => void;
@@ -314,7 +314,18 @@ export const ChatInterface = ({
                     <div className="mb-2 space-y-2">
                       {message.attachments.map((attachment, idx) => (
                         <div key={idx}>
-                          {attachment.type === 'image' ? (
+                          {attachment.type === 'video' ? (
+                            <div className="relative rounded-lg overflow-hidden max-w-xs">
+                              <video
+                                src={attachment.url}
+                                controls
+                                className="w-full rounded-lg"
+                                style={{ maxHeight: '300px' }}
+                              >
+                                Your browser does not support video playback.
+                              </video>
+                            </div>
+                          ) : attachment.type === 'image' ? (
                             <img
                               src={attachment.url}
                               alt={attachment.name}

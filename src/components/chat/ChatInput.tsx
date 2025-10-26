@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Camera, Mic, Gift, Gamepad2 } from "lucide-react";
+import { X, Send, Camera, Mic, Gift, Gamepad2, Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
 import { AttachmentMenu } from "./AttachmentMenu";
@@ -9,7 +9,7 @@ import { InlineVoiceRecorder } from "./InlineVoiceRecorder";
 import { toast } from "sonner";
 
 interface ChatInputProps {
-  onSendMessage: (message: string, attachments?: { type: 'image' | 'file' | 'gift' | 'audio'; url: string; name: string; duration?: number; giftData?: any }[]) => void;
+  onSendMessage: (message: string, attachments?: { type: 'image' | 'file' | 'gift' | 'audio' | 'video'; url: string; name: string; duration?: number; giftData?: any }[]) => void;
   disabled?: boolean;
   replyTo?: { messageId: string; content: string; senderName: string } | null;
   onCancelReply?: () => void;
@@ -19,12 +19,14 @@ interface ChatInputProps {
 
 export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, recipientName = "User", onStartQuiz }: ChatInputProps) => {
   const [message, setMessage] = useState("");
-  const [attachments, setAttachments] = useState<{ type: 'image' | 'file' | 'gift' | 'audio'; url: string; name: string; duration?: number; giftData?: any }[]>([]);
+  const [attachments, setAttachments] = useState<{ type: 'image' | 'file' | 'gift' | 'audio' | 'video'; url: string; name: string; duration?: number; giftData?: any }[]>([]);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     if (message.trim() || attachments.length > 0) {
@@ -46,13 +48,25 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    const newAttachments = [];
-    for (let i = 0; i < files.length; i++) {
+    toast.info(`Processing ${files.length} photo(s)...`);
+    
+    const newAttachments: typeof attachments = [];
+    let processedCount = 0;
+
+    for (let i = 0; i < files.length && i < 5; i++) {
       const file = files[i];
+      
       if (file.size > 10 * 1024 * 1024) {
-        alert(`${file.name} exceeds 10MB limit`);
+        toast.error(`${file.name} exceeds 10MB limit`);
+        processedCount++;
+        continue;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image`);
+        processedCount++;
         continue;
       }
 
@@ -65,9 +79,17 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
           name: file.name,
         });
         
-        if (newAttachments.length === files.length || newAttachments.length + attachments.length >= 5) {
+        processedCount++;
+        if (processedCount === Math.min(files.length, 5)) {
           setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
+          if (newAttachments.length > 0) {
+            toast.success(`${newAttachments.length} photo(s) added!`);
+          }
         }
+      };
+      reader.onerror = () => {
+        toast.error(`Failed to read ${file.name}`);
+        processedCount++;
       };
       reader.readAsDataURL(file);
     }
@@ -83,7 +105,7 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > 50 * 1024 * 1024) {
-        alert(`${file.name} exceeds 50MB limit`);
+        toast.error(`${file.name} exceeds 50MB limit`);
         continue;
       }
 
@@ -94,7 +116,10 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
       });
     }
 
-    setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
+    if (newAttachments.length > 0) {
+      setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
+      toast.success(`${newAttachments.length} file(s) added!`);
+    }
     e.target.value = "";
   };
 
@@ -121,10 +146,66 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
   };
 
   const handleCameraClick = () => {
-    toast.info("📷 Camera feature coming soon!", {
-      description: "Take photos directly from the chat",
-      duration: 2000,
-    });
+    cameraInputRef.current?.click();
+  };
+
+  const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Photo exceeds 10MB limit");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const url = e.target?.result as string;
+      setAttachments(prev => [...prev, {
+        type: 'image' as const,
+        url,
+        name: file.name,
+      }].slice(0, 5));
+      toast.success("Photo captured!");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    toast.info("Processing video...");
+    
+    const newAttachments: typeof attachments = [];
+
+    for (let i = 0; i < files.length && i < 2; i++) {
+      const file = files[i];
+      
+      if (file.size > 100 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds 100MB limit`);
+        continue;
+      }
+
+      if (!file.type.startsWith('video/')) {
+        toast.error(`${file.name} is not a video`);
+        continue;
+      }
+
+      newAttachments.push({
+        type: 'video' as const,
+        url: URL.createObjectURL(file),
+        name: file.name,
+      });
+    }
+
+    if (newAttachments.length > 0) {
+      setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
+      toast.success(`${newAttachments.length} video(s) added!`);
+    }
+
+    e.target.value = "";
   };
 
   const formatDuration = (seconds: number) => {
@@ -189,7 +270,23 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
           <div className="mb-3 flex flex-wrap gap-2">
             {attachments.map((attachment, index) => (
               <div key={index} className="relative group">
-                {attachment.type === 'image' ? (
+                {attachment.type === 'video' ? (
+                  <div className="relative w-32 h-20 rounded-lg overflow-hidden border-2 border-border">
+                    <video 
+                      src={attachment.url} 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <Play className="h-6 w-6 text-white" />
+                    </div>
+                    <button
+                      onClick={() => removeAttachment(index)}
+                      className="absolute top-1 right-1 bg-destructive/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : attachment.type === 'image' ? (
                   <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-border">
                     <img 
                       src={attachment.url} 
@@ -265,11 +362,28 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 className="hidden"
                 onChange={handleFileSelect}
               />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleCameraCapture}
+              />
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                multiple
+                className="hidden"
+                onChange={handleVideoSelect}
+              />
 
               {/* Plus Button - More Tools */}
               <AttachmentMenu
                 onImageSelect={() => imageInputRef.current?.click()}
                 onFileSelect={() => fileInputRef.current?.click()}
+                onVideoSelect={() => videoInputRef.current?.click()}
                 disabled={disabled || isRecording}
               />
               

@@ -12,7 +12,7 @@ export interface Message {
   timestamp: Date;
   isRead?: boolean;
   attachments?: {
-    type: 'image' | 'file' | 'gift' | 'audio';
+    type: 'image' | 'file' | 'gift' | 'audio' | 'video';
     url: string;
     name: string;
     duration?: number;

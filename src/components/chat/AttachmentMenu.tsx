@@ -1,17 +1,19 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Plus, ImageIcon, Paperclip } from "lucide-react";
+import { Plus, ImageIcon, Paperclip, Video } from "lucide-react";
 import { useState } from "react";
 
 interface AttachmentMenuProps {
   onImageSelect: () => void;
   onFileSelect: () => void;
+  onVideoSelect: () => void;
   disabled?: boolean;
 }
 
 export const AttachmentMenu = ({
   onImageSelect,
   onFileSelect,
+  onVideoSelect,
   disabled,
 }: AttachmentMenuProps) => {
   const [open, setOpen] = useState(false);
@@ -32,9 +34,9 @@ export const AttachmentMenu = ({
       <PopoverContent 
         side="top" 
         align="start"
-        className="w-48 p-2"
+        className="w-64 p-2"
       >
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {/* Photos */}
           <Button
             onClick={() => {
@@ -45,7 +47,20 @@ export const AttachmentMenu = ({
             className="h-20 flex flex-col gap-2 hover:bg-primary/10"
           >
             <ImageIcon className="h-6 w-6 text-primary" />
-            <span className="text-base">Photos</span>
+            <span className="text-sm">Photos</span>
+          </Button>
+
+          {/* Videos */}
+          <Button
+            onClick={() => {
+              onVideoSelect();
+              setOpen(false);
+            }}
+            variant="outline"
+            className="h-20 flex flex-col gap-2 hover:bg-primary/10"
+          >
+            <Video className="h-6 w-6 text-green-600" />
+            <span className="text-sm">Videos</span>
           </Button>
 
           {/* Files */}
@@ -57,8 +72,8 @@ export const AttachmentMenu = ({
             variant="outline"
             className="h-20 flex flex-col gap-2 hover:bg-primary/10"
           >
-            <Paperclip className="h-6 w-6 text-primary" />
-            <span className="text-base">Files</span>
+            <Paperclip className="h-6 w-6 text-blue-600" />
+            <span className="text-sm">Files</span>
           </Button>
         </div>
       </PopoverContent>
