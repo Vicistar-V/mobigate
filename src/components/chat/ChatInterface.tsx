@@ -411,7 +411,7 @@ export const ChatInterface = ({
                   )}
 
                   {/* Message Content */}
-                  {message.content && (
+                  {message.content && !message.attachments?.some(att => att.type === 'audio') && (
                     <p className="text-base text-[#111b21] break-words mb-1">{message.content}</p>
                   )}
 
