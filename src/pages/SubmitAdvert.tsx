@@ -218,6 +218,8 @@ export default function SubmitAdvert() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [advertiserName, setAdvertiserName] = useState("");
   const [advertDescription, setAdvertDescription] = useState("");
+  const [advertHeadline, setAdvertHeadline] = useState("");
+  const [advertCTAText, setAdvertCTAText] = useState("Learn More");
   const [catchmentLocked, setCatchmentLocked] = useState(() => {
     const saved = localStorage.getItem('advert-catchment-locked');
     return saved ? JSON.parse(saved) : false;
@@ -364,6 +366,12 @@ export default function SubmitAdvert() {
         if (advertToEdit.advertDescription) {
           setAdvertDescription(advertToEdit.advertDescription);
         }
+        if (advertToEdit.advertHeadline) {
+          setAdvertHeadline(advertToEdit.advertHeadline);
+        }
+        if (advertToEdit.advertCTAText) {
+          setAdvertCTAText(advertToEdit.advertCTAText);
+        }
         
         // Ensure form step is visible by creating an entry pack draft
         try {
@@ -500,7 +508,11 @@ export default function SubmitAdvert() {
         launchDate,
         catchmentMarket,
         agreed,
-        files: []
+        files: [],
+        advertiserName: advertiserName || undefined,
+        advertDescription: advertDescription || undefined,
+        advertHeadline: advertHeadline || undefined,
+        advertCTAText: advertCTAText || undefined
       });
       
       toast({
@@ -709,7 +721,9 @@ export default function SubmitAdvert() {
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
             advertiserName: advertiserName || undefined,
-            advertDescription: advertDescription || undefined
+            advertDescription: advertDescription || undefined,
+            advertHeadline: advertHeadline || undefined,
+            advertCTAText: advertCTAText || undefined
           },
           pricing
         );
@@ -741,7 +755,9 @@ export default function SubmitAdvert() {
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
             advertiserName: advertiserName || undefined,
-            advertDescription: advertDescription || undefined
+            advertDescription: advertDescription || undefined,
+            advertHeadline: advertHeadline || undefined,
+            advertCTAText: advertCTAText || undefined
           },
           pricing
         );
@@ -1941,14 +1957,57 @@ export default function SubmitAdvert() {
                     )}
                   </div>
 
+                  {/* Advert Headline */}
+                  <div className="space-y-2">
+                    <Label htmlFor="advert-headline" className="text-xs font-medium flex items-center gap-2">
+                      Advert Headline (Optional)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Main headline that appears in your advertisement (e.g., "Buy and Sell with Confidence")</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </Label>
+                    <Input
+                      id="advert-headline"
+                      type="text"
+                      value={advertHeadline}
+                      onChange={(e) => setAdvertHeadline(e.target.value)}
+                      placeholder="Enter attention-grabbing headline (e.g., 'Buy and Sell with Confidence')"
+                      maxLength={100}
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">
+                        Create an eye-catching headline
+                      </p>
+                      <span className="text-xs text-muted-foreground">
+                        {advertHeadline.length}/100
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Advert Description */}
                   <div className="space-y-2">
-                    <Label htmlFor="advert-description" className="text-xs font-medium">
-                      Advert Text Description (Optional)
+                    <Label htmlFor="advert-description" className="text-xs font-medium flex items-center gap-2">
+                      Advert Description (Optional)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Brief description of your product/service shown below the headline</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </Label>
                     <textarea
                       id="advert-description"
-                      placeholder="Enter a brief description of your product, service, or offer (e.g., 'Premium quality shoes at 30% off!', 'Expert legal services - Free consultation')"
+                      placeholder="Describe your offering (e.g., 'Connect with millions of buyers worldwide')"
                       value={advertDescription}
                       onChange={(e) => setAdvertDescription(e.target.value)}
                       maxLength={200}
@@ -1965,7 +2024,40 @@ export default function SubmitAdvert() {
                     </div>
                   </div>
 
-                  {(advertiserName || advertDescription) && (
+                  {/* Call-to-Action Button Text */}
+                  <div className="space-y-2">
+                    <Label htmlFor="cta-text" className="text-xs font-medium flex items-center gap-2">
+                      Call-to-Action Button Text (Optional)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Text on the action button (e.g., "Start Selling", "Learn More", "Shop Now")</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </Label>
+                    <Input
+                      id="cta-text"
+                      type="text"
+                      value={advertCTAText}
+                      onChange={(e) => setAdvertCTAText(e.target.value)}
+                      placeholder="Enter button text (e.g., 'Start Selling', 'Shop Now')"
+                      maxLength={30}
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">
+                        Encourage customers to take action
+                      </p>
+                      <span className="text-xs text-muted-foreground">
+                        {advertCTAText.length}/30
+                      </span>
+                    </div>
+                  </div>
+
+                  {(advertiserName || advertHeadline || advertDescription || advertCTAText) && (
                     <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
                       <p className="text-xs text-muted-foreground">
                         ✓ Your brand name and description will be displayed on your advert

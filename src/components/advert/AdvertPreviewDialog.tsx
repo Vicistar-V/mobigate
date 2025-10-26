@@ -24,9 +24,9 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
       verified: true,
     },
     content: {
-      headline: `${formData.category === "pictorial" ? "📸" : "🎬"} ${formData.type} Display Preview`,
-      description: formData.advertDescription || `This is how your ${formData.size} advert will appear to viewers`,
-      ctaText: "Learn More",
+      headline: formData.advertHeadline || "Your Headline Here",
+      description: formData.advertDescription || "Your description will appear here",
+      ctaText: formData.advertCTAText || "Learn More",
       ctaUrl: "#",
     },
     media: {
@@ -70,7 +70,7 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
           {/* Preview Container - Mobile Optimized */}
           <div className="flex justify-center p-2 sm:p-4 lg:p-6 bg-gradient-to-br from-accent/5 to-accent/10 rounded-lg border min-h-[300px] sm:min-h-[400px] lg:min-h-[450px]">
             <div className="w-full max-w-full sm:max-w-xl lg:max-w-3xl transition-all duration-300">
-              <PremiumAdCard {...previewAd} />
+              <PremiumAdCard {...previewAd} isPreviewMode={true} />
             </div>
           </div>
 

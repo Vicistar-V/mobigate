@@ -40,6 +40,7 @@ export interface PremiumAdCardProps {
     email?: string;
     website?: string;
   };
+  isPreviewMode?: boolean;
 }
 
 export const PremiumAdCard = ({
@@ -49,6 +50,7 @@ export const PremiumAdCard = ({
   media,
   layout,
   contactDetails,
+  isPreviewMode = false,
 }: PremiumAdCardProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [showComments, setShowComments] = useState(false);
@@ -326,9 +328,11 @@ export const PremiumAdCard = ({
             </h3>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
               {content.description}
-              <span className="block mt-2 text-xs text-blue-600 dark:text-blue-400">
-                <strong>Note:</strong> Ensure your advert material fits properly. Edit or resize images/videos if distorted before submitting.
-              </span>
+              {isPreviewMode && (
+                <span className="block mt-2 text-xs text-blue-600 dark:text-blue-400">
+                  <strong>Note:</strong> Ensure your advert material fits properly. Edit or resize images/videos if distorted before submitting.
+                </span>
+              )}
             </p>
           </div>
           {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
