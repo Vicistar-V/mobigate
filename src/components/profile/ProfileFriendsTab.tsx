@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 
 interface ProfileFriendsTabProps {
   userName: string;
@@ -42,6 +43,8 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   const navigate = useNavigate();
   const [friendStatuses, setFriendStatuses] = useState<FriendStatuses>({});
   const [interactions, setInteractions] = useState<FriendInteractions>({});
+  const [giftDialogOpen, setGiftDialogOpen] = useState(false);
+  const [selectedUserForGift, setSelectedUserForGift] = useState<{ name: string } | null>(null);
 
   const handleAddFriend = (friendId: string, friendName: string) => {
     setFriendStatuses(prev => ({ ...prev, [friendId]: 'pending' }));
@@ -84,17 +87,28 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   };
 
   const handleSendGift = (friendId: string, friendName: string) => {
-    toast({
-      title: "Gift Store",
-      description: `Opening gift store for ${friendName}`,
-    });
+    setSelectedUserForGift({ name: friendName });
+    setGiftDialogOpen(true);
+  };
+
+  const handleGiftSent = (giftData: GiftSelection) => {
+    if (selectedUserForGift) {
+      toast({
+        title: "Gift Sent",
+        description: `Gift sent to ${selectedUserForGift.name}!`,
+      });
+    }
+    setGiftDialogOpen(false);
+    setSelectedUserForGift(null);
   };
 
   const handleChat = (friendId: string, friendName: string) => {
-    toast({
-      title: "Opening Chat",
-      description: `Starting conversation with ${friendName}`,
-    });
+    window.dispatchEvent(new CustomEvent('openChatWithUser', {
+      detail: { 
+        userId: friendId,
+        userName: friendName 
+      }
+    }));
   };
 
   const handleCall = (friendId: string, friendName: string) => {
@@ -398,6 +412,16 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
           );
         })}
       </Card>
+
+      <SendGiftDialog
+        isOpen={giftDialogOpen}
+        onClose={() => {
+          setGiftDialogOpen(false);
+          setSelectedUserForGift(null);
+        }}
+        recipientName={selectedUserForGift?.name || ""}
+        onSendGift={handleGiftSent}
+      />
     </div>
   );
 };

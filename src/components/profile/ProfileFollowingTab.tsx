@@ -17,6 +17,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { followingAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
 import React from "react";
+import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 
 interface ProfileFollowingTabProps {
   userName: string;
@@ -32,6 +33,8 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
   const [interactions, setInteractions] = useState<{
     [key: string]: { isLiked: boolean; isBlocked: boolean };
   }>({});
+  const [giftDialogOpen, setGiftDialogOpen] = useState(false);
+  const [selectedUserForGift, setSelectedUserForGift] = useState<{ name: string } | null>(null);
 
   const handleViewProfile = (userId: string, name: string) => {
     toast({
@@ -68,10 +71,12 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
   };
 
   const handleChat = (userId: string, userName: string) => {
-    toast({
-      title: "Opening Chat",
-      description: `Starting conversation with ${userName}`,
-    });
+    window.dispatchEvent(new CustomEvent('openChatWithUser', {
+      detail: { 
+        userId: userId,
+        userName: userName 
+      }
+    }));
   };
 
   const handleCall = (userId: string, userName: string) => {
@@ -82,10 +87,19 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
   };
 
   const handleSendGift = (userId: string, userName: string) => {
-    toast({
-      title: "Send Gift",
-      description: `Opening gift store for ${userName}`,
-    });
+    setSelectedUserForGift({ name: userName });
+    setGiftDialogOpen(true);
+  };
+
+  const handleGiftSent = (giftData: GiftSelection) => {
+    if (selectedUserForGift) {
+      toast({
+        title: "Gift Sent",
+        description: `Gift sent to ${selectedUserForGift.name}!`,
+      });
+    }
+    setGiftDialogOpen(false);
+    setSelectedUserForGift(null);
   };
 
   const handleAddToCircle = (userId: string, userName: string) => {
@@ -316,6 +330,16 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
           );
         })}
       </Card>
+
+      <SendGiftDialog
+        isOpen={giftDialogOpen}
+        onClose={() => {
+          setGiftDialogOpen(false);
+          setSelectedUserForGift(null);
+        }}
+        recipientName={selectedUserForGift?.name || ""}
+        onSendGift={handleGiftSent}
+      />
     </div>
   );
 };

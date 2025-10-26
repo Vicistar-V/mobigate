@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import sarahJohnson from "@/assets/profile-sarah-johnson.jpg";
 import michaelChen from "@/assets/profile-michael-chen.jpg";
 import emilyDavis from "@/assets/profile-emily-davis.jpg";
@@ -47,6 +48,8 @@ export const PeopleYouMayKnow = () => {
   const [circleDialogOpen, setCircleDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
   const { toast } = useToast();
+  const [giftDialogOpen, setGiftDialogOpen] = useState(false);
+  const [selectedUserForGift, setSelectedUserForGift] = useState<{ name: string } | null>(null);
 
   const handleAddFriend = (userId: string, userName: string) => {
     setFriendRequestStatus((prev) => ({ ...prev, [userId]: true }));
@@ -80,10 +83,12 @@ export const PeopleYouMayKnow = () => {
   };
 
   const handleChat = (userId: string, userName: string) => {
-    toast({
-      title: "Opening Chat",
-      description: `Starting conversation with ${userName}`,
-    });
+    window.dispatchEvent(new CustomEvent('openChatWithUser', {
+      detail: { 
+        userId: userId,
+        userName: userName 
+      }
+    }));
   };
 
   const handleCall = (userId: string, userName: string) => {
@@ -94,10 +99,19 @@ export const PeopleYouMayKnow = () => {
   };
 
   const handleSendGift = (userId: string, userName: string) => {
-    toast({
-      title: "Send Gift",
-      description: `Opening gift store for ${userName}`,
-    });
+    setSelectedUserForGift({ name: userName });
+    setGiftDialogOpen(true);
+  };
+
+  const handleGiftSent = (giftData: GiftSelection) => {
+    if (selectedUserForGift) {
+      toast({
+        title: "Gift Sent",
+        description: `Gift sent to ${selectedUserForGift.name}!`,
+      });
+    }
+    setGiftDialogOpen(false);
+    setSelectedUserForGift(null);
   };
 
   const handleBlock = (userId: string, userName: string) => {
@@ -384,6 +398,16 @@ export const PeopleYouMayKnow = () => {
         onOpenChange={setCircleDialogOpen}
         userName={selectedUser?.name || ""}
         onComplete={() => selectedUser && handleCircleComplete(selectedUser.id)}
+      />
+
+      <SendGiftDialog
+        isOpen={giftDialogOpen}
+        onClose={() => {
+          setGiftDialogOpen(false);
+          setSelectedUserForGift(null);
+        }}
+        recipientName={selectedUserForGift?.name || ""}
+        onSendGift={handleGiftSent}
       />
     </>
   );
