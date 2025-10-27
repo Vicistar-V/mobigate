@@ -219,8 +219,19 @@ const menuItems: MenuItem[] = [{
           title: "View Accredited Advertisers",
           url: "#",
           items: [
-            { title: "By Countries", url: "#" },
-            { title: "By States/Provinces", url: "#" }
+            { 
+              title: "By Countries", 
+              url: "#",
+              items: [
+                { 
+                  title: "By States/Provinces", 
+                  url: "#",
+                  items: [
+                    { title: "By Cities/Counties", url: "#" }
+                  ]
+                }
+              ]
+            }
           ]
         }
       ]
