@@ -466,6 +466,13 @@ export const PremiumAdCard = ({
           <div className="flex-1 min-w-0">
             <div className="space-y-0.5 mb-1.5">
               <div className="flex items-center gap-1.5">
+                {advertiser.logo && (
+                  <img 
+                    src={advertiser.logo} 
+                    alt={advertiser.name}
+                    className="h-4 w-4 sm:h-5 sm:w-5 rounded-full object-cover bg-muted flex-shrink-0"
+                  />
+                )}
                 <span className="font-semibold text-foreground text-xs sm:text-sm truncate">{advertiser.name}</span>
               </div>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">

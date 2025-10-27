@@ -16,7 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock, ArrowLeft, Phone, X } from "lucide-react";
+import { CalendarIcon, Upload, Eye, Save, Info, AlertCircle, Lock, Unlock, ArrowLeft, Phone, X, Image } from "lucide-react";
+import { ImageUploader } from "@/components/profile/ImageUploader";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { 
@@ -217,6 +218,7 @@ export default function SubmitAdvert() {
   const [contactEmail, setContactEmail] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [catalogueUrl, setCatalogueUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
   const [advertiserName, setAdvertiserName] = useState("");
   const [advertDescription, setAdvertDescription] = useState("");
   const [advertHeadline, setAdvertHeadline] = useState("");
@@ -364,6 +366,9 @@ export default function SubmitAdvert() {
         if (advertToEdit.catalogueUrl) {
           setCatalogueUrl(advertToEdit.catalogueUrl);
         }
+        if (advertToEdit.logoUrl) {
+          setLogoUrl(advertToEdit.logoUrl);
+        }
         if (advertToEdit.advertiserName) {
           setAdvertiserName(advertToEdit.advertiserName);
         }
@@ -436,6 +441,7 @@ export default function SubmitAdvert() {
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
             catalogueUrl: catalogueUrl || undefined,
+            logoUrl: logoUrl || undefined,
             advertiserName: advertiserName || undefined,
             advertDescription: advertDescription || undefined
           });
@@ -444,7 +450,7 @@ export default function SubmitAdvert() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl, catalogueUrl, advertiserName, advertDescription, editMode]);
+  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl, catalogueUrl, logoUrl, advertiserName, advertDescription, editMode]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
     if (catchmentLocked) return;
@@ -739,6 +745,7 @@ export default function SubmitAdvert() {
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
             catalogueUrl: catalogueUrl || undefined,
+            logoUrl: logoUrl || undefined,
             advertiserName: advertiserName || undefined,
             advertDescription: advertDescription || undefined,
             advertHeadline: advertHeadline || undefined,
@@ -774,6 +781,7 @@ export default function SubmitAdvert() {
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
             catalogueUrl: catalogueUrl || undefined,
+            logoUrl: logoUrl || undefined,
             advertiserName: advertiserName || undefined,
             advertDescription: advertDescription || undefined,
             advertHeadline: advertHeadline || undefined,
@@ -1003,6 +1011,7 @@ export default function SubmitAdvert() {
       contactEmail: contactEmail || undefined,
       websiteUrl: websiteUrl || undefined,
       catalogueUrl: catalogueUrl || undefined,
+      logoUrl: logoUrl || undefined,
       advertiserName: advertiserName || undefined,
       advertDescription: advertDescription || undefined
     };
@@ -1075,6 +1084,7 @@ export default function SubmitAdvert() {
     setContactEmail(slot.formData.contactEmail || "");
     setWebsiteUrl(slot.formData.websiteUrl || "");
     setCatalogueUrl(slot.formData.catalogueUrl || "");
+    setLogoUrl(slot.formData.logoUrl);
     setAdvertiserName(slot.formData.advertiserName || "");
     setAdvertDescription(slot.formData.advertDescription || "");
     setAdvertHeadline(slot.formData.advertHeadline || "");
@@ -1195,6 +1205,7 @@ export default function SubmitAdvert() {
         if (draft.contactEmail) setContactEmail(draft.contactEmail);
         if (draft.websiteUrl) setWebsiteUrl(draft.websiteUrl);
         if (draft.catalogueUrl) setCatalogueUrl(draft.catalogueUrl);
+        if (draft.logoUrl) setLogoUrl(draft.logoUrl);
         
         setUserType("individual");
         setCurrentStep("fill-slot");
@@ -1789,6 +1800,28 @@ export default function SubmitAdvert() {
                       />
                     </PopoverContent>
                   </Popover>
+                </div>
+
+                <Separator />
+
+                {/* Brand Logo/Icon */}
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm">
+                      Brand Logo/Icon (Optional)
+                      <InfoTooltip content="Upload your company or brand logo to appear on your advert. This helps with brand recognition and professionalism." />
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Add your logo to make your advert more recognizable
+                    </p>
+                  </div>
+                  
+                  <ImageUploader
+                    type="logo"
+                    value={logoUrl}
+                    onChange={setLogoUrl}
+                    placeholder="Upload Brand Logo"
+                  />
                 </div>
 
                 <Separator />

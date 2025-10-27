@@ -20,7 +20,7 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
     id: "preview-ad",
     advertiser: {
       name: formData.advertiserName || "Your Business",
-      logo: "/placeholder.svg",
+      logo: formData.logoUrl || "/placeholder.svg",
       verified: true,
     },
     content: {
