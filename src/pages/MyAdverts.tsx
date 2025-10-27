@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { loadUserAdverts, deleteAdvert, updateAdvertStatus, updateAdvertMedia, storeAdvertForEdit } from "@/lib/advertStorage";
-import { SavedAdvert, getMultipleCount } from "@/types/advert";
+import { SavedAdvert, getMultipleCount, getDisplayMode, AdvertFormData } from "@/types/advert";
+import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
 import { formatCurrency } from "@/lib/advertPricing";
 import { Plus, Eye, Trash2, Play, Pause, BarChart3, Calendar, Zap, X, Upload, Image as ImageIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -61,6 +62,8 @@ export default function MyAdverts() {
   const [selectedRejectionReason, setSelectedRejectionReason] = useState<string>("");
   const [approvalReasonDialogOpen, setApprovalReasonDialogOpen] = useState(false);
   const [selectedApprovalReason, setSelectedApprovalReason] = useState<string>("");
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewAdvert, setPreviewAdvert] = useState<SavedAdvert | null>(null);
 
   useEffect(() => {
     loadAdverts();
@@ -208,6 +211,43 @@ export default function MyAdverts() {
     setRejectionReasonDialogOpen(false);
   };
 
+  const handlePreviewAdvert = (advert: SavedAdvert) => {
+    setPreviewAdvert(advert);
+    setPreviewDialogOpen(true);
+  };
+
+  const convertSavedAdvertToFormData = (advert: SavedAdvert): AdvertFormData => {
+    const displayMode = getDisplayMode(advert.type);
+    const multipleCount = getMultipleCount(advert.type);
+
+    return {
+      category: advert.category,
+      displayMode,
+      multipleCount,
+      type: advert.type,
+      size: advert.size,
+      dpdPackage: advert.dpdPackage,
+      subscriptionMonths: 1,
+      extendedExposure: advert.extendedExposure,
+      recurrentAfter: advert.recurrentAfter,
+      recurrentEvery: advert.recurrentEvery,
+      catchmentMarket: advert.catchmentMarket,
+      launchDate: advert.launchDate,
+      files: [],
+      agreed: true,
+      contactPhone: advert.contactPhone,
+      contactMethod: advert.contactMethod,
+      contactEmail: advert.contactEmail,
+      websiteUrl: advert.websiteUrl,
+      catalogueUrl: advert.catalogueUrl,
+      logoUrl: advert.logoUrl,
+      advertiserName: advert.advertiserName,
+      advertHeadline: advert.advertHeadline,
+      advertDescription: advert.advertDescription,
+      advertCTAText: advert.advertCTAText,
+    };
+  };
+
   const AdvertCard = ({ advert }: { advert: SavedAdvert }) => {
     const canPause = advert.status === "active" || advert.status === "paused";
     const daysUntilExpiry = advert.expiresAt
@@ -240,6 +280,15 @@ export default function MyAdverts() {
               >
                 <Upload className="h-4 w-4 sm:mr-0 mr-2" />
                 <span className="sm:hidden">Change Media</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePreviewAdvert(advert)}
+                className="flex-1 sm:flex-none"
+              >
+                <Eye className="h-4 w-4 sm:mr-0 mr-2" />
+                <span className="sm:hidden">Preview</span>
               </Button>
               {canPause && (
                 <Button
@@ -680,6 +729,16 @@ export default function MyAdverts() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Preview Dialog */}
+      {previewAdvert && (
+        <AdvertPreviewDialog
+          open={previewDialogOpen}
+          onOpenChange={setPreviewDialogOpen}
+          formData={convertSavedAdvertToFormData(previewAdvert)}
+          fileUrls={previewAdvert.fileUrls}
+        />
+      )}
       </div>
     </>
   );

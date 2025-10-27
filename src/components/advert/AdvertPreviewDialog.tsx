@@ -10,9 +10,10 @@ interface AdvertPreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   formData: AdvertFormData;
+  fileUrls?: string[];
 }
 
-export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPreviewDialogProps) => {
+export const AdvertPreviewDialog = ({ open, onOpenChange, formData, fileUrls }: AdvertPreviewDialogProps) => {
   const [layout, setLayout] = useState<"fullscreen" | "standard" | "compact">("standard");
 
   // Convert form data to preview format
@@ -35,10 +36,15 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
         : formData.category === "video" 
           ? ("video" as const)
           : ("image" as const),
-      items: formData.files.map((file, idx) => ({
-        url: URL.createObjectURL(file),
-        caption: `Display ${idx + 1}`,
-      })),
+      items: fileUrls 
+        ? fileUrls.map((url, idx) => ({
+            url,
+            caption: `Display ${idx + 1}`,
+          }))
+        : formData.files.map((file, idx) => ({
+            url: URL.createObjectURL(file),
+            caption: `Display ${idx + 1}`,
+          })),
     },
     layout,
     duration: 15,
@@ -142,7 +148,7 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData }: AdvertPrev
 
             <div className="flex items-center gap-2 p-2 bg-background/50 rounded">
               <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-orange-500">{formData.files.length}</span>
+                <span className="text-sm font-bold text-orange-500">{fileUrls ? fileUrls.length : formData.files.length}</span>
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] sm:text-xs text-muted-foreground">Files</p>
