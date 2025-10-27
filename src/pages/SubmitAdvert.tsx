@@ -2326,6 +2326,8 @@ export default function SubmitAdvert() {
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
+            catalogueUrl: catalogueUrl || undefined,
+            logoUrl: logoUrl,
             advertiserName: advertiserName || undefined,
             advertHeadline: advertHeadline || undefined,
             advertDescription: advertDescription || undefined,
