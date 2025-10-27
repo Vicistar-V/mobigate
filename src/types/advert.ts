@@ -123,6 +123,7 @@ export interface AdvertFormData {
   contactMethod?: ContactMethod;
   contactEmail?: string;
   websiteUrl?: string;
+  catalogueUrl?: string;
   advertiserName?: string;
   advertDescription?: string;
   advertHeadline?: string;
@@ -242,6 +243,7 @@ export interface SavedAdvert {
   contactMethod?: ContactMethod;
   contactEmail?: string;
   websiteUrl?: string;
+  catalogueUrl?: string;
   advertiserName?: string;
   advertDescription?: string;
   advertHeadline?: string;

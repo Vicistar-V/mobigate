@@ -216,6 +216,7 @@ export default function SubmitAdvert() {
   const [contactMethod, setContactMethod] = useState<"whatsapp" | "call">("whatsapp");
   const [contactEmail, setContactEmail] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [catalogueUrl, setCatalogueUrl] = useState("");
   const [advertiserName, setAdvertiserName] = useState("");
   const [advertDescription, setAdvertDescription] = useState("");
   const [advertHeadline, setAdvertHeadline] = useState("");
@@ -360,6 +361,9 @@ export default function SubmitAdvert() {
         if (advertToEdit.websiteUrl) {
           setWebsiteUrl(advertToEdit.websiteUrl);
         }
+        if (advertToEdit.catalogueUrl) {
+          setCatalogueUrl(advertToEdit.catalogueUrl);
+        }
         if (advertToEdit.advertiserName) {
           setAdvertiserName(advertToEdit.advertiserName);
         }
@@ -431,6 +435,7 @@ export default function SubmitAdvert() {
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
+            catalogueUrl: catalogueUrl || undefined,
             advertiserName: advertiserName || undefined,
             advertDescription: advertDescription || undefined
           });
@@ -439,7 +444,7 @@ export default function SubmitAdvert() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl, advertiserName, advertDescription, editMode]);
+  }, [category, displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths, extendedExposureTime, recurrentAfter, recurrentEvery, launchDate, catchmentMarket, agreed, contactPhone, contactMethod, contactEmail, websiteUrl, catalogueUrl, advertiserName, advertDescription, editMode]);
 
   const updateCatchmentMarket = (field: keyof typeof catchmentMarket, value: number[]) => {
     if (catchmentLocked) return;
@@ -666,6 +671,19 @@ export default function SubmitAdvert() {
       }
     }
 
+    if (catalogueUrl && catalogueUrl.trim().length > 0) {
+      try {
+        new URL(catalogueUrl);
+        if (!catalogueUrl.startsWith('http://') && !catalogueUrl.startsWith('https://')) {
+          throw new Error('Invalid protocol');
+        }
+      } catch {
+        console.log('❌ Validation failed: Invalid catalogue URL', catalogueUrl);
+        if (showToast) toast({ title: "Validation Error", description: "Please enter a valid catalogue URL (must start with http:// or https://)", variant: "destructive" });
+        return false;
+      }
+    }
+
     console.log('✅ Validation passed!');
     return true;
   };
@@ -720,6 +738,7 @@ export default function SubmitAdvert() {
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
+            catalogueUrl: catalogueUrl || undefined,
             advertiserName: advertiserName || undefined,
             advertDescription: advertDescription || undefined,
             advertHeadline: advertHeadline || undefined,
@@ -754,6 +773,7 @@ export default function SubmitAdvert() {
             contactMethod: contactPhone ? contactMethod : undefined,
             contactEmail: contactEmail || undefined,
             websiteUrl: websiteUrl || undefined,
+            catalogueUrl: catalogueUrl || undefined,
             advertiserName: advertiserName || undefined,
             advertDescription: advertDescription || undefined,
             advertHeadline: advertHeadline || undefined,
@@ -982,6 +1002,7 @@ export default function SubmitAdvert() {
       contactMethod: contactPhone ? contactMethod : undefined,
       contactEmail: contactEmail || undefined,
       websiteUrl: websiteUrl || undefined,
+      catalogueUrl: catalogueUrl || undefined,
       advertiserName: advertiserName || undefined,
       advertDescription: advertDescription || undefined
     };
@@ -1049,6 +1070,15 @@ export default function SubmitAdvert() {
     setCatchmentMarket(slot.formData.catchmentMarket);
     setUploadedFiles(slot.formData.files);
     setAgreed(slot.formData.agreed);
+    setContactPhone(slot.formData.contactPhone || "");
+    setContactMethod(slot.formData.contactMethod || "whatsapp");
+    setContactEmail(slot.formData.contactEmail || "");
+    setWebsiteUrl(slot.formData.websiteUrl || "");
+    setCatalogueUrl(slot.formData.catalogueUrl || "");
+    setAdvertiserName(slot.formData.advertiserName || "");
+    setAdvertDescription(slot.formData.advertDescription || "");
+    setAdvertHeadline(slot.formData.advertHeadline || "");
+    setAdvertCTAText(slot.formData.advertCTAText || "Learn More");
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -1164,6 +1194,7 @@ export default function SubmitAdvert() {
         if (draft.contactMethod) setContactMethod(draft.contactMethod);
         if (draft.contactEmail) setContactEmail(draft.contactEmail);
         if (draft.websiteUrl) setWebsiteUrl(draft.websiteUrl);
+        if (draft.catalogueUrl) setCatalogueUrl(draft.catalogueUrl);
         
         setUserType("individual");
         setCurrentStep("fill-slot");
@@ -1861,7 +1892,28 @@ export default function SubmitAdvert() {
                       )}
                     </div>
 
-                    {(contactPhone || contactEmail || websiteUrl) && (
+                    {/* Biz-Catalogue URL */}
+                    <div className="space-y-2">
+                      <Label htmlFor="catalogue-url" className="text-xs font-medium">
+                        Biz-Catalogue URL (Optional)
+                        <InfoTooltip content="Link to your business catalogue where customers can browse your products or services." />
+                      </Label>
+                      <Input
+                        id="catalogue-url"
+                        type="url"
+                        placeholder="https://yoursite.com/catalogue"
+                        value={catalogueUrl}
+                        onChange={(e) => setCatalogueUrl(e.target.value)}
+                        maxLength={200}
+                      />
+                      {catalogueUrl && (
+                        <p className="text-xs text-muted-foreground">
+                          Customers can view your business catalogue
+                        </p>
+                      )}
+                    </div>
+
+                    {(contactPhone || contactEmail || websiteUrl || catalogueUrl) && (
                       <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
                         <p className="text-xs text-muted-foreground">
                           ✓ Contact buttons will appear on your advert for customers to reach you easily

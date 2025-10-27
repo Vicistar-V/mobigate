@@ -39,6 +39,7 @@ export interface PremiumAdCardProps {
     phoneMethod?: 'whatsapp' | 'call';
     email?: string;
     website?: string;
+    catalogue?: string;
   };
   isPreviewMode?: boolean;
 }
@@ -89,6 +90,12 @@ export const PremiumAdCard = ({
   const handleContactWebsite = () => {
     if (contactDetails?.website) {
       window.open(contactDetails.website, '_blank');
+    }
+  };
+
+  const handleContactCatalogue = () => {
+    if (contactDetails?.catalogue) {
+      window.open(contactDetails.catalogue, '_blank');
     }
   };
 
@@ -159,7 +166,7 @@ export const PremiumAdCard = ({
                   {content.description}
                 </p>
               </div>
-              {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
+              {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website || contactDetails.catalogue) ? (
                 <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
                   {contactDetails.phone && (
                     <Button
@@ -186,6 +193,15 @@ export const PremiumAdCard = ({
                       className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
                     >
                       🌐 Website
+                    </Button>
+                  )}
+                  {contactDetails.catalogue && (
+                    <Button
+                      onClick={handleContactCatalogue}
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    >
+                      📋 View Catalogue
                     </Button>
                   )}
                 </div>
@@ -340,7 +356,7 @@ export const PremiumAdCard = ({
               )}
             </div>
           </div>
-          {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
+          {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website || contactDetails.catalogue) ? (
             <div className="flex flex-wrap gap-2">
               {contactDetails.phone && (
                 <Button
@@ -364,6 +380,14 @@ export const PremiumAdCard = ({
                   className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-sm sm:text-base rounded-lg"
                 >
                   🌐 Website
+                </Button>
+              )}
+              {contactDetails.catalogue && (
+                <Button
+                  onClick={handleContactCatalogue}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-5 text-sm sm:text-base rounded-lg"
+                >
+                  📋 View Catalogue
                 </Button>
               )}
             </div>
@@ -481,7 +505,7 @@ export const PremiumAdCard = ({
         </div>
 
         {/* CTA Button(s) */}
-        {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website) ? (
+        {contactDetails && (contactDetails.phone || contactDetails.email || contactDetails.website || contactDetails.catalogue) ? (
           <div className="flex flex-wrap gap-1.5">
             {contactDetails.phone && (
               <Button
@@ -505,6 +529,16 @@ export const PremiumAdCard = ({
                 className="flex-1 min-w-[80px] bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs sm:text-sm py-2.5"
               >
                 🌐
+              </Button>
+            )}
+            {contactDetails.catalogue && (
+              <Button
+                onClick={handleContactCatalogue}
+                variant="outline"
+                size="sm"
+                className="flex-1 min-w-0 text-xs sm:text-sm font-medium"
+              >
+                📋 Catalogue
               </Button>
             )}
           </div>
