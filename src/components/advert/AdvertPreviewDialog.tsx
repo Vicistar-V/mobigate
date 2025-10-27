@@ -31,7 +31,7 @@ export const AdvertPreviewDialog = ({ open, onOpenChange, formData, fileUrls }: 
       ctaUrl: "#",
     },
     media: {
-      type: formData.files.length > 1 
+      type: (fileUrls ? fileUrls.length : formData.files.length) > 1 
         ? ("carousel" as const)
         : formData.category === "video" 
           ? ("video" as const)
