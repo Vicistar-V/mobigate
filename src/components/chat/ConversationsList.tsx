@@ -39,7 +39,7 @@ export const ConversationsList = ({
           <div className="h-8 w-8 shrink-0" />
         )}
         
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-start">
           <img 
             src={mobichatLogo} 
             alt="MobiChat" 
