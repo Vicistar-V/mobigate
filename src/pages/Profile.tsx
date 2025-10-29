@@ -504,7 +504,7 @@ const Profile = () => {
               onClick={openBannerGallery}
             />
             <button
-              className="absolute bottom-3 right-3 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded flex items-center gap-1"
+              className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded flex items-center gap-1"
               onClick={(e) => {
                 e.stopPropagation();
                 setEditingBanner(true);
@@ -519,8 +519,8 @@ const Profile = () => {
             {/* Profile Image and Name Row */}
             <div className="relative">
               {/* Profile Image and Online Indicator Row */}
-              <div className="flex items-end gap-3 -mt-20">
-                <div className="relative group">
+              <div className="relative z-10 flex w-fit items-end gap-3 -mt-20">
+                <div className="relative group pointer-events-auto">
                   <img 
                     src={userProfile.profileImage} 
                     alt={userProfile.name}
@@ -538,7 +538,7 @@ const Profile = () => {
                 
                 {/* Online Indicator - Next to Profile Image */}
                 {userProfile.status === "Online" && (
-                  <div className="mb-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                  <div className="mb-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold select-none pointer-events-none">
                     Online
                   </div>
                 )}
