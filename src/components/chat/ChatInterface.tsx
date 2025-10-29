@@ -172,7 +172,7 @@ export const ChatInterface = ({
 
       {/* Chat Header */}
       {!isSelectionMode && (
-        <div className="px-4 py-[10px] border-b flex items-center bg-[#f9f9f9] border-[#e9edef] flex-shrink-0">
+        <div className="w-full px-4 py-[10px] border-b flex items-center bg-[#f9f9f9] border-[#e9edef]">
           {onBack && (
             <Button
               variant="ghost"
