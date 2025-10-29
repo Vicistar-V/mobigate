@@ -8,6 +8,7 @@ import { formatMessageTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import mobichatLogo from "@/assets/mobichat-logo.svg";
 
 interface ConversationsListProps {
   conversations: Conversation[];
@@ -24,6 +25,15 @@ export const ConversationsList = ({
 }: ConversationsListProps) => {
   return (
     <div className="flex flex-col h-full border-r border-border">
+      {/* MobiChat Logo Row */}
+      <div className="w-full py-3 flex justify-center items-center border-b border-[#e9edef]">
+        <img 
+          src={mobichatLogo} 
+          alt="MobiChat" 
+          className="h-8 w-auto"
+        />
+      </div>
+
       <div className="p-4 border-b border-border flex items-center gap-2">
         {onBack && (
           <Button
