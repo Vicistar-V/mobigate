@@ -25,17 +25,8 @@ export const ConversationsList = ({
 }: ConversationsListProps) => {
   return (
     <div className="flex flex-col h-full border-r border-border">
-      {/* MobiChat Logo Row */}
-      <div className="w-full py-3 flex justify-center items-center border-b border-[#e9edef]">
-        <img 
-          src={mobichatLogo} 
-          alt="MobiChat" 
-          className="h-8 w-auto"
-        />
-      </div>
-
-      <div className="p-4 border-b border-border flex items-center gap-2">
-        {onBack && (
+      <div className="p-4 border-b border-border flex items-center justify-between gap-2">
+        {onBack ? (
           <Button
             variant="ghost"
             size="icon"
@@ -44,13 +35,18 @@ export const ConversationsList = ({
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
+        ) : (
+          <div className="h-8 w-8 shrink-0" />
         )}
-        <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold">Messages</h2>
-          <p className="text-base text-muted-foreground">
-            {conversations.filter((c) => c.unreadCount > 0).length} unread
-          </p>
+        
+        <div className="flex-1 flex justify-center">
+          <img 
+            src={mobichatLogo} 
+            alt="MobiChat" 
+            className="h-8 w-auto"
+          />
         </div>
+        
         <Button
           variant="ghost"
           size="icon"
