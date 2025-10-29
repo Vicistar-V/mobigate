@@ -9,6 +9,7 @@ import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
 import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause, Gamepad2 } from "lucide-react";
+import mobichatLogo from "@/assets/mobichat-logo.svg";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -172,86 +173,98 @@ export const ChatInterface = ({
 
       {/* Chat Header */}
       {!isSelectionMode && (
-        <div className="w-full px-4 py-[10px] border-b flex items-center bg-[#f9f9f9] border-[#e9edef]">
-          {onBack && (
-            <Button
-              variant="ghost"
-              className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] mr-2 sm:hidden"
-              onClick={onBack}
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-          )}
+        <div className="w-full border-b bg-[#f9f9f9] border-[#e9edef]">
+          {/* MobiChat Logo Row */}
+          <div className="w-full py-3 flex justify-center items-center border-b border-[#e9edef]">
+            <img 
+              src={mobichatLogo} 
+              alt="MobiChat" 
+              className="h-8 w-auto"
+            />
+          </div>
           
-          <Link
-            to={`/profile/${conversation.user.id}`}
-            className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors"
-            onClick={() => onCloseSheet?.()}
-          >
-            <div className="relative mr-[15px] shrink-0">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={conversation.user.avatar} />
-                <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
-              </Avatar>
-              {conversation.user.isOnline && (
-                <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-[#111b21] text-lg">{conversation.user.name}</h3>
-              <p className="text-[15px] text-[#667781]">
-                {isGameMode ? (
-                  <span className="flex items-center gap-1">
-                    <Gamepad2 className="h-3 w-3" />
-                    Playing Quiz
-                  </span>
-                ) : conversation.user.isOnline ? (
-                  "online"
-                ) : (
-                  "Offline"
+          {/* User Info Row */}
+          <div className="px-4 py-[10px] flex items-center">
+            {onBack && (
+              <Button
+                variant="ghost"
+                className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] mr-2 sm:hidden"
+                onClick={onBack}
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </Button>
+            )}
+            
+            <Link
+              to={`/profile/${conversation.user.id}`}
+              className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors"
+              onClick={() => onCloseSheet?.()}
+            >
+              <div className="relative mr-[15px] shrink-0">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={conversation.user.avatar} />
+                  <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
+                </Avatar>
+                {conversation.user.isOnline && (
+                  <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />
                 )}
-              </p>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-[#111b21] text-lg">{conversation.user.name}</h3>
+                <p className="text-[15px] text-[#667781]">
+                  {isGameMode ? (
+                    <span className="flex items-center gap-1">
+                      <Gamepad2 className="h-3 w-3" />
+                      Playing Quiz
+                    </span>
+                  ) : conversation.user.isOnline ? (
+                    "online"
+                  ) : (
+                    "Offline"
+                  )}
+                </p>
+              </div>
+            </Link>
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2"
+                onClick={handleVideoCall}
+              >
+                <Video className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2"
+                onClick={handleVoiceCall}
+              >
+                <Phone className="h-6 w-6" />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
+                    <MoreVertical className="h-6 w-6" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => toast.info("View contact info")}>
+                    View Contact
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
+                    Mute Notifications
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
+                    Clear Chat
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
+                    Block User
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          </Link>
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2"
-              onClick={handleVideoCall}
-            >
-              <Video className="h-6 w-6" />
-            </Button>
-            <Button
-              variant="ghost"
-              className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2"
-              onClick={handleVoiceCall}
-            >
-              <Phone className="h-6 w-6" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
-                  <MoreVertical className="h-6 w-6" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => toast.info("View contact info")}>
-                  View Contact
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
-                  Mute Notifications
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
-                  Clear Chat
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
-                  Block User
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       )}
