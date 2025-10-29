@@ -174,8 +174,17 @@ export const ChatInterface = ({
       {/* Chat Header */}
       {!isSelectionMode && (
         <div className="w-full border-b bg-[#f9f9f9] border-[#e9edef]">
-          {/* MobiChat Logo Row */}
-          <div className="w-full py-3 flex justify-center items-center border-b border-[#e9edef]">
+          {/* MobiChat Logo Row with Back Button */}
+          <div className="w-full py-3 px-2 flex items-center justify-center border-b border-[#e9edef] relative">
+            {onBack && (
+              <Button
+                variant="ghost"
+                className="absolute left-2 h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] sm:hidden"
+                onClick={onBack}
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </Button>
+            )}
             <img 
               src={mobichatLogo} 
               alt="MobiChat" 
@@ -185,16 +194,6 @@ export const ChatInterface = ({
           
           {/* User Info Row */}
           <div className="px-4 py-[10px] flex items-center">
-            {onBack && (
-              <Button
-                variant="ghost"
-                className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] mr-2 sm:hidden"
-                onClick={onBack}
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-            )}
-            
             <Link
               to={`/profile/${conversation.user.id}`}
               className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors"
