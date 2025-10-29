@@ -436,19 +436,98 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 onKeyDown={handleKeyDown}
                 placeholder="Type a message..."
                 disabled={disabled || isRecording}
+                allowImagePaste={true}
                 className="flex-1 min-h-[40px] max-h-[120px] resize-none border-0 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 py-2 px-2 text-base placeholder:text-[#667781]"
                 rows={1}
                 onPaste={(e) => {
                   const items = e.clipboardData?.items;
                   if (!items) return;
                   
-                  const hasImage = Array.from(items).some(
+                  console.debug('[ChatInput] Paste event detected');
+                  
+                  // Check for image files in clipboard
+                  const imageItems = Array.from(items).filter(
                     (item) => item.kind === "file" && item.type.startsWith("image/")
                   );
                   
-                  if (hasImage) {
-                    e.preventDefault();
-                    toast.info("Use the 📎 button to attach images and GIFs");
+                  if (imageItems.length === 0) {
+                    console.debug('[ChatInput] No image items found in paste');
+                    return; // Allow text paste
+                  }
+                  
+                  console.debug(`[ChatInput] Found ${imageItems.length} image(s) in paste`);
+                  e.preventDefault(); // Prevent junk text in textarea
+                  
+                  // Check if we're at attachment limit
+                  if (attachments.length >= 5) {
+                    toast.error("Maximum 5 attachments allowed");
+                    return;
+                  }
+                  
+                  const newAttachments: typeof attachments = [];
+                  let processedCount = 0;
+                  const totalImages = Math.min(imageItems.length, 5 - attachments.length);
+                  
+                  for (let i = 0; i < totalImages; i++) {
+                    const item = imageItems[i];
+                    const file = item.getAsFile();
+                    
+                    if (!file) {
+                      console.debug(`[ChatInput] Could not get file from item ${i}`);
+                      processedCount++;
+                      continue;
+                    }
+                    
+                    console.debug(`[ChatInput] Processing pasted image ${i + 1}:`, file.name, file.type, file.size);
+                    
+                    // Enforce 10MB limit
+                    if (file.size > 10 * 1024 * 1024) {
+                      console.warn('[ChatInput] Pasted image too large:', file.name);
+                      toast.error(`Image "${file.name}" is too large (max 10MB)`);
+                      processedCount++;
+                      continue;
+                    }
+                    
+                    // Read image as Data URL
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      console.debug('[ChatInput] Pasted image read success:', file.name);
+                      const url = e.target?.result as string;
+                      newAttachments.push({
+                        type: 'image' as const,
+                        url,
+                        name: file.name || `pasted-image-${Date.now()}.${file.type.split('/')[1]}`,
+                      });
+                      
+                      processedCount++;
+                      console.debug(`[ChatInput] Paste progress: ${processedCount}/${totalImages}`);
+                      
+                      if (processedCount === totalImages) {
+                        console.debug(`[ChatInput] All pasted images processed: ${newAttachments.length} added`);
+                        setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
+                        
+                        if (newAttachments.length > 0) {
+                          toast.success(`Added ${newAttachments.length} image${newAttachments.length !== 1 ? 's' : ''} from paste`);
+                        }
+                      }
+                    };
+                    
+                    reader.onerror = (error) => {
+                      console.error('[ChatInput] Pasted image read error:', file.name, error);
+                      processedCount++;
+                      
+                      if (processedCount === totalImages && newAttachments.length > 0) {
+                        setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
+                        toast.success(`Added ${newAttachments.length} image${newAttachments.length !== 1 ? 's' : ''} from paste`);
+                      }
+                    };
+                    
+                    try {
+                      reader.readAsDataURL(file);
+                    } catch (error) {
+                      console.error('[ChatInput] Exception reading pasted image:', file.name, error);
+                      processedCount++;
+                    }
                   }
                 }}
               />
