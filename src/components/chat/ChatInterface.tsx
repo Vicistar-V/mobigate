@@ -175,7 +175,7 @@ export const ChatInterface = ({
       {!isSelectionMode && (
         <div className="w-full border-b bg-[#f9f9f9] border-[#e9edef]">
           {/* MobiChat Logo Row with Back Button and Menu */}
-          <div className="w-full py-3 px-2 flex items-center justify-center border-b border-[#e9edef] relative">
+          <div className="w-full py-3 px-2 flex items-center justify-start border-b border-[#e9edef] relative">
             {onBack && (
               <Button
                 variant="ghost"
