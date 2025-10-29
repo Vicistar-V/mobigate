@@ -167,7 +167,7 @@ export const ChatInterface = ({
                 {conversation.user.isOnline && <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />}
               </div>
               <div className="flex-1 min-w-0 max-w-full overflow-hidden">
-                <h3 className="font-semibold text-[#111b21] text-lg truncate max-w-[55vw] sm:max-w-full">{conversation.user.name}</h3>
+                <h3 className="font-semibold text-[#111b21] text-lg truncate max-w-[55vw] sm:max-w-full">{conversation.user.name.split(' ')[0]}</h3>
                 <p className="text-[15px] text-[#667781]">
                   {isGameMode ? <span className="flex items-center gap-1">
                       <Gamepad2 className="h-3 w-3" />
