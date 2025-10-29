@@ -25,7 +25,7 @@ export const ConversationsList = ({
 }: ConversationsListProps) => {
   return (
     <div className="flex flex-col h-full border-r border-border">
-      <div className="p-4 border-b border-border flex items-center justify-between gap-2">
+      <div className="p-4 border-b border-border flex items-center justify-between gap-2 bg-[#f0e699]">
         {onBack ? (
           <Button
             variant="ghost"
