@@ -153,40 +153,11 @@ export const ChatInterface = ({
 
       {/* Chat Header */}
       {!isSelectionMode && <div className="w-full border-b bg-[#f9f9f9] border-[#e9edef]">
-          {/* Top Bar with Back and Menu */}
-          <div className="w-full py-2 px-2 flex items-center justify-between border-b border-[#e9edef] relative">
-            {onBack && <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] sm:hidden" onClick={onBack}>
-                <ArrowLeft className="h-6 w-6" />
-              </Button>}
-            <div className="flex-1" />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
-                  <MoreVertical className="h-6 w-6" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => toast.info("View contact info")}>
-                  View Contact
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
-                  Mute Notifications
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
-                  Clear Chat
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
-                  Block User
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
           {/* User Info Row */}
           <div className="px-4 py-[10px] flex items-center bg-[#25d366]/20 border-b-[6px] border-[hsl(252,73%,26%)]">
+            {onBack && <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] mr-2 sm:hidden" onClick={onBack}>
+                <ArrowLeft className="h-6 w-6" />
+              </Button>}
             <Link to={`/profile/${conversation.user.id}`} className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors" onClick={() => onCloseSheet?.()}>
               <div className="relative mr-[15px] shrink-0">
                 <Avatar className="h-10 w-10">
@@ -212,6 +183,30 @@ export const ChatInterface = ({
               <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2" onClick={handleVoiceCall}>
                 <Phone className="h-6 w-6" />
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
+                    <MoreVertical className="h-6 w-6" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => toast.info("View contact info")}>
+                    View Contact
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
+                    Mute Notifications
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
+                    Clear Chat
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
+                    Block User
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>}
