@@ -505,7 +505,10 @@ const Profile = () => {
             />
             <button
               className="absolute bottom-3 right-3 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded flex items-center gap-1"
-              onClick={() => setEditingBanner(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingBanner(true);
+              }}
             >
               <Camera className="h-2.5 w-2.5" />
               Change
