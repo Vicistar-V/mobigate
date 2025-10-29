@@ -438,6 +438,19 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 disabled={disabled || isRecording}
                 className="flex-1 min-h-[40px] max-h-[120px] resize-none border-0 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 py-2 px-2 text-base placeholder:text-[#667781]"
                 rows={1}
+                onPaste={(e) => {
+                  const items = e.clipboardData?.items;
+                  if (!items) return;
+                  
+                  const hasImage = Array.from(items).some(
+                    (item) => item.kind === "file" && item.type.startsWith("image/")
+                  );
+                  
+                  if (hasImage) {
+                    e.preventDefault();
+                    toast.info("Use the 📎 button to attach images and GIFs");
+                  }
+                }}
               />
             </div>
           </div>

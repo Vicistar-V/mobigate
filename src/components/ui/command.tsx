@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -38,19 +39,46 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-    <CommandPrimitive.Input
-      ref={ref}
-      className={cn(
-        "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-        className,
-      )}
-      {...props}
-    />
-  </div>
-));
+>(({ className, onPaste, ...props }, ref) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    // Call custom onPaste handler first if provided
+    if (onPaste) {
+      onPaste(e);
+    }
+
+    // Check for image data in clipboard
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    const hasImage = Array.from(items).some(
+      (item) => item.kind === "file" && item.type.startsWith("image/")
+    );
+
+    if (hasImage) {
+      e.preventDefault();
+      toast({
+        title: "Image pasting not supported",
+        description: "Image pasting is not supported in search fields",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <CommandPrimitive.Input
+        ref={ref}
+        className={cn(
+          "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        onPaste={handlePaste}
+        {...props}
+      />
+    </div>
+  );
+});
 
 CommandInput.displayName = CommandPrimitive.Input.displayName;
 
