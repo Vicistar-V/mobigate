@@ -158,7 +158,7 @@ export const ChatInterface = ({
             {onBack && <Button variant="ghost" className="absolute left-2 h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] sm:hidden" onClick={onBack}>
                 <ArrowLeft className="h-6 w-6" />
               </Button>}
-            <img src={mobichatLogo} alt="MobiChat" className="h-8 w-auto" />
+            <img src={mobichatLogo} alt="MobiChat" className="h-8 w-auto ml-12 sm:ml-0" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="absolute right-2 h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
