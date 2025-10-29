@@ -186,7 +186,7 @@ export const ChatInterface = ({
           </div>
           
           {/* User Info Row */}
-          <div className="px-4 py-[10px] flex items-center">
+          <div className="px-4 py-[10px] flex items-center bg-[#00a884]">
             <Link to={`/profile/${conversation.user.id}`} className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors" onClick={() => onCloseSheet?.()}>
               <div className="relative mr-[15px] shrink-0">
                 <Avatar className="h-10 w-10">
