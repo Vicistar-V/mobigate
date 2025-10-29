@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Camera, Mic, Gift, Gamepad2, Play } from "lucide-react";
+import { X, Send, Camera, Mic, Gift, Gamepad2, Play, MoreVertical } from "lucide-react";
 import { useRef, useState } from "react";
 import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
 import { AttachmentMenu } from "./AttachmentMenu";
 import { InlineVoiceRecorder } from "./InlineVoiceRecorder";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { toast } from "sonner";
 
@@ -393,40 +394,33 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
                 disabled={disabled || isRecording}
               />
               
-              {/* Camera Button - Toast Only */}
-              <Button
-                onClick={handleCameraClick}
-                variant="ghost"
-                size="icon"
-                disabled={disabled || isRecording}
-                className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:text-foreground"
-              >
-                <Camera className="h-5 w-5" />
-              </Button>
-              
-              {/* Gift Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 h-9 w-9 text-muted-foreground hover:text-foreground"
-                onClick={() => setIsGiftDialogOpen(true)}
-                type="button"
-                disabled={disabled || isRecording}
-              >
-                <Gift className="h-5 w-5" />
-              </Button>
-
-              {/* Quiz Game Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 h-9 w-9 text-muted-foreground hover:text-foreground"
-                onClick={() => onStartQuiz?.()}
-                type="button"
-                disabled={disabled || isRecording}
-              >
-                <Gamepad2 className="h-5 w-5" />
-              </Button>
+              {/* More Options Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={disabled || isRecording}
+                    className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:text-foreground"
+                  >
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="z-50 bg-white dark:bg-gray-800">
+                  <DropdownMenuItem onClick={handleCameraClick}>
+                    <Camera className="h-4 w-4 mr-2" />
+                    Camera
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsGiftDialogOpen(true)}>
+                    <Gift className="h-4 w-4 mr-2" />
+                    Send Gift
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onStartQuiz?.()}>
+                    <Gamepad2 className="h-4 w-4 mr-2" />
+                    Start Quiz
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Text Input */}
               <Textarea
