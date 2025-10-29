@@ -9,13 +9,17 @@ interface EditProfilePictureDialogProps {
   onOpenChange: (open: boolean) => void;
   currentImage: string;
   onSave: (newImage: string) => void;
+  type?: "avatar" | "banner";
+  title?: string;
 }
 
 export const EditProfilePictureDialog = ({ 
   open, 
   onOpenChange, 
   currentImage,
-  onSave 
+  onSave,
+  type = "avatar",
+  title = "Change Profile Picture"
 }: EditProfilePictureDialogProps) => {
   const [profileImage, setProfileImage] = useState<string | undefined>(currentImage);
 
@@ -26,7 +30,8 @@ export const EditProfilePictureDialog = ({
   const handleSave = () => {
     if (profileImage) {
       onSave(profileImage);
-      toast.success("Profile picture updated successfully");
+      const successMessage = type === "banner" ? "Banner updated successfully" : "Profile picture updated successfully";
+      toast.success(successMessage);
       onOpenChange(false);
     }
   };
@@ -35,14 +40,14 @@ export const EditProfilePictureDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Change Profile Picture</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <ImageUploader
             value={profileImage}
             onChange={setProfileImage}
-            type="avatar"
+            type={type}
           />
         </div>
 

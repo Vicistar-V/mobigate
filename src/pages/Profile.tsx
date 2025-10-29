@@ -904,6 +904,8 @@ const Profile = () => {
         onOpenChange={setEditingBanner}
         currentImage={bannerImage}
         onSave={setBannerImage}
+        type="banner"
+        title="Change Banner"
       />
 
       <MediaGalleryViewer

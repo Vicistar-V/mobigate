@@ -7,7 +7,7 @@ import { toast } from "sonner";
 interface ImageUploaderProps {
   value?: string;
   onChange: (imageData: string | undefined) => void;
-  type?: "avatar" | "logo";
+  type?: "avatar" | "logo" | "banner";
   placeholder?: string;
 }
 
@@ -79,6 +79,61 @@ export const ImageUploader = ({ value, onChange, type = "avatar", placeholder }:
             </Button>
           )}
         </div>
+      </div>
+    );
+  }
+
+  // Banner type
+  if (type === "banner") {
+    return (
+      <div className="space-y-2">
+        {preview ? (
+          <div className="space-y-4">
+            <div className="w-full h-32 rounded border overflow-hidden bg-background">
+              <img src={preview} alt="Banner" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex gap-2">
+              <label htmlFor="banner-upload">
+                <Button type="button" size="sm" variant="outline" asChild>
+                  <span className="cursor-pointer">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Change
+                  </span>
+                </Button>
+                <input
+                  id="banner-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
+              <Button type="button" size="sm" variant="ghost" onClick={handleRemove}>
+                <X className="h-4 w-4 mr-2" />
+                Remove
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <label htmlFor="banner-upload">
+            <div className="border-2 border-dashed rounded-lg p-8 hover:border-primary cursor-pointer transition-colors">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <Upload className="h-8 w-8 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">{placeholder || "Upload Banner"}</p>
+                  <p className="text-sm text-muted-foreground">Max 2MB, PNG, JPG, WEBP</p>
+                </div>
+              </div>
+            </div>
+            <input
+              id="banner-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
+        )}
       </div>
     );
   }
