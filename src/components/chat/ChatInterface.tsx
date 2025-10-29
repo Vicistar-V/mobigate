@@ -174,7 +174,7 @@ export const ChatInterface = ({
       {/* Chat Header */}
       {!isSelectionMode && (
         <div className="w-full border-b bg-[#f9f9f9] border-[#e9edef]">
-          {/* MobiChat Logo Row with Back Button */}
+          {/* MobiChat Logo Row with Back Button and Menu */}
           <div className="w-full py-3 px-2 flex items-center justify-center border-b border-[#e9edef] relative">
             {onBack && (
               <Button
@@ -190,6 +190,30 @@ export const ChatInterface = ({
               alt="MobiChat" 
               className="h-8 w-auto"
             />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="absolute right-2 h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9]">
+                  <MoreVertical className="h-6 w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => toast.info("View contact info")}>
+                  View Contact
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
+                  Mute Notifications
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
+                  Clear Chat
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
+                  Block User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           {/* User Info Row */}
@@ -239,30 +263,6 @@ export const ChatInterface = ({
               >
                 <Phone className="h-6 w-6" />
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
-                    <MoreVertical className="h-6 w-6" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => toast.info("View contact info")}>
-                    View Contact
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
-                    Mute Notifications
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
-                    Clear Chat
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
-                    Block User
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
         </div>
