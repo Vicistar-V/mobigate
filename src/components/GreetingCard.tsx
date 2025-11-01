@@ -10,10 +10,11 @@ import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState } from "react";
-import { useUserProfile } from "@/hooks/useWindowData";
+import { useUserProfile, useCurrentUserId } from "@/hooks/useWindowData";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
+  const currentUserId = useCurrentUserId();
   const [friendsMenuView, setFriendsMenuView] = useState<'main' | 'requests'>('main');
   const {
     showDialog,
@@ -28,17 +29,17 @@ export const GreetingSection = () => {
   };
   const primaryLinks = [{
     label: "About",
-    href: "/profile/current-user#about"
+    href: `/profile/${currentUserId}#about`
   }];
   const moreLinks = [{
     label: "Followers",
-    href: "/profile/current-user#followers"
+    href: `/profile/${currentUserId}#followers`
   }, {
     label: "Following",
-    href: "/profile/current-user#following"
+    href: `/profile/${currentUserId}#following`
   }, {
     label: "Gifts",
-    href: "/profile/current-user#gifts"
+    href: `/profile/${currentUserId}#gifts`
   }, {
     label: "Mobi Quiz Game",
     href: "/mobi-quiz-game"
@@ -56,7 +57,7 @@ export const GreetingSection = () => {
     href: "/biz-catalogue"
   }, {
     label: "E-Library",
-    href: "/profile/current-user#contents"
+    href: `/profile/${currentUserId}#contents`
   }, {
     label: "Adverts Log",
     href: "/adverts-log"
@@ -96,7 +97,7 @@ export const GreetingSection = () => {
                 {friendsMenuView === 'main' ? (
                   <>
                     <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/profile/current-user#friends" className="cursor-pointer">
+                      <Link to={`/profile/${currentUserId}#friends`} className="cursor-pointer">
                         Friends
                       </Link>
                     </DropdownMenuItem>
@@ -163,7 +164,7 @@ export const GreetingSection = () => {
           
           {/* Albums Link */}
           <span className="flex items-center flex-shrink-0">
-            <Link to="/profile/current-user#albums" className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap">
+            <Link to={`/profile/${currentUserId}#albums`} className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap">
               Albums
             </Link>
             <span className="text-muted-foreground px-1.5">|</span>

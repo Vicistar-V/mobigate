@@ -195,6 +195,26 @@ export interface Post {
   albumName?: string;
 }
 
+export interface Conversation {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    avatar: string;
+    isOnline: boolean;
+  };
+  messages: Array<{
+    id: string;
+    senderId: string;
+    content: string;
+    timestamp: Date;
+    isRead: boolean;
+  }>;
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
+}
+
 export interface WindowBridge {
   __USER_PROFILE__?: UserProfile;
   __FRIENDS_LIST__?: Friend[];
@@ -211,6 +231,7 @@ export interface WindowBridge {
   __BANNER_IMAGE__?: string;
   __BANNER_IMAGE_HISTORY__?: string[];
   __CURRENT_USER_ID__?: string;
+  __CONVERSATIONS__?: Conversation[];
 }
 
 declare global {

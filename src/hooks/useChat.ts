@@ -2,11 +2,14 @@ import { useState, useCallback } from "react";
 import { Message, Conversation, QuizSession, QuizQuestion } from "@/types/chat";
 import { mockConversations } from "@/data/chatData";
 import { getRandomQuestions } from "@/data/quizData";
-import { useCurrentUserId } from "@/hooks/useWindowData";
+import { useCurrentUserId, useConversations } from "@/hooks/useWindowData";
 
 export const useChat = () => {
   const currentUserId = useCurrentUserId();
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
+  const phpConversations = useConversations();
+  const [conversations, setConversations] = useState<Conversation[]>(() => 
+    phpConversations || mockConversations
+  );
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState<{ [key: string]: boolean }>({});
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());

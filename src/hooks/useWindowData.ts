@@ -213,3 +213,36 @@ export function useCurrentUserId(): string {
 
   return userId;
 }
+
+export function useConversations() {
+  const [conversations, setConversations] = useState(() => {
+    if (typeof window !== 'undefined' && window.__CONVERSATIONS__) {
+      // Convert timestamp strings to Date objects
+      return window.__CONVERSATIONS__.map(conv => ({
+        ...conv,
+        messages: conv.messages.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        })),
+        lastMessageTime: new Date(conv.lastMessageTime)
+      }));
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (window.__CONVERSATIONS__ && !conversations) {
+      const converted = window.__CONVERSATIONS__.map(conv => ({
+        ...conv,
+        messages: conv.messages.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        })),
+        lastMessageTime: new Date(conv.lastMessageTime)
+      }));
+      setConversations(converted);
+    }
+  }, [conversations]);
+
+  return conversations;
+}
