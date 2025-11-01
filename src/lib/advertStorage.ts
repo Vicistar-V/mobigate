@@ -91,6 +91,23 @@ export function saveAdvert(
 
 export function loadAllAdverts(): SavedAdvert[] {
   try {
+    // Check PHP data first
+    if (typeof window !== 'undefined' && window.__USER_ADVERTS__) {
+      return window.__USER_ADVERTS__.map((ad: any) => ({
+        ...ad,
+        launchDate: new Date(ad.launchDate),
+        createdAt: new Date(ad.createdAt),
+        updatedAt: new Date(ad.updatedAt),
+        approvedAt: ad.approvedAt ? new Date(ad.approvedAt) : undefined,
+        expiresAt: ad.expiresAt ? new Date(ad.expiresAt) : undefined,
+        statistics: {
+          ...ad.statistics,
+          lastDisplayed: ad.statistics?.lastDisplayed ? new Date(ad.statistics.lastDisplayed) : undefined,
+        },
+      }));
+    }
+    
+    // Fallback to localStorage
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) return [];
 

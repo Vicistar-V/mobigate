@@ -15,9 +15,16 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
+import { useFeedPosts, useWallStatusPosts } from "@/hooks/useWindowData";
 
 const Index = () => {
   const { toast } = useToast();
+  const phpFeedPosts = useFeedPosts();
+  const phpWallPosts = useWallStatusPosts();
+  
+  const activeFeedPosts = phpFeedPosts || feedPosts;
+  const activeWallStatusPosts = phpWallPosts || wallStatusPosts;
+  
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
@@ -55,7 +62,7 @@ const Index = () => {
   // Open media gallery for wall status
   const openWallStatusGallery = (initialPost: Post) => {
     // Convert wall status posts to MediaItem format
-    const items: MediaItem[] = wallStatusPosts.map((post) => ({
+    const items: MediaItem[] = activeWallStatusPosts.map((post) => ({
       id: post.id,
       url: post.url,
       type: post.type,
@@ -68,7 +75,7 @@ const Index = () => {
       comments: post.comments,
       isLiked: post.isLiked,
     }));
-    const initialIndex = wallStatusPosts.findIndex(p => p.id === initialPost.id);
+    const initialIndex = activeWallStatusPosts.findIndex(p => p.id === initialPost.id);
     setGalleryItems(items);
     setGalleryInitialIndex(initialIndex >= 0 ? initialIndex : 0);
     setMediaGalleryOpen(true);
@@ -89,7 +96,7 @@ const Index = () => {
   }, [contentFilter]);
 
   // Convert wall status posts to Post format for WallStatusCarousel
-  const wallStatusPostsForCarousel = wallStatusPosts.map(post => ({
+  const wallStatusPostsForCarousel = activeWallStatusPosts.map(post => ({
     id: post.id,
     title: post.title || "Wall Status",
     subtitle: post.description,
@@ -311,8 +318,8 @@ const Index = () => {
   ];
 
   const filteredPosts = contentFilter === "all"
-    ? feedPosts 
-    : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
+    ? activeFeedPosts 
+    : activeFeedPosts.filter(post => post.type.toLowerCase() === contentFilter);
   
   const displayedPosts = filteredPosts.slice(0, visiblePostCount);
   const hasMorePosts = visiblePostCount < filteredPosts.length;
@@ -363,7 +370,7 @@ const Index = () => {
               <div className="space-y-6 mt-6">
                 {displayedPosts.map((post, index) => (
                 <div key={index}>
-                  <FeedPost {...post} />
+                  <FeedPost {...post as any} />
                   {/* Insert premium ad after every 4 posts */}
                   {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
                     <div className="my-8">

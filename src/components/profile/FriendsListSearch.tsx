@@ -5,6 +5,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFriendsList } from "@/hooks/useWindowData";
+import { mockFriends as fallbackFriends } from "@/data/profileData";
 
 export interface Friend {
   id: string;
@@ -33,6 +35,15 @@ interface FriendsListSearchProps {
 }
 
 export const FriendsListSearch = ({ open, onOpenChange, onSelect, selectedFriendId }: FriendsListSearchProps) => {
+  const phpFriends = useFriendsList();
+  const friends = phpFriends || fallbackFriends;
+  const mockFriends: Friend[] = friends.map(f => ({ 
+    id: f.id, 
+    name: f.name, 
+    username: `@${f.name.toLowerCase().replace(/\s+/g, '')}`,
+    profileImage: f.avatar 
+  }));
+  
   const [tempSelected, setTempSelected] = useState<string | undefined>(selectedFriendId);
 
   const handleSelect = () => {

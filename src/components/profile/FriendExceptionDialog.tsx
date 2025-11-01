@@ -52,9 +52,9 @@ export const FriendExceptionDialog = ({
     return mockFriends.filter(
       (friend) =>
         friend.name.toLowerCase().includes(query) ||
-        friend.email.toLowerCase().includes(query)
+        (friend.email && friend.email.toLowerCase().includes(query))
     );
-  }, [searchQuery]);
+  }, [searchQuery, mockFriends]);
 
   // Auto-suggestion for custom input
   const handleCustomInputChange = (value: string) => {
@@ -64,9 +64,9 @@ export const FriendExceptionDialog = ({
       const query = value.toLowerCase();
       const matches = mockFriends.filter(
         (friend) =>
-          !exceptions.includes(friend.id) &&
+          !localExceptions.includes(friend.id) &&
           (friend.name.toLowerCase().includes(query) ||
-           friend.email.toLowerCase().includes(query))
+           (friend.email && friend.email.toLowerCase().includes(query)))
       );
       setSuggestions(matches.slice(0, 5));
     } else {
@@ -75,21 +75,21 @@ export const FriendExceptionDialog = ({
   };
 
   const toggleException = (id: string) => {
-    setExceptions((prev) =>
+    setLocalExceptions((prev) =>
       prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
     );
   };
 
   const addCustomException = (friendId?: string, customName?: string) => {
     if (friendId) {
-      if (!exceptions.includes(friendId)) {
-        setExceptions([...exceptions, friendId]);
+      if (!localExceptions.includes(friendId)) {
+        setLocalExceptions([...localExceptions, friendId]);
       }
     } else if (customName && customName.trim()) {
       // For custom entries (non-friends), use a special format
       const customId = `custom_${customName.trim()}`;
-      if (!exceptions.includes(customId)) {
-        setExceptions([...exceptions, customId]);
+      if (!localExceptions.includes(customId)) {
+        setLocalExceptions([...localExceptions, customId]);
       }
     }
     setCustomInput("");
@@ -97,11 +97,11 @@ export const FriendExceptionDialog = ({
   };
 
   const removeException = (id: string) => {
-    setExceptions(exceptions.filter((e) => e !== id));
+    setLocalExceptions(localExceptions.filter((e) => e !== id));
   };
 
   const handleSave = () => {
-    onSave(exceptions);
+    onSave(localExceptions);
     onOpenChange(false);
   };
 
@@ -122,11 +122,11 @@ export const FriendExceptionDialog = ({
 
         <div className="space-y-4">
           {/* Selected Exceptions Display */}
-          {exceptions.length > 0 && (
+          {localExceptions.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Selected ({exceptions.length})</Label>
+              <Label className="text-sm font-medium">Selected ({localExceptions.length})</Label>
               <div className="flex flex-wrap gap-2">
-                {exceptions.map((id) => (
+                {localExceptions.map((id) => (
                   <Badge key={id} variant="secondary" className="gap-1">
                     {getExceptionDisplay(id)}
                     <button
@@ -203,7 +203,7 @@ export const FriendExceptionDialog = ({
                     >
                       <Checkbox
                         id={`friend-${friend.id}`}
-                        checked={exceptions.includes(friend.id)}
+                        checked={localExceptions.includes(friend.id)}
                         onCheckedChange={() => toggleException(friend.id)}
                       />
                       <label
@@ -230,7 +230,7 @@ export const FriendExceptionDialog = ({
             Cancel
           </Button>
           <Button onClick={handleSave}>
-            Save Exceptions ({exceptions.length})
+            Save Exceptions ({localExceptions.length})
           </Button>
         </DialogFooter>
       </DialogContent>

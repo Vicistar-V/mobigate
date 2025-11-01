@@ -22,9 +22,14 @@ import { Plus, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlbumSelector } from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
+import { useUserAlbums } from "@/hooks/useWindowData";
 import { mockAlbums } from "@/data/posts";
 
 export const CreatePostDialog = () => {
+  const { toast } = useToast();
+  const phpAlbums = useUserAlbums();
+  const albums = phpAlbums || mockAlbums;
+  
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
@@ -35,7 +40,6 @@ export const CreatePostDialog = () => {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [showNewAlbumDialog, setShowNewAlbumDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,7 +112,7 @@ export const CreatePostDialog = () => {
     // and create the post in the database
     
     const albumName = selectedAlbum 
-      ? mockAlbums.find(a => a.id === selectedAlbum)?.name 
+      ? albums.find(a => a.id === selectedAlbum)?.name 
       : null;
     
     toast({

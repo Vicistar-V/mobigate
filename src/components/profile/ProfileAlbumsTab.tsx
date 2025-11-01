@@ -11,6 +11,7 @@ import { mockAlbums, Album, Post } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
+import { useUserAlbums } from "@/hooks/useWindowData";
 
 interface ProfileAlbumsTabProps {
   userId: string;
@@ -25,6 +26,8 @@ export const ProfileAlbumsTab = ({
   bannerImageHistory,
   userPosts,
 }: ProfileAlbumsTabProps) => {
+  const phpAlbums = useUserAlbums();
+  
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { isSystem?: boolean }) | null>(null);
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
   const [albumsView, setAlbumsView] = useState<"normal" | "large">("normal");
@@ -61,7 +64,8 @@ export const ProfileAlbumsTab = ({
 
   // Get user-created albums (from mockAlbums) with posts assigned to them
   const userAlbums = useMemo(() => {
-    return mockAlbums.map((album) => {
+    const baseAlbums = phpAlbums || mockAlbums;
+    return baseAlbums.map((album) => {
       const postsInAlbum = userPosts.filter((post) => post.albumId === album.id);
       return {
         ...album,
@@ -69,7 +73,7 @@ export const ProfileAlbumsTab = ({
         coverImage: postsInAlbum[0]?.imageUrl || album.coverImage,
       };
     }).filter((album) => album.itemCount > 0); // Only show albums with items
-  }, [userPosts]);
+  }, [phpAlbums, userPosts]);
 
   // Combine all albums for carousel
   const allAlbums = useMemo(() => {

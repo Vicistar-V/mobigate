@@ -14,20 +14,13 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MobigateUserSearch, MobigateUser } from "./MobigateUserSearch";
 import { FriendsListSearch, Friend } from "./FriendsListSearch";
+import { useFriendsList } from "@/hooks/useWindowData";
+import { mockFriends as fallbackFriends } from "@/data/profileData";
 
 const loveFriendshipSchema = z.object({
   friendId: z.string().min(1, "Please select a friend"),
   relationshipTag: z.string().min(1, "Relationship tag is required"),
 });
-
-// Mock friends data - in real app this would come from backend
-const mockFriends = [
-  { id: "1", name: "John Doe" },
-  { id: "2", name: "Jane Smith" },
-  { id: "3", name: "Mike Johnson" },
-  { id: "4", name: "Sarah Williams" },
-  { id: "5", name: "David Brown" },
-];
 
 export interface LoveFriendship {
   id: string;
@@ -49,6 +42,10 @@ interface EditLoveFriendshipFormProps {
 }
 
 export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLoveFriendshipFormProps) => {
+  const phpFriends = useFriendsList();
+  const friends = phpFriends || fallbackFriends;
+  const mockFriends = friends.map(f => ({ id: f.id, name: f.name }));
+  
   const [friendships, setFriendships] = useState<LoveFriendship[]>(currentData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);

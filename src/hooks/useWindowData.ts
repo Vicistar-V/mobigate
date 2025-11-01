@@ -246,3 +246,88 @@ export function useConversations() {
 
   return conversations;
 }
+
+export function useUserAlbums() {
+  const [albums, setAlbums] = useState(() => {
+    if (typeof window !== 'undefined' && window.__USER_ALBUMS__) {
+      return window.__USER_ALBUMS__;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (window.__USER_ALBUMS__ && !albums) {
+      setAlbums(window.__USER_ALBUMS__);
+    }
+  }, [albums]);
+
+  return albums;
+}
+
+export function useFeedPosts() {
+  const [posts, setPosts] = useState(() => {
+    if (typeof window !== 'undefined' && window.__FEED_POSTS__) {
+      return window.__FEED_POSTS__;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (window.__FEED_POSTS__ && !posts) {
+      setPosts(window.__FEED_POSTS__);
+    }
+  }, [posts]);
+
+  return posts;
+}
+
+export function useWallStatusPosts() {
+  const [posts, setPosts] = useState(() => {
+    if (typeof window !== 'undefined' && window.__WALL_STATUS_POSTS__) {
+      return window.__WALL_STATUS_POSTS__;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (window.__WALL_STATUS_POSTS__ && !posts) {
+      setPosts(window.__WALL_STATUS_POSTS__);
+    }
+  }, [posts]);
+
+  return posts;
+}
+
+export function useUserAdverts() {
+  const [adverts, setAdverts] = useState(() => {
+    if (typeof window !== 'undefined' && window.__USER_ADVERTS__) {
+      // Convert date strings to Date objects
+      return window.__USER_ADVERTS__.map((ad: any) => ({
+        ...ad,
+        launchDate: new Date(ad.launchDate),
+        createdAt: new Date(ad.createdAt),
+        updatedAt: new Date(ad.updatedAt),
+        approvedAt: ad.approvedAt ? new Date(ad.approvedAt) : undefined,
+        expiresAt: ad.expiresAt ? new Date(ad.expiresAt) : undefined,
+      }));
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (window.__USER_ADVERTS__ && !adverts) {
+      setAdverts(
+        window.__USER_ADVERTS__.map((ad: any) => ({
+          ...ad,
+          launchDate: new Date(ad.launchDate),
+          createdAt: new Date(ad.createdAt),
+          updatedAt: new Date(ad.updatedAt),
+          approvedAt: ad.approvedAt ? new Date(ad.approvedAt) : undefined,
+          expiresAt: ad.expiresAt ? new Date(ad.expiresAt) : undefined,
+        }))
+      );
+    }
+  }, [adverts]);
+
+  return adverts;
+}

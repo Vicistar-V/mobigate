@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { mockAlbums } from "@/data/posts";
+import { useUserAlbums } from "@/hooks/useWindowData";
 
 interface AlbumSelectorProps {
   value: string | null;
@@ -15,6 +16,9 @@ interface AlbumSelectorProps {
 }
 
 export const AlbumSelector = ({ value, onChange, onCreateNew }: AlbumSelectorProps) => {
+  const phpAlbums = useUserAlbums();
+  const albums = phpAlbums || mockAlbums;
+
   const handleValueChange = (newValue: string) => {
     if (newValue === "__create_new__") {
       onCreateNew();
@@ -45,7 +49,7 @@ export const AlbumSelector = ({ value, onChange, onCreateNew }: AlbumSelectorPro
             <span>Create New Album</span>
           </div>
         </SelectItem>
-        {mockAlbums.map((album) => (
+        {albums.map((album) => (
           <SelectItem key={album.id} value={album.id}>
             <div className="flex items-center gap-2">
               <Folder className="h-4 w-4" />

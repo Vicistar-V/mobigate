@@ -5,6 +5,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFriendsList } from "@/hooks/useWindowData";
+import { mockFriends as fallbackFriends } from "@/data/profileData";
 
 export interface MobigateUser {
   id: string;
@@ -12,25 +14,6 @@ export interface MobigateUser {
   username: string;
   profileImage?: string;
 }
-
-// Mock platform users data - in real app this would come from backend API
-const mockMobigateUsers: MobigateUser[] = [
-  { id: "u1", name: "John Doe", username: "@johndoe", profileImage: "/profile-photo.jpg" },
-  { id: "u2", name: "Jane Smith", username: "@janesmith", profileImage: "/profile-sarah-johnson.jpg" },
-  { id: "u3", name: "Michael Brown", username: "@mbrown", profileImage: "/profile-michael-chen.jpg" },
-  { id: "u4", name: "Sarah Williams", username: "@sarahw", profileImage: "/profile-emily-davis.jpg" },
-  { id: "u5", name: "David Martinez", username: "@davidm", profileImage: "/profile-david-martinez.jpg" },
-  { id: "u6", name: "Emily Davis", username: "@emilyd", profileImage: "/profile-jennifer-taylor.jpg" },
-  { id: "u7", name: "James Wilson", username: "@jamesw", profileImage: "/profile-james-wilson.jpg" },
-  { id: "u8", name: "Lisa Anderson", username: "@lisaa", profileImage: "/profile-lisa-anderson.jpg" },
-  { id: "u9", name: "Robert Brown", username: "@robertb", profileImage: "/profile-robert-brown.jpg" },
-  { id: "u10", name: "Jennifer Taylor", username: "@jennifert", profileImage: "/profile-jennifer-taylor.jpg" },
-  { id: "u11", name: "Michael Chen", username: "@michaelc", profileImage: "/profile-michael-chen.jpg" },
-  { id: "u12", name: "Sarah Johnson", username: "@sarahj", profileImage: "/profile-sarah-johnson.jpg" },
-  { id: "u13", name: "David Brown", username: "@davidb", profileImage: "/profile-david-martinez.jpg" },
-  { id: "u14", name: "Emily Wilson", username: "@emilyw", profileImage: "/profile-emily-davis.jpg" },
-  { id: "u15", name: "James Anderson", username: "@jamesa", profileImage: "/profile-james-wilson.jpg" },
-];
 
 interface MobigateUserSearchProps {
   open: boolean;
@@ -40,6 +23,15 @@ interface MobigateUserSearchProps {
 }
 
 export const MobigateUserSearch = ({ open, onOpenChange, onSelect, selectedUserId }: MobigateUserSearchProps) => {
+  const phpFriends = useFriendsList();
+  const friends = phpFriends || fallbackFriends;
+  const mockMobigateUsers: MobigateUser[] = friends.map(f => ({ 
+    id: f.id, 
+    name: f.name, 
+    username: `@${f.name.toLowerCase().replace(/\s+/g, '')}`,
+    profileImage: f.avatar 
+  }));
+  
   const [tempSelected, setTempSelected] = useState<string | undefined>(selectedUserId);
 
   const handleSelect = () => {

@@ -177,6 +177,16 @@ export interface AboutData {
   };
 }
 
+export interface Album {
+  id: string;
+  name: string;
+  description?: string;
+  coverImage?: string;
+  itemCount: number;
+  privacy?: "Public" | "Friends" | "Private";
+  createdAt: string;
+}
+
 export interface Post {
   id?: string;
   title: string;
@@ -193,6 +203,44 @@ export interface Post {
   imageUrl?: string;
   albumId?: string;
   albumName?: string;
+}
+
+export interface SavedAdvert {
+  id: string;
+  userId: string;
+  category: string;
+  type: string;
+  size: string;
+  dpdPackage: string;
+  extendedExposure?: string;
+  recurrentAfter?: string;
+  recurrentEvery?: string;
+  catchmentMarket: {
+    ownCity: number;
+    ownState: number;
+    ownCountry: number;
+    foreignCountries: number;
+    popularSearches: number;
+    random: number;
+    others: number;
+  };
+  launchDate: Date;
+  fileUrls: string[];
+  status: "pending" | "active" | "paused" | "rejected" | "expired";
+  pricing: any;
+  statistics: any;
+  createdAt: Date;
+  updatedAt: Date;
+  approvedAt?: Date;
+  expiresAt?: Date;
+  contactPhone?: string;
+  contactMethod?: string;
+  contactEmail?: string;
+  websiteUrl?: string;
+  advertiserName?: string;
+  advertDescription?: string;
+  approvedReason?: string;
+  rejectedReason?: string;
 }
 
 export interface Conversation {
@@ -232,6 +280,10 @@ export interface WindowBridge {
   __BANNER_IMAGE_HISTORY__?: string[];
   __CURRENT_USER_ID__?: string;
   __CONVERSATIONS__?: Conversation[];
+  __USER_ALBUMS__?: Album[];
+  __FEED_POSTS__?: Post[];
+  __WALL_STATUS_POSTS__?: any[];
+  __USER_ADVERTS__?: SavedAdvert[];
 }
 
 declare global {

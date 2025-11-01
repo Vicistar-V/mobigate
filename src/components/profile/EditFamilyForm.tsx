@@ -18,20 +18,13 @@ import { FriendsListSearch, Friend } from "./FriendsListSearch";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useFriendsList } from "@/hooks/useWindowData";
+import { mockFriends as fallbackFriends } from "@/data/profileData";
 
 const familySchema = z.object({
   friendId: z.string().min(1, "Please select a friend"),
   relation: z.string().min(1, "Relation is required"),
 });
-
-// Mock friends data - in real app this would come from backend
-const mockFriends = [
-  { id: "1", name: "John Doe" },
-  { id: "2", name: "Jane Smith" },
-  { id: "3", name: "Mike Johnson" },
-  { id: "4", name: "Sarah Williams" },
-  { id: "5", name: "David Brown" },
-];
 
 interface FamilyMember {
   id: string;
@@ -53,6 +46,10 @@ interface EditFamilyFormProps {
 }
 
 export const EditFamilyForm = ({ currentData, onSave, onClose }: EditFamilyFormProps) => {
+  const phpFriends = useFriendsList();
+  const friends = phpFriends || fallbackFriends;
+  const mockFriends = friends.map(f => ({ id: f.id, name: f.name }));
+  
   const [family, setFamily] = useState<FamilyMember[]>(currentData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
