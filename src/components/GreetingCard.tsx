@@ -10,7 +10,10 @@ import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState } from "react";
+import { useUserProfile } from "@/hooks/useWindowData";
+
 export const GreetingSection = () => {
+  const profile = useUserProfile();
   const [friendsMenuView, setFriendsMenuView] = useState<'main' | 'requests'>('main');
   const {
     showDialog,
@@ -63,13 +66,13 @@ export const GreetingSection = () => {
       <Card className="p-6 space-y-4 hover:shadow-md transition-shadow px-[10px]">
         <div className="flex items-start gap-4">
           <Avatar className="h-20 w-20 border-2 border-primary/20">
-            <AvatarImage src={profilePhoto} alt="Profile" />
-            <AvatarFallback>NP</AvatarFallback>
+            <AvatarImage src={profile.avatar} alt="Profile" />
+            <AvatarFallback>{profile.username.substring(0, 2)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-2">
-            <p className="text-lg text-destructive font-semibold">Good Evening</p>
-            <h2 className="text-3xl font-bold">NKEMJKA PETER IPREC</h2>
-            <p className="text-base text-muted-foreground">Oct 5, 2025, 5:30pm</p>
+            <p className="text-lg text-destructive font-semibold">{profile.greeting}</p>
+            <h2 className="text-3xl font-bold">{profile.fullName}</h2>
+            <p className="text-base text-muted-foreground">{profile.timestamp}</p>
           </div>
         </div>
 

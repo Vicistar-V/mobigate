@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { mockLikes } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
+import { useLikesList } from "@/hooks/useWindowData";
 import { Eye, Users, Heart, UserPlus, Eye as EyeIcon, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus } from "lucide-react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { likesAdSlots } from "@/data/profileAds";
@@ -26,6 +27,8 @@ interface ProfileLikesTabProps {
 
 export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
   const { toast } = useToast();
+  const phpLikes = useLikesList();
+  const likes = phpLikes || mockLikes;
   const [interactions, setInteractions] = useState<{
     [key: string]: { isFollowing: boolean; isLiked: boolean; isBlocked: boolean };
   }>({});
@@ -140,7 +143,7 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
 
       {/* Likes List */}
       <Card className="divide-y">
-        {mockLikes.map((like, index) => (
+        {likes.map((like, index) => (
           <React.Fragment key={like.id}>
             <div className="group p-4 flex gap-4 hover:bg-accent/5 transition-all duration-200">
               {/* Avatar Section */}
@@ -305,7 +308,7 @@ export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
             </div>
 
             {/* Insert Premium Ad after every 4 likes */}
-            {(index + 1) % 4 === 0 && index < mockLikes.length - 1 && (
+            {(index + 1) % 4 === 0 && index < likes.length - 1 && (
               <div className="col-span-full p-4 bg-muted/30">
                 <PremiumAdRotation
                   slotId={`likes-premium-${Math.floor((index + 1) / 4)}`}

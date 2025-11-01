@@ -9,23 +9,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, Settings, CreditCard, LogOut } from "lucide-react";
-import profilePhoto from "@/assets/profile-photo.jpg";
+import { useUserProfile } from "@/hooks/useWindowData";
 
 export const ProfileDropdown = () => {
   const navigate = useNavigate();
+  const profile = useUserProfile();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="h-14 w-14 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
-          <AvatarImage src={profilePhoto} alt="Profile" />
-          <AvatarFallback>NP</AvatarFallback>
+          <AvatarImage src={profile.avatar} alt="Profile" />
+          <AvatarFallback>{profile.username.substring(0, 2)}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-card">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-base font-medium">NKEMJKA PETER I.</p>
-            <p className="text-sm text-muted-foreground">peter@mobigate.com</p>
+            <p className="text-base font-medium">{profile.username}</p>
+            <p className="text-sm text-muted-foreground">{profile.email || 'peter@mobigate.com'}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

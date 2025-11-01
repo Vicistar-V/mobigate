@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { mockFriends } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
+import { useFriendsList } from "@/hooks/useWindowData";
 import { UserPlus, Eye, Users, Heart, Clock, Check, MoreVertical, UserMinus, ThumbsUp, ThumbsDown, Gift, MessageCircle, Phone, Ban, Flag, Search } from "lucide-react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { friendsAdSlots } from "@/data/profileAds";
@@ -41,6 +42,8 @@ interface FriendInteractions {
 export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const phpFriends = useFriendsList();
+  const friends = phpFriends || mockFriends;
   const [friendStatuses, setFriendStatuses] = useState<FriendStatuses>({});
   const [interactions, setInteractions] = useState<FriendInteractions>({});
   const [giftDialogOpen, setGiftDialogOpen] = useState(false);
@@ -196,7 +199,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
       {/* Header */}
       <div className="space-y-1">
         <h2 className="text-lg font-bold uppercase">
-          {mockFriends.length} FRIENDS OF {userName}
+          {friends.length} FRIENDS OF {userName}
         </h2>
         <p className="text-sm text-destructive italic">
           Users blocked by you and/or users that blocked you will not be displayed
@@ -205,7 +208,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
 
       {/* Friends List */}
       <Card className="divide-y">
-        {mockFriends.map((friend, index) => {
+        {friends.map((friend, index) => {
           const buttonConfig = getFriendButtonConfig(friendStatuses[friend.id]);
           const ButtonIcon = buttonConfig.icon;
           
@@ -399,7 +402,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
               </div>
 
               {/* Insert Premium Ad after every 4 friends */}
-              {(index + 1) % 4 === 0 && index < mockFriends.length - 1 && (
+              {(index + 1) % 4 === 0 && index < friends.length - 1 && (
                 <div className="col-span-full p-4 bg-muted/30">
                   <PremiumAdRotation
                     slotId={`friends-premium-${Math.floor((index + 1) / 4)}`}
