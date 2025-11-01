@@ -9,9 +9,7 @@ import profilePhoto from "@/assets/profile-photo.jpg";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
-import { useEffect, useState } from "react";
-import { EXTERNAL_PROFILE_API_URL, EXTERNAL_PROFILE_QUERY_PARAM, EXTERNAL_PROFILE_QUERY_VALUE } from "@/config";
-import { ExternalProfile, fetchExternalProfile } from "@/lib/externalProfileApi";
+import { useState } from "react";
 export const GreetingSection = () => {
   const [friendsMenuView, setFriendsMenuView] = useState<'main' | 'requests'>('main');
   const {
@@ -60,33 +58,17 @@ export const GreetingSection = () => {
     label: "Adverts Log",
     href: "/adverts-log"
   }];
-  // External profile state (optional — only used if EXTERNAL_PROFILE_API_URL is configured)
-  const [externalProfile, setExternalProfile] = useState<ExternalProfile | null>(null);
-
-  useEffect(() => {
-    async function load() {
-      if (!EXTERNAL_PROFILE_API_URL || !EXTERNAL_PROFILE_QUERY_VALUE) return;
-      const data = await fetchExternalProfile(
-        EXTERNAL_PROFILE_API_URL,
-        EXTERNAL_PROFILE_QUERY_PARAM,
-        EXTERNAL_PROFILE_QUERY_VALUE
-      );
-      if (data) setExternalProfile(data);
-    }
-    load();
-  }, []);
-
   return <div className="space-y-4">
       {/* Greeting Card */}
       <Card className="p-6 space-y-4 hover:shadow-md transition-shadow px-[10px]">
         <div className="flex items-start gap-4">
           <Avatar className="h-20 w-20 border-2 border-primary/20">
-            <AvatarImage src={externalProfile?.passport || profilePhoto} alt={externalProfile?.name || "Profile"} />
+            <AvatarImage src={profilePhoto} alt="Profile" />
             <AvatarFallback>NP</AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-2">
             <p className="text-lg text-destructive font-semibold">Good Evening</p>
-            <h2 className="text-3xl font-bold">{externalProfile?.name || "NKEMJKA PETER IPREC"}</h2>
+            <h2 className="text-3xl font-bold">NKEMJKA PETER IPREC</h2>
             <p className="text-base text-muted-foreground">Oct 5, 2025, 5:30pm</p>
           </div>
         </div>
