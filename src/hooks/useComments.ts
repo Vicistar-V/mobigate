@@ -2,8 +2,10 @@ import { useState, useCallback } from "react";
 import { Comment } from "@/types/comments";
 import { mockComments, getCommentsByPostId } from "@/data/comments";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 
 export const useComments = (postId: string) => {
+  const currentUserId = useCurrentUserId();
   const [comments, setComments] = useState<Comment[]>(
     getCommentsByPostId(postId)
   );
@@ -19,7 +21,7 @@ export const useComments = (postId: string) => {
         const newComment: Comment = {
           id: `comm_${Date.now()}`,
           postId,
-          userId: "1",
+          userId: currentUserId,
           author,
           authorProfileImage: authorImage,
           content,
@@ -36,7 +38,7 @@ export const useComments = (postId: string) => {
         });
       }, 500);
     },
-    [postId, toast]
+    [postId, currentUserId, toast]
   );
 
   const deleteComment = useCallback(

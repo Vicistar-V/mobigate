@@ -11,6 +11,7 @@ import { PostDetailDialog } from "@/components/PostDetailDialog";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { Columns2, LayoutGrid } from "lucide-react";
 import React, { useState } from "react";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 
 interface Post {
   id?: string;
@@ -76,6 +77,7 @@ export const WallStatusCarousel = ({
   onItemClick,
   showFriendsSuggestions = false
 }: WallStatusCarouselProps) => {
+  const currentUserId = useCurrentUserId();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(15);
@@ -461,7 +463,7 @@ export const WallStatusCarousel = ({
             likes: "0",
             author: selectedPost.author,
             authorProfileImage: "/placeholder.svg",
-            userId: "1",
+            userId: currentUserId,
             status: "Offline",
             type: selectedPost.type as "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL",
             fee: "0"

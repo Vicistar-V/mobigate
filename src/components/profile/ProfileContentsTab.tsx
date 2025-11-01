@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal, UserPlus, Share2 } from "lucide-react";
 import { getPostsByUserId, Post } from "@/data/posts";
+import { useUserPosts } from "@/hooks/useWindowData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -190,7 +191,15 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   ];
 
   // Fetch user's posts
-  const userPosts = useMemo(() => getPostsByUserId(userId), [userId]);
+  const phpUserPosts = useUserPosts();
+  const userPosts = useMemo(() => {
+    // Priority 1: PHP data
+    if (phpUserPosts && phpUserPosts.length > 0) {
+      return phpUserPosts as Post[];
+    }
+    // Priority 2: Mock data (development)
+    return getPostsByUserId(userId);
+  }, [phpUserPosts, userId]);
   
   // Prepare premium ad slots for rotation
   const premiumAdSlots = contentsAdSlots.map((ads, index) => ({

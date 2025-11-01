@@ -469,7 +469,7 @@ const Profile = () => {
     description: post.description,
     author: post.author,
     authorProfileImage: post.authorImage,
-    userId: "1",
+    userId: currentUserId,
     status: "Online" as const,
     views: "0",
     comments: String(post.comments),

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
-import { useAboutData } from "@/hooks/useWindowData";
+import { useAboutData, useCurrentUserId } from "@/hooks/useWindowData";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -118,6 +118,7 @@ export const ProfileAboutTab = ({
 
   // Get PHP-injected data if available
   const phpAbout = useAboutData();
+  const currentUserId = useCurrentUserId();
 
   // Dialog states
   const [editLocationOpen, setEditLocationOpen] = useState(false);
@@ -272,7 +273,7 @@ export const ProfileAboutTab = ({
     phpAbout?.refererUrl || loadFromStorage("profile_refererUrl", {
       url: "https://mobigate.com/profile/john-doe",
       refererName: "John Doe",
-      refererId: "user-123",
+      refererId: currentUserId,
       privacy: "public",
       exceptions: []
     })

@@ -15,10 +15,11 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
-import { useFeedPosts, useWallStatusPosts } from "@/hooks/useWindowData";
+import { useFeedPosts, useWallStatusPosts, useCurrentUserId } from "@/hooks/useWindowData";
 
 const Index = () => {
   const { toast } = useToast();
+  const currentUserId = useCurrentUserId();
   const phpFeedPosts = useFeedPosts();
   const phpWallPosts = useWallStatusPosts();
   
@@ -103,7 +104,7 @@ const Index = () => {
     description: post.description,
     author: post.author,
     authorProfileImage: post.authorImage,
-    userId: "1",
+    userId: currentUserId,
     status: "Online" as const,
     views: "0",
     comments: String(post.comments),

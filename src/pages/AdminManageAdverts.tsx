@@ -62,8 +62,14 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-// User mapping for display (mock data)
+// User mapping for display (supports PHP window.__USER_MAP__)
 const getUserDisplay = (userId: string) => {
+  // Priority 1: PHP user map
+  if (typeof window !== 'undefined' && window.__USER_MAP__?.[userId]) {
+    return window.__USER_MAP__[userId].name;
+  }
+  
+  // Priority 2: Hardcoded fallback (development)
   const userMap: Record<string, string> = {
     "user-123": "John Doe",
     "user-456": "Jane Smith",
