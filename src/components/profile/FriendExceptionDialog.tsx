@@ -7,18 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X, Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-// Mock friends data - will be replaced with actual data from backend
-const mockFriends = [
-  { id: "1", name: "John Doe", email: "john.doe@example.com" },
-  { id: "2", name: "Jane Smith", email: "jane.smith@example.com" },
-  { id: "3", name: "Mike Johnson", email: "mike.j@example.com" },
-  { id: "4", name: "Sarah Williams", email: "sarah.w@example.com" },
-  { id: "5", name: "David Brown", email: "david.brown@example.com" },
-  { id: "6", name: "Emily Davis", email: "emily.d@example.com" },
-  { id: "7", name: "Chris Wilson", email: "chris.wilson@example.com" },
-  { id: "8", name: "Lisa Anderson", email: "lisa.a@example.com" },
-];
+import { useFriendsList } from "@/hooks/useWindowData";
 
 interface Friend {
   id: string;
@@ -43,6 +32,23 @@ export const FriendExceptionDialog = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [customInput, setCustomInput] = useState("");
   const [suggestions, setSuggestions] = useState<Friend[]>([]);
+
+  // Get friends from PHP or use mock data for development
+  const phpFriends = useFriendsList();
+  const mockFriends: Friend[] = phpFriends?.map(f => ({
+    id: f.id,
+    name: f.name,
+    email: `${f.name.toLowerCase().replace(/\s+/g, '.')}@mobigate.com`
+  })) || [
+    { id: "1", name: "John Doe", email: "john.doe@example.com" },
+    { id: "2", name: "Jane Smith", email: "jane.smith@example.com" },
+    { id: "3", name: "Mike Johnson", email: "mike.j@example.com" },
+    { id: "4", name: "Sarah Williams", email: "sarah.w@example.com" },
+    { id: "5", name: "David Brown", email: "david.brown@example.com" },
+    { id: "6", name: "Emily Davis", email: "emily.d@example.com" },
+    { id: "7", name: "Chris Wilson", email: "chris.wilson@example.com" },
+    { id: "8", name: "Lisa Anderson", email: "lisa.a@example.com" },
+  ];
 
   // Filter friends based on search query
   const filteredFriends = useMemo(() => {

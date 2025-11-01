@@ -31,7 +31,7 @@ import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
 import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
 import { ProfileContentsTab } from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
-import { useProfileData, useUserPosts } from "@/hooks/useWindowData";
+import { useProfileData, useUserPosts, useCurrentUserId } from "@/hooks/useWindowData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +58,9 @@ const Profile = () => {
   const [messagesSheetOpen, setMessagesSheetOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const { toast } = useToast();
+  
+  // Get current user ID from PHP or fallback
+  const currentUserId = useCurrentUserId();
 
   // Handle hash-based tab navigation
   useEffect(() => {
@@ -339,7 +342,7 @@ const Profile = () => {
     // Dispatch custom event to open chat with this specific user
     const event = new CustomEvent('openChatWithUser', {
       detail: { 
-        userId: 'user-5',
+        userId: currentUserId,
         userName: userProfile.name,
         conversationId: '5'
       }

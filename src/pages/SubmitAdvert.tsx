@@ -388,7 +388,7 @@ export default function SubmitAdvert() {
         
         // Ensure form step is visible by creating an entry pack draft
         try {
-          const draft = createNewPackDraft("entry");
+          const draft = createNewPackDraft("entry", currentUserId);
           setPackDraft(draft);
         } catch (e) {
           // Fallback: if createNewPackDraft fails for any reason, keep a minimal draft-like object
@@ -859,7 +859,7 @@ export default function SubmitAdvert() {
     
     if (type === "individual") {
       // Individual users get a single-slot pack
-      const newDraft = createNewPackDraft("entry");
+      const newDraft = createNewPackDraft("entry", currentUserId);
       setPackDraft(newDraft);
       setCurrentStep("fill-slot");
       resetSlotForm();
@@ -882,7 +882,7 @@ export default function SubmitAdvert() {
   };
 
   const handlePackSelection = (packId: SlotPackId) => {
-    const newDraft = createNewPackDraft(packId);
+    const newDraft = createNewPackDraft(packId, currentUserId);
     setPackDraft(newDraft);
     setCurrentStep("fill-slot");
     resetSlotForm();

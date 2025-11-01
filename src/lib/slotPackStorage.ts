@@ -2,15 +2,14 @@ import { SlotPackDraft, AdvertSlot, SlotPackId, AdvertFormData, AdvertPricing } 
 import { SLOT_PACKS } from "@/data/slotPacks";
 
 const PACK_DRAFT_KEY = "mobigate_slot_pack_draft";
-const MOCK_USER_ID = "user-123";
 
-export function createNewPackDraft(packId: SlotPackId): SlotPackDraft {
+export function createNewPackDraft(packId: SlotPackId, userId: string): SlotPackDraft {
   const pack = SLOT_PACKS.find(p => p.id === packId);
   if (!pack) throw new Error("Invalid pack ID");
 
   const draft: SlotPackDraft = {
     id: `pack-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    userId: MOCK_USER_ID,
+    userId,
     packId,
     slots: [],
     status: "draft",

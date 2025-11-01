@@ -1,11 +1,30 @@
 import { updateAdvertStatistics } from "./advertStorage";
+import type { SavedAdvert } from "@/types/advert";
+
+/**
+ * Get adverts from PHP data first, then localStorage
+ */
+function getAdverts(): any[] {
+  // Priority 1: PHP injected data
+  if (typeof window !== 'undefined' && window.__USER_ADVERTS__) {
+    return window.__USER_ADVERTS__ as any[];
+  }
+  
+  // Priority 2: localStorage (development fallback)
+  try {
+    const data = localStorage.getItem("mobigate_adverts");
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Track impression when advert is shown
  */
 export function trackImpression(advertId: string): void {
   try {
-    const adverts = JSON.parse(localStorage.getItem("mobigate_adverts") || "[]");
+    const adverts = getAdverts();
     const advert = adverts.find((ad: any) => ad.id === advertId);
     
     if (!advert) return;
@@ -25,7 +44,7 @@ export function trackImpression(advertId: string): void {
  */
 export function trackClick(advertId: string): void {
   try {
-    const adverts = JSON.parse(localStorage.getItem("mobigate_adverts") || "[]");
+    const adverts = getAdverts();
     const advert = adverts.find((ad: any) => ad.id === advertId);
     
     if (!advert) return;
@@ -48,7 +67,7 @@ export function trackClick(advertId: string): void {
  */
 export function trackView(advertId: string): void {
   try {
-    const adverts = JSON.parse(localStorage.getItem("mobigate_adverts") || "[]");
+    const adverts = getAdverts();
     const advert = adverts.find((ad: any) => ad.id === advertId);
     
     if (!advert) return;
@@ -71,7 +90,7 @@ export function initializeDailyDisplayReset(): void {
   if (lastResetDate !== today) {
     // Reset all adverts' displayedToday counter
     try {
-      const adverts = JSON.parse(localStorage.getItem("mobigate_adverts") || "[]");
+      const adverts = getAdverts();
       
       adverts.forEach((advert: any) => {
         updateAdvertStatistics(advert.id, {
@@ -92,7 +111,7 @@ export function initializeDailyDisplayReset(): void {
  */
 export function simulateAdvertDisplays(): void {
   try {
-    const adverts = JSON.parse(localStorage.getItem("mobigate_adverts") || "[]");
+    const adverts = getAdverts();
     const activeAdverts = adverts.filter(
       (ad: any) => ad.status === "active" || ad.status === "approved"
     );
