@@ -3,9 +3,6 @@ import { SavedAdvert, AdvertFormData, AdvertPricing } from "@/types/advert";
 const STORAGE_KEY = "mobigate_adverts";
 const DRAFT_KEY = "mobigate_advert_draft";
 
-// Mock user ID - in real app this would come from auth
-const MOCK_USER_ID = "user-123";
-
 export function saveAdvertDraft(formData: Partial<AdvertFormData>): void {
   try {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
@@ -34,7 +31,8 @@ export function clearAdvertDraft(): void {
 
 export function saveAdvert(
   formData: AdvertFormData,
-  pricing: AdvertPricing
+  pricing: AdvertPricing,
+  userId: string
 ): SavedAdvert {
   try {
     // Convert files to data URLs for storage
@@ -42,7 +40,7 @@ export function saveAdvert(
 
     const newAdvert: SavedAdvert = {
       id: `ad-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      userId: MOCK_USER_ID,
+      userId,
       category: formData.category,
       type: formData.type,
       size: formData.size,
@@ -131,7 +129,7 @@ export function loadAllAdverts(): SavedAdvert[] {
   }
 }
 
-export function loadUserAdverts(userId: string = MOCK_USER_ID): SavedAdvert[] {
+export function loadUserAdverts(userId: string): SavedAdvert[] {
   const allAdverts = loadAllAdverts();
   return allAdverts.filter(ad => ad.userId === userId);
 }

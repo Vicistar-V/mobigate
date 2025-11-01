@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { loadUserAdverts, deleteAdvert, updateAdvertStatus, updateAdvertMedia, storeAdvertForEdit } from "@/lib/advertStorage";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 import { SavedAdvert, getMultipleCount, getDisplayMode, AdvertFormData } from "@/types/advert";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
 import { formatCurrency } from "@/lib/advertPricing";
@@ -51,6 +52,7 @@ const getStatusLabel = (status: SavedAdvert["status"]) => {
 
 export default function MyAdverts() {
   const navigate = useNavigate();
+  const currentUserId = useCurrentUserId();
   const [adverts, setAdverts] = useState<SavedAdvert[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAdvert, setSelectedAdvert] = useState<SavedAdvert | null>(null);
@@ -70,7 +72,7 @@ export default function MyAdverts() {
   }, []);
 
   const loadAdverts = () => {
-    const userAdverts = loadUserAdverts();
+    const userAdverts = loadUserAdverts(currentUserId);
     setAdverts(userAdverts);
   };
 

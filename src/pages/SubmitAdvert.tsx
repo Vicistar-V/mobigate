@@ -755,7 +755,8 @@ export default function SubmitAdvert() {
             advertHeadline: advertHeadline || undefined,
             advertCTAText: advertCTAText || undefined
           },
-          pricing
+          pricing,
+          currentUserId
         );
         
         toast({
@@ -791,7 +792,8 @@ export default function SubmitAdvert() {
             advertHeadline: advertHeadline || undefined,
             advertCTAText: advertCTAText || undefined
           },
-          pricing
+          pricing,
+          currentUserId
         );
 
         toast({
@@ -1128,7 +1130,7 @@ export default function SubmitAdvert() {
     setTimeout(() => {
       // Save all slots as individual adverts
       packDraft.slots.forEach((slot, index) => {
-        saveAdvert(slot.formData, slot.pricing);
+        saveAdvert(slot.formData, slot.pricing, currentUserId);
       });
 
       clearPackDraft();

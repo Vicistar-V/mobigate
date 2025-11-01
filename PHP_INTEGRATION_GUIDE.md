@@ -46,8 +46,24 @@ interface UserProfile {
     gifts: string;
     contents: string;
   };
+  // Discount profile fields for advertiser tiers
+  accreditedTier?: "bronze" | "silver" | "gold" | "platinum" | null;
+  totalCampaigns?: number;
+  activeAdverts?: number;
+  successfulCampaigns?: number;
 }
 ```
+
+**New Fields:**
+- `accreditedTier`: The user's advertiser accreditation level (null if not accredited)
+- `totalCampaigns`: Total number of advertising campaigns run by the user
+- `activeAdverts`: Number of currently active advertisements
+- `successfulCampaigns`: Number of successfully completed campaigns
+
+**Used in:**
+- `src/data/discountData.ts` - Fetches discount profile data
+- `src/pages/SubmitAdvert.tsx` - Applies tier-based discounts
+- `src/hooks/useComments.ts` - Gets author name and avatar for comments
 
 ---
 
@@ -169,6 +185,40 @@ interface Album {
 ### `window.__BANNER_IMAGE_HISTORY__`
 **Type:** `string[]`  
 **Description:** Array of previous banner image URLs
+
+---
+
+## User Administration
+
+### `window.__USER_MAP__`
+**Type:** `Record<string, UserMapEntry>`  
+**Description:** Mapping of user IDs to display information for admin interfaces
+
+```typescript
+interface UserMapEntry {
+  name: string;
+  email?: string;
+  username?: string;
+}
+```
+
+**Example:**
+```javascript
+window.__USER_MAP__ = {
+  "user-123": {
+    name: "John Doe",
+    email: "john@example.com",
+    username: "johndoe"
+  },
+  "user-456": {
+    name: "Jane Smith",
+    email: "jane@example.com"
+  }
+};
+```
+
+**Used in:**
+- `src/pages/AdminManageAdverts.tsx` - Displays advertiser names in admin panel
 
 ---
 
@@ -402,13 +452,22 @@ When implementing PHP integration:
 
 ## Migration Status
 
-### ✅ Completed Integrations
+### ✅ Completed Integrations (Phase 1-6)
 
 1. **FriendExceptionDialog** - Uses `useFriendsList()` hook
 2. **advertSimulator.ts** - Checks `window.__USER_ADVERTS__` first
 3. **slotPackStorage.ts** - Accepts dynamic `userId` parameter
-4. **Profile.tsx** - Uses `useCurrentUserId()` for chat
-5. **SubmitAdvert.tsx** - Uses `useCurrentUserId()` for pack creation
+4. **Profile.tsx** - Uses `useCurrentUserId()` for chat and posts
+5. **SubmitAdvert.tsx** - Uses `useCurrentUserId()` for pack creation and saving adverts
+6. **useComments.ts** - Uses `useCurrentUserId()` and `useUserProfile()` for comment authors
+7. **ProfileContentsTab.tsx** - Uses `useUserPosts()` for user posts
+8. **Index.tsx** - Uses `useCurrentUserId()` for wall status transformations
+9. **WallStatusCarousel.tsx** - Uses `useCurrentUserId()` for post detail dialogs
+10. **ProfileAboutTab.tsx** - Uses `useCurrentUserId()` for referer IDs
+11. **AdminManageAdverts.tsx** - Uses `window.__USER_MAP__` for user display names
+12. **MyAdverts.tsx** - Uses `useCurrentUserId()` to load user-specific adverts
+13. **advertStorage.ts** - Removed hardcoded `MOCK_USER_ID`, requires `userId` parameter
+14. **discountData.ts** - Checks `window.__USER_PROFILE__` for discount profile data
 
 ### 📋 All Data Access Points
 

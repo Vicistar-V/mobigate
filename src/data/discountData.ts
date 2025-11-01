@@ -48,10 +48,23 @@ const MOCK_USER_PROFILES: Record<string, UserDiscountProfile> = {
 };
 
 /**
- * Get user discount profile
+ * Get user discount profile from PHP data or fallback to mock
  * @param userId - User ID (defaults to "current-user" for demo)
  */
 export function getUserDiscountProfile(userId: string = "current-user"): UserDiscountProfile {
+  // Priority 1: Check window.__USER_PROFILE__ for PHP data
+  if (typeof window !== 'undefined' && window.__USER_PROFILE__?.id === userId) {
+    const profile = window.__USER_PROFILE__;
+    return {
+      userId: profile.id,
+      accreditedTier: profile.accreditedTier || null,
+      totalCampaigns: profile.totalCampaigns || 0,
+      activeAdverts: profile.activeAdverts || 0,
+      successfulCampaigns: profile.successfulCampaigns || 0,
+    };
+  }
+  
+  // Priority 2: Mock data fallback (development)
   return MOCK_USER_PROFILES[userId] || {
     userId,
     accreditedTier: null,

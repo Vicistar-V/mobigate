@@ -2,10 +2,11 @@ import { useState, useCallback } from "react";
 import { Comment } from "@/types/comments";
 import { mockComments, getCommentsByPostId } from "@/data/comments";
 import { useToast } from "@/hooks/use-toast";
-import { useCurrentUserId } from "@/hooks/useWindowData";
+import { useCurrentUserId, useUserProfile } from "@/hooks/useWindowData";
 
 export const useComments = (postId: string) => {
   const currentUserId = useCurrentUserId();
+  const userProfile = useUserProfile();
   const [comments, setComments] = useState<Comment[]>(
     getCommentsByPostId(postId)
   );
@@ -13,7 +14,7 @@ export const useComments = (postId: string) => {
   const { toast } = useToast();
 
   const addComment = useCallback(
-    (content: string, author: string = "AMAKA JANE JOHNSON", authorImage: string = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80") => {
+    (content: string, author?: string, authorImage?: string) => {
       setLoading(true);
 
       // Simulate API call
@@ -22,8 +23,8 @@ export const useComments = (postId: string) => {
           id: `comm_${Date.now()}`,
           postId,
           userId: currentUserId,
-          author,
-          authorProfileImage: authorImage,
+          author: author || userProfile.fullName,
+          authorProfileImage: authorImage || userProfile.avatar,
           content,
           timestamp: new Date().toISOString(),
           likes: 0,
@@ -38,7 +39,7 @@ export const useComments = (postId: string) => {
         });
       }, 500);
     },
-    [postId, currentUserId, toast]
+    [postId, currentUserId, userProfile, toast]
   );
 
   const deleteComment = useCallback(

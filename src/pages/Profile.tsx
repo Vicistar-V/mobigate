@@ -154,7 +154,7 @@ const Profile = () => {
   
   // Get posts for this specific user and manage as state
   const phpPosts = useUserPosts();
-  const initialPosts = (phpPosts || getPostsByUserId("1")) as Post[];
+  const initialPosts = (phpPosts || getPostsByUserId(currentUserId)) as Post[];
   const [userPosts, setUserPosts] = useState<Post[]>(initialPosts);
   
   // Get profile data from PHP or use fallback

@@ -12,6 +12,11 @@ export interface UserProfile {
     followers: number;
     following: number;
   };
+  // Discount profile fields for advertiser tiers
+  accreditedTier?: "bronze" | "silver" | "gold" | "platinum" | null;
+  totalCampaigns?: number;
+  activeAdverts?: number;
+  successfulCampaigns?: number;
 }
 
 export interface Friend {
