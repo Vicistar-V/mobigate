@@ -45,6 +45,7 @@ import { DisplayModeSelector } from "@/components/advert/DisplayModeSelector";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
 import { getUserDiscountProfile } from "@/data/discountData";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
 import { SlotPackManager } from "@/components/advert/SlotPackManager";
 import { SlotPackSummary } from "@/components/advert/SlotPackSummary";
@@ -172,8 +173,11 @@ export default function SubmitAdvert() {
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  // Get current user ID from PHP or fallback
+  const currentUserId = useCurrentUserId();
+  
   // Get user discount profile (mock data for now)
-  const userProfile = getUserDiscountProfile("current-user");
+  const userProfile = getUserDiscountProfile(currentUserId);
   
   // Wallet balance (hardcoded for now)
   const walletBalance = 2000000;

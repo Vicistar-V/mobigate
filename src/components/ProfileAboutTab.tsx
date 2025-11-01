@@ -268,22 +268,27 @@ export const ProfileAboutTab = ({
     }
     return stored;
   });
-  const [refererUrl, setRefererUrl] = useState<RefererUrl>(() => loadFromStorage("profile_refererUrl", {
-    url: "https://mobigate.com/profile/john-doe",
-    refererName: "John Doe",
-    refererId: "user-123",
-    privacy: "public",
-    exceptions: []
-  }));
-  const [currency, setCurrency] = useState<CurrencyInfo>(() => loadFromStorage("profile_currency", {
-    preferredCurrency: "Nigerian Naira",
-    currencySymbol: "₦",
-    accountSummaryPrivacy: "only-me",
-    accountSummaryExceptions: [],
-    privacy: "public",
-    exceptions: []
-  }));
-  const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => loadFromStorage<SchoolMate[]>("profile_schoolMates", [{
+  const [refererUrl, setRefererUrl] = useState<RefererUrl>(() => 
+    phpAbout?.refererUrl || loadFromStorage("profile_refererUrl", {
+      url: "https://mobigate.com/profile/john-doe",
+      refererName: "John Doe",
+      refererId: "user-123",
+      privacy: "public",
+      exceptions: []
+    })
+  );
+  const [currency, setCurrency] = useState<CurrencyInfo>(() => 
+    phpAbout?.currency || loadFromStorage("profile_currency", {
+      preferredCurrency: "Nigerian Naira",
+      currencySymbol: "₦",
+      accountSummaryPrivacy: "only-me",
+      accountSummaryExceptions: [],
+      privacy: "public",
+      exceptions: []
+    })
+  );
+  const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => 
+    phpAbout?.schoolMates || loadFromStorage<SchoolMate[]>("profile_schoolMates", [{
     id: "1",
     name: "Chidi Okafor",
     nickname: "Chief",
@@ -314,7 +319,8 @@ export const ProfileAboutTab = ({
     teacherPosition: "Head of Languages",
     privacy: "friends"
   }]));
-  const [classmates, setClassmates] = useState<Classmate[]>(() => loadFromStorage<Classmate[]>("profile_classmates", [{
+  const [classmates, setClassmates] = useState<Classmate[]>(() => 
+    phpAbout?.classmates || loadFromStorage<Classmate[]>("profile_classmates", [{
     id: "1",
     name: "Emeka Nnamdi",
     nickname: "Eme",
@@ -345,7 +351,8 @@ export const ProfileAboutTab = ({
     teacherPosition: "Professor",
     privacy: "friends"
   }]));
-  const [ageMates, setAgeMates] = useState<AgeMate[]>(() => loadFromStorage<AgeMate[]>("profile_ageMates", [{
+  const [ageMates, setAgeMates] = useState<AgeMate[]>(() => 
+    phpAbout?.ageMates || loadFromStorage<AgeMate[]>("profile_ageMates", [{
     id: "1",
     name: "Chukwuemeka Okafor",
     community: "Onitsha Urban Community",
@@ -364,7 +371,8 @@ export const ProfileAboutTab = ({
     postsHeld: "PRO (2000-2005), Vice Chairman (2012-2015)",
     privacy: "public"
   }]));
-  const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>(() => loadFromStorage<WorkColleague[]>("profile_workColleagues", [{
+  const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>(() => 
+    phpAbout?.workColleagues || loadFromStorage<WorkColleague[]>("profile_workColleagues", [{
     id: "1",
     name: "Ifeanyi Mbah",
     nickname: "Ify",
@@ -387,8 +395,11 @@ export const ProfileAboutTab = ({
     specialSkills: "Brand Development, Client Relations",
     privacy: "friends"
   }]));
-  const [loveFriendship, setLoveFriendship] = useState<LoveFriendship[]>(() => loadFromStorage<LoveFriendship[]>("profile_loveFriendship", []));
-  const [socialCommunities, setSocialCommunities] = useState<SocialCommunity[]>(() => loadFromStorage<SocialCommunity[]>("profile_socialCommunities", [{
+  const [loveFriendship, setLoveFriendship] = useState<LoveFriendship[]>(() => 
+    phpAbout?.loveFriendships || loadFromStorage<LoveFriendship[]>("profile_loveFriendship", [])
+  );
+  const [socialCommunities, setSocialCommunities] = useState<SocialCommunity[]>(() => 
+    phpAbout?.socialCommunities || loadFromStorage<SocialCommunity[]>("profile_socialCommunities", [{
     id: "1",
     name: "Onitsha Town Union",
     type: "Town Union",

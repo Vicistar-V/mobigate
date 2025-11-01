@@ -2,8 +2,10 @@ import { useState, useCallback } from "react";
 import { Message, Conversation, QuizSession, QuizQuestion } from "@/types/chat";
 import { mockConversations } from "@/data/chatData";
 import { getRandomQuestions } from "@/data/quizData";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 
 export const useChat = () => {
+  const currentUserId = useCurrentUserId();
   const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState<{ [key: string]: boolean }>({});
@@ -21,7 +23,7 @@ export const useChat = () => {
 
       const newMessage: Message = {
         id: `msg-${Date.now()}`,
-        senderId: "current-user",
+        senderId: currentUserId,
         content: content.trim(),
         timestamp: new Date(),
         isRead: true,
@@ -268,26 +270,26 @@ export const useChat = () => {
             messages: conv.messages.map((msg) => {
               if (msg.id === messageId) {
                 const reactions = msg.reactions || [];
-                const existingReaction = reactions.find(r => r.userId === "current-user");
+                const existingReaction = reactions.find(r => r.userId === currentUserId);
                 
                 if (existingReaction) {
                   if (existingReaction.emoji === emoji) {
                     return {
                       ...msg,
-                      reactions: reactions.filter(r => r.userId !== "current-user"),
+                      reactions: reactions.filter(r => r.userId !== currentUserId),
                     };
                   } else {
                     return {
                       ...msg,
                       reactions: reactions.map(r =>
-                        r.userId === "current-user" ? { ...r, emoji } : r
+                        r.userId === currentUserId ? { ...r, emoji } : r
                       ),
                     };
                   }
                 } else {
                   return {
                     ...msg,
-                    reactions: [...reactions, { userId: "current-user", emoji }],
+                    reactions: [...reactions, { userId: currentUserId, emoji }],
                   };
                 }
               }

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 interface ChatInterfaceProps {
   conversation: Conversation | undefined;
   isTyping: boolean;
@@ -54,6 +55,7 @@ export const ChatInterface = ({
   onExitQuiz,
   isGameMode = false
 }: ChatInterfaceProps) => {
+  const currentUserId = useCurrentUserId();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingMessage, setEditingMessage] = useState<{
     id: string;
@@ -78,7 +80,7 @@ export const ChatInterface = ({
     toast.success(`Starting voice call with ${conversation?.user.name}...`);
   };
   const handleReply = (message: Message) => {
-    const senderName = message.senderId === "current-user" ? "You" : conversation?.user.name || "Unknown";
+    const senderName = message.senderId === currentUserId ? "You" : conversation?.user.name || "Unknown";
     setReplyTo({
       messageId: message.id,
       content: message.content,
@@ -216,7 +218,7 @@ export const ChatInterface = ({
       backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAC3CAMAAAAGjUrGAAAAA1BMVEXm5+i+5p7XAAAAR0lEQVR4nO3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADeDcYqAAE0I2HfAAAAAElFTkSuQmCC")'
     }} ref={scrollRef}>
         {conversation.messages.map(message => {
-        const isCurrentUser = message.senderId === "current-user";
+        const isCurrentUser = message.senderId === currentUserId;
         const isSelected = selectedMessages.has(message.id);
         return <MessageContextMenu key={message.id} message={message} isOwnMessage={isCurrentUser} onReply={handleReply} onEdit={handleEdit} onDelete={handleDelete} onReact={onReactToMessage}>
               <div className={cn("flex gap-2 mb-4 max-w-[85%] sm:max-w-[70%] animate-in fade-in slide-in-from-bottom-2 duration-300", isCurrentUser ? "self-end" : "self-start")}>
