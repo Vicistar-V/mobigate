@@ -31,6 +31,7 @@ import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
 import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
 import { ProfileContentsTab } from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { useProfileData, useUserPosts } from "@/hooks/useWindowData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,45 +67,53 @@ const Profile = () => {
     }
   }, []);
   
-  // Load profile image and history from localStorage
+  // Load profile image and history from localStorage or PHP
   const [profileImage, setProfileImage] = useState<string>(() => {
+    if (typeof window !== 'undefined' && window.__PROFILE_IMAGE__) {
+      return window.__PROFILE_IMAGE__;
+    }
     const saved = localStorage.getItem("profileImage");
     return saved || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
   });
 
   const [profileImageHistory, setProfileImageHistory] = useState<string[]>(() => {
+    if (typeof window !== 'undefined' && window.__PROFILE_IMAGE_HISTORY__) {
+      return window.__PROFILE_IMAGE_HISTORY__;
+    }
     const saved = localStorage.getItem("profileImageHistory");
     if (saved) {
       const history = JSON.parse(saved);
       const currentImage = localStorage.getItem("profileImage") || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80";
-      // Ensure current image is in history
       if (!history.includes(currentImage)) {
         return [currentImage, ...history];
       }
       return history;
     }
-    // Initialize with mock data
     return mockProfilePictures.map(pic => pic.url);
   });
 
-  // Load banner image and history from localStorage
+  // Load banner image and history from localStorage or PHP
   const [bannerImage, setBannerImage] = useState<string>(() => {
+    if (typeof window !== 'undefined' && window.__BANNER_IMAGE__) {
+      return window.__BANNER_IMAGE__;
+    }
     const saved = localStorage.getItem("bannerImage");
     return saved || profileBanner;
   });
 
   const [bannerImageHistory, setBannerImageHistory] = useState<string[]>(() => {
+    if (typeof window !== 'undefined' && window.__BANNER_IMAGE_HISTORY__) {
+      return window.__BANNER_IMAGE_HISTORY__;
+    }
     const saved = localStorage.getItem("bannerImageHistory");
     if (saved) {
       const history = JSON.parse(saved);
       const currentBanner = localStorage.getItem("bannerImage") || profileBanner;
-      // Ensure current banner is in history
       if (!history.includes(currentBanner)) {
         return [currentBanner, ...history];
       }
       return history;
     }
-    // Initialize with mock data
     return mockBannerImages.map(banner => banner.url);
   });
 
@@ -141,9 +150,16 @@ const Profile = () => {
   }, [bannerImageHistory]);
   
   // Get posts for this specific user and manage as state
-  const [userPosts, setUserPosts] = useState<Post[]>(() => getPostsByUserId("1"));
+  const phpPosts = useUserPosts();
+  const initialPosts = (phpPosts || getPostsByUserId("1")) as Post[];
+  const [userPosts, setUserPosts] = useState<Post[]>(initialPosts);
   
-  const userProfile = {
+  // Get profile data from PHP or use fallback
+  const phpProfile = useProfileData();
+  const userProfile = phpProfile ? {
+    ...phpProfile,
+    profileImage: phpProfile.profileImage || profileImage
+  } : {
     name: "Amaka Jane Johnson",
     location: "Lagos, Nigeria",
     profileImage: profileImage,

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { mockFollowing } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
+import { useFollowingList } from "@/hooks/useWindowData";
 import { UserPlus, UserCheck, Eye, Users, Heart, Eye as EyeIcon, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag } from "lucide-react";
 import { useState } from "react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
@@ -26,8 +27,10 @@ interface ProfileFollowingTabProps {
 
 export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
   const { toast } = useToast();
+  const phpFollowing = useFollowingList();
+  const following = phpFollowing || mockFollowing;
   const [followingStatus, setFollowingStatus] = useState<Map<string, boolean>>(
-    new Map(mockFollowing.map(user => [user.id, true]))
+    new Map(following.map(user => [user.id, true]))
   );
   const [hoveredUserId, setHoveredUserId] = useState<string | null>(null);
   const [interactions, setInteractions] = useState<{
@@ -136,7 +139,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
       {/* Header */}
       <div className="space-y-1">
         <h2 className="text-lg font-bold uppercase">
-          {mockFollowing.length} USER{mockFollowing.length !== 1 ? 'S' : ''} FOLLOWED BY {userName}
+          {following.length} USER{following.length !== 1 ? 'S' : ''} FOLLOWED BY {userName}
         </h2>
         <p className="text-sm text-destructive italic">
           Users blocked by you and/or users that blocked you will not be displayed
@@ -145,7 +148,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
 
       {/* Following List */}
       <Card className="divide-y">
-        {mockFollowing.map((user, index) => {
+        {following.map((user, index) => {
           const isFollowing = followingStatus.get(user.id);
           const isHovered = hoveredUserId === user.id;
           
@@ -317,7 +320,7 @@ export const ProfileFollowingTab = ({ userName }: ProfileFollowingTabProps) => {
               </div>
 
               {/* Insert Premium Ad after every 4 users */}
-              {(index + 1) % 4 === 0 && index < mockFollowing.length - 1 && (
+              {(index + 1) % 4 === 0 && index < following.length - 1 && (
                 <div className="col-span-full p-4 bg-muted/30">
                   <PremiumAdRotation
                     slotId={`following-premium-${Math.floor((index + 1) / 4)}`}

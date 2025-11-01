@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { mockFollowers } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
+import { useFollowersList } from "@/hooks/useWindowData";
 import { Eye, UserPlus, UserCheck, Users, Heart, Eye as EyeIcon, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus } from "lucide-react";
 import { useState } from "react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
@@ -27,8 +28,10 @@ interface ProfileFollowersTabProps {
 
 export const ProfileFollowersTab = ({ userName }: ProfileFollowersTabProps) => {
   const { toast } = useToast();
+  const phpFollowers = useFollowersList();
+  const followers = phpFollowers || mockFollowers;
   const [followingBack, setFollowingBack] = useState<Map<string, boolean>>(
-    new Map(mockFollowers.map(follower => [follower.id, follower.isFollowingBack || false]))
+    new Map(followers.map(follower => [follower.id, follower.isFollowingBack || false]))
   );
   const [interactions, setInteractions] = useState<{
     [key: string]: { isLiked: boolean; isBlocked: boolean };
@@ -136,7 +139,7 @@ export const ProfileFollowersTab = ({ userName }: ProfileFollowersTabProps) => {
       {/* Header */}
       <div className="space-y-1">
         <h2 className="text-lg font-bold uppercase">
-          {mockFollowers.length} FOLLOWER{mockFollowers.length !== 1 ? 'S' : ''} OF {userName}
+          {followers.length} FOLLOWER{followers.length !== 1 ? 'S' : ''} OF {userName}
         </h2>
         <p className="text-sm text-destructive italic">
           Users blocked by you and/or users that blocked you will not be displayed
@@ -145,7 +148,7 @@ export const ProfileFollowersTab = ({ userName }: ProfileFollowersTabProps) => {
 
       {/* Followers List */}
       <Card className="divide-y">
-        {mockFollowers.map((follower, index) => {
+        {followers.map((follower, index) => {
           const isFollowing = followingBack.get(follower.id);
           
           return (
@@ -346,7 +349,7 @@ export const ProfileFollowersTab = ({ userName }: ProfileFollowersTabProps) => {
               </div>
 
               {/* Insert Premium Ad after every 4 followers */}
-              {(index + 1) % 4 === 0 && index < mockFollowers.length - 1 && (
+              {(index + 1) % 4 === 0 && index < followers.length - 1 && (
                 <div className="col-span-full p-4 bg-muted/30">
                   <PremiumAdRotation
                     slotId={`followers-premium-${Math.floor((index + 1) / 4)}`}

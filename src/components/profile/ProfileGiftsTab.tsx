@@ -13,6 +13,7 @@ import {
   mockSentGifts 
 } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
+import { useReceivedGifts, useSentGifts } from "@/hooks/useWindowData";
 import { Gift, Wallet, Heart, User, ExternalLink, ChevronLeft, ChevronDown, Send } from "lucide-react";
 import { useState } from "react";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
@@ -47,6 +48,10 @@ type GiftSelection = {
 export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const { toast } = useToast();
   const { showDialog, Dialog } = useServiceUnavailableDialog();
+  const phpReceivedGifts = useReceivedGifts();
+  const receivedGifts = phpReceivedGifts || mockReceivedGifts;
+  const phpSentGifts = useSentGifts();
+  const sentGifts = phpSentGifts || mockSentGifts;
   const [selectedGift, setSelectedGift] = useState<GiftSelection>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
@@ -436,9 +441,9 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                 <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">Received</span>
               </div>
-              {mockReceivedGifts.length > 0 && (
+              {receivedGifts.length > 0 && (
                 <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                  {mockReceivedGifts.length}
+                  {receivedGifts.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -447,9 +452,9 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
                 <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">Sent</span>
               </div>
-              {mockSentGifts.length > 0 && (
+              {sentGifts.length > 0 && (
                 <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                  {mockSentGifts.length}
+                  {sentGifts.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -457,7 +462,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
           {/* TAB 1: Received Gifts */}
           <TabsContent value="received" className="mt-0">
-            {mockReceivedGifts.length === 0 ? (
+            {receivedGifts.length === 0 ? (
               <div className="text-center py-12">
                 <Gift className="h-16 w-16 mx-auto mb-3 text-muted-foreground/30" />
                 <h4 className="text-base font-semibold mb-2">No Gifts Yet</h4>
@@ -467,7 +472,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {mockReceivedGifts.map((gift, index) => {
+                {receivedGifts.map((gift, index) => {
                   const category = getValueCategory(gift.mobiValue);
                   
                   return (
@@ -509,7 +514,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
 
           {/* TAB 2: Sent Gifts */}
           <TabsContent value="sent" className="mt-0">
-            {mockSentGifts.length === 0 ? (
+            {sentGifts.length === 0 ? (
               <div className="text-center py-12">
                 <Send className="h-16 w-16 mx-auto mb-3 text-muted-foreground/30" />
                 <h4 className="text-base font-semibold mb-2">No Gifts Sent</h4>
@@ -519,7 +524,7 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {mockSentGifts.map((gift, index) => {
+                {sentGifts.map((gift, index) => {
                   const category = getValueCategory(gift.mobiValue);
                   
                   return (

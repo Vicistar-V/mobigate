@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
+import { useAboutData } from "@/hooks/useWindowData";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -115,6 +116,9 @@ export const ProfileAboutTab = ({
     Dialog
   } = useServiceUnavailableDialog();
 
+  // Get PHP-injected data if available
+  const phpAbout = useAboutData();
+
   // Dialog states
   const [editLocationOpen, setEditLocationOpen] = useState(false);
   const [editEducationOpen, setEditEducationOpen] = useState(false);
@@ -211,14 +215,17 @@ export const ProfileAboutTab = ({
     position: "MD",
     period: "July 22, 2010 - December 10, 2024."
   }]));
-  const [basicInfo, setBasicInfo] = useState<BasicInfo>(() => loadFromStorage("profile_basicInfo", {
-    gender: "Female",
-    birthday: "1976-09-20",
-    languages: "English, French and Igbo",
-    birthdayPrivacy: "full",
-    privacy: "public"
-  }));
+  const [basicInfo, setBasicInfo] = useState<BasicInfo>(() => 
+    phpAbout?.basicInfo || loadFromStorage("profile_basicInfo", {
+      gender: "Female",
+      birthday: "1976-09-20",
+      languages: "English, French and Igbo",
+      birthdayPrivacy: "full",
+      privacy: "public"
+    })
+  );
   const [relationship, setRelationship] = useState<RelationshipInfo>(() => {
+    if (phpAbout?.relationship) return phpAbout.relationship;
     const stored = loadFromStorage<RelationshipInfo | string>("profile_relationship", "Married");
     if (typeof stored === 'string') {
       return {
@@ -242,12 +249,15 @@ export const ProfileAboutTab = ({
     name: "Michael Johnson Obi",
     relation: "Son"
   }]));
-  const [contact, setContact] = useState<ContactInfo>(() => loadFromStorage("profile_contact", {
-    phone1: "+234-806-408-9171",
-    phone2: "+234-803-477-1843",
-    email: "kemjikng@yahoo.com"
-  }));
+  const [contact, setContact] = useState<ContactInfo>(() => 
+    phpAbout?.contact || loadFromStorage("profile_contact", {
+      phone1: "+234-806-408-9171",
+      phone2: "+234-803-477-1843",
+      email: "kemjikng@yahoo.com"
+    })
+  );
   const [about, setAbout] = useState<AboutInfo>(() => {
+    if (phpAbout?.about) return phpAbout.about;
     const stored = loadFromStorage<AboutInfo | string>("profile_about", "I'm a Lawyer, Media Professional and Schola, with unique passion and experince in real estates, property development and management.\n\nI work with BeamColumn PCC Limited as Legal Adviser on Property Investments and Corporate Law; and also Senior Negotiator and Evaluator, etc.");
     if (typeof stored === 'string') {
       return {
