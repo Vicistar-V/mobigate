@@ -39,7 +39,7 @@ export const FriendExceptionDialog = ({
   selectedExceptions,
   onSave,
 }: FriendExceptionDialogProps) => {
-  const [exceptions, setExceptions] = useState<string[]>(selectedExceptions);
+  const [localExceptions, setLocalExceptions] = useState<string[]>(selectedExceptions);
   const [searchQuery, setSearchQuery] = useState("");
   const [customInput, setCustomInput] = useState("");
   const [suggestions, setSuggestions] = useState<Friend[]>([]);
