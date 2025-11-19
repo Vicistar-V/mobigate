@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Wallet, TrendingUp, TrendingDown, Calendar } from "lucide-react";
 import { RecentTransactionsDialog } from "./RecentTransactionsDialog";
+import { useWalletBalance, useWalletStats } from "@/hooks/useWindowData";
 
 interface AccountSummaryDialogProps {
   open: boolean;
@@ -19,14 +20,15 @@ export const AccountSummaryDialog = ({
   currencySymbol 
 }: AccountSummaryDialogProps) => {
   const [showTransactions, setShowTransactions] = useState(false);
+  const walletData = useWalletBalance();
+  const walletStats = useWalletStats();
   
-  // Mock data - in production, this would come from backend
-  const mobiBalance = 100000;
-  const creditBalance = 100000;
-  const mobiReceived = 150000;
-  const creditReceived = 150000;
-  const mobiSpent = 50000;
-  const creditSpent = 50000;
+  const mobiBalance = walletData.mobi;
+  const creditBalance = walletData.credit;
+  const mobiReceived = walletStats.mobiReceived;
+  const creditReceived = walletStats.creditReceived;
+  const mobiSpent = walletStats.mobiSpent;
+  const creditSpent = walletStats.creditSpent;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

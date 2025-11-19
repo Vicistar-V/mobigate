@@ -13,7 +13,7 @@ import {
   mockSentGifts 
 } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { useReceivedGifts, useSentGifts } from "@/hooks/useWindowData";
+import { useReceivedGifts, useSentGifts, useWalletBalance } from "@/hooks/useWindowData";
 import { Gift, Wallet, Heart, User, ExternalLink, ChevronLeft, ChevronDown, Send } from "lucide-react";
 import { useState } from "react";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
@@ -52,10 +52,11 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
   const receivedGifts = phpReceivedGifts || mockReceivedGifts;
   const phpSentGifts = useSentGifts();
   const sentGifts = phpSentGifts || mockSentGifts;
+  const walletData = useWalletBalance();
+  const walletBalance = walletData.mobi; // Gifts use Mobi wallet
   const [selectedGift, setSelectedGift] = useState<GiftSelection>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
-  const [walletBalance] = useState(50000);
   const [giftHistoryTab, setGiftHistoryTab] = useState<"received" | "sent">("received");
   
   // Collapsible states
@@ -122,10 +123,15 @@ export const ProfileGiftsTab = ({ userName }: ProfileGiftsTabProps) => {
         <h3 className="text-base font-bold uppercase mb-2">
           SEND {userName.toUpperCase()} GIFTS
         </h3>
-        <div className="flex items-center gap-2 text-sm">
-          <Wallet className="h-4 w-4 text-primary" />
-          <span className="text-muted-foreground">Wallet Balance:</span>
-          <span className="font-bold text-primary">{walletBalance.toLocaleString()} Mobi</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">Wallet Balance:</span>
+          </div>
+          <div className="text-right">
+            <span className="text-lg font-bold text-primary block">{walletBalance.toLocaleString()} Mobi</span>
+            <span className="text-sm text-muted-foreground">₦{walletData.credit.toLocaleString()} Credit</span>
+          </div>
         </div>
       </Card>
 

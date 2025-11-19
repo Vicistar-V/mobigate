@@ -45,7 +45,7 @@ import { DisplayModeSelector } from "@/components/advert/DisplayModeSelector";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
 import { getUserDiscountProfile } from "@/data/discountData";
-import { useCurrentUserId } from "@/hooks/useWindowData";
+import { useCurrentUserId, useWalletBalance } from "@/hooks/useWindowData";
 import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
 import { SlotPackManager } from "@/components/advert/SlotPackManager";
 import { SlotPackSummary } from "@/components/advert/SlotPackSummary";
@@ -179,8 +179,9 @@ export default function SubmitAdvert() {
   // Get user discount profile (mock data for now)
   const userProfile = getUserDiscountProfile(currentUserId);
   
-  // Wallet balance (hardcoded for now)
-  const walletBalance = 2000000;
+  // Wallet balance from PHP or fallback to mock
+  const walletData = useWalletBalance();
+  const walletBalance = walletData.credit; // Adverts use Credit wallet
   
   // Pack system state
   const [currentStep, setCurrentStep] = useState<"select-user-type" | "verify-accreditation" | "select-pack" | "fill-slot">("select-user-type");
@@ -913,8 +914,8 @@ export default function SubmitAdvert() {
     
     if (walletBalance < finalAmount) {
       toast({
-        title: "Insufficient Funds",
-        description: `You need ₦${finalAmount.toLocaleString()} but your wallet balance is ₦${walletBalance.toLocaleString()}. Please fund your wallet to continue.`,
+        title: "Insufficient Credit Balance",
+        description: `You need ₦${finalAmount.toLocaleString()} but your credit wallet has ₦${walletBalance.toLocaleString()}. Please fund your wallet to continue.`,
         variant: "destructive",
       });
       return false;

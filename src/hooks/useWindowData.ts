@@ -214,6 +214,73 @@ export function useCurrentUserId(): string {
   return userId;
 }
 
+export interface WalletData {
+  mobi: number;
+  credit: number;
+}
+
+export interface WalletStats {
+  mobiReceived: number;
+  creditReceived: number;
+  mobiSpent: number;
+  creditSpent: number;
+}
+
+/**
+ * Get user's wallet balance from PHP or fallback to mock
+ */
+export function useWalletBalance(): WalletData {
+  const [wallet, setWallet] = useState<WalletData>(() => {
+    // Priority 1: Check window.__USER_PROFILE__ for PHP wallet data
+    if (typeof window !== 'undefined' && window.__USER_PROFILE__?.walletBalance) {
+      return window.__USER_PROFILE__.walletBalance;
+    }
+    
+    // Priority 2: Mock data fallback (development)
+    return {
+      mobi: 50000,
+      credit: 50000,
+    };
+  });
+
+  useEffect(() => {
+    if (window.__USER_PROFILE__?.walletBalance && 
+        (wallet.mobi === 50000 || wallet.credit === 50000)) {
+      setWallet(window.__USER_PROFILE__.walletBalance);
+    }
+  }, [wallet.mobi, wallet.credit]);
+
+  return wallet;
+}
+
+/**
+ * Get user's wallet statistics from PHP or fallback to mock
+ */
+export function useWalletStats(): WalletStats {
+  const [stats, setStats] = useState<WalletStats>(() => {
+    // Priority 1: Check window.__USER_PROFILE__ for PHP wallet stats
+    if (typeof window !== 'undefined' && window.__USER_PROFILE__?.walletStats) {
+      return window.__USER_PROFILE__.walletStats;
+    }
+    
+    // Priority 2: Mock data fallback (development)
+    return {
+      mobiReceived: 150000,
+      creditReceived: 150000,
+      mobiSpent: 50000,
+      creditSpent: 50000,
+    };
+  });
+
+  useEffect(() => {
+    if (window.__USER_PROFILE__?.walletStats) {
+      setStats(window.__USER_PROFILE__.walletStats);
+    }
+  }, []);
+
+  return stats;
+}
+
 export function useConversations() {
   const [conversations, setConversations] = useState(() => {
     if (typeof window !== 'undefined' && window.__CONVERSATIONS__) {

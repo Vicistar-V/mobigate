@@ -51,6 +51,17 @@ interface UserProfile {
   totalCampaigns?: number;
   activeAdverts?: number;
   successfulCampaigns?: number;
+  // Wallet fields
+  walletBalance?: {
+    mobi: number;
+    credit: number;
+  };
+  walletStats?: {
+    mobiReceived: number;
+    creditReceived: number;
+    mobiSpent: number;
+    creditSpent: number;
+  };
 }
 ```
 
@@ -59,11 +70,56 @@ interface UserProfile {
 - `totalCampaigns`: Total number of advertising campaigns run by the user
 - `activeAdverts`: Number of currently active advertisements
 - `successfulCampaigns`: Number of successfully completed campaigns
+- `walletBalance`: Object containing Mobi and Credit wallet balances
+  - `mobi`: Mobi wallet balance (used for gifts, social interactions)
+  - `credit`: Credit wallet balance (used for adverts, subscriptions)
+- `walletStats`: Object containing wallet transaction statistics
+  - `mobiReceived`: Total Mobi received
+  - `creditReceived`: Total Credit received
+  - `mobiSpent`: Total Mobi spent
+  - `creditSpent`: Total Credit spent
+
+**Example:**
+```javascript
+window.__USER_PROFILE__ = {
+  id: "user-123",
+  username: "john_doe",
+  fullName: "John Doe",
+  avatar: "/path/to/avatar.jpg",
+  greeting: "Good Morning",
+  timestamp: "2025-01-15 09:30 AM",
+  email: "john@example.com",
+  stats: {
+    friends: 150,
+    likes: 1200,
+    followers: 500,
+    following: 300
+  },
+  accreditedTier: "gold",
+  totalCampaigns: 15,
+  activeAdverts: 3,
+  successfulCampaigns: 12,
+  walletBalance: {
+    mobi: 150000,
+    credit: 250000
+  },
+  walletStats: {
+    mobiReceived: 500000,
+    creditReceived: 750000,
+    mobiSpent: 350000,
+    creditSpent: 500000
+  }
+};
+```
 
 **Used in:**
 - `src/data/discountData.ts` - Fetches discount profile data
-- `src/pages/SubmitAdvert.tsx` - Applies tier-based discounts
+- `src/pages/SubmitAdvert.tsx` - Applies tier-based discounts and checks Credit wallet balance
 - `src/hooks/useComments.ts` - Gets author name and avatar for comments
+- `src/hooks/useWindowData.ts` - `useWalletBalance()` and `useWalletStats()` hooks
+- `src/components/chat/SendGiftDialog.tsx` - Displays Mobi wallet balance for gift sending
+- `src/components/profile/ProfileGiftsTab.tsx` - Displays Mobi wallet balance
+- `src/components/profile/AccountSummaryDialog.tsx` - Displays complete wallet info and stats
 
 ---
 
@@ -452,13 +508,13 @@ When implementing PHP integration:
 
 ## Migration Status
 
-### ✅ Completed Integrations (Phase 1-6)
+### ✅ Completed Integrations (Phase 1-7)
 
 1. **FriendExceptionDialog** - Uses `useFriendsList()` hook
 2. **advertSimulator.ts** - Checks `window.__USER_ADVERTS__` first
 3. **slotPackStorage.ts** - Accepts dynamic `userId` parameter
 4. **Profile.tsx** - Uses `useCurrentUserId()` for chat and posts
-5. **SubmitAdvert.tsx** - Uses `useCurrentUserId()` for pack creation and saving adverts
+5. **SubmitAdvert.tsx** - Uses `useCurrentUserId()` for pack creation, saving adverts, and `useWalletBalance()` for Credit wallet
 6. **useComments.ts** - Uses `useCurrentUserId()` and `useUserProfile()` for comment authors
 7. **ProfileContentsTab.tsx** - Uses `useUserPosts()` for user posts
 8. **Index.tsx** - Uses `useCurrentUserId()` for wall status transformations
@@ -468,6 +524,9 @@ When implementing PHP integration:
 12. **MyAdverts.tsx** - Uses `useCurrentUserId()` to load user-specific adverts
 13. **advertStorage.ts** - Removed hardcoded `MOCK_USER_ID`, requires `userId` parameter
 14. **discountData.ts** - Checks `window.__USER_PROFILE__` for discount profile data
+15. **SendGiftDialog.tsx** - Uses `useWalletBalance()` for Mobi wallet
+16. **ProfileGiftsTab.tsx** - Uses `useWalletBalance()` for Mobi wallet
+17. **AccountSummaryDialog.tsx** - Uses `useWalletBalance()` and `useWalletStats()` for all wallet data
 
 ### 📋 All Data Access Points
 
@@ -478,6 +537,7 @@ When implementing PHP integration:
 - Conversations: `useConversations()` hook
 - Adverts: `useUserAdverts()` hook + direct `window.__USER_ADVERTS__` access
 - Gifts: `useReceivedGifts()`, `useSentGifts()` hooks
+- Wallet: `useWalletBalance()`, `useWalletStats()` hooks
 
 ---
 
