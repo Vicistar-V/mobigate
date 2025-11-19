@@ -17,6 +17,17 @@ export interface UserProfile {
   totalCampaigns?: number;
   activeAdverts?: number;
   successfulCampaigns?: number;
+  // Wallet fields
+  walletBalance?: {
+    mobi: number;
+    credit: number;
+  };
+  walletStats?: {
+    mobiReceived: number;
+    creditReceived: number;
+    mobiSpent: number;
+    creditSpent: number;
+  };
 }
 
 export interface Friend {

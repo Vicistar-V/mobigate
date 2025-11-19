@@ -12,6 +12,7 @@ import {
   giftsVault,
 } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
+import { useWalletBalance } from "@/hooks/useWindowData";
 import { Gift, Wallet, Heart, ChevronLeft, ChevronDown, Coins, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -45,10 +46,11 @@ export const SendGiftDialog = ({
   onSendGift,
 }: SendGiftDialogProps) => {
   const { toast } = useToast();
+  const walletData = useWalletBalance();
+  const walletBalance = walletData.mobi; // Gifts use Mobi wallet
   const [selectedGift, setSelectedGift] = useState<GiftSelection>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
-  const [walletBalance] = useState(50000);
   
   // Collapsible states
   const [specialGiftOpen, setSpecialGiftOpen] = useState(true);
@@ -113,10 +115,15 @@ export const SendGiftDialog = ({
         <div className="space-y-4">
           {/* Wallet Balance */}
           <Card className="p-3 bg-gradient-to-r from-primary/5 to-primary/10">
-            <div className="flex items-center gap-2 text-sm">
-              <Wallet className="h-4 w-4 text-primary" />
-              <span className="text-muted-foreground">Wallet Balance:</span>
-              <span className="font-bold text-primary">{walletBalance.toLocaleString()} Mobi</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Wallet Balance:</span>
+              </div>
+              <div className="text-right">
+                <span className="font-bold text-primary block">{walletBalance.toLocaleString()} Mobi</span>
+                <span className="text-sm text-muted-foreground">₦{walletData.credit.toLocaleString()} Credit</span>
+              </div>
             </div>
           </Card>
 
