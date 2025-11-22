@@ -1,3 +1,4 @@
+// User profile data structure for PHP integration
 export interface UserProfile {
   id: string;
   username: string;
@@ -17,7 +18,7 @@ export interface UserProfile {
   totalCampaigns?: number;
   activeAdverts?: number;
   successfulCampaigns?: number;
-  // Wallet fields
+  // Wallet balance and statistics
   walletBalance?: {
     mobi: number;
     credit: number;
