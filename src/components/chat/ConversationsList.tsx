@@ -62,7 +62,7 @@ export const ConversationsList = ({
         </Button>
       </div>
 
-      {/* Friends List Link */}
+      {/* Chat Friends Link */}
       <button
         onClick={() => {
           // Close the sheet first
@@ -89,7 +89,7 @@ export const ConversationsList = ({
       >
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">Friends List</span>
+          <span className="text-sm font-medium">Chat Friends</span>
         </div>
         <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">
           View all →
