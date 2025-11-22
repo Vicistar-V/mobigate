@@ -6,9 +6,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Conversation } from "@/types/chat";
 import { formatMessageTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft, Settings, Users } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import mobichatLogo from "@/assets/mobichat-logo.svg";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 
 interface ConversationsListProps {
   conversations: Conversation[];
@@ -23,6 +24,8 @@ export const ConversationsList = ({
   onSelectConversation,
   onBack,
 }: ConversationsListProps) => {
+  const currentUserId = useCurrentUserId();
+  
   return (
     <div className="flex flex-col h-full border-r border-border">
       <div className="p-4 border-b-[6px] border-[hsl(252,73%,26%)] flex items-center justify-between gap-2 bg-[#f0e699]">
@@ -56,6 +59,20 @@ export const ConversationsList = ({
           <Settings className="h-5 w-5" />
         </Button>
       </div>
+
+      {/* Friends List Link */}
+      <Link 
+        to={`/profile/${currentUserId}#friends`}
+        className="px-4 py-2 border-b border-border bg-muted/30 hover:bg-muted/50 transition-colors flex items-center justify-between group"
+      >
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">Friends List</span>
+        </div>
+        <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">
+          View all →
+        </span>
+      </Link>
 
       <ScrollArea className="flex-1">
         <div className="space-y-1 p-2">
