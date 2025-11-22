@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
@@ -61,13 +61,44 @@ const Profile = () => {
   
   // Get current user ID from PHP or fallback
   const currentUserId = useCurrentUserId();
+  
+  // Ref for tabs section to enable auto-scroll
+  const tabsSectionRef = useRef<HTMLDivElement>(null);
 
-  // Handle hash-based tab navigation
+  // Handle hash-based tab navigation with auto-scroll
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
-      setActiveTab(hash);
-    }
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        // Change the active tab
+        setActiveTab(hash);
+        
+        // Scroll to tabs section after a brief delay to ensure content is rendered
+        setTimeout(() => {
+          if (tabsSectionRef.current) {
+            const headerHeight = 80; // Approximate header height
+            const elementPosition = tabsSectionRef.current.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+            
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
+    };
+
+    // Handle initial hash on mount
+    handleHashChange();
+
+    // Listen for hash changes (e.g., from navigation)
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
   
   // Load profile image and history from localStorage or PHP
@@ -704,7 +735,7 @@ const Profile = () => {
         </Card>
 
         {/* Tabs Section */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs ref={tabsSectionRef} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <ScrollArea className="w-full whitespace-nowrap mb-6">
             <TabsList className="inline-flex w-auto">
               <TabsTrigger value="status">Status</TabsTrigger>
