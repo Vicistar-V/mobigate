@@ -1,12 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Conversation } from "@/types/chat";
 import { formatMessageTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Settings, Users } from "lucide-react";
+import { ArrowLeft, Settings, Users, Search, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import mobichatLogo from "@/assets/mobichat-logo.svg";
 import { useCurrentUserId } from "@/hooks/useWindowData";
@@ -27,6 +29,13 @@ export const ConversationsList = ({
   onCloseSheet,
 }: ConversationsListProps) => {
   const currentUserId = useCurrentUserId();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter conversations based on search query
+  const filteredConversations = conversations.filter((conversation) =>
+    conversation.user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   
   return (
     <div className="flex flex-col h-full border-r border-border">
@@ -62,6 +71,28 @@ export const ConversationsList = ({
         </Button>
       </div>
 
+      {/* Search Bar */}
+      <div className="px-4 py-3 border-b border-border bg-background">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search friend by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 pr-9 h-10"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Chat Friends Link */}
       <button
         onClick={() => {
@@ -88,8 +119,8 @@ export const ConversationsList = ({
                 window.dispatchEvent(new Event('forceScrollToTabs'));
               }
             } else {
-              // Not on profile page, navigate to current user's profile with hash
-              window.location.href = `/profile/${currentUserId}#friends`;
+              // Not on profile page, navigate using React Router (NO RELOAD!)
+              navigate(`/profile/${currentUserId}#friends`);
             }
           }, 100);
         }}
@@ -106,7 +137,7 @@ export const ConversationsList = ({
 
       <ScrollArea className="flex-1">
         <div className="space-y-1 p-2">
-          {conversations.map((conversation) => (
+          {filteredConversations.map((conversation) => (
             <button
               key={conversation.id}
               onClick={() => onSelectConversation(conversation.id)}
@@ -154,6 +185,18 @@ export const ConversationsList = ({
               </div>
             </button>
           ))}
+          
+          {filteredConversations.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <Search className="h-12 w-12 text-muted-foreground/50 mb-3" />
+              <p className="text-sm font-medium text-muted-foreground">
+                No friends found
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Try a different search term
+              </p>
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>
