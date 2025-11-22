@@ -11,7 +11,10 @@ import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
+import { ChatWithFriendsDialog } from "@/components/chat/ChatWithFriendsDialog";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { feedPosts, Post, wallStatusPosts } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +38,7 @@ const Index = () => {
   const [galleryItems, setGalleryItems] = useState<MediaItem[]>([]);
   const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
   const [visiblePostCount, setVisiblePostCount] = useState(20);
+  const [chatWithFriendsOpen, setChatWithFriendsOpen] = useState(false);
 
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
@@ -335,6 +339,21 @@ const Index = () => {
           {/* Left Sidebar - Greeting Section */}
           <aside className="lg:col-span-1 space-y-6 min-w-0">
             <GreetingSection />
+            
+            {/* Chat with Friends Button */}
+            <Card className="p-4 hover:shadow-md transition-shadow bg-gradient-to-r from-primary/5 to-primary/10">
+              <Button
+                onClick={() => setChatWithFriendsOpen(true)}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 sm:py-6 text-base sm:text-lg shadow-md hover:shadow-lg transition-all group"
+                size="lg"
+              >
+                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
+                <span>Chat with Friends</span>
+              </Button>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                Start a conversation with your friends
+              </p>
+            </Card>
           </aside>
 
           {/* Main Feed */}
@@ -423,6 +442,12 @@ const Index = () => {
       </main>
 
       <Footer />
+
+      {/* Chat with Friends Dialog */}
+      <ChatWithFriendsDialog
+        open={chatWithFriendsOpen}
+        onOpenChange={setChatWithFriendsOpen}
+      />
 
       <MediaGalleryViewer
         open={mediaGalleryOpen}

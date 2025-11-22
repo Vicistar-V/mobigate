@@ -21,7 +21,15 @@ export const GreetingSection = () => {
     Dialog
   } = useServiceUnavailableDialog();
   const restrictedServices = ['/mobi-shop', '/mobi-circle', '/biz-catalogue', '/community'];
-  const handleLinkClick = (e: React.MouseEvent, href: string) => {
+  const handleLinkClick = (e: React.MouseEvent, href: string, action?: string) => {
+    // Handle MobiChat action - trigger messages sheet
+    if (action === "openChat") {
+      e.preventDefault();
+      const messagesButton = document.querySelector('[data-messages-trigger]') as HTMLElement;
+      messagesButton?.click();
+      return;
+    }
+    
     if (restrictedServices.includes(href)) {
       e.preventDefault();
       showDialog();
@@ -40,6 +48,10 @@ export const GreetingSection = () => {
   }, {
     label: "Gifts",
     href: `/profile/${currentUserId}#gifts`
+  }, {
+    label: "MobiChat",
+    href: "#",
+    action: "openChat"
   }, {
     label: "Mobi Quiz Game",
     href: "/mobi-quiz-game"
@@ -178,7 +190,7 @@ export const GreetingSection = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-card z-50 w-48">
               {moreLinks.map(link => <DropdownMenuItem key={link.label} asChild className="text-base font-medium text-primary">
-                  <Link to={link.href} className="cursor-pointer" onClick={e => handleLinkClick(e, link.href)}>
+                  <Link to={link.href} className="cursor-pointer" onClick={e => handleLinkClick(e, link.href, link.action)}>
                     {link.label}
                   </Link>
                 </DropdownMenuItem>)}
