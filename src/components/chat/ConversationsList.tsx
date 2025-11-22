@@ -16,6 +16,7 @@ interface ConversationsListProps {
   activeConversationId: string | null;
   onSelectConversation: (conversationId: string) => void;
   onBack?: () => void;
+  onCloseSheet?: () => void;
 }
 
 export const ConversationsList = ({
@@ -23,6 +24,7 @@ export const ConversationsList = ({
   activeConversationId,
   onSelectConversation,
   onBack,
+  onCloseSheet,
 }: ConversationsListProps) => {
   const currentUserId = useCurrentUserId();
   
@@ -61,9 +63,18 @@ export const ConversationsList = ({
       </div>
 
       {/* Friends List Link */}
-      <Link 
-        to={`/profile/${currentUserId}#friends`}
-        className="px-4 py-2 border-b border-border bg-muted/30 hover:bg-muted/50 transition-colors flex items-center justify-between group"
+      <button
+        onClick={() => {
+          // Close the sheet first
+          if (onCloseSheet) {
+            onCloseSheet();
+          }
+          // Then navigate with a slight delay to ensure smooth transition
+          setTimeout(() => {
+            window.location.hash = 'friends';
+          }, 100);
+        }}
+        className="px-4 py-2 border-b border-border bg-muted/30 hover:bg-muted/50 transition-colors flex items-center justify-between group w-full text-left"
       >
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary" />
@@ -72,7 +83,7 @@ export const ConversationsList = ({
         <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">
           View all →
         </span>
-      </Link>
+      </button>
 
       <ScrollArea className="flex-1">
         <div className="space-y-1 p-2">

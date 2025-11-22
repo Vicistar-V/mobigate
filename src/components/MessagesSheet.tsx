@@ -115,6 +115,7 @@ export const MessagesSheet = () => {
               activeConversationId={activeConversationId}
               onSelectConversation={selectConversation}
               onBack={() => setIsOpen(false)}
+              onCloseSheet={() => setIsOpen(false)}
             />
           </div>
 
