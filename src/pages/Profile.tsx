@@ -69,7 +69,8 @@ const Profile = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (hash) {
+      if (hash && hash !== activeTab) {
+        // Only update if different to prevent circular updates
         // Change the active tab
         setActiveTab(hash);
         
@@ -86,6 +87,9 @@ const Profile = () => {
             });
           }
         }, 100);
+      } else if (!hash) {
+        // If no hash, default to 'status' tab
+        setActiveTab('status');
       }
     };
 
@@ -755,7 +759,16 @@ const Profile = () => {
         </Card>
 
         {/* Tabs Section */}
-        <Tabs ref={tabsSectionRef} value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs 
+          ref={tabsSectionRef} 
+          value={activeTab} 
+          onValueChange={(newTab) => {
+            setActiveTab(newTab);
+            // Update URL hash when tab changes
+            window.location.hash = newTab;
+          }} 
+          className="w-full"
+        >
           <ScrollArea className="w-full whitespace-nowrap mb-6">
             <TabsList className="inline-flex w-auto">
               <TabsTrigger value="status">Status</TabsTrigger>
