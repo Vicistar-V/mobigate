@@ -70,18 +70,26 @@ export const ConversationsList = ({
             onCloseSheet();
           }
           
-          // Get current hash
-          const currentHash = window.location.hash.replace('#', '');
-          
           // Navigate with a delay
           setTimeout(() => {
-            // Set the hash (this will work if user is on different tab)
-            window.location.hash = 'friends';
+            // Get the current path to determine where we are
+            const currentPath = window.location.pathname;
+            const currentHash = window.location.hash.replace('#', '');
             
-            // If we were already on friends tab, hash won't change
-            // So dispatch a custom event to force the scroll
-            if (currentHash === 'friends') {
-              window.dispatchEvent(new Event('forceScrollToTabs'));
+            // Check if we're already on a profile page
+            const isOnProfilePage = currentPath.startsWith('/profile/');
+            
+            if (isOnProfilePage) {
+              // Already on profile, just change hash
+              window.location.hash = 'friends';
+              
+              // If we were already on friends tab, force scroll
+              if (currentHash === 'friends') {
+                window.dispatchEvent(new Event('forceScrollToTabs'));
+              }
+            } else {
+              // Not on profile page, navigate to current user's profile with hash
+              window.location.href = `/profile/${currentUserId}#friends`;
             }
           }, 100);
         }}
