@@ -89,15 +89,35 @@ const Profile = () => {
       }
     };
 
+    // Custom event handler for forced scrolling (when hash doesn't change)
+    const handleForceScroll = () => {
+      setTimeout(() => {
+        if (tabsSectionRef.current) {
+          const headerHeight = 80;
+          const elementPosition = tabsSectionRef.current.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 150); // Slightly longer delay to ensure sheet is closed
+    };
+
     // Handle initial hash on mount
     handleHashChange();
 
     // Listen for hash changes (e.g., from navigation)
     window.addEventListener('hashchange', handleHashChange);
     
-    // Cleanup listener on unmount
+    // Listen for forced scroll events
+    window.addEventListener('forceScrollToTabs', handleForceScroll as EventListener);
+    
+    // Cleanup listeners on unmount
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('forceScrollToTabs', handleForceScroll as EventListener);
     };
   }, []);
   
