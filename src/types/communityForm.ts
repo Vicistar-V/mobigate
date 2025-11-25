@@ -65,6 +65,10 @@ export interface MeetingSchedule {
 }
 
 export interface CommunityFormData {
+  // Community Identity
+  name: string;
+  shortDescription: string;
+  
   // Classification & Type
   classification: CommunityClassification | "";
   category: CommunityCategory | "";
@@ -101,6 +105,8 @@ export interface CommunityFormData {
 }
 
 export const defaultCommunityFormData: CommunityFormData = {
+  name: "",
+  shortDescription: "",
   classification: "",
   category: "",
   interest: "public",

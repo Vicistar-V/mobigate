@@ -77,6 +77,9 @@ export function useCommunityForm() {
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof CommunityFormData, string>> = {};
 
+    if (!formData.name.trim()) {
+      newErrors.name = "Community name is required";
+    }
     if (!formData.classification) {
       newErrors.classification = "Classification is required";
     }
