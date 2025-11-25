@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CommunityFormData, OfficialPosition, PositionLevel } from "@/types/communityForm";
-import { Plus, Trash2 } from "lucide-react";
+import { mockAdminOptions } from "@/data/communityFormOptions";
+import { Plus, Trash2, ExternalLink } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "@/hooks/use-toast";
 
 interface OfficesPositionsSectionProps {
   formData: CommunityFormData;
@@ -32,7 +34,9 @@ export function OfficesPositionsSection({
     const newPosition: OfficialPosition = {
       id: `pos-${Date.now()}-${Math.random()}`,
       title: newPositionTitle.trim(),
-      level: newPositionLevel
+      level: newPositionLevel,
+      adminId: undefined,
+      adminName: undefined
     };
 
     addPosition(newPosition);
@@ -40,11 +44,31 @@ export function OfficesPositionsSection({
     setNewPositionLevel("topmost");
   };
 
+  const handleAdminChange = (positionId: string, adminId: string) => {
+    const admin = mockAdminOptions.find(a => a.id === adminId);
+    updatePosition(positionId, {
+      adminId: adminId,
+      adminName: admin?.name
+    });
+  };
+
+  const handleViewFullList = () => {
+    toast({
+      title: "Full Positions List",
+      description: `Total positions: ${formData.positions.length}`,
+    });
+  };
+
   // Get available office titles based on what user selected
   const getAvailablePositions = () => {
     const topmost = formData.topmostOffices;
     const deputies = formData.deputyOffices;
     return [...topmost, ...deputies];
+  };
+
+  // Format serial number with leading zero
+  const formatSerialNumber = (index: number) => {
+    return String(index + 1).padStart(2, '0');
   };
 
   return (
@@ -110,7 +134,7 @@ export function OfficesPositionsSection({
             className="w-full"
             size="sm"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 mr-2" />
             Add Position
           </Button>
         </div>
@@ -133,45 +157,73 @@ export function OfficesPositionsSection({
             </p>
           </div>
         ) : (
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">S/N</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Level</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {formData.positions.map((position, index) => (
-                  <TableRow key={position.id}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell>{position.title}</TableCell>
-                    <TableCell>
-                      <span className={
-                        position.level === "topmost" 
-                          ? "text-primary font-medium" 
-                          : "text-muted-foreground"
-                      }>
-                        {position.level === "topmost" ? "Topmost" : "Deputy"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removePosition(position.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
+          <>
+            <div className="border rounded-md overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-primary hover:bg-primary">
+                    <TableHead className="w-16 text-primary-foreground font-semibold">S/N</TableHead>
+                    <TableHead className="text-primary-foreground font-semibold">POSITION</TableHead>
+                    <TableHead className="text-primary-foreground font-semibold">ADMINS</TableHead>
+                    <TableHead className="w-12 text-primary-foreground"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {formData.positions.map((position, index) => (
+                    <TableRow key={position.id}>
+                      <TableCell className="font-medium text-muted-foreground">
+                        {formatSerialNumber(index)}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {position.title}
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={position.adminId || ""}
+                          onValueChange={(value) => handleAdminChange(position.id, value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select admin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockAdminOptions.map((admin) => (
+                              <SelectItem key={admin.id} value={admin.id}>
+                                {admin.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removePosition(position.id)}
+                          className="h-8 w-8"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="flex justify-end pt-2">
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={handleViewFullList}
+                className="text-primary hover:text-primary/80 gap-1"
+              >
+                View Full list
+                <ExternalLink className="h-3 w-3" />
+              </Button>
+            </div>
+          </>
         )}
       </div>
     </div>
