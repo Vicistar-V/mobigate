@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ArrowLeft, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useCommunityForm } from "@/hooks/useCommunityForm";
 import { ClassificationSection } from "@/components/community/form/ClassificationSection";
 import { MembershipSection } from "@/components/community/form/MembershipSection";
@@ -64,6 +67,53 @@ export default function CreateCommunity() {
 
           {/* Form */}
           <form onSubmit={onSubmit}>
+            {/* Community Identity Section */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Community Identity</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">
+                    Community Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="Enter community name..."
+                    value={formData.name}
+                    onChange={(e) => updateField("name", e.target.value)}
+                    className={errors.name ? "border-destructive" : ""}
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-destructive">{errors.name}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="shortDescription">
+                    Short Description
+                    <span className="text-muted-foreground text-xs ml-2">(Optional)</span>
+                  </Label>
+                  <Textarea
+                    id="shortDescription"
+                    placeholder="Brief description of your community..."
+                    value={formData.shortDescription}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 200) {
+                        updateField("shortDescription", e.target.value);
+                      }
+                    }}
+                    maxLength={200}
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground text-right">
+                    {formData.shortDescription.length}/200 characters
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Detailed Information */}
           <Card>
             <CardHeader>
               <CardTitle>Community Information</CardTitle>
