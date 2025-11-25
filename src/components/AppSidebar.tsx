@@ -178,7 +178,7 @@ const menuItems: MenuItem[] = [{
 }, {
   title: "My Social Communities",
   icon: Building2,
-  url: "#"
+  url: "/community"
 }, {
   title: "My Circles",
   icon: Users,
