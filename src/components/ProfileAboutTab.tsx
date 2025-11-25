@@ -156,10 +156,8 @@ export const ProfileAboutTab = ({
     navigate(`/profile/${userId}`);
   };
   const handleCommunityClick = (communityId: string) => {
-    toast({
-      title: "Community Profile",
-      description: "Community profile pages are coming soon!"
-    });
+    // Navigate to community page (detail pages coming later)
+    navigate('/community');
   };
 
   // Load data from localStorage on mount

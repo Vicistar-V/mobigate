@@ -20,7 +20,7 @@ export const GreetingSection = () => {
     showDialog,
     Dialog
   } = useServiceUnavailableDialog();
-  const restrictedServices = ['/mobi-shop', '/mobi-circle', '/biz-catalogue', '/community'];
+  const restrictedServices = ['/mobi-shop', '/mobi-circle', '/biz-catalogue'];
   const handleLinkClick = (e: React.MouseEvent, href: string, action?: string) => {
     // Handle MobiChat action - trigger messages sheet
     if (action === "openChat") {
