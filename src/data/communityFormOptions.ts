@@ -115,3 +115,15 @@ export const dayOfWeekOptions: { value: DayOfWeek; label: string }[] = [
   { value: "saturday", label: "Saturday" },
   { value: "sunday", label: "Sunday" }
 ];
+
+// Mock admin options for UI demonstration
+export const mockAdminOptions = [
+  { id: "admin-1", name: "John Doe" },
+  { id: "admin-2", name: "Jane Smith" },
+  { id: "admin-3", name: "Michael Johnson" },
+  { id: "admin-4", name: "Sarah Williams" },
+  { id: "admin-5", name: "David Brown" },
+  { id: "admin-6", name: "Emily Davis" },
+  { id: "admin-7", name: "Robert Miller" },
+  { id: "admin-8", name: "Lisa Anderson" }
+];
