@@ -1,13 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export function CreateCommunityCard() {
+  const navigate = useNavigate();
+
   const handleClick = () => {
-    toast({
-      title: "Coming Soon!",
-      description: "Community creation feature will be available soon.",
-    });
+    navigate("/create-community");
   };
 
   return (

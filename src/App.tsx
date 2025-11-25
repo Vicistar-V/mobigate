@@ -12,6 +12,7 @@ import SubmitAdvert from "./pages/SubmitAdvert";
 import MyAdverts from "./pages/MyAdverts";
 import AdminManageAdverts from "./pages/AdminManageAdverts";
 import Community from "./pages/Community";
+import CreateCommunity from "./pages/CreateCommunity";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -49,6 +50,7 @@ const App = () => {
                   <Route path="/mobi-circle" element={<ServiceUnavailable />} />
                   <Route path="/biz-catalogue" element={<ServiceUnavailable />} />
                   <Route path="/community" element={<Community />} />
+                  <Route path="/create-community" element={<CreateCommunity />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
