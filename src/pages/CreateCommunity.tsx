@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -38,27 +40,30 @@ export default function CreateCommunity() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-4xl mx-auto py-6 px-4">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/community")}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Create New Community</h1>
-            <p className="text-sm text-muted-foreground">
-              Fill in the details to create your community
-            </p>
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+      
+      <main className="flex-1 container mx-auto px-4 py-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Page Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/community")}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Create New Community</h1>
+              <p className="text-sm text-muted-foreground">
+                Fill in the details to create your community
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Form */}
-        <form onSubmit={onSubmit}>
+          {/* Form */}
+          <form onSubmit={onSubmit}>
           <Card>
             <CardHeader>
               <CardTitle>Community Information</CardTitle>
@@ -183,7 +188,10 @@ export default function CreateCommunity() {
             </Button>
           </div>
         </form>
-      </div>
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 }
