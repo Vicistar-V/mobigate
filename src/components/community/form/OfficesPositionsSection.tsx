@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CommunityFormData, OfficialPosition, PositionLevel } from "@/types/communityForm";
-import { mockAdminOptions } from "@/data/communityFormOptions";
 import { Plus, Trash2, ExternalLink } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
@@ -31,12 +30,14 @@ export function OfficesPositionsSection({
   const handleAddPosition = () => {
     if (!newPositionTitle.trim()) return;
 
+    const nextSlotNumber = formData.positions.length + 1;
+
     const newPosition: OfficialPosition = {
       id: `pos-${Date.now()}-${Math.random()}`,
       title: newPositionTitle.trim(),
       level: newPositionLevel,
-      adminId: undefined,
-      adminName: undefined
+      adminId: `admin-${nextSlotNumber}`,
+      adminName: `Admin-${nextSlotNumber}`, // Auto-assigned!
     };
 
     addPosition(newPosition);
@@ -44,12 +45,23 @@ export function OfficesPositionsSection({
     setNewPositionLevel("topmost");
   };
 
-  const handleAdminChange = (positionId: string, adminId: string) => {
-    const admin = mockAdminOptions.find(a => a.id === adminId);
-    updatePosition(positionId, {
-      adminId: adminId,
-      adminName: admin?.name
-    });
+  const handleToggleAdmin = (positionId: string, currentAdminName: string | undefined) => {
+    const position = formData.positions.find(p => p.id === positionId);
+    if (!position) return;
+
+    // Get the position's slot number (1-indexed)
+    const slotNumber = formData.positions.indexOf(position) + 1;
+
+    if (currentAdminName) {
+      // Toggle to unassigned
+      updatePosition(positionId, { adminId: undefined, adminName: undefined });
+    } else {
+      // Toggle back to assigned
+      updatePosition(positionId, { 
+        adminId: `admin-${slotNumber}`,
+        adminName: `Admin-${slotNumber}`
+      });
+    }
   };
 
   const handleViewFullList = () => {
@@ -177,22 +189,20 @@ export function OfficesPositionsSection({
                       <TableCell className="font-medium">
                         {position.title}
                       </TableCell>
-                      <TableCell>
-                        <Select
-                          value={position.adminId || ""}
-                          onValueChange={(value) => handleAdminChange(position.id, value)}
+                      <TableCell className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleAdmin(position.id, position.adminName)}
+                          className="w-full text-center hover:opacity-70 transition-opacity cursor-pointer py-1"
                         >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select admin" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {mockAdminOptions.map((admin) => (
-                              <SelectItem key={admin.id} value={admin.id}>
-                                {admin.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          {position.adminName ? (
+                            <span className="text-yellow-600 dark:text-yellow-500 font-medium">
+                              {position.adminName}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">- - - - - -</span>
+                          )}
+                        </button>
                       </TableCell>
                       <TableCell>
                         <Button
