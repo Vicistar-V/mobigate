@@ -1,17 +1,21 @@
 import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, ChevronRight } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { MoreVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
@@ -25,196 +29,322 @@ export function CommunityMainMenu({
   isMember = false,
 }: CommunityMainMenuProps) {
   const { toast } = useToast();
+  const [open, setOpen] = useState(false);
 
   const handleMenuClick = (action: string) => {
     toast({
       title: action,
       description: "This feature is coming soon!",
     });
+    setOpen(false);
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <MoreVertical className="h-4 w-4" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 max-h-[80vh] overflow-y-auto">
-        {/* Guests Section */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>Guests</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => handleMenuClick("E-Mail Login")}>
-              E-Mail Login [OTP]
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+      </SheetTrigger>
+      <SheetContent side="bottom" className="h-[85vh] p-0">
+        <SheetHeader className="px-6 py-4 border-b">
+          <SheetTitle>Community Menu</SheetTitle>
+        </SheetHeader>
+        
+        <div className="overflow-y-auto h-[calc(85vh-73px)]">
+          <Accordion type="multiple" className="w-full px-4">
+            {/* Guests Section */}
+            <AccordionItem value="guests">
+              <AccordionTrigger className="text-base">Guests</AccordionTrigger>
+              <AccordionContent>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("E-Mail Login")}
+                >
+                  E-Mail Login [OTP]
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
-        <DropdownMenuSeparator />
-
-        {/* Members Section */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>Members</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => handleMenuClick("Login")}>Login</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Logout")}>Logout</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Exit Community")}>
-              Exit Community
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Exit Request")}>
-              Exit Request
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        {/* Admins Section - Only show if user is admin */}
-        {(isAdmin || isOwner) && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <span>Admins</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem onClick={() => handleMenuClick("Admin Login")}>
+            {/* Members Section */}
+            <AccordionItem value="members">
+              <AccordionTrigger className="text-base">Members</AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Login")}
+                >
                   Login
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleMenuClick("Admin Logout")}>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Logout")}
+                >
                   Logout
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          </>
-        )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Exit Community")}
+                >
+                  Exit Community
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Exit Request")}
+                >
+                  Exit Request
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
-        <DropdownMenuSeparator />
+            {/* Admins Section - Only show if user is admin */}
+            {(isAdmin || isOwner) && (
+              <AccordionItem value="admins">
+                <AccordionTrigger className="text-base">Admins</AccordionTrigger>
+                <AccordionContent className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-4"
+                    onClick={() => handleMenuClick("Admin Login")}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-4"
+                    onClick={() => handleMenuClick("Admin Logout")}
+                  >
+                    Logout
+                  </Button>
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
-        {/* Administration/Leadership */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>Administration/Leadership</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => handleMenuClick("Management Committee")}>
-              Management Committee
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Office Tenure")}>
-              Office Tenure
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Staff")}>Staff</DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+            {/* Administration/Leadership */}
+            <AccordionItem value="administration">
+              <AccordionTrigger className="text-base">
+                Administration/Leadership
+              </AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Management Committee")}
+                >
+                  Management Committee
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Office Tenure")}
+                >
+                  Office Tenure
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Staff")}
+                >
+                  Staff
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
-        <DropdownMenuSeparator />
+            {/* FundRaiser */}
+            <AccordionItem value="fundraiser">
+              <AccordionTrigger className="text-base">FundRaiser</AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Raise Campaign")}
+                >
+                  Raise Campaign
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("View Campaigns")}
+                >
+                  View Campaigns
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("View Donors")}
+                >
+                  View Donors
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Celebrity Donors")}
+                >
+                  Celebrity Donors
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
-        {/* FundRaiser */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>FundRaiser</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => handleMenuClick("Raise Campaign")}>
-              Raise Campaign
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("View Campaigns")}>
-              View Campaigns
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("View Donors")}>
-              View Donors
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Celebrity Donors")}>
-              Celebrity Donors
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+            {/* Election/Voting */}
+            <AccordionItem value="election">
+              <AccordionTrigger className="text-base">
+                Election/Voting
+              </AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Launch Election")}
+                >
+                  Launch
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("View Results")}
+                >
+                  Results
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("View Winners")}
+                >
+                  Winners
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("View Opinions")}
+                >
+                  Opinions
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
-        <DropdownMenuSeparator />
+          <Separator className="my-2" />
 
-        {/* Election/Voting */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>Election/Voting</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => handleMenuClick("Launch Election")}>
-              Launch
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("View Results")}>
-              Results
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("View Winners")}>
-              Winners
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("View Opinions")}>
-              Opinions
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+          {/* Single Items */}
+          <div className="px-4 space-y-1">
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("Meetings/Activities")}
+            >
+              Meetings/Activities
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("Roll-Calls")}
+            >
+              Roll-Calls
+            </Button>
+          </div>
 
-        <DropdownMenuSeparator />
+          <Separator className="my-2" />
 
-        {/* Other Menu Items */}
-        <DropdownMenuItem onClick={() => handleMenuClick("Meetings/Activities")}>
-          Meetings/Activities
-        </DropdownMenuItem>
+          <Accordion type="multiple" className="w-full px-4">
+            {/* Finance */}
+            <AccordionItem value="finance">
+              <AccordionTrigger className="text-base">Finance</AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("CAM")}
+                >
+                  CAM
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Overview")}
+                >
+                  Overview
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Obligations")}
+                >
+                  Obligations
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Status Checker")}
+                >
+                  Status Checker
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Audit")}
+                >
+                  Audit
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
-        <DropdownMenuItem onClick={() => handleMenuClick("Roll-Calls")}>
-          Roll-Calls
-        </DropdownMenuItem>
+            {/* Community Resources */}
+            <AccordionItem value="resources">
+              <AccordionTrigger className="text-base">
+                Community Resources
+              </AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("ID Card")}
+                >
+                  ID Card
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Letter")}
+                >
+                  Letter
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Constitution")}
+                >
+                  Constitution
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Journals")}
+                >
+                  Journals
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
-        <DropdownMenuSeparator />
+          <Separator className="my-2" />
 
-        {/* Finance */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>Finance</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => handleMenuClick("CAM")}>CAM</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Overview")}>
-              Overview
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Obligations")}>
-              Obligations
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Status Checker")}>
-              Status Checker
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Audit")}>Audit</DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuSeparator />
-
-        {/* Community Resources */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>Community Resources</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => handleMenuClick("ID Card")}>ID Card</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Letter")}>Letter</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Constitution")}>
-              Constitution
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuClick("Journals")}>
-              Journals
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuSeparator />
-
-        {/* Inside Community */}
-        <DropdownMenuItem onClick={() => handleMenuClick("Inside Community")}>
-          Inside Community
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {/* Inside Community */}
+          <div className="px-4 pb-6">
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("Inside Community")}
+            >
+              Inside Community
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
