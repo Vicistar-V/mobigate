@@ -506,11 +506,11 @@ const CommunityProfile = () => {
                 showFilterCounts={true}
               />
 
-              {/* 5. Recommended E-Library Contents */}
+              {/* 5. Community Contents */}
               <ELibrarySection
                 activeFilter={contentFilter}
                 onFilterChange={setContentFilter}
-                title="Recommended E-Library Contents"
+                title="Community Contents"
               />
 
               {/* Community Posts */}
