@@ -205,13 +205,6 @@ const CommunityProfile = () => {
           </div>
         </Card>
 
-        {/* Quick Links */}
-        <CommunityQuickLinks
-          fundRaiserEnabled={community.fundRaiserEnabled}
-          mobiStoreEnabled={community.mobiStoreEnabled}
-          quizGameEnabled={community.quizGameEnabled}
-        />
-
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
