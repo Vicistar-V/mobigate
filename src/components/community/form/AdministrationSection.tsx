@@ -20,7 +20,10 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
           min="1"
           max="10"
           value={formData.officeTenure}
-          onChange={(e) => updateField("officeTenure", parseInt(e.target.value) || 2)}
+          onChange={(e) => {
+            const value = e.target.value;
+            updateField("officeTenure", value === "" ? 1 : parseInt(value) || 1);
+          }}
         />
         <p className="text-xs text-muted-foreground">
           How long should elected officials serve?
@@ -36,7 +39,10 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
           type="number"
           min="0"
           value={formData.staffCount}
-          onChange={(e) => updateField("staffCount", parseInt(e.target.value) || 0)}
+          onChange={(e) => {
+            const value = e.target.value;
+            updateField("staffCount", value === "" ? 0 : parseInt(value) || 0);
+          }}
           placeholder="Number of staff/employees"
         />
         <p className="text-xs text-muted-foreground">
