@@ -24,6 +24,7 @@ import { Post, wallStatusPosts, feedPosts } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { getCommunityById, getCommunityPosts } from "@/data/communityProfileData";
+import { communityPeople } from "@/data/communityPeopleData";
 import { CommunityAboutTab } from "@/components/community/CommunityAboutTab";
 import { CommunityMembershipTab } from "@/components/community/CommunityMembershipTab";
 import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks";
@@ -460,7 +461,7 @@ const CommunityProfile = () => {
             {/* Status Tab */}
             <TabsContent value="status" className="space-y-6 mt-6">
               {/* 1. Our People, Our Strength - Images only, no filters */}
-              <OurPeopleCarousel items={wallStatusPostsForCarousel} />
+              <OurPeopleCarousel items={communityPeople} />
 
               {/* 2. Recommended Community Gallery - Filters without counts, no grid toggle */}
               <WallStatusCarousel
