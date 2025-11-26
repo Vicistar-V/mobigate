@@ -236,6 +236,23 @@ const CommunityProfile = () => {
                 </div>
               )}
 
+              {/* MobiFundRaiser Badge */}
+              {community.fundRaiserEnabled && (
+                <div className="flex justify-center mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-primary/10 border-primary text-primary hover:bg-primary/20"
+                    onClick={() => toast({
+                      title: "MobiFundRaiser",
+                      description: "Community fundraiser feature coming soon!",
+                    })}
+                  >
+                    MobiFundRaiser
+                  </Button>
+                </div>
+              )}
+
               {/* Wall Status */}
               <WallStatusCarousel
                 items={communityPosts.slice(0, 3)}
@@ -246,22 +263,28 @@ const CommunityProfile = () => {
               />
 
               {/* Create Post Button */}
-              <Button
-                onClick={() => toast({
-                  title: "Create Post",
-                  description: "Post creation feature coming soon!",
-                })}
-                className="w-full"
-                variant="outline"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Create Post on Community's Status
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => toast({
+                    title: "Create Post",
+                    description: "Post creation feature coming soon!",
+                  })}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Create Post on Community's Status
+                </Button>
+                <p className="text-xs text-center text-muted-foreground italic">
+                  [Admin could turn off this in Privacy Setting]
+                </p>
+              </div>
 
               {/* E-Library Section */}
               <ELibrarySection
                 activeFilter={contentFilter}
                 onFilterChange={setContentFilter}
+                title="Recommended Community Gallery"
               />
 
               {/* Community Posts */}
