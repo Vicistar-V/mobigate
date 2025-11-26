@@ -5,6 +5,7 @@ import { toast } from "@/hooks/use-toast";
 export function useCommunityForm() {
   const [formData, setFormData] = useState<CommunityFormData>(defaultCommunityFormData);
   const [errors, setErrors] = useState<Partial<Record<keyof CommunityFormData, string>>>({});
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
   const updateField = <K extends keyof CommunityFormData>(
     field: K,
@@ -97,6 +98,85 @@ export function useCommunityForm() {
     }));
   };
 
+  const validateStep = (step: number): boolean => {
+    const newErrors: Partial<Record<keyof CommunityFormData, string>> = {};
+
+    switch (step) {
+      case 1: // Basics
+        if (!formData.name.trim()) {
+          newErrors.name = "Community name is required";
+        }
+        if (!formData.classification) {
+          newErrors.classification = "Classification is required";
+        }
+        if (!formData.category) {
+          newErrors.category = "Category is required";
+        }
+        if (!formData.designation.trim()) {
+          newErrors.designation = "Designation is required";
+        }
+        break;
+
+      case 2: // Structure
+        if (!formData.leadershipStyle) {
+          newErrors.leadershipStyle = "Leadership style is required";
+        }
+        if (formData.populationStrength < 1) {
+          newErrors.populationStrength = "Population strength must be at least 1";
+        }
+        if (formData.positions.length === 0) {
+          newErrors.positions = "At least one position is required";
+        }
+        break;
+
+      case 3: // Operations (no required fields)
+        break;
+
+      case 4: // Settings (no required fields)
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const getStepErrors = (step: number): string[] => {
+    const stepErrors: string[] = [];
+
+    switch (step) {
+      case 1:
+        if (!formData.name.trim()) stepErrors.push("Community name is required");
+        if (!formData.classification) stepErrors.push("Classification is required");
+        if (!formData.category) stepErrors.push("Category is required");
+        if (!formData.designation.trim()) stepErrors.push("Designation is required");
+        break;
+
+      case 2:
+        if (!formData.leadershipStyle) stepErrors.push("Leadership style is required");
+        if (formData.populationStrength < 1) stepErrors.push("Population strength must be at least 1");
+        if (formData.positions.length === 0) stepErrors.push("At least one position is required");
+        break;
+
+      case 3:
+        break;
+
+      case 4:
+        break;
+    }
+
+    return stepErrors;
+  };
+
+  const isStepComplete = (step: number): boolean => {
+    return getStepErrors(step).length === 0;
+  };
+
+  const markStepComplete = (step: number) => {
+    if (!completedSteps.includes(step)) {
+      setCompletedSteps(prev => [...prev, step]);
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof CommunityFormData, string>> = {};
 
@@ -155,6 +235,7 @@ export function useCommunityForm() {
   return {
     formData,
     errors,
+    completedSteps,
     updateField,
     addPosition,
     removePosition,
@@ -167,6 +248,10 @@ export function useCommunityForm() {
     updateEvent,
     handleSubmit,
     resetForm,
-    validateForm
+    validateForm,
+    validateStep,
+    getStepErrors,
+    isStepComplete,
+    markStepComplete
   };
 }

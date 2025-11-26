@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Check, Building, Users, Calendar, Settings } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Building, Users, Calendar, Settings, AlertCircle, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 import { useCommunityForm } from "@/hooks/useCommunityForm";
 import { ClassificationSection } from "@/components/community/form/ClassificationSection";
 import { MembershipSection } from "@/components/community/form/MembershipSection";
@@ -34,10 +37,14 @@ const steps = [
 export default function CreateCommunity() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [showValidationBanner, setShowValidationBanner] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const formTopRef = useRef<HTMLDivElement>(null);
   
   const {
     formData,
     errors,
+    completedSteps,
     updateField,
     addPosition,
     removePosition,
@@ -50,7 +57,17 @@ export default function CreateCommunity() {
     updateEvent,
     handleSubmit,
     validateForm,
+    validateStep,
+    getStepErrors,
+    isStepComplete,
+    markStepComplete,
   } = useCommunityForm();
+
+  useEffect(() => {
+    if (showValidationBanner && formTopRef.current) {
+      formTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showValidationBanner]);
 
   const progressPercentage = (currentStep / steps.length) * 100;
 
@@ -63,6 +80,26 @@ export default function CreateCommunity() {
   };
 
   const goToNextStep = () => {
+    const isValid = validateStep(currentStep);
+    
+    if (!isValid) {
+      const stepErrors = getStepErrors(currentStep);
+      setValidationErrors(stepErrors);
+      setShowValidationBanner(true);
+      
+      toast({
+        title: "Please complete required fields",
+        description: `Fix ${stepErrors.length} ${stepErrors.length === 1 ? 'issue' : 'issues'} before continuing`,
+        variant: "destructive"
+      });
+      
+      return;
+    }
+    
+    markStepComplete(currentStep);
+    setShowValidationBanner(false);
+    setValidationErrors([]);
+    
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -70,6 +107,9 @@ export default function CreateCommunity() {
   };
 
   const goToPreviousStep = () => {
+    setShowValidationBanner(false);
+    setValidationErrors([]);
+    
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -77,6 +117,8 @@ export default function CreateCommunity() {
   };
 
   const goToStep = (step: number) => {
+    setShowValidationBanner(false);
+    setValidationErrors([]);
     setCurrentStep(step);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -87,6 +129,8 @@ export default function CreateCommunity() {
       
       <main className="flex-1 container mx-auto px-4 py-4 md:py-6 pb-24">
         <div className="max-w-3xl mx-auto">
+          <div ref={formTopRef} />
+          
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
             <Button
@@ -113,37 +157,48 @@ export default function CreateCommunity() {
             <div className="grid grid-cols-4 gap-2">
               {steps.map((step) => {
                 const StepIcon = step.icon;
-                const isCompleted = step.id < currentStep;
+                const isCompleted = completedSteps.includes(step.id) || step.id < currentStep;
                 const isCurrent = step.id === currentStep;
+                const stepErrorCount = getStepErrors(step.id).length;
+                const hasErrors = stepErrorCount > 0 && !isCurrent;
                 
                 return (
                   <button
                     key={step.id}
                     onClick={() => goToStep(step.id)}
                     className={cn(
-                      "flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all",
+                      "relative flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all",
                       isCurrent && "bg-primary/10",
                       !isCurrent && "hover:bg-muted"
                     )}
                   >
                     <div
                       className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                        isCompleted && "bg-primary text-primary-foreground",
-                        isCurrent && "bg-primary text-primary-foreground ring-4 ring-primary/20",
-                        !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
+                        "w-10 h-10 rounded-full flex items-center justify-center transition-all relative",
+                        isCompleted && !hasErrors && "bg-primary text-primary-foreground",
+                        hasErrors && "bg-destructive/10 text-destructive ring-2 ring-destructive/30",
+                        isCurrent && !hasErrors && "bg-primary text-primary-foreground ring-4 ring-primary/20",
+                        !isCompleted && !isCurrent && !hasErrors && "bg-muted text-muted-foreground"
                       )}
                     >
-                      {isCompleted ? (
+                      {isCompleted && !hasErrors ? (
                         <Check className="h-5 w-5" />
+                      ) : hasErrors ? (
+                        <AlertCircle className="h-5 w-5" />
                       ) : (
                         <StepIcon className="h-5 w-5" />
                       )}
                     </div>
+                    {hasErrors && (
+                      <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                        {stepErrorCount}
+                      </Badge>
+                    )}
                     <span className={cn(
                       "text-xs font-medium",
                       isCurrent && "text-primary",
-                      !isCurrent && "text-muted-foreground"
+                      hasErrors && "text-destructive",
+                      !isCurrent && !hasErrors && "text-muted-foreground"
                     )}>
                       {step.name}
                     </span>
@@ -153,6 +208,36 @@ export default function CreateCommunity() {
             </div>
           </div>
 
+          {/* Validation Banner */}
+          {showValidationBanner && validationErrors.length > 0 && (
+            <Alert variant="destructive" className="mb-6 animate-in slide-in-from-top-2">
+              <AlertCircle className="h-5 w-5" />
+              <AlertDescription className="ml-2 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="font-semibold mb-2">Please complete required fields before continuing</p>
+                    <ul className="space-y-1 text-sm">
+                      {validationErrors.map((error, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-destructive mt-0.5">•</span>
+                          <span>{error}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0"
+                    onClick={() => setShowValidationBanner(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Form Content */}
           <form onSubmit={onSubmit}>
             {/* Step 1: Basics */}
@@ -160,14 +245,22 @@ export default function CreateCommunity() {
               <div className="space-y-6 animate-in fade-in-50 duration-300">
                 {/* Community Identity */}
                 <div className="bg-card border rounded-lg p-4 md:p-6 space-y-4">
-                  <div className="flex items-center gap-3 pb-3 border-b">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Building className="h-5 w-5 text-primary" />
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Building className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold">Community Identity</h2>
+                        <p className="text-xs text-muted-foreground">Basic information about your community</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">Community Identity</h2>
-                      <p className="text-xs text-muted-foreground">Basic information about your community</p>
-                    </div>
+                    {(errors.name || errors.shortDescription) && (
+                      <Badge variant="destructive" className="shrink-0">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        {[errors.name, errors.shortDescription].filter(Boolean).length}
+                      </Badge>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -215,14 +308,22 @@ export default function CreateCommunity() {
 
                 {/* Classification & Type */}
                 <div className="bg-card border rounded-lg p-4 md:p-6 space-y-4">
-                  <div className="flex items-center gap-3 pb-3 border-b">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Building className="h-5 w-5 text-primary" />
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Building className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold">Classification & Type</h2>
+                        <p className="text-xs text-muted-foreground">Define your community's category</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">Classification & Type</h2>
-                      <p className="text-xs text-muted-foreground">Define your community's category</p>
-                    </div>
+                    {(errors.classification || errors.category || errors.designation) && (
+                      <Badge variant="destructive" className="shrink-0">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        {[errors.classification, errors.category, errors.designation].filter(Boolean).length}
+                      </Badge>
+                    )}
                   </div>
 
                   <ClassificationSection
@@ -258,14 +359,22 @@ export default function CreateCommunity() {
 
                 {/* Leadership Style */}
                 <div className="bg-card border rounded-lg p-4 md:p-6 space-y-4">
-                  <div className="flex items-center gap-3 pb-3 border-b">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary" />
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold">Leadership Style</h2>
+                        <p className="text-xs text-muted-foreground">Choose how leaders are selected</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">Leadership Style</h2>
-                      <p className="text-xs text-muted-foreground">Choose how leaders are selected</p>
-                    </div>
+                    {errors.leadershipStyle && (
+                      <Badge variant="destructive" className="shrink-0">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        1
+                      </Badge>
+                    )}
                   </div>
 
                   <LeadershipSection
@@ -277,14 +386,22 @@ export default function CreateCommunity() {
 
                 {/* Administration */}
                 <div className="bg-card border rounded-lg p-4 md:p-6 space-y-4">
-                  <div className="flex items-center gap-3 pb-3 border-b">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Settings className="h-5 w-5 text-primary" />
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Settings className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold">Administration</h2>
+                        <p className="text-xs text-muted-foreground">Set administrative parameters</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">Administration</h2>
-                      <p className="text-xs text-muted-foreground">Set administrative parameters</p>
-                    </div>
+                    {errors.populationStrength && (
+                      <Badge variant="destructive" className="shrink-0">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        1
+                      </Badge>
+                    )}
                   </div>
 
                   <AdministrationSection
@@ -295,14 +412,22 @@ export default function CreateCommunity() {
 
                 {/* Offices & Positions */}
                 <div className="bg-card border rounded-lg p-4 md:p-6 space-y-4">
-                  <div className="flex items-center gap-3 pb-3 border-b">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary" />
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold">Offices & Positions</h2>
+                        <p className="text-xs text-muted-foreground">Add leadership positions</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">Offices & Positions</h2>
-                      <p className="text-xs text-muted-foreground">Add leadership positions</p>
-                    </div>
+                    {errors.positions && (
+                      <Badge variant="destructive" className="shrink-0">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        1
+                      </Badge>
+                    )}
                   </div>
 
                   <OfficesPositionsSection
