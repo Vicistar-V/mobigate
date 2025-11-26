@@ -3,10 +3,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CommunityFormData } from "@/types/communityForm";
 import { leadershipStyleOptions, topmostOfficeOptions, deputyOfficeOptions } from "@/data/communityFormOptions";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface LeadershipSectionProps {
@@ -18,28 +18,22 @@ interface LeadershipSectionProps {
 export function LeadershipSection({ formData, updateField, errors }: LeadershipSectionProps) {
   const [showCustomTopmost, setShowCustomTopmost] = useState(false);
   const [showCustomDeputy, setShowCustomDeputy] = useState(false);
+  const [customTopmostOptions, setCustomTopmostOptions] = useState<string[]>([]);
+  const [customDeputyOptions, setCustomDeputyOptions] = useState<string[]>([]);
 
-  const toggleTopmostOffice = (office: string) => {
-    const current = formData.topmostOffices;
-    if (current.includes(office)) {
-      updateField("topmostOffices", current.filter(o => o !== office));
-    } else {
-      updateField("topmostOffices", [...current, office]);
-    }
+  const selectTopmostOffice = (office: string) => {
+    updateField("topmostOffice", office);
   };
 
-  const toggleDeputyOffice = (office: string) => {
-    const current = formData.deputyOffices;
-    if (current.includes(office)) {
-      updateField("deputyOffices", current.filter(o => o !== office));
-    } else {
-      updateField("deputyOffices", [...current, office]);
-    }
+  const selectDeputyOffice = (office: string) => {
+    updateField("deputyOffice", office);
   };
 
   const addCustomTopmostOffice = () => {
     if (formData.customTopmostOffice.trim()) {
-      updateField("topmostOffices", [...formData.topmostOffices, formData.customTopmostOffice.trim()]);
+      const customOffice = formData.customTopmostOffice.trim();
+      setCustomTopmostOptions([...customTopmostOptions, customOffice]);
+      updateField("topmostOffice", customOffice);
       updateField("customTopmostOffice", "");
       setShowCustomTopmost(false);
     }
@@ -47,7 +41,9 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
 
   const addCustomDeputyOffice = () => {
     if (formData.customDeputyOffice.trim()) {
-      updateField("deputyOffices", [...formData.deputyOffices, formData.customDeputyOffice.trim()]);
+      const customOffice = formData.customDeputyOffice.trim();
+      setCustomDeputyOptions([...customDeputyOptions, customOffice]);
+      updateField("deputyOffice", customOffice);
       updateField("customDeputyOffice", "");
       setShowCustomDeputy(false);
     }
@@ -81,7 +77,7 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">Topmost Offices</Label>
+          <Label className="text-sm font-semibold">Topmost Office</Label>
           <Button
             type="button"
             variant="outline"
@@ -107,39 +103,34 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          {topmostOfficeOptions.map(office => (
-            <div key={office} className="flex items-center space-x-2">
-              <Checkbox
-                id={`topmost-${office}`}
-                checked={formData.topmostOffices.includes(office)}
-                onCheckedChange={() => toggleTopmostOffice(office)}
-              />
-              <Label htmlFor={`topmost-${office}`} className="text-sm font-normal cursor-pointer">
-                {office}
-              </Label>
-            </div>
-          ))}
-        </div>
-
-        {formData.topmostOffices.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {formData.topmostOffices.map(office => (
-              <Badge key={office} variant="secondary" className="gap-1">
-                {office}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => toggleTopmostOffice(office)}
+        <RadioGroup value={formData.topmostOffice} onValueChange={selectTopmostOffice}>
+          <div className="grid grid-cols-2 gap-3">
+            {[...topmostOfficeOptions, ...customTopmostOptions].map(office => (
+              <div key={office} className="flex items-center space-x-2">
+                <RadioGroupItem
+                  id={`topmost-${office}`}
+                  value={office}
                 />
-              </Badge>
+                <Label htmlFor={`topmost-${office}`} className="text-sm font-normal cursor-pointer">
+                  {office}
+                </Label>
+              </div>
             ))}
+          </div>
+        </RadioGroup>
+
+        {formData.topmostOffice && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            <Badge variant="secondary">
+              Selected: {formData.topmostOffice}
+            </Badge>
           </div>
         )}
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">Deputy Offices</Label>
+          <Label className="text-sm font-semibold">Deputy Office</Label>
           <Button
             type="button"
             variant="outline"
@@ -165,32 +156,27 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          {deputyOfficeOptions.map(office => (
-            <div key={office} className="flex items-center space-x-2">
-              <Checkbox
-                id={`deputy-${office}`}
-                checked={formData.deputyOffices.includes(office)}
-                onCheckedChange={() => toggleDeputyOffice(office)}
-              />
-              <Label htmlFor={`deputy-${office}`} className="text-sm font-normal cursor-pointer">
-                {office}
-              </Label>
-            </div>
-          ))}
-        </div>
-
-        {formData.deputyOffices.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {formData.deputyOffices.map(office => (
-              <Badge key={office} variant="secondary" className="gap-1">
-                {office}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => toggleDeputyOffice(office)}
+        <RadioGroup value={formData.deputyOffice} onValueChange={selectDeputyOffice}>
+          <div className="grid grid-cols-2 gap-3">
+            {[...deputyOfficeOptions, ...customDeputyOptions].map(office => (
+              <div key={office} className="flex items-center space-x-2">
+                <RadioGroupItem
+                  id={`deputy-${office}`}
+                  value={office}
                 />
-              </Badge>
+                <Label htmlFor={`deputy-${office}`} className="text-sm font-normal cursor-pointer">
+                  {office}
+                </Label>
+              </div>
             ))}
+          </div>
+        </RadioGroup>
+
+        {formData.deputyOffice && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            <Badge variant="secondary">
+              Selected: {formData.deputyOffice}
+            </Badge>
           </div>
         )}
       </div>
