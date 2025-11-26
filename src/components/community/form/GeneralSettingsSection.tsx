@@ -16,7 +16,7 @@ export function GeneralSettingsSection({
   errors,
 }: GeneralSettingsSectionProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="handover-time">Handover Time</Label>

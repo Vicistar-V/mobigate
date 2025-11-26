@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { CommunityFormData } from "@/types/communityForm";
 import { genderOptions, membershipChoiceOptions } from "@/data/communityFormOptions";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface MembershipSectionProps {
   formData: CommunityFormData;
@@ -20,16 +21,16 @@ export function MembershipSection({ formData, updateField, errors }: MembershipS
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="gender" className="text-sm font-semibold">
+        <Label htmlFor="gender" className="text-sm font-medium">
           Gender <span className="text-destructive">*</span>
         </Label>
         <Select 
           value={formData.gender} 
           onValueChange={(value) => updateField("gender", value as any)}
         >
-          <SelectTrigger id="gender">
+          <SelectTrigger id="gender" className="h-11">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -43,24 +44,24 @@ export function MembershipSection({ formData, updateField, errors }: MembershipS
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">Men/Women Ratio</Label>
-        <div className="p-3 rounded-md bg-muted border">
+        <Label className="text-sm font-medium">Men/Women Ratio</Label>
+        <div className="p-3 rounded-lg bg-muted/50 border">
           <Badge variant="secondary" className="font-normal">
             {getMenWomenRatio()}
           </Badge>
-          <p className="text-xs text-muted-foreground mt-1">System Defined</p>
+          <p className="text-xs text-muted-foreground mt-1">Automatically calculated</p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="membershipChoice" className="text-sm font-semibold">
+        <Label htmlFor="membershipChoice" className="text-sm font-medium">
           Membership Choice <span className="text-destructive">*</span>
         </Label>
         <Select 
           value={formData.membershipChoice} 
           onValueChange={(value) => updateField("membershipChoice", value as any)}
         >
-          <SelectTrigger id="membershipChoice">
+          <SelectTrigger id="membershipChoice" className="h-11">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -74,7 +75,7 @@ export function MembershipSection({ formData, updateField, errors }: MembershipS
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="populationStrength" className="text-sm font-semibold">
+        <Label htmlFor="populationStrength" className="text-sm font-medium">
           Population Strength <span className="text-destructive">*</span>
         </Label>
         <Input
@@ -84,7 +85,7 @@ export function MembershipSection({ formData, updateField, errors }: MembershipS
           value={formData.populationStrength || ""}
           onChange={(e) => updateField("populationStrength", parseInt(e.target.value) || 0)}
           placeholder="Enter expected population"
-          className={errors.populationStrength ? "border-destructive" : ""}
+          className={cn("h-11", errors.populationStrength && "border-destructive focus-visible:ring-destructive")}
         />
         {errors.populationStrength && (
           <p className="text-xs text-destructive">{errors.populationStrength}</p>

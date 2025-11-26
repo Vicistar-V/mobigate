@@ -15,7 +15,7 @@ export function PrivacySettingsSection({
   errors,
 }: PrivacySettingsSectionProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="text-sm text-muted-foreground">
         Control who can view sensitive community information and activities.
       </div>

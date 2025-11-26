@@ -17,10 +17,10 @@ export function OriginationContactsSection({
   errors,
 }: OriginationContactsSectionProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Origination */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Origination</h3>
+        <h3 className="text-sm font-medium">Origination</h3>
 
         <div className="space-y-2">
           <Label htmlFor="origin-country">Country of Origin</Label>
@@ -66,7 +66,7 @@ export function OriginationContactsSection({
 
       {/* Official Contacts */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Official Contacts</h3>
+        <h3 className="text-sm font-medium">Official Contacts</h3>
 
         <div className="space-y-2">
           <Label htmlFor="office-address">Office Address</Label>
@@ -104,7 +104,7 @@ export function OriginationContactsSection({
 
       {/* Official Currency */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Official Currency</h3>
+        <h3 className="text-sm font-medium">Official Currency</h3>
 
         <div className="space-y-2">
           <Label htmlFor="default-currency">Default Currency</Label>

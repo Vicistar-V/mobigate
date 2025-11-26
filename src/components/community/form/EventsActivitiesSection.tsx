@@ -87,10 +87,10 @@ export function EventsActivitiesSection({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Create New Event Form */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Create New Event/Activity</h3>
+        <h3 className="text-sm font-medium">Create New Event/Activity</h3>
 
         <div className="space-y-2">
           <Label htmlFor="event-name">Event Name</Label>

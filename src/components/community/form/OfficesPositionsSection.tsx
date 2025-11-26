@@ -119,9 +119,9 @@ export function OfficesPositionsSection({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 p-4 rounded-md border bg-muted/50">
-        <Label className="text-sm font-semibold">Add New Position</Label>
+    <div className="space-y-5">
+      <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
+        <Label className="text-sm font-medium">Add New Position</Label>
         
         <div className="space-y-3">
           <div className="space-y-2">
@@ -244,7 +244,7 @@ export function OfficesPositionsSection({
       )}
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">
+        <Label className="text-sm font-medium">
           Positions List ({formData.positions.length})
         </Label>
         

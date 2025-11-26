@@ -15,7 +15,7 @@ export function CommunityElectionsSection({
   errors,
 }: CommunityElectionsSectionProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="text-sm text-muted-foreground">
         Configure access controls for community elections and voting processes.
       </div>

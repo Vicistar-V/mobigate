@@ -135,18 +135,18 @@ export function MeetingsSection({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">General Meetings</Label>
+          <Label className="text-sm font-medium">General Meetings</Label>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => addNewMeeting("general")}
           >
-            <Plus className="h-3 w-3" />
-            Add Meeting
+            <Plus className="h-4 w-4 mr-1" />
+            Add
           </Button>
         </div>
         
@@ -161,15 +161,15 @@ export function MeetingsSection({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">Executive Meetings</Label>
+          <Label className="text-sm font-medium">Executive Meetings</Label>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => addNewMeeting("executive")}
           >
-            <Plus className="h-3 w-3" />
-            Add Meeting
+            <Plus className="h-4 w-4 mr-1" />
+            Add
           </Button>
         </div>
         
@@ -182,9 +182,9 @@ export function MeetingsSection({
         )}
       </div>
 
-      <div className="flex items-center justify-between p-3 rounded-md border">
+      <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
         <div className="space-y-0.5">
-          <Label className="text-sm font-semibold">Attendance Register</Label>
+          <Label className="text-sm font-medium">Attendance Register</Label>
           <p className="text-xs text-muted-foreground">Track meeting attendance</p>
         </div>
         <Switch
