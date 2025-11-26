@@ -20,7 +20,7 @@ import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { useToast } from "@/hooks/use-toast";
-import { Post, wallStatusPosts } from "@/data/posts";
+import { Post, wallStatusPosts, feedPosts } from "@/data/posts";
 import { getCommunityById, getCommunityPosts } from "@/data/communityProfileData";
 import { CommunityAboutTab } from "@/components/community/CommunityAboutTab";
 import { CommunityMembershipTab } from "@/components/community/CommunityMembershipTab";
@@ -44,11 +44,29 @@ const CommunityProfile = () => {
   const community = getCommunityById(communityId || "1");
   const communityPosts = getCommunityPosts(communityId || "1");
 
-  // Filter community posts by content type
-  const filteredCommunityPosts = contentFilter === "all" 
-    ? communityPosts 
-    : communityPosts.filter(post => post.type.toLowerCase() === contentFilter);
-  const displayedCommunityPosts = filteredCommunityPosts.slice(0, visiblePostCount);
+  // Convert wall status posts to Post format for WallStatusCarousel (same as Index.tsx)
+  const wallStatusPostsForCarousel = wallStatusPosts.map(post => ({
+    id: post.id,
+    title: post.title || "Wall Status",
+    subtitle: post.description,
+    description: post.description,
+    author: post.author,
+    authorProfileImage: post.authorImage,
+    userId: "community",
+    status: "Online" as const,
+    views: "0",
+    comments: String(post.comments),
+    likes: String(post.likes),
+    type: post.type === "video" ? "Video" as const : "Photo" as const,
+    imageUrl: post.url,
+    isOwner: false
+  }));
+
+  // Filter feed posts by content type (use feedPosts for rich content like Home page)
+  const filteredPosts = contentFilter === "all" 
+    ? feedPosts 
+    : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
+  const displayedPosts = filteredPosts.slice(0, visiblePostCount);
 
   // Reset visible post count when content filter changes
   useEffect(() => {
@@ -260,7 +278,7 @@ const CommunityProfile = () => {
 
               {/* Wall Status */}
               <WallStatusCarousel
-                items={communityPosts.slice(0, 3)}
+                items={wallStatusPostsForCarousel}
                 view="normal"
                 filter="all"
                 onViewChange={() => {}}
@@ -294,7 +312,7 @@ const CommunityProfile = () => {
 
               {/* Community Posts */}
               <div className="space-y-4">
-                {displayedCommunityPosts.map((post) => (
+                {displayedPosts.map((post) => (
                   <FeedPost
                     key={post.id}
                     id={post.id}
@@ -315,7 +333,7 @@ const CommunityProfile = () => {
               </div>
 
               {/* Pagination Controls */}
-              {filteredCommunityPosts.length > visiblePostCount && (
+              {filteredPosts.length > visiblePostCount && (
                 <div className="flex justify-center mt-4">
                   <Button
                     variant="link"
@@ -326,7 +344,7 @@ const CommunityProfile = () => {
                   </Button>
                 </div>
               )}
-              {visiblePostCount > 20 && filteredCommunityPosts.length > 20 && (
+              {visiblePostCount > 20 && filteredPosts.length > 20 && (
                 <div className="flex justify-center mt-2">
                   <Button variant="link" onClick={() => setVisiblePostCount(20)}>
                     Less...
