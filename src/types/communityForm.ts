@@ -46,6 +46,20 @@ export type DayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "frida
 
 export type WeekOfMonth = "first" | "second" | "third" | "fourth" | "last";
 
+export type MonthOfYear = 
+  | "january" 
+  | "february" 
+  | "march" 
+  | "april" 
+  | "may" 
+  | "june" 
+  | "july" 
+  | "august" 
+  | "september" 
+  | "october" 
+  | "november" 
+  | "december";
+
 export interface OfficialPosition {
   id: string;
   title: string;
@@ -59,6 +73,7 @@ export interface MeetingSchedule {
   id: string;
   type: "general" | "executive";
   frequency: MeetingFrequency;
+  monthOfYear?: MonthOfYear;
   weekOfMonth?: WeekOfMonth;
   dayOfWeek: DayOfWeek;
   time?: string;
