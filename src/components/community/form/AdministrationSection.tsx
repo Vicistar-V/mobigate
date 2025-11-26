@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CommunityFormData } from "@/types/communityForm";
@@ -8,6 +9,22 @@ interface AdministrationSectionProps {
 }
 
 export function AdministrationSection({ formData, updateField }: AdministrationSectionProps) {
+  // Local state for display values (allows empty strings while typing)
+  const [tenureDisplay, setTenureDisplay] = useState<string>(
+    formData.officeTenure.toString()
+  );
+  const [staffDisplay, setStaffDisplay] = useState<string>(
+    formData.staffCount.toString()
+  );
+
+  // Sync display state when form data changes externally
+  useEffect(() => {
+    setTenureDisplay(formData.officeTenure.toString());
+  }, [formData.officeTenure]);
+
+  useEffect(() => {
+    setStaffDisplay(formData.staffCount.toString());
+  }, [formData.staffCount]);
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -19,10 +36,22 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
           type="number"
           min="1"
           max="10"
-          value={formData.officeTenure}
+          value={tenureDisplay}
           onChange={(e) => {
             const value = e.target.value;
-            updateField("officeTenure", value === "" ? 1 : parseInt(value) || 1);
+            setTenureDisplay(value);
+            
+            // Only update form if valid number
+            if (value !== "" && !isNaN(parseInt(value))) {
+              updateField("officeTenure", parseInt(value));
+            }
+          }}
+          onBlur={() => {
+            // On blur, if empty, reset to default
+            if (tenureDisplay === "" || isNaN(parseInt(tenureDisplay))) {
+              setTenureDisplay("1");
+              updateField("officeTenure", 1);
+            }
           }}
         />
         <p className="text-xs text-muted-foreground">
@@ -38,10 +67,22 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
           id="staffCount"
           type="number"
           min="0"
-          value={formData.staffCount}
+          value={staffDisplay}
           onChange={(e) => {
             const value = e.target.value;
-            updateField("staffCount", value === "" ? 0 : parseInt(value) || 0);
+            setStaffDisplay(value);
+            
+            // Only update form if valid number
+            if (value !== "" && !isNaN(parseInt(value))) {
+              updateField("staffCount", parseInt(value));
+            }
+          }}
+          onBlur={() => {
+            // On blur, if empty, reset to default
+            if (staffDisplay === "" || isNaN(parseInt(staffDisplay))) {
+              setStaffDisplay("0");
+              updateField("staffCount", 0);
+            }
           }}
           placeholder="Number of staff/employees"
         />
