@@ -14,6 +14,7 @@ import { useState } from "react";
 interface ELibrarySectionProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
+  title?: string;
 }
 
 const primaryFilters = [
@@ -29,7 +30,7 @@ const moreFilters = [
   { value: "url", label: "URL Links", icon: Link, count: "20.0k" },
 ];
 
-export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectionProps) => {
+export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recommended E-Library Contents" }: ELibrarySectionProps) => {
   const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
   const [sortFilter, setSortFilter] = useState("all");
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
@@ -45,7 +46,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange }: ELibrarySectio
   return (
     <div className="py-4" data-elibrary-section>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-base md:text-lg">Recommended E-Library Contents</h3>
+        <h3 className="font-semibold text-base md:text-lg">{title}</h3>
         
         <FilterDialog
           title="Filter E-Library Contents"
