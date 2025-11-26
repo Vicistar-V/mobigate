@@ -2,10 +2,21 @@ import { useState } from "react";
 import { CommunityFormData, defaultCommunityFormData, OfficialPosition, MeetingSchedule, CommunityEvent } from "@/types/communityForm";
 import { toast } from "@/hooks/use-toast";
 
+const STORAGE_KEY = "mobigate-community-draft";
+
+export interface SavedDraft {
+  formData: CommunityFormData;
+  completedSteps: number[];
+  currentStep: number;
+  savedAt: string;
+}
+
 export function useCommunityForm() {
   const [formData, setFormData] = useState<CommunityFormData>(defaultCommunityFormData);
   const [errors, setErrors] = useState<Partial<Record<keyof CommunityFormData, string>>>({});
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [hasSavedDraft, setHasSavedDraft] = useState(false);
 
   const updateField = <K extends keyof CommunityFormData>(
     field: K,
@@ -230,12 +241,80 @@ export function useCommunityForm() {
   const resetForm = () => {
     setFormData(defaultCommunityFormData);
     setErrors({});
+    setCompletedSteps([]);
+    setLastSaved(null);
+  };
+
+  // Auto-save functionality
+  const saveToStorage = (currentStep: number) => {
+    try {
+      const draft: SavedDraft = {
+        formData,
+        completedSteps,
+        currentStep,
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+      setLastSaved(new Date());
+      setHasSavedDraft(true);
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+    }
+  };
+
+  const loadFromStorage = (): SavedDraft | null => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        setHasSavedDraft(true);
+        return draft;
+      }
+      return null;
+    } catch (error) {
+      console.error("Failed to load draft:", error);
+      return null;
+    }
+  };
+
+  const clearStorage = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      setHasSavedDraft(false);
+      setLastSaved(null);
+    } catch (error) {
+      console.error("Failed to clear draft:", error);
+    }
+  };
+
+  const checkForSavedDraft = (): boolean => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const exists = !!saved;
+      setHasSavedDraft(exists);
+      return exists;
+    } catch (error) {
+      console.error("Failed to check for draft:", error);
+      return false;
+    }
+  };
+
+  const restoreFromDraft = (draft: SavedDraft) => {
+    setFormData(draft.formData);
+    setCompletedSteps(draft.completedSteps);
+    setLastSaved(new Date(draft.savedAt));
+    toast({
+      title: "Draft Restored",
+      description: "Your progress has been restored successfully"
+    });
   };
 
   return {
     formData,
     errors,
     completedSteps,
+    lastSaved,
+    hasSavedDraft,
     updateField,
     addPosition,
     removePosition,
@@ -252,6 +331,11 @@ export function useCommunityForm() {
     validateStep,
     getStepErrors,
     isStepComplete,
-    markStepComplete
+    markStepComplete,
+    saveToStorage,
+    loadFromStorage,
+    clearStorage,
+    checkForSavedDraft,
+    restoreFromDraft
   };
 }

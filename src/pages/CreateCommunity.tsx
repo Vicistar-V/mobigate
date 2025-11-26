@@ -4,11 +4,13 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Check, Building, Users, Calendar, Settings, AlertCircle, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Building, Users, Calendar, Settings, AlertCircle, X, Save, CheckCircle2, Clock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { useCommunityForm } from "@/hooks/useCommunityForm";
+import { useCommunityForm, SavedDraft } from "@/hooks/useCommunityForm";
+import { formatDistanceToNow } from "date-fns";
 import { ClassificationSection } from "@/components/community/form/ClassificationSection";
 import { MembershipSection } from "@/components/community/form/MembershipSection";
 import { LeadershipSection } from "@/components/community/form/LeadershipSection";
@@ -34,17 +36,24 @@ const steps = [
   { id: 4, name: "Settings", icon: Settings },
 ];
 
+const AUTO_SAVE_DELAY = 2000; // 2 seconds
+
 export default function CreateCommunity() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [showValidationBanner, setShowValidationBanner] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+  const [savedDraft, setSavedDraft] = useState<SavedDraft | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const formTopRef = useRef<HTMLDivElement>(null);
   
   const {
     formData,
     errors,
     completedSteps,
+    lastSaved,
+    hasSavedDraft,
     updateField,
     addPosition,
     removePosition,
@@ -61,7 +70,46 @@ export default function CreateCommunity() {
     getStepErrors,
     isStepComplete,
     markStepComplete,
+    saveToStorage,
+    loadFromStorage,
+    clearStorage,
+    checkForSavedDraft,
+    restoreFromDraft,
   } = useCommunityForm();
+
+  // Check for saved draft on mount
+  useEffect(() => {
+    const draft = loadFromStorage();
+    if (draft) {
+      setSavedDraft(draft);
+      setShowResumeDialog(true);
+    }
+  }, []);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.name || formData.classification || formData.category) {
+        setIsSaving(true);
+        saveToStorage(currentStep);
+        setTimeout(() => setIsSaving(false), 500);
+      }
+    }, AUTO_SAVE_DELAY);
+
+    return () => clearTimeout(timer);
+  }, [formData, currentStep, completedSteps]);
+
+  // Save on beforeunload
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (formData.name || formData.classification) {
+        saveToStorage(currentStep);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [formData, currentStep, completedSteps]);
 
   useEffect(() => {
     if (showValidationBanner && formTopRef.current) {
@@ -75,6 +123,7 @@ export default function CreateCommunity() {
     e.preventDefault();
     const success = handleSubmit();
     if (success) {
+      clearStorage(); // Clear draft on successful submit
       navigate("/community");
     }
   };
@@ -101,7 +150,9 @@ export default function CreateCommunity() {
     setValidationErrors([]);
     
     if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      saveToStorage(nextStep); // Save immediately on step change
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -121,6 +172,33 @@ export default function CreateCommunity() {
     setValidationErrors([]);
     setCurrentStep(step);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleContinueEditing = () => {
+    if (savedDraft) {
+      restoreFromDraft(savedDraft);
+      setCurrentStep(savedDraft.currentStep);
+      setShowResumeDialog(false);
+    }
+  };
+
+  const handleStartFresh = () => {
+    clearStorage();
+    setShowResumeDialog(false);
+    setSavedDraft(null);
+    toast({
+      title: "Starting Fresh",
+      description: "Previous draft has been discarded"
+    });
+  };
+
+  const formatLastSaved = () => {
+    if (!lastSaved) return null;
+    try {
+      return formatDistanceToNow(lastSaved, { addSuffix: true });
+    } catch (error) {
+      return "just now";
+    }
   };
 
   return (
@@ -143,9 +221,28 @@ export default function CreateCommunity() {
             </Button>
             <div className="flex-1 min-w-0">
               <h1 className="text-xl md:text-2xl font-bold truncate">Create Community</h1>
-              <p className="text-xs md:text-sm text-muted-foreground truncate">
-                Step {currentStep} of {steps.length}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">
+                  Step {currentStep} of {steps.length}
+                </p>
+                {/* Auto-save indicator */}
+                {(isSaving || lastSaved) && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span className="hidden sm:inline">•</span>
+                    {isSaving ? (
+                      <>
+                        <Save className="w-3 h-3 animate-pulse" />
+                        <span className="hidden sm:inline">Saving...</span>
+                      </>
+                    ) : lastSaved ? (
+                      <>
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                        <span className="hidden sm:inline">Saved {formatLastSaved()}</span>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -660,6 +757,51 @@ export default function CreateCommunity() {
       </div>
       
       <Footer />
+
+      {/* Resume Draft Dialog */}
+      <Dialog open={showResumeDialog} onOpenChange={setShowResumeDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 w-5 text-primary" />
+              Continue Your Progress?
+            </DialogTitle>
+            <DialogDescription className="space-y-2 pt-2">
+              <p>You have an unsaved community draft.</p>
+              {savedDraft && (
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1 text-sm">
+                  {savedDraft.formData.name && (
+                    <p className="font-medium text-foreground">
+                      Community: "{savedDraft.formData.name}"
+                    </p>
+                  )}
+                  <p className="text-muted-foreground">
+                    Progress: Step {savedDraft.currentStep} of {steps.length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Last saved: {formatDistanceToNow(new Date(savedDraft.savedAt), { addSuffix: true })}
+                  </p>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={handleStartFresh}
+              className="w-full sm:w-auto"
+            >
+              Start Fresh
+            </Button>
+            <Button
+              onClick={handleContinueEditing}
+              className="w-full sm:w-auto"
+            >
+              Continue Editing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
