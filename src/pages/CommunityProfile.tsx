@@ -431,10 +431,6 @@ const CommunityProfile = () => {
                 <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
               </Button>
 
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share2 className="h-4 w-4" />
-              </Button>
-
               <CommunityMainMenu
                 isOwner={community.isOwner}
                 isAdmin={community.role === "Admin"}
