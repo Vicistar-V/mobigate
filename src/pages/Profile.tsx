@@ -10,7 +10,7 @@ import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { useState, useRef } from "react";
-import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts } from "@/data/posts";
+import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts, feedPosts } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import profileBanner from "@/assets/profile-banner.jpg";
@@ -539,10 +539,10 @@ const Profile = () => {
     ? wallStatusPostsForCarousel
     : wallStatusPostsForCarousel.filter(post => post.type.toLowerCase() === wallStatusFilter);
 
-  // Filter e-library content posts
+  // Filter e-library content posts (use feedPosts for rich content like Home page)
   const filteredPosts = contentFilter === "all" 
-    ? userPosts 
-    : userPosts.filter(post => post.type.toLowerCase() === contentFilter);
+    ? feedPosts 
+    : feedPosts.filter(post => post.type.toLowerCase() === contentFilter);
   
   const displayedPosts = filteredPosts.slice(0, visiblePostCount);
   const hasMorePosts = visiblePostCount < filteredPosts.length;
