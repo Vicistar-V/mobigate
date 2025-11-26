@@ -12,3 +12,23 @@ export interface Community {
   status: "Active" | "Inactive";
   location?: string;
 }
+
+export interface CommunityProfile extends Community {
+  motto?: string;
+  bannerImage?: string;
+  logoImage?: string;
+  followers: number;
+  likes: number;
+  fundRaiserEnabled: boolean;
+  mobiStoreEnabled: boolean;
+  quizGameEnabled: boolean;
+  donationEnabled: boolean;
+  visionStatement?: string;
+  originCountry?: string;
+  originState?: string;
+  originCity?: string;
+  officeAddress?: string;
+  telephone?: string;
+  emailAddress?: string;
+  defaultCurrency?: string;
+}
