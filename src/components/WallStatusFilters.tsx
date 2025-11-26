@@ -11,6 +11,7 @@ import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog
 interface WallStatusFiltersProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
+  showCounts?: boolean;
 }
 
 const primaryFilters = [
@@ -27,7 +28,7 @@ const moreFilters = [
   { value: "biz-catalogue", label: "Biz-Catalogue", icon: Package, count: "15.0k" },
 ];
 
-export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFiltersProps) => {
+export const WallStatusFilters = ({ activeFilter, onFilterChange, showCounts = true }: WallStatusFiltersProps) => {
   const { showDialog, Dialog } = useServiceUnavailableDialog();
   const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
 
@@ -54,7 +55,7 @@ export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFi
             className="text-sm md:text-base gap-1.5"
           >
             {Icon && <Icon className="w-3 h-3" />}
-            {option.label} ({option.count})
+            {showCounts ? `${option.label} (${option.count})` : option.label}
           </Button>
         );
       })}
@@ -82,7 +83,7 @@ export const WallStatusFilters = ({ activeFilter, onFilterChange }: WallStatusFi
                 className={isActive ? "bg-primary text-primary-foreground" : ""}
               >
                 <Icon className="w-4 h-4 mr-2" />
-                {option.label} ({option.count})
+                {showCounts ? `${option.label} (${option.count})` : option.label}
               </DropdownMenuItem>
             );
           })}

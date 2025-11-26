@@ -61,6 +61,9 @@ interface WallStatusCarouselProps {
   onDelete?: (postId: string) => void;
   onItemClick?: (post: Post) => void;
   showFriendsSuggestions?: boolean;
+  showViewToggle?: boolean;
+  showFilters?: boolean;
+  showFilterCounts?: boolean;
 }
 
 export const WallStatusCarousel = ({
@@ -75,7 +78,10 @@ export const WallStatusCarousel = ({
   onEdit,
   onDelete,
   onItemClick,
-  showFriendsSuggestions = false
+  showFriendsSuggestions = false,
+  showViewToggle = true,
+  showFilters = true,
+  showFilterCounts = true
 }: WallStatusCarouselProps) => {
   const currentUserId = useCurrentUserId();
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -117,28 +123,33 @@ export const WallStatusCarousel = ({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onViewChange(view === "normal" ? "large" : "normal")}
-            className="gap-1"
-          >
-            {view === "normal" ? (
-              <Columns2 className="h-4 w-4" />
-            ) : (
-              <LayoutGrid className="h-4 w-4" />
-            )}
-          </Button>
+          {showViewToggle && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onViewChange(view === "normal" ? "large" : "normal")}
+              className="gap-1"
+            >
+              {view === "normal" ? (
+                <Columns2 className="h-4 w-4" />
+              ) : (
+                <LayoutGrid className="h-4 w-4" />
+              )}
+            </Button>
+          )}
         </div>
       </div>
       
       {/* Media Type Filters */}
-      <div className="mb-4">
-        <WallStatusFilters 
-          activeFilter={filter} 
-          onFilterChange={onFilterChange} 
-        />
-      </div>
+      {showFilters && (
+        <div className="mb-4">
+          <WallStatusFilters 
+            activeFilter={filter} 
+            onFilterChange={onFilterChange}
+            showCounts={showFilterCounts}
+          />
+        </div>
+      )}
       
       {/* Normal View - Horizontal Carousel */}
       {view === "normal" && (
