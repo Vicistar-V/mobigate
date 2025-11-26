@@ -39,6 +39,15 @@ import profile6 from "@/assets/profile-james-wilson.jpg";
 import profile7 from "@/assets/profile-lisa-anderson.jpg";
 import profile8 from "@/assets/profile-jennifer-taylor.jpg";
 import profile9 from "@/assets/profile-robert-brown.jpg";
+import communityPerson1 from "@/assets/community-person-1.jpg";
+import communityPerson2 from "@/assets/community-person-2.jpg";
+import communityPerson3 from "@/assets/community-person-3.jpg";
+import communityPerson4 from "@/assets/community-person-4.jpg";
+import communityPerson5 from "@/assets/community-person-5.jpg";
+import communityPerson6 from "@/assets/community-person-6.jpg";
+import communityPerson7 from "@/assets/community-person-7.jpg";
+import communityPerson8 from "@/assets/community-person-8.jpg";
+import banner from "@/assets/profile-banner.jpg";
 
 interface CommunityMember {
   id: string;
@@ -52,7 +61,7 @@ interface CommunityMember {
 
 // Mock community members data
 const communityMembers: CommunityMember[] = [
-  { id: "1", name: "Chief Emeka Okafor", avatar: profile1, gender: "male", memberSince: "2015", mutualFriends: 45, isOnline: true },
+  { id: "1", name: "Chief Emeka Okafor", avatar: communityPerson1, gender: "male", memberSince: "2015", mutualFriends: 45, isOnline: true },
   { id: "2", name: "Sarah Johnson", avatar: profile2, gender: "female", memberSince: "2016", mutualFriends: 32, isOnline: true },
   { id: "3", name: "Michael Chen", avatar: profile3, gender: "male", memberSince: "2017", mutualFriends: 28, isOnline: false },
   { id: "4", name: "Emily Davis", avatar: profile4, gender: "female", memberSince: "2018", mutualFriends: 56, isOnline: true },
@@ -61,9 +70,233 @@ const communityMembers: CommunityMember[] = [
   { id: "7", name: "Lisa Anderson", avatar: profile7, gender: "female", memberSince: "2017", mutualFriends: 38, isOnline: true },
   { id: "8", name: "Jennifer Taylor", avatar: profile8, gender: "female", memberSince: "2018", mutualFriends: 29, isOnline: false },
   { id: "9", name: "Robert Brown", avatar: profile9, gender: "male", memberSince: "2015", mutualFriends: 67, isOnline: true },
-  { id: "10", name: "Dr. Ngozi Eze", avatar: profile2, gender: "female", memberSince: "2015", mutualFriends: 89, isOnline: true },
-  { id: "11", name: "Barr. Chidi Nwosu", avatar: profile3, gender: "male", memberSince: "2016", mutualFriends: 52, isOnline: false },
-  { id: "12", name: "Mrs. Amaka Johnson", avatar: profile4, gender: "female", memberSince: "2017", mutualFriends: 44, isOnline: true },
+  { id: "10", name: "Dr. Ngozi Eze", avatar: communityPerson2, gender: "female", memberSince: "2015", mutualFriends: 89, isOnline: true },
+  { id: "11", name: "Barr. Chidi Nwosu", avatar: communityPerson3, gender: "male", memberSince: "2016", mutualFriends: 52, isOnline: false },
+  { id: "12", name: "Mrs. Amaka Johnson", avatar: communityPerson4, gender: "female", memberSince: "2017", mutualFriends: 44, isOnline: true },
+];
+
+// Birthday posts with properly mapped imageUrl and local profile images
+const birthdayPosts = [
+  {
+    id: "birthday_1",
+    title: "Happy Birthday Chief Emeka Okafor! 🎉",
+    imageUrl: communityPerson1,
+    author: "Chief Emeka Okafor",
+    type: "Photo",
+    authorImage: communityPerson1,
+    timestamp: "Today",
+    description: "Celebrating another blessed year of life, wisdom, and leadership!",
+    likes: 245,
+    comments: 89,
+  },
+  {
+    id: "birthday_2",
+    title: "Birthday Celebration - Princess Adaeze 🎂",
+    imageUrl: communityPerson2,
+    author: "Princess Adaeze",
+    type: "Photo",
+    authorImage: communityPerson2,
+    timestamp: "Today",
+    description: "Grateful for another year of God's blessings and grace!",
+    likes: 189,
+    comments: 67,
+  },
+  {
+    id: "birthday_3",
+    title: "Alhaji Musa's Birthday Wishes 🎈",
+    imageUrl: communityPerson3,
+    author: "Alhaji Musa Ibrahim",
+    type: "Photo",
+    authorImage: communityPerson3,
+    timestamp: "Tomorrow",
+    description: "Join me in celebrating another year of Allah's blessings!",
+    likes: 156,
+    comments: 45,
+  },
+  {
+    id: "birthday_4",
+    title: "Pastor Grace Birthday Thanksgiving 🙏",
+    imageUrl: communityPerson4,
+    author: "Pastor Grace Okonkwo",
+    type: "Photo",
+    authorImage: communityPerson4,
+    timestamp: "This Week",
+    description: "Thanksgiving service for another year of ministry and service!",
+    likes: 203,
+    comments: 78,
+  },
+  {
+    id: "birthday_5",
+    title: "Sarah Johnson's Birthday Party 🎊",
+    imageUrl: profile2,
+    author: "Sarah Johnson",
+    type: "Photo",
+    authorImage: profile2,
+    timestamp: "This Week",
+    description: "Join me for a birthday celebration filled with joy and laughter!",
+    likes: 167,
+    comments: 54,
+  },
+  {
+    id: "birthday_6",
+    title: "Michael Chen Birthday Celebration 🎉",
+    imageUrl: profile3,
+    author: "Michael Chen",
+    type: "Photo",
+    authorImage: profile3,
+    timestamp: "Next Week",
+    description: "Celebrating another year around the sun with friends and family!",
+    likes: 142,
+    comments: 39,
+  },
+  {
+    id: "birthday_7",
+    title: "Emily Davis Birthday Wishes 🎂",
+    imageUrl: profile4,
+    author: "Emily Davis",
+    type: "Photo",
+    authorImage: profile4,
+    timestamp: "Next Week",
+    description: "Grateful for all the love and blessings on my special day!",
+    likes: 198,
+    comments: 71,
+  },
+  {
+    id: "birthday_8",
+    title: "James Wilson's Birthday Bash 🎈",
+    imageUrl: profile6,
+    author: "James Wilson",
+    type: "Photo",
+    authorImage: profile6,
+    timestamp: "Next Week",
+    description: "Come celebrate with me as I turn another year older and wiser!",
+    likes: 221,
+    comments: 92,
+  },
+  {
+    id: "birthday_9",
+    title: "Lisa Anderson Birthday Celebration 🎊",
+    imageUrl: profile7,
+    author: "Lisa Anderson",
+    type: "Photo",
+    authorImage: profile7,
+    timestamp: "Last Week",
+    description: "Thank you all for the wonderful birthday wishes and love!",
+    likes: 134,
+    comments: 48,
+  },
+  {
+    id: "birthday_10",
+    title: "Robert Brown's Birthday Celebration 🎉",
+    imageUrl: profile9,
+    author: "Robert Brown",
+    type: "Photo",
+    authorImage: profile9,
+    timestamp: "Last Month",
+    description: "Had an amazing birthday celebration with loved ones!",
+    likes: 178,
+    comments: 63,
+  },
+];
+
+// Special events posts with properly mapped imageUrl
+const specialEventPosts = [
+  {
+    id: "event_1",
+    title: "Annual Community Fundraising Gala 2024",
+    imageUrl: communityPerson5,
+    author: "Community Events Team",
+    type: "Photo",
+    authorImage: communityPerson5,
+    timestamp: "2 days ago",
+    description: "Join us for our biggest fundraising event of the year!",
+    likes: 342,
+    comments: 156,
+  },
+  {
+    id: "event_2",
+    title: "Youth Leadership Summit",
+    imageUrl: communityPerson6,
+    author: "Youth Department",
+    type: "Photo",
+    authorImage: communityPerson6,
+    timestamp: "5 days ago",
+    description: "Empowering the next generation of leaders in our community!",
+    likes: 289,
+    comments: 98,
+  },
+  {
+    id: "event_3",
+    title: "Cultural Heritage Festival",
+    imageUrl: communityPerson7,
+    author: "Cultural Affairs",
+    type: "Photo",
+    authorImage: communityPerson7,
+    timestamp: "1 week ago",
+    description: "Celebrating our rich cultural diversity and traditions!",
+    likes: 412,
+    comments: 187,
+  },
+  {
+    id: "event_4",
+    title: "Community Health & Wellness Fair",
+    imageUrl: communityPerson8,
+    author: "Health Committee",
+    type: "Photo",
+    authorImage: communityPerson8,
+    timestamp: "1 week ago",
+    description: "Free health screenings and wellness workshops for all members!",
+    likes: 267,
+    comments: 74,
+  },
+  {
+    id: "event_5",
+    title: "Annual Sports Tournament",
+    imageUrl: profile5,
+    author: "Sports Committee",
+    type: "Photo",
+    authorImage: profile5,
+    timestamp: "2 weeks ago",
+    description: "Bringing our community together through sports and competition!",
+    likes: 356,
+    comments: 142,
+  },
+  {
+    id: "event_6",
+    title: "Women's Empowerment Conference",
+    imageUrl: profile8,
+    author: "Women's Forum",
+    type: "Photo",
+    authorImage: profile8,
+    timestamp: "3 weeks ago",
+    description: "Inspiring and empowering women in our community to excel!",
+    likes: 298,
+    comments: 119,
+  },
+  {
+    id: "event_7",
+    title: "Education Scholarship Awards Ceremony",
+    imageUrl: banner,
+    author: "Education Committee",
+    type: "Photo",
+    authorImage: profile1,
+    timestamp: "1 month ago",
+    description: "Celebrating academic excellence and awarding scholarships!",
+    likes: 445,
+    comments: 203,
+  },
+  {
+    id: "event_8",
+    title: "End of Year Community Dinner",
+    imageUrl: profile1,
+    author: "Social Committee",
+    type: "Photo",
+    authorImage: profile1,
+    timestamp: "1 month ago",
+    description: "Join us for a grand dinner to celebrate our achievements!",
+    likes: 389,
+    comments: 167,
+  },
 ];
 
 export function CommunityMembershipTab() {
@@ -280,17 +513,17 @@ export function CommunityMembershipTab() {
         </div>
       </button>
 
-      {/* 4. Special Events Section */}
-      <WallStatusCarousel
-        items={wallStatusPosts.slice(0, 8) as any}
-        title="Special Events"
-        view={specialEventsView}
-        filter={specialEventsFilter}
-        onViewChange={setSpecialEventsView}
-        onFilterChange={setSpecialEventsFilter}
-        showViewToggle={true}
-        showFilterCounts={true}
-      />
+        {/* 4. Special Events Section */}
+        <WallStatusCarousel
+          items={specialEventPosts as any}
+          title="Special Events"
+          view={specialEventsView}
+          filter={specialEventsFilter}
+          onViewChange={setSpecialEventsView}
+          onFilterChange={setSpecialEventsFilter}
+          showViewToggle={true}
+          showFilterCounts={true}
+        />
 
       {/* 5. Members' Birthdays Section */}
       <section className="space-y-4">
@@ -339,7 +572,7 @@ export function CommunityMembershipTab() {
 
         {/* Birthday Posts Carousel */}
         <WallStatusCarousel
-          items={wallStatusPosts.slice(8, 16) as any}
+          items={birthdayPosts as any}
           title=""
           view={birthdayView}
           filter="all"
@@ -347,15 +580,16 @@ export function CommunityMembershipTab() {
           onFilterChange={() => {}}
           showViewToggle={false}
           showFilterCounts={false}
+          showFilters={false}
         />
       </section>
 
-      {/* 6. Recommended E-Library Contents */}
-      <ELibrarySection
-        activeFilter={eLibraryFilter}
-        onFilterChange={setELibraryFilter}
-        title="Recommended E-Library Contents"
-      />
+        {/* 6. Community Content */}
+        <ELibrarySection
+          activeFilter={eLibraryFilter}
+          onFilterChange={setELibraryFilter}
+          title="Community Content"
+        />
     </div>
   );
 }
