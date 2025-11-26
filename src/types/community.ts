@@ -31,4 +31,39 @@ export interface CommunityProfile extends Community {
   telephone?: string;
   emailAddress?: string;
   defaultCurrency?: string;
+  
+  // Designations
+  designation?: string;
+  classification?: string;
+  category?: string;
+  interest?: string;
+  
+  // Founded/Formed
+  foundedLocation?: string;
+  foundedDate?: Date;
+  parentBody?: string;
+  currentCity?: string;
+  
+  // Membership & Gender
+  gender?: "males" | "females" | "both";
+  populationStrength?: number;
+  maleMembers?: number;
+  femaleMembers?: number;
+  membershipChoice?: "mandatory" | "voluntary";
+  
+  // Leadership Style
+  leadershipStyle?: string;
+  topmostOffice?: string;
+  deputyOffice?: string;
+  officeTenure?: number;
+  staffCount?: number;
+  hasManagementCommittee?: boolean;
+  
+  // Meetings
+  generalMeetingSchedule?: string;
+  executiveMeetingSchedule?: string;
+  meetingAttendance?: "mandatory" | "voluntary";
+  
+  // Additional contacts
+  telephone2?: string;
 }
