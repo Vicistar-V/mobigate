@@ -461,30 +461,6 @@ const CommunityProfile = () => {
 
             {/* Status Tab */}
             <TabsContent value="status" className="space-y-6 mt-6">
-              {/* Motto */}
-              {community.motto && (
-                <div className="text-center py-4">
-                  <p className="text-lg italic text-muted-foreground">"{community.motto}"</p>
-                </div>
-              )}
-
-              {/* MobiFundRaiser Badge */}
-              {community.fundRaiserEnabled && (
-                <div className="flex justify-center mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-primary/10 border-primary text-primary hover:bg-primary/20"
-                    onClick={() => toast({
-                      title: "MobiFundRaiser",
-                      description: "Community fundraiser feature coming soon!",
-                    })}
-                  >
-                    MobiFundRaiser
-                  </Button>
-                </div>
-              )}
-
               {/* Wall Status */}
               <WallStatusCarousel
                 items={wallStatusPostsForCarousel}
