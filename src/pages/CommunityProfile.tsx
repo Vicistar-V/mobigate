@@ -27,6 +27,7 @@ import { CommunityMembershipTab } from "@/components/community/CommunityMembersh
 import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks";
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useEffect } from "react";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -42,6 +43,17 @@ const CommunityProfile = () => {
   // Get community data
   const community = getCommunityById(communityId || "1");
   const communityPosts = getCommunityPosts(communityId || "1");
+
+  // Filter community posts by content type
+  const filteredCommunityPosts = contentFilter === "all" 
+    ? communityPosts 
+    : communityPosts.filter(post => post.type.toLowerCase() === contentFilter);
+  const displayedCommunityPosts = filteredCommunityPosts.slice(0, visiblePostCount);
+
+  // Reset visible post count when content filter changes
+  useEffect(() => {
+    setVisiblePostCount(20);
+  }, [contentFilter]);
 
   if (!community) {
     return (
@@ -282,7 +294,7 @@ const CommunityProfile = () => {
 
               {/* Community Posts */}
               <div className="space-y-4">
-                {communityPosts.slice(0, visiblePostCount).map((post) => (
+                {displayedCommunityPosts.map((post) => (
                   <FeedPost
                     key={post.id}
                     id={post.id}
@@ -301,6 +313,26 @@ const CommunityProfile = () => {
                   />
                 ))}
               </div>
+
+              {/* Pagination Controls */}
+              {filteredCommunityPosts.length > visiblePostCount && (
+                <div className="flex justify-center mt-4">
+                  <Button
+                    variant="link"
+                    onClick={() => setVisiblePostCount(prev => prev + 20)}
+                    className="text-primary"
+                  >
+                    ...more
+                  </Button>
+                </div>
+              )}
+              {visiblePostCount > 20 && filteredCommunityPosts.length > 20 && (
+                <div className="flex justify-center mt-2">
+                  <Button variant="link" onClick={() => setVisiblePostCount(20)}>
+                    Less...
+                  </Button>
+                </div>
+              )}
 
               {/* People You May Know */}
               <PeopleYouMayKnow />
