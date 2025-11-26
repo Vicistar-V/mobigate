@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { CommunityFormData, MeetingSchedule } from "@/types/communityForm";
-import { meetingFrequencyOptions, dayOfWeekOptions, weekOfMonthOptions } from "@/data/communityFormOptions";
+import { meetingFrequencyOptions, dayOfWeekOptions, weekOfMonthOptions, monthOfYearOptions } from "@/data/communityFormOptions";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -70,11 +70,32 @@ export function MeetingsSection({
           </Select>
         </div>
 
-        {meeting.frequency === "monthly" && (
+        {(meeting.frequency === "quarterly" || meeting.frequency === "bi-annually" || meeting.frequency === "annually") && (
+          <div className="space-y-2">
+            <Label className="text-xs">Month</Label>
+            <Select 
+              value={meeting.monthOfYear || "january"}
+              onValueChange={(value) => updateMeeting(type, meeting.id, { monthOfYear: value as any })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOfYearOptions.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {(meeting.frequency === "monthly" || meeting.frequency === "quarterly" || meeting.frequency === "bi-annually" || meeting.frequency === "annually") && (
           <div className="space-y-2">
             <Label className="text-xs">Week of Month</Label>
             <Select 
-              value={meeting.weekOfMonth}
+              value={meeting.weekOfMonth || "first"}
               onValueChange={(value) => updateMeeting(type, meeting.id, { weekOfMonth: value as any })}
             >
               <SelectTrigger>
