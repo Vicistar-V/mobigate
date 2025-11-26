@@ -30,6 +30,7 @@ import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks"
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect } from "react";
+import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -41,6 +42,7 @@ const CommunityProfile = () => {
   const [visiblePostCount, setVisiblePostCount] = useState(20);
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
+  const [galleryFilter, setGalleryFilter] = useState<string>("all");
   const { toast } = useToast();
   const tabsSectionRef = useRef<HTMLDivElement>(null);
 
@@ -457,19 +459,22 @@ const CommunityProfile = () => {
 
             {/* Status Tab */}
             <TabsContent value="status" className="space-y-6 mt-6">
-              {/* Wall Status */}
+              {/* 1. Our People, Our Strength - Images only, no filters */}
+              <OurPeopleCarousel items={wallStatusPostsForCarousel} />
+
+              {/* 2. Recommended Community Gallery - Filters without counts, no grid toggle */}
               <WallStatusCarousel
                 items={wallStatusPostsForCarousel}
-                adSlots={adSlots}
-                premiumAdSlots={wallStatusPremiumAdSlots}
-                view={wallStatusView}
-                filter={wallStatusFilter}
-                onViewChange={setWallStatusView}
-                onFilterChange={setWallStatusFilter}
-                showFriendsSuggestions={true}
+                title="Recommended Community Gallery"
+                view="normal"
+                filter={galleryFilter}
+                onViewChange={() => {}}
+                onFilterChange={setGalleryFilter}
+                showViewToggle={false}
+                showFilterCounts={false}
               />
 
-              {/* Create Post Button */}
+              {/* 3. Create Post Button */}
               <div className="space-y-2">
                 <Button
                   onClick={() => toast({
@@ -487,11 +492,25 @@ const CommunityProfile = () => {
                 </p>
               </div>
 
-              {/* E-Library Section */}
+              {/* 4. Wall Status - Full features */}
+              <WallStatusCarousel
+                items={wallStatusPostsForCarousel}
+                adSlots={adSlots}
+                premiumAdSlots={wallStatusPremiumAdSlots}
+                view={wallStatusView}
+                filter={wallStatusFilter}
+                onViewChange={setWallStatusView}
+                onFilterChange={setWallStatusFilter}
+                showFriendsSuggestions={true}
+                showViewToggle={true}
+                showFilterCounts={true}
+              />
+
+              {/* 5. Recommended E-Library Contents */}
               <ELibrarySection
                 activeFilter={contentFilter}
                 onFilterChange={setContentFilter}
-                title="Recommended Community Gallery"
+                title="Recommended E-Library Contents"
               />
 
               {/* Community Posts */}
