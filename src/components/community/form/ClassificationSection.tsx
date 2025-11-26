@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { CommunityFormData, CommunityInterest } from "@/types/communityForm";
 import { classificationOptions, categoryOptions } from "@/data/communityFormOptions";
+import { cn } from "@/lib/utils";
 
 interface ClassificationSectionProps {
   formData: CommunityFormData;
@@ -13,16 +14,16 @@ interface ClassificationSectionProps {
 
 export function ClassificationSection({ formData, updateField, errors }: ClassificationSectionProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="classification" className="text-sm font-semibold">
+        <Label htmlFor="classification" className="text-sm font-medium">
           Classification <span className="text-destructive">*</span>
         </Label>
         <Select 
           value={formData.classification} 
           onValueChange={(value) => updateField("classification", value as any)}
         >
-          <SelectTrigger id="classification" className={errors.classification ? "border-destructive" : ""}>
+          <SelectTrigger id="classification" className={cn("h-11", errors.classification && "border-destructive focus-visible:ring-destructive")}>
             <SelectValue placeholder="Select classification" />
           </SelectTrigger>
           <SelectContent>
@@ -39,14 +40,14 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="category" className="text-sm font-semibold">
-          Choose Type/Category <span className="text-destructive">*</span>
+        <Label htmlFor="category" className="text-sm font-medium">
+          Type/Category <span className="text-destructive">*</span>
         </Label>
         <Select 
           value={formData.category} 
           onValueChange={(value) => updateField("category", value as any)}
         >
-          <SelectTrigger id="category" className={errors.category ? "border-destructive" : ""}>
+          <SelectTrigger id="category" className={cn("h-11", errors.category && "border-destructive focus-visible:ring-destructive")}>
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
@@ -63,8 +64,8 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">Community Interests</Label>
-        <RadioGroup 
+        <Label className="text-sm font-medium">Community Interests</Label>
+        <RadioGroup
           value={formData.interest} 
           onValueChange={(value) => updateField("interest", value as CommunityInterest)}
           className="flex gap-4"
@@ -81,7 +82,7 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="designation" className="text-sm font-semibold">
+        <Label htmlFor="designation" className="text-sm font-medium">
           Designation <span className="text-destructive">*</span>
         </Label>
         <Input
@@ -89,7 +90,7 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
           value={formData.designation}
           onChange={(e) => updateField("designation", e.target.value)}
           placeholder="Enter community designation"
-          className={errors.designation ? "border-destructive" : ""}
+          className={cn("h-11", errors.designation && "border-destructive focus-visible:ring-destructive")}
         />
         {errors.designation && (
           <p className="text-xs text-destructive">{errors.designation}</p>
@@ -97,13 +98,13 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">Founding/Creating</Label>
+        <Label className="text-sm font-medium">Founder</Label>
         <Input
           value={formData.founderName}
           disabled
-          className="bg-muted"
+          className="bg-muted h-11"
         />
-        <p className="text-xs text-muted-foreground">You are set as the founder by default</p>
+        <p className="text-xs text-muted-foreground">You are set as the founder</p>
       </div>
     </div>
   );

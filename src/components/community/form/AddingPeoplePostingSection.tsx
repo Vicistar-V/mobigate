@@ -23,10 +23,10 @@ export function AddingPeoplePostingSection({
     formData.whoCanEditPauseDeleteApprove === "specified-admin";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Adding People */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Adding People</h3>
+        <h3 className="text-sm font-medium">Adding People</h3>
 
         <div className="space-y-2">
           <Label htmlFor="who-can-add">Who Can Add Members</Label>
@@ -88,7 +88,7 @@ export function AddingPeoplePostingSection({
 
       {/* Posting on Community */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Posting on Community</h3>
+        <h3 className="text-sm font-medium">Posting on Community</h3>
 
         <div className="space-y-2">
           <Label htmlFor="who-can-post">Who Can Post</Label>

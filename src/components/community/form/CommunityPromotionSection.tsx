@@ -24,7 +24,7 @@ export function CommunityPromotionSection({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="text-sm text-muted-foreground">
         Control how your community is discovered and who can see it.
       </div>

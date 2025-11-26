@@ -8,6 +8,7 @@ import { CommunityFormData } from "@/types/communityForm";
 import { leadershipStyleOptions, topmostOfficeOptions, deputyOfficeOptions } from "@/data/communityFormOptions";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface LeadershipSectionProps {
   formData: CommunityFormData;
@@ -50,16 +51,16 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="leadershipStyle" className="text-sm font-semibold">
+        <Label htmlFor="leadershipStyle" className="text-sm font-medium">
           Selection/Election Style <span className="text-destructive">*</span>
         </Label>
         <Select 
           value={formData.leadershipStyle} 
           onValueChange={(value) => updateField("leadershipStyle", value as any)}
         >
-          <SelectTrigger id="leadershipStyle" className={errors.leadershipStyle ? "border-destructive" : ""}>
+          <SelectTrigger id="leadershipStyle" className={cn("h-11", errors.leadershipStyle && "border-destructive focus-visible:ring-destructive")}>
             <SelectValue placeholder="Select leadership style" />
           </SelectTrigger>
           <SelectContent>
@@ -77,15 +78,15 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">Topmost Office</Label>
+          <Label className="text-sm font-medium">Topmost Office</Label>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => setShowCustomTopmost(!showCustomTopmost)}
           >
-            <Plus className="h-3 w-3" />
-            Add Custom
+            <Plus className="h-3 w-3 mr-1" />
+            Custom
           </Button>
         </div>
 
@@ -96,8 +97,9 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
               value={formData.customTopmostOffice}
               onChange={(e) => updateField("customTopmostOffice", e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && addCustomTopmostOffice()}
+              className="h-10"
             />
-            <Button type="button" size="sm" onClick={addCustomTopmostOffice}>
+            <Button type="button" size="sm" onClick={addCustomTopmostOffice} className="shrink-0">
               Add
             </Button>
           </div>
@@ -130,15 +132,15 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold">Deputy Office</Label>
+          <Label className="text-sm font-medium">Deputy Office</Label>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => setShowCustomDeputy(!showCustomDeputy)}
           >
-            <Plus className="h-3 w-3" />
-            Add Custom
+            <Plus className="h-3 w-3 mr-1" />
+            Custom
           </Button>
         </div>
 
@@ -149,8 +151,9 @@ export function LeadershipSection({ formData, updateField, errors }: LeadershipS
               value={formData.customDeputyOffice}
               onChange={(e) => updateField("customDeputyOffice", e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && addCustomDeputyOffice()}
+              className="h-10"
             />
-            <Button type="button" size="sm" onClick={addCustomDeputyOffice}>
+            <Button type="button" size="sm" onClick={addCustomDeputyOffice} className="shrink-0">
               Add
             </Button>
           </div>

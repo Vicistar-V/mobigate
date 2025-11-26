@@ -26,9 +26,9 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
     setStaffDisplay(formData.staffCount.toString());
   }, [formData.staffCount]);
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="officeTenure" className="text-sm font-semibold">
+        <Label htmlFor="officeTenure" className="text-sm font-medium">
           Office Tenure (Years)
         </Label>
         <Input
@@ -37,6 +37,7 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
           min="1"
           max="10"
           value={tenureDisplay}
+          className="h-11"
           onChange={(e) => {
             const value = e.target.value;
             setTenureDisplay(value);
@@ -60,7 +61,7 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="staffCount" className="text-sm font-semibold">
+        <Label htmlFor="staffCount" className="text-sm font-medium">
           Staff & Employees Count
         </Label>
         <Input
@@ -68,6 +69,7 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
           type="number"
           min="0"
           value={staffDisplay}
+          className="h-11"
           onChange={(e) => {
             const value = e.target.value;
             setStaffDisplay(value);
