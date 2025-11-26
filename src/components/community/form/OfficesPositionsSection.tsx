@@ -30,6 +30,20 @@ export function OfficesPositionsSection({
   const handleAddPosition = () => {
     if (!newPositionTitle.trim()) return;
 
+    // Check if position with same title already exists
+    const positionExists = formData.positions.some(
+      p => p.title.toLowerCase() === newPositionTitle.trim().toLowerCase()
+    );
+
+    if (positionExists) {
+      toast({
+        title: "Duplicate Position",
+        description: `"${newPositionTitle}" has already been added. Each position can only be assigned once.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const nextSlotNumber = formData.positions.length + 1;
 
     const newPosition: OfficialPosition = {
@@ -76,7 +90,10 @@ export function OfficesPositionsSection({
     const positions: string[] = [];
     if (formData.topmostOffice) positions.push(formData.topmostOffice);
     if (formData.deputyOffice) positions.push(formData.deputyOffice);
-    return positions;
+    
+    // Filter out positions that have already been added
+    const existingTitles = formData.positions.map(p => p.title);
+    return positions.filter(title => !existingTitles.includes(title));
   };
 
   // Format serial number with leading zero
