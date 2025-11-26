@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CommunityFormData, defaultCommunityFormData, OfficialPosition, MeetingSchedule } from "@/types/communityForm";
+import { CommunityFormData, defaultCommunityFormData, OfficialPosition, MeetingSchedule, CommunityEvent } from "@/types/communityForm";
 import { toast } from "@/hooks/use-toast";
 
 export function useCommunityForm() {
@@ -74,6 +74,29 @@ export function useCommunityForm() {
     }));
   };
 
+  const addEvent = (event: CommunityEvent) => {
+    setFormData(prev => ({
+      ...prev,
+      events: [...prev.events, event]
+    }));
+  };
+
+  const removeEvent = (eventId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      events: prev.events.filter(e => e.id !== eventId)
+    }));
+  };
+
+  const updateEvent = (eventId: string, updates: Partial<CommunityEvent>) => {
+    setFormData(prev => ({
+      ...prev,
+      events: prev.events.map(e => 
+        e.id === eventId ? { ...e, ...updates } : e
+      )
+    }));
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof CommunityFormData, string>> = {};
 
@@ -139,6 +162,9 @@ export function useCommunityForm() {
     addMeeting,
     removeMeeting,
     updateMeeting,
+    addEvent,
+    removeEvent,
+    updateEvent,
     handleSubmit,
     resetForm,
     validateForm

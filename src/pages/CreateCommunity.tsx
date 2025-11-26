@@ -16,6 +16,13 @@ import { LeadershipSection } from "@/components/community/form/LeadershipSection
 import { AdministrationSection } from "@/components/community/form/AdministrationSection";
 import { MeetingsSection } from "@/components/community/form/MeetingsSection";
 import { OfficesPositionsSection } from "@/components/community/form/OfficesPositionsSection";
+import { EventsActivitiesSection } from "@/components/community/form/EventsActivitiesSection";
+import { OriginationContactsSection } from "@/components/community/form/OriginationContactsSection";
+import { PrivacySettingsSection } from "@/components/community/form/PrivacySettingsSection";
+import { GeneralSettingsSection } from "@/components/community/form/GeneralSettingsSection";
+import { CommunityPromotionSection } from "@/components/community/form/CommunityPromotionSection";
+import { CommunityElectionsSection } from "@/components/community/form/CommunityElectionsSection";
+import { AddingPeoplePostingSection } from "@/components/community/form/AddingPeoplePostingSection";
 
 export default function CreateCommunity() {
   const navigate = useNavigate();
@@ -29,6 +36,9 @@ export default function CreateCommunity() {
     addMeeting,
     removeMeeting,
     updateMeeting,
+    addEvent,
+    removeEvent,
+    updateEvent,
     handleSubmit,
   } = useCommunityForm();
 
@@ -214,6 +224,105 @@ export default function CreateCommunity() {
                       addPosition={addPosition}
                       removePosition={removePosition}
                       updatePosition={updatePosition}
+                      errors={errors}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Events & Activities */}
+                <AccordionItem value="events">
+                  <AccordionTrigger className="text-base font-semibold">
+                    Events & Activities
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <EventsActivitiesSection
+                      formData={formData}
+                      addEvent={addEvent}
+                      removeEvent={removeEvent}
+                      errors={errors}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Origination & Contacts */}
+                <AccordionItem value="origination">
+                  <AccordionTrigger className="text-base font-semibold">
+                    Origination & Contacts
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <OriginationContactsSection
+                      formData={formData}
+                      updateField={updateField}
+                      errors={errors}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Privacy Settings */}
+                <AccordionItem value="privacy">
+                  <AccordionTrigger className="text-base font-semibold">
+                    Privacy Settings
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <PrivacySettingsSection
+                      formData={formData}
+                      updateField={updateField}
+                      errors={errors}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* General Settings */}
+                <AccordionItem value="general-settings">
+                  <AccordionTrigger className="text-base font-semibold">
+                    General Settings
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <GeneralSettingsSection
+                      formData={formData}
+                      updateField={updateField}
+                      errors={errors}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Community Promotion */}
+                <AccordionItem value="promotion">
+                  <AccordionTrigger className="text-base font-semibold">
+                    Community Promotion
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CommunityPromotionSection
+                      formData={formData}
+                      updateField={updateField}
+                      errors={errors}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Community Elections */}
+                <AccordionItem value="elections">
+                  <AccordionTrigger className="text-base font-semibold">
+                    Community Elections
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CommunityElectionsSection
+                      formData={formData}
+                      updateField={updateField}
+                      errors={errors}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Adding People & Posting */}
+                <AccordionItem value="people-posting">
+                  <AccordionTrigger className="text-base font-semibold">
+                    Adding People & Posting
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <AddingPeoplePostingSection
+                      formData={formData}
+                      updateField={updateField}
                       errors={errors}
                     />
                   </AccordionContent>

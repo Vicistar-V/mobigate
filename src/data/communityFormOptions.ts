@@ -134,12 +134,49 @@ export const monthOfYearOptions: { value: MonthOfYear; label: string }[] = [
 
 // Mock admin options for UI demonstration
 export const mockAdminOptions = [
-  { id: "admin-1", name: "John Doe" },
-  { id: "admin-2", name: "Jane Smith" },
-  { id: "admin-3", name: "Michael Johnson" },
-  { id: "admin-4", name: "Sarah Williams" },
-  { id: "admin-5", name: "David Brown" },
-  { id: "admin-6", name: "Emily Davis" },
-  { id: "admin-7", name: "Robert Miller" },
-  { id: "admin-8", name: "Lisa Anderson" }
+  { id: "admin-1", name: "Admin-1" },
+  { id: "admin-2", name: "Admin-2" },
+  { id: "admin-3", name: "Admin-3" },
+  { id: "admin-4", name: "Admin-4" },
+  { id: "admin-5", name: "Admin-5" },
+];
+
+// Access Level Options
+export const accessLevelOptions = [
+  { value: "all-members", label: "All Members" },
+  { value: "only-active-members", label: "Only Active Members" },
+  { value: "executives-officers", label: "Executives/Officers" },
+  { value: "only-admins", label: "Only Admins" },
+  { value: "only-admin-1", label: "Only Admin-1" },
+  { value: "specified-admin", label: "Only a Specified Admin [1-20]" },
+];
+
+// Promotion Visibility Options (for multi-select)
+export const promotionVisibilityOptions = [
+  { value: "all-public", label: "All Public" },
+  { value: "common-state-origin", label: "Common State of Origin" },
+  { value: "all-connections", label: "All Connections [Same Town, City, School, Workplace, Location, etc]" },
+  { value: "members-friends", label: "Members' Friends" },
+  { value: "members-other-communities", label: "Members' Other Communities" },
+];
+
+// Event Nature Options
+export const eventNatureOptions = [
+  { value: "cultural", label: "Cultural" },
+  { value: "corporate", label: "Corporate" },
+  { value: "religious", label: "Religious" },
+  { value: "social", label: "Social" },
+  { value: "financial", label: "Financial" },
+];
+
+// Currency Options
+export const currencyOptions = [
+  { value: "NGN", label: "Nigerian Naira (₦)" },
+  { value: "USD", label: "US Dollar ($)" },
+  { value: "GBP", label: "British Pound (£)" },
+  { value: "EUR", label: "Euro (€)" },
+  { value: "GHS", label: "Ghanaian Cedi (₵)" },
+  { value: "KES", label: "Kenyan Shilling (KSh)" },
+  { value: "ZAR", label: "South African Rand (R)" },
+  { value: "custom", label: "Custom Currency" },
 ];

@@ -60,6 +60,27 @@ export type MonthOfYear =
   | "november" 
   | "december";
 
+export type AccessLevel = 
+  | "all-members"
+  | "only-active-members"
+  | "executives-officers"
+  | "only-admins"
+  | "only-admin-1"
+  | "specified-admin";
+
+export type PromotionVisibility = 
+  | "all-public"
+  | "common-state-origin"
+  | "all-connections"
+  | "members-friends"
+  | "members-other-communities";
+
+export type EventNature = "cultural" | "corporate" | "religious" | "social" | "financial";
+
+export type EventAttendance = "mandatory" | "voluntary";
+
+export type GuestAccessType = "allowed" | "not-allowed";
+
 export interface OfficialPosition {
   id: string;
   title: string;
@@ -77,6 +98,20 @@ export interface MeetingSchedule {
   weekOfMonth?: WeekOfMonth;
   dayOfWeek: DayOfWeek;
   time?: string;
+}
+
+export interface CommunityEvent {
+  id: string;
+  name: string;
+  nature: EventNature;
+  approvedDues: number;
+  contraventions: string;
+  contraventionCount: number;
+  timeframe: string;
+  validityDate: string;
+  attendance: EventAttendance;
+  penaltyAbsentPercent: number;
+  penaltyOwingPercent: number;
 }
 
 export interface CommunityFormData {
@@ -117,6 +152,61 @@ export interface CommunityFormData {
   
   // Offices & Positions
   positions: OfficialPosition[];
+  
+  // Events & Activities
+  events: CommunityEvent[];
+  
+  // Origination
+  originCountry: string;
+  originState: string;
+  originCity: string;
+  visionStatement: string;
+  
+  // Official Contacts
+  officeAddress: string;
+  telephone: string;
+  emailAddress: string;
+  
+  // Official Currency
+  defaultCurrency: string;
+  customCurrency: string;
+  
+  // Privacy Settings
+  privacyCommunityFinances: AccessLevel;
+  privacyMembersFinancialStatus: AccessLevel;
+  privacyMembersComplaints: AccessLevel;
+  privacyRecordingMeetings: AccessLevel;
+  privacySeeGeneralPosts: AccessLevel;
+  privacySeeMembersComments: AccessLevel;
+  
+  // General Settings
+  handoverTime: string;
+  communityAccountManager: string;
+  meetingsDownloadFee: number;
+  publicAccessFee: number;
+  complaintBoxFee: number;
+  postingFee: number;
+  
+  // Community Promotion
+  communitySuggestion: PromotionVisibility[];
+  communityVisibility: PromotionVisibility[];
+  publicGuestUsers: GuestAccessType;
+  
+  // Community Elections
+  whoCanVote: AccessLevel;
+  whoCanViewElectionResults: AccessLevel;
+  whoCanViewAccreditedVoters: AccessLevel;
+  whoCanDownloadResources: AccessLevel;
+  
+  // Adding People
+  whoCanAdd: AccessLevel;
+  whoCanApproveNewMembers: AccessLevel;
+  whoCanRemoveSuspendBlock: AccessLevel;
+  
+  // Posting on Community
+  whoCanPost: AccessLevel;
+  whoCanEditPauseDeleteApprove: AccessLevel;
+  specifiedAdminNumber: number;
 }
 
 export const defaultCommunityFormData: CommunityFormData = {
@@ -141,5 +231,40 @@ export const defaultCommunityFormData: CommunityFormData = {
   generalMeetings: [],
   executiveMeetings: [],
   attendanceRegister: true,
-  positions: []
+  positions: [],
+  events: [],
+  originCountry: "",
+  originState: "",
+  originCity: "",
+  visionStatement: "",
+  officeAddress: "",
+  telephone: "",
+  emailAddress: "",
+  defaultCurrency: "NGN",
+  customCurrency: "",
+  privacyCommunityFinances: "only-admins",
+  privacyMembersFinancialStatus: "only-admins",
+  privacyMembersComplaints: "only-admins",
+  privacyRecordingMeetings: "executives-officers",
+  privacySeeGeneralPosts: "all-members",
+  privacySeeMembersComments: "all-members",
+  handoverTime: "",
+  communityAccountManager: "",
+  meetingsDownloadFee: 0,
+  publicAccessFee: 0,
+  complaintBoxFee: 0,
+  postingFee: 0,
+  communitySuggestion: [],
+  communityVisibility: [],
+  publicGuestUsers: "not-allowed",
+  whoCanVote: "only-active-members",
+  whoCanViewElectionResults: "all-members",
+  whoCanViewAccreditedVoters: "executives-officers",
+  whoCanDownloadResources: "executives-officers",
+  whoCanAdd: "only-admins",
+  whoCanApproveNewMembers: "only-admins",
+  whoCanRemoveSuspendBlock: "only-admins",
+  whoCanPost: "all-members",
+  whoCanEditPauseDeleteApprove: "only-admins",
+  specifiedAdminNumber: 1
 };
