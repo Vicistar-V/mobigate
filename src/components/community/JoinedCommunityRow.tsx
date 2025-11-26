@@ -2,18 +2,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Community } from "@/types/community";
 import { Users, ChevronRight, MapPin } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface JoinedCommunityRowProps {
   community: Community;
 }
 
 export function JoinedCommunityRow({ community }: JoinedCommunityRowProps) {
+  const navigate = useNavigate();
+
   const handleClick = () => {
-    toast({
-      title: "Coming Soon!",
-      description: `${community.name} details will be available soon.`,
-    });
+    navigate(`/community/${community.id}`);
   };
 
   // Get icon based on community type

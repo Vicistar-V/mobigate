@@ -2,18 +2,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Community } from "@/types/community";
 import { Users } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface CommunityOwnerCardProps {
   community: Community;
 }
 
 export function CommunityOwnerCard({ community }: CommunityOwnerCardProps) {
+  const navigate = useNavigate();
+
   const handleClick = () => {
-    toast({
-      title: "Coming Soon!",
-      description: `${community.name} details will be available soon.`,
-    });
+    navigate(`/community/${community.id}`);
   };
 
   return (
