@@ -67,38 +67,78 @@ export function CommunityMainMenu({
               </AccordionContent>
             </AccordionItem>
 
-            {/* Members Section */}
-            <AccordionItem value="members">
-              <AccordionTrigger className="text-base">Members</AccordionTrigger>
-              <AccordionContent className="space-y-1">
+            {/* MEMBERSHIP Section */}
+            <AccordionItem value="membership">
+              <AccordionTrigger className="text-base font-semibold">MEMBERSHIP</AccordionTrigger>
+              <AccordionContent>
+                {/* Nested accordion for View Members */}
+                <Accordion type="multiple" className="pl-2">
+                  <AccordionItem value="view-members" className="border-none">
+                    <AccordionTrigger className="text-sm py-2">View Members</AccordionTrigger>
+                    <AccordionContent className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("Members")}
+                      >
+                        Members
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("Chat Members")}
+                      >
+                        Chat Members
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("Gift Members")}
+                      >
+                        Gift Members
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("Block Members")}
+                      >
+                        Block Members
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+                
+                {/* Single item: Add Friends */}
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Login")}
+                  className="w-full justify-start pl-2 mt-1"
+                  onClick={() => handleMenuClick("Add Friends")}
                 >
-                  Login
+                  Add Friends
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Logout")}
-                >
-                  Logout
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Exit Community")}
-                >
-                  Exit Community
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Exit Request")}
-                >
-                  Exit Request
-                </Button>
+                
+                {/* Nested accordion for Invite Members */}
+                <Accordion type="multiple" className="pl-2 mt-1">
+                  <AccordionItem value="invite-members" className="border-none">
+                    <AccordionTrigger className="text-sm py-2">Invite Members</AccordionTrigger>
+                    <AccordionContent className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("Invite Mobigate Users")}
+                      >
+                        Invite Mobigate Users
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("Invite Non-Mobigate Users")}
+                      >
+                        Invite Non-Mobigate Users
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </AccordionContent>
             </AccordionItem>
 
