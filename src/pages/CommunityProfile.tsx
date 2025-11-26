@@ -39,6 +39,8 @@ const CommunityProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [visiblePostCount, setVisiblePostCount] = useState(20);
+  const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
+  const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const { toast } = useToast();
   const tabsSectionRef = useRef<HTMLDivElement>(null);
 
@@ -488,10 +490,10 @@ const CommunityProfile = () => {
                 items={wallStatusPostsForCarousel}
                 adSlots={adSlots}
                 premiumAdSlots={wallStatusPremiumAdSlots}
-                view="normal"
-                filter="all"
-                onViewChange={() => {}}
-                onFilterChange={() => {}}
+                view={wallStatusView}
+                filter={wallStatusFilter}
+                onViewChange={setWallStatusView}
+                onFilterChange={setWallStatusFilter}
                 showFriendsSuggestions={true}
               />
 
