@@ -8,6 +8,7 @@ import { CommunityFormData, OfficialPosition, PositionLevel } from "@/types/comm
 import { Plus, Trash2, ExternalLink } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
+import { topmostOfficeOptions, deputyOfficeOptions } from "@/data/communityFormOptions";
 
 interface OfficesPositionsSectionProps {
   formData: CommunityFormData;
@@ -26,6 +27,7 @@ export function OfficesPositionsSection({
 }: OfficesPositionsSectionProps) {
   const [newPositionTitle, setNewPositionTitle] = useState("");
   const [newPositionLevel, setNewPositionLevel] = useState<PositionLevel>("topmost");
+  const [inputMode, setInputMode] = useState<"select" | "custom">("select");
 
   const handleAddPosition = () => {
     if (!newPositionTitle.trim()) return;
@@ -87,13 +89,28 @@ export function OfficesPositionsSection({
 
   // Get available office titles based on what user selected
   const getAvailablePositions = () => {
-    const positions: string[] = [];
-    if (formData.topmostOffice) positions.push(formData.topmostOffice);
-    if (formData.deputyOffice) positions.push(formData.deputyOffice);
+    // Combine all topmost and deputy office options
+    const allPositions = [...topmostOfficeOptions, ...deputyOfficeOptions];
     
     // Filter out positions that have already been added
-    const existingTitles = formData.positions.map(p => p.title);
-    return positions.filter(title => !existingTitles.includes(title));
+    const existingTitles = formData.positions.map(p => p.title.toLowerCase());
+    return allPositions.filter(title => 
+      !existingTitles.includes(title.toLowerCase())
+    );
+  };
+
+  const getFilteredTopmostOptions = () => {
+    const existingTitles = formData.positions.map(p => p.title.toLowerCase());
+    return topmostOfficeOptions.filter(title => 
+      !existingTitles.includes(title.toLowerCase())
+    );
+  };
+
+  const getFilteredDeputyOptions = () => {
+    const existingTitles = formData.positions.map(p => p.title.toLowerCase());
+    return deputyOfficeOptions.filter(title => 
+      !existingTitles.includes(title.toLowerCase())
+    );
   };
 
   // Format serial number with leading zero
@@ -131,28 +148,80 @@ export function OfficesPositionsSection({
 
           <div className="space-y-2">
             <Label className="text-xs">Position Title</Label>
-            {getAvailablePositions().length > 0 ? (
-              <Select 
-                value={newPositionTitle}
-                onValueChange={setNewPositionTitle}
+            
+            {/* Input Mode Toggle */}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={inputMode === "select" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setInputMode("select")}
+                className="flex-1"
               >
-                <SelectTrigger>
+                Select from List
+              </Button>
+              <Button
+                type="button"
+                variant={inputMode === "custom" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setInputMode("custom")}
+                className="flex-1"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Create Office
+              </Button>
+            </div>
+
+            {/* Conditional Input Based on Mode */}
+            {inputMode === "select" ? (
+              <Select value={newPositionTitle} onValueChange={setNewPositionTitle}>
+                <SelectTrigger className="bg-card">
                   <SelectValue placeholder="Select position title" />
                 </SelectTrigger>
-                <SelectContent>
-                  {getAvailablePositions().map(title => (
-                    <SelectItem key={title} value={title}>
-                      {title}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="max-h-60">
+                  {getFilteredTopmostOptions().length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                        Topmost Positions
+                      </div>
+                      {getFilteredTopmostOptions().map((title) => (
+                        <SelectItem key={title} value={title}>
+                          {title}
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
+                  {getFilteredDeputyOptions().length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-1">
+                        Deputy Positions
+                      </div>
+                      {getFilteredDeputyOptions().map((title) => (
+                        <SelectItem key={title} value={title}>
+                          {title}
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
+                  {getFilteredTopmostOptions().length === 0 && getFilteredDeputyOptions().length === 0 && (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      All positions have been added
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             ) : (
               <Input
-                placeholder="Enter position title"
+                placeholder="Enter custom position title (e.g., Treasurer)"
                 value={newPositionTitle}
                 onChange={(e) => setNewPositionTitle(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleAddPosition()}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddPosition();
+                  }
+                }}
+                className="bg-card"
               />
             )}
           </div>
