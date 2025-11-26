@@ -27,6 +27,9 @@ import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { FeedPost } from "@/components/FeedPost";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { PremiumAdCardProps } from "@/components/PremiumAdCard";
+import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { communityPeople } from "@/data/communityPeopleData";
 import { wallStatusPosts, feedPosts } from "@/data/posts";
 
@@ -77,7 +80,71 @@ const communityMembers: CommunityMember[] = [
 ];
 
 // Birthday posts with properly mapped imageUrl and local profile images
-const birthdayPosts = [
+  // Premium ad slots for community content feed
+  const premiumAdSlots: PremiumAdCardProps[] = [
+    {
+      id: "premium-membership-feed-1",
+      advertiser: {
+        name: "Kerex Group Co.,Ltd",
+        verified: true,
+      },
+      content: {
+        headline: "Professional Leading Manufacturer of Heavy Equipment",
+        description: "Drilling Rig | Air Compressor | Generator - Quality You Can Trust.",
+        ctaText: "Get in touch",
+        ctaUrl: "https://example.com/kerex",
+      },
+      media: {
+        type: "image" as const,
+        items: [{ url: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1200&q=80" }],
+      },
+      layout: "standard" as const,
+      duration: 15,
+    },
+    {
+      id: "premium-membership-feed-2",
+      advertiser: {
+        name: "TechStart Business Solutions",
+        verified: true,
+      },
+      content: {
+        headline: "Scale Your Business with Cloud Solutions",
+        description: "Enterprise-grade tools at startup prices. Get 50% off your first 3 months.",
+        ctaText: "Start Free Trial",
+        ctaUrl: "https://example.com/techstart",
+      },
+      media: {
+        type: "image" as const,
+        items: [{ url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80" }],
+      },
+      layout: "standard" as const,
+      duration: 15,
+    },
+    {
+      id: "premium-membership-feed-3",
+      advertiser: {
+        name: "Elite Fitness Center",
+        verified: true,
+      },
+      content: {
+        headline: "Get Fit, Stay Healthy",
+        description: "Join Nigeria's premier fitness destination. First month 50% off!",
+        ctaText: "Join Now",
+        ctaUrl: "https://example.com/fitness",
+      },
+      media: {
+        type: "carousel" as const,
+        items: [
+          { url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80", caption: "State-of-the-art equipment" },
+          { url: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80", caption: "Personal training" },
+        ],
+      },
+      layout: "standard" as const,
+      duration: 15,
+    },
+  ];
+
+  const birthdayPosts = [
   {
     id: "birthday_1",
     title: "Happy Birthday Chief Emeka Okafor! 🎉",
@@ -601,24 +668,41 @@ export function CommunityMembershipTab() {
         />
 
         {/* Community Content Items */}
-        <div className="space-y-4">
-          {displayedContent.map((post) => (
-            <FeedPost
-              key={post.id}
-              id={post.id}
-              title={post.title}
-              subtitle={post.subtitle}
-              description={post.description}
-              author={post.author}
-              authorProfileImage={post.authorProfileImage}
-              userId={post.userId}
-              status={post.status}
-              views={post.views}
-              comments={post.comments}
-              likes={post.likes}
-              type={post.type}
-              imageUrl={post.imageUrl}
-            />
+        <div className="space-y-6">
+          {displayedContent.map((post, index) => (
+            <div key={post.id}>
+              <FeedPost
+                id={post.id}
+                title={post.title}
+                subtitle={post.subtitle}
+                description={post.description}
+                author={post.author}
+                authorProfileImage={post.authorProfileImage}
+                userId={post.userId}
+                status={post.status}
+                views={post.views}
+                comments={post.comments}
+                likes={post.likes}
+                type={post.type}
+                imageUrl={post.imageUrl}
+              />
+              {/* Insert premium ad after every 4 posts */}
+              {(index + 1) % 4 === 0 && index < displayedContent.length - 1 && (
+                <div className="my-8">
+                  <PremiumAdRotation
+                    slotId={`membership-feed-premium-${Math.floor((index + 1) / 4)}`}
+                    ads={[premiumAdSlots[Math.floor((index + 1) / 4) % premiumAdSlots.length]]}
+                    context="feed"
+                  />
+                </div>
+              )}
+              {/* Insert People You May Know after every 10 posts */}
+              {(index + 1) % 10 === 0 && index < displayedContent.length - 1 && (
+                <div className="my-6">
+                  <PeopleYouMayKnow />
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
