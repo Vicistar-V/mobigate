@@ -73,9 +73,10 @@ export function OfficesPositionsSection({
 
   // Get available office titles based on what user selected
   const getAvailablePositions = () => {
-    const topmost = formData.topmostOffices;
-    const deputies = formData.deputyOffices;
-    return [...topmost, ...deputies];
+    const positions: string[] = [];
+    if (formData.topmostOffice) positions.push(formData.topmostOffice);
+    if (formData.deputyOffice) positions.push(formData.deputyOffice);
+    return positions;
   };
 
   // Format serial number with leading zero

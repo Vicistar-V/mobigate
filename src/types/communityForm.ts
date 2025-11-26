@@ -86,9 +86,9 @@ export interface CommunityFormData {
   
   // Leadership Style
   leadershipStyle: LeadershipStyle | "";
-  topmostOffices: string[];
+  topmostOffice: string;
   customTopmostOffice: string;
-  deputyOffices: string[];
+  deputyOffice: string;
   customDeputyOffice: string;
   
   // Administration
@@ -117,9 +117,9 @@ export const defaultCommunityFormData: CommunityFormData = {
   membershipChoice: "voluntary",
   populationStrength: 0,
   leadershipStyle: "",
-  topmostOffices: [],
+  topmostOffice: "",
   customTopmostOffice: "",
-  deputyOffices: [],
+  deputyOffice: "",
   customDeputyOffice: "",
   officeTenure: 2,
   staffCount: 0,
