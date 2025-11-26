@@ -26,8 +26,9 @@ import { toast } from "sonner";
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { ELibrarySection } from "@/components/ELibrarySection";
+import { FeedPost } from "@/components/FeedPost";
 import { communityPeople } from "@/data/communityPeopleData";
-import { wallStatusPosts } from "@/data/posts";
+import { wallStatusPosts, feedPosts } from "@/data/posts";
 
 // Profile images
 import profile1 from "@/assets/profile-photo.jpg";
@@ -314,6 +315,7 @@ export function CommunityMembershipTab() {
 
   // E-Library states
   const [eLibraryFilter, setELibraryFilter] = useState<string>("all");
+  const [visibleContentCount, setVisibleContentCount] = useState(4);
 
   // Filter members by gender
   const filteredMembers = communityMembers.filter((member) => {
@@ -333,6 +335,13 @@ export function CommunityMembershipTab() {
   const handleMemberAction = (action: string, memberName: string) => {
     toast.success(`${action} ${memberName}`);
   };
+
+  // Filter content based on active filter
+  const filteredContent = eLibraryFilter === "all" 
+    ? feedPosts 
+    : feedPosts.filter(post => post.type.toLowerCase() === eLibraryFilter);
+
+  const displayedContent = filteredContent.slice(0, visibleContentCount);
 
   // Birthday filter options
   const birthdayFilters = [
@@ -590,6 +599,50 @@ export function CommunityMembershipTab() {
           onFilterChange={setELibraryFilter}
           title="Community Content"
         />
+
+        {/* Community Content Items */}
+        <div className="space-y-4">
+          {displayedContent.map((post) => (
+            <FeedPost
+              key={post.id}
+              id={post.id}
+              title={post.title}
+              subtitle={post.subtitle}
+              description={post.description}
+              author={post.author}
+              authorProfileImage={post.authorProfileImage}
+              userId={post.userId}
+              status={post.status}
+              views={post.views}
+              comments={post.comments}
+              likes={post.likes}
+              type={post.type}
+              imageUrl={post.imageUrl}
+            />
+          ))}
+        </div>
+
+        {/* Load More / Less buttons */}
+        {filteredContent.length > visibleContentCount && (
+          <div className="flex justify-center mt-4">
+            <Button
+              variant="link"
+              onClick={() => setVisibleContentCount(prev => prev + 4)}
+            >
+              ...more
+            </Button>
+          </div>
+        )}
+        {visibleContentCount > 4 && filteredContent.length > 4 && (
+          <div className="flex justify-center">
+            <Button 
+              variant="link" 
+              onClick={() => setVisibleContentCount(4)}
+            >
+              Less...
+            </Button>
+          </div>
+        )}
     </div>
   );
 }
