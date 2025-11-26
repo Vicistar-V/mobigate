@@ -3,10 +3,11 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import React from "react";
 
 interface PersonImage {
-  id?: string;
+  id: string;
+  name: string;
   title: string;
-  imageUrl?: string;
-  author: string;
+  imageUrl: string;
+  country?: string;
 }
 
 interface OurPeopleCarouselProps {
@@ -37,7 +38,7 @@ export const OurPeopleCarousel = ({ items }: OurPeopleCarouselProps) => {
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
-                  <p className="text-white text-sm sm:text-base font-medium truncate">{item.author}</p>
+                  <p className="text-white text-sm sm:text-base font-semibold truncate">{item.name}</p>
                   <p className="text-white/90 text-xs sm:text-sm truncate">{item.title}</p>
                 </div>
               </Card>
