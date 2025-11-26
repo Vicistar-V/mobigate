@@ -86,6 +86,20 @@ export function EventsActivitiesSection({
     return String(index + 1).padStart(2, "0");
   };
 
+  const formatCurrency = (amount: number) => {
+    return `N${amount.toLocaleString()}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB');
+  };
+
+  const calculatePenaltyAmount = (approvedDues: number, penaltyPercent: number) => {
+    return (approvedDues * penaltyPercent) / 100;
+  };
+
   return (
     <div className="space-y-5">
       {/* Create New Event Form */}
@@ -240,25 +254,47 @@ export function EventsActivitiesSection({
           </Button>
 
           {showEventsList && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">S/N</th>
-                    <th className="text-left p-2">Event Name</th>
-                    <th className="text-left p-2">Nature</th>
-                    <th className="text-left p-2">Dues</th>
-                    <th className="text-left p-2">Action</th>
+                <thead className="bg-gray-800 text-white">
+                  <tr>
+                    <th rowSpan={2} className="border border-gray-600 p-3 text-left font-semibold">S/N</th>
+                    <th rowSpan={2} className="border border-gray-600 p-3 text-left font-semibold">Events/Activities</th>
+                    <th rowSpan={2} className="border border-gray-600 p-3 text-left font-semibold">Approved Annual Dues</th>
+                    <th rowSpan={2} className="border border-gray-600 p-3 text-left font-semibold">Contravention/Offenses</th>
+                    <th colSpan={2} className="border border-gray-600 p-3 text-center font-semibold">Penalties</th>
+                    <th rowSpan={2} className="border border-gray-600 p-3 text-left font-semibold">Validity Date</th>
+                    <th rowSpan={2} className="border border-gray-600 p-3 text-center font-semibold">Action</th>
+                  </tr>
+                  <tr>
+                    <th className="border border-gray-600 p-3 text-left font-semibold">Owing</th>
+                    <th className="border border-gray-600 p-3 text-left font-semibold">Absent</th>
                   </tr>
                 </thead>
                 <tbody>
                   {formData.events.map((event, index) => (
-                    <tr key={event.id} className="border-b">
-                      <td className="p-2">{formatSerialNumber(index)}</td>
-                      <td className="p-2">{event.name}</td>
-                      <td className="p-2 capitalize">{event.nature}</td>
-                      <td className="p-2">{event.approvedDues}</td>
-                      <td className="p-2">
+                    <tr key={event.id} className={index % 2 === 0 ? "bg-card" : "bg-muted/30"}>
+                      <td className="border border-border p-3">{formatSerialNumber(index)}</td>
+                      <td className="border border-border p-3 font-medium">{event.name}</td>
+                      <td className="border border-border p-3 text-yellow-500 font-semibold">
+                        {formatCurrency(event.approvedDues)}
+                      </td>
+                      <td className="border border-border p-3">
+                        <span className="text-cyan-400">{event.contraventions || "None"}</span>
+                        {event.contraventionCount > 0 && (
+                          <span className="text-red-500"> / {event.contraventionCount}</span>
+                        )}
+                      </td>
+                      <td className="border border-border p-3 text-green-500 font-medium">
+                        {event.penaltyOwingPercent}% of {formatCurrency(calculatePenaltyAmount(event.approvedDues, event.penaltyOwingPercent))}
+                      </td>
+                      <td className="border border-border p-3 text-red-500 font-semibold">
+                        {formatCurrency(calculatePenaltyAmount(event.approvedDues, event.penaltyAbsentPercent))}
+                      </td>
+                      <td className="border border-border p-3 text-cyan-400">
+                        {formatDate(event.validityDate)}
+                      </td>
+                      <td className="border border-border p-3 text-center">
                         <Button
                           type="button"
                           variant="ghost"
