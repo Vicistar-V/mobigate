@@ -449,7 +449,7 @@ const CommunityProfile = () => {
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
           {/* Back Button for Hidden Sections */}
-          {["finance", "meetings", "rollcalls", "fundraiser", "election", "administration", "resources"].includes(activeTab) && (
+          {["finance", "meetings", "rollcalls", "fundraiser", "election", "administration", "resources", "news", "articles", "events"].includes(activeTab) && (
             <Button
               variant="ghost"
               onClick={() => setActiveTab("status")}
@@ -461,7 +461,7 @@ const CommunityProfile = () => {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-            <TabsList className="w-full grid grid-cols-4 h-auto">
+            <TabsList className="w-full grid grid-cols-3 h-auto">
               <TabsTrigger value="status" className="text-xs sm:text-sm">
                 Status
               </TabsTrigger>
@@ -470,9 +470,6 @@ const CommunityProfile = () => {
               </TabsTrigger>
               <TabsTrigger value="membership" className="text-xs sm:text-sm">
                 Membership
-              </TabsTrigger>
-              <TabsTrigger value="news" className="text-xs sm:text-sm">
-                News
               </TabsTrigger>
             </TabsList>
 
@@ -601,15 +598,6 @@ const CommunityProfile = () => {
             <TabsContent value="membership" className="mt-6">
               <CommunityMembershipTab />
             </TabsContent>
-
-            {/* News Tab */}
-            <TabsContent value="news" className="mt-6">
-              <CommunityNewsSection 
-                premiumAdSlots={premiumAdSlots}
-                showPeopleYouMayKnow={true}
-                canPostNews={true}
-              />
-            </TabsContent>
           </Tabs>
 
           {/* Hidden Tabs Content - Not in TabsList but still accessible */}
@@ -719,6 +707,48 @@ const CommunityProfile = () => {
                   <li>Community Constitution</li>
                   <li>Journals & Publications</li>
                   <li>Document Library</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "news" && (
+            <div className="mt-6">
+              <CommunityNewsSection 
+                premiumAdSlots={premiumAdSlots}
+                showPeopleYouMayKnow={true}
+                canPostNews={true}
+              />
+            </div>
+          )}
+
+          {activeTab === "articles" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Articles</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Community articles and publications...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Featured Articles</li>
+                  <li>Member Contributions</li>
+                  <li>Opinion Pieces</li>
+                  <li>Educational Content</li>
+                  <li>Historical Archives</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "events" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Events</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Community events and gatherings...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Upcoming Events</li>
+                  <li>Past Events Gallery</li>
+                  <li>Event Calendar</li>
+                  <li>RSVP Management</li>
+                  <li>Event Photos & Videos</li>
                 </ul>
               </div>
             </Card>
