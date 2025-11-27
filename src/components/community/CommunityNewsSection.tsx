@@ -12,6 +12,7 @@ import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, Fil
 import { mockNewsData, NewsItem } from "@/data/newsData";
 import { formatDistanceToNow } from "date-fns";
 import { NewsDetailDialog } from "./NewsDetailDialog";
+import { CreateNewsForm } from "./CreateNewsForm";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
@@ -56,12 +57,14 @@ interface CommunityNewsSectionProps {
   className?: string;
   premiumAdSlots?: PremiumAdCardProps[];
   showPeopleYouMayKnow?: boolean;
+  canPostNews?: boolean;
 }
 
 export function CommunityNewsSection({ 
   className,
   premiumAdSlots = [],
-  showPeopleYouMayKnow = false
+  showPeopleYouMayKnow = false,
+  canPostNews = true
 }: CommunityNewsSectionProps) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [dateTimeFilter, setDateTimeFilter] = useState("all");
@@ -79,6 +82,9 @@ export function CommunityNewsSection({
   // State for pagination
   const [visibleNewsCount, setVisibleNewsCount] = useState(10);
   
+  // State for user-created news
+  const [userNews, setUserNews] = useState<NewsItem[]>([]);
+  
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleNewsCount(10);
@@ -86,7 +92,8 @@ export function CommunityNewsSection({
 
   // Filter and sort news items
   const filteredNews = useMemo(() => {
-    let filtered = [...mockNewsData];
+    // Combine user-created news with existing news data
+    let filtered = [...userNews, ...mockNewsData];
 
     // Category filter
     if (categoryFilter !== "all") {
@@ -146,7 +153,7 @@ export function CommunityNewsSection({
     }
 
     return filtered;
-  }, [categoryFilter, dateTimeFilter, mediaTypeFilter, sortByFilter]);
+  }, [categoryFilter, dateTimeFilter, mediaTypeFilter, sortByFilter, userNews]);
   
   // Pagination logic
   const displayedNews = filteredNews.slice(0, visibleNewsCount);
@@ -231,12 +238,28 @@ export function CommunityNewsSection({
     }
   };
 
+  const handleNewsCreated = (news: NewsItem) => {
+    setUserNews(prev => [news, ...prev]);
+    toast({
+      title: "Success!",
+      description: "Your news has been published successfully.",
+    });
+  };
+
   return (
     <div className={className}>
       {/* Header */}
       <div className="mb-4 sm:mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-foreground">News Info</h2>
       </div>
+
+      {/* Create News Form */}
+      {canPostNews && (
+        <CreateNewsForm 
+          onNewsCreated={handleNewsCreated}
+          canPost={canPostNews}
+        />
+      )}
 
       {/* Filter Tabs */}
       <div className="mb-6 space-y-3">

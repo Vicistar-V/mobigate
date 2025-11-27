@@ -590,10 +590,11 @@ const CommunityProfile = () => {
 
             {/* News Tab */}
             <TabsContent value="news" className="mt-6">
-              <CommunityNewsSection 
-                premiumAdSlots={premiumAdSlots}
-                showPeopleYouMayKnow={true}
-              />
+          <CommunityNewsSection 
+            premiumAdSlots={premiumAdSlots}
+            showPeopleYouMayKnow={true}
+            canPostNews={true}
+          />
             </TabsContent>
           </Tabs>
         </div>
