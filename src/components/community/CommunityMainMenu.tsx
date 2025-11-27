@@ -355,30 +355,58 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Launch Voting")}
+                  onClick={() => handleMenuClick("election-campaigns", true)}
                 >
-                  Launch Voting
+                  Campaigns
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Voting Results")}
+                  onClick={() => handleMenuClick("election-voting", true)}
                 >
-                  View Voting Results
+                  Start Voting
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Winners")}
+                  onClick={() => handleMenuClick("election-results", true)}
+                >
+                  View Results
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("election-winners", true)}
                 >
                   View Winners
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Community Opinions")}
+                  onClick={() => handleMenuClick("election-opinions", true)}
                 >
-                  View Community Opinions
+                  Public Opinions
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("election-accreditation", true)}
+                >
+                  Accreditation
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("election-clearances", true)}
+                >
+                  Clearances
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("election-primaries", true)}
+                >
+                  Nomination Primaries
                 </Button>
               </AccordionContent>
             </AccordionItem>
