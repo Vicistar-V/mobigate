@@ -422,15 +422,26 @@ export function AppSidebar() {
                 }
 
                 // Items without sub-menu
+                const isInternalRoute = item.url && item.url.startsWith('/') && !item.url.includes('.php');
+                
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title} className="group transition-all duration-200 hover:bg-accent/50">
-                      <a href={item.url!} onClick={handleLinkClick}>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
-                          <item.icon className="h-4 w-4" />
-                        </div>
-                        <span className="font-medium">{item.title}</span>
-                      </a>
+                      {isInternalRoute ? (
+                        <Link to={item.url!} onClick={handleLinkClick}>
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          <span className="font-medium">{item.title}</span>
+                        </Link>
+                      ) : (
+                        <a href={item.url!} onClick={handleLinkClick}>
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          <span className="font-medium">{item.title}</span>
+                        </a>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
