@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const BackToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const location = useLocation();
+  
+  // Don't show on create community page
+  if (location.pathname === "/create-community") {
+    return null;
+  }
 
   useEffect(() => {
     const toggleVisibility = () => {
