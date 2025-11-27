@@ -59,34 +59,34 @@ export function CommunityMainMenu({
         </SheetHeader>
         
         <div className="overflow-y-auto h-[calc(85vh-73px)]">
+          {/* Direct Menu Items - Articles, News Info, Events */}
+          <div className="px-4 py-2 space-y-1">
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("articles", true)}
+            >
+              Articles
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("news", true)}
+            >
+              News Info
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("events", true)}
+            >
+              Events
+            </Button>
+          </div>
+
+          <Separator className="my-2" />
+
           <Accordion type="multiple" className="w-full px-4">
-            {/* ...More Section - Content items */}
-            <AccordionItem value="more-content">
-              <AccordionTrigger className="text-base">...More</AccordionTrigger>
-              <AccordionContent className="space-y-1">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("articles", true)}
-                >
-                  Articles
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("news", true)}
-                >
-                  News Info
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("events", true)}
-                >
-                  Events
-                </Button>
-              </AccordionContent>
-            </AccordionItem>
 
             {/* Guests Section */}
             <AccordionItem value="guests">
