@@ -415,7 +415,8 @@ export function CommunityMainMenu({
           <Separator className="my-2" />
 
           {/* Community Meetings - Expanded Accordion */}
-          <AccordionItem value="meetings-main">
+          <Accordion type="multiple" className="w-full px-4">
+            <AccordionItem value="meetings-main">
             <AccordionTrigger className="text-base font-semibold">
               Community Meetings
             </AccordionTrigger>
@@ -562,6 +563,7 @@ export function CommunityMainMenu({
               </Button>
             </AccordionContent>
           </AccordionItem>
+          </Accordion>
 
           {/* Roll-Calls (kept as single item) */}
           <div className="px-4 mt-2">
