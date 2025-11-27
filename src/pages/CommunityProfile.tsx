@@ -40,6 +40,7 @@ import { CommunityExecutiveTab } from "@/components/community/CommunityExecutive
 import { CommunityTenureTab } from "@/components/community/CommunityTenureTab";
 import { CommunityAdhocTab } from "@/components/community/CommunityAdhocTab";
 import { CommunityStaffTab } from "@/components/community/CommunityStaffTab";
+import { CommunityElectionTab } from "@/components/community/CommunityElectionTab";
 import { CommunityMeetingsTab } from "@/components/community/CommunityMeetingsTab";
 import { MeetingProceedingsTab } from "@/components/community/meetings/MeetingProceedingsTab";
 import { MeetingHeadlineThemeTab } from "@/components/community/meetings/MeetingHeadlineThemeTab";
@@ -705,20 +706,18 @@ const CommunityProfile = () => {
             </Card>
           )}
 
-          {activeTab === "election" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Election & Voting</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Democratic election management system...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Launch New Election</li>
-                  <li>View Election Results</li>
-                  <li>Winner Announcements</li>
-                  <li>Member Opinions & Feedback</li>
-                  <li>Voting History</li>
-                </ul>
-              </div>
-            </Card>
+          {(activeTab === "elections" || 
+            activeTab === "election-campaigns" ||
+            activeTab === "election-voting" ||
+            activeTab === "election-results" ||
+            activeTab === "election-winners" ||
+            activeTab === "election-opinions" ||
+            activeTab === "election-accreditation" ||
+            activeTab === "election-clearances" ||
+            activeTab === "election-primaries") && (
+            <div className="mt-6">
+              <CommunityElectionTab />
+            </div>
           )}
 
           {activeTab === "executive" && (
