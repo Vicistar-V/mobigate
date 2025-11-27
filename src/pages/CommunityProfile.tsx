@@ -40,6 +40,7 @@ import { CommunityExecutiveTab } from "@/components/community/CommunityExecutive
 import { CommunityTenureTab } from "@/components/community/CommunityTenureTab";
 import { CommunityAdhocTab } from "@/components/community/CommunityAdhocTab";
 import { CommunityStaffTab } from "@/components/community/CommunityStaffTab";
+import { CommunityMeetingsTab } from "@/components/community/CommunityMeetingsTab";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -624,19 +625,9 @@ const CommunityProfile = () => {
           )}
 
           {activeTab === "meetings" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Meetings & Activities</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Schedule and manage community meetings and activities...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Upcoming Meetings</li>
-                  <li>Past Meetings</li>
-                  <li>Meeting Minutes</li>
-                  <li>Event Calendar</li>
-                  <li>Activity Planning</li>
-                </ul>
-              </div>
-            </Card>
+            <div className="mt-6">
+              <CommunityMeetingsTab />
+            </div>
           )}
 
           {activeTab === "rollcalls" && (
