@@ -82,6 +82,13 @@ export function CommunityMainMenu({
             >
               Events
             </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("vibes", true)}
+            >
+              Community Vibes
+            </Button>
           </div>
 
           <Separator className="my-2" />

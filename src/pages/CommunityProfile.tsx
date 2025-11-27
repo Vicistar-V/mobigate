@@ -35,6 +35,7 @@ import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
+import { CommunityVibesSection } from "@/components/community/CommunityVibesSection";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -450,7 +451,7 @@ const CommunityProfile = () => {
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
           {/* Back Button for Hidden Sections */}
-          {["finance", "meetings", "rollcalls", "fundraiser", "election", "administration", "resources", "news", "articles", "events"].includes(activeTab) && (
+          {["finance", "meetings", "rollcalls", "fundraiser", "election", "administration", "resources", "news", "articles", "events", "vibes"].includes(activeTab) && (
             <Button
               variant="ghost"
               onClick={() => setActiveTab("status")}
@@ -745,6 +746,15 @@ const CommunityProfile = () => {
                 premiumAdSlots={premiumAdSlots}
                 showPeopleYouMayKnow={true}
                 canPostEvents={true}
+              />
+            </div>
+          )}
+
+          {activeTab === "vibes" && (
+            <div className="mt-6">
+              <CommunityVibesSection 
+                isOwner={community.isOwner}
+                isAdmin={community.role === "Admin"}
               />
             </div>
           )}
