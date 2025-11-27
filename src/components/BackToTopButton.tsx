@@ -6,11 +6,6 @@ import { Button } from "@/components/ui/button";
 export const BackToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
   const location = useLocation();
-  
-  // Don't show on create community page
-  if (location.pathname === "/create-community") {
-    return null;
-  }
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -32,6 +27,11 @@ export const BackToTopButton = () => {
       behavior: "smooth",
     });
   };
+
+  // Don't show on create community page - moved after all hooks
+  if (location.pathname === "/create-community") {
+    return null;
+  }
 
   if (!isVisible) {
     return null;
