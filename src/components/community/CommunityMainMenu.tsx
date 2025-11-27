@@ -21,22 +21,29 @@ interface CommunityMainMenuProps {
   isOwner?: boolean;
   isAdmin?: boolean;
   isMember?: boolean;
+  onNavigate?: (section: string) => void;
 }
 
 export function CommunityMainMenu({
   isOwner = false,
   isAdmin = false,
   isMember = false,
+  onNavigate,
 }: CommunityMainMenuProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
-  const handleMenuClick = (action: string) => {
-    toast({
-      title: action,
-      description: "This feature is coming soon!",
-    });
-    setOpen(false);
+  const handleMenuClick = (action: string, isNavigable?: boolean) => {
+    if (isNavigable && onNavigate) {
+      onNavigate(action);
+      setOpen(false);
+    } else {
+      toast({
+        title: action,
+        description: "This feature is coming soon!",
+      });
+      setOpen(false);
+    }
   };
 
   return (
@@ -174,23 +181,9 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Management Committee")}
+                  onClick={() => handleMenuClick("administration", true)}
                 >
-                  Management Committee
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Office Tenure")}
-                >
-                  Office Tenure
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Staff")}
-                >
-                  Staff
+                  View Administration Section
                 </Button>
               </AccordionContent>
             </AccordionItem>
@@ -202,30 +195,9 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Raise Campaign")}
+                  onClick={() => handleMenuClick("fundraiser", true)}
                 >
-                  Raise Campaign
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Campaigns")}
-                >
-                  View Campaigns
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Donors")}
-                >
-                  View Donors
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Celebrity Donors")}
-                >
-                  Celebrity Donors
+                  View FundRaiser Section
                 </Button>
               </AccordionContent>
             </AccordionItem>
@@ -239,30 +211,9 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Launch Election")}
+                  onClick={() => handleMenuClick("election", true)}
                 >
-                  Launch
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Results")}
-                >
-                  Results
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Winners")}
-                >
-                  Winners
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Opinions")}
-                >
-                  Opinions
+                  View Election Section
                 </Button>
               </AccordionContent>
             </AccordionItem>
@@ -275,14 +226,14 @@ export function CommunityMainMenu({
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => handleMenuClick("Meetings/Activities")}
+              onClick={() => handleMenuClick("meetings", true)}
             >
               Meetings/Activities
             </Button>
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => handleMenuClick("Roll-Calls")}
+              onClick={() => handleMenuClick("rollcalls", true)}
             >
               Roll-Calls
             </Button>
@@ -298,37 +249,9 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("CAM")}
+                  onClick={() => handleMenuClick("finance", true)}
                 >
-                  CAM
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Overview")}
-                >
-                  Overview
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Obligations")}
-                >
-                  Obligations
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Status Checker")}
-                >
-                  Status Checker
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Audit")}
-                >
-                  Audit
+                  View Finance Section
                 </Button>
               </AccordionContent>
             </AccordionItem>
@@ -342,30 +265,9 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("ID Card")}
+                  onClick={() => handleMenuClick("resources", true)}
                 >
-                  ID Card
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Letter")}
-                >
-                  Letter
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Constitution")}
-                >
-                  Constitution
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Journals")}
-                >
-                  Journals
+                  View Resources Section
                 </Button>
               </AccordionContent>
             </AccordionItem>

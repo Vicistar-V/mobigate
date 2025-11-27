@@ -12,6 +12,7 @@ import {
   UserPlus,
   UserMinus,
   DollarSign,
+  ArrowLeft,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -439,6 +440,7 @@ const CommunityProfile = () => {
                 isOwner={community.isOwner}
                 isAdmin={community.role === "Admin"}
                 isMember={community.isMember || isMember}
+                onNavigate={(section) => setActiveTab(section)}
               />
             </div>
           </div>
@@ -446,6 +448,18 @@ const CommunityProfile = () => {
 
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
+          {/* Back Button for Hidden Sections */}
+          {["finance", "meetings", "rollcalls", "fundraiser", "election", "administration", "resources"].includes(activeTab) && (
+            <Button
+              variant="ghost"
+              onClick={() => setActiveTab("status")}
+              className="mb-4 gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Community
+            </Button>
+          )}
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
             <TabsList className="w-full grid grid-cols-4 h-auto">
               <TabsTrigger value="status" className="text-xs sm:text-sm">
@@ -590,13 +604,125 @@ const CommunityProfile = () => {
 
             {/* News Tab */}
             <TabsContent value="news" className="mt-6">
-          <CommunityNewsSection 
-            premiumAdSlots={premiumAdSlots}
-            showPeopleYouMayKnow={true}
-            canPostNews={true}
-          />
+              <CommunityNewsSection 
+                premiumAdSlots={premiumAdSlots}
+                showPeopleYouMayKnow={true}
+                canPostNews={true}
+              />
             </TabsContent>
           </Tabs>
+
+          {/* Hidden Tabs Content - Not in TabsList but still accessible */}
+          {activeTab === "finance" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Finance Section</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Finance management features coming soon...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>CAM (Community Account Management)</li>
+                  <li>Financial Overview</li>
+                  <li>Member Obligations</li>
+                  <li>Status Checker</li>
+                  <li>Financial Audit</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "meetings" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Meetings & Activities</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Schedule and manage community meetings and activities...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Upcoming Meetings</li>
+                  <li>Past Meetings</li>
+                  <li>Meeting Minutes</li>
+                  <li>Event Calendar</li>
+                  <li>Activity Planning</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "rollcalls" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Roll Calls</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Track member attendance and participation...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Current Roll Call</li>
+                  <li>Attendance History</li>
+                  <li>Member Participation Stats</li>
+                  <li>Absence Tracking</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "fundraiser" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">FundRaiser</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Manage fundraising campaigns and donations...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Raise New Campaign</li>
+                  <li>Active Campaigns</li>
+                  <li>View All Donors</li>
+                  <li>Celebrity Donors Recognition</li>
+                  <li>Campaign Analytics</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "election" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Election & Voting</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Democratic election management system...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Launch New Election</li>
+                  <li>View Election Results</li>
+                  <li>Winner Announcements</li>
+                  <li>Member Opinions & Feedback</li>
+                  <li>Voting History</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "administration" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Administration & Leadership</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Community leadership and governance...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Management Committee</li>
+                  <li>Office Tenure Information</li>
+                  <li>Staff Directory</li>
+                  <li>Leadership Structure</li>
+                  <li>Governance Documents</li>
+                </ul>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === "resources" && (
+            <Card className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Community Resources</h2>
+              <div className="space-y-4 text-muted-foreground">
+                <p>Access important community documents and resources...</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                  <li>Community ID Cards</li>
+                  <li>Official Letters & Templates</li>
+                  <li>Community Constitution</li>
+                  <li>Journals & Publications</li>
+                  <li>Document Library</li>
+                </ul>
+              </div>
+            </Card>
+          )}
         </div>
       </main>
 
