@@ -27,6 +27,7 @@ import { getCommunityById, getCommunityPosts } from "@/data/communityProfileData
 import { communityPeople } from "@/data/communityPeopleData";
 import { CommunityAboutTab } from "@/components/community/CommunityAboutTab";
 import { CommunityMembershipTab } from "@/components/community/CommunityMembershipTab";
+import { CommunityNewsSection } from "@/components/community/CommunityNewsSection";
 import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks";
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -446,7 +447,7 @@ const CommunityProfile = () => {
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-            <TabsList className="w-full grid grid-cols-3 h-auto">
+            <TabsList className="w-full grid grid-cols-4 h-auto">
               <TabsTrigger value="status" className="text-xs sm:text-sm">
                 Status
               </TabsTrigger>
@@ -455,6 +456,9 @@ const CommunityProfile = () => {
               </TabsTrigger>
               <TabsTrigger value="membership" className="text-xs sm:text-sm">
                 Membership
+              </TabsTrigger>
+              <TabsTrigger value="news" className="text-xs sm:text-sm">
+                News
               </TabsTrigger>
             </TabsList>
 
@@ -582,6 +586,11 @@ const CommunityProfile = () => {
             {/* Membership Tab */}
             <TabsContent value="membership" className="mt-6">
               <CommunityMembershipTab />
+            </TabsContent>
+
+            {/* News Tab */}
+            <TabsContent value="news" className="mt-6">
+              <CommunityNewsSection />
             </TabsContent>
           </Tabs>
         </div>
