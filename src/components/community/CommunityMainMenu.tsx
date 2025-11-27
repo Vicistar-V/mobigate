@@ -60,34 +60,6 @@ export function CommunityMainMenu({
         
         <div className="overflow-y-auto h-[calc(85vh-73px)]">
           <Accordion type="multiple" className="w-full px-4">
-            {/* ...More Section - Content items */}
-            <AccordionItem value="more-content">
-              <AccordionTrigger className="text-base">...More</AccordionTrigger>
-              <AccordionContent className="space-y-1">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("articles", true)}
-                >
-                  Articles
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("news", true)}
-                >
-                  News Info
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("events", true)}
-                >
-                  Events
-                </Button>
-              </AccordionContent>
-            </AccordionItem>
-
             {/* Guests Section */}
             <AccordionItem value="guests">
               <AccordionTrigger className="text-base">Guests</AccordionTrigger>
