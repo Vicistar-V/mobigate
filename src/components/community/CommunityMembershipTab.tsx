@@ -472,7 +472,7 @@ export function CommunityMembershipTab() {
             {filteredMembers.map((member) => (
               <Card 
                 key={member.id} 
-                className="flex-shrink-0 w-[140px] sm:w-[160px] p-3 space-y-3 hover:shadow-lg transition-shadow"
+                className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 space-y-3 hover:shadow-lg transition-shadow"
               >
                 {/* Avatar */}
                 <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
