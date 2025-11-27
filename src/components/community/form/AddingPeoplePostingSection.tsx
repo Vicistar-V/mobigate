@@ -1,8 +1,8 @@
 import { CommunityFormData, AccessLevel } from "@/types/communityForm";
 import { accessLevelOptions } from "@/data/communityFormOptions";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface AddingPeoplePostingSectionProps {
   formData: CommunityFormData;
@@ -15,12 +15,24 @@ export function AddingPeoplePostingSection({
   updateField,
   errors,
 }: AddingPeoplePostingSectionProps) {
-  const showSpecifiedAdminInput = 
+  const showSpecifiedAdminSelector = 
     formData.whoCanAdd === "specified-admin" ||
     formData.whoCanApproveNewMembers === "specified-admin" ||
     formData.whoCanRemoveSuspendBlock === "specified-admin" ||
     formData.whoCanPost === "specified-admin" ||
     formData.whoCanEditPauseDeleteApprove === "specified-admin";
+
+  // Toggle admin selection
+  const toggleAdmin = (adminNum: number) => {
+    const currentSelection = formData.specifiedAdminNumbers || [];
+    if (currentSelection.includes(adminNum)) {
+      updateField("specifiedAdminNumbers", currentSelection.filter(n => n !== adminNum));
+    } else {
+      updateField("specifiedAdminNumbers", [...currentSelection, adminNum]);
+    }
+  };
+
+  const specifiedAdminNumbers = formData.specifiedAdminNumbers || [];
 
   return (
     <div className="space-y-5">
@@ -129,22 +141,32 @@ export function AddingPeoplePostingSection({
         </div>
       </div>
 
-      {/* Conditional Specified Admin Number */}
-      {showSpecifiedAdminInput && (
-        <div className="space-y-2 pt-4 border-t">
-          <Label htmlFor="specified-admin-number">Specified Admin Number</Label>
-          <Input
-            id="specified-admin-number"
-            type="number"
-            min="1"
-            max="20"
-            placeholder="Enter admin number (1-20)"
-            value={formData.specifiedAdminNumber}
-            onChange={(e) => updateField("specifiedAdminNumber", Number(e.target.value))}
-          />
+      {/* Multi-Select Admin Buttons */}
+      {showSpecifiedAdminSelector && (
+        <div className="space-y-3 pt-4 border-t border-border">
+          <Label>Specified Admin Numbers</Label>
           <p className="text-xs text-muted-foreground">
-            Enter the admin number (1-20) for permissions set to "Only a Specified Admin"
+            Select one or more admins (tap to toggle selection)
           </p>
+          <div className="grid grid-cols-4 gap-2">
+            {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+              <Button
+                key={num}
+                type="button"
+                variant={specifiedAdminNumbers.includes(num) ? "default" : "outline"}
+                size="sm"
+                className="h-10 text-xs"
+                onClick={() => toggleAdmin(num)}
+              >
+                Admin-{num}
+              </Button>
+            ))}
+          </div>
+          {specifiedAdminNumbers.length > 0 && (
+            <p className="text-xs text-primary font-medium">
+              Selected: {specifiedAdminNumbers.sort((a, b) => a - b).join(", ")}
+            </p>
+          )}
         </div>
       )}
     </div>
