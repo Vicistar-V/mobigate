@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,12 +8,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp, Heart } from "lucide-react";
+import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp, Heart, Play } from "lucide-react";
 import { mockNewsData, NewsItem } from "@/data/newsData";
 import { formatDistanceToNow } from "date-fns";
 import { NewsDetailDialog } from "./NewsDetailDialog";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+import { PremiumAdCardProps } from "@/components/PremiumAdCard";
+import React from "react";
 
 const categoryFilters = [
   { value: "all", label: "All Categories" },
@@ -50,9 +54,15 @@ const sortByFilters = [
 
 interface CommunityNewsSectionProps {
   className?: string;
+  premiumAdSlots?: PremiumAdCardProps[];
+  showPeopleYouMayKnow?: boolean;
 }
 
-export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
+export function CommunityNewsSection({ 
+  className,
+  premiumAdSlots = [],
+  showPeopleYouMayKnow = false
+}: CommunityNewsSectionProps) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [dateTimeFilter, setDateTimeFilter] = useState("all");
   const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
@@ -65,6 +75,14 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
   // State for likes
   const [likedNews, setLikedNews] = useState<Set<string>>(new Set());
   const [newsLikes, setNewsLikes] = useState<Record<string, number>>({});
+  
+  // State for pagination
+  const [visibleNewsCount, setVisibleNewsCount] = useState(10);
+  
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleNewsCount(10);
+  }, [categoryFilter, dateTimeFilter, mediaTypeFilter, sortByFilter]);
 
   // Filter and sort news items
   const filteredNews = useMemo(() => {
@@ -129,6 +147,20 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
 
     return filtered;
   }, [categoryFilter, dateTimeFilter, mediaTypeFilter, sortByFilter]);
+  
+  // Pagination logic
+  const displayedNews = filteredNews.slice(0, visibleNewsCount);
+  const hasMoreNews = visibleNewsCount < filteredNews.length;
+  const canCollapseNews = visibleNewsCount > 10;
+
+  const handleLoadMore = () => {
+    setVisibleNewsCount((prev) => Math.min(prev + 10, filteredNews.length));
+  };
+
+  const handleShowLess = () => {
+    setVisibleNewsCount(10);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const getMediaIcon = (mediaType: NewsItem["mediaType"]) => {
     switch (mediaType) {
@@ -345,111 +377,163 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
 
       {/* News Items */}
       <div className="space-y-4">
-        {filteredNews.length === 0 ? (
+        {displayedNews.length === 0 ? (
           <Card className="p-8 text-center">
             <p className="text-muted-foreground">No news items match your filters.</p>
           </Card>
         ) : (
-          filteredNews.map((news) => (
-            <Card 
-              key={news.id} 
-              className="p-4 sm:p-6 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99]"
-              onClick={() => handleNewsClick(news)}
-            >
-              <div className="space-y-3">
-                {/* Header with badges */}
-                <div className="flex flex-wrap items-start gap-2">
-                  <Badge className={getCategoryColor(news.category)}>
-                    {categoryFilters.find((f) => f.value === news.category)?.label}
-                  </Badge>
-                  <Badge variant="outline" className="gap-1">
-                    {getMediaIcon(news.mediaType)}
-                    <span className="capitalize">{news.mediaType}</span>
-                  </Badge>
-                  {news.trending && (
-                    <Badge variant="default" className="gap-1 bg-primary">
-                      <TrendingUp className="h-3 w-3" />
-                      Trending
+          displayedNews.map((news, index) => (
+            <React.Fragment key={news.id}>
+              <Card 
+                className="p-4 sm:p-6 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99]"
+                onClick={() => handleNewsClick(news)}
+              >
+                <div className="space-y-3">
+                  {/* Header with badges */}
+                  <div className="flex flex-wrap items-start gap-2">
+                    <Badge className={getCategoryColor(news.category)}>
+                      {categoryFilters.find((f) => f.value === news.category)?.label}
                     </Badge>
-                  )}
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(news.date), { addSuffix: true })}
-                  </span>
-                </div>
+                    <Badge variant="outline" className="gap-1">
+                      {getMediaIcon(news.mediaType)}
+                      <span className="capitalize">{news.mediaType}</span>
+                    </Badge>
+                    {news.trending && (
+                      <Badge variant="default" className="gap-1 bg-primary">
+                        <TrendingUp className="h-3 w-3" />
+                        Trending
+                      </Badge>
+                    )}
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(news.date), { addSuffix: true })}
+                    </span>
+                  </div>
 
-                {/* Title and Description */}
-                <div>
-                  <h3 className="font-semibold text-base sm:text-lg text-foreground mb-2">
-                    {news.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                    {news.description}
-                  </p>
-                </div>
+                  {/* Title and Description */}
+                  <div>
+                    <h3 className="font-semibold text-base sm:text-lg text-foreground mb-2">
+                      {news.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                      {news.description}
+                    </p>
+                  </div>
 
-                {/* Thumbnail for media items */}
-                {news.thumbnail && (news.mediaType === "video" || news.mediaType === "photo") && (
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                    <img
-                      src={news.thumbnail}
-                      alt={news.title}
-                      className="w-full h-full object-cover"
-                    />
-                    {news.mediaType === "video" && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-primary/90 flex items-center justify-center">
-                          <Video className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground ml-1" />
+                  {/* Thumbnail for media items */}
+                  {news.thumbnail && (news.mediaType === "video" || news.mediaType === "photo") && (
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={news.thumbnail}
+                        alt={news.title}
+                        className="w-full h-full object-cover"
+                      />
+                      {news.mediaType === "video" && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-primary/90 flex items-center justify-center">
+                            <Play className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground ml-1" />
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
 
-                {/* Interactive Engagement Bar */}
-                <div className="flex items-center gap-2 pt-2 border-t">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => handleLike(news.id, e)}
-                    className={cn(
-                      "gap-1.5 hover:bg-accent",
-                      likedNews.has(news.id) && "text-red-500"
-                    )}
-                  >
-                    <Heart className={cn("h-4 w-4", likedNews.has(news.id) && "fill-current")} />
-                    <span>{(newsLikes[news.id] ?? news.likes).toLocaleString()}</span>
-                  </Button>
-                  
-                  <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-accent">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>{news.comments.toLocaleString()}</span>
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => handleShare(news, e)}
-                    className="gap-1.5 hover:bg-accent"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    <span>{news.shares.toLocaleString()}</span>
-                  </Button>
-                  
-                  <div className="ml-auto flex items-center gap-1.5 text-muted-foreground text-sm">
-                    <Eye className="h-4 w-4" />
-                    <span>{news.views.toLocaleString()}</span>
+                  {/* Interactive Engagement Bar */}
+                  <div className="flex items-center gap-2 pt-2 border-t">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleLike(news.id, e)}
+                      className={cn(
+                        "gap-1.5 hover:bg-accent",
+                        likedNews.has(news.id) && "text-red-500"
+                      )}
+                    >
+                      <Heart className={cn("h-4 w-4", likedNews.has(news.id) && "fill-current")} />
+                      <span>{(newsLikes[news.id] ?? news.likes).toLocaleString()}</span>
+                    </Button>
+                    
+                    <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-accent">
+                      <MessageSquare className="h-4 w-4" />
+                      <span>{news.comments.toLocaleString()}</span>
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleShare(news, e)}
+                      className="gap-1.5 hover:bg-accent"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      <span>{news.shares.toLocaleString()}</span>
+                    </Button>
+                    
+                    <div className="ml-auto flex items-center gap-1.5 text-muted-foreground text-sm">
+                      <Eye className="h-4 w-4" />
+                      <span>{news.views.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+
+              {/* Insert premium ad after every 4 news items */}
+              {(index + 1) % 4 === 0 && 
+               index < displayedNews.length - 1 && 
+               premiumAdSlots.length > 0 && (
+                <div className="my-6">
+                  <PremiumAdRotation
+                    slotId={`news-premium-${Math.floor((index + 1) / 4)}`}
+                    ads={[premiumAdSlots[Math.floor((index + 1) / 4) % premiumAdSlots.length]]}
+                    context="feed"
+                  />
+                </div>
+              )}
+
+              {/* Insert People You May Know after every 10 news items */}
+              {showPeopleYouMayKnow &&
+               (index + 1) % 10 === 0 &&
+               index < displayedNews.length - 1 && (
+                <div className="my-6">
+                  <PeopleYouMayKnow />
+                </div>
+              )}
+            </React.Fragment>
           ))
         )}
       </div>
 
+      {/* Pagination Controls */}
+      {(hasMoreNews || canCollapseNews) && (
+        <div className="flex justify-center items-center gap-6 mt-8 mb-4">
+          {hasMoreNews && (
+            <Button
+              onClick={handleLoadMore}
+              variant="outline"
+              size="lg"
+              className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl transition-all active:scale-95"
+            >
+              ...more
+            </Button>
+          )}
+          {canCollapseNews && (
+            <Button
+              onClick={handleShowLess}
+              variant="outline"
+              size="lg"
+              className="text-3xl font-bold text-destructive hover:text-destructive hover:bg-destructive/10 border-2 border-destructive/20 px-8 py-6 rounded-xl transition-all active:scale-95"
+            >
+              Less...
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Results count */}
-      {filteredNews.length > 0 && (
+      {displayedNews.length > 0 && (
         <div className="mt-6 text-center text-sm text-muted-foreground">
-          Showing {filteredNews.length} of {mockNewsData.length} news items
+          Showing {displayedNews.length} of {filteredNews.length} news items
+          {filteredNews.length < mockNewsData.length && 
+            ` (filtered from ${mockNewsData.length} total)`
+          }
         </div>
       )}
 
