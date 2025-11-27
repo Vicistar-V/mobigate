@@ -501,32 +501,32 @@ export function CommunityMembershipTab() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-1 w-full overflow-hidden">
+                <div className="flex gap-2">
                   {friendRequestStatus[member.id] ? (
                     <Button 
                       size="sm" 
                       variant="secondary" 
-                      className="flex-1 text-xs min-w-0 overflow-hidden"
+                      className="flex-1 text-xs"
                       disabled
                     >
-                      <UserCheck className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">Sent</span>
+                      <UserCheck className="h-3 w-3 mr-1" />
+                      Sent
                     </Button>
                   ) : (
                     <Button
                       size="sm"
-                      className="flex-1 text-xs min-w-0 overflow-hidden"
+                      className="flex-1 text-xs"
                       onClick={() => handleAddFriend(member.id, member.name)}
                     >
-                      <UserPlus className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">Add</span>
+                      <UserPlus className="h-3 w-3 mr-1" />
+                      Add Friend
                     </Button>
                   )}
                   
                   {/* Do More Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="sm" variant="outline" className="px-1.5 flex-shrink-0">
+                      <Button size="sm" variant="outline" className="px-2">
                         <MoreVertical className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
