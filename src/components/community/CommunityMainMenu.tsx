@@ -283,21 +283,21 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Management/Executive Committee")}
+                  onClick={() => handleMenuClick("administration", true)}
                 >
                   Management/Executive Committee
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Office Tenure")}
+                  onClick={() => handleMenuClick("administration", true)}
                 >
                   Office Tenure
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Staff & Employees")}
+                  onClick={() => handleMenuClick("administration", true)}
                 >
                   Staff & Employees
                 </Button>

@@ -8,12 +8,14 @@ interface ExecutiveMembersCarouselProps {
   title: string;
   members: ExecutiveMember[];
   showViewToggle?: boolean;
+  onMemberClick?: (member: ExecutiveMember) => void;
 }
 
 export const ExecutiveMembersCarousel = ({
   title,
   members,
   showViewToggle = true,
+  onMemberClick,
 }: ExecutiveMembersCarouselProps) => {
   return (
     <Card className="overflow-hidden">
@@ -46,6 +48,7 @@ export const ExecutiveMembersCarousel = ({
                 tenure={member.tenure}
                 imageUrl={member.imageUrl}
                 isFriend={member.isFriend}
+                onClick={onMemberClick ? () => onMemberClick(member) : undefined}
               />
             </div>
           ))}

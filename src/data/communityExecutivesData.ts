@@ -17,6 +17,9 @@ export interface ExecutiveMember {
   committee: "executive" | "ad-hoc" | "staff";
   adHocDepartment?: "Finance" | "Welfare" | "Protocol" | "Education" | "Sports";
   isFriend?: boolean;
+  electedDate?: string;
+  tenureDuration?: string;
+  milestones?: string[];
 }
 
 export const executiveMembers: ExecutiveMember[] = [
@@ -29,6 +32,15 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person2,
     level: "topmost",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Anambra Hospital Project, Jos.",
+      "Igbo Cultural Centre, Jos.",
+      "Free Scholarship Scheme for Anambra Less-privileged in Jos.",
+      "Community Development Fund Initiative",
+      "Youth Empowerment Program Launch",
+    ],
   },
   
   // DEPUTY LEVEL
@@ -40,6 +52,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person8,
     level: "deputy",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Infrastructure Development Committee Chair",
+      "Inter-Community Relations Program",
+      "Strategic Planning Implementation",
+    ],
   },
   
   // OFFICERS
@@ -51,6 +70,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person6,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Digital Record Management System",
+      "Meeting Documentation Excellence",
+      "Communication Framework Development",
+    ],
   },
   {
     id: "exec-4",
@@ -60,6 +86,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person7,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Financial Transparency Initiative",
+      "Budget Optimization Program",
+      "Investment Portfolio Management",
+    ],
   },
   {
     id: "exec-5",
@@ -69,6 +102,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person1,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Automated Payment System Implementation",
+      "Financial Reporting Standards",
+      "Member Contribution Tracking",
+    ],
   },
   {
     id: "exec-6",
@@ -78,6 +118,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person4,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Media Engagement Strategy",
+      "Community Brand Development",
+      "Digital Presence Enhancement",
+    ],
   },
   {
     id: "exec-7",
@@ -87,6 +134,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person1,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Annual Gala Organization",
+      "Member Engagement Programs",
+      "Cultural Events Coordination",
+    ],
   },
   {
     id: "exec-8",
@@ -96,6 +150,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person5,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Spiritual Guidance Programs",
+      "Community Prayer Initiatives",
+      "Interfaith Dialogue Sessions",
+    ],
   },
   {
     id: "exec-9",
@@ -105,6 +166,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person6,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Annual Financial Audit Excellence",
+      "Compliance Framework Development",
+      "Risk Management Systems",
+    ],
   },
   {
     id: "exec-10",
@@ -114,6 +182,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person7,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Member Support Programs",
+      "Health Insurance Scheme",
+      "Emergency Assistance Fund",
+    ],
   },
   {
     id: "exec-11",
@@ -123,6 +198,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person1,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Event Protocol Standards",
+      "VIP Guest Management",
+      "Ceremonial Procedures Development",
+    ],
   },
   {
     id: "exec-12",
@@ -132,6 +214,13 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person6,
     level: "officer",
     committee: "executive",
+    electedDate: "January 2024",
+    tenureDuration: "Four Years",
+    milestones: [
+      "Legal Framework Modernization",
+      "Contract Review Systems",
+      "Dispute Resolution Mechanisms",
+    ],
   },
 ];
 
