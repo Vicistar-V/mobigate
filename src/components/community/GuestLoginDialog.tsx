@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { OTPVerificationDialog } from "./OTPVerificationDialog";
+import { CommunityJoinDialog } from "./CommunityJoinDialog";
 import {
   Dialog,
   DialogContent,
@@ -22,30 +24,60 @@ import { toast } from "@/hooks/use-toast";
 interface GuestLoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onLoginSuccess?: (role: "guest") => void;
 }
 
-export function GuestLoginDialog({ open, onOpenChange }: GuestLoginDialogProps) {
+export function GuestLoginDialog({
+  open,
+  onOpenChange,
+  onLoginSuccess,
+}: GuestLoginDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const isMobile = useIsMobile();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    // Simulate sending OTP
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    setIsSubmitting(false);
     toast({
-      title: "Login Submitted",
-      description: "OTP has been sent to your email address.",
+      title: "OTP Sent",
+      description: "Please check your email for the verification code.",
+    });
+
+    // Open OTP dialog
+    setShowOTP(true);
+  };
+
+  const handleOTPVerified = () => {
+    toast({
+      title: "Welcome, Guest!",
+      description: "You now have limited access to the community.",
     });
     onOpenChange(false);
+    onLoginSuccess?.("guest");
   };
 
   const handleJoin = () => {
-    toast({
-      title: "Join Community",
-      description: "Redirecting to registration...",
-    });
     onOpenChange(false);
+    setShowJoin(true);
+  };
+
+  const handleJoinSuccess = () => {
+    toast({
+      title: "Registration Complete!",
+      description: "Welcome to the community. Viewing your profile...",
+    });
+    onLoginSuccess?.("guest");
   };
 
   const formContent = (
@@ -121,13 +153,22 @@ export function GuestLoginDialog({ open, onOpenChange }: GuestLoginDialogProps) 
       <div className="flex gap-3 pt-2">
         <Button
           type="submit"
+          disabled={isSubmitting}
           className="flex-1 h-11 bg-green-600 hover:bg-green-700 text-white font-medium"
         >
-          Submit
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Sending OTP...
+            </>
+          ) : (
+            "Submit"
+          )}
         </Button>
         <Button
           type="button"
           onClick={handleJoin}
+          disabled={isSubmitting}
           className="flex-1 h-11 bg-cyan-500 hover:bg-cyan-600 text-white font-medium"
         >
           Join
@@ -136,31 +177,51 @@ export function GuestLoginDialog({ open, onOpenChange }: GuestLoginDialogProps) 
     </form>
   );
 
-  if (isMobile) {
+  const renderDialog = () => {
+
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent>
+            <DrawerHeader className="bg-black text-white py-4">
+              <DrawerTitle className="text-center text-lg">Guest Login</DrawerTitle>
+            </DrawerHeader>
+            <div className="max-h-[70vh] overflow-y-auto pt-6">
+              {formContent}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      );
+    }
+
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader className="bg-black text-white py-4">
-            <DrawerTitle className="text-center text-lg">Guest Login</DrawerTitle>
-          </DrawerHeader>
-          <div className="max-h-[70vh] overflow-y-auto pt-6">
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md p-0">
+          <DialogHeader className="bg-black text-white py-4 px-6">
+            <DialogTitle className="text-center text-lg">Guest Login</DialogTitle>
+          </DialogHeader>
+          <div className="pt-6">
             {formContent}
           </div>
-        </DrawerContent>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     );
-  }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0">
-        <DialogHeader className="bg-black text-white py-4 px-6">
-          <DialogTitle className="text-center text-lg">Guest Login</DialogTitle>
-        </DialogHeader>
-        <div className="pt-6">
-          {formContent}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      {renderDialog()}
+      <OTPVerificationDialog
+        open={showOTP}
+        onOpenChange={setShowOTP}
+        onVerified={handleOTPVerified}
+        email={email}
+      />
+      <CommunityJoinDialog
+        open={showJoin}
+        onOpenChange={setShowJoin}
+        onJoinSuccess={handleJoinSuccess}
+      />
+    </>
   );
 }

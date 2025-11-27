@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { OTPVerificationDialog } from "./OTPVerificationDialog";
+import { CommunityJoinDialog } from "./CommunityJoinDialog";
+import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
 import {
   Dialog,
   DialogContent,
@@ -22,38 +25,67 @@ import { toast } from "@/hooks/use-toast";
 interface MemberLoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onLoginSuccess?: (role: "member") => void;
 }
 
-export function MemberLoginDialog({ open, onOpenChange }: MemberLoginDialogProps) {
+export function MemberLoginDialog({
+  open,
+  onOpenChange,
+  onLoginSuccess,
+}: MemberLoginDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otaaCode, setOtaaCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const isMobile = useIsMobile();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    // Simulate login validation
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    setIsSubmitting(false);
+
+    // Simulate "wrong password" scenario - send OTP
     toast({
-      title: "Login Submitted",
-      description: "OTP has been sent to your email address.",
+      title: "Verification Required",
+      description: "We've sent an OTP to your email for verification.",
+    });
+    setShowOTP(true);
+  };
+
+  const handleOTPVerified = () => {
+    toast({
+      title: "Welcome back!",
+      description: `${email} - You're logged in as a Member.`,
     });
     onOpenChange(false);
+    onLoginSuccess?.("member");
   };
 
   const handleJoin = () => {
-    toast({
-      title: "Join Community",
-      description: "Redirecting to registration...",
-    });
     onOpenChange(false);
+    setShowJoin(true);
+  };
+
+  const handleJoinSuccess = () => {
+    toast({
+      title: "Registration Complete!",
+      description: "Welcome to the community. Viewing your profile...",
+    });
+    onLoginSuccess?.("member");
   };
 
   const handleForgotPassword = () => {
-    toast({
-      title: "Password Reset",
-      description: "Password reset link will be sent to your email.",
-    });
+    onOpenChange(false);
+    setShowForgotPassword(true);
   };
 
   const formContent = (
@@ -144,13 +176,22 @@ export function MemberLoginDialog({ open, onOpenChange }: MemberLoginDialogProps
       <div className="flex gap-3 pt-2">
         <Button
           type="submit"
+          disabled={isSubmitting}
           className="flex-1 h-11 bg-green-600 hover:bg-green-700 text-white font-medium"
         >
-          Submit
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Logging in...
+            </>
+          ) : (
+            "Submit"
+          )}
         </Button>
         <Button
           type="button"
           onClick={handleJoin}
+          disabled={isSubmitting}
           className="flex-1 h-11 bg-cyan-500 hover:bg-cyan-600 text-white font-medium"
         >
           Join
@@ -158,12 +199,12 @@ export function MemberLoginDialog({ open, onOpenChange }: MemberLoginDialogProps
       </div>
 
       {/* Forgot Password Link */}
-      <div className="text-center pt-2">
+      <div className="text-center">
         <Button
           type="button"
           variant="link"
           onClick={handleForgotPassword}
-          className="text-sm text-blue-600 hover:text-blue-700"
+          className="text-sm text-primary underline"
         >
           Forgot your Password? Click Here
         </Button>
@@ -171,31 +212,54 @@ export function MemberLoginDialog({ open, onOpenChange }: MemberLoginDialogProps
     </form>
   );
 
-  if (isMobile) {
+  const renderDialog = () => {
+    if (isMobile) {
+      return (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent>
+            <DrawerHeader className="bg-black text-white py-4">
+              <DrawerTitle className="text-center text-lg">User Login</DrawerTitle>
+            </DrawerHeader>
+            <div className="max-h-[70vh] overflow-y-auto pt-6">
+              {formContent}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      );
+    }
+
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader className="bg-black text-white py-4">
-            <DrawerTitle className="text-center text-lg">User Login</DrawerTitle>
-          </DrawerHeader>
-          <div className="max-h-[70vh] overflow-y-auto pt-6">
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md p-0">
+          <DialogHeader className="bg-black text-white py-4 px-6">
+            <DialogTitle className="text-center text-lg">User Login</DialogTitle>
+          </DialogHeader>
+          <div className="pt-6">
             {formContent}
           </div>
-        </DrawerContent>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     );
-  }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0">
-        <DialogHeader className="bg-black text-white py-4 px-6">
-          <DialogTitle className="text-center text-lg">User Login</DialogTitle>
-        </DialogHeader>
-        <div className="pt-6">
-          {formContent}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      {renderDialog()}
+      <OTPVerificationDialog
+        open={showOTP}
+        onOpenChange={setShowOTP}
+        onVerified={handleOTPVerified}
+        email={email}
+      />
+      <CommunityJoinDialog
+        open={showJoin}
+        onOpenChange={setShowJoin}
+        onJoinSuccess={handleJoinSuccess}
+      />
+      <ForgotPasswordDialog
+        open={showForgotPassword}
+        onOpenChange={setShowForgotPassword}
+      />
+    </>
   );
 }

@@ -35,24 +35,37 @@ export function CommunityMainMenu({
 }: CommunityMainMenuProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [guestLoginOpen, setGuestLoginOpen] = useState(false);
-  const [memberLoginOpen, setMemberLoginOpen] = useState(false);
-  const [adminLoginOpen, setAdminLoginOpen] = useState(false);
+  const [showGuestLogin, setShowGuestLogin] = useState(false);
+  const [showMemberLogin, setShowMemberLogin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+
+  const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
+    if (!onNavigate) return;
+    
+    setOpen(false);
+    
+    // Navigate based on role
+    if (role === "guest" || role === "member") {
+      onNavigate("status"); // Navigate to community home
+    } else if (role === "admin") {
+      onNavigate("administration"); // Navigate to admin dashboard
+    }
+  };
 
   const handleMenuClick = (action: string, isNavigable?: boolean) => {
     // Handle login dialogs
     if (action === "E-Mail Login") {
-      setGuestLoginOpen(true);
+      setShowGuestLogin(true);
       setOpen(false);
       return;
     }
     if (action === "Login/Logout") {
-      setMemberLoginOpen(true);
+      setShowMemberLogin(true);
       setOpen(false);
       return;
     }
     if (action === "Admin Login") {
-      setAdminLoginOpen(true);
+      setShowAdminLogin(true);
       setOpen(false);
       return;
     }
@@ -478,9 +491,21 @@ export function CommunityMainMenu({
       </SheetContent>
 
       {/* Login Dialogs */}
-      <GuestLoginDialog open={guestLoginOpen} onOpenChange={setGuestLoginOpen} />
-      <MemberLoginDialog open={memberLoginOpen} onOpenChange={setMemberLoginOpen} />
-      <AdminLoginDialog open={adminLoginOpen} onOpenChange={setAdminLoginOpen} />
+      <GuestLoginDialog
+        open={showGuestLogin}
+        onOpenChange={setShowGuestLogin}
+        onLoginSuccess={handleLoginSuccess}
+      />
+      <MemberLoginDialog
+        open={showMemberLogin}
+        onOpenChange={setShowMemberLogin}
+        onLoginSuccess={handleLoginSuccess}
+      />
+      <AdminLoginDialog
+        open={showAdminLogin}
+        onOpenChange={setShowAdminLogin}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </Sheet>
   );
 }
