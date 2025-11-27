@@ -16,6 +16,9 @@ import {
 import { MoreVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { GuestLoginDialog } from "./GuestLoginDialog";
+import { MemberLoginDialog } from "./MemberLoginDialog";
+import { AdminLoginDialog } from "./AdminLoginDialog";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
@@ -32,8 +35,29 @@ export function CommunityMainMenu({
 }: CommunityMainMenuProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [guestLoginOpen, setGuestLoginOpen] = useState(false);
+  const [memberLoginOpen, setMemberLoginOpen] = useState(false);
+  const [adminLoginOpen, setAdminLoginOpen] = useState(false);
 
   const handleMenuClick = (action: string, isNavigable?: boolean) => {
+    // Handle login dialogs
+    if (action === "E-Mail Login") {
+      setGuestLoginOpen(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Login/Logout") {
+      setMemberLoginOpen(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Admin Login") {
+      setAdminLoginOpen(true);
+      setOpen(false);
+      return;
+    }
+
+    // Handle navigation
     if (isNavigable && onNavigate) {
       onNavigate(action);
       setOpen(false);
@@ -452,6 +476,11 @@ export function CommunityMainMenu({
           </div>
         </div>
       </SheetContent>
+
+      {/* Login Dialogs */}
+      <GuestLoginDialog open={guestLoginOpen} onOpenChange={setGuestLoginOpen} />
+      <MemberLoginDialog open={memberLoginOpen} onOpenChange={setMemberLoginOpen} />
+      <AdminLoginDialog open={adminLoginOpen} onOpenChange={setAdminLoginOpen} />
     </Sheet>
   );
 }
