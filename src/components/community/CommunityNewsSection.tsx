@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp } from "lucide-react";
+import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp, Filter, Calendar, Check, X } from "lucide-react";
 import { mockNewsData, NewsItem } from "@/data/newsData";
 import { formatDistanceToNow } from "date-fns";
 
@@ -21,19 +21,23 @@ const categoryFilters = [
   { value: "affairs", label: "Community Affairs" },
 ];
 
-const dateTimeMediaFilters = [
+const dateTimeFilters = [
   { value: "all", label: "All Time" },
   { value: "today", label: "Today" },
   { value: "week", label: "This Week" },
   { value: "month", label: "This Month" },
   { value: "year", label: "This Year" },
-  { value: "video", label: "Videos Only" },
-  { value: "photo", label: "Photos Only" },
-  { value: "article", label: "Articles Only" },
 ];
 
-const trendingFilters = [
-  { value: "all", label: "All" },
+const mediaTypeFilters = [
+  { value: "all", label: "All Media" },
+  { value: "video", label: "Videos" },
+  { value: "photo", label: "Photos" },
+  { value: "article", label: "Articles" },
+];
+
+const sortByFilters = [
+  { value: "all", label: "Default" },
   { value: "trending", label: "Trending Now" },
   { value: "viewed", label: "Most Viewed" },
   { value: "commented", label: "Most Commented" },
@@ -47,8 +51,9 @@ interface CommunityNewsSectionProps {
 
 export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [dateTimeMediaFilter, setDateTimeMediaFilter] = useState("all");
-  const [trendingFilter, setTrendingFilter] = useState("all");
+  const [dateTimeFilter, setDateTimeFilter] = useState("all");
+  const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
+  const [sortByFilter, setSortByFilter] = useState("all");
 
   // Filter and sort news items
   const filteredNews = useMemo(() => {
@@ -59,8 +64,8 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
       filtered = filtered.filter((item) => item.category === categoryFilter);
     }
 
-    // Date/Time/Media filter
-    if (dateTimeMediaFilter !== "all") {
+    // Date/Time filter
+    if (dateTimeFilter !== "all") {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -70,7 +75,7 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
       filtered = filtered.filter((item) => {
         const itemDate = new Date(item.date);
         
-        switch (dateTimeMediaFilter) {
+        switch (dateTimeFilter) {
           case "today":
             return itemDate >= today;
           case "week":
@@ -79,21 +84,20 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
             return itemDate >= monthAgo;
           case "year":
             return itemDate >= yearAgo;
-          case "video":
-            return item.mediaType === "video";
-          case "photo":
-            return item.mediaType === "photo";
-          case "article":
-            return item.mediaType === "article";
           default:
             return true;
         }
       });
     }
 
-    // Trending filter
-    if (trendingFilter !== "all") {
-      switch (trendingFilter) {
+    // Media Type filter
+    if (mediaTypeFilter !== "all") {
+      filtered = filtered.filter((item) => item.mediaType === mediaTypeFilter);
+    }
+
+    // Sort By filter
+    if (sortByFilter !== "all") {
+      switch (sortByFilter) {
         case "trending":
           filtered = filtered.filter((item) => item.trending);
           break;
@@ -113,7 +117,7 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
     }
 
     return filtered;
-  }, [categoryFilter, dateTimeMediaFilter, trendingFilter]);
+  }, [categoryFilter, dateTimeFilter, mediaTypeFilter, sortByFilter]);
 
   const getMediaIcon = (mediaType: NewsItem["mediaType"]) => {
     switch (mediaType) {
@@ -163,7 +167,7 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="start" className="w-56 bg-background">
               {categoryFilters.map((filter) => (
                 <DropdownMenuItem
                   key={filter.value}
@@ -176,22 +180,22 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Date/Time/Media Filter */}
+          {/* Date/Time Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <span className="text-sm">
-                  {dateTimeMediaFilters.find((f) => f.value === dateTimeMediaFilter)?.label || "Time/Media"}
+                  {dateTimeFilters.find((f) => f.value === dateTimeFilter)?.label || "Date/Time"}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              {dateTimeMediaFilters.map((filter) => (
+            <DropdownMenuContent align="start" className="w-56 bg-background">
+              {dateTimeFilters.map((filter) => (
                 <DropdownMenuItem
                   key={filter.value}
-                  onClick={() => setDateTimeMediaFilter(filter.value)}
-                  className={dateTimeMediaFilter === filter.value ? "bg-accent" : ""}
+                  onClick={() => setDateTimeFilter(filter.value)}
+                  className={dateTimeFilter === filter.value ? "bg-accent" : ""}
                 >
                   {filter.label}
                 </DropdownMenuItem>
@@ -199,22 +203,45 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Trending Filter */}
+          {/* Media Type Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <span className="text-sm">
-                  {trendingFilters.find((f) => f.value === trendingFilter)?.label || "Sort"}
+                  {mediaTypeFilters.find((f) => f.value === mediaTypeFilter)?.label || "Media Type"}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              {trendingFilters.map((filter) => (
+            <DropdownMenuContent align="start" className="w-56 bg-background">
+              {mediaTypeFilters.map((filter) => (
                 <DropdownMenuItem
                   key={filter.value}
-                  onClick={() => setTrendingFilter(filter.value)}
-                  className={trendingFilter === filter.value ? "bg-accent" : ""}
+                  onClick={() => setMediaTypeFilter(filter.value)}
+                  className={mediaTypeFilter === filter.value ? "bg-accent" : ""}
+                >
+                  {filter.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Sort By Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <span className="text-sm">
+                  {sortByFilters.find((f) => f.value === sortByFilter)?.label || "Sort By"}
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background">
+              {sortByFilters.map((filter) => (
+                <DropdownMenuItem
+                  key={filter.value}
+                  onClick={() => setSortByFilter(filter.value)}
+                  className={sortByFilter === filter.value ? "bg-accent" : ""}
                 >
                   {filter.label}
                 </DropdownMenuItem>
@@ -224,7 +251,7 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
         </div>
 
         {/* Active Filters Display */}
-        {(categoryFilter !== "all" || dateTimeMediaFilter !== "all" || trendingFilter !== "all") && (
+        {(categoryFilter !== "all" || dateTimeFilter !== "all" || mediaTypeFilter !== "all" || sortByFilter !== "all") && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-sm text-muted-foreground">Active filters:</span>
             {categoryFilter !== "all" && (
@@ -232,14 +259,19 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
                 {categoryFilters.find((f) => f.value === categoryFilter)?.label}
               </Badge>
             )}
-            {dateTimeMediaFilter !== "all" && (
+            {dateTimeFilter !== "all" && (
               <Badge variant="secondary" className="gap-1">
-                {dateTimeMediaFilters.find((f) => f.value === dateTimeMediaFilter)?.label}
+                {dateTimeFilters.find((f) => f.value === dateTimeFilter)?.label}
               </Badge>
             )}
-            {trendingFilter !== "all" && (
+            {mediaTypeFilter !== "all" && (
               <Badge variant="secondary" className="gap-1">
-                {trendingFilters.find((f) => f.value === trendingFilter)?.label}
+                {mediaTypeFilters.find((f) => f.value === mediaTypeFilter)?.label}
+              </Badge>
+            )}
+            {sortByFilter !== "all" && (
+              <Badge variant="secondary" className="gap-1">
+                {sortByFilters.find((f) => f.value === sortByFilter)?.label}
               </Badge>
             )}
             <Button
@@ -247,8 +279,9 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
               size="sm"
               onClick={() => {
                 setCategoryFilter("all");
-                setDateTimeMediaFilter("all");
-                setTrendingFilter("all");
+                setDateTimeFilter("all");
+                setMediaTypeFilter("all");
+                setSortByFilter("all");
               }}
               className="h-6 text-xs"
             >
