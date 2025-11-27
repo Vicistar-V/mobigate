@@ -29,6 +29,7 @@ import { communityPeople } from "@/data/communityPeopleData";
 import { CommunityAboutTab } from "@/components/community/CommunityAboutTab";
 import { CommunityMembershipTab } from "@/components/community/CommunityMembershipTab";
 import { CommunityNewsSection } from "@/components/community/CommunityNewsSection";
+import { CommunityEventsSection } from "@/components/community/CommunityEventsSection";
 import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks";
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -739,19 +740,13 @@ const CommunityProfile = () => {
           )}
 
           {activeTab === "events" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Events</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Community events and gatherings...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Upcoming Events</li>
-                  <li>Past Events Gallery</li>
-                  <li>Event Calendar</li>
-                  <li>RSVP Management</li>
-                  <li>Event Photos & Videos</li>
-                </ul>
-              </div>
-            </Card>
+            <div className="mt-6">
+              <CommunityEventsSection 
+                premiumAdSlots={premiumAdSlots}
+                showPeopleYouMayKnow={true}
+                canPostEvents={true}
+              />
+            </div>
           )}
         </div>
       </main>
