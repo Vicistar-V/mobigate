@@ -455,18 +455,6 @@ const CommunityProfile = () => {
 
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
-          {/* Back Button for Hidden Sections */}
-          {["finance", "meetings", "rollcalls", "fundraiser", "election", "executive", "tenure", "adhoc", "staff", "resources", "news", "articles", "events", "vibes"].includes(activeTab) && (
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("status")}
-              className="mb-4 gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Community
-            </Button>
-          )}
-
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
             <TabsList className="w-full grid grid-cols-3 h-auto">
               <TabsTrigger value="status" className="text-xs sm:text-sm">
