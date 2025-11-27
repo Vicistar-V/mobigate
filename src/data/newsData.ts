@@ -9,7 +9,11 @@ export interface NewsItem {
   views: number;
   comments: number;
   shares: number;
+  likes: number;
   trending: boolean;
+  author: string;
+  authorProfileImage?: string;
+  authorId?: string;
 }
 
 export const mockNewsData: NewsItem[] = [
@@ -23,7 +27,11 @@ export const mockNewsData: NewsItem[] = [
     views: 1250,
     comments: 45,
     shares: 23,
+    likes: 234,
     trending: true,
+    author: "Sarah Johnson",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-1",
   },
   {
     id: "2",
@@ -36,7 +44,11 @@ export const mockNewsData: NewsItem[] = [
     views: 2100,
     comments: 89,
     shares: 156,
+    likes: 456,
     trending: true,
+    author: "Michael Chen",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-2",
   },
   {
     id: "3",
@@ -48,7 +60,11 @@ export const mockNewsData: NewsItem[] = [
     views: 890,
     comments: 34,
     shares: 12,
+    likes: 123,
     trending: false,
+    author: "Jennifer Taylor",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-3",
   },
   {
     id: "4",
@@ -61,7 +77,11 @@ export const mockNewsData: NewsItem[] = [
     views: 1580,
     comments: 67,
     shares: 89,
+    likes: 312,
     trending: true,
+    author: "David Martinez",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-4",
   },
   {
     id: "5",
@@ -74,7 +94,11 @@ export const mockNewsData: NewsItem[] = [
     views: 756,
     comments: 28,
     shares: 45,
+    likes: 187,
     trending: false,
+    author: "Lisa Anderson",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-5",
   },
   {
     id: "6",
@@ -86,7 +110,11 @@ export const mockNewsData: NewsItem[] = [
     views: 1920,
     comments: 112,
     shares: 201,
+    likes: 534,
     trending: true,
+    author: "Robert Brown",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-6",
   },
   {
     id: "7",
@@ -98,7 +126,11 @@ export const mockNewsData: NewsItem[] = [
     views: 680,
     comments: 23,
     shares: 15,
+    likes: 98,
     trending: false,
+    author: "Emily Davis",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-7",
   },
   {
     id: "8",
@@ -111,7 +143,11 @@ export const mockNewsData: NewsItem[] = [
     views: 945,
     comments: 41,
     shares: 67,
+    likes: 223,
     trending: false,
+    author: "James Wilson",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-8",
   },
   {
     id: "9",
@@ -124,7 +160,11 @@ export const mockNewsData: NewsItem[] = [
     views: 1340,
     comments: 56,
     shares: 78,
+    likes: 289,
     trending: true,
+    author: "Sarah Johnson",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-1",
   },
   {
     id: "10",
@@ -136,6 +176,10 @@ export const mockNewsData: NewsItem[] = [
     views: 520,
     comments: 18,
     shares: 34,
+    likes: 145,
     trending: false,
+    author: "Michael Chen",
+    authorProfileImage: "/placeholder.svg",
+    authorId: "user-2",
   },
 ];
