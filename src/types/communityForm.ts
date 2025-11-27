@@ -144,6 +144,7 @@ export interface CommunityFormData {
   // Administration
   officeTenure: number; // in years
   staffCount: number;
+  maxAdminsAllowed: number; // Number of admins allowed (1-20)
   
   // Meetings
   generalMeetings: MeetingSchedule[];
@@ -228,6 +229,7 @@ export const defaultCommunityFormData: CommunityFormData = {
   customDeputyOffice: "",
   officeTenure: 2,
   staffCount: 0,
+  maxAdminsAllowed: 1,
   generalMeetings: [],
   executiveMeetings: [],
   attendanceRegister: true,

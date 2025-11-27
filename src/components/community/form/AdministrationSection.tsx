@@ -16,6 +16,9 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
   const [staffDisplay, setStaffDisplay] = useState<string>(
     formData.staffCount.toString()
   );
+  const [adminsDisplay, setAdminsDisplay] = useState<string>(
+    formData.maxAdminsAllowed.toString()
+  );
 
   // Sync display state when form data changes externally
   useEffect(() => {
@@ -25,6 +28,11 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
   useEffect(() => {
     setStaffDisplay(formData.staffCount.toString());
   }, [formData.staffCount]);
+
+  useEffect(() => {
+    setAdminsDisplay(formData.maxAdminsAllowed.toString());
+  }, [formData.maxAdminsAllowed]);
+
   return (
     <div className="space-y-5">
       <div className="space-y-2">
@@ -57,6 +65,40 @@ export function AdministrationSection({ formData, updateField }: AdministrationS
         />
         <p className="text-xs text-muted-foreground">
           How long should elected officials serve?
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="maxAdminsAllowed" className="text-sm font-medium">
+          Number of Admins Allowed
+        </Label>
+        <Input
+          id="maxAdminsAllowed"
+          type="number"
+          min="1"
+          max="20"
+          value={adminsDisplay}
+          className="h-11"
+          onChange={(e) => {
+            const value = e.target.value;
+            setAdminsDisplay(value);
+            
+            // Only update form if valid number
+            if (value !== "" && !isNaN(parseInt(value))) {
+              updateField("maxAdminsAllowed", parseInt(value));
+            }
+          }}
+          onBlur={() => {
+            // On blur, if empty, reset to default
+            if (adminsDisplay === "" || isNaN(parseInt(adminsDisplay))) {
+              setAdminsDisplay("1");
+              updateField("maxAdminsAllowed", 1);
+            }
+          }}
+          placeholder="Number of admins (1-20)"
+        />
+        <p className="text-xs text-muted-foreground">
+          Maximum number of administrators for this community
         </p>
       </div>
 
