@@ -386,15 +386,157 @@ export function CommunityMainMenu({
 
           <Separator className="my-2" />
 
-          {/* Single Items */}
-          <div className="px-4 space-y-1">
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("meetings", true)}
-            >
-              Meetings/Activities
-            </Button>
+          {/* Community Meetings - Expanded Accordion */}
+          <AccordionItem value="meetings-main">
+            <AccordionTrigger className="text-base font-semibold">
+              Community Meetings
+            </AccordionTrigger>
+            <AccordionContent>
+              {/* Recent Meetings Sub-Accordion */}
+              <Accordion type="multiple" className="pl-2">
+                <AccordionItem value="recent-meetings" className="border-none">
+                  <AccordionTrigger className="text-sm py-2">
+                    + Recent Meetings
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-1">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-proceedings", true)}
+                    >
+                      Download Meeting Proceedings
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-headline", true)}
+                    >
+                      Meeting Headline/Theme
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-resolutions", true)}
+                    >
+                      Meeting Resolutions
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-conflicts", true)}
+                    >
+                      Conflicts of Interests
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-chats", true)}
+                    >
+                      Meeting Chats
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-vote-notes", true)}
+                    >
+                      Meeting Vote Notes
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-lighter-moods", true)}
+                    >
+                      Lighter Moods
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-attendance", true)}
+                    >
+                      Attendance Roll-Calls
+                    </Button>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Previous Meetings Sub-Accordion */}
+                <AccordionItem value="previous-meetings" className="border-none">
+                  <AccordionTrigger className="text-sm py-2">
+                    + Previous Meetings
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-1">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-proceedings", true)}
+                    >
+                      Download Meeting Proceedings
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-headline", true)}
+                    >
+                      Meeting Headline/Theme
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-resolutions", true)}
+                    >
+                      Meeting Resolutions
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-conflicts", true)}
+                    >
+                      Conflicts of Interests
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-chats", true)}
+                    >
+                      Meeting Chats
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-vote-notes", true)}
+                    >
+                      Meeting Vote Notes
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-lighter-moods", true)}
+                    >
+                      Lighter Moods
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start pl-4 text-sm h-8"
+                      onClick={() => handleMenuClick("meeting-attendance", true)}
+                    >
+                      Attendance Roll-Calls
+                    </Button>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              {/* Live Meeting Button */}
+              <Button
+                variant="ghost"
+                className="w-full justify-start pl-2 mt-2"
+                onClick={() => handleMenuClick("meetings", true)}
+              >
+                Join Live Meeting
+              </Button>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Roll-Calls (kept as single item) */}
+          <div className="px-4 mt-2">
             <Button
               variant="ghost"
               className="w-full justify-start"

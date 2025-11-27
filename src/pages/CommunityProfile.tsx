@@ -41,6 +41,14 @@ import { CommunityTenureTab } from "@/components/community/CommunityTenureTab";
 import { CommunityAdhocTab } from "@/components/community/CommunityAdhocTab";
 import { CommunityStaffTab } from "@/components/community/CommunityStaffTab";
 import { CommunityMeetingsTab } from "@/components/community/CommunityMeetingsTab";
+import { MeetingProceedingsTab } from "@/components/community/meetings/MeetingProceedingsTab";
+import { MeetingHeadlineThemeTab } from "@/components/community/meetings/MeetingHeadlineThemeTab";
+import { MeetingResolutionsTab } from "@/components/community/meetings/MeetingResolutionsTab";
+import { MeetingConflictsTab } from "@/components/community/meetings/MeetingConflictsTab";
+import { MeetingChatsTab } from "@/components/community/meetings/MeetingChatsTab";
+import { MeetingVoteNotesTab } from "@/components/community/meetings/MeetingVoteNotesTab";
+import { MeetingLighterMoodsTab } from "@/components/community/meetings/MeetingLighterMoodsTab";
+import { MeetingAttendanceTab } from "@/components/community/meetings/MeetingAttendanceTab";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -615,6 +623,54 @@ const CommunityProfile = () => {
           {activeTab === "meetings" && (
             <div className="mt-6">
               <CommunityMeetingsTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-proceedings" && (
+            <div className="mt-6">
+              <MeetingProceedingsTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-headline" && (
+            <div className="mt-6">
+              <MeetingHeadlineThemeTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-resolutions" && (
+            <div className="mt-6">
+              <MeetingResolutionsTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-conflicts" && (
+            <div className="mt-6">
+              <MeetingConflictsTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-chats" && (
+            <div className="mt-6">
+              <MeetingChatsTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-vote-notes" && (
+            <div className="mt-6">
+              <MeetingVoteNotesTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-lighter-moods" && (
+            <div className="mt-6">
+              <MeetingLighterMoodsTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-attendance" && (
+            <div className="mt-6">
+              <MeetingAttendanceTab />
             </div>
           )}
 

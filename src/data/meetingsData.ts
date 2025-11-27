@@ -38,6 +38,98 @@ export interface Meeting {
   duration?: string;
 }
 
+// Extended Meeting Interfaces
+export interface MeetingProceedings {
+  id: string;
+  meetingId: string;
+  content: string;
+  downloadUrl: string;
+  fileType: 'PDF' | 'DOC' | 'DOCX';
+  fileSize: string;
+  createdAt: Date;
+}
+
+export interface MeetingHeadline {
+  id: string;
+  meetingId: string;
+  headline: string;
+  theme: string;
+  description: string;
+  agendaItems: string[];
+}
+
+export interface MeetingResolution {
+  id: string;
+  meetingId: string;
+  title: string;
+  description: string;
+  votesFor: number;
+  votesAgainst: number;
+  abstentions: number;
+  status: 'passed' | 'rejected' | 'tabled';
+  proposedBy: string;
+}
+
+export interface ConflictOfInterest {
+  id: string;
+  meetingId: string;
+  memberId: string;
+  memberName: string;
+  memberAvatar: string;
+  description: string;
+  resolution: string;
+  status: 'declared' | 'resolved' | 'dismissed';
+  declaredAt: Date;
+}
+
+export interface MeetingVoteNote {
+  id: string;
+  meetingId: string;
+  resolutionId: string;
+  voterId: string;
+  voterName: string;
+  voterAvatar: string;
+  vote: 'for' | 'against' | 'abstain';
+  note?: string;
+  timestamp: Date;
+}
+
+export interface LighterMood {
+  id: string;
+  meetingId: string;
+  memberId: string;
+  memberName: string;
+  memberAvatar: string;
+  content: string;
+  type: 'joke' | 'quote' | 'anecdote' | 'photo';
+  mediaUrl?: string;
+  likes: number;
+  createdAt: Date;
+}
+
+export interface AttendanceRollCall {
+  id: string;
+  meetingId: string;
+  memberId: string;
+  memberName: string;
+  avatar: string;
+  position: string;
+  status: 'present' | 'absent' | 'excused' | 'late';
+  arrivalTime?: Date;
+  departureTime?: Date;
+  notes?: string;
+}
+
+export interface ExtendedMeeting extends Meeting {
+  proceedings?: MeetingProceedings;
+  headline?: MeetingHeadline;
+  resolutions: MeetingResolution[];
+  conflictsOfInterest: ConflictOfInterest[];
+  voteNotes: MeetingVoteNote[];
+  lighterMoods: LighterMood[];
+  rollCalls: AttendanceRollCall[];
+}
+
 export const mockParticipants: MeetingParticipant[] = [
   {
     id: "p1",
@@ -141,6 +233,232 @@ export const mockChatMessages: MeetingChatMessage[] = [
     senderAvatar: profileLisa,
     content: "Can everyone see the shared screen?",
     timestamp: new Date(Date.now() - 60000),
+  },
+];
+
+// Extended mock data
+export const mockMeetingProceedings: MeetingProceedings[] = [
+  {
+    id: "proc1",
+    meetingId: "meet2",
+    content: "Meeting proceedings for Executive Meeting held on...",
+    downloadUrl: "#",
+    fileType: "PDF",
+    fileSize: "2.4 MB",
+    createdAt: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "proc2",
+    meetingId: "meet3",
+    content: "General Meeting proceedings and minutes...",
+    downloadUrl: "#",
+    fileType: "DOC",
+    fileSize: "1.8 MB",
+    createdAt: new Date(Date.now() - 86400000 * 7),
+  },
+];
+
+export const mockMeetingHeadlines: MeetingHeadline[] = [
+  {
+    id: "head1",
+    meetingId: "meet2",
+    headline: "Strategic Planning & Budget Review",
+    theme: "Financial Sustainability",
+    description: "Comprehensive review of annual budget and strategic initiatives for the upcoming fiscal year.",
+    agendaItems: ["Budget Review", "Strategic Goals", "Resource Allocation", "Timeline Discussion"],
+  },
+  {
+    id: "head2",
+    meetingId: "meet3",
+    headline: "Community Engagement & Growth",
+    theme: "Member Retention",
+    description: "Discussion on improving community engagement and member retention strategies.",
+    agendaItems: ["Member Feedback", "Event Planning", "Communication Strategy", "New Initiatives"],
+  },
+];
+
+export const mockResolutions: MeetingResolution[] = [
+  {
+    id: "res1",
+    meetingId: "meet2",
+    title: "Approve Annual Budget 2025",
+    description: "Motion to approve the proposed annual budget for fiscal year 2025 with allocated funds for community programs.",
+    votesFor: 18,
+    votesAgainst: 2,
+    abstentions: 1,
+    status: "passed",
+    proposedBy: "Sarah Johnson",
+  },
+  {
+    id: "res2",
+    meetingId: "meet2",
+    title: "Increase Membership Dues",
+    description: "Proposal to increase annual membership dues by 15% to support enhanced community services.",
+    votesFor: 12,
+    votesAgainst: 8,
+    abstentions: 1,
+    status: "passed",
+    proposedBy: "Emily Davis",
+  },
+  {
+    id: "res3",
+    meetingId: "meet3",
+    title: "Establish New Committee",
+    description: "Motion to establish a new Technology & Innovation Committee.",
+    votesFor: 25,
+    votesAgainst: 0,
+    abstentions: 2,
+    status: "passed",
+    proposedBy: "Michael Chen",
+  },
+];
+
+export const mockConflictsOfInterest: ConflictOfInterest[] = [
+  {
+    id: "conf1",
+    meetingId: "meet2",
+    memberId: "p3",
+    memberName: "Emily Davis",
+    memberAvatar: profileEmily,
+    description: "Personal financial interest in vendor selection for community event management services.",
+    resolution: "Recused from voting on vendor selection. Alternative oversight assigned.",
+    status: "resolved",
+    declaredAt: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "conf2",
+    meetingId: "meet3",
+    memberId: "p4",
+    memberName: "David Martinez",
+    memberAvatar: profileDavid,
+    description: "Family member employed by proposed contractor for facility renovations.",
+    resolution: "Declared and documented. Did not participate in contractor discussions.",
+    status: "resolved",
+    declaredAt: new Date(Date.now() - 86400000 * 7),
+  },
+];
+
+export const mockVoteNotes: MeetingVoteNote[] = [
+  {
+    id: "vote1",
+    meetingId: "meet2",
+    resolutionId: "res1",
+    voterId: "p1",
+    voterName: "Sarah Johnson",
+    voterAvatar: profileSarah,
+    vote: "for",
+    note: "The budget is well-balanced and addresses our key priorities.",
+    timestamp: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "vote2",
+    meetingId: "meet2",
+    resolutionId: "res1",
+    voterId: "p2",
+    voterName: "Michael Chen",
+    voterAvatar: profileMichael,
+    vote: "for",
+    timestamp: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "vote3",
+    meetingId: "meet2",
+    resolutionId: "res2",
+    voterId: "p4",
+    voterName: "David Martinez",
+    voterAvatar: profileDavid,
+    vote: "against",
+    note: "I believe the increase is too steep for our members at this time.",
+    timestamp: new Date(Date.now() - 86400000 * 2),
+  },
+];
+
+export const mockLighterMoods: LighterMood[] = [
+  {
+    id: "mood1",
+    meetingId: "meet2",
+    memberId: "p5",
+    memberName: "Lisa Anderson",
+    memberAvatar: profileLisa,
+    content: "Why did the meeting go to therapy? It had too many issues to resolve! 😄",
+    type: "joke",
+    likes: 12,
+    createdAt: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "mood2",
+    meetingId: "meet3",
+    memberId: "p6",
+    memberName: "James Wilson",
+    memberAvatar: profileJames,
+    content: "Coming together is a beginning, staying together is progress, and working together is success. - Henry Ford",
+    type: "quote",
+    likes: 24,
+    createdAt: new Date(Date.now() - 86400000 * 7),
+  },
+  {
+    id: "mood3",
+    meetingId: "meet3",
+    memberId: "p1",
+    memberName: "Sarah Johnson",
+    memberAvatar: profileSarah,
+    content: "Remember when we tried to use the new video conferencing software and spent 10 minutes trying to unmute everyone? Classic!",
+    type: "anecdote",
+    likes: 18,
+    createdAt: new Date(Date.now() - 86400000 * 7),
+  },
+];
+
+export const mockAttendance: AttendanceRollCall[] = [
+  {
+    id: "att1",
+    meetingId: "meet2",
+    memberId: "p1",
+    memberName: "Sarah Johnson",
+    avatar: profileSarah,
+    position: "President-General",
+    status: "present",
+    arrivalTime: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "att2",
+    meetingId: "meet2",
+    memberId: "p2",
+    memberName: "Michael Chen",
+    avatar: profileMichael,
+    position: "Secretary",
+    status: "present",
+    arrivalTime: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "att3",
+    meetingId: "meet2",
+    memberId: "p3",
+    memberName: "Emily Davis",
+    avatar: profileEmily,
+    position: "Treasurer",
+    status: "late",
+    arrivalTime: new Date(Date.now() - 86400000 * 2 + 900000),
+    notes: "Traffic delay",
+  },
+  {
+    id: "att4",
+    meetingId: "meet3",
+    memberId: "p1",
+    memberName: "Sarah Johnson",
+    avatar: profileSarah,
+    position: "President-General",
+    status: "present",
+  },
+  {
+    id: "att5",
+    meetingId: "meet3",
+    memberId: "p6",
+    memberName: "James Wilson",
+    avatar: profileJames,
+    position: "Member",
+    status: "absent",
+    notes: "Out of town",
   },
 ];
 
