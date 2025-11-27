@@ -473,6 +473,27 @@ export function CommunityMainMenu({
                 </Button>
               </AccordionContent>
             </AccordionItem>
+
+            {/* Mobi-Merchant */}
+            <AccordionItem value="mobi-merchant">
+              <AccordionTrigger className="text-base">Mobi-Merchant</AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Create Mobi Quiz-Games")}
+                >
+                  Create Mobi Quiz-Games
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Subscribe for Voucher Bundles")}
+                >
+                  Subscribe for Voucher Bundles
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
 
           <Separator className="my-2" />
