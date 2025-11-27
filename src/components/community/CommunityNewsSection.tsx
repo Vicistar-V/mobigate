@@ -8,9 +8,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp, Filter, Calendar, Check, X } from "lucide-react";
+import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp, Heart } from "lucide-react";
 import { mockNewsData, NewsItem } from "@/data/newsData";
 import { formatDistanceToNow } from "date-fns";
+import { NewsDetailDialog } from "./NewsDetailDialog";
+import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const categoryFilters = [
   { value: "all", label: "All Categories" },
@@ -54,6 +57,14 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
   const [dateTimeFilter, setDateTimeFilter] = useState("all");
   const [mediaTypeFilter, setMediaTypeFilter] = useState("all");
   const [sortByFilter, setSortByFilter] = useState("all");
+  
+  // State for news detail dialog
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  
+  // State for likes
+  const [likedNews, setLikedNews] = useState<Set<string>>(new Set());
+  const [newsLikes, setNewsLikes] = useState<Record<string, number>>({});
 
   // Filter and sort news items
   const filteredNews = useMemo(() => {
@@ -144,6 +155,47 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
         return "bg-red-500/10 text-red-600 dark:text-red-400";
       default:
         return "bg-muted text-muted-foreground";
+    }
+  };
+
+  // Handler to open news detail dialog
+  const handleNewsClick = (news: NewsItem) => {
+    setSelectedNews(news);
+    setDetailOpen(true);
+  };
+
+  // Handler for like toggle
+  const handleLike = (newsId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation(); // Prevent card click
+    setLikedNews(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(newsId)) {
+        newSet.delete(newsId);
+        setNewsLikes(p => ({ ...p, [newsId]: (p[newsId] || mockNewsData.find(n => n.id === newsId)?.likes || 0) - 1 }));
+      } else {
+        newSet.add(newsId);
+        setNewsLikes(p => ({ ...p, [newsId]: (p[newsId] || mockNewsData.find(n => n.id === newsId)?.likes || 0) + 1 }));
+      }
+      return newSet;
+    });
+  };
+
+  // Handler for share
+  const handleShare = async (news: NewsItem, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: news.title,
+          text: news.description,
+          url: window.location.href,
+        });
+      } catch (error) {
+        // User cancelled or error occurred
+      }
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({ description: "Link copied to clipboard" });
     }
   };
 
@@ -299,7 +351,11 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
           </Card>
         ) : (
           filteredNews.map((news) => (
-            <Card key={news.id} className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
+            <Card 
+              key={news.id} 
+              className="p-4 sm:p-6 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99]"
+              onClick={() => handleNewsClick(news)}
+            >
               <div className="space-y-3">
                 {/* Header with badges */}
                 <div className="flex flex-wrap items-start gap-2">
@@ -326,7 +382,7 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
                   <h3 className="font-semibold text-base sm:text-lg text-foreground mb-2">
                     {news.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
                     {news.description}
                   </p>
                 </div>
@@ -349,19 +405,39 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
                   </div>
                 )}
 
-                {/* Engagement Stats */}
-                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-muted-foreground pt-2 border-t">
-                  <div className="flex items-center gap-1.5">
-                    <Eye className="h-4 w-4" />
-                    <span>{news.views.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
+                {/* Interactive Engagement Bar */}
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => handleLike(news.id, e)}
+                    className={cn(
+                      "gap-1.5 hover:bg-accent",
+                      likedNews.has(news.id) && "text-red-500"
+                    )}
+                  >
+                    <Heart className={cn("h-4 w-4", likedNews.has(news.id) && "fill-current")} />
+                    <span>{(newsLikes[news.id] ?? news.likes).toLocaleString()}</span>
+                  </Button>
+                  
+                  <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-accent">
                     <MessageSquare className="h-4 w-4" />
                     <span>{news.comments.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => handleShare(news, e)}
+                    className="gap-1.5 hover:bg-accent"
+                  >
                     <Share2 className="h-4 w-4" />
                     <span>{news.shares.toLocaleString()}</span>
+                  </Button>
+                  
+                  <div className="ml-auto flex items-center gap-1.5 text-muted-foreground text-sm">
+                    <Eye className="h-4 w-4" />
+                    <span>{news.views.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -375,6 +451,18 @@ export function CommunityNewsSection({ className }: CommunityNewsSectionProps) {
         <div className="mt-6 text-center text-sm text-muted-foreground">
           Showing {filteredNews.length} of {mockNewsData.length} news items
         </div>
+      )}
+
+      {/* News Detail Dialog */}
+      {selectedNews && (
+        <NewsDetailDialog
+          open={detailOpen}
+          onOpenChange={setDetailOpen}
+          news={selectedNews}
+          onLike={handleLike}
+          isLiked={likedNews.has(selectedNews.id)}
+          likeCount={newsLikes[selectedNews.id] ?? selectedNews.likes}
+        />
       )}
     </div>
   );
