@@ -40,7 +40,14 @@ import { CommunityExecutiveTab } from "@/components/community/CommunityExecutive
 import { CommunityTenureTab } from "@/components/community/CommunityTenureTab";
 import { CommunityAdhocTab } from "@/components/community/CommunityAdhocTab";
 import { CommunityStaffTab } from "@/components/community/CommunityStaffTab";
-import { CommunityElectionTab } from "@/components/community/CommunityElectionTab";
+import { ElectionCampaignsTab } from "@/components/community/elections/ElectionCampaignsTab";
+import { ElectionVotingTab } from "@/components/community/elections/ElectionVotingTab";
+import { ElectionResultsTab } from "@/components/community/elections/ElectionResultsTab";
+import { ElectionWinnersTab } from "@/components/community/elections/ElectionWinnersTab";
+import { ElectionOpinionsTab } from "@/components/community/elections/ElectionOpinionsTab";
+import { ElectionAccreditationTab } from "@/components/community/elections/ElectionAccreditationTab";
+import { ElectionClearancesTab } from "@/components/community/elections/ElectionClearancesTab";
+import { ElectionPrimariesTab } from "@/components/community/elections/ElectionPrimariesTab";
 import { CommunityMeetingsTab } from "@/components/community/CommunityMeetingsTab";
 import { MeetingProceedingsTab } from "@/components/community/meetings/MeetingProceedingsTab";
 import { MeetingHeadlineThemeTab } from "@/components/community/meetings/MeetingHeadlineThemeTab";
@@ -706,17 +713,45 @@ const CommunityProfile = () => {
             </Card>
           )}
 
-          {(activeTab === "elections" || 
-            activeTab === "election-campaigns" ||
-            activeTab === "election-voting" ||
-            activeTab === "election-results" ||
-            activeTab === "election-winners" ||
-            activeTab === "election-opinions" ||
-            activeTab === "election-accreditation" ||
-            activeTab === "election-clearances" ||
-            activeTab === "election-primaries") && (
+          {/* Elections & Voting Tabs - Separated */}
+          {activeTab === "election-campaigns" && (
             <div className="mt-6">
-              <CommunityElectionTab />
+              <ElectionCampaignsTab />
+            </div>
+          )}
+          {activeTab === "election-voting" && (
+            <div className="mt-6">
+              <ElectionVotingTab />
+            </div>
+          )}
+          {activeTab === "election-results" && (
+            <div className="mt-6">
+              <ElectionResultsTab />
+            </div>
+          )}
+          {activeTab === "election-winners" && (
+            <div className="mt-6">
+              <ElectionWinnersTab />
+            </div>
+          )}
+          {activeTab === "election-opinions" && (
+            <div className="mt-6">
+              <ElectionOpinionsTab />
+            </div>
+          )}
+          {activeTab === "election-accreditation" && (
+            <div className="mt-6">
+              <ElectionAccreditationTab />
+            </div>
+          )}
+          {activeTab === "election-clearances" && (
+            <div className="mt-6">
+              <ElectionClearancesTab />
+            </div>
+          )}
+          {activeTab === "election-primaries" && (
+            <div className="mt-6">
+              <ElectionPrimariesTab />
             </div>
           )}
 
