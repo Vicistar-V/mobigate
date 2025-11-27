@@ -32,7 +32,6 @@ import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
-import { CommunityNewsSection } from "@/components/community/CommunityNewsSection";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -45,14 +44,8 @@ const CommunityProfile = () => {
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [galleryFilter, setGalleryFilter] = useState<string>("all");
-  const [newsFilter, setNewsFilter] = useState({
-    category: "all",
-    dateTimeMedia: "all",
-    trending: "all"
-  });
   const { toast } = useToast();
   const tabsSectionRef = useRef<HTMLDivElement>(null);
-  const newsSectionRef = useRef<HTMLDivElement>(null);
 
   // Get community data
   const community = getCommunityById(communityId || "1");
@@ -450,18 +443,6 @@ const CommunityProfile = () => {
           </div>
         </Card>
 
-        {/* Quick Links */}
-        <CommunityQuickLinks
-          fundRaiserEnabled={community.fundRaiserEnabled}
-          mobiStoreEnabled={community.mobiStoreEnabled}
-          quizGameEnabled={community.quizGameEnabled}
-          onNewsClick={() => {
-            if (newsSectionRef.current) {
-              newsSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-          }}
-        />
-
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
@@ -525,14 +506,6 @@ const CommunityProfile = () => {
                 showViewToggle={true}
                 showFilterCounts={true}
               />
-
-              {/* 4.5. Community News Section */}
-              <div ref={newsSectionRef}>
-                <CommunityNewsSection
-                  activeFilters={newsFilter}
-                  onFilterChange={setNewsFilter}
-                />
-              </div>
 
               {/* 5. Community Contents */}
               <ELibrarySection

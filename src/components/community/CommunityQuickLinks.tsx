@@ -1,4 +1,4 @@
-import { Gift, Store, GamepadIcon, Newspaper } from "lucide-react";
+import { Gift, Store, GamepadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -6,14 +6,12 @@ interface CommunityQuickLinksProps {
   fundRaiserEnabled?: boolean;
   mobiStoreEnabled?: boolean;
   quizGameEnabled?: boolean;
-  onNewsClick?: () => void;
 }
 
 export function CommunityQuickLinks({
   fundRaiserEnabled = false,
   mobiStoreEnabled = false,
   quizGameEnabled = false,
-  onNewsClick,
 }: CommunityQuickLinksProps) {
   const { toast } = useToast();
 
@@ -38,14 +36,7 @@ export function CommunityQuickLinks({
     });
   };
 
-  const handleNews = () => {
-    if (onNewsClick) {
-      onNewsClick();
-    }
-  };
-
   const links = [
-    { enabled: true, label: "News", icon: Newspaper, onClick: handleNews },
     { enabled: fundRaiserEnabled, label: "FundRaiser", icon: Gift, onClick: handleFundRaiser },
     { enabled: mobiStoreEnabled, label: "Mobi-Store", icon: Store, onClick: handleStore },
     { enabled: quizGameEnabled, label: "Play Mobi-Quiz Game", icon: GamepadIcon, onClick: handleQuiz },
