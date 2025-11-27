@@ -36,7 +36,10 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 import { CommunityVibesSection } from "@/components/community/CommunityVibesSection";
-import { CommunityAdministrationTab } from "@/components/community/CommunityAdministrationTab";
+import { CommunityExecutiveTab } from "@/components/community/CommunityExecutiveTab";
+import { CommunityTenureTab } from "@/components/community/CommunityTenureTab";
+import { CommunityAdhocTab } from "@/components/community/CommunityAdhocTab";
+import { CommunityStaffTab } from "@/components/community/CommunityStaffTab";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -452,7 +455,7 @@ const CommunityProfile = () => {
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
           {/* Back Button for Hidden Sections */}
-          {["finance", "meetings", "rollcalls", "fundraiser", "election", "administration", "resources", "news", "articles", "events", "vibes"].includes(activeTab) && (
+          {["finance", "meetings", "rollcalls", "fundraiser", "election", "executive", "tenure", "adhoc", "staff", "resources", "news", "articles", "events", "vibes"].includes(activeTab) && (
             <Button
               variant="ghost"
               onClick={() => setActiveTab("status")}
@@ -683,9 +686,27 @@ const CommunityProfile = () => {
             </Card>
           )}
 
-          {activeTab === "administration" && (
+          {activeTab === "executive" && (
             <div className="mt-6">
-              <CommunityAdministrationTab />
+              <CommunityExecutiveTab />
+            </div>
+          )}
+
+          {activeTab === "tenure" && (
+            <div className="mt-6">
+              <CommunityTenureTab />
+            </div>
+          )}
+
+          {activeTab === "adhoc" && (
+            <div className="mt-6">
+              <CommunityAdhocTab />
+            </div>
+          )}
+
+          {activeTab === "staff" && (
+            <div className="mt-6">
+              <CommunityStaffTab />
             </div>
           )}
 
