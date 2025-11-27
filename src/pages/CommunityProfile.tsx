@@ -36,6 +36,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 import { CommunityVibesSection } from "@/components/community/CommunityVibesSection";
+import { CommunityAdministrationTab } from "@/components/community/CommunityAdministrationTab";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -683,19 +684,9 @@ const CommunityProfile = () => {
           )}
 
           {activeTab === "administration" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Administration & Leadership</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Community leadership and governance...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Management Committee</li>
-                  <li>Office Tenure Information</li>
-                  <li>Staff Directory</li>
-                  <li>Leadership Structure</li>
-                  <li>Governance Documents</li>
-                </ul>
-              </div>
-            </Card>
+            <div className="mt-6">
+              <CommunityAdministrationTab />
+            </div>
           )}
 
           {activeTab === "resources" && (
