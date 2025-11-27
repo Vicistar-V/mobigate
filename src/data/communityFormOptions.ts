@@ -146,8 +146,6 @@ export const accessLevelOptions = [
   { value: "all-members", label: "All Members" },
   { value: "only-active-members", label: "Only Active Members" },
   { value: "executives-officers", label: "Executives/Officers" },
-  { value: "only-admins", label: "Only Admins" },
-  { value: "only-admin-1", label: "Only Admin-1" },
   { value: "specified-admin", label: "Only a Specified Admin [1-20]" },
 ];
 

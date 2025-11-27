@@ -64,8 +64,6 @@ export type AccessLevel =
   | "all-members"
   | "only-active-members"
   | "executives-officers"
-  | "only-admins"
-  | "only-admin-1"
   | "specified-admin";
 
 export type PromotionVisibility = 
@@ -207,7 +205,7 @@ export interface CommunityFormData {
   // Posting on Community
   whoCanPost: AccessLevel;
   whoCanEditPauseDeleteApprove: AccessLevel;
-  specifiedAdminNumber: number;
+  specifiedAdminNumbers: number[];
 }
 
 export const defaultCommunityFormData: CommunityFormData = {
@@ -244,9 +242,9 @@ export const defaultCommunityFormData: CommunityFormData = {
   emailAddress: "",
   defaultCurrency: "NGN",
   customCurrency: "",
-  privacyCommunityFinances: "only-admins",
-  privacyMembersFinancialStatus: "only-admins",
-  privacyMembersComplaints: "only-admins",
+  privacyCommunityFinances: "executives-officers",
+  privacyMembersFinancialStatus: "executives-officers",
+  privacyMembersComplaints: "executives-officers",
   privacyRecordingMeetings: "executives-officers",
   privacySeeGeneralPosts: "all-members",
   privacySeeMembersComments: "all-members",
@@ -263,10 +261,10 @@ export const defaultCommunityFormData: CommunityFormData = {
   whoCanViewElectionResults: "all-members",
   whoCanViewAccreditedVoters: "executives-officers",
   whoCanDownloadResources: "executives-officers",
-  whoCanAdd: "only-admins",
-  whoCanApproveNewMembers: "only-admins",
-  whoCanRemoveSuspendBlock: "only-admins",
+  whoCanAdd: "executives-officers",
+  whoCanApproveNewMembers: "executives-officers",
+  whoCanRemoveSuspendBlock: "executives-officers",
   whoCanPost: "all-members",
-  whoCanEditPauseDeleteApprove: "only-admins",
-  specifiedAdminNumber: 1
+  whoCanEditPauseDeleteApprove: "executives-officers",
+  specifiedAdminNumbers: []
 };

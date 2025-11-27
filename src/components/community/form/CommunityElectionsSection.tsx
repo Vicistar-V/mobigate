@@ -2,6 +2,7 @@ import { CommunityFormData, AccessLevel } from "@/types/communityForm";
 import { accessLevelOptions } from "@/data/communityFormOptions";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface CommunityElectionsSectionProps {
   formData: CommunityFormData;
@@ -14,6 +15,25 @@ export function CommunityElectionsSection({
   updateField,
   errors,
 }: CommunityElectionsSectionProps) {
+  // Check if any election field needs admin selection
+  const showAdminSelector = 
+    formData.whoCanVote === "specified-admin" ||
+    formData.whoCanViewElectionResults === "specified-admin" ||
+    formData.whoCanViewAccreditedVoters === "specified-admin" ||
+    formData.whoCanDownloadResources === "specified-admin";
+
+  // Toggle admin selection
+  const toggleAdmin = (adminNum: number) => {
+    const currentSelection = formData.specifiedAdminNumbers || [];
+    if (currentSelection.includes(adminNum)) {
+      updateField("specifiedAdminNumbers", currentSelection.filter(n => n !== adminNum));
+    } else {
+      updateField("specifiedAdminNumbers", [...currentSelection, adminNum]);
+    }
+  };
+
+  const specifiedAdminNumbers = formData.specifiedAdminNumbers || [];
+
   return (
     <div className="space-y-5">
       <div className="text-sm text-muted-foreground">
@@ -97,6 +117,35 @@ export function CommunityElectionsSection({
           </Select>
         </div>
       </div>
+
+      {/* Multi-Select Admin Buttons */}
+      {showAdminSelector && (
+        <div className="space-y-3 pt-4 border-t border-border">
+          <Label>Specified Admin Numbers</Label>
+          <p className="text-xs text-muted-foreground">
+            Select one or more admins (tap to toggle selection)
+          </p>
+          <div className="grid grid-cols-4 gap-2">
+            {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+              <Button
+                key={num}
+                type="button"
+                variant={specifiedAdminNumbers.includes(num) ? "default" : "outline"}
+                size="sm"
+                className="h-10 text-xs"
+                onClick={() => toggleAdmin(num)}
+              >
+                Admin-{num}
+              </Button>
+            ))}
+          </div>
+          {specifiedAdminNumbers.length > 0 && (
+            <p className="text-xs text-primary font-medium">
+              Selected: {specifiedAdminNumbers.sort((a, b) => a - b).join(", ")}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
