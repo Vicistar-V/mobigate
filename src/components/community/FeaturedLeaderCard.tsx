@@ -4,11 +4,15 @@ import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 interface FeaturedLeaderCardProps {
   leader: ExecutiveMember;
+  onClick?: () => void;
 }
 
-export const FeaturedLeaderCard = ({ leader }: FeaturedLeaderCardProps) => {
+export const FeaturedLeaderCard = ({ leader, onClick }: FeaturedLeaderCardProps) => {
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={onClick}
+    >
       <div className="aspect-[4/5] bg-muted relative">
         <Avatar className="w-full h-full rounded-none">
           <AvatarImage src={leader.imageUrl} alt={leader.name} className="object-cover" />

@@ -12,6 +12,7 @@ interface ExecutiveMemberCardProps {
   tenure: string;
   imageUrl: string;
   isFriend?: boolean;
+  onClick?: () => void;
 }
 
 export const ExecutiveMemberCard = ({
@@ -21,12 +22,14 @@ export const ExecutiveMemberCard = ({
   tenure,
   imageUrl,
   isFriend = false,
+  onClick,
 }: ExecutiveMemberCardProps) => {
   const [requestSent, setRequestSent] = useState(false);
   const [isFriendState, setIsFriendState] = useState(isFriend);
   const { toast } = useToast();
 
-  const handleAddFriend = () => {
+  const handleAddFriend = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (isFriendState) {
       toast({
         title: "Already Friends",
@@ -73,7 +76,10 @@ export const ExecutiveMemberCard = ({
   const ButtonIcon = buttonConfig.icon;
 
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card 
+      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+      onClick={onClick}
+    >
       <div className="aspect-[3/4] bg-muted relative">
         <Avatar className="w-full h-full rounded-none">
           <AvatarImage src={imageUrl} alt={name} className="object-cover" />

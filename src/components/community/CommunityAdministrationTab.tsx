@@ -10,6 +10,7 @@ import {
   adHocMembers,
   staffMembers,
   officeTenures,
+  ExecutiveMember,
 } from "@/data/communityExecutivesData";
 import { useState } from "react";
 import {
@@ -19,10 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ExecutiveDetailSheet } from "./ExecutiveDetailSheet";
 
 export const CommunityAdministrationTab = () => {
   const [adHocFilter, setAdHocFilter] = useState<string>("all");
   const [staffFilter, setStaffFilter] = useState<string>("all");
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   
   // Get the President-General (topmost level)
   const presidentGeneral = executiveMembers.find((m) => m.level === "topmost");
@@ -34,6 +38,11 @@ export const CommunityAdministrationTab = () => {
   const filteredAdHocMembers = adHocFilter === "all" 
     ? adHocMembers 
     : adHocMembers.filter((m) => m.adHocDepartment === adHocFilter);
+
+  const handleMemberClick = (member: ExecutiveMember) => {
+    setSelectedMember(member);
+    setIsDetailOpen(true);
+  };
 
   // Premium ad data
   const premiumAd1 = {
@@ -151,7 +160,10 @@ export const CommunityAdministrationTab = () => {
                   <Grid3x3 className="h-4 w-4" />
                 </div>
               </Card>
-              <FeaturedLeaderCard leader={presidentGeneral} />
+              <FeaturedLeaderCard 
+                leader={presidentGeneral}
+                onClick={() => handleMemberClick(presidentGeneral)}
+              />
             </div>
           )}
 
@@ -159,6 +171,7 @@ export const CommunityAdministrationTab = () => {
           <ExecutiveMembersCarousel
             title="Executive Committee Members"
             members={otherExecutives}
+            onMemberClick={handleMemberClick}
           />
 
           {/* Advertisement 1 */}
@@ -168,6 +181,7 @@ export const CommunityAdministrationTab = () => {
           <ExecutiveMembersCarousel
             title="Executive Committee Members"
             members={otherExecutives.slice(0, 6)}
+            onMemberClick={handleMemberClick}
           />
 
           {/* Advertisement 2 */}
@@ -233,6 +247,7 @@ export const CommunityAdministrationTab = () => {
             title={`Ad-hoc Committee Members ${adHocFilter !== "all" ? `- ${adHocFilter}` : ""}`}
             members={filteredAdHocMembers}
             showViewToggle={false}
+            onMemberClick={handleMemberClick}
           />
 
           {/* Advertisement */}
@@ -243,6 +258,7 @@ export const CommunityAdministrationTab = () => {
             title="Ad-hoc Committee Members"
             members={adHocMembers.slice(0, 6)}
             showViewToggle={false}
+            onMemberClick={handleMemberClick}
           />
 
           {/* Advertisement */}
@@ -278,6 +294,7 @@ export const CommunityAdministrationTab = () => {
             title="Staff & Employees"
             members={staffMembers}
             showViewToggle={false}
+            onMemberClick={handleMemberClick}
           />
 
           {/* Advertisement */}
@@ -288,6 +305,7 @@ export const CommunityAdministrationTab = () => {
             title="Staff & Employees"
             members={staffMembers.slice(0, 4)}
             showViewToggle={false}
+            onMemberClick={handleMemberClick}
           />
 
           {/* Advertisement */}
@@ -297,6 +315,13 @@ export const CommunityAdministrationTab = () => {
           <PeopleYouMayKnow />
         </TabsContent>
       </Tabs>
+
+      {/* Executive Detail Sheet */}
+      <ExecutiveDetailSheet
+        member={selectedMember}
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
+      />
     </div>
   );
 };
