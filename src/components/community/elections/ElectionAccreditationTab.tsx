@@ -1,148 +1,188 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Menu, Search, CheckCircle, XCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Menu, Download } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
-
-interface AccreditedVoter {
-  id: string;
-  name: string;
-  registration: string;
-  avatar: string;
-  status: "verified" | "pending" | "rejected";
-  verifiedAt?: Date;
-}
-
-const mockAccreditedVoters: AccreditedVoter[] = [
-  {
-    id: "av-1",
-    name: "Mark Anthony Orji",
-    registration: "VR-2025/2865219",
-    avatar: "/src/assets/profile-photo.jpg",
-    status: "verified",
-    verifiedAt: new Date("2025-02-15"),
-  },
-  {
-    id: "av-2",
-    name: "Theodore Ike Nwannunu",
-    registration: "VR-2025/2865220",
-    avatar: "/src/assets/profile-james-wilson.jpg",
-    status: "verified",
-    verifiedAt: new Date("2025-02-16"),
-  },
-  {
-    id: "av-3",
-    name: "Sarah Johnson",
-    registration: "VR-2025/2865221",
-    avatar: "/src/assets/profile-sarah-johnson.jpg",
-    status: "pending",
-  },
-  {
-    id: "av-4",
-    name: "Michael Chen",
-    registration: "VR-2025/2865222",
-    avatar: "/src/assets/profile-michael-chen.jpg",
-    status: "verified",
-    verifiedAt: new Date("2025-02-17"),
-  },
-];
+import { CheckIndebtednessSheet } from "./CheckIndebtednessSheet";
+import { CheckActivitiesSheet } from "./CheckActivitiesSheet";
+import { AccreditedVotersSection } from "./AccreditedVotersSection";
+import { UpcomingElectionsSection } from "./UpcomingElectionsSection";
+import { PreviousResultsSection } from "./PreviousResultsSection";
+import { UpcomingSchedulesSection } from "./UpcomingSchedulesSection";
+import { toast } from "sonner";
 
 export const ElectionAccreditationTab = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities'>('financial');
+  const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
+  const [showActivitiesSheet, setShowActivitiesSheet] = useState(false);
+  const [debtsChecked, setDebtsChecked] = useState(false);
+  const [receiptsChecked, setReceiptsChecked] = useState(false);
+  const [isAccredited, setIsAccredited] = useState(false);
 
-  const filteredVoters = mockAccreditedVoters.filter(
-    (voter) =>
-      voter.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      voter.registration.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleGetAccreditation = () => {
+    toast.success("Accreditation successful! Check your email for your accreditation number.");
+    setIsAccredited(true);
+  };
+
+  const handleDebtsClearing = () => {
+    if (debtsChecked) {
+      toast.success("Processing debt clearance from your wallet...");
+    } else {
+      toast.error("Please check the box to confirm debt clearance.");
+    }
+  };
+
+  const handleDownloadReceipts = () => {
+    if (receiptsChecked) {
+      toast.success("Downloading receipts...");
+    } else {
+      toast.error("Please check the box to confirm receipt download.");
+    }
+  };
 
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Menu className="w-5 h-5" />
-          <h1 className="text-2xl font-bold">Voter Accreditation</h1>
+        <h1 className="text-2xl font-bold">Voters Accreditation</h1>
+        <Button variant="ghost" size="icon">
+          <Menu className="h-5 w-5" />
+        </Button>
+      </div>
+      
+      {/* Navigation tabs */}
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" className="bg-purple-800 hover:bg-purple-900">Campaigns</Button>
+        <Button size="sm" variant="link" className="text-blue-600">Start Voting</Button>
+        <Button size="sm" variant="link" className="text-blue-600">Results</Button>
+        <Button size="sm" variant="link" className="text-blue-600">View Winners</Button>
+        <Button size="sm" variant="link" className="text-blue-600">...More</Button>
+      </div>
+      
+      {/* Financial / Activities toggle */}
+      <div className="flex items-center gap-2">
+        <Button 
+          className={`${activeSubTab === 'financial' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+          onClick={() => setActiveSubTab('financial')}
+        >
+          Financial
+        </Button>
+        <Button 
+          className={`${activeSubTab === 'activities' ? 'bg-yellow-400 text-black hover:bg-yellow-500' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+          onClick={() => setActiveSubTab('activities')}
+        >
+          Activities
+        </Button>
+      </div>
+      
+      {/* Info text */}
+      <p className="text-sm leading-relaxed">
+        Please complete the following <span className="text-blue-600 font-semibold">Verification</span> processes and endeavour to update your financial records to get mandatory <span className="text-purple-700 font-semibold">Voter Accreditation</span> to qualify for <span className="text-blue-600 font-semibold">Community Voting Rights & Privileges</span>.
+      </p>
+      
+      {/* Action Buttons */}
+      <div className="flex flex-col gap-3">
+        <Button 
+          className="bg-red-600 hover:bg-red-700 font-bold py-6"
+          onClick={() => setShowIndebtednessSheet(true)}
+        >
+          Check Total Indebtedness
+        </Button>
+        
+        <div className="flex items-center gap-3">
+          <Checkbox 
+            id="debts" 
+            checked={debtsChecked}
+            onCheckedChange={(checked) => setDebtsChecked(checked as boolean)}
+          />
+          <Button 
+            className="bg-yellow-400 text-black hover:bg-yellow-500 flex-1 font-bold py-6"
+            onClick={handleDebtsClearing}
+          >
+            Debts Clearance Now
+          </Button>
         </div>
+        
+        <div className="flex items-center gap-3">
+          <Checkbox 
+            id="receipts"
+            checked={receiptsChecked}
+            onCheckedChange={(checked) => setReceiptsChecked(checked as boolean)}
+          />
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 flex-1 font-bold py-6"
+            onClick={handleDownloadReceipts}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download Receipts
+          </Button>
+        </div>
+        
+        <Button 
+          className="bg-yellow-400 text-black hover:bg-yellow-500 font-bold py-6"
+          onClick={() => toast.info("Generating financial status report...")}
+        >
+          Financial Status Report
+        </Button>
+        
+        <Button 
+          className="bg-yellow-400 text-black hover:bg-yellow-500 font-bold py-6"
+          onClick={() => setShowActivitiesSheet(true)}
+        >
+          Check All Activities Index
+        </Button>
       </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">1,156</div>
-          <div className="text-xs text-muted-foreground">Verified</div>
-        </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600">44</div>
-          <div className="text-xs text-muted-foreground">Pending</div>
-        </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-red-600">12</div>
-          <div className="text-xs text-muted-foreground">Rejected</div>
-        </Card>
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by name or registration number..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      {/* Voters List */}
-      <div className="space-y-3">
-        {filteredVoters.map((voter) => (
-          <Card key={voter.id} className="p-4">
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src={voter.avatar} alt={voter.name} />
-                <AvatarFallback>{voter.name[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h4 className="font-semibold">{voter.name}</h4>
-                <p className="text-xs text-muted-foreground">{voter.registration}</p>
-                {voter.verifiedAt && (
-                  <p className="text-xs text-muted-foreground">
-                    Verified: {voter.verifiedAt.toLocaleDateString()}
-                  </p>
-                )}
-              </div>
-              <Badge
-                variant={
-                  voter.status === "verified"
-                    ? "default"
-                    : voter.status === "pending"
-                    ? "secondary"
-                    : "destructive"
-                }
-                className="flex items-center gap-1"
-              >
-                {voter.status === "verified" ? (
-                  <CheckCircle className="w-3 h-3" />
-                ) : voter.status === "rejected" ? (
-                  <XCircle className="w-3 h-3" />
-                ) : null}
-                {voter.status}
-              </Badge>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Ads */}
+      
+      {/* Get Accreditation Now button */}
+      <Button 
+        className="w-full bg-green-600 hover:bg-green-700 text-xl font-bold py-8"
+        onClick={handleGetAccreditation}
+      >
+        Get Accreditation<br/>Now!
+      </Button>
+      
+      {/* Success message */}
+      {isAccredited && (
+        <div className="p-4 bg-green-50 border-2 border-green-600 rounded-lg">
+          <p className="text-sm text-center leading-relaxed font-semibold text-green-800">
+            ✓ Accreditation Successful! Check your email for your accreditation number.
+          </p>
+        </div>
+      )}
+      
+      <p className="text-sm text-center leading-relaxed text-muted-foreground">
+        You will receive your <strong>Accreditation Number</strong> in your registered e-mail address as soon as you have completed this process successfully. Please check your e-mail inbox now if you have done this.
+      </p>
+      
+      {/* View All Accredited Voters */}
+      <AccreditedVotersSection />
+      
+      {/* Sponsored Advert */}
       <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-accreditation" />
-
+      
+      {/* Upcoming Elections */}
+      <UpcomingElectionsSection />
+      
       {/* People You May Know */}
       <PeopleYouMayKnow />
+      
+      {/* Previous Election Results */}
+      <PreviousResultsSection />
+      
+      {/* Upcoming Meeting Schedules */}
+      <UpcomingSchedulesSection />
+      
+      {/* Sheets */}
+      <CheckIndebtednessSheet 
+        open={showIndebtednessSheet} 
+        onOpenChange={setShowIndebtednessSheet} 
+      />
+      <CheckActivitiesSheet 
+        open={showActivitiesSheet} 
+        onOpenChange={setShowActivitiesSheet} 
+      />
     </div>
   );
 };
