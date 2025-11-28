@@ -57,6 +57,9 @@ import { MeetingChatsTab } from "@/components/community/meetings/MeetingChatsTab
 import { MeetingVoteNotesTab } from "@/components/community/meetings/MeetingVoteNotesTab";
 import { MeetingLighterMoodsTab } from "@/components/community/meetings/MeetingLighterMoodsTab";
 import { MeetingAttendanceTab } from "@/components/community/meetings/MeetingAttendanceTab";
+import { FinancialSummaryTab } from "@/components/community/finance/FinancialSummaryTab";
+import { FinancialClearancesTab } from "@/components/community/finance/FinancialClearancesTab";
+import { FinancialAccreditationTab } from "@/components/community/finance/FinancialAccreditationTab";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -837,6 +840,23 @@ const CommunityProfile = () => {
                 isOwner={community.isOwner}
                 isAdmin={community.role === "Admin"}
               />
+            </div>
+          )}
+
+          {/* Financial Tabs */}
+          {activeTab === "finance-summary" && (
+            <div className="mt-6">
+              <FinancialSummaryTab />
+            </div>
+          )}
+          {activeTab === "finance-clearances" && (
+            <div className="mt-6">
+              <FinancialClearancesTab />
+            </div>
+          )}
+          {activeTab === "finance-accreditation" && (
+            <div className="mt-6">
+              <FinancialAccreditationTab />
             </div>
           )}
         </div>
