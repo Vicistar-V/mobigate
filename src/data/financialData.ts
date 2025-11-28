@@ -233,6 +233,31 @@ export interface AccountBalance {
   availableBalance: number;
 }
 
+// Activity attendance data
+export interface ActivityAttendance {
+  category: 'meetings' | 'events' | 'invitations';
+  title: string;
+  period: string;
+  attendancePercentage: number;
+  penaltyAmount: number;
+}
+
+// Indebtedness item with penalty
+export interface IndebtednessItem {
+  id: string;
+  name: string;
+  amount: number;
+  penaltyPercentage: number;
+  totalWithPenalty: number;
+}
+
+// Penalty tier scale
+export interface PenaltyTier {
+  threshold: string;
+  percentage: number;
+  amount: number;
+}
+
 export const mockTransactions: Transaction[] = [
   {
     id: 'txn-1',
@@ -307,3 +332,115 @@ export const mockAccountBalance: AccountBalance = {
   totalDebit: 450000,
   availableBalance: 520000
 };
+
+// Mock data for indebtedness items
+export const mockIndebtednessItems: IndebtednessItem[] = [
+  {
+    id: '1',
+    name: 'Membership Registration Fees',
+    amount: 120000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 144000,
+  },
+  {
+    id: '2',
+    name: 'General Annual Dues & Levies',
+    amount: 360000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 432000,
+  },
+  {
+    id: '3',
+    name: 'Cultural Events Levies',
+    amount: 300000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 360000,
+  },
+  {
+    id: '4',
+    name: 'Annual Membership Fee',
+    amount: 150000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 180000,
+  },
+  {
+    id: '5',
+    name: 'Donation/Civic Centre Project',
+    amount: 300000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 360000,
+  },
+  {
+    id: '6',
+    name: 'Fine Imposed/Details Here',
+    amount: 350000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 420000,
+  },
+  {
+    id: '7',
+    name: 'Other Unclassified Fees',
+    amount: 400000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 480000,
+  },
+  {
+    id: '8',
+    name: 'Special Contributions',
+    amount: 250000,
+    penaltyPercentage: 20,
+    totalWithPenalty: 300000,
+  },
+];
+
+// Penalty tiers for activities
+export const penaltyTiers: PenaltyTier[] = [
+  { threshold: '<60%', percentage: 60, amount: 100000 },
+  { threshold: '<50%', percentage: 50, amount: 150000 },
+  { threshold: '<40%', percentage: 40, amount: 200000 },
+  { threshold: '<30%', percentage: 30, amount: 250000 },
+  { threshold: '<20%', percentage: 20, amount: 300000 },
+  { threshold: '<10%', percentage: 10, amount: 350000 },
+  { threshold: '<5%', percentage: 5, amount: 400000 },
+  { threshold: '<3%', percentage: 3, amount: 450000 },
+  { threshold: '<0%', percentage: 0, amount: 500000 },
+];
+
+// Mock data for activity attendance
+export const mockActivityAttendance: ActivityAttendance[] = [
+  {
+    category: 'meetings',
+    title: 'General Meetings',
+    period: '36 months',
+    attendancePercentage: 75,
+    penaltyAmount: 0,
+  },
+  {
+    category: 'meetings',
+    title: 'Executive Meetings',
+    period: '36 months',
+    attendancePercentage: 65,
+    penaltyAmount: 0,
+  },
+  {
+    category: 'events',
+    title: 'Cultural Events',
+    period: '36 months',
+    attendancePercentage: 55,
+    penaltyAmount: 150000,
+  },
+  {
+    category: 'events',
+    title: 'Public Functions',
+    period: '36 months',
+    attendancePercentage: 70,
+    penaltyAmount: 0,
+  },
+  {
+    category: 'invitations',
+    title: 'Social Invitations',
+    period: '36 months',
+    attendancePercentage: 45,
+    penaltyAmount: 200000,
+  },
+];

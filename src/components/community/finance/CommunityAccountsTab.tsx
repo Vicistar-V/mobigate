@@ -19,13 +19,40 @@ import { TransactionTable } from "./TransactionTable";
 import { FinancialSummaryTable } from "./FinancialSummaryTable";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { CheckIndebtednessSheet } from "../elections/CheckIndebtednessSheet";
 import { mockTransactions, mockAccountBalance, mockMemberFinancialRecord } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
+import { toast } from "sonner";
 
 export const CommunityAccountsTab = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'credit' | 'debit' | 'balance'>('all');
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [sortBy, setSortBy] = useState('all');
+  const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
+  const [debtsChecked, setDebtsChecked] = useState(false);
+  const [receiptsChecked, setReceiptsChecked] = useState(false);
+
+  const filteredTransactions = mockTransactions.filter((transaction) => {
+    if (activeFilter === 'credit') return transaction.type === 'credit';
+    if (activeFilter === 'debit') return transaction.type === 'debit';
+    return true;
+  });
+
+  const handleDebtsClearing = () => {
+    if (debtsChecked) {
+      toast.success("Processing debt clearance from your wallet...");
+    } else {
+      toast.error("Please check the box to confirm debt clearance.");
+    }
+  };
+
+  const handleDownloadReceipts = () => {
+    if (receiptsChecked) {
+      toast.success("Downloading receipts...");
+    } else {
+      toast.error("Please check the box to confirm receipt download.");
+    }
+  };
 
   const getBalanceInfo = () => {
     if (activeFilter === 'balance') {
@@ -148,28 +175,44 @@ export const CommunityAccountsTab = () => {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3">
-        <Button className="bg-yellow-400 text-black hover:bg-yellow-500 w-full font-bold">
+        <Button 
+          className="bg-yellow-400 text-black hover:bg-yellow-500 w-full font-bold py-6"
+          onClick={() => toast.info("Generating financial status report...")}
+        >
           Financial Status Report
         </Button>
-        <Button className="bg-red-600 hover:bg-red-700 w-full font-bold">
+        <Button 
+          className="bg-red-600 hover:bg-red-700 w-full font-bold py-6"
+          onClick={() => setShowIndebtednessSheet(true)}
+        >
           Check Total Indebtedness
         </Button>
-        <div className="flex items-center gap-2">
-          <Checkbox id="clearance" />
-          <label htmlFor="clearance" className="flex-1">
-            <Button className="bg-green-600 hover:bg-green-700 w-full font-bold">
-              Debts Clearance Now
-            </Button>
-          </label>
+        <div className="flex items-center gap-3">
+          <Checkbox 
+            id="debts-accounts"
+            checked={debtsChecked}
+            onCheckedChange={(checked) => setDebtsChecked(checked as boolean)}
+          />
+          <Button 
+            className="bg-green-600 hover:bg-green-700 flex-1 font-bold py-6"
+            onClick={handleDebtsClearing}
+          >
+            Debts Clearance Now
+          </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Checkbox id="download" />
-          <label htmlFor="download" className="flex-1">
-            <Button className="bg-blue-600 hover:bg-blue-700 w-full font-bold">
-              <Download className="w-4 h-4 mr-2" />
-              Download Receipts
-            </Button>
-          </label>
+        <div className="flex items-center gap-3">
+          <Checkbox 
+            id="receipts-accounts"
+            checked={receiptsChecked}
+            onCheckedChange={(checked) => setReceiptsChecked(checked as boolean)}
+          />
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 flex-1 font-bold py-6"
+            onClick={handleDownloadReceipts}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download Receipts
+          </Button>
         </div>
       </div>
 
@@ -192,6 +235,12 @@ export const CommunityAccountsTab = () => {
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
+
+      {/* Check Indebtedness Sheet */}
+      <CheckIndebtednessSheet 
+        open={showIndebtednessSheet} 
+        onOpenChange={setShowIndebtednessSheet} 
+      />
     </div>
   );
 };
