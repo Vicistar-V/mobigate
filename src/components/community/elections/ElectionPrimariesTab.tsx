@@ -1,10 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Menu, Users, TrendingUp } from "lucide-react";
+import { Menu, Users, TrendingUp, ChevronRight } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
+import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 
 interface PrimaryResult {
   id: string;
@@ -83,6 +84,15 @@ const mockPrimaries: PrimaryResult[] = [
   },
 ];
 
+const getCandidateColors = (index: number) => {
+  const colors = [
+    { header: "bg-green-600 text-white", cell: "border-green-600 bg-green-50" },
+    { header: "bg-yellow-400 text-black", cell: "border-yellow-500 bg-yellow-50" },
+    { header: "bg-pink-500 text-white", cell: "border-pink-500 bg-pink-50" },
+  ];
+  return colors[index % colors.length];
+};
+
 export const ElectionPrimariesTab = () => {
   return (
     <div className="space-y-6 pb-20">
@@ -102,10 +112,10 @@ export const ElectionPrimariesTab = () => {
         </p>
       </Card>
 
-      {/* Primaries List */}
+      {/* Primaries Tables */}
       <div className="space-y-6">
         {mockPrimaries.map((primary) => (
-          <Card key={primary.id} className="p-4">
+          <Card key={primary.id} className="p-3">
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold">{primary.office}</h3>
@@ -122,32 +132,73 @@ export const ElectionPrimariesTab = () => {
               </div>
             </div>
 
-            <div className="space-y-3">
-              {primary.nominees.map((nominee, idx) => (
-                <div key={nominee.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                  <div className="flex items-center gap-3 flex-1">
-                    <span className="text-xl font-bold text-muted-foreground">
-                      #{idx + 1}
-                    </span>
-                    <Avatar>
-                      <AvatarImage src={nominee.avatar} alt={nominee.name} />
-                      <AvatarFallback>{nominee.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{nominee.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {nominee.votes} votes ({nominee.percentage.toFixed(1)}%)
-                      </p>
-                    </div>
-                    {nominee.qualified && (
-                      <Badge className="bg-green-600 flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3" />
-                        Qualified
-                      </Badge>
-                    )}
-                  </div>
+            {/* Horizontally Scrollable Table */}
+            <div className="overflow-x-auto -mx-3">
+              <div className="inline-flex gap-1 px-3 pb-2">
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  More scrolling out <ChevronRight className="w-3 h-3" />
                 </div>
-              ))}
+              </div>
+              <table className="min-w-[600px] border-collapse">
+                <thead>
+                  <tr>
+                    <th className="bg-pink-200 p-2 text-left min-w-[120px] sticky left-0 z-10 border border-gray-300">
+                      <div className="font-bold">Primary for</div>
+                      <div className="text-sm font-normal">{primary.office}</div>
+                      <div className="text-xs text-muted-foreground">[{primary.totalVotes}]</div>
+                    </th>
+                    {primary.nominees.map((nominee, index) => {
+                      const colors = getCandidateColors(index);
+                      return (
+                        <th key={nominee.id} className={`${colors.header} p-2 text-center min-w-[140px] border border-gray-300`}>
+                          <div className="flex flex-col items-center gap-1">
+                            <Avatar className="h-10 w-10 border-2 border-white">
+                              <AvatarImage src={nominee.avatar} alt={nominee.name} />
+                              <AvatarFallback>{nominee.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <div className="font-bold text-sm">{nominee.name}</div>
+                          </div>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="bg-pink-200 p-2 font-bold sticky left-0 z-10 border border-gray-300">
+                      Performance
+                    </td>
+                    {primary.nominees.map((nominee, index) => {
+                      const colors = getCandidateColors(index);
+                      return (
+                        <td key={nominee.id} className="p-1 border border-gray-300 bg-white">
+                          <VoteBoxGroup
+                            values={[nominee.votes, `${nominee.percentage.toFixed(1)}%`, index + 1]}
+                            labels={['Votes', '%', 'Rank']}
+                            colorClass={colors.cell}
+                            isLarge={true}
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr>
+                    <td className="bg-pink-200 p-2 font-bold sticky left-0 z-10 border border-gray-300">
+                      Qualification
+                    </td>
+                    {primary.nominees.map((nominee) => (
+                      <td key={nominee.id} className="p-2 text-center border border-gray-300 bg-white">
+                        {nominee.qualified && (
+                          <Badge className="bg-green-600 flex items-center gap-1 justify-center">
+                            <TrendingUp className="w-3 h-3" />
+                            Qualified
+                          </Badge>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </Card>
         ))}

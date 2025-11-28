@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, TrendingUp } from "lucide-react";
 import { ElectionWinner } from "@/data/electionData";
 import { format } from "date-fns";
+import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 
 interface WinnersViewProps {
   winners: ElectionWinner[];
@@ -31,18 +32,13 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Votes</p>
-                  <p className="text-2xl font-bold">{winner.votes}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Vote Share</p>
-                  <p className="text-2xl font-bold flex items-center">
-                    {winner.percentage}%
-                    <TrendingUp className="w-5 h-5 ml-2 text-green-500" />
-                  </p>
-                </div>
+              <div className="flex justify-center p-4 bg-muted rounded-lg">
+                <VoteBoxGroup
+                  values={[winner.votes, `${winner.percentage}%`, winner.votes - Math.floor(winner.votes * 0.3)]}
+                  labels={['Votes', 'Share', 'Margin']}
+                  colorClass="border-yellow-500 bg-yellow-50"
+                  isLarge={true}
+                />
               </div>
 
               <div className="text-xs text-muted-foreground">

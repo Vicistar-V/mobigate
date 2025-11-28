@@ -10,16 +10,21 @@ import {
   Clock,
   AlertCircle,
   Users,
+  ChevronRight,
+  Table,
+  List,
 } from "lucide-react";
 import { mockAttendance, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { useState } from "react";
+import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 
 export const MeetingAttendanceTab = () => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"list" | "table">("table");
   const itemsPerPage = 5;
 
   // Get completed meetings
@@ -108,6 +113,21 @@ export const MeetingAttendanceTab = () => {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "present":
+        return "border-green-600 bg-green-50";
+      case "absent":
+        return "border-red-600 bg-red-50";
+      case "late":
+        return "border-yellow-500 bg-yellow-50";
+      case "excused":
+        return "border-blue-500 bg-blue-50";
+      default:
+        return "border-gray-300";
+    }
+  };
+
   const calculateStats = () => {
     const total = meetingAttendance.length;
     const present = meetingAttendance.filter((a) => a.status === "present").length;
@@ -154,10 +174,19 @@ export const MeetingAttendanceTab = () => {
           </p>
         </div>
         {selectedMeeting && (
-          <Button size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setViewMode(viewMode === "table" ? "list" : "table")}
+            >
+              {viewMode === "table" ? <List className="h-4 w-4" /> : <Table className="h-4 w-4" />}
+            </Button>
+            <Button size="sm" onClick={handleExport}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
         )}
       </div>
 
@@ -271,43 +300,127 @@ export const MeetingAttendanceTab = () => {
             </Button>
           </Card>
 
-          {/* Attendance List */}
-          <div className="space-y-3">
-            {filteredAttendance.map((attendance) => (
-              <Card key={attendance.id} className="p-4">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage
-                      src={attendance.avatar}
-                      alt={attendance.memberName}
-                    />
-                    <AvatarFallback>
-                      {attendance.memberName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium">{attendance.memberName}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {attendance.position}
-                    </p>
-                    {attendance.notes && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {attendance.notes}
-                      </p>
-                    )}
-                    {attendance.arrivalTime && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Arrived: {format(attendance.arrivalTime, "h:mm a")}
-                      </p>
-                    )}
+          {viewMode === "table" ? (
+            /* Table View */
+            <Card className="p-3">
+              <div className="overflow-x-auto -mx-3">
+                <div className="inline-flex gap-1 px-3 pb-2">
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                    More scrolling out <ChevronRight className="w-3 h-3" />
                   </div>
-
-                  {getStatusBadge(attendance.status)}
                 </div>
-              </Card>
-            ))}
-          </div>
+                <table className="min-w-[600px] border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="bg-pink-200 p-2 text-left min-w-[150px] sticky left-0 z-10 border border-gray-300">
+                        <div className="font-bold">Member</div>
+                        <div className="text-xs font-normal text-muted-foreground">
+                          [{meetingAttendance.length} attendees]
+                        </div>
+                      </th>
+                      <th className="bg-gray-200 p-2 text-center min-w-[120px] border border-gray-300">
+                        <div className="font-bold">Status</div>
+                      </th>
+                      <th className="bg-gray-200 p-2 text-center min-w-[120px] border border-gray-300">
+                        <div className="font-bold">Arrival Time</div>
+                      </th>
+                      <th className="bg-gray-200 p-2 text-center min-w-[200px] border border-gray-300">
+                        <div className="font-bold">Notes</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAttendance.map((attendance) => (
+                      <tr key={attendance.id}>
+                        <td className="bg-pink-200 p-2 sticky left-0 z-10 border border-gray-300">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                src={attendance.avatar}
+                                alt={attendance.memberName}
+                              />
+                              <AvatarFallback>
+                                {attendance.memberName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-semibold text-sm">
+                                {attendance.memberName}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {attendance.position}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-1 border border-gray-300">
+                          <div className="flex justify-center">
+                            <div
+                              className={`border-2 ${getStatusColor(
+                                attendance.status
+                              )} w-20 h-8 flex items-center justify-center font-semibold text-xs`}
+                            >
+                              {attendance.status.toUpperCase()}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2 text-center border border-gray-300">
+                          <div className="text-sm">
+                            {attendance.arrivalTime
+                              ? format(attendance.arrivalTime, "h:mm a")
+                              : "---"}
+                          </div>
+                        </td>
+                        <td className="p-2 border border-gray-300">
+                          <div className="text-xs text-muted-foreground">
+                            {attendance.notes || "---"}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          ) : (
+            /* List View */
+            <div className="space-y-3">
+              {filteredAttendance.map((attendance) => (
+                <Card key={attendance.id} className="p-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage
+                        src={attendance.avatar}
+                        alt={attendance.memberName}
+                      />
+                      <AvatarFallback>
+                        {attendance.memberName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium">{attendance.memberName}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {attendance.position}
+                      </p>
+                      {attendance.notes && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {attendance.notes}
+                        </p>
+                      )}
+                      {attendance.arrivalTime && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Arrived: {format(attendance.arrivalTime, "h:mm a")}
+                        </p>
+                      )}
+                    </div>
+
+                    {getStatusBadge(attendance.status)}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         /* Meeting List View */
