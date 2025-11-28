@@ -1,11 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Calendar, CheckCircle2, XCircle, Clock, User } from "lucide-react";
 import { mockResolutions, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { VoteBoxGroup } from "@/components/community/shared/VoteBoxGroup";
 import { useState } from "react";
 
 export const MeetingResolutionsTab = () => {
@@ -91,10 +91,6 @@ export const MeetingResolutionsTab = () => {
     }
   };
 
-  const calculatePercentage = (votes: number, total: number) => {
-    return total > 0 ? (votes / total) * 100 : 0;
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -154,14 +150,6 @@ export const MeetingResolutionsTab = () => {
             resolution.votesFor +
             resolution.votesAgainst +
             resolution.abstentions;
-          const forPercentage = calculatePercentage(
-            resolution.votesFor,
-            totalVotes
-          );
-          const againstPercentage = calculatePercentage(
-            resolution.votesAgainst,
-            totalVotes
-          );
 
           return (
             <div key={resolution.id}>
@@ -201,40 +189,25 @@ export const MeetingResolutionsTab = () => {
                   {resolution.description}
                 </p>
 
-                {/* Voting Results */}
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-green-600 font-medium">
-                        For: {resolution.votesFor}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {forPercentage.toFixed(1)}%
-                      </span>
+                {/* Voting Results with Box Style */}
+                <div className="space-y-4">
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <p className="text-sm font-semibold mb-3 text-center">Voting Results</p>
+                    <div className="flex justify-center">
+                      <VoteBoxGroup
+                        values={[
+                          resolution.votesFor,
+                          resolution.votesAgainst,
+                          resolution.abstentions
+                        ]}
+                        labels={['For', 'Against', 'Abstain']}
+                        colorClass="border-gray-400"
+                        isLarge
+                      />
                     </div>
-                    <Progress value={forPercentage} className="h-2" />
                   </div>
 
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-red-600 font-medium">
-                        Against: {resolution.votesAgainst}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {againstPercentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={againstPercentage}
-                      className="h-2 [&>div]:bg-red-500"
-                    />
-                  </div>
-
-                  <div className="text-sm text-muted-foreground">
-                    Abstentions: {resolution.abstentions}
-                  </div>
-
-                  <div className="text-sm font-medium pt-2 border-t">
+                  <div className="text-sm font-medium text-center pt-2 border-t">
                     Total Votes: {totalVotes}
                   </div>
                 </div>
