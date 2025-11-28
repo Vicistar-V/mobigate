@@ -61,6 +61,10 @@ import { FinancialSummaryTab } from "@/components/community/finance/FinancialSum
 import { FinancialClearancesTab } from "@/components/community/finance/FinancialClearancesTab";
 import { FinancialAccreditationTab } from "@/components/community/finance/FinancialAccreditationTab";
 import { CommunityAccountsTab } from "@/components/community/finance/CommunityAccountsTab";
+import { FundRaiserRaiseCampaignTab } from "@/components/community/fundraiser/FundRaiserRaiseCampaignTab";
+import { FundRaiserViewCampaignsTab } from "@/components/community/fundraiser/FundRaiserViewCampaignsTab";
+import { FundRaiserViewDonorsTab } from "@/components/community/fundraiser/FundRaiserViewDonorsTab";
+import { FundRaiserCelebrityDonorsTab } from "@/components/community/fundraiser/FundRaiserCelebrityDonorsTab";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -701,20 +705,29 @@ const CommunityProfile = () => {
             </Card>
           )}
 
-          {activeTab === "fundraiser" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">FundRaiser</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Manage fundraising campaigns and donations...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Raise New Campaign</li>
-                  <li>Active Campaigns</li>
-                  <li>View All Donors</li>
-                  <li>Celebrity Donors Recognition</li>
-                  <li>Campaign Analytics</li>
-                </ul>
-              </div>
-            </Card>
+          {/* FundRaiser Tabs */}
+          {activeTab === "fundraiser-raise" && (
+            <div className="mt-6">
+              <FundRaiserRaiseCampaignTab />
+            </div>
+          )}
+
+          {activeTab === "fundraiser-campaigns" && (
+            <div className="mt-6">
+              <FundRaiserViewCampaignsTab />
+            </div>
+          )}
+
+          {activeTab === "fundraiser-donors" && (
+            <div className="mt-6">
+              <FundRaiserViewDonorsTab />
+            </div>
+          )}
+
+          {activeTab === "fundraiser-celebrity" && (
+            <div className="mt-6">
+              <FundRaiserCelebrityDonorsTab />
+            </div>
           )}
 
           {/* Elections & Voting Tabs - Separated */}

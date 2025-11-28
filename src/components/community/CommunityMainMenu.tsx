@@ -318,28 +318,28 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("Raise Campaign")}
+                  onClick={() => handleMenuClick("fundraiser-raise", true)}
                 >
                   Raise Campaign
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Campaigns")}
+                  onClick={() => handleMenuClick("fundraiser-campaigns", true)}
                 >
                   View Campaigns
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Donors")}
+                  onClick={() => handleMenuClick("fundraiser-donors", true)}
                 >
                   View Donors
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("View Celebrity Donors")}
+                  onClick={() => handleMenuClick("fundraiser-celebrity", true)}
                 >
                   View Celebrity Donors
                 </Button>
