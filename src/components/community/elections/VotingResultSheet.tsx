@@ -10,6 +10,7 @@ import {
 import { Download, X } from "lucide-react";
 import { ElectionOffice, VoteRecord } from "@/data/electionData";
 import { useState } from "react";
+import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 
 interface VotingResultSheetProps {
   office: ElectionOffice;
@@ -17,38 +18,6 @@ interface VotingResultSheetProps {
   onClose?: () => void;
   onDownload?: () => void;
 }
-
-interface VoteBoxGroupProps {
-  votes: number;
-  loss: number | null | undefined;
-  vct: number;
-  colorClass?: string;
-  showLabels?: boolean;
-  isPerformance?: boolean;
-}
-
-const VoteBoxGroup = ({ votes, loss, vct, colorClass, showLabels, isPerformance }: VoteBoxGroupProps) => (
-  <div className="flex flex-col items-center gap-1">
-    <div className="flex gap-0.5">
-      <div className={`border-2 ${colorClass || 'border-gray-400'} ${isPerformance ? 'bg-white' : 'bg-white'} w-12 h-10 flex items-center justify-center ${isPerformance ? 'text-xl font-bold' : 'font-semibold text-sm'}`}>
-        {votes}
-      </div>
-      <div className={`border-2 ${colorClass || 'border-gray-400'} ${isPerformance ? 'bg-white' : 'bg-white'} w-12 h-10 flex items-center justify-center ${isPerformance ? 'text-xl font-bold' : 'text-sm'}`}>
-        {loss !== null && loss !== undefined && loss !== 0 ? loss : '---'}
-      </div>
-      <div className={`border-2 ${colorClass || 'border-gray-400'} ${isPerformance ? 'bg-white' : 'bg-white'} w-12 h-10 flex items-center justify-center ${isPerformance ? 'text-xl font-bold' : 'font-semibold text-sm'}`}>
-        {vct}
-      </div>
-    </div>
-    {showLabels && (
-      <div className="flex w-full justify-around text-[10px] text-gray-600 font-medium px-0.5">
-        <span>{isPerformance ? 'Votes' : 'Vote'}</span>
-        <span>Loss</span>
-        <span>VCT</span>
-      </div>
-    )}
-  </div>
-);
 
 export const VotingResultSheet = ({
   office,
@@ -145,12 +114,11 @@ export const VotingResultSheet = ({
                   return (
                     <td key={candidate.id} className="p-2 text-center border border-gray-300 bg-white">
                       <VoteBoxGroup
-                        votes={candidate.votes}
-                        loss={candidate.losses}
-                        vct={candidate.vct}
+                        values={[candidate.votes, candidate.losses, candidate.vct]}
+                        labels={['Votes', 'Loss', 'VCT']}
                         colorClass={colors.border}
                         showLabels={true}
-                        isPerformance={true}
+                        isLarge={true}
                       />
                     </td>
                   );
@@ -169,11 +137,9 @@ export const VotingResultSheet = ({
                     return (
                       <td key={candidate.id} className="p-2 text-center border border-gray-300 bg-white">
                         <VoteBoxGroup
-                          votes={vote?.vote || 0}
-                          loss={vote?.loss}
-                          vct={vote?.vct || 0}
+                          values={[vote?.vote || 0, vote?.loss, vote?.vct || 0]}
+                          labels={['Vote', 'Loss', 'VCT']}
                           showLabels={true}
-                          isPerformance={false}
                         />
                       </td>
                     );

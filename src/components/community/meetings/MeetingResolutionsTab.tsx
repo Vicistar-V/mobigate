@@ -1,12 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Calendar, CheckCircle2, XCircle, Clock, User } from "lucide-react";
 import { mockResolutions, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { useState } from "react";
+import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 
 export const MeetingResolutionsTab = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -202,39 +202,33 @@ export const MeetingResolutionsTab = () => {
                 </p>
 
                 {/* Voting Results */}
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-green-600 font-medium">
-                        For: {resolution.votesFor}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {forPercentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress value={forPercentage} className="h-2" />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-red-600 font-medium">
-                        Against: {resolution.votesAgainst}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {againstPercentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={againstPercentage}
-                      className="h-2 [&>div]:bg-red-500"
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="flex justify-center">
+                    <VoteBoxGroup
+                      values={[
+                        resolution.votesFor,
+                        resolution.votesAgainst,
+                        resolution.abstentions
+                      ]}
+                      labels={['For', 'Against', 'Abstain']}
+                      colorClass="border-gray-400"
+                      isLarge={true}
                     />
                   </div>
-
-                  <div className="text-sm text-muted-foreground">
-                    Abstentions: {resolution.abstentions}
+                  
+                  <div className="flex gap-4 text-xs">
+                    <span className="text-green-600 font-medium">
+                      {forPercentage.toFixed(1)}%
+                    </span>
+                    <span className="text-red-600 font-medium">
+                      {againstPercentage.toFixed(1)}%
+                    </span>
+                    <span className="text-muted-foreground">
+                      {((resolution.abstentions / totalVotes) * 100).toFixed(1)}%
+                    </span>
                   </div>
 
-                  <div className="text-sm font-medium pt-2 border-t">
+                  <div className="text-sm font-medium pt-2 border-t w-full text-center">
                     Total Votes: {totalVotes}
                   </div>
                 </div>
