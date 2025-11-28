@@ -618,6 +618,27 @@ export function CommunityMainMenu({
                 >
                   Automated Financial Audit
                 </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("finance-summary", true)}
+                >
+                  Financial Summary
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("finance-clearances", true)}
+                >
+                  Financial Clearances
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("finance-accreditation", true)}
+                >
+                  Financial Accreditation
+                </Button>
               </AccordionContent>
             </AccordionItem>
 
