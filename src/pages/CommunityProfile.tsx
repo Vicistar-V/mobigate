@@ -60,6 +60,7 @@ import { MeetingAttendanceTab } from "@/components/community/meetings/MeetingAtt
 import { FinancialSummaryTab } from "@/components/community/finance/FinancialSummaryTab";
 import { FinancialClearancesTab } from "@/components/community/finance/FinancialClearancesTab";
 import { FinancialAccreditationTab } from "@/components/community/finance/FinancialAccreditationTab";
+import { CommunityAccountsTab } from "@/components/community/finance/CommunityAccountsTab";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -857,6 +858,11 @@ const CommunityProfile = () => {
           {activeTab === "finance-accreditation" && (
             <div className="mt-6">
               <FinancialAccreditationTab />
+            </div>
+          )}
+          {activeTab === "community-accounts" && (
+            <div className="mt-6">
+              <CommunityAccountsTab />
             </div>
           )}
         </div>

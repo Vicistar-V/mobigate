@@ -213,3 +213,97 @@ export const mockMembersWithClearance: MemberWithClearance[] = [
     ]
   }
 ];
+
+// Community Accounts Data
+export interface Transaction {
+  id: string;
+  serialNumber: number;
+  description: string;
+  creditAmount: number | null;
+  debitAmount: number | null;
+  approvalCode: string | null;
+  date: string;
+  type: 'credit' | 'debit';
+  status: 'approved' | 'pending' | 'rejected';
+}
+
+export interface AccountBalance {
+  totalCredit: number;
+  totalDebit: number;
+  availableBalance: number;
+}
+
+export const mockTransactions: Transaction[] = [
+  {
+    id: 'txn-1',
+    serialNumber: 1,
+    description: 'Membership Registration',
+    creditAmount: 100000,
+    debitAmount: 120000,
+    approvalCode: 'ADM-18#5 21-X07Y2 4M',
+    date: 'Jan 15, 2025',
+    type: 'credit',
+    status: 'approved'
+  },
+  {
+    id: 'txn-2',
+    serialNumber: 2,
+    description: 'General Annual Dues & Levies',
+    creditAmount: 180000,
+    debitAmount: 200000,
+    approvalCode: 'ADM-22#3 18-K09Z5 2N',
+    date: 'Feb 20, 2025',
+    type: 'credit',
+    status: 'approved'
+  },
+  {
+    id: 'txn-3',
+    serialNumber: 3,
+    description: 'Cultural Events Levies payment',
+    creditAmount: 210000,
+    debitAmount: 230000,
+    approvalCode: 'ADM-19#7 25-M11P8 6Q',
+    date: 'Mar 10, 2025',
+    type: 'debit',
+    status: 'approved'
+  },
+  {
+    id: 'txn-4',
+    serialNumber: 4,
+    description: 'Payment of Annual Membership Fee',
+    creditAmount: 80000,
+    debitAmount: 100000,
+    approvalCode: 'ADM-16#2 30-R14S3 9T',
+    date: 'Mar 25, 2025',
+    type: 'credit',
+    status: 'approved'
+  },
+  {
+    id: 'txn-5',
+    serialNumber: 5,
+    description: 'Donation for Civic Centre Project',
+    creditAmount: 250000,
+    debitAmount: null,
+    approvalCode: 'ADM-20#8 12-L06W4 1V',
+    date: 'Apr 05, 2025',
+    type: 'credit',
+    status: 'approved'
+  },
+  {
+    id: 'txn-6',
+    serialNumber: 6,
+    description: 'Support Received - Infrastructure',
+    creditAmount: 150000,
+    debitAmount: null,
+    approvalCode: 'ADM-21#4 19-N08Y7 3X',
+    date: 'Apr 18, 2025',
+    type: 'credit',
+    status: 'approved'
+  }
+];
+
+export const mockAccountBalance: AccountBalance = {
+  totalCredit: 970000,
+  totalDebit: 450000,
+  availableBalance: 520000
+};

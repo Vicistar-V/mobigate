@@ -586,7 +586,7 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("CAM")}
+                  onClick={() => handleMenuClick("community-accounts", true)}
                 >
                   CAM [Community Account Manager]
                 </Button>
