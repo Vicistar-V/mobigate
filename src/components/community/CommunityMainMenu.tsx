@@ -185,6 +185,11 @@ export function CommunityMainMenu({
       setOpen(false);
       return;
     }
+    if (action === "rollcalls" && communityId) {
+      navigate(`/community/${communityId}/roll-calls`);
+      setOpen(false);
+      return;
+    }
 
     // Handle navigation
     if (isNavigable && onNavigate) {
