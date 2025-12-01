@@ -65,6 +65,8 @@ import { FundRaiserRaiseCampaignTab } from "@/components/community/fundraiser/Fu
 import { FundRaiserViewCampaignsTab } from "@/components/community/fundraiser/FundRaiserViewCampaignsTab";
 import { FundRaiserViewDonorsTab } from "@/components/community/fundraiser/FundRaiserViewDonorsTab";
 import { FundRaiserCelebrityDonorsTab } from "@/components/community/fundraiser/FundRaiserCelebrityDonorsTab";
+import { DonationDialog } from "@/components/community/DonationDialog";
+import { CommunityPostDialog } from "@/components/community/CommunityPostDialog";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -77,6 +79,8 @@ const CommunityProfile = () => {
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [galleryFilter, setGalleryFilter] = useState<string>("all");
+  const [showDonationDialog, setShowDonationDialog] = useState(false);
+  const [showPostDialog, setShowPostDialog] = useState(false);
   const { toast } = useToast();
   const tabsSectionRef = useRef<HTMLDivElement>(null);
 
@@ -370,10 +374,7 @@ const CommunityProfile = () => {
   };
 
   const handleDonate = () => {
-    toast({
-      title: "Donate",
-      description: "Donation feature coming soon!",
-    });
+    setShowDonationDialog(true);
   };
 
   return (
@@ -465,6 +466,14 @@ const CommunityProfile = () => {
                 onClick={handleLike}
               >
                 <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPostDialog(true)}
+              >
+                Create Post
               </Button>
 
               <CommunityMainMenu
@@ -885,6 +894,18 @@ const CommunityProfile = () => {
 
       {/* Create Post Dialog */}
       <CreatePostDialog />
+      
+      {/* Donation Dialog */}
+      <DonationDialog 
+        open={showDonationDialog} 
+        onOpenChange={setShowDonationDialog} 
+      />
+      
+      {/* Community Post Dialog */}
+      <CommunityPostDialog 
+        open={showPostDialog} 
+        onOpenChange={setShowPostDialog} 
+      />
     </div>
   );
 };

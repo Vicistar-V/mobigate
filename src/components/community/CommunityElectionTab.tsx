@@ -19,6 +19,10 @@ import { ElectionChatSection } from "./elections/ElectionChatSection";
 import { PreviousElectionsList } from "./elections/PreviousElectionsList";
 import { CampaignsView } from "./elections/CampaignsView";
 import { WinnersView } from "./elections/WinnersView";
+import { ElectionOpinionsTab } from "./elections/ElectionOpinionsTab";
+import { ElectionAccreditationTab } from "./elections/ElectionAccreditationTab";
+import { ElectionClearancesTab } from "./elections/ElectionClearancesTab";
+import { ElectionPrimariesTab } from "./elections/ElectionPrimariesTab";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import {
@@ -195,13 +199,40 @@ export const CommunityElectionTab = () => {
           </>
         )}
 
-        {/* Placeholder for other views */}
-        {["opinions", "accreditation", "clearances", "primaries"].includes(activeView) && (
-          <div className="text-center py-12 border rounded-lg">
-            <p className="text-muted-foreground">
-              {activeView.charAt(0).toUpperCase() + activeView.slice(1)} section coming soon...
-            </p>
-          </div>
+        {/* Public Opinions View */}
+        {activeView === "opinions" && (
+          <>
+            <ElectionOpinionsTab />
+            <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-opinions" />
+            <PeopleYouMayKnow />
+          </>
+        )}
+
+        {/* Accreditation View */}
+        {activeView === "accreditation" && (
+          <>
+            <ElectionAccreditationTab />
+            <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-accreditation" />
+            <PeopleYouMayKnow />
+          </>
+        )}
+
+        {/* Clearances View */}
+        {activeView === "clearances" && (
+          <>
+            <ElectionClearancesTab />
+            <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-clearances" />
+            <PeopleYouMayKnow />
+          </>
+        )}
+
+        {/* Primaries View */}
+        {activeView === "primaries" && (
+          <>
+            <ElectionPrimariesTab />
+            <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-primaries" />
+            <PeopleYouMayKnow />
+          </>
         )}
       </div>
     </div>
