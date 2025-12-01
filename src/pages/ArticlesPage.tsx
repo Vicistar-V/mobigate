@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { articles } from "@/data/articlesData";
 import { CommentSectionDialog } from "@/components/community/CommentSectionDialog";
+import { ArticleEditorDialog } from "@/components/community/ArticleEditorDialog";
 
 export const ArticlesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -30,6 +31,7 @@ export const ArticlesPage = () => {
   const [selectedArticle, setSelectedArticle] = useState<typeof articles[0] | null>(null);
   const [showArticleDialog, setShowArticleDialog] = useState(false);
   const [commentArticleId, setCommentArticleId] = useState<string | null>(null);
+  const [showArticleEditor, setShowArticleEditor] = useState(false);
   const { toast } = useToast();
 
   const categories = ["all", ...Array.from(new Set(articles.map((a) => a.category)))];
@@ -69,10 +71,7 @@ export const ArticlesPage = () => {
   };
 
   const handleWriteArticle = () => {
-    toast({
-      title: "Write Article",
-      description: "Article editor coming soon! This feature will allow permitted members to write articles.",
-    });
+    setShowArticleEditor(true);
   };
 
   return (
@@ -315,6 +314,12 @@ export const ArticlesPage = () => {
         onOpenChange={(open) => !open && setCommentArticleId(null)}
         title="Article Comments"
         contextId={commentArticleId || ""}
+      />
+
+      {/* Article Editor Dialog */}
+      <ArticleEditorDialog 
+        open={showArticleEditor} 
+        onOpenChange={setShowArticleEditor} 
       />
     </>
   );

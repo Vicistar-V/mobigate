@@ -11,6 +11,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { CommentSectionDialog } from "../CommentSectionDialog";
 
 interface Opinion {
   id: string;
@@ -68,6 +69,7 @@ export const ElectionOpinionsTab = () => {
   const [opinions, setOpinions] = useState<Opinion[]>(mockOpinions);
   const [newOpinion, setNewOpinion] = useState("");
   const [sortBy, setSortBy] = useState<"popular" | "recent">("popular");
+  const [commentOpinionId, setCommentOpinionId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleLike = (opinionId: string) => {
