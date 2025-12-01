@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CreateCircleDialog } from "./community/CreateCircleDialog";
 
 interface AddToCircleDialogProps {
   open: boolean;
@@ -39,11 +40,25 @@ export const AddToCircleDialog = ({
 }: AddToCircleDialogProps) => {
   const [selectedCircles, setSelectedCircles] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [circles, setCircles] = useState(availableCircles);
+  const [showCreateCircle, setShowCreateCircle] = useState(false);
   const { toast } = useToast();
 
-  const filteredCircles = availableCircles.filter((circle) =>
+  const filteredCircles = circles.filter((circle) =>
     circle.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleCircleCreated = (newCircle: any) => {
+    setCircles([...circles, {
+      id: newCircle.id,
+      name: newCircle.name,
+      icon: newCircle.icon,
+    }]);
+    toast({
+      title: "Circle Created",
+      description: `"${newCircle.name}" is now available`,
+    });
+  };
 
   const handleToggleCircle = (circleId: string) => {
     setSelectedCircles((prev) =>
@@ -55,7 +70,7 @@ export const AddToCircleDialog = ({
 
   const handleDone = () => {
     if (selectedCircles.length > 0) {
-      const selectedNames = availableCircles
+      const selectedNames = circles
         .filter((c) => selectedCircles.includes(c.id))
         .map((c) => c.name)
         .join(", ");
@@ -118,12 +133,7 @@ export const AddToCircleDialog = ({
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => {
-              toast({
-                title: "Feature coming soon",
-                description: "Create new circle functionality will be available soon",
-              });
-            }}
+            onClick={() => setShowCreateCircle(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
             Create New Circle
@@ -145,6 +155,13 @@ export const AddToCircleDialog = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Create Circle Dialog */}
+      <CreateCircleDialog 
+        open={showCreateCircle} 
+        onOpenChange={setShowCreateCircle}
+        onCircleCreated={handleCircleCreated}
+      />
     </Dialog>
   );
 };

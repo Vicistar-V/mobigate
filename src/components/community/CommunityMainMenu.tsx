@@ -191,14 +191,25 @@ export function CommunityMainMenu({
       return;
     }
 
+    // Handle admin actions
+    if (action === "Admin Logout") {
+      toast({
+        title: "Logged Out",
+        description: "You have been logged out from admin mode",
+      });
+      setOpen(false);
+      return;
+    }
+
     // Handle navigation
     if (isNavigable && onNavigate) {
       onNavigate(action);
       setOpen(false);
     } else {
+      // More specific message for truly unimplemented features
       toast({
-        title: action,
-        description: "This feature is coming soon!",
+        title: "Feature Not Available",
+        description: `"${action}" feature is currently under development`,
       });
       setOpen(false);
     }
