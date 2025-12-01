@@ -25,6 +25,10 @@ import { BlockMembersDialog } from "./BlockMembersDialog";
 import { AddFriendsDialog } from "./AddFriendsDialog";
 import { InviteMembersDialog } from "./InviteMembersDialog";
 import { ExitCommunityDialog } from "./ExitCommunityDialog";
+import { FinancialOverviewDialog } from "./finance/FinancialOverviewDialog";
+import { FinancialObligationsDialog } from "./finance/FinancialObligationsDialog";
+import { FinancialStatusDialog } from "./finance/FinancialStatusDialog";
+import { FinancialAuditDialog } from "./finance/FinancialAuditDialog";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
@@ -50,6 +54,10 @@ export function CommunityMainMenu({
   const [showAddFriends, setShowAddFriends] = useState(false);
   const [showInviteMembers, setShowInviteMembers] = useState(false);
   const [showExitCommunity, setShowExitCommunity] = useState(false);
+  const [showFinancialOverview, setShowFinancialOverview] = useState(false);
+  const [showFinancialObligations, setShowFinancialObligations] = useState(false);
+  const [showFinancialStatus, setShowFinancialStatus] = useState(false);
+  const [showFinancialAudit, setShowFinancialAudit] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -110,6 +118,28 @@ export function CommunityMainMenu({
     }
     if (action === "Exit Request") {
       setShowExitCommunity(true);
+      setOpen(false);
+      return;
+    }
+
+    // Handle finance dialogs
+    if (action === "Financial Overview/Wallet") {
+      setShowFinancialOverview(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Financial Obligations") {
+      setShowFinancialObligations(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Financial Status Checker") {
+      setShowFinancialStatus(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Automated Financial Audit") {
+      setShowFinancialAudit(true);
       setOpen(false);
       return;
     }
@@ -779,6 +809,12 @@ export function CommunityMainMenu({
       <AddFriendsDialog open={showAddFriends} onOpenChange={setShowAddFriends} />
       <InviteMembersDialog open={showInviteMembers} onOpenChange={setShowInviteMembers} />
       <ExitCommunityDialog open={showExitCommunity} onOpenChange={setShowExitCommunity} />
+
+      {/* Finance Dialogs */}
+      <FinancialOverviewDialog open={showFinancialOverview} onOpenChange={setShowFinancialOverview} />
+      <FinancialObligationsDialog open={showFinancialObligations} onOpenChange={setShowFinancialObligations} />
+      <FinancialStatusDialog open={showFinancialStatus} onOpenChange={setShowFinancialStatus} />
+      <FinancialAuditDialog open={showFinancialAudit} onOpenChange={setShowFinancialAudit} />
     </Sheet>
   );
 }
