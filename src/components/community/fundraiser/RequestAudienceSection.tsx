@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { audienceOptions } from "@/data/fundraiserData";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { AudienceExclusionDialog } from "@/components/community/AudienceExclusionDialog";
+import { CustomAudienceDialog } from "@/components/community/CustomAudienceDialog";
 
 interface RequestAudienceSectionProps {
   selectedAudience: string[];
@@ -14,6 +17,14 @@ export const RequestAudienceSection = ({
   onAudienceChange,
 }: RequestAudienceSectionProps) => {
   const { toast } = useToast();
+  const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [customAudiences, setCustomAudiences] = useState<
+    Array<{ id: string; name: string; memberIds: string[]; createdAt: string }>
+  >([]);
+  const [showExclusionDialog, setShowExclusionDialog] = useState(false);
+  const [exclusionMode, setExclusionMode] = useState<"browse" | "view">("browse");
+  const [showAudienceDialog, setShowAudienceDialog] = useState(false);
+  const [audienceMode, setAudienceMode] = useState<"create" | "view">("create");
 
   const toggleAudience = (audienceId: string) => {
     if (selectedAudience.includes(audienceId)) {
@@ -24,38 +35,31 @@ export const RequestAudienceSection = ({
   };
 
   const handleBrowseExclusion = () => {
-    toast({
-      title: "Browse Exclusion List",
-      description: "Feature coming soon!",
-    });
+    setExclusionMode("browse");
+    setShowExclusionDialog(true);
   };
 
   const handleViewExclusion = () => {
-    toast({
-      title: "View Exclusion List",
-      description: "Feature coming soon!",
-    });
+    setExclusionMode("view");
+    setShowExclusionDialog(true);
   };
 
   const handleAddAudience = () => {
-    toast({
-      title: "Add New Audience",
-      description: "Feature coming soon!",
-    });
+    setAudienceMode("create");
+    setShowAudienceDialog(true);
   };
 
   const handleViewNewList = () => {
-    toast({
-      title: "View New List",
-      description: "Feature coming soon!",
-    });
+    setAudienceMode("view");
+    setShowAudienceDialog(true);
   };
 
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-bold mb-4 text-center">
-        REQUEST AUDIENCE
-      </h3>
+    <>
+      <Card className="p-6">
+        <h3 className="text-lg font-bold mb-4 text-center">
+          REQUEST AUDIENCE
+        </h3>
       
       <div className="space-y-4">
         {/* CHANNELED TO Section */}
@@ -126,7 +130,24 @@ export const RequestAudienceSection = ({
         <Button className="w-full bg-black text-white hover:bg-black/90 font-bold mt-6">
           SAVE
         </Button>
-      </div>
-    </Card>
+        </div>
+      </Card>
+
+      <AudienceExclusionDialog
+        open={showExclusionDialog}
+        onOpenChange={setShowExclusionDialog}
+        mode={exclusionMode}
+        excludedIds={excludedIds}
+        onExcludedIdsChange={setExcludedIds}
+      />
+
+      <CustomAudienceDialog
+        open={showAudienceDialog}
+        onOpenChange={setShowAudienceDialog}
+        mode={audienceMode}
+        audiences={customAudiences}
+        onAudiencesChange={setCustomAudiences}
+      />
+    </>
   );
 };
