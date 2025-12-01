@@ -19,6 +19,12 @@ import { Separator } from "@/components/ui/separator";
 import { GuestLoginDialog } from "./GuestLoginDialog";
 import { MemberLoginDialog } from "./MemberLoginDialog";
 import { AdminLoginDialog } from "./AdminLoginDialog";
+import { ChatMembersDialog } from "./ChatMembersDialog";
+import { GiftMembersDialog } from "./GiftMembersDialog";
+import { BlockMembersDialog } from "./BlockMembersDialog";
+import { AddFriendsDialog } from "./AddFriendsDialog";
+import { InviteMembersDialog } from "./InviteMembersDialog";
+import { ExitCommunityDialog } from "./ExitCommunityDialog";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
@@ -38,6 +44,12 @@ export function CommunityMainMenu({
   const [showGuestLogin, setShowGuestLogin] = useState(false);
   const [showMemberLogin, setShowMemberLogin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showChatMembers, setShowChatMembers] = useState(false);
+  const [showGiftMembers, setShowGiftMembers] = useState(false);
+  const [showBlockMembers, setShowBlockMembers] = useState(false);
+  const [showAddFriends, setShowAddFriends] = useState(false);
+  const [showInviteMembers, setShowInviteMembers] = useState(false);
+  const [showExitCommunity, setShowExitCommunity] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -66,6 +78,38 @@ export function CommunityMainMenu({
     }
     if (action === "Admin Login") {
       setShowAdminLogin(true);
+      setOpen(false);
+      return;
+    }
+
+    // Handle new membership dialogs
+    if (action === "Chat Members") {
+      setShowChatMembers(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Gift Members") {
+      setShowGiftMembers(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Block Members") {
+      setShowBlockMembers(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Add Friends") {
+      setShowAddFriends(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Invite Mobigate Users" || action === "Invite Non-Mobigate Users") {
+      setShowInviteMembers(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Exit Request") {
+      setShowExitCommunity(true);
       setOpen(false);
       return;
     }
@@ -727,6 +771,14 @@ export function CommunityMainMenu({
         onOpenChange={setShowAdminLogin}
         onLoginSuccess={handleLoginSuccess}
       />
+
+      {/* Membership & Social Dialogs */}
+      <ChatMembersDialog open={showChatMembers} onOpenChange={setShowChatMembers} />
+      <GiftMembersDialog open={showGiftMembers} onOpenChange={setShowGiftMembers} />
+      <BlockMembersDialog open={showBlockMembers} onOpenChange={setShowBlockMembers} />
+      <AddFriendsDialog open={showAddFriends} onOpenChange={setShowAddFriends} />
+      <InviteMembersDialog open={showInviteMembers} onOpenChange={setShowInviteMembers} />
+      <ExitCommunityDialog open={showExitCommunity} onOpenChange={setShowExitCommunity} />
     </Sheet>
   );
 }
