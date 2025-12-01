@@ -32,6 +32,7 @@ import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { communityPeople } from "@/data/communityPeopleData";
 import { wallStatusPosts, feedPosts } from "@/data/posts";
+import { CreateSpecialEventDialog } from "@/components/community/CreateSpecialEventDialog";
 
 // Profile images
 import profile1 from "@/assets/profile-photo.jpg";
@@ -368,6 +369,8 @@ const specialEventPosts = [
 ];
 
 export function CommunityMembershipTab() {
+  const [showSpecialEventDialog, setShowSpecialEventDialog] = useState(false);
+  
   // Member filter states
   const [memberGenderFilter, setMemberGenderFilter] = useState<"all" | "men" | "women">("all");
   const [friendRequestStatus, setFriendRequestStatus] = useState<Record<string, boolean>>({});
@@ -580,7 +583,7 @@ export function CommunityMembershipTab() {
 
       {/* 3. Create Special Event Posts Button */}
       <button
-        onClick={() => toast.info("Special Event Posts feature coming soon!")}
+        onClick={() => setShowSpecialEventDialog(true)}
         className="w-full p-4 sm:p-5 bg-card border-2 border-success/30 rounded-lg hover:border-success/50 hover:shadow-md transition-all group"
       >
         <div className="flex items-center justify-center gap-2 text-foreground">
@@ -588,6 +591,8 @@ export function CommunityMembershipTab() {
           <Plus className="h-5 w-5 group-hover:scale-110 transition-transform" />
         </div>
       </button>
+      
+      <CreateSpecialEventDialog open={showSpecialEventDialog} onOpenChange={setShowSpecialEventDialog} />
 
         {/* 4. Special Events Section */}
         <WallStatusCarousel
