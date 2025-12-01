@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Gift, Store, GamepadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { MobiStoreDialog } from "./MobiStoreDialog";
+import { MobiQuizGameDialog } from "./MobiQuizGameDialog";
 
 interface CommunityQuickLinksProps {
   fundRaiserEnabled?: boolean;
@@ -13,27 +15,23 @@ export function CommunityQuickLinks({
   mobiStoreEnabled = false,
   quizGameEnabled = false,
 }: CommunityQuickLinksProps) {
-  const { toast } = useToast();
+  const [storeOpen, setStoreOpen] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   const handleFundRaiser = () => {
-    toast({
-      title: "FundRaiser",
-      description: "Community fundraiser feature coming soon!",
-    });
+    // Navigate to fundraiser tab - this will be handled by parent component
+    const fundraiserTab = document.querySelector('[data-value="fundraiser-campaigns"]');
+    if (fundraiserTab instanceof HTMLElement) {
+      fundraiserTab.click();
+    }
   };
 
   const handleStore = () => {
-    toast({
-      title: "Mobi-Store",
-      description: "Community store feature coming soon!",
-    });
+    setStoreOpen(true);
   };
 
   const handleQuiz = () => {
-    toast({
-      title: "Mobi-Quiz Game",
-      description: "Community quiz game coming soon!",
-    });
+    setQuizOpen(true);
   };
 
   const links = [
@@ -45,20 +43,25 @@ export function CommunityQuickLinks({
   if (links.length === 0) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 py-3 px-4 border-y border-border bg-muted/20">
-      {links.map((link, index) => (
-        <span key={link.label}>
-          <Button
-            variant="link"
-            className="h-auto p-0 text-xs sm:text-sm text-primary hover:text-primary/80 font-medium"
-            onClick={link.onClick}
-          >
-            <link.icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-            {link.label}
-          </Button>
-          {index < links.length - 1 && <span className="mx-2 text-muted-foreground">|</span>}
-        </span>
-      ))}
-    </div>
+    <>
+      <div className="flex items-center justify-center gap-2 py-3 px-4 border-y border-border bg-muted/20">
+        {links.map((link, index) => (
+          <span key={link.label}>
+            <Button
+              variant="link"
+              className="h-auto p-0 text-xs sm:text-sm text-primary hover:text-primary/80 font-medium"
+              onClick={link.onClick}
+            >
+              <link.icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              {link.label}
+            </Button>
+            {index < links.length - 1 && <span className="mx-2 text-muted-foreground">|</span>}
+          </span>
+        ))}
+      </div>
+
+      <MobiStoreDialog open={storeOpen} onOpenChange={setStoreOpen} />
+      <MobiQuizGameDialog open={quizOpen} onOpenChange={setQuizOpen} />
+    </>
   );
 }
