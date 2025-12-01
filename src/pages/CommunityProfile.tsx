@@ -70,6 +70,7 @@ import { CommunityPostDialog } from "@/components/community/CommunityPostDialog"
 import { RollCallsPage } from "@/pages/RollCallsPage";
 import { CommunityResourcesDialog } from "@/components/community/CommunityResourcesDialog";
 import { ArticlesPage } from "@/pages/ArticlesPage";
+import { InsideCommunityPage } from "@/pages/InsideCommunityPage";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -714,6 +715,15 @@ const CommunityProfile = () => {
 
           {activeTab === "rollcalls" && (
             <div className="mt-6">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setActiveTab("status")}
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Status
+              </Button>
               <RollCallsPage />
             </div>
           )}
@@ -870,7 +880,31 @@ const CommunityProfile = () => {
 
           {activeTab === "articles" && (
             <div className="mt-6">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setActiveTab("status")}
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Status
+              </Button>
               <ArticlesPage />
+            </div>
+          )}
+
+          {activeTab === "inside-community" && (
+            <div className="mt-6">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setActiveTab("status")}
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Status
+              </Button>
+              <InsideCommunityPage />
             </div>
           )}
 

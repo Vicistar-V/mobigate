@@ -174,19 +174,19 @@ export function CommunityMainMenu({
       return;
     }
 
-    // Handle new page routes
-    if (action === "Articles" && communityId) {
-      navigate(`/community/${communityId}/articles`);
+    // Handle navigation to hidden tabs
+    if (action === "Articles") {
+      if (onNavigate) onNavigate("articles");
       setOpen(false);
       return;
     }
-    if (action === "Inside Community" && communityId) {
-      navigate(`/community/${communityId}/inside`);
+    if (action === "Inside Community") {
+      if (onNavigate) onNavigate("inside-community");
       setOpen(false);
       return;
     }
-    if (action === "rollcalls" && communityId) {
-      navigate(`/community/${communityId}/roll-calls`);
+    if (action === "rollcalls") {
+      if (onNavigate) onNavigate("rollcalls");
       setOpen(false);
       return;
     }
