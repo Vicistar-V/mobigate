@@ -29,6 +29,10 @@ import { FinancialOverviewDialog } from "./finance/FinancialOverviewDialog";
 import { FinancialObligationsDialog } from "./finance/FinancialObligationsDialog";
 import { FinancialStatusDialog } from "./finance/FinancialStatusDialog";
 import { FinancialAuditDialog } from "./finance/FinancialAuditDialog";
+import { ConstitutionViewer } from "./ConstitutionViewer";
+import { CommunityResourcesDialog } from "./CommunityResourcesDialog";
+import { QuizCreationDialog } from "./QuizCreationDialog";
+import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
@@ -58,6 +62,10 @@ export function CommunityMainMenu({
   const [showFinancialObligations, setShowFinancialObligations] = useState(false);
   const [showFinancialStatus, setShowFinancialStatus] = useState(false);
   const [showFinancialAudit, setShowFinancialAudit] = useState(false);
+  const [showConstitution, setShowConstitution] = useState(false);
+  const [showResources, setShowResources] = useState(false);
+  const [showQuizCreation, setShowQuizCreation] = useState(false);
+  const [showVoucherBundles, setShowVoucherBundles] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -140,6 +148,25 @@ export function CommunityMainMenu({
     }
     if (action === "Automated Financial Audit") {
       setShowFinancialAudit(true);
+      setOpen(false);
+      return;
+    }
+
+    // Handle constitution and resources
+    if (action === "View Constitution") {
+      setShowConstitution(true);
+      setOpen(false);
+      return;
+    }
+
+    // Handle mobi-merchant
+    if (action === "Create Mobi Quiz-Games") {
+      setShowQuizCreation(true);
+      setOpen(false);
+      return;
+    }
+    if (action === "Subscribe for Voucher Bundles") {
+      setShowVoucherBundles(true);
       setOpen(false);
       return;
     }
@@ -741,7 +768,10 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
-                  onClick={() => handleMenuClick("resources", true)}
+                  onClick={() => {
+                    setShowResources(true);
+                    setOpen(false);
+                  }}
                 >
                   View Resources Section
                 </Button>
@@ -815,6 +845,14 @@ export function CommunityMainMenu({
       <FinancialObligationsDialog open={showFinancialObligations} onOpenChange={setShowFinancialObligations} />
       <FinancialStatusDialog open={showFinancialStatus} onOpenChange={setShowFinancialStatus} />
       <FinancialAuditDialog open={showFinancialAudit} onOpenChange={setShowFinancialAudit} />
+
+      {/* Constitution & Resources Dialogs */}
+      <ConstitutionViewer open={showConstitution} onOpenChange={setShowConstitution} />
+      <CommunityResourcesDialog open={showResources} onOpenChange={setShowResources} />
+
+      {/* Mobi-Merchant Dialogs */}
+      <QuizCreationDialog open={showQuizCreation} onOpenChange={setShowQuizCreation} />
+      <VoucherBundlesDialog open={showVoucherBundles} onOpenChange={setShowVoucherBundles} />
     </Sheet>
   );
 }
