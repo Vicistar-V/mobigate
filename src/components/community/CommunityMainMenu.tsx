@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -48,6 +49,8 @@ export function CommunityMainMenu({
   onNavigate,
 }: CommunityMainMenuProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { communityId } = useParams<{ communityId: string }>();
   const [open, setOpen] = useState(false);
   const [showGuestLogin, setShowGuestLogin] = useState(false);
   const [showMemberLogin, setShowMemberLogin] = useState(false);
@@ -171,6 +174,18 @@ export function CommunityMainMenu({
       return;
     }
 
+    // Handle new page routes
+    if (action === "Articles" && communityId) {
+      navigate(`/community/${communityId}/articles`);
+      setOpen(false);
+      return;
+    }
+    if (action === "Inside Community" && communityId) {
+      navigate(`/community/${communityId}/inside`);
+      setOpen(false);
+      return;
+    }
+
     // Handle navigation
     if (isNavigable && onNavigate) {
       onNavigate(action);
@@ -202,7 +217,7 @@ export function CommunityMainMenu({
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => handleMenuClick("articles", true)}
+              onClick={() => handleMenuClick("Articles")}
             >
               Articles
             </Button>
