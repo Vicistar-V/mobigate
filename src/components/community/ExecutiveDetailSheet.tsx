@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { Separator } from "@/components/ui/separator";
+import { AddToCircleDialog } from "@/components/AddToCircleDialog";
 
 interface ExecutiveDetailSheetProps {
   member: ExecutiveMember | null;
@@ -26,6 +27,7 @@ export const ExecutiveDetailSheet = ({
 }: ExecutiveDetailSheetProps) => {
   const [requestSent, setRequestSent] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [showAddToCircle, setShowAddToCircle] = useState(false);
   const { toast } = useToast();
 
   if (!member) return null;
@@ -57,10 +59,7 @@ export const ExecutiveDetailSheet = ({
   };
 
   const handleAddToCircle = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Add to Circle feature will be available soon",
-    });
+    setShowAddToCircle(true);
   };
 
   return (
@@ -207,6 +206,12 @@ export const ExecutiveDetailSheet = ({
           </div>
         </div>
       </DrawerContent>
+
+      <AddToCircleDialog
+        open={showAddToCircle}
+        onOpenChange={setShowAddToCircle}
+        userName={member?.name || ""}
+      />
     </Drawer>
   );
 };

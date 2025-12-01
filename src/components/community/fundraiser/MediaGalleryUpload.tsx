@@ -5,6 +5,8 @@ import { CampaignMediaItem } from "@/data/fundraiserData";
 import { ChevronLeft, ChevronRight, Upload, Eye, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { MediaUploadDialog } from "@/components/community/MediaUploadDialog";
+import { MediaPreviewDialog } from "@/components/community/MediaPreviewDialog";
 
 interface MediaGalleryUploadProps {
   items: CampaignMediaItem[];
@@ -16,13 +18,24 @@ export const MediaGalleryUpload = ({
   onItemsChange,
 }: MediaGalleryUploadProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const { toast } = useToast();
 
   const handleUpload = () => {
-    toast({
-      title: "Upload Media",
-      description: "Photo/Video upload feature coming soon!",
-    });
+    setShowUploadDialog(true);
+  };
+
+  const handleUploadComplete = (
+    files: Array<{ url: string; type: "image" | "video" }>
+  ) => {
+    const newItems: CampaignMediaItem[] = files.map((file, index) => ({
+      id: `media-${Date.now()}-${index}`,
+      url: file.url,
+      type: file.type === "image" ? "photo" : "video",
+      selected: false,
+    }));
+    onItemsChange([...items, ...newItems]);
   };
 
   const handlePrevious = () => {
@@ -45,10 +58,16 @@ export const MediaGalleryUpload = ({
   };
 
   const handlePreview = () => {
-    toast({
-      title: "Preview Selected Media",
-      description: "Preview feature coming soon!",
-    });
+    const selectedItems = items.filter((item) => item.selected);
+    if (selectedItems.length === 0) {
+      toast({
+        title: "No Selection",
+        description: "Please select media items to preview",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowPreviewDialog(true);
   };
 
   const handleDelete = () => {
@@ -82,8 +101,9 @@ export const MediaGalleryUpload = ({
   const currentItem = items[currentIndex];
 
   return (
-    <Card className="p-6">
-      <div className="space-y-4">
+    <>
+      <Card className="p-6">
+        <div className="space-y-4">
         {/* Upload Button */}
         <Button
           onClick={handleUpload}
@@ -195,7 +215,24 @@ export const MediaGalleryUpload = ({
             <p className="text-sm">Click upload to add photos or videos</p>
           </div>
         )}
-      </div>
-    </Card>
+        </div>
+      </Card>
+
+      <MediaUploadDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        onUploadComplete={handleUploadComplete}
+      />
+
+      <MediaPreviewDialog
+        open={showPreviewDialog}
+        onOpenChange={setShowPreviewDialog}
+        items={items.map((item) => ({
+          ...item,
+          type: item.type === "photo" ? "image" : "video",
+        }))}
+        initialIndex={currentIndex}
+      />
+    </>
   );
 };
