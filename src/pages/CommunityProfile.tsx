@@ -67,6 +67,9 @@ import { FundRaiserViewDonorsTab } from "@/components/community/fundraiser/FundR
 import { FundRaiserCelebrityDonorsTab } from "@/components/community/fundraiser/FundRaiserCelebrityDonorsTab";
 import { DonationDialog } from "@/components/community/DonationDialog";
 import { CommunityPostDialog } from "@/components/community/CommunityPostDialog";
+import { RollCallsPage } from "@/pages/RollCallsPage";
+import { CommunityResourcesDialog } from "@/components/community/CommunityResourcesDialog";
+import { ArticlesPage } from "@/pages/ArticlesPage";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -521,10 +524,7 @@ const CommunityProfile = () => {
               {/* 3. Create Post Button */}
               <div className="space-y-2">
                 <Button
-                  onClick={() => toast({
-                    title: "Create Post",
-                    description: "Post creation feature coming soon!",
-                  })}
+                  onClick={() => setShowPostDialog(true)}
                   className="w-full"
                   variant="outline"
                 >
@@ -630,19 +630,32 @@ const CommunityProfile = () => {
 
           {/* Hidden Tabs Content - Not in TabsList but still accessible */}
           {activeTab === "finance" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Finance Section</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Finance management features coming soon...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>CAM (Community Account Management)</li>
-                  <li>Financial Overview</li>
-                  <li>Member Obligations</li>
-                  <li>Status Checker</li>
-                  <li>Financial Audit</li>
-                </ul>
-              </div>
-            </Card>
+            <div className="mt-6">
+              <Tabs defaultValue="summary" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4">
+                  <TabsTrigger value="summary">Summary</TabsTrigger>
+                  <TabsTrigger value="clearances">Clearances</TabsTrigger>
+                  <TabsTrigger value="accreditation">Accreditation</TabsTrigger>
+                  <TabsTrigger value="accounts">Accounts</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="summary">
+                  <FinancialSummaryTab />
+                </TabsContent>
+                
+                <TabsContent value="clearances">
+                  <FinancialClearancesTab />
+                </TabsContent>
+                
+                <TabsContent value="accreditation">
+                  <FinancialAccreditationTab />
+                </TabsContent>
+                
+                <TabsContent value="accounts">
+                  <CommunityAccountsTab />
+                </TabsContent>
+              </Tabs>
+            </div>
           )}
 
           {activeTab === "meetings" && (
@@ -700,18 +713,9 @@ const CommunityProfile = () => {
           )}
 
           {activeTab === "rollcalls" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Roll Calls</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Track member attendance and participation...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Current Roll Call</li>
-                  <li>Attendance History</li>
-                  <li>Member Participation Stats</li>
-                  <li>Absence Tracking</li>
-                </ul>
-              </div>
-            </Card>
+            <div className="mt-6">
+              <RollCallsPage />
+            </div>
           )}
 
           {/* FundRaiser Tabs */}
@@ -806,19 +810,52 @@ const CommunityProfile = () => {
           )}
 
           {activeTab === "resources" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Community Resources</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Access important community documents and resources...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Community ID Cards</li>
-                  <li>Official Letters & Templates</li>
-                  <li>Community Constitution</li>
-                  <li>Journals & Publications</li>
-                  <li>Document Library</li>
-                </ul>
-              </div>
-            </Card>
+            <div className="mt-6">
+              <Card className="p-6">
+                <h2 className="text-2xl font-bold mb-6">Community Resources</h2>
+                <Tabs defaultValue="id-cards" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="id-cards">ID Cards</TabsTrigger>
+                    <TabsTrigger value="letters">Letters</TabsTrigger>
+                    <TabsTrigger value="publications">Publications</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="id-cards" className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Access your community ID card and request new cards
+                    </p>
+                    <Button onClick={() => {
+                      setActiveTab("resources");
+                      toast({ title: "ID Card Feature", description: "View and manage your community ID card" });
+                    }}>
+                      View ID Card Resources
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="letters" className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Request official letters and view your request history
+                    </p>
+                    <Button onClick={() => {
+                      toast({ title: "Official Letters", description: "Access letter templates and request official letters" });
+                    }}>
+                      Request Official Letter
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="publications" className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Browse and download community publications, journals, and constitution
+                    </p>
+                    <Button onClick={() => {
+                      toast({ title: "Publications", description: "Access community publications and documents" });
+                    }}>
+                      Browse Publications
+                    </Button>
+                  </TabsContent>
+                </Tabs>
+              </Card>
+            </div>
           )}
 
           {activeTab === "news" && (
@@ -832,19 +869,9 @@ const CommunityProfile = () => {
           )}
 
           {activeTab === "articles" && (
-            <Card className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Articles</h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p>Community articles and publications...</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                  <li>Featured Articles</li>
-                  <li>Member Contributions</li>
-                  <li>Opinion Pieces</li>
-                  <li>Educational Content</li>
-                  <li>Historical Archives</li>
-                </ul>
-              </div>
-            </Card>
+            <div className="mt-6">
+              <ArticlesPage />
+            </div>
           )}
 
           {activeTab === "events" && (

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { mockFinancialStatus } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
+import { PaymentPlanDialog } from "./PaymentPlanDialog";
 
 interface FinancialStatusDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface FinancialStatusDialogProps {
 export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDialogProps) {
   const { toast } = useToast();
   const [status] = useState(mockFinancialStatus);
+  const [showPaymentPlanDialog, setShowPaymentPlanDialog] = useState(false);
 
   const handleRequestWaiver = () => {
     toast({
@@ -26,10 +28,7 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
   };
 
   const handlePaymentPlan = () => {
-    toast({
-      title: "Payment Plan Options",
-      description: "Payment plan feature will be available soon",
-    });
+    setShowPaymentPlanDialog(true);
   };
 
   const getStandingColor = (standing: string) => {
@@ -58,6 +57,7 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0">
         <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10">
@@ -199,5 +199,13 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
         </ScrollArea>
       </DialogContent>
     </Dialog>
+
+    {/* Payment Plan Dialog */}
+    <PaymentPlanDialog 
+      open={showPaymentPlanDialog} 
+      onOpenChange={setShowPaymentPlanDialog}
+      outstandingBalance={status.outstandingBalance}
+    />
+    </>
   );
 }

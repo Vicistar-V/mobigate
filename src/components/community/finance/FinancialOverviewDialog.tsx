@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { mockWalletData, mockTransactions } from "@/data/financeData";
-import { useToast } from "@/hooks/use-toast";
+import { WalletTopUpDialog } from "./WalletTopUpDialog";
+import { WalletTransferDialog } from "./WalletTransferDialog";
+import { WalletWithdrawDialog } from "./WalletWithdrawDialog";
 
 interface FinancialOverviewDialogProps {
   open: boolean;
@@ -14,32 +16,26 @@ interface FinancialOverviewDialogProps {
 }
 
 export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOverviewDialogProps) {
-  const { toast } = useToast();
   const [walletData] = useState(mockWalletData);
+  const [showTopUpDialog, setShowTopUpDialog] = useState(false);
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
 
   const handleTopUp = () => {
-    toast({
-      title: "Top Up Wallet",
-      description: "Top up feature will be available soon",
-    });
+    setShowTopUpDialog(true);
   };
 
   const handleTransfer = () => {
-    toast({
-      title: "Transfer Funds",
-      description: "Transfer feature will be available soon",
-    });
+    setShowTransferDialog(true);
   };
 
   const handleWithdraw = () => {
-    toast({
-      title: "Withdraw Funds",
-      description: "Withdrawal feature will be available soon",
-    });
+    setShowWithdrawDialog(true);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0">
         <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10">
           <div className="flex items-center justify-between">
@@ -174,5 +170,11 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
         </ScrollArea>
       </DialogContent>
     </Dialog>
+
+    {/* Wallet Action Dialogs */}
+    <WalletTopUpDialog open={showTopUpDialog} onOpenChange={setShowTopUpDialog} />
+    <WalletTransferDialog open={showTransferDialog} onOpenChange={setShowTransferDialog} />
+    <WalletWithdrawDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog} />
+    </>
   );
 }
