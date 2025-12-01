@@ -22,12 +22,14 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { articles } from "@/data/articlesData";
+import { CommentSectionDialog } from "@/components/community/CommentSectionDialog";
 
 export const ArticlesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<typeof articles[0] | null>(null);
   const [showArticleDialog, setShowArticleDialog] = useState(false);
+  const [commentArticleId, setCommentArticleId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const categories = ["all", ...Array.from(new Set(articles.map((a) => a.category)))];
@@ -56,10 +58,7 @@ export const ArticlesPage = () => {
   };
 
   const handleComment = (articleId: string) => {
-    toast({
-      title: "Comments",
-      description: "Comment feature coming soon!",
-    });
+    setCommentArticleId(articleId);
   };
 
   const handleShare = (articleId: string) => {
@@ -309,6 +308,14 @@ export const ArticlesPage = () => {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      {/* Comment Dialog */}
+      <CommentSectionDialog
+        open={commentArticleId !== null}
+        onOpenChange={(open) => !open && setCommentArticleId(null)}
+        title="Article Comments"
+        contextId={commentArticleId || ""}
+      />
     </>
   );
 };

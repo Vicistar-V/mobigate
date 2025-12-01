@@ -85,10 +85,7 @@ export const ElectionOpinionsTab = () => {
   };
 
   const handleComment = (opinionId: string) => {
-    toast({
-      title: "Comments",
-      description: "Comment feature coming soon!",
-    });
+    setCommentOpinionId(opinionId);
   };
 
   const handleShare = (opinionId: string) => {
@@ -251,6 +248,14 @@ export const ElectionOpinionsTab = () => {
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
+
+      {/* Comment Dialog */}
+      <CommentSectionDialog
+        open={commentOpinionId !== null}
+        onOpenChange={(open) => !open && setCommentOpinionId(null)}
+        title="Comments"
+        contextId={commentOpinionId || ""}
+      />
     </div>
   );
 };
