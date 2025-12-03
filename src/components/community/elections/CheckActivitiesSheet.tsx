@@ -1,22 +1,24 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { penaltyTiers, mockIndebtednessItems } from "@/data/financialData";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 interface CheckActivitiesSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const CheckActivitiesSheet = ({ open, onOpenChange }: CheckActivitiesSheetProps) => {
+const ActivitiesContent = () => {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[90vh]">
-        <SheetHeader>
-          <SheetTitle className="text-xl font-bold">Check All Activities Index [=&gt; 60%]:</SheetTitle>
-        </SheetHeader>
-        
-        <ScrollArea className="h-[calc(90vh-80px)] mt-4">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-4 pt-4 pb-2 flex-shrink-0">
+        <h2 className="text-xl font-bold">Check All Activities Index [=&gt; 60%]:</h2>
+      </div>
+      
+      <ScrollArea className="flex-1 px-4">
+        <div className="pb-6">
           {/* Meetings Attendance Section */}
           <div className="py-4 border-b">
             <h3 className="font-bold text-lg mb-2">
@@ -107,11 +109,33 @@ export const CheckActivitiesSheet = ({ open, onOpenChange }: CheckActivitiesShee
           </div>
           
           {/* Get Accreditation Now button */}
-          <Button className="w-full bg-green-600 hover:bg-green-700 mt-8 text-lg font-bold py-6 mb-6">
+          <Button className="w-full bg-green-600 hover:bg-green-700 mt-8 text-lg font-bold py-6">
             'Get Accreditation Now!'
           </Button>
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+};
+
+export const CheckActivitiesSheet = ({ open, onOpenChange }: CheckActivitiesSheetProps) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[90vh] overflow-hidden">
+          <ActivitiesContent />
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[85vh] overflow-hidden p-0">
+        <ActivitiesContent />
+      </DialogContent>
+    </Dialog>
   );
 };

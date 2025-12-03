@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { MoreVertical, Video, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MeetingVideoGrid } from "./meetings/MeetingVideoGrid";
@@ -13,6 +12,9 @@ import { MeetingChatPanel } from "./meetings/MeetingChatPanel";
 import { PreviousMeetingsList } from "./meetings/PreviousMeetingsList";
 import { UpcomingSchedulesList } from "./meetings/UpcomingSchedulesList";
 import { PremiumAdCard } from "@/components/PremiumAdCard";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
   mockMeetings,
   mockUpcomingMeetings,
@@ -28,6 +30,7 @@ type MeetingType = "executive" | "general";
 
 export const CommunityMeetingsTab = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [meetingView, setMeetingView] = useState<MeetingView>("lobby");
   const [selectedMeetingType, setSelectedMeetingType] = useState<MeetingType>("general");
   const [isMeetingActive, setIsMeetingActive] = useState(true);
@@ -120,6 +123,16 @@ export const CommunityMeetingsTab = () => {
       description: item.name,
     });
   };
+
+  const ChatPanelContent = () => (
+    <div className="h-full overflow-hidden">
+      <MeetingChatPanel
+        messages={chatMessages}
+        onSendMessage={handleSendMessage}
+        onDownloadChat={handleDownloadChat}
+      />
+    </div>
+  );
 
   return (
     <div className="w-full">
@@ -273,16 +286,20 @@ export const CommunityMeetingsTab = () => {
                 onSelectParticipant={handleSelectParticipant}
               />
 
-              {/* Chat Panel Sheet */}
-              <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
-                <SheetContent side="bottom" className="h-[80vh]">
-                  <MeetingChatPanel
-                    messages={chatMessages}
-                    onSendMessage={handleSendMessage}
-                    onDownloadChat={handleDownloadChat}
-                  />
-                </SheetContent>
-              </Sheet>
+              {/* Chat Panel - Drawer on mobile, Dialog on desktop */}
+              {isMobile ? (
+                <Drawer open={isChatOpen} onOpenChange={setIsChatOpen}>
+                  <DrawerContent className="h-[80vh] overflow-hidden">
+                    <ChatPanelContent />
+                  </DrawerContent>
+                </Drawer>
+              ) : (
+                <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+                  <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden p-0">
+                    <ChatPanelContent />
+                  </DialogContent>
+                </Dialog>
+              )}
             </>
           )}
         </div>

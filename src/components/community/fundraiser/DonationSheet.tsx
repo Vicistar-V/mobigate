@@ -1,17 +1,15 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { FundRaiserCampaign, currencyRates } from "@/data/fundraiserData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { DollarSign } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 interface DonationSheetProps {
   open: boolean;
@@ -19,18 +17,17 @@ interface DonationSheetProps {
   campaign: FundRaiserCampaign | null;
 }
 
-export const DonationSheet = ({
-  open,
-  onOpenChange,
-  campaign,
-}: DonationSheetProps) => {
+interface DonationContentProps {
+  campaign: FundRaiserCampaign;
+  onOpenChange: (open: boolean) => void;
+}
+
+const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<'USD' | 'MOBI'>('USD');
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const { toast } = useToast();
-
-  if (!campaign) return null;
 
   const getConvertedAmount = () => {
     const amt = parseFloat(amount) || 0;
@@ -65,13 +62,13 @@ export const DonationSheet = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[90vh]">
-        <SheetHeader>
-          <SheetTitle>Make a Donation</SheetTitle>
-        </SheetHeader>
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-4 pt-4 pb-2 flex-shrink-0">
+        <h2 className="text-lg font-semibold">Make a Donation</h2>
+      </div>
 
-        <div className="space-y-6 py-6 overflow-y-auto h-[calc(90vh-80px)]">
+      <ScrollArea className="flex-1 px-4">
+        <div className="space-y-6 pb-6">
           {/* Campaign Info */}
           <div className="bg-muted p-4 rounded-lg">
             <h3 className="font-bold mb-2">{campaign.theme}</h3>
@@ -169,7 +166,35 @@ export const DonationSheet = ({
             Your donation is secure and will be processed immediately
           </p>
         </div>
-      </SheetContent>
-    </Sheet>
+      </ScrollArea>
+    </div>
+  );
+};
+
+export const DonationSheet = ({
+  open,
+  onOpenChange,
+  campaign,
+}: DonationSheetProps) => {
+  const isMobile = useIsMobile();
+
+  if (!campaign) return null;
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[90vh] overflow-hidden">
+          <DonationContent campaign={campaign} onOpenChange={onOpenChange} />
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[85vh] overflow-hidden p-0">
+        <DonationContent campaign={campaign} onOpenChange={onOpenChange} />
+      </DialogContent>
+    </Dialog>
   );
 };

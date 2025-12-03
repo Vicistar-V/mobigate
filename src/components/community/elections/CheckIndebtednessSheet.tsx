@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockIndebtednessItems } from "@/data/financialData";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 interface CheckIndebtednessSheetProps {
   open: boolean;
@@ -15,8 +15,8 @@ const IndebtednessContent = () => {
   const totalWithPenalty = mockIndebtednessItems.reduce((sum, item) => sum + item.totalWithPenalty, 0);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-4 pt-4 pb-2">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-4 pt-4 pb-2 flex-shrink-0">
         <h2 className="text-xl font-bold">Check Total Financial Indebtedness:</h2>
         <p className="text-sm text-muted-foreground">
           - - Penalty: +20% of Indebtedness.
@@ -24,60 +24,62 @@ const IndebtednessContent = () => {
       </div>
       
       <ScrollArea className="flex-1 px-4">
-        {/* Numbered list of indebtedness items */}
-        <div className="space-y-3 py-4">
-          {mockIndebtednessItems.map((item, index) => (
-            <div key={item.id} className="flex justify-between items-start gap-4">
-              <span className="text-sm flex-1">
-                {index + 1}. <span className="text-blue-600 underline cursor-pointer hover:text-blue-800">{item.name}</span>
-              </span>
-              <span className="font-semibold text-sm whitespace-nowrap">
-                = ₦{item.amount.toLocaleString()}.{' '}
-                <span className="text-blue-600 cursor-pointer hover:text-blue-800">Details</span>
-              </span>
-            </div>
-          ))}
-        </div>
+        <div className="pb-6">
+          {/* Numbered list of indebtedness items */}
+          <div className="space-y-3 py-4">
+            {mockIndebtednessItems.map((item, index) => (
+              <div key={item.id} className="flex justify-between items-start gap-4">
+                <span className="text-sm flex-1">
+                  {index + 1}. <span className="text-blue-600 underline cursor-pointer hover:text-blue-800">{item.name}</span>
+                </span>
+                <span className="font-semibold text-sm whitespace-nowrap">
+                  = ₦{item.amount.toLocaleString()}.{' '}
+                  <span className="text-blue-600 cursor-pointer hover:text-blue-800">Details</span>
+                </span>
+              </div>
+            ))}
+          </div>
 
-        {/* Total Summary */}
-        <div className="mt-6 p-4 bg-gray-100 rounded-lg space-y-2">
-          <div className="flex justify-between font-semibold">
-            <span>Total Indebtedness:</span>
-            <span>₦{totalIndebtedness.toLocaleString()}</span>
+          {/* Total Summary */}
+          <div className="mt-6 p-4 bg-muted rounded-lg space-y-2">
+            <div className="flex justify-between font-semibold">
+              <span>Total Indebtedness:</span>
+              <span>₦{totalIndebtedness.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-destructive font-semibold">
+              <span>Penalty (20%):</span>
+              <span>₦{(totalWithPenalty - totalIndebtedness).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold border-t-2 border-foreground pt-2">
+              <span>Total Amount Due:</span>
+              <span>₦{totalWithPenalty.toLocaleString()}</span>
+            </div>
           </div>
-          <div className="flex justify-between text-red-600 font-semibold">
-            <span>Penalty (20%):</span>
-            <span>₦{(totalWithPenalty - totalIndebtedness).toLocaleString()}</span>
+          
+          {/* Debts Clearance Now explanation */}
+          <div className="mt-8 space-y-4">
+            <h3 className="text-xl font-bold">'Debts Clearance Now'</h3>
+            <p className="text-sm leading-relaxed">
+              Clicking on this Button will do the following:
+            </p>
+            <ol className="list-decimal pl-5 space-y-3 text-sm leading-relaxed">
+              <li>
+                Pull out funds from <strong>Members' User Wallet</strong> to pay off Member's any outstanding Debts to the Community.
+              </li>
+              <li>
+                If the <strong>Wallet Balance</strong> is insufficient, it will still pull out whatever amount that's in it; and this will reduce the Member's total indebtedness by that amount so-pulled out from the <strong>Member's Wallet</strong>. Remaining <strong>Indebted Balance</strong> will automatically be calculated and noted.
+              </li>
+            </ol>
+            <p className="text-sm mt-4 leading-relaxed">
+              The <strong>System</strong> should send a <strong>Request</strong> to the <strong>Member</strong> to <strong>'Fund Wallet'</strong> adequately to proceed with the <strong>Account Clearance</strong> and <strong>Voter Accreditation Process</strong>.
+            </p>
           </div>
-          <div className="flex justify-between text-lg font-bold border-t-2 border-black pt-2">
-            <span>Total Amount Due:</span>
-            <span>₦{totalWithPenalty.toLocaleString()}</span>
-          </div>
+          
+          {/* Get Accreditation Now button */}
+          <Button className="w-full bg-green-600 hover:bg-green-700 mt-8 text-lg font-bold py-6">
+            'Get Accreditation Now!'
+          </Button>
         </div>
-        
-        {/* Debts Clearance Now explanation */}
-        <div className="mt-8 space-y-4">
-          <h3 className="text-xl font-bold">'Debts Clearance Now'</h3>
-          <p className="text-sm leading-relaxed">
-            Clicking on this Button will do the following:
-          </p>
-          <ol className="list-decimal pl-5 space-y-3 text-sm leading-relaxed">
-            <li>
-              Pull out funds from <strong>Members' User Wallet</strong> to pay off Member's any outstanding Debts to the Community.
-            </li>
-            <li>
-              If the <strong>Wallet Balance</strong> is insufficient, it will still pull out whatever amount that's in it; and this will reduce the Member's total indebtedness by that amount so-pulled out from the <strong>Member's Wallet</strong>. Remaining <strong>Indebted Balance</strong> will automatically be calculated and noted.
-            </li>
-          </ol>
-          <p className="text-sm mt-4 leading-relaxed">
-            The <strong>System</strong> should send a <strong>Request</strong> to the <strong>Member</strong> to <strong>'Fund Wallet'</strong> adequately to proceed with the <strong>Account Clearance</strong> and <strong>Voter Accreditation Process</strong>.
-          </p>
-        </div>
-        
-        {/* Get Accreditation Now button */}
-        <Button className="w-full bg-green-600 hover:bg-green-700 mt-8 mb-6 text-lg font-bold py-6">
-          'Get Accreditation Now!'
-        </Button>
       </ScrollArea>
     </div>
   );
@@ -89,7 +91,7 @@ export const CheckIndebtednessSheet = ({ open, onOpenChange }: CheckIndebtedness
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh]">
+        <DrawerContent className="h-[90vh] overflow-hidden">
           <IndebtednessContent />
         </DrawerContent>
       </Drawer>

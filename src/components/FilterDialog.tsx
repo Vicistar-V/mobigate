@@ -1,18 +1,12 @@
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-} from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 
 interface FilterOption {
   value: string;
@@ -28,6 +22,30 @@ interface FilterDialogProps {
   triggerLabel?: string;
 }
 
+const FilterContent = ({
+  options,
+  selectedValue,
+  onValueChange,
+}: {
+  options: FilterOption[];
+  selectedValue: string;
+  onValueChange: (value: string) => void;
+}) => (
+  <div className="space-y-3 py-4 px-4">
+    <Label>Filter Options</Label>
+    <RadioGroup value={selectedValue} onValueChange={onValueChange}>
+      {options.map((option) => (
+        <div key={option.value} className="flex items-center space-x-2">
+          <RadioGroupItem value={option.value} id={option.value} />
+          <Label htmlFor={option.value} className="font-normal cursor-pointer">
+            {option.label}
+          </Label>
+        </div>
+      ))}
+    </RadioGroup>
+  </div>
+);
+
 export const FilterDialog = ({
   title = "Filter Options",
   description = "Choose how you want to filter the content.",
@@ -37,6 +55,7 @@ export const FilterDialog = ({
   triggerLabel = "Filter",
 }: FilterDialogProps) => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState(defaultValue);
 
@@ -49,41 +68,62 @@ export const FilterDialog = ({
     setOpen(false);
   };
 
+  const TriggerButton = (
+    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setOpen(true)}>
+      <SlidersHorizontal className="w-3 h-3" />
+      {triggerLabel}
+    </Button>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        {TriggerButton}
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="h-auto">
+            <DrawerHeader className="text-left">
+              <DrawerTitle>{title}</DrawerTitle>
+              <DrawerDescription>{description}</DrawerDescription>
+            </DrawerHeader>
+            <FilterContent
+              options={options}
+              selectedValue={selectedValue}
+              onValueChange={setSelectedValue}
+            />
+            <DrawerFooter className="flex-row gap-3 pt-2">
+              <Button variant="outline" onClick={() => setOpen(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={handleApply} className="flex-1">Apply Filter</Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      </>
+    );
+  }
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <SlidersHorizontal className="w-3 h-3" />
-          {triggerLabel}
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="bottom" className="h-auto">
-        <SheetHeader>
-          <SheetTitle>{title}</SheetTitle>
-          <SheetDescription>{description}</SheetDescription>
-        </SheetHeader>
-        <div className="space-y-6 py-6">
-          <div className="space-y-3">
-            <Label>Filter Options</Label>
-            <RadioGroup value={selectedValue} onValueChange={setSelectedValue}>
-              {options.map((option) => (
-                <div key={option.value} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option.value} id={option.value} />
-                  <Label htmlFor={option.value} className="font-normal cursor-pointer">
-                    {option.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
-        </div>
-        <SheetFooter className="flex gap-3">
-          <Button variant="outline" onClick={() => setOpen(false)} className="flex-1">
-            Cancel
-          </Button>
-          <Button onClick={handleApply} className="flex-1">Apply Filter</Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+    <>
+      {TriggerButton}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </DialogHeader>
+          <FilterContent
+            options={options}
+            selectedValue={selectedValue}
+            onValueChange={setSelectedValue}
+          />
+          <DialogFooter className="flex gap-3 sm:flex-row">
+            <Button variant="outline" onClick={() => setOpen(false)} className="flex-1">
+              Cancel
+            </Button>
+            <Button onClick={handleApply} className="flex-1">Apply Filter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

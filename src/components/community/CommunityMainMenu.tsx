@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Accordion,
   AccordionContent,
@@ -35,6 +29,10 @@ import { CommunityResourcesDialog } from "./CommunityResourcesDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+
 interface CommunityMainMenuProps {
   isOwner?: boolean;
   isAdmin?: boolean;
@@ -50,6 +48,7 @@ export function CommunityMainMenu({
 }: CommunityMainMenuProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { communityId } = useParams<{ communityId: string }>();
   const [open, setOpen] = useState(false);
   const [showGuestLogin, setShowGuestLogin] = useState(false);
@@ -76,23 +75,20 @@ export function CommunityMainMenu({
     
     setOpen(false);
     
-    // Navigate based on role
     if (role === "guest" || role === "member") {
-      onNavigate("status"); // Navigate to community home
+      onNavigate("status");
     } else if (role === "admin") {
-      onNavigate("administration"); // Navigate to admin dashboard
+      onNavigate("administration");
     }
   };
 
   const handleMenuClick = (action: string, isNavigable?: boolean) => {
-    // Handle join community
     if (action === "Join Community") {
       setShowJoinCommunity(true);
       setOpen(false);
       return;
     }
     
-    // Handle login dialogs
     if (action === "E-Mail Login") {
       setShowGuestLogin(true);
       setOpen(false);
@@ -109,7 +105,6 @@ export function CommunityMainMenu({
       return;
     }
 
-    // Handle new membership dialogs
     if (action === "Chat Members") {
       setShowChatMembers(true);
       setOpen(false);
@@ -141,7 +136,6 @@ export function CommunityMainMenu({
       return;
     }
 
-    // Handle finance dialogs
     if (action === "Financial Overview/Wallet") {
       setShowFinancialOverview(true);
       setOpen(false);
@@ -163,14 +157,12 @@ export function CommunityMainMenu({
       return;
     }
 
-    // Handle constitution and resources
     if (action === "View Constitution") {
       setShowConstitution(true);
       setOpen(false);
       return;
     }
 
-    // Handle mobi-merchant
     if (action === "Create Mobi Quiz-Games") {
       setShowQuizCreation(true);
       setOpen(false);
@@ -182,7 +174,6 @@ export function CommunityMainMenu({
       return;
     }
 
-    // Handle navigation to hidden tabs
     if (action === "Articles") {
       if (onNavigate) onNavigate("articles");
       setOpen(false);
@@ -199,7 +190,6 @@ export function CommunityMainMenu({
       return;
     }
 
-    // Handle admin actions
     if (action === "Admin Logout") {
       toast({
         title: "Logged Out",
@@ -209,12 +199,10 @@ export function CommunityMainMenu({
       return;
     }
 
-    // Handle navigation
     if (isNavigable && onNavigate) {
       onNavigate(action);
       setOpen(false);
     } else {
-      // More specific message for truly unimplemented features
       toast({
         title: "Feature Not Available",
         description: `"${action}" feature is currently under development`,
@@ -223,20 +211,15 @@ export function CommunityMainMenu({
     }
   };
 
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreVertical className="h-4 w-4" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="bottom" className="h-[85vh] p-0">
-        <SheetHeader className="px-6 py-4 border-b">
-          <SheetTitle>Community Menu</SheetTitle>
-        </SheetHeader>
-        
-        <div className="overflow-y-auto h-[calc(85vh-73px)]">
-          {/* Direct Menu Items - Articles, News Info, Events */}
+  const MenuContent = () => (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-6 py-4 border-b flex-shrink-0">
+        <h2 className="text-lg font-semibold">Community Menu</h2>
+      </div>
+      
+      <ScrollArea className="flex-1">
+        <div className="pb-6">
+          {/* Direct Menu Items */}
           <div className="px-4 py-2 space-y-1">
             <Button
               variant="ghost"
@@ -271,7 +254,6 @@ export function CommunityMainMenu({
           <Separator className="my-2" />
 
           <Accordion type="multiple" className="w-full px-4">
-
             {/* Guests Section */}
             <AccordionItem value="guests">
               <AccordionTrigger className="text-base">Guests</AccordionTrigger>
@@ -305,7 +287,6 @@ export function CommunityMainMenu({
                   Login/Logout
                 </Button>
                 
-                {/* Nested accordion for Exit Community */}
                 <Accordion type="multiple" className="pl-2 mt-1">
                   <AccordionItem value="exit-community" className="border-none">
                     <AccordionTrigger className="text-sm py-2">Exit Community</AccordionTrigger>
@@ -327,7 +308,6 @@ export function CommunityMainMenu({
             <AccordionItem value="membership">
               <AccordionTrigger className="text-base font-semibold">MEMBERSHIP</AccordionTrigger>
               <AccordionContent>
-                {/* Nested accordion for View Members */}
                 <Accordion type="multiple" className="pl-2">
                   <AccordionItem value="view-members" className="border-none">
                     <AccordionTrigger className="text-sm py-2">View Members</AccordionTrigger>
@@ -364,7 +344,6 @@ export function CommunityMainMenu({
                   </AccordionItem>
                 </Accordion>
                 
-                {/* Single item: Add Friends */}
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-2 mt-1"
@@ -373,7 +352,6 @@ export function CommunityMainMenu({
                   Add Friends
                 </Button>
                 
-                {/* Nested accordion for Invite Members */}
                 <Accordion type="multiple" className="pl-2 mt-1">
                   <AccordionItem value="invite-members" className="border-none">
                     <AccordionTrigger className="text-sm py-2">Invite Members</AccordionTrigger>
@@ -398,7 +376,7 @@ export function CommunityMainMenu({
               </AccordionContent>
             </AccordionItem>
 
-            {/* Admins Section - Only show if user is admin */}
+            {/* Admins Section */}
             {(isAdmin || isOwner) && (
               <AccordionItem value="admins">
                 <AccordionTrigger className="text-base">Admins</AccordionTrigger>
@@ -568,14 +546,13 @@ export function CommunityMainMenu({
 
           <Separator className="my-2" />
 
-          {/* Community Meetings - Expanded Accordion */}
+          {/* Community Meetings */}
           <Accordion type="multiple" className="w-full px-4">
             <AccordionItem value="meetings-main">
             <AccordionTrigger className="text-base font-semibold">
               Community Meetings
             </AccordionTrigger>
             <AccordionContent>
-              {/* Recent Meetings Sub-Accordion */}
               <Accordion type="multiple" className="pl-2">
                 <AccordionItem value="recent-meetings" className="border-none">
                   <AccordionTrigger className="text-sm py-2">
@@ -641,7 +618,6 @@ export function CommunityMainMenu({
                   </AccordionContent>
                 </AccordionItem>
 
-                {/* Previous Meetings Sub-Accordion */}
                 <AccordionItem value="previous-meetings" className="border-none">
                   <AccordionTrigger className="text-sm py-2">
                     + Previous Meetings
@@ -707,7 +683,6 @@ export function CommunityMainMenu({
                 </AccordionItem>
               </Accordion>
 
-              {/* Live Meeting Button */}
               <Button
                 variant="ghost"
                 className="w-full justify-start pl-2 mt-2"
@@ -719,7 +694,7 @@ export function CommunityMainMenu({
           </AccordionItem>
           </Accordion>
 
-          {/* Roll-Calls (kept as single item) */}
+          {/* Roll-Calls */}
           <div className="px-4 mt-2">
             <Button
               variant="ghost"
@@ -866,7 +841,29 @@ export function CommunityMainMenu({
             </Button>
           </div>
         </div>
-      </SheetContent>
+      </ScrollArea>
+    </div>
+  );
+
+  return (
+    <>
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setOpen(true)}>
+        <MoreVertical className="h-4 w-4" />
+      </Button>
+
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="h-[85vh] overflow-hidden">
+            <MenuContent />
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-md max-h-[85vh] overflow-hidden p-0">
+            <MenuContent />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Login Dialogs */}
       <GuestLoginDialog
@@ -912,6 +909,6 @@ export function CommunityMainMenu({
         open={showJoinCommunity} 
         onOpenChange={setShowJoinCommunity}
       />
-    </Sheet>
+    </>
   );
 }
