@@ -33,6 +33,10 @@ export const FundRaiserViewDonorsTab = () => {
     switch (sortBy) {
       case "amount":
         return b.amount - a.amount;
+      case "lowest":
+        return a.amount - b.amount;
+      case "oldest":
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
       case "recent":
       default:
         return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -68,7 +72,9 @@ export const FundRaiserViewDonorsTab = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
               <SelectItem value="amount">Highest Amount</SelectItem>
+              <SelectItem value="lowest">Lowest Amount</SelectItem>
             </SelectContent>
           </Select>
         </div>
