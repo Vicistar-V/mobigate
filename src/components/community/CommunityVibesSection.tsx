@@ -14,6 +14,7 @@ import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { mockVibesData, VibeItem } from "@/data/communityVibesData";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ViewToggleButton, ViewMode } from "@/components/ui/ViewToggleButton";
 
 // Mock community members for invite carousel
 import profile1 from "@/assets/community-person-1.jpg";
@@ -82,6 +83,7 @@ export const CommunityVibesSection = ({
   const [selectedVibe, setSelectedVibe] = useState<VibeItem | null>(null);
   const [isVibeDialogOpen, setIsVibeDialogOpen] = useState(false);
   const [inviteStatus, setInviteStatus] = useState<Record<string, boolean>>({});
+  const [inviteViewMode, setInviteViewMode] = useState<ViewMode>("carousel");
 
   const canPost = isOwner || isAdmin;
 
@@ -132,48 +134,80 @@ export const CommunityVibesSection = ({
 
       {/* 2. Invite Someone to Community */}
       <section className="space-y-4">
-        <h2 className="text-lg sm:text-xl font-semibold">Invite Someone to Community</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-semibold">Invite Someone to Community</h2>
+          <ViewToggleButton view={inviteViewMode} onViewChange={setInviteViewMode} />
+        </div>
         <div className="relative">
-          <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-            {membersToInvite.map((member) => (
-              <Card 
-                key={member.id} 
-                className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 space-y-3 hover:shadow-lg transition-shadow"
-              >
-                {/* Avatar */}
-                <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
-                  <Avatar className="w-full h-full border-2 border-primary/20">
-                    <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                </div>
-
-                {/* Name */}
-                <h3 className="text-sm font-semibold text-center line-clamp-2 min-h-[2.5rem]">
-                  {member.name}
-                </h3>
-
-                {/* Mutual Friends */}
-                <p className="text-xs text-muted-foreground text-center">
-                  {member.mutualFriends} mutual friends
-                </p>
-
-                {/* Invite Button */}
-                <Button
-                  size="sm"
-                  onClick={() => handleInvite(member.id, member.name)}
-                  disabled={inviteStatus[member.id]}
-                  className={cn(
-                    "w-full gap-2 transition-all",
-                    inviteStatus[member.id] && "bg-green-600 hover:bg-green-700"
-                  )}
+          {inviteViewMode === "carousel" ? (
+            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              {membersToInvite.map((member) => (
+                <Card 
+                  key={member.id} 
+                  className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 space-y-3 hover:shadow-lg transition-shadow"
                 >
-                  <UserPlus className="w-4 h-4" />
-                  {inviteStatus[member.id] ? "INVITED" : "INVITE"}
-                </Button>
-              </Card>
-            ))}
-          </div>
+                  <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
+                    <Avatar className="w-full h-full border-2 border-primary/20">
+                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <h3 className="text-sm font-semibold text-center line-clamp-2 min-h-[2.5rem]">
+                    {member.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    {member.mutualFriends} mutual friends
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => handleInvite(member.id, member.name)}
+                    disabled={inviteStatus[member.id]}
+                    className={cn(
+                      "w-full gap-2 transition-all",
+                      inviteStatus[member.id] && "bg-green-600 hover:bg-green-700"
+                    )}
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    {inviteStatus[member.id] ? "INVITED" : "INVITE"}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {membersToInvite.map((member) => (
+                <Card 
+                  key={member.id} 
+                  className="p-3 space-y-3 hover:shadow-lg transition-shadow"
+                >
+                  <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20">
+                    <Avatar className="w-full h-full border-2 border-primary/20">
+                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-semibold text-center line-clamp-2 min-h-[2rem]">
+                    {member.name}
+                  </h3>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
+                    {member.mutualFriends} mutual friends
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => handleInvite(member.id, member.name)}
+                    disabled={inviteStatus[member.id]}
+                    className={cn(
+                      "w-full gap-1 text-xs transition-all",
+                      inviteStatus[member.id] && "bg-green-600 hover:bg-green-700"
+                    )}
+                  >
+                    <UserPlus className="w-3 h-3" />
+                    {inviteStatus[member.id] ? "INVITED" : "INVITE"}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
