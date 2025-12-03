@@ -479,51 +479,55 @@ export const ExecutiveDetailSheet = ({
 
             <Separator className="my-4" />
 
-            {/* Action Buttons - Hide some for own profile */}
+            {/* Action Buttons - Hide for own profile */}
             {!isOwn && (
-              <div className="grid grid-cols-3 gap-2 pt-2">
-                <Button
-                  variant={
-                    member.isFriend || requestSent ? "secondary" : "default"
-                  }
-                  size="sm"
-                  className="w-full"
-                  onClick={handleAddFriend}
-                  disabled={member.isFriend || requestSent}
-                >
-                  {member.isFriend ? (
-                    <>
-                      <UserCheck className="h-3.5 w-3.5 mr-1" />
-                      <span className="text-xs">Friends</span>
-                    </>
-                  ) : requestSent ? (
-                    <>
-                      <UserCheck className="h-3.5 w-3.5 mr-1" />
-                      <span className="text-xs">Sent</span>
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="h-3.5 w-3.5 mr-1" />
-                      <span className="text-xs">Add Friend</span>
-                    </>
-                  )}
-                </Button>
+              <div className="flex flex-col gap-3 pt-4 pb-2">
+                {/* First row: Add Friend + Follow */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant={member.isFriend || requestSent ? "secondary" : "default"}
+                    className="w-full h-11"
+                    onClick={handleAddFriend}
+                    disabled={member.isFriend || requestSent}
+                  >
+                    {member.isFriend ? (
+                      <>
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Friends</span>
+                      </>
+                    ) : requestSent ? (
+                      <>
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Sent</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Add Friend</span>
+                      </>
+                    )}
+                  </Button>
 
-                <Button
-                  variant={isFollowing ? "secondary" : "default"}
-                  size="sm"
-                  className="w-full"
-                  onClick={handleFollow}
-                >
-                  <UserCheck className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">
-                    {isFollowing ? "Following" : "Follow"}
-                  </span>
-                </Button>
+                  <Button
+                    variant={isFollowing ? "secondary" : "default"}
+                    className="w-full h-11"
+                    onClick={handleFollow}
+                  >
+                    <UserCheck className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-medium">
+                      {isFollowing ? "Following" : "Follow"}
+                    </span>
+                  </Button>
+                </div>
 
-                <Button variant="outline" size="sm" className="w-full" onClick={handleAddToCircle}>
-                  <Users className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">Circle</span>
+                {/* Second row: Add to Circle - full width */}
+                <Button 
+                  variant="outline" 
+                  className="w-full h-11" 
+                  onClick={handleAddToCircle}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  <span className="text-sm font-medium">Add to Circle</span>
                 </Button>
               </div>
             )}
