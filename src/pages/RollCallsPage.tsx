@@ -191,15 +191,15 @@ export const RollCallsPage = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-2">
-                <Button onClick={() => setShowMarkDialog(true)} className="flex-1">
+              <div className="flex flex-col gap-2">
+                <Button onClick={() => setShowMarkDialog(true)} className="w-full">
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Mark Attendance
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setShowAbsenceDialog(true)}
-                  className="flex-1"
+                  className="w-full"
                 >
                   <XCircle className="h-4 w-4 mr-2" />
                   Report Absence
