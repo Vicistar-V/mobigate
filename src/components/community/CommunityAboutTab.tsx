@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CommunityProfile } from "@/types/community";
+import { getCommunityTier, getTierRange } from "@/lib/communityTierUtils";
 
 interface CommunityAboutTabProps {
   community: CommunityProfile;
@@ -123,13 +124,18 @@ export function CommunityAboutTab({ community }: CommunityAboutTabProps) {
         <InfoRow value={formatDate(community.createdAt)} />
       </Card>
 
-      {/* Designations */}
-      {community.designation && (
-        <Card className="p-4">
-          <AboutSectionHeader icon={Award} title="Designations" />
-          <InfoRow value={community.designation} />
-        </Card>
-      )}
+      {/* Designations - System Assigned based on member count */}
+      <Card className="p-4">
+        <AboutSectionHeader icon={Award} title="Designations" />
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-foreground">
+            {getCommunityTier(community.memberCount)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            ({getTierRange(getCommunityTier(community.memberCount))})
+          </p>
+        </div>
+      </Card>
 
       {/* Location */}
       <Card className="p-4">

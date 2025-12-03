@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { CommunityFormData, CommunityInterest } from "@/types/communityForm";
 import { classificationOptions, categoryOptions } from "@/data/communityFormOptions";
 import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
 
 interface ClassificationSectionProps {
   formData: CommunityFormData;
@@ -82,19 +83,18 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="designation" className="text-sm font-medium">
-          Designation <span className="text-destructive">*</span>
+        <Label className="text-sm font-medium">
+          Designation
         </Label>
-        <Input
-          id="designation"
-          value={formData.designation}
-          onChange={(e) => updateField("designation", e.target.value)}
-          placeholder="Enter community designation"
-          className={cn("h-11", errors.designation && "border-destructive focus-visible:ring-destructive")}
-        />
-        {errors.designation && (
-          <p className="text-xs text-destructive">{errors.designation}</p>
-        )}
+        <div className="bg-muted rounded-md px-3 py-2 h-11 flex items-center">
+          <span className="text-sm text-muted-foreground">System Assigned Automatically</span>
+        </div>
+        <div className="flex items-start gap-1.5 mt-1">
+          <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            Community designation is automatically assigned based on member count (Tier-1 to Tier-10)
+          </p>
+        </div>
       </div>
 
       <div className="space-y-2">
