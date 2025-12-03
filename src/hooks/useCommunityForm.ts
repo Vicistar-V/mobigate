@@ -123,9 +123,7 @@ export function useCommunityForm() {
         if (!formData.category) {
           newErrors.category = "Category is required";
         }
-        if (!formData.designation.trim()) {
-          newErrors.designation = "Designation is required";
-        }
+        // Designation is now system-assigned, no validation needed
         break;
 
       case 2: // Structure
@@ -159,7 +157,7 @@ export function useCommunityForm() {
         if (!formData.name.trim()) stepErrors.push("Community name is required");
         if (!formData.classification) stepErrors.push("Classification is required");
         if (!formData.category) stepErrors.push("Category is required");
-        if (!formData.designation.trim()) stepErrors.push("Designation is required");
+        // Designation is system-assigned, no validation needed
         break;
 
       case 2:
@@ -200,9 +198,7 @@ export function useCommunityForm() {
     if (!formData.category) {
       newErrors.category = "Category is required";
     }
-    if (!formData.designation.trim()) {
-      newErrors.designation = "Designation is required";
-    }
+    // Designation is system-assigned based on member count, no validation needed
     if (!formData.leadershipStyle) {
       newErrors.leadershipStyle = "Leadership style is required";
     }
