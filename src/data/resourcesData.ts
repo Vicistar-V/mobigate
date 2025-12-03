@@ -10,6 +10,29 @@ export interface CommunityIDCard {
   cardNumber: string;
 }
 
+export interface IDCardRequest {
+  id: string;
+  memberId: string;
+  memberName: string;
+  memberPhoto: string;
+  requestDate: Date;
+  status: "pending" | "approved" | "rejected" | "issued";
+  requestType: "new" | "renewal" | "replacement";
+  processedBy?: string;
+  processedDate?: Date;
+  notes?: string;
+}
+
+export interface ResourceManager {
+  id: string;
+  userId: string;
+  name: string;
+  photo: string;
+  role: "id_cards" | "letters" | "publications" | "all";
+  assignedDate: Date;
+  assignedBy: string;
+}
+
 export interface LetterTemplate {
   id: string;
   title: string;
@@ -243,5 +266,81 @@ export const publications: Publication[] = [
     fileSize: "8.9 MB",
     downloadUrl: "#",
     featured: false
+  }
+];
+
+export const mockIDCardRequests: IDCardRequest[] = [
+  {
+    id: "idreq-1",
+    memberId: "MEM-2024-0456",
+    memberName: "Sarah Thompson",
+    memberPhoto: "/placeholder.svg",
+    requestDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    status: "pending",
+    requestType: "new"
+  },
+  {
+    id: "idreq-2",
+    memberId: "MEM-2024-0234",
+    memberName: "David Chen",
+    memberPhoto: "/placeholder.svg",
+    requestDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    status: "approved",
+    requestType: "renewal",
+    processedBy: "Resource Manager",
+    processedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: "idreq-3",
+    memberId: "MEM-2023-0789",
+    memberName: "Emily Rodriguez",
+    memberPhoto: "/placeholder.svg",
+    requestDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    status: "issued",
+    requestType: "replacement",
+    processedBy: "Resource Manager",
+    processedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: "idreq-4",
+    memberId: "MEM-2024-0567",
+    memberName: "James Wilson",
+    memberPhoto: "/placeholder.svg",
+    requestDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    status: "pending",
+    requestType: "new"
+  },
+  {
+    id: "idreq-5",
+    memberId: "MEM-2022-0123",
+    memberName: "Linda Martinez",
+    memberPhoto: "/placeholder.svg",
+    requestDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+    status: "rejected",
+    requestType: "renewal",
+    processedBy: "Resource Manager",
+    processedDate: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
+    notes: "Outstanding dues - please clear financial obligations first"
+  }
+];
+
+export const mockResourceManagers: ResourceManager[] = [
+  {
+    id: "mgr-1",
+    userId: "user-001",
+    name: "Margaret Okonkwo",
+    photo: "/placeholder.svg",
+    role: "all",
+    assignedDate: new Date("2024-06-15"),
+    assignedBy: "Community Owner"
+  },
+  {
+    id: "mgr-2",
+    userId: "user-002",
+    name: "Robert Adeyemi",
+    photo: "/placeholder.svg",
+    role: "letters",
+    assignedDate: new Date("2024-09-01"),
+    assignedBy: "Community Owner"
   }
 ];
