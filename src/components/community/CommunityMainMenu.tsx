@@ -27,6 +27,7 @@ import { FinancialAuditDialog } from "./finance/FinancialAuditDialog";
 import { ConstitutionViewer } from "./ConstitutionViewer";
 import { CommunityResourcesDialog } from "./CommunityResourcesDialog";
 import { ManageCommunityResourcesDialog } from "./ManageCommunityResourcesDialog";
+import { ManageMembershipRequestsDialog } from "./ManageMembershipRequestsDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
@@ -73,6 +74,7 @@ export function CommunityMainMenu({
   const [showJoinCommunity, setShowJoinCommunity] = useState(false);
   const [showManageLeadership, setShowManageLeadership] = useState(false);
   const [showManageResources, setShowManageResources] = useState(false);
+  const [showManageMembershipRequests, setShowManageMembershipRequests] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -377,6 +379,20 @@ export function CommunityMainMenu({
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
+                
+                {(isAdmin || isOwner) && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-2 mt-1 text-primary"
+                    onClick={() => {
+                      setShowManageMembershipRequests(true);
+                      setOpen(false);
+                    }}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Membership Requests (Admin)
+                  </Button>
+                )}
               </AccordionContent>
             </AccordionItem>
 

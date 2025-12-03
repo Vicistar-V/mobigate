@@ -71,6 +71,8 @@ import { RollCallsPage } from "@/pages/RollCallsPage";
 import { CommunityResourcesDialog } from "@/components/community/CommunityResourcesDialog";
 import { ArticlesPage } from "@/pages/ArticlesPage";
 import { InsideCommunityPage } from "@/pages/InsideCommunityPage";
+import { MembershipApplicationDrawer } from "@/components/community/MembershipApplicationDrawer";
+import { ExitCommunityDialog } from "@/components/community/ExitCommunityDialog";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -85,6 +87,8 @@ const CommunityProfile = () => {
   const [galleryFilter, setGalleryFilter] = useState<string>("all");
   const [showDonationDialog, setShowDonationDialog] = useState(false);
   const [showPostDialog, setShowPostDialog] = useState(false);
+  const [showMembershipApplication, setShowMembershipApplication] = useState(false);
+  const [showExitCommunity, setShowExitCommunity] = useState(false);
   const { toast } = useToast();
   const tabsSectionRef = useRef<HTMLDivElement>(null);
 
@@ -359,12 +363,21 @@ const CommunityProfile = () => {
   };
 
   const handleJoinLeave = () => {
-    setIsMember(!isMember);
+    if (isMember) {
+      // If already a member, show exit confirmation
+      setShowExitCommunity(true);
+    } else {
+      // If not a member, open membership application form
+      setShowMembershipApplication(true);
+    }
+  };
+
+  const handleExitConfirm = () => {
+    setIsMember(false);
+    setShowExitCommunity(false);
     toast({
-      title: isMember ? "Left Community" : "Joined Community",
-      description: isMember
-        ? `You left ${community.name}`
-        : `You joined ${community.name}`,
+      title: "Exit Request Submitted",
+      description: `Your exit request from ${community.name} has been submitted.`,
     });
   };
 
@@ -966,6 +979,18 @@ const CommunityProfile = () => {
       <CommunityPostDialog 
         open={showPostDialog} 
         onOpenChange={setShowPostDialog} 
+      />
+
+      {/* Membership Application Drawer */}
+      <MembershipApplicationDrawer
+        open={showMembershipApplication}
+        onOpenChange={setShowMembershipApplication}
+      />
+
+      {/* Exit Community Dialog */}
+      <ExitCommunityDialog
+        open={showExitCommunity}
+        onOpenChange={setShowExitCommunity}
       />
     </div>
   );
