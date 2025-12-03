@@ -34,7 +34,7 @@ import { ConstitutionViewer } from "./ConstitutionViewer";
 import { CommunityResourcesDialog } from "./CommunityResourcesDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
-
+import { CommunityJoinDialog } from "./CommunityJoinDialog";
 interface CommunityMainMenuProps {
   isOwner?: boolean;
   isAdmin?: boolean;
@@ -69,6 +69,7 @@ export function CommunityMainMenu({
   const [showResources, setShowResources] = useState(false);
   const [showQuizCreation, setShowQuizCreation] = useState(false);
   const [showVoucherBundles, setShowVoucherBundles] = useState(false);
+  const [showJoinCommunity, setShowJoinCommunity] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -84,6 +85,13 @@ export function CommunityMainMenu({
   };
 
   const handleMenuClick = (action: string, isNavigable?: boolean) => {
+    // Handle join community
+    if (action === "Join Community") {
+      setShowJoinCommunity(true);
+      setOpen(false);
+      return;
+    }
+    
     // Handle login dialogs
     if (action === "E-Mail Login") {
       setShowGuestLogin(true);
@@ -267,13 +275,20 @@ export function CommunityMainMenu({
             {/* Guests Section */}
             <AccordionItem value="guests">
               <AccordionTrigger className="text-base">Guests</AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4"
                   onClick={() => handleMenuClick("E-Mail Login")}
                 >
                   E-Mail Login [OTP]
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("Join Community")}
+                >
+                  Join Community
                 </Button>
               </AccordionContent>
             </AccordionItem>
@@ -891,6 +906,15 @@ export function CommunityMainMenu({
       {/* Mobi-Merchant Dialogs */}
       <QuizCreationDialog open={showQuizCreation} onOpenChange={setShowQuizCreation} />
       <VoucherBundlesDialog open={showVoucherBundles} onOpenChange={setShowVoucherBundles} />
+
+      {/* Join Community Dialog */}
+      <CommunityJoinDialog 
+        open={showJoinCommunity} 
+        onOpenChange={setShowJoinCommunity}
+        onJoinSuccess={() => {
+          if (onNavigate) onNavigate("status");
+        }}
+      />
     </Sheet>
   );
 }
