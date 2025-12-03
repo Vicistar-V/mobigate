@@ -968,6 +968,13 @@ export function CommunityMainMenu({
         onOpenChange={setShowManageResources}
         isOwner={isOwner}
       />
+
+      {/* Membership Requests Management Dialog (Admin Only) */}
+      <ManageMembershipRequestsDialog 
+        open={showManageMembershipRequests} 
+        onOpenChange={setShowManageMembershipRequests}
+        isOwner={isOwner}
+      />
     </>
   );
 }
