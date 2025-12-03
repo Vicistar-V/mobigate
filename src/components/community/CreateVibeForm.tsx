@@ -250,33 +250,35 @@ export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: Cre
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handlePreview}
-                    disabled={!title || !description}
-                    className="flex-1 sm:flex-none gap-2 min-w-[120px]"
-                  >
-                    <Eye className="w-4 h-4" />
-                    PREVIEW NOW
-                  </Button>
-                  
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleDelete}
-                    className="flex-1 sm:flex-none gap-2 min-w-[120px]"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    DELETE
-                  </Button>
+                <div className="flex flex-col gap-2 mt-6 pt-4 border-t">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handlePreview}
+                      disabled={!title || !description}
+                      className="gap-1 text-xs sm:text-sm"
+                    >
+                      <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="truncate">PREVIEW</span>
+                    </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleDelete}
+                      className="gap-1 text-xs sm:text-sm"
+                    >
+                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="truncate">DELETE</span>
+                    </Button>
+                  </div>
                   
                   <Button
                     type="button"
                     onClick={handlePublish}
                     disabled={!title || !description}
-                    className="flex-1 sm:flex-none gap-2 min-w-[120px]"
+                    className="w-full gap-2"
                   >
                     <Send className="w-4 h-4" />
                     PUBLISH NOW
