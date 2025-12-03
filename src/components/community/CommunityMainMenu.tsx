@@ -402,6 +402,20 @@ export function CommunityMainMenu({
                     Manage Membership Requests (Admin)
                   </Button>
                 )}
+
+                {(isAdmin || isOwner) && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-2 mt-1 text-primary"
+                    onClick={() => {
+                      setShowManageGallery(true);
+                      setOpen(false);
+                    }}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Community Gallery (Admin)
+                  </Button>
+                )}
               </AccordionContent>
             </AccordionItem>
 
