@@ -225,3 +225,25 @@ export const exitReasons = [
   "Financial constraints",
   "Other"
 ];
+
+export const howHeardOptions = [
+  { value: "social-media", label: "Social Media" },
+  { value: "friend-family", label: "Friend/Family Member" },
+  { value: "website", label: "Community Website" },
+  { value: "event", label: "Community Event" },
+  { value: "search", label: "Internet Search" },
+  { value: "other", label: "Other" }
+];
+
+export const genderOptions = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" }
+];
+
+export const nigerianStates = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno",
+  "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT", "Gombe",
+  "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara",
+  "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau",
+  "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
+];

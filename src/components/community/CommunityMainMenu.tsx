@@ -34,7 +34,7 @@ import { ConstitutionViewer } from "./ConstitutionViewer";
 import { CommunityResourcesDialog } from "./CommunityResourcesDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
-import { CommunityJoinDialog } from "./CommunityJoinDialog";
+import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 interface CommunityMainMenuProps {
   isOwner?: boolean;
   isAdmin?: boolean;
@@ -907,13 +907,10 @@ export function CommunityMainMenu({
       <QuizCreationDialog open={showQuizCreation} onOpenChange={setShowQuizCreation} />
       <VoucherBundlesDialog open={showVoucherBundles} onOpenChange={setShowVoucherBundles} />
 
-      {/* Join Community Dialog */}
-      <CommunityJoinDialog 
+      {/* Membership Application Drawer */}
+      <MembershipApplicationDrawer 
         open={showJoinCommunity} 
         onOpenChange={setShowJoinCommunity}
-        onJoinSuccess={() => {
-          if (onNavigate) onNavigate("status");
-        }}
       />
     </Sheet>
   );
