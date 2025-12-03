@@ -34,6 +34,7 @@ export interface ExecutiveMember {
   position: string;
   tenure: string;
   imageUrl: string;
+  communityImageUrl?: string; // Community-specific profile photo (separate from Mobigate)
   level: "topmost" | "deputy" | "officer" | "staff";
   committee: "executive" | "ad-hoc" | "staff";
   adHocDepartment?: "Finance" | "Welfare" | "Protocol" | "Education" | "Sports";
@@ -42,6 +43,9 @@ export interface ExecutiveMember {
   tenureDuration?: string;
   milestones?: string[];
   profile?: ExecutiveProfile;
+  // Admin role fields - visible only to the officer themselves
+  isAdmin?: boolean;
+  adminRole?: string; // e.g., "Admin-1", "Admin-2"
 }
 
 export const executiveMembers: ExecutiveMember[] = [
@@ -54,6 +58,8 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person2,
     level: "topmost",
     committee: "executive",
+    isAdmin: true,
+    adminRole: "Admin-1",
     electedDate: "January 2024",
     tenureDuration: "Four Years",
     milestones: [
@@ -99,6 +105,8 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person8,
     level: "deputy",
     committee: "executive",
+    isAdmin: true,
+    adminRole: "Admin-2",
     electedDate: "January 2024",
     tenureDuration: "Four Years",
     milestones: [
@@ -139,6 +147,8 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person6,
     level: "officer",
     committee: "executive",
+    isAdmin: true,
+    adminRole: "Admin-3",
     electedDate: "January 2024",
     tenureDuration: "Four Years",
     milestones: [
@@ -178,6 +188,8 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person7,
     level: "officer",
     committee: "executive",
+    isAdmin: true,
+    adminRole: "Admin-4",
     electedDate: "January 2024",
     tenureDuration: "Four Years",
     milestones: [
@@ -216,6 +228,8 @@ export const executiveMembers: ExecutiveMember[] = [
     imageUrl: person1,
     level: "officer",
     committee: "executive",
+    isAdmin: true,
+    adminRole: "Admin-5",
     electedDate: "January 2024",
     tenureDuration: "Four Years",
     milestones: [

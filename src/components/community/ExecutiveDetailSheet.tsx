@@ -27,14 +27,20 @@ import {
   MapPin, 
   Star,
   Building,
-  ChevronDown
+  ChevronDown,
+  Pencil,
+  Camera
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ExecutiveMember } from "@/data/communityExecutivesData";
+import { ExecutiveMember, ExecutiveProfile } from "@/data/communityExecutivesData";
 import { Separator } from "@/components/ui/separator";
 import { AddToCircleDialog } from "@/components/AddToCircleDialog";
 import { cn } from "@/lib/utils";
+import { useCommunityUser } from "@/hooks/useCommunityUser";
+import { AdminRoleBadge } from "./AdminRoleBadge";
+import { EditCommunityProfileDialog } from "./EditCommunityProfileDialog";
+import { EditCommunityPhotoDialog } from "./EditCommunityPhotoDialog";
 
 interface ExecutiveDetailSheetProps {
   member: ExecutiveMember | null;
@@ -85,9 +91,16 @@ export const ExecutiveDetailSheet = ({
   const [requestSent, setRequestSent] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [showAddToCircle, setShowAddToCircle] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showEditPhoto, setShowEditPhoto] = useState(false);
+  const [communityImage, setCommunityImage] = useState<string | undefined>(undefined);
   const { toast } = useToast();
+  const { isOwnProfile } = useCommunityUser();
 
   if (!member) return null;
+
+  const isOwn = isOwnProfile(member.id);
+  const displayImage = communityImage || member.communityImageUrl || member.imageUrl;
 
   const handleAddFriend = () => {
     if (member.isFriend) {
@@ -119,6 +132,15 @@ export const ExecutiveDetailSheet = ({
     setShowAddToCircle(true);
   };
 
+  const handleSaveProfile = (updatedProfile: Partial<ExecutiveProfile>) => {
+    // In a real app, this would update the backend
+    console.log("Updated profile:", updatedProfile);
+  };
+
+  const handleSavePhoto = (newImage: string) => {
+    setCommunityImage(newImage);
+  };
+
   const profile = member.profile;
 
   return (
@@ -143,18 +165,37 @@ export const ExecutiveDetailSheet = ({
         {/* Scrollable Content */}
         <ScrollArea className="flex-1 overflow-y-auto">
           <div className="px-4 pb-6">
+            {/* Admin Role Badge - Only visible to own profile */}
+            {isOwn && member.adminRole && (
+              <div className="py-3">
+                <AdminRoleBadge adminRole={member.adminRole} />
+              </div>
+            )}
+
             {/* Large Profile Photo */}
-            <div className="flex justify-center py-5">
-              <Avatar className="h-32 w-32 border-4 border-primary/10">
-                <AvatarImage
-                  src={member.imageUrl}
-                  alt={member.name}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-4xl">
-                  {member.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex justify-center py-5 relative">
+              <div className="relative">
+                <Avatar className="h-32 w-32 border-4 border-primary/10">
+                  <AvatarImage
+                    src={displayImage}
+                    alt={member.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-4xl">
+                    {member.name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                {isOwn && (
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="absolute bottom-0 right-0 h-8 w-8 rounded-full shadow-md"
+                    onClick={() => setShowEditPhoto(true)}
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Name and Position */}
@@ -164,6 +205,18 @@ export const ExecutiveDetailSheet = ({
                 {member.position} {member.tenure}
               </p>
             </div>
+
+            {/* Edit Profile Button - Only visible to own profile */}
+            {isOwn && (
+              <Button
+                variant="outline"
+                className="w-full mb-4"
+                onClick={() => setShowEditProfile(true)}
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit My Community Profile
+              </Button>
+            )}
 
             {/* Elected Date and Tenure Duration */}
             {(member.electedDate || member.tenureDuration) && (
@@ -377,52 +430,54 @@ export const ExecutiveDetailSheet = ({
 
             <Separator className="my-4" />
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-3 gap-2 pt-2">
-              <Button
-                variant={
-                  member.isFriend || requestSent ? "secondary" : "default"
-                }
-                size="sm"
-                className="w-full"
-                onClick={handleAddFriend}
-                disabled={member.isFriend || requestSent}
-              >
-                {member.isFriend ? (
-                  <>
-                    <UserCheck className="h-3.5 w-3.5 mr-1" />
-                    <span className="text-xs">Friends</span>
-                  </>
-                ) : requestSent ? (
-                  <>
-                    <UserCheck className="h-3.5 w-3.5 mr-1" />
-                    <span className="text-xs">Sent</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="h-3.5 w-3.5 mr-1" />
-                    <span className="text-xs">Add Friend</span>
-                  </>
-                )}
-              </Button>
+            {/* Action Buttons - Hide some for own profile */}
+            {!isOwn && (
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                <Button
+                  variant={
+                    member.isFriend || requestSent ? "secondary" : "default"
+                  }
+                  size="sm"
+                  className="w-full"
+                  onClick={handleAddFriend}
+                  disabled={member.isFriend || requestSent}
+                >
+                  {member.isFriend ? (
+                    <>
+                      <UserCheck className="h-3.5 w-3.5 mr-1" />
+                      <span className="text-xs">Friends</span>
+                    </>
+                  ) : requestSent ? (
+                    <>
+                      <UserCheck className="h-3.5 w-3.5 mr-1" />
+                      <span className="text-xs">Sent</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-3.5 w-3.5 mr-1" />
+                      <span className="text-xs">Add Friend</span>
+                    </>
+                  )}
+                </Button>
 
-              <Button
-                variant={isFollowing ? "secondary" : "default"}
-                size="sm"
-                className="w-full"
-                onClick={handleFollow}
-              >
-                <UserCheck className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">
-                  {isFollowing ? "Following" : "Follow"}
-                </span>
-              </Button>
+                <Button
+                  variant={isFollowing ? "secondary" : "default"}
+                  size="sm"
+                  className="w-full"
+                  onClick={handleFollow}
+                >
+                  <UserCheck className="h-3.5 w-3.5 mr-1" />
+                  <span className="text-xs">
+                    {isFollowing ? "Following" : "Follow"}
+                  </span>
+                </Button>
 
-              <Button variant="outline" size="sm" className="w-full" onClick={handleAddToCircle}>
-                <Users className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">Circle</span>
-              </Button>
-            </div>
+                <Button variant="outline" size="sm" className="w-full" onClick={handleAddToCircle}>
+                  <Users className="h-3.5 w-3.5 mr-1" />
+                  <span className="text-xs">Circle</span>
+                </Button>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </DrawerContent>
@@ -431,6 +486,20 @@ export const ExecutiveDetailSheet = ({
         open={showAddToCircle}
         onOpenChange={setShowAddToCircle}
         userName={member?.name || ""}
+      />
+
+      <EditCommunityProfileDialog
+        open={showEditProfile}
+        onOpenChange={setShowEditProfile}
+        member={member}
+        onSave={handleSaveProfile}
+      />
+
+      <EditCommunityPhotoDialog
+        open={showEditPhoto}
+        onOpenChange={setShowEditPhoto}
+        currentImage={displayImage}
+        onSave={handleSavePhoto}
       />
     </Drawer>
   );

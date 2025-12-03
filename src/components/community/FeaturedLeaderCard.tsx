@@ -8,6 +8,8 @@ interface FeaturedLeaderCardProps {
 }
 
 export const FeaturedLeaderCard = ({ leader, onClick }: FeaturedLeaderCardProps) => {
+  const displayImage = leader.communityImageUrl || leader.imageUrl;
+  
   return (
     <Card 
       className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
@@ -15,7 +17,7 @@ export const FeaturedLeaderCard = ({ leader, onClick }: FeaturedLeaderCardProps)
     >
       <div className="aspect-[4/5] bg-muted relative">
         <Avatar className="w-full h-full rounded-none">
-          <AvatarImage src={leader.imageUrl} alt={leader.name} className="object-cover" />
+          <AvatarImage src={displayImage} alt={leader.name} className="object-cover" />
           <AvatarFallback className="rounded-none text-6xl">
             {leader.name.charAt(0)}
           </AvatarFallback>

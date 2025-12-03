@@ -11,6 +11,7 @@ interface ExecutiveMemberCardProps {
   position: string;
   tenure: string;
   imageUrl: string;
+  communityImageUrl?: string;
   isFriend?: boolean;
   onClick?: () => void;
 }
@@ -21,9 +22,11 @@ export const ExecutiveMemberCard = ({
   position,
   tenure,
   imageUrl,
+  communityImageUrl,
   isFriend = false,
   onClick,
 }: ExecutiveMemberCardProps) => {
+  const displayImage = communityImageUrl || imageUrl;
   const [requestSent, setRequestSent] = useState(false);
   const [isFriendState, setIsFriendState] = useState(isFriend);
   const { toast } = useToast();
@@ -82,7 +85,7 @@ export const ExecutiveMemberCard = ({
     >
       <div className="aspect-[3/4] bg-muted relative">
         <Avatar className="w-full h-full rounded-none">
-          <AvatarImage src={imageUrl} alt={name} className="object-cover" />
+          <AvatarImage src={displayImage} alt={name} className="object-cover" />
           <AvatarFallback className="rounded-none text-2xl">
             {name.charAt(0)}
           </AvatarFallback>
