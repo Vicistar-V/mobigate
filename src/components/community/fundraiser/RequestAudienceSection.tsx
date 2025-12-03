@@ -25,6 +25,8 @@ export const RequestAudienceSection = ({
   const [exclusionMode, setExclusionMode] = useState<"browse" | "view">("browse");
   const [showAudienceDialog, setShowAudienceDialog] = useState(false);
   const [audienceMode, setAudienceMode] = useState<"create" | "view">("create");
+  const [publicExceptEnabled, setPublicExceptEnabled] = useState(false);
+  const [customAudienceEnabled, setCustomAudienceEnabled] = useState(false);
 
   const toggleAudience = (audienceId: string) => {
     if (selectedAudience.includes(audienceId)) {
@@ -54,6 +56,13 @@ export const RequestAudienceSection = ({
     setShowAudienceDialog(true);
   };
 
+  const handleSave = () => {
+    toast({
+      title: "Audience Saved",
+      description: "Your audience selection has been saved successfully.",
+    });
+  };
+
   return (
     <>
       <Card className="p-6">
@@ -81,7 +90,10 @@ export const RequestAudienceSection = ({
         {/* PUBLIC EXCEPT Section */}
         <div className="pt-4 border-t">
           <div className="flex items-center gap-3 mb-2">
-            <Checkbox />
+            <Checkbox 
+              checked={publicExceptEnabled}
+              onCheckedChange={(checked) => setPublicExceptEnabled(checked as boolean)}
+            />
             <span className="text-sm font-semibold">PUBLIC EXCEPT:</span>
           </div>
           <div className="flex gap-2 pl-7">
@@ -105,7 +117,10 @@ export const RequestAudienceSection = ({
         {/* ADD ANOTHER AUDIENCE Section */}
         <div className="pt-4 border-t">
           <div className="flex items-center gap-3 mb-2">
-            <Checkbox />
+            <Checkbox 
+              checked={customAudienceEnabled}
+              onCheckedChange={(checked) => setCustomAudienceEnabled(checked as boolean)}
+            />
             <span className="text-sm font-semibold">ADD ANOTHER AUDIENCE:</span>
           </div>
           <div className="flex gap-2 pl-7">
@@ -127,7 +142,10 @@ export const RequestAudienceSection = ({
         </div>
 
         {/* SAVE Button */}
-        <Button className="w-full bg-black text-white hover:bg-black/90 font-bold mt-6">
+        <Button 
+          className="w-full bg-black text-white hover:bg-black/90 font-bold mt-6"
+          onClick={handleSave}
+        >
           SAVE
         </Button>
         </div>
