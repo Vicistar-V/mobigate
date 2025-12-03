@@ -14,7 +14,7 @@ export interface LetterTemplate {
   id: string;
   title: string;
   description: string;
-  category: "recommendation" | "confirmation" | "clearance" | "invitation" | "general";
+  category: "identification" | "recommendation" | "confirmation" | "clearance" | "invitation" | "general";
   icon: string;
   requiresApproval: boolean;
 }
@@ -58,6 +58,14 @@ export const mockIDCard: CommunityIDCard = {
 };
 
 export const letterTemplates: LetterTemplate[] = [
+  {
+    id: "template-0",
+    title: "Letter of Identification",
+    description: "Official letter confirming member identity and community affiliation",
+    category: "identification",
+    icon: "IdCard",
+    requiresApproval: true
+  },
   {
     id: "template-1",
     title: "Letter of Recommendation",
