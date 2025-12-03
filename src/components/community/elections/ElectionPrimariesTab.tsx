@@ -139,18 +139,18 @@ export const ElectionPrimariesTab = () => {
                   More scrolling out <ChevronRight className="w-3 h-3" />
                 </div>
               </div>
-              <table className="min-w-[600px] border-collapse">
+              <table className="min-w-[650px] border-collapse">
                 <thead>
                   <tr>
-                    <th className="bg-pink-200 p-2 text-left min-w-[120px] sticky left-0 z-10 border border-gray-300">
-                      <div className="font-bold">Primary for</div>
-                      <div className="text-sm font-normal">{primary.office}</div>
-                      <div className="text-xs text-muted-foreground">[{primary.totalVotes}]</div>
+                    <th className="bg-pink-200 p-2 text-left min-w-[100px] sticky left-0 z-10 border border-gray-300">
+                      <div className="font-bold text-sm">Primary for</div>
+                      <div className="text-xs font-normal">{primary.office}</div>
+                      <div className="text-[10px] text-muted-foreground">[{primary.totalVotes}]</div>
                     </th>
                     {primary.nominees.map((nominee, index) => {
                       const colors = getCandidateColors(index);
                       return (
-                        <th key={nominee.id} className={`${colors.header} p-2 text-center min-w-[140px] border border-gray-300`}>
+                        <th key={nominee.id} className={`${colors.header} p-3 text-center min-w-[160px] border border-gray-300`}>
                           <div className="flex flex-col items-center gap-1">
                             <Avatar className="h-10 w-10 border-2 border-white">
                               <AvatarImage src={nominee.avatar} alt={nominee.name} />
@@ -165,31 +165,31 @@ export const ElectionPrimariesTab = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="bg-pink-200 p-2 font-bold sticky left-0 z-10 border border-gray-300">
+                    <td className="bg-pink-200 p-2 font-bold text-sm sticky left-0 z-10 border border-gray-300">
                       Performance
                     </td>
                     {primary.nominees.map((nominee, index) => {
                       const colors = getCandidateColors(index);
                       return (
-                        <td key={nominee.id} className="p-1 border border-gray-300 bg-white">
+                        <td key={nominee.id} className="p-3 border border-gray-300 bg-white">
                           <VoteBoxGroup
-                            values={[nominee.votes, `${nominee.percentage.toFixed(1)}%`, index + 1]}
+                            values={[nominee.votes, `${nominee.percentage.toFixed(0)}%`, index + 1]}
                             labels={['Votes', '%', 'Rank']}
                             colorClass={colors.cell}
-                            isLarge={true}
+                            isLarge={false}
                           />
                         </td>
                       );
                     })}
                   </tr>
                   <tr>
-                    <td className="bg-pink-200 p-2 font-bold sticky left-0 z-10 border border-gray-300">
+                    <td className="bg-pink-200 p-2 font-bold text-sm sticky left-0 z-10 border border-gray-300">
                       Qualification
                     </td>
                     {primary.nominees.map((nominee) => (
-                      <td key={nominee.id} className="p-2 text-center border border-gray-300 bg-white">
+                      <td key={nominee.id} className="p-3 text-center border border-gray-300 bg-white">
                         {nominee.qualified && (
-                          <Badge className="bg-green-600 flex items-center gap-1 justify-center">
+                          <Badge className="bg-green-600 flex items-center gap-1 justify-center text-xs">
                             <TrendingUp className="w-3 h-3" />
                             Qualified
                           </Badge>

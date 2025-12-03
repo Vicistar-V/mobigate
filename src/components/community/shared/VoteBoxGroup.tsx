@@ -15,12 +15,14 @@ export const VoteBoxGroup = ({
 }: VoteBoxGroupProps) => {
   return (
     <div className="flex flex-col items-center">
-      <div className="flex gap-0.5">
+      <div className="flex gap-1">
         {values.map((value, index) => (
           <div 
             key={index}
-            className={`border-2 ${colorClass} w-10 h-8 flex items-center justify-center ${
-              isLarge ? 'text-lg font-bold' : 'font-semibold text-sm'
+            className={`border-2 ${colorClass} ${
+              isLarge ? 'w-14 h-10' : 'w-11 h-9'
+            } flex items-center justify-center ${
+              isLarge ? 'text-sm font-bold' : 'font-semibold text-xs'
             }`}
           >
             {value !== null && value !== undefined ? value : '---'}
@@ -28,7 +30,7 @@ export const VoteBoxGroup = ({
         ))}
       </div>
       {showLabels && (
-        <div className="flex w-full justify-around text-[10px] text-muted-foreground mt-0.5">
+        <div className="flex w-full justify-around text-[10px] text-muted-foreground mt-1">
           {labels.map((label, index) => (
             <span key={index}>{label}</span>
           ))}
