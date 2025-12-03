@@ -5,7 +5,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { FundRaiserCampaign, currencyRates } from "@/data/fundraiserData";
-import { DollarSign, Calendar, Target } from "lucide-react";
+import { DollarSign, Calendar, Target, Clock } from "lucide-react";
+import { differenceInDays, addDays, parseISO } from "date-fns";
 
 interface DonationCardProps {
   campaign: FundRaiserCampaign;
@@ -17,6 +18,22 @@ export const DonationCard = ({ campaign, onDonate }: DonationCardProps) => {
   const [currency, setCurrency] = useState<'USD' | 'MOBI'>(campaign.currency === 'MOBI' ? 'MOBI' : 'USD');
 
   const progressPercentage = (campaign.raisedAmount / campaign.targetAmount) * 100;
+
+  const calculateRemainingDays = () => {
+    if (!campaign.timeFrame || !campaign.createdAt) return null;
+    
+    const daysMatch = campaign.timeFrame.match(/(\d+)/);
+    if (!daysMatch) return null;
+    
+    const totalDays = parseInt(daysMatch[1], 10);
+    const startDate = parseISO(campaign.createdAt);
+    const endDate = addDays(startDate, totalDays);
+    const today = new Date();
+    
+    return differenceInDays(endDate, today);
+  };
+
+  const remainingDays = calculateRemainingDays();
 
   const convertAmount = (amount: number, toCurrency: 'USD' | 'MOBI') => {
     if (campaign.currency === toCurrency) return amount;
@@ -81,9 +98,34 @@ export const DonationCard = ({ campaign, onDonate }: DonationCardProps) => {
           <span className="font-semibold">{campaign.urgencyLevel}</span>
         </div>
         {campaign.timeFrame && (
-          <div className="flex items-center gap-2 bg-blue-50 p-2 rounded">
-            <Target className="h-4 w-4 text-blue-600" />
-            <span>{campaign.timeFrame}</span>
+          <div className={`flex items-center gap-2 p-2 rounded ${
+            remainingDays !== null && remainingDays <= 7 
+              ? 'bg-red-50' 
+              : remainingDays !== null && remainingDays <= 14 
+                ? 'bg-orange-50' 
+                : 'bg-blue-50'
+          }`}>
+            <Clock className={`h-4 w-4 ${
+              remainingDays !== null && remainingDays <= 7 
+                ? 'text-red-600' 
+                : remainingDays !== null && remainingDays <= 14 
+                  ? 'text-orange-600' 
+                  : 'text-blue-600'
+            }`} />
+            <span className={`font-medium ${
+              remainingDays !== null && remainingDays <= 0 
+                ? 'text-red-600' 
+                : remainingDays !== null && remainingDays <= 7
+                  ? 'text-red-600'
+                  : ''
+            }`}>
+              {remainingDays !== null 
+                ? remainingDays <= 0 
+                  ? 'Expired' 
+                  : `${remainingDays} days left`
+                : campaign.timeFrame
+              }
+            </span>
           </div>
         )}
       </div>
