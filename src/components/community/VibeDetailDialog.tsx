@@ -12,7 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, MessageCircle, Share2, Eye, X, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Share2, Eye, X, TrendingUp, ChevronLeft, ChevronRight, Gift } from "lucide-react";
+import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
 import { CommentSection } from "@/components/CommentSection";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -41,6 +42,7 @@ export const VibeDetailDialog = ({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
+  const [showGiftDialog, setShowGiftDialog] = useState(false);
 
   const handleLike = () => {
     onLike(vibe.id);
@@ -328,6 +330,14 @@ export const VibeDetailDialog = ({
           </button>
           
           <button
+            onClick={() => setShowGiftDialog(true)}
+            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
+          >
+            <Gift className="h-6 w-6 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">Gift</span>
+          </button>
+          
+          <button
             onClick={handleShare}
             className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
           >
@@ -367,6 +377,16 @@ export const VibeDetailDialog = ({
         <Button
           variant="outline"
           size="sm"
+          onClick={() => setShowGiftDialog(true)}
+          className="gap-2"
+        >
+          <Gift className="h-4 w-4" />
+          Send Gift
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleShare}
           className="gap-2"
         >
@@ -392,6 +412,19 @@ export const VibeDetailDialog = ({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Send Gift Dialog */}
+      <SendGiftDialog
+        isOpen={showGiftDialog}
+        onClose={() => setShowGiftDialog(false)}
+        recipientName={vibe.author}
+        onSendGift={(giftData) => {
+          if (giftData) {
+            toast.success(`Gift "${giftData.giftData.name}" sent to ${vibe.author}!`);
+          }
+          setShowGiftDialog(false);
+        }}
+      />
     </>
   );
 };
