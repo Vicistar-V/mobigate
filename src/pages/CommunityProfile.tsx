@@ -977,9 +977,6 @@ const CommunityProfile = () => {
       </main>
 
       <Footer />
-
-      {/* Create Post Dialog */}
-      <CreatePostDialog />
       
       {/* Donation Dialog */}
       <DonationDialog 
