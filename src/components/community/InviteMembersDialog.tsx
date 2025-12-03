@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { X, Search, Mail, Phone, Link as LinkIcon, Copy, Check, Send } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { X, Search, Mail, Phone, Link as LinkIcon, Copy, Check, Send, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,24 +11,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { mockOnlineMembers } from "@/data/membershipData";
 import { useToast } from "@/hooks/use-toast";
 
 interface InviteMembersDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityName?: string;
 }
 
-export function InviteMembersDialog({ open, onOpenChange }: InviteMembersDialogProps) {
+export function InviteMembersDialog({ open, onOpenChange, communityName = "our community" }: InviteMembersDialogProps) {
+  const { communityId } = useParams<{ communityId: string }>();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [inviteMessage, setInviteMessage] = useState("Join our amazing community on Mobigate!");
+  const [inviteMessage, setInviteMessage] = useState(`You've been invited to join ${communityName} on Mobigate! Click the link below to complete your membership application.`);
   const [emailList, setEmailList] = useState("");
   const [phoneList, setPhoneList] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
   const { toast } = useToast();
 
-  const inviteLink = "https://mobigate.com/invite/community123";
+  // Generate proper invite code
+  const generateInviteCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = 'INV-' + new Date().getFullYear() + '-';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
+  // Dynamic invite link that points to the membership application page
+  const inviteCode = generateInviteCode();
+  const inviteLink = `${window.location.origin}/community/${communityId || "1"}/join?invite=${inviteCode}&from=Member`;
 
   const filteredMembers = mockOnlineMembers.filter(member =>
     member.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -266,9 +282,17 @@ export function InviteMembersDialog({ open, onOpenChange }: InviteMembersDialogP
                     <div>
                       <h3 className="font-semibold mb-2">Share Invitation Link</h3>
                       <p className="text-sm text-muted-foreground">
-                        Anyone with this link can request to join the community
+                        Share this link to invite people to apply for membership
                       </p>
                     </div>
+
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription className="text-xs">
+                        When someone clicks this link, they'll be taken to a membership application form. 
+                        Their application will be reviewed before membership is granted.
+                      </AlertDescription>
+                    </Alert>
 
                     <div className="space-y-3">
                       <Label>Invitation Link</Label>
