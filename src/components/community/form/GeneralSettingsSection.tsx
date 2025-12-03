@@ -27,7 +27,10 @@ export function GeneralSettingsSection({
             onChange={(e) => updateField("handoverTime", e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
-            The date and time when leadership changes take effect
+            The date and time when leadership changes take effect.
+            <span className="block mt-1.5 text-amber-600 dark:text-amber-400 font-medium">
+              Note: Upon Handover, the Community Creator loses all privileges and/or powers of the Super-Admin if he/she is not elected/nominated/appointed or returned as the Leader of the Community who is automatically Admin-1 (Super-Admin).
+            </span>
           </p>
         </div>
 
