@@ -23,6 +23,7 @@ import { ElectionOpinionsTab } from "./elections/ElectionOpinionsTab";
 import { ElectionAccreditationTab } from "./elections/ElectionAccreditationTab";
 import { ElectionClearancesTab } from "./elections/ElectionClearancesTab";
 import { ElectionPrimariesTab } from "./elections/ElectionPrimariesTab";
+import { AccreditedVotersTab } from "./elections/AccreditedVotersTab";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import {
@@ -125,6 +126,9 @@ export const CommunityElectionTab = () => {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleNavigationClick("primaries")}>
               Nomination Primaries
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigationClick("accredited-voters")}>
+              Accredited Voters
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -231,6 +235,15 @@ export const CommunityElectionTab = () => {
           <>
             <ElectionPrimariesTab />
             <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-primaries" />
+            <PeopleYouMayKnow />
+          </>
+        )}
+
+        {/* Accredited Voters View */}
+        {activeView === "accredited-voters" && (
+          <>
+            <AccreditedVotersTab />
+            <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-accredited-voters" />
             <PeopleYouMayKnow />
           </>
         )}
