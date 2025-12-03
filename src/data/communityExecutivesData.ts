@@ -24,6 +24,18 @@ export interface ExecutiveProfile {
     period: string;
   }[];
   professionalAchievements?: string[];
+  skills?: string[];
+  awards?: {
+    title: string;
+    organization: string;
+    year?: string;
+  }[];
+  certifications?: {
+    name: string;
+    issuer: string;
+    year?: string;
+  }[];
+  languages?: string[];
   phone?: string;
   email?: string;
 }
