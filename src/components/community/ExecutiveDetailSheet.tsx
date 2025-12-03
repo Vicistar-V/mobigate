@@ -8,6 +8,11 @@ import {
 } from "@/components/ui/drawer";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { 
   UserPlus, 
   UserCheck, 
@@ -21,19 +26,56 @@ import {
   Mail, 
   MapPin, 
   Star,
-  Building
+  Building,
+  ChevronDown
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { Separator } from "@/components/ui/separator";
 import { AddToCircleDialog } from "@/components/AddToCircleDialog";
+import { cn } from "@/lib/utils";
 
 interface ExecutiveDetailSheetProps {
   member: ExecutiveMember | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+interface CollapsibleSectionProps {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}
+
+const CollapsibleSection = ({ icon, title, children, defaultOpen = true }: CollapsibleSectionProps) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger className="w-full">
+        <div className="flex items-center justify-between py-2 hover:bg-muted/50 rounded-md px-2 -mx-2 transition-colors">
+          <div className="flex items-center gap-2">
+            {icon}
+            <h3 className="text-sm font-bold uppercase tracking-wide">
+              {title}
+            </h3>
+          </div>
+          <ChevronDown 
+            className={cn(
+              "h-4 w-4 text-muted-foreground transition-transform duration-200",
+              isOpen && "rotate-180"
+            )} 
+          />
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2 pb-1 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
 
 export const ExecutiveDetailSheet = ({
   member,
@@ -156,60 +198,58 @@ export const ExecutiveDetailSheet = ({
             {profile && (
               <>
                 <Separator className="my-4" />
-                <div className="space-y-4">
-                  {/* Section Header */}
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">
-                      Personal Profile
-                    </h3>
-                  </div>
-
-                  {/* Bio/About */}
-                  {profile.bio && (
-                    <div className="space-y-1">
-                      <span className="text-xs font-medium text-muted-foreground uppercase">
-                        About
-                      </span>
-                      <p className="text-sm leading-relaxed">{profile.bio}</p>
-                    </div>
-                  )}
-
-                  {/* Profession */}
-                  {profile.profession && (
-                    <div className="flex items-start gap-3">
-                      <Briefcase className="h-4 w-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <span className="text-xs font-medium text-muted-foreground uppercase block">
-                          Profession
+                <CollapsibleSection
+                  icon={<User className="h-4 w-4 text-primary" />}
+                  title="Personal Profile"
+                  defaultOpen={true}
+                >
+                  <div className="space-y-3">
+                    {/* Bio/About */}
+                    {profile.bio && (
+                      <div className="space-y-1">
+                        <span className="text-xs font-medium text-muted-foreground uppercase">
+                          About
                         </span>
-                        <span className="text-sm font-medium">{profile.profession}</span>
+                        <p className="text-sm leading-relaxed">{profile.bio}</p>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Origin */}
-                  {(profile.stateOfOrigin || profile.lga || profile.hometown) && (
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <span className="text-xs font-medium text-muted-foreground uppercase block">
-                          Origin
-                        </span>
-                        <div className="text-sm">
-                          {profile.lga && <span className="font-medium">{profile.lga} LGA</span>}
-                          {profile.lga && profile.stateOfOrigin && ", "}
-                          {profile.stateOfOrigin && <span>{profile.stateOfOrigin}</span>}
-                          {profile.hometown && (
-                            <div className="text-muted-foreground text-xs mt-0.5">
-                              Hometown: {profile.hometown}
-                            </div>
-                          )}
+                    {/* Profession */}
+                    {profile.profession && (
+                      <div className="flex items-start gap-3">
+                        <Briefcase className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground uppercase block">
+                            Profession
+                          </span>
+                          <span className="text-sm font-medium">{profile.profession}</span>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+
+                    {/* Origin */}
+                    {(profile.stateOfOrigin || profile.lga || profile.hometown) && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground uppercase block">
+                            Origin
+                          </span>
+                          <div className="text-sm">
+                            {profile.lga && <span className="font-medium">{profile.lga} LGA</span>}
+                            {profile.lga && profile.stateOfOrigin && ", "}
+                            {profile.stateOfOrigin && <span>{profile.stateOfOrigin}</span>}
+                            {profile.hometown && (
+                              <div className="text-muted-foreground text-xs mt-0.5">
+                                Hometown: {profile.hometown}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CollapsibleSection>
               </>
             )}
 
@@ -217,13 +257,11 @@ export const ExecutiveDetailSheet = ({
             {profile?.education && profile.education.length > 0 && (
               <>
                 <Separator className="my-4" />
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">
-                      Education
-                    </h3>
-                  </div>
+                <CollapsibleSection
+                  icon={<GraduationCap className="h-4 w-4 text-primary" />}
+                  title="Education"
+                  defaultOpen={false}
+                >
                   <ul className="space-y-2">
                     {profile.education.map((edu, index) => (
                       <li key={index} className="flex items-start gap-2">
@@ -238,7 +276,7 @@ export const ExecutiveDetailSheet = ({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </CollapsibleSection>
               </>
             )}
 
@@ -246,13 +284,11 @@ export const ExecutiveDetailSheet = ({
             {profile?.previousPositions && profile.previousPositions.length > 0 && (
               <>
                 <Separator className="my-4" />
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Building className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">
-                      Previous Community Positions
-                    </h3>
-                  </div>
+                <CollapsibleSection
+                  icon={<Building className="h-4 w-4 text-primary" />}
+                  title="Previous Community Positions"
+                  defaultOpen={false}
+                >
                   <ul className="space-y-2">
                     {profile.previousPositions.map((pos, index) => (
                       <li key={index} className="flex items-start gap-2">
@@ -266,7 +302,7 @@ export const ExecutiveDetailSheet = ({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </CollapsibleSection>
               </>
             )}
 
@@ -274,13 +310,11 @@ export const ExecutiveDetailSheet = ({
             {profile?.professionalAchievements && profile.professionalAchievements.length > 0 && (
               <>
                 <Separator className="my-4" />
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">
-                      Professional Achievements
-                    </h3>
-                  </div>
+                <CollapsibleSection
+                  icon={<Trophy className="h-4 w-4 text-primary" />}
+                  title="Professional Achievements"
+                  defaultOpen={false}
+                >
                   <ul className="space-y-1.5">
                     {profile.professionalAchievements.map((achievement, index) => (
                       <li key={index} className="flex items-start gap-2">
@@ -289,7 +323,7 @@ export const ExecutiveDetailSheet = ({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </CollapsibleSection>
               </>
             )}
 
@@ -297,13 +331,11 @@ export const ExecutiveDetailSheet = ({
             {(profile?.phone || profile?.email) && (
               <>
                 <Separator className="my-4" />
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">
-                      Contact
-                    </h3>
-                  </div>
+                <CollapsibleSection
+                  icon={<Phone className="h-4 w-4 text-primary" />}
+                  title="Contact"
+                  defaultOpen={false}
+                >
                   <div className="space-y-2">
                     {profile.phone && (
                       <div className="flex items-center gap-3">
@@ -318,7 +350,7 @@ export const ExecutiveDetailSheet = ({
                       </div>
                     )}
                   </div>
-                </div>
+                </CollapsibleSection>
               </>
             )}
 
@@ -326,13 +358,11 @@ export const ExecutiveDetailSheet = ({
             {member.milestones && member.milestones.length > 0 && (
               <>
                 <Separator className="my-4" />
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">
-                      Leadership/Administrative Milestones
-                    </h3>
-                  </div>
+                <CollapsibleSection
+                  icon={<Star className="h-4 w-4 text-primary" />}
+                  title="Leadership Milestones"
+                  defaultOpen={true}
+                >
                   <ul className="space-y-1.5">
                     {member.milestones.map((milestone, index) => (
                       <li key={index} className="flex items-start gap-2">
@@ -341,7 +371,7 @@ export const ExecutiveDetailSheet = ({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </CollapsibleSection>
               </>
             )}
 
