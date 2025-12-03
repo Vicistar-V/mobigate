@@ -28,6 +28,7 @@ import { ConstitutionViewer } from "./ConstitutionViewer";
 import { CommunityResourcesDialog } from "./CommunityResourcesDialog";
 import { ManageCommunityResourcesDialog } from "./ManageCommunityResourcesDialog";
 import { ManageMembershipRequestsDialog } from "./ManageMembershipRequestsDialog";
+import { ManageCommunityGalleryDialog } from "./ManageCommunityGalleryDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
@@ -75,6 +76,7 @@ export function CommunityMainMenu({
   const [showManageLeadership, setShowManageLeadership] = useState(false);
   const [showManageResources, setShowManageResources] = useState(false);
   const [showManageMembershipRequests, setShowManageMembershipRequests] = useState(false);
+  const [showManageGallery, setShowManageGallery] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -254,6 +256,13 @@ export function CommunityMainMenu({
               onClick={() => handleMenuClick("vibes", true)}
             >
               Community Vibes
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => handleMenuClick("gallery", true)}
+            >
+              Community Gallery
             </Button>
           </div>
 
@@ -973,6 +982,13 @@ export function CommunityMainMenu({
       <ManageMembershipRequestsDialog 
         open={showManageMembershipRequests} 
         onOpenChange={setShowManageMembershipRequests}
+        isOwner={isOwner}
+      />
+
+      {/* Gallery Management Dialog (Admin Only) */}
+      <ManageCommunityGalleryDialog 
+        open={showManageGallery} 
+        onOpenChange={setShowManageGallery}
         isOwner={isOwner}
       />
     </>

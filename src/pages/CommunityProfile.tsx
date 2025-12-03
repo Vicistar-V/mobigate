@@ -73,6 +73,7 @@ import { ArticlesPage } from "@/pages/ArticlesPage";
 import { InsideCommunityPage } from "@/pages/InsideCommunityPage";
 import { MembershipApplicationDrawer } from "@/components/community/MembershipApplicationDrawer";
 import { ExitCommunityDialog } from "@/components/community/ExitCommunityDialog";
+import { CommunityGallerySection } from "@/components/community/CommunityGallerySection";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -903,6 +904,17 @@ const CommunityProfile = () => {
                 Back to Status
               </Button>
               <ArticlesPage />
+            </div>
+          )}
+
+          {activeTab === "gallery" && (
+            <div className="mt-6">
+              <CommunityGallerySection 
+                isOwner={community.isOwner}
+                isGalleryManager={false}
+                isMember={isMember}
+                isExecutive={false}
+              />
             </div>
           )}
 
