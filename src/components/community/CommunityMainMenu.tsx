@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { GuestLoginDialog } from "./GuestLoginDialog";
@@ -29,6 +29,7 @@ import { CommunityResourcesDialog } from "./CommunityResourcesDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
+import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -69,6 +70,7 @@ export function CommunityMainMenu({
   const [showQuizCreation, setShowQuizCreation] = useState(false);
   const [showVoucherBundles, setShowVoucherBundles] = useState(false);
   const [showJoinCommunity, setShowJoinCommunity] = useState(false);
+  const [showManageLeadership, setShowManageLeadership] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -433,6 +435,19 @@ export function CommunityMainMenu({
                 >
                   Staff & Employees
                 </Button>
+                {(isAdmin || isOwner) && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-4 text-primary"
+                    onClick={() => {
+                      setShowManageLeadership(true);
+                      setOpen(false);
+                    }}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Leadership (Admin)
+                  </Button>
+                )}
               </AccordionContent>
             </AccordionItem>
 
@@ -908,6 +923,12 @@ export function CommunityMainMenu({
       <MembershipApplicationDrawer 
         open={showJoinCommunity} 
         onOpenChange={setShowJoinCommunity}
+      />
+
+      {/* Leadership Management Dialog (Admin Only) */}
+      <ManageLeadershipDialog 
+        open={showManageLeadership} 
+        onOpenChange={setShowManageLeadership}
       />
     </>
   );
