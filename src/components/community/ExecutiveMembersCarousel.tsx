@@ -69,6 +69,7 @@ export const ExecutiveMembersCarousel = ({
                   position={member.position}
                   tenure={member.tenure}
                   imageUrl={member.imageUrl}
+                  communityImageUrl={member.communityImageUrl}
                   isFriend={member.isFriend}
                   onClick={onMemberClick ? () => onMemberClick(member) : undefined}
                 />
@@ -85,6 +86,7 @@ export const ExecutiveMembersCarousel = ({
                 position={member.position}
                 tenure={member.tenure}
                 imageUrl={member.imageUrl}
+                communityImageUrl={member.communityImageUrl}
                 isFriend={member.isFriend}
                 onClick={onMemberClick ? () => onMemberClick(member) : undefined}
               />
