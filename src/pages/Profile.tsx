@@ -29,6 +29,7 @@ import { ProfileLikesTab } from "@/components/profile/ProfileLikesTab";
 import { ProfileGiftsTab } from "@/components/profile/ProfileGiftsTab";
 import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
 import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
+import { ProfileCommunityTab } from "@/components/profile/ProfileCommunityTab";
 import { ProfileContentsTab } from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { useProfileData, useUserPosts, useCurrentUserId } from "@/hooks/useWindowData";
@@ -906,18 +907,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="community">
-            <Card className="p-6">
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Service Unavailable</AlertTitle>
-                <AlertDescription className="mt-2">
-                  You cannot use this Service now: it's either you are not eligible to use 
-                  the Service, or this Service is not yet available in your country. You can 
-                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
-                  and 'COMMUNITY STANDARDS'.
-                </AlertDescription>
-              </Alert>
-            </Card>
+            <ProfileCommunityTab userName={userProfile.name} />
           </TabsContent>
 
           <TabsContent value="mobi-circle">
