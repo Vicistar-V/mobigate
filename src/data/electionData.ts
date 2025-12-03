@@ -135,13 +135,63 @@ export const mockCandidates: ElectionCandidate[] = [
   }
 ];
 
-// Mock Election Office
+// Mock Election Office - President General
 export const mockElectionOffice: ElectionOffice = {
   id: "office-1",
   name: "President General",
   shortCode: "PG",
   totalAccreditedVoters: 1200,
   candidates: mockCandidates
+};
+
+// Vice President Office
+export const mockVicePresidentOffice: ElectionOffice = {
+  id: "office-2",
+  name: "Vice President",
+  shortCode: "VP",
+  totalAccreditedVoters: 1200,
+  candidates: [
+    { id: "vp-cand-1", name: "Grace", officeId: "office-2", votes: 412, losses: 588, vct: 98, color: "blue" },
+    { id: "vp-cand-2", name: "Emmanuel", officeId: "office-2", votes: 389, losses: 611, vct: 87, color: "orange" },
+    { id: "vp-cand-3", name: "Patricia", officeId: "office-2", votes: 287, losses: 713, vct: 65, color: "green" }
+  ]
+};
+
+// Secretary Office
+export const mockSecretaryOffice: ElectionOffice = {
+  id: "office-3",
+  name: "Secretary",
+  shortCode: "SEC",
+  totalAccreditedVoters: 1200,
+  candidates: [
+    { id: "sec-cand-1", name: "Daniel", officeId: "office-3", votes: 523, losses: 477, vct: 132, color: "purple" },
+    { id: "sec-cand-2", name: "Monica", officeId: "office-3", votes: 478, losses: 522, vct: 118, color: "magenta" }
+  ]
+};
+
+// Treasurer Office
+export const mockTreasurerOffice: ElectionOffice = {
+  id: "office-4",
+  name: "Treasurer",
+  shortCode: "TRS",
+  totalAccreditedVoters: 1200,
+  candidates: [
+    { id: "trs-cand-1", name: "Benjamin", officeId: "office-4", votes: 567, losses: 433, vct: 145, color: "green" },
+    { id: "trs-cand-2", name: "Victoria", officeId: "office-4", votes: 401, losses: 599, vct: 95, color: "blue" },
+    { id: "trs-cand-3", name: "Kenneth", officeId: "office-4", votes: 298, losses: 702, vct: 72, color: "orange" }
+  ]
+};
+
+// Financial Secretary Office
+export const mockFinSecOffice: ElectionOffice = {
+  id: "office-5",
+  name: "Financial Secretary",
+  shortCode: "FS",
+  totalAccreditedVoters: 1200,
+  candidates: [
+    { id: "fs-cand-1", name: "Anthony", officeId: "office-5", votes: 489, losses: 511, vct: 112, color: "purple" },
+    { id: "fs-cand-2", name: "Rebecca", officeId: "office-5", votes: 445, losses: 555, vct: 98, color: "magenta" }
+  ]
 };
 
 // Mock Vote Records
@@ -225,7 +275,13 @@ export const mockElection: Election = {
   type: "general",
   date: new Date("2025-03-15"),
   status: "active",
-  offices: [mockElectionOffice],
+  offices: [
+    mockElectionOffice,
+    mockVicePresidentOffice,
+    mockSecretaryOffice,
+    mockTreasurerOffice,
+    mockFinSecOffice
+  ],
   totalVoters: 1200,
   votesCast: 847
 };
