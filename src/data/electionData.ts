@@ -94,6 +94,16 @@ export interface ElectionWinner {
   announcedAt: Date;
 }
 
+// Accredited Voter
+export interface AccreditedVoter {
+  id: string;
+  name: string;
+  avatar: string;
+  dateAccredited: string;
+  status: 'valid' | 'invalid';
+  membershipId: string;
+}
+
 // Mock Candidates
 export const mockCandidates: ElectionCandidate[] = [
   {
@@ -362,5 +372,89 @@ export const mockWinners: ElectionWinner[] = [
     votes: 527,
     percentage: 43.9,
     announcedAt: new Date("2025-03-15T18:00:00")
+  }
+];
+
+// Mock Accredited Voters
+export const mockAccreditedVoters: AccreditedVoter[] = [
+  {
+    id: "av-1",
+    name: "Mark Anthony Orji",
+    avatar: "/src/assets/profile-james-wilson.jpg",
+    dateAccredited: "2025-02-15",
+    status: "valid",
+    membershipId: "MEM-2024/001234"
+  },
+  {
+    id: "av-2",
+    name: "Theodore Ike Nwannunu",
+    avatar: "/src/assets/profile-michael-chen.jpg",
+    dateAccredited: "2025-02-14",
+    status: "valid",
+    membershipId: "MEM-2024/001235"
+  },
+  {
+    id: "av-3",
+    name: "Sarah Johnson",
+    avatar: "/src/assets/profile-sarah-johnson.jpg",
+    dateAccredited: "2025-02-13",
+    status: "valid",
+    membershipId: "MEM-2024/001236"
+  },
+  {
+    id: "av-4",
+    name: "Michael Chen",
+    avatar: "/src/assets/profile-michael-chen.jpg",
+    dateAccredited: "2025-02-12",
+    status: "valid",
+    membershipId: "MEM-2024/001237"
+  },
+  {
+    id: "av-5",
+    name: "Emily Davis",
+    avatar: "/src/assets/profile-emily-davis.jpg",
+    dateAccredited: "2025-02-11",
+    status: "valid",
+    membershipId: "MEM-2024/001238"
+  },
+  {
+    id: "av-6",
+    name: "James Wilson",
+    avatar: "/src/assets/profile-james-wilson.jpg",
+    dateAccredited: "2025-02-10",
+    status: "valid",
+    membershipId: "MEM-2024/001239"
+  },
+  {
+    id: "av-7",
+    name: "Lisa Anderson",
+    avatar: "/src/assets/profile-lisa-anderson.jpg",
+    dateAccredited: "2024-03-15",
+    status: "invalid",
+    membershipId: "MEM-2023/000891"
+  },
+  {
+    id: "av-8",
+    name: "Robert Brown",
+    avatar: "/src/assets/profile-robert-brown.jpg",
+    dateAccredited: "2024-03-14",
+    status: "invalid",
+    membershipId: "MEM-2023/000892"
+  },
+  {
+    id: "av-9",
+    name: "Jennifer Taylor",
+    avatar: "/src/assets/profile-jennifer-taylor.jpg",
+    dateAccredited: "2024-03-13",
+    status: "invalid",
+    membershipId: "MEM-2023/000893"
+  },
+  {
+    id: "av-10",
+    name: "David Martinez",
+    avatar: "/src/assets/profile-david-martinez.jpg",
+    dateAccredited: "2024-03-12",
+    status: "invalid",
+    membershipId: "MEM-2023/000894"
   }
 ];

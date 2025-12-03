@@ -540,6 +540,13 @@ export function CommunityMainMenu({
                 >
                   Nomination Primaries
                 </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4"
+                  onClick={() => handleMenuClick("election-accredited-voters", true)}
+                >
+                  Accredited Voters
+                </Button>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
