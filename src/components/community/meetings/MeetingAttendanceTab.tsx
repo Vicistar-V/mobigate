@@ -306,26 +306,26 @@ export const MeetingAttendanceTab = () => {
               <div className="overflow-x-auto -mx-3">
                 <div className="inline-flex gap-1 px-3 pb-2">
                   <div className="text-xs text-muted-foreground flex items-center gap-1">
-                    More scrolling out <ChevronRight className="w-3 h-3" />
+                    Scroll for more <ChevronRight className="w-3 h-3" />
                   </div>
                 </div>
-                <table className="min-w-[600px] border-collapse">
+                <table className="min-w-[650px] border-collapse">
                   <thead>
                     <tr>
-                      <th className="bg-pink-200 p-2 text-left min-w-[150px] sticky left-0 z-10 border border-gray-300">
-                        <div className="font-bold">Member</div>
+                      <th className="bg-pink-200 p-3 text-left min-w-[160px] sticky left-0 z-10 border border-gray-300">
+                        <div className="font-bold text-sm">Member</div>
                         <div className="text-xs font-normal text-muted-foreground">
                           [{meetingAttendance.length} attendees]
                         </div>
                       </th>
-                      <th className="bg-gray-200 p-2 text-center min-w-[120px] border border-gray-300">
-                        <div className="font-bold">Status</div>
+                      <th className="bg-gray-200 p-3 text-center min-w-[100px] border border-gray-300">
+                        <div className="font-bold text-sm">Status</div>
                       </th>
-                      <th className="bg-gray-200 p-2 text-center min-w-[120px] border border-gray-300">
-                        <div className="font-bold">Arrival Time</div>
+                      <th className="bg-gray-200 p-3 text-center min-w-[110px] border border-gray-300">
+                        <div className="font-bold text-sm">Arrival</div>
                       </th>
-                      <th className="bg-gray-200 p-2 text-center min-w-[200px] border border-gray-300">
-                        <div className="font-bold">Notes</div>
+                      <th className="bg-gray-200 p-3 text-center min-w-[180px] border border-gray-300">
+                        <div className="font-bold text-sm">Notes</div>
                       </th>
                     </tr>
                   </thead>
@@ -353,12 +353,12 @@ export const MeetingAttendanceTab = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="p-1 border border-gray-300">
+                        <td className="p-2 border border-gray-300">
                           <div className="flex justify-center">
                             <div
                               className={`border-2 ${getStatusColor(
                                 attendance.status
-                              )} w-20 h-8 flex items-center justify-center font-semibold text-xs`}
+                              )} w-24 h-8 flex items-center justify-center font-semibold text-xs`}
                             >
                               {attendance.status.toUpperCase()}
                             </div>

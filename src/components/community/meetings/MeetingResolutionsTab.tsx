@@ -203,7 +203,7 @@ export const MeetingResolutionsTab = () => {
 
                 {/* Voting Results */}
                 <div className="flex flex-col items-center space-y-3">
-                  <div className="flex justify-center">
+                  <div className="flex justify-center p-2">
                     <VoteBoxGroup
                       values={[
                         resolution.votesFor,
@@ -212,19 +212,19 @@ export const MeetingResolutionsTab = () => {
                       ]}
                       labels={['For', 'Against', 'Abstain']}
                       colorClass="border-gray-400"
-                      isLarge={true}
+                      isLarge={false}
                     />
                   </div>
                   
                   <div className="flex gap-4 text-xs">
                     <span className="text-green-600 font-medium">
-                      {forPercentage.toFixed(1)}%
+                      {forPercentage.toFixed(0)}%
                     </span>
                     <span className="text-red-600 font-medium">
-                      {againstPercentage.toFixed(1)}%
+                      {againstPercentage.toFixed(0)}%
                     </span>
                     <span className="text-muted-foreground">
-                      {((resolution.abstentions / totalVotes) * 100).toFixed(1)}%
+                      {((resolution.abstentions / totalVotes) * 100).toFixed(0)}%
                     </span>
                   </div>
 
