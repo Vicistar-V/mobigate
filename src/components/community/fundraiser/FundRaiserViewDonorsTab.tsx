@@ -74,7 +74,7 @@ export const FundRaiserViewDonorsTab = () => {
               <SelectItem value="recent">Most Recent</SelectItem>
               <SelectItem value="oldest">Oldest</SelectItem>
               <SelectItem value="amount">Highest Amount</SelectItem>
-              <SelectItem value="lowest">Lowest Amount</SelectItem>
+              <SelectItem value="lowest">Lowest Amount</SelectItem> 
             </SelectContent>
           </Select>
         </div>
