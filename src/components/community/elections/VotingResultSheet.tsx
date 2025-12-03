@@ -74,10 +74,13 @@ export const VotingResultSheet = ({
 
         {/* Horizontally Scrollable Table */}
         <div className="overflow-x-auto -mx-4 px-4">
-          <table className="min-w-[700px] border-collapse border-spacing-0">
+          <div className="text-xs text-muted-foreground flex items-center gap-1 px-3 pb-2">
+            <span>Scroll for more →</span>
+          </div>
+          <table className="min-w-[750px] border-collapse border-spacing-0">
             <thead>
               <tr>
-                <th className="bg-pink-200 p-3 text-left min-w-[180px] sticky left-0 z-20 border border-gray-300">
+                <th className="bg-pink-200 p-3 text-left min-w-[160px] sticky left-0 z-20 border border-gray-300">
                   <div className="text-sm leading-tight">
                     Voting/Voters for<br />
                     <span className="font-bold text-base">{office.name}</span> [{office.shortCode}] [{office.totalAccreditedVoters}]
@@ -88,7 +91,7 @@ export const VotingResultSheet = ({
                   return (
                     <th
                       key={candidate.id}
-                      className={`${colors.header} p-3 text-center min-w-[160px] border border-gray-300`}
+                      className={`${colors.header} p-3 text-center min-w-[180px] border border-gray-300`}
                     >
                       <div className="text-sm font-bold leading-tight">
                         {candidate.name.split(' ').map((part, i) => (
@@ -112,13 +115,13 @@ export const VotingResultSheet = ({
                 {office.candidates.map((candidate, index) => {
                   const colors = getCandidateColors(index);
                   return (
-                    <td key={candidate.id} className="p-2 text-center border border-gray-300 bg-white">
+                    <td key={candidate.id} className="p-3 text-center border border-gray-300 bg-white">
                       <VoteBoxGroup
                         values={[candidate.votes, candidate.losses, candidate.vct]}
                         labels={['Votes', 'Loss', 'VCT']}
                         colorClass={colors.border}
                         showLabels={true}
-                        isLarge={true}
+                        isLarge={false}
                       />
                     </td>
                   );
@@ -135,11 +138,12 @@ export const VotingResultSheet = ({
                   {office.candidates.map((candidate) => {
                     const vote = record.votes.find((v) => v.candidateId === candidate.id);
                     return (
-                      <td key={candidate.id} className="p-2 text-center border border-gray-300 bg-white">
+                      <td key={candidate.id} className="p-3 text-center border border-gray-300 bg-white">
                         <VoteBoxGroup
                           values={[vote?.vote || 0, vote?.loss, vote?.vct || 0]}
                           labels={['Vote', 'Loss', 'VCT']}
                           showLabels={true}
+                          isLarge={false}
                         />
                       </td>
                     );

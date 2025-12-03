@@ -44,10 +44,13 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange }: Fina
 
       {/* Horizontally Scrollable Table */}
       <div className="overflow-x-auto -mx-4 px-4">
-        <table className="min-w-[1000px] border-collapse">
+        <div className="text-xs text-muted-foreground px-3 pb-2">
+          Scroll for more →
+        </div>
+        <table className="min-w-[900px] border-collapse">
           <thead>
             <tr>
-              <th className="bg-pink-200 p-3 text-left min-w-[220px] sticky left-0 z-20 border border-gray-300">
+              <th className="bg-pink-200 p-3 text-left min-w-[180px] sticky left-0 z-20 border border-gray-300">
                 <div className="text-sm font-bold">
                   {member.memberName}<br/>
                   <span className="text-xs text-gray-600">{member.memberRegistration}</span>
@@ -55,12 +58,11 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange }: Fina
               </th>
               {years.map(year => (
                 <>
-                  <th key={`year-${year}`} className="bg-green-600 text-white p-3 text-center min-w-[140px] border border-gray-300">
-                    <div className="text-sm font-bold">Period: {year}</div>
-                    <div className="text-xs">Years</div>
+                  <th key={`year-${year}`} className="bg-green-600 text-white p-2 text-center min-w-[110px] border border-gray-300">
+                    <div className="text-xs font-bold">{year}</div>
                   </th>
-                  <th key={`date-${year}`} className="bg-green-600 text-white p-3 text-center min-w-[110px] border border-gray-300">
-                    <div className="text-sm font-bold">Dates</div>
+                  <th key={`date-${year}`} className="bg-green-600 text-white p-2 text-center min-w-[90px] border border-gray-300">
+                    <div className="text-xs font-bold">Date</div>
                   </th>
                 </>
               ))}
@@ -71,30 +73,30 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange }: Fina
               const itemData = member.items.find(i => i.itemId === item.id);
               return (
                 <tr key={item.id}>
-                  <td className="bg-pink-200 p-3 font-semibold sticky left-0 z-20 border border-gray-300">
-                    <div className="flex items-start gap-2">
-                      <span className="text-sm">{index + 1}.</span>
-                      <span className="text-sm">{item.name}</span>
+                  <td className="bg-pink-200 p-2 font-semibold sticky left-0 z-20 border border-gray-300">
+                    <div className="flex items-start gap-1">
+                      <span className="text-xs">{index + 1}.</span>
+                      <span className="text-xs">{item.name}</span>
                     </div>
                   </td>
                   {years.map(year => {
                     const period = itemData?.periods.find(p => p.year === year);
                     return (
                       <>
-                        <td key={`amount-${year}`} className="p-2 border border-gray-300 bg-white">
+                        <td key={`amount-${year}`} className="p-1 border border-gray-300 bg-white">
                           <div className="flex justify-center">
-                            <div className="border-2 border-green-600 bg-green-50 px-4 py-2 text-center min-w-[100px]">
-                              <div className="text-base font-bold">
-                                {period?.amount ? period.amount.toLocaleString() + '.' : '- - - - - - - -'}
+                            <div className="border-2 border-green-600 bg-green-50 px-2 py-1 text-center min-w-[90px]">
+                              <div className="text-sm font-bold">
+                                {period?.amount ? period.amount.toLocaleString() : '---'}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td key={`date-${year}`} className="p-2 border border-gray-300 bg-white">
+                        <td key={`date-${year}`} className="p-1 border border-gray-300 bg-white">
                           <div className="flex justify-center">
-                            <div className="border-2 border-gray-400 bg-gray-50 px-3 py-2 text-center min-w-[80px]">
-                              <div className="text-sm font-semibold">
-                                {period?.date || '- - - - - -'}
+                            <div className="border-2 border-gray-400 bg-gray-50 px-2 py-1 text-center min-w-[70px]">
+                              <div className="text-xs font-semibold">
+                                {period?.date || '---'}
                               </div>
                             </div>
                           </div>

@@ -34,7 +34,7 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
 
               <div className="flex justify-center p-4 bg-muted rounded-lg">
                 <VoteBoxGroup
-                  values={[winner.votes, `${winner.percentage}%`, winner.votes - Math.floor(winner.votes * 0.3)]}
+                  values={[winner.votes, `${winner.percentage.toFixed(0)}%`, winner.votes - Math.floor(winner.votes * 0.3)]}
                   labels={['Votes', 'Share', 'Margin']}
                   colorClass="border-yellow-500 bg-yellow-50"
                   isLarge={true}
