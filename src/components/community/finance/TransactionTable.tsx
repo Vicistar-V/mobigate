@@ -25,7 +25,7 @@ export const TransactionTable = ({ transactions, filter }: TransactionTableProps
                 <span className="text-xs text-blue-600 font-normal">Click-on for Details</span>
               </th>
               <th className="bg-yellow-300 p-3 border border-gray-300 text-center font-bold text-sm">
-                ₦/₦<br/>Amount
+                ₦<br/>Amount
               </th>
               <th className="bg-green-500 text-white p-3 border border-gray-300 text-center font-bold text-sm">
                 ✓<br/>Approval
