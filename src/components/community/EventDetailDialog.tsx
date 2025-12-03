@@ -149,7 +149,7 @@ export const EventDetailDialog = ({
           )}
 
           {/* Content Container */}
-          <div className="p-4 space-y-4">
+          <div className="px-5 sm:px-6 py-4 space-y-4">
             {/* Event Type and Venue Type Badges */}
             <div className="flex flex-wrap items-center gap-2">
               <Badge className={getEventTypeColor(event.eventType)}>
@@ -284,7 +284,7 @@ export const EventDetailDialog = ({
       </ScrollArea>
 
       {/* Fixed Bottom Action Bar - Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-4 py-3 safe-area-pb z-50">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
         <div className="flex items-center gap-2 max-w-md mx-auto">
           <Button
             variant={hasRSVPd ? "default" : "outline"}
@@ -373,13 +373,13 @@ export const EventDetailDialog = ({
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[95vh] p-0">
+          <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden p-0">
             <EventContent />
           </DrawerContent>
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+          <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden rounded-xl">
             <EventContent />
           </DialogContent>
         </Dialog>

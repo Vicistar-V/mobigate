@@ -138,7 +138,7 @@ export const PostDetailDialog = ({
           )}
 
           {/* Content Container */}
-          <div className="p-4 space-y-4">
+          <div className="px-5 sm:px-6 py-4 space-y-4">
             {/* Author Section */}
             <button
               onClick={handleAuthorClick}
@@ -218,7 +218,7 @@ export const PostDetailDialog = ({
       </ScrollArea>
 
       {/* Fixed Bottom Action Bar - Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-4 py-3 safe-area-pb z-50">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
         <div className="flex items-center justify-around max-w-md mx-auto gap-2">
           <button
             onClick={handleLike}
@@ -346,13 +346,13 @@ export const PostDetailDialog = ({
 
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[95vh] p-0">
+          <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden p-0">
             <PostContent />
           </DrawerContent>
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+          <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden rounded-xl">
             <PostContent />
           </DialogContent>
         </Dialog>
