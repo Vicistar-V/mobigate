@@ -132,9 +132,12 @@ export const ExecutiveDetailSheet = ({
     setShowAddToCircle(true);
   };
 
-  const handleSaveProfile = (updatedProfile: Partial<ExecutiveProfile>) => {
+  const handleSaveProfile = (updatedProfile: Partial<ExecutiveProfile>, updatedMilestones?: string[]) => {
     // In a real app, this would update the backend
     console.log("Updated profile:", updatedProfile);
+    if (updatedMilestones) {
+      console.log("Updated milestones:", updatedMilestones);
+    }
   };
 
   const handleSavePhoto = (newImage: string) => {
@@ -380,6 +383,52 @@ export const ExecutiveDetailSheet = ({
               </>
             )}
 
+            {/* SKILLS */}
+            {profile?.skills && profile.skills.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                <CollapsibleSection
+                  icon={<Briefcase className="h-4 w-4 text-primary" />}
+                  title="Skills"
+                  defaultOpen={false}
+                >
+                  <div className="flex flex-wrap gap-1.5">
+                    {profile.skills.map((skill, index) => (
+                      <span key={index} className="inline-flex items-center bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              </>
+            )}
+
+            {/* AWARDS */}
+            {profile?.awards && profile.awards.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                <CollapsibleSection
+                  icon={<Star className="h-4 w-4 text-primary" />}
+                  title="Awards & Recognitions"
+                  defaultOpen={false}
+                >
+                  <ul className="space-y-2">
+                    {profile.awards.map((award, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-primary font-bold text-sm mt-0.5">•</span>
+                        <div className="flex-1">
+                          <span className="text-sm font-medium">{award.title}</span>
+                          <div className="text-xs text-muted-foreground">
+                            {award.organization}{award.year && ` (${award.year})`}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </CollapsibleSection>
+              </>
+            )}
+
             {/* CONTACT SECTION */}
             {(profile?.phone || profile?.email) && (
               <>
@@ -488,12 +537,12 @@ export const ExecutiveDetailSheet = ({
         userName={member?.name || ""}
       />
 
-      <EditCommunityProfileDialog
-        open={showEditProfile}
-        onOpenChange={setShowEditProfile}
-        member={member}
-        onSave={handleSaveProfile}
-      />
+            <EditCommunityProfileDialog
+              open={showEditProfile}
+              onOpenChange={setShowEditProfile}
+              member={member}
+              onSave={(profile, milestones) => handleSaveProfile(profile, milestones)}
+            />
 
       <EditCommunityPhotoDialog
         open={showEditPhoto}
