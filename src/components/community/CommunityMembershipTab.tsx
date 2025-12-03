@@ -14,7 +14,9 @@ import {
   Gift,
   Users as UsersIcon,
   Ban,
-  Flag
+  Flag,
+  Grid3x3,
+  LayoutList
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -387,6 +389,13 @@ export function CommunityMembershipTab() {
   const [eLibraryFilter, setELibraryFilter] = useState<string>("all");
   const [visibleContentCount, setVisibleContentCount] = useState(4);
 
+  // View All Members view mode
+  const [membersViewMode, setMembersViewMode] = useState<"carousel" | "grid">("carousel");
+
+  const toggleMembersView = () => {
+    setMembersViewMode(membersViewMode === "carousel" ? "grid" : "carousel");
+  };
+
   // Filter members by gender
   const filteredMembers = communityMembers.filter((member) => {
     if (memberGenderFilter === "all") return true;
@@ -433,6 +442,17 @@ export function CommunityMembershipTab() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-semibold">View All Members</h2>
+          <button
+            onClick={toggleMembersView}
+            className="p-2 rounded-md hover:bg-muted transition-colors"
+            title={membersViewMode === "carousel" ? "Switch to grid view" : "Switch to carousel view"}
+          >
+            {membersViewMode === "carousel" ? (
+              <Grid3x3 className="h-4 w-4" />
+            ) : (
+              <LayoutList className="h-4 w-4" />
+            )}
+          </button>
         </div>
 
         {/* Gender Filter Tabs */}
@@ -469,115 +489,225 @@ export function CommunityMembershipTab() {
           )}
         </div>
 
-        {/* Members Carousel */}
+        {/* Members Carousel/Grid */}
         <div className="relative">
-          <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-            {filteredMembers.map((member) => (
-              <Card 
-                key={member.id} 
-                className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 space-y-3 hover:shadow-lg transition-shadow"
-              >
-                {/* Avatar */}
-                <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
-                  <Avatar className="w-full h-full border-2 border-primary/20">
-                    <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  {member.isOnline && (
-                    <div className="absolute bottom-1 right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
-                  )}
-                </div>
+          {membersViewMode === "carousel" ? (
+            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              {filteredMembers.map((member) => (
+                <Card 
+                  key={member.id} 
+                  className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 space-y-3 hover:shadow-lg transition-shadow"
+                >
+                  {/* Avatar */}
+                  <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
+                    <Avatar className="w-full h-full border-2 border-primary/20">
+                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    {member.isOnline && (
+                      <div className="absolute bottom-1 right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                    )}
+                  </div>
 
-                {/* Name & Info */}
-                <div className="text-center space-y-1">
-                  <h4 className="font-semibold text-sm truncate" title={member.name}>
-                    {member.name}
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    Member since {member.memberSince}
-                  </p>
-                  {member.mutualFriends && (
-                    <p className="text-xs text-primary">
-                      {member.mutualFriends} mutual friends
+                  {/* Name & Info */}
+                  <div className="text-center space-y-1">
+                    <h4 className="font-semibold text-sm truncate" title={member.name}>
+                      {member.name}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Member since {member.memberSince}
                     </p>
-                  )}
-                </div>
+                    {member.mutualFriends && (
+                      <p className="text-xs text-primary">
+                        {member.mutualFriends} mutual friends
+                      </p>
+                    )}
+                  </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  {friendRequestStatus[member.id] ? (
-                    <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      className="flex-1 text-xs"
-                      disabled
-                    >
-                      <UserCheck className="h-3 w-3 mr-1" />
-                      Sent
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      className="flex-1 text-xs"
-                      onClick={() => handleAddFriend(member.id, member.name)}
-                    >
-                      <UserPlus className="h-3 w-3 mr-1" />
-                      Add Friend
-                    </Button>
-                  )}
-                  
-                  {/* Do More Dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="sm" variant="outline" className="px-2">
-                        <MoreVertical className="h-3 w-3" />
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    {friendRequestStatus[member.id] ? (
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="flex-1 text-xs"
+                        disabled
+                      >
+                        <UserCheck className="h-3 w-3 mr-1" />
+                        Sent
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuItem onClick={() => handleMemberAction("Following", member.name)}>
-                        <UserCheck className="h-4 w-4 mr-2" />
-                        Follow
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleMemberAction("Liked", member.name)}>
-                        <Heart className="h-4 w-4 mr-2" />
-                        Like
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleMemberAction("Chatting with", member.name)}>
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Chat
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleMemberAction("Calling", member.name)}>
-                        <Phone className="h-4 w-4 mr-2" />
-                        Call
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleMemberAction("Sending gift to", member.name)}>
-                        <Gift className="h-4 w-4 mr-2" />
-                        Send Gift
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleMemberAction("Adding to circle", member.name)}>
-                        <UsersIcon className="h-4 w-4 mr-2" />
-                        Add to Circle
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleMemberAction("Blocked", member.name)}
-                        className="text-destructive"
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="flex-1 text-xs"
+                        onClick={() => handleAddFriend(member.id, member.name)}
                       >
-                        <Ban className="h-4 w-4 mr-2" />
-                        Block
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleMemberAction("Reported", member.name)}
-                        className="text-destructive"
+                        <UserPlus className="h-3 w-3 mr-1" />
+                        Add Friend
+                      </Button>
+                    )}
+                    
+                    {/* Do More Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="outline" className="px-2">
+                          <MoreVertical className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem onClick={() => handleMemberAction("Following", member.name)}>
+                          <UserCheck className="h-4 w-4 mr-2" />
+                          Follow
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Liked", member.name)}>
+                          <Heart className="h-4 w-4 mr-2" />
+                          Like
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Chatting with", member.name)}>
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Chat
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Calling", member.name)}>
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Sending gift to", member.name)}>
+                          <Gift className="h-4 w-4 mr-2" />
+                          Send Gift
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Adding to circle", member.name)}>
+                          <UsersIcon className="h-4 w-4 mr-2" />
+                          Add to Circle
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleMemberAction("Blocked", member.name)}
+                          className="text-destructive"
+                        >
+                          <Ban className="h-4 w-4 mr-2" />
+                          Block
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleMemberAction("Reported", member.name)}
+                          className="text-destructive"
+                        >
+                          <Flag className="h-4 w-4 mr-2" />
+                          Report
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {filteredMembers.map((member) => (
+                <Card 
+                  key={member.id} 
+                  className="p-3 space-y-2 hover:shadow-lg transition-shadow"
+                >
+                  {/* Avatar */}
+                  <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20">
+                    <Avatar className="w-full h-full border-2 border-primary/20">
+                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    {member.isOnline && (
+                      <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                    )}
+                  </div>
+
+                  {/* Name & Info */}
+                  <div className="text-center space-y-0.5">
+                    <h4 className="font-semibold text-xs sm:text-sm truncate" title={member.name}>
+                      {member.name}
+                    </h4>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
+                      Since {member.memberSince}
+                    </p>
+                    {member.mutualFriends && (
+                      <p className="text-[10px] sm:text-xs text-primary">
+                        {member.mutualFriends} mutual
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-1">
+                    {friendRequestStatus[member.id] ? (
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="flex-1 text-[10px] sm:text-xs h-7"
+                        disabled
                       >
-                        <Flag className="h-4 w-4 mr-2" />
-                        Report
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </Card>
-            ))}
-          </div>
+                        <UserCheck className="h-3 w-3 mr-1" />
+                        Sent
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="flex-1 text-[10px] sm:text-xs h-7"
+                        onClick={() => handleAddFriend(member.id, member.name)}
+                      >
+                        <UserPlus className="h-3 w-3 mr-1" />
+                        Add
+                      </Button>
+                    )}
+                    
+                    {/* Do More Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="outline" className="px-1.5 h-7">
+                          <MoreVertical className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem onClick={() => handleMemberAction("Following", member.name)}>
+                          <UserCheck className="h-4 w-4 mr-2" />
+                          Follow
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Liked", member.name)}>
+                          <Heart className="h-4 w-4 mr-2" />
+                          Like
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Chatting with", member.name)}>
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Chat
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Calling", member.name)}>
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Sending gift to", member.name)}>
+                          <Gift className="h-4 w-4 mr-2" />
+                          Send Gift
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleMemberAction("Adding to circle", member.name)}>
+                          <UsersIcon className="h-4 w-4 mr-2" />
+                          Add to Circle
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleMemberAction("Blocked", member.name)}
+                          className="text-destructive"
+                        >
+                          <Ban className="h-4 w-4 mr-2" />
+                          Block
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleMemberAction("Reported", member.name)}
+                          className="text-destructive"
+                        >
+                          <Flag className="h-4 w-4 mr-2" />
+                          Report
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -659,7 +789,7 @@ export function CommunityMembershipTab() {
           filter="all"
           onViewChange={setBirthdayView}
           onFilterChange={() => {}}
-          showViewToggle={false}
+          showViewToggle={true}
           showFilterCounts={false}
           showFilters={false}
         />
