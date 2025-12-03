@@ -24,6 +24,7 @@ import { ElectionAccreditationTab } from "./elections/ElectionAccreditationTab";
 import { ElectionClearancesTab } from "./elections/ElectionClearancesTab";
 import { ElectionPrimariesTab } from "./elections/ElectionPrimariesTab";
 import { AccreditedVotersTab } from "./elections/AccreditedVotersTab";
+import { LaunchCampaignDialog } from "./elections/LaunchCampaignDialog";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import {
@@ -40,6 +41,7 @@ export const CommunityElectionTab = () => {
   const [activeView, setActiveView] = useState<string>("campaigns");
   const [showResultSheet, setShowResultSheet] = useState(false);
   const [viewMode, setViewMode] = useState<"offices" | "candidates">("offices");
+  const [showLaunchDialog, setShowLaunchDialog] = useState(false);
 
   const handleNavigationClick = (view: string) => {
     setActiveView(view);
@@ -139,7 +141,14 @@ export const CommunityElectionTab = () => {
         {/* Campaigns View */}
         {activeView === "campaigns" && (
           <>
-            <CampaignsView campaigns={mockCampaigns} />
+            <CampaignsView 
+              campaigns={mockCampaigns} 
+              onLaunchCampaign={() => setShowLaunchDialog(true)} 
+            />
+            <LaunchCampaignDialog 
+              open={showLaunchDialog} 
+              onOpenChange={setShowLaunchDialog} 
+            />
             <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-campaigns" />
             <PeopleYouMayKnow />
           </>

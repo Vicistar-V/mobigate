@@ -1,14 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Menu } from "lucide-react";
+import { useState } from "react";
+import { Menu } from "lucide-react";
 import { CampaignsView } from "./CampaignsView";
+import { LaunchCampaignDialog } from "./LaunchCampaignDialog";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { mockCampaigns } from "@/data/electionData";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
 
 export const ElectionCampaignsTab = () => {
+  const [showLaunchDialog, setShowLaunchDialog] = useState(false);
+
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
@@ -20,7 +21,16 @@ export const ElectionCampaignsTab = () => {
       </div>
 
       {/* Campaigns Content */}
-      <CampaignsView campaigns={mockCampaigns} />
+      <CampaignsView 
+        campaigns={mockCampaigns} 
+        onLaunchCampaign={() => setShowLaunchDialog(true)} 
+      />
+      
+      {/* Launch Campaign Dialog */}
+      <LaunchCampaignDialog 
+        open={showLaunchDialog} 
+        onOpenChange={setShowLaunchDialog} 
+      />
       
       {/* Ads & Suggestions */}
       <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-campaigns" />
