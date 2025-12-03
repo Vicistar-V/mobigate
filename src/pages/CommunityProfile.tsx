@@ -494,13 +494,13 @@ const CommunityProfile = () => {
         <div ref={tabsSectionRef}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
             <TabsList className="w-full grid grid-cols-3 h-auto">
-              <TabsTrigger value="status" className="text-xs sm:text-sm">
+              <TabsTrigger value="status" className="text-sm sm:text-base py-2.5 px-4">
                 Status
               </TabsTrigger>
-              <TabsTrigger value="about" className="text-xs sm:text-sm">
+              <TabsTrigger value="about" className="text-sm sm:text-base py-2.5 px-4">
                 About
               </TabsTrigger>
-              <TabsTrigger value="membership" className="text-xs sm:text-sm">
+              <TabsTrigger value="membership" className="text-sm sm:text-base py-2.5 px-4">
                 Membership
               </TabsTrigger>
             </TabsList>
@@ -634,10 +634,10 @@ const CommunityProfile = () => {
             <div className="mt-6">
               <Tabs defaultValue="summary" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4">
-                  <TabsTrigger value="summary">Summary</TabsTrigger>
-                  <TabsTrigger value="clearances">Clearances</TabsTrigger>
-                  <TabsTrigger value="accreditation">Accreditation</TabsTrigger>
-                  <TabsTrigger value="accounts">Accounts</TabsTrigger>
+                  <TabsTrigger value="summary" className="text-sm sm:text-base py-2.5">Summary</TabsTrigger>
+                  <TabsTrigger value="clearances" className="text-sm sm:text-base py-2.5">Clearances</TabsTrigger>
+                  <TabsTrigger value="accreditation" className="text-sm sm:text-base py-2.5">Accreditation</TabsTrigger>
+                  <TabsTrigger value="accounts" className="text-sm sm:text-base py-2.5">Accounts</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="summary">
