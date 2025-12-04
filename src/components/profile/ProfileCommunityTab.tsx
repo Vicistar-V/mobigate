@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, Crown, ChevronRight, Building2, MapPin } from "lucide-react";
+import { Users, Crown, ChevronRight, Building2, MapPin, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getOwnedCommunities, getJoinedCommunities } from "@/data/communityData";
 import { Community } from "@/types/community";
@@ -106,6 +106,10 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
     navigate("/community");
   };
 
+  const handleCreateCommunity = () => {
+    navigate("/create-community");
+  };
+
   if (totalCommunities === 0) {
     return (
       <Card className="p-6">
@@ -115,9 +119,15 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
           <p className="text-sm text-muted-foreground mb-4">
             {userName} hasn't joined any communities yet.
           </p>
-          <Button onClick={handleViewAll}>
-            Explore Communities
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button onClick={handleCreateCommunity}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Community
+            </Button>
+            <Button variant="outline" onClick={handleViewAll}>
+              Explore Communities
+            </Button>
+          </div>
         </div>
       </Card>
     );
@@ -125,7 +135,7 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
 
   return (
     <div className="space-y-4">
-      {/* Header with View All button */}
+      {/* Header with Create and View All buttons */}
       <Card className="p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -134,15 +144,26 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
               {totalCommunities} {totalCommunities === 1 ? "Community" : "Communities"}
             </span>
           </div>
-          <Button 
-            variant="default" 
-            size="sm"
-            onClick={handleViewAll}
-            className="h-8"
-          >
-            View All
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleCreateCommunity}
+              className="h-8"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={handleViewAll}
+              className="h-8"
+            >
+              View All
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
         </div>
       </Card>
 
