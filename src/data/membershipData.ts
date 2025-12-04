@@ -24,6 +24,41 @@ export interface BlockedMember extends Member {
   reason: string;
 }
 
+// Enhanced interface for admin blocking capabilities (members + non-members)
+export type UserType = "member" | "executive" | "admin" | "guest" | "visitor" | "external";
+export type BlockDuration = "7d" | "14d" | "30d" | "90d" | "1yr" | "permanent";
+
+export interface BlockedUser {
+  id: string;
+  name: string;
+  avatar?: string;
+  userType: UserType;
+  email?: string;
+  phone?: string;
+  ipAddress?: string;
+  guestId?: string;
+  blockedDate: Date;
+  blockedBy: string;
+  blockedByAvatar?: string;
+  reason: string;
+  duration: BlockDuration;
+  expiryDate?: Date;
+  isPermaBan: boolean;
+  blockCount: number; // How many times this user has been blocked
+}
+
+export interface NonMember {
+  id: string;
+  name: string;
+  avatar?: string;
+  userType: "guest" | "visitor" | "external";
+  email?: string;
+  ipAddress?: string;
+  guestId?: string;
+  lastActivity?: string;
+  visitCount?: number;
+}
+
 export interface FriendRequest {
   id: string;
   from: Member;
@@ -223,6 +258,147 @@ export const mockBlockedMembers: BlockedMember[] = [
     blockedDate: new Date("2024-11-01"),
     reason: "Inappropriate behavior"
   }
+];
+
+// Enhanced blocked users list for admin management
+export const mockBlockedUsers: BlockedUser[] = [
+  {
+    id: "bu-1",
+    name: "John Doe",
+    avatar: "/placeholder.svg",
+    userType: "member",
+    email: "john.doe@email.com",
+    blockedDate: new Date("2024-10-15"),
+    blockedBy: "Admin Fatima",
+    blockedByAvatar: "/placeholder.svg",
+    reason: "Repeated spam messages in community chat. Warned 3 times before action.",
+    duration: "permanent",
+    isPermaBan: true,
+    blockCount: 2
+  },
+  {
+    id: "bu-2",
+    name: "Jane Smith",
+    avatar: "/placeholder.svg",
+    userType: "executive",
+    email: "jane.smith@email.com",
+    blockedDate: new Date("2024-11-01"),
+    blockedBy: "Admin Chukwudi",
+    blockedByAvatar: "/placeholder.svg",
+    reason: "Inappropriate behavior during community meeting",
+    duration: "30d",
+    expiryDate: new Date("2024-12-01"),
+    isPermaBan: false,
+    blockCount: 1
+  },
+  {
+    id: "bu-3",
+    name: "Guest #4567",
+    userType: "guest",
+    guestId: "GUEST-4567",
+    blockedDate: new Date("2024-11-28"),
+    blockedBy: "Admin Amina",
+    blockedByAvatar: "/placeholder.svg",
+    reason: "Posting inappropriate content as guest",
+    duration: "90d",
+    expiryDate: new Date("2025-02-26"),
+    isPermaBan: false,
+    blockCount: 1
+  },
+  {
+    id: "bu-4",
+    name: "Visitor IP 192.168.1.45",
+    userType: "visitor",
+    ipAddress: "192.168.1.45",
+    blockedDate: new Date("2024-11-25"),
+    blockedBy: "Admin Fatima",
+    blockedByAvatar: "/placeholder.svg",
+    reason: "Suspicious activity and potential bot behavior",
+    duration: "permanent",
+    isPermaBan: true,
+    blockCount: 3
+  },
+  {
+    id: "bu-5",
+    name: "External User",
+    userType: "external",
+    email: "spammer@fakeemail.com",
+    blockedDate: new Date("2024-12-01"),
+    blockedBy: "Admin Ngozi",
+    blockedByAvatar: "/placeholder.svg",
+    reason: "Pre-emptive block - known spam email domain",
+    duration: "permanent",
+    isPermaBan: true,
+    blockCount: 0
+  }
+];
+
+// Non-members who can be blocked (guests, visitors, external)
+export const mockNonMembers: NonMember[] = [
+  {
+    id: "nm-1",
+    name: "Guest #1234",
+    userType: "guest",
+    guestId: "GUEST-1234",
+    email: "guest1234@email.com",
+    lastActivity: "2 hours ago",
+    visitCount: 5
+  },
+  {
+    id: "nm-2",
+    name: "Guest #5678",
+    userType: "guest",
+    guestId: "GUEST-5678",
+    lastActivity: "30 minutes ago",
+    visitCount: 12
+  },
+  {
+    id: "nm-3",
+    name: "Visitor from Lagos",
+    userType: "visitor",
+    ipAddress: "102.89.23.156",
+    lastActivity: "5 minutes ago",
+    visitCount: 3
+  },
+  {
+    id: "nm-4",
+    name: "Visitor from Abuja",
+    userType: "visitor",
+    ipAddress: "41.58.67.89",
+    lastActivity: "1 hour ago",
+    visitCount: 8
+  },
+  {
+    id: "nm-5",
+    name: "Anonymous Viewer",
+    userType: "visitor",
+    ipAddress: "197.210.45.123",
+    lastActivity: "Just now",
+    visitCount: 1
+  }
+];
+
+// Block duration options for admin selection
+export const blockDurationOptions = [
+  { value: "7d", label: "7 Days", days: 7 },
+  { value: "14d", label: "14 Days", days: 14 },
+  { value: "30d", label: "30 Days", days: 30 },
+  { value: "90d", label: "90 Days", days: 90 },
+  { value: "1yr", label: "1 Year", days: 365 },
+  { value: "permanent", label: "Permanent", days: null }
+];
+
+// Common block reasons for quick selection
+export const commonBlockReasons = [
+  "Spam messages or content",
+  "Inappropriate behavior",
+  "Harassment or bullying",
+  "Violating community guidelines",
+  "Suspicious or bot-like activity",
+  "Posting misleading information",
+  "Impersonation",
+  "Pre-emptive block (known bad actor)",
+  "Other"
 ];
 
 export const suggestedFriends: Member[] = [
