@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { UserPlus, Users, Grid3x3, List, Check, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus } from "lucide-react";
+import { UserPlus, Users, MoveHorizontal, MoveVertical, Check, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -136,12 +136,23 @@ export const PeopleYouMayKnow = () => {
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">People you may know</h3>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
             onClick={() => setViewMode(viewMode === "carousel" ? "grid" : "carousel")}
-            className="h-8 w-8"
+            className="gap-1.5 transition-all duration-200"
+            title={viewMode === "carousel" ? "Switch to Vertical View" : "Switch to Horizontal View"}
           >
-            {viewMode === "carousel" ? <Grid3x3 className="h-4 w-4" /> : <List className="h-4 w-4" />}
+            {viewMode === "carousel" ? (
+              <>
+                <MoveHorizontal className="h-4 w-4" />
+                <span className="text-xs hidden sm:inline">Horizontal</span>
+              </>
+            ) : (
+              <>
+                <MoveVertical className="h-4 w-4" />
+                <span className="text-xs hidden sm:inline">Vertical</span>
+              </>
+            )}
           </Button>
         </div>
         

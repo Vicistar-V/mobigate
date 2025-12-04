@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal, UserPlus, Share2 } from "lucide-react";
+import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal, UserPlus, Share2, MoveHorizontal, MoveVertical } from "lucide-react";
 import { getPostsByUserId, Post } from "@/data/posts";
 import { useUserPosts } from "@/hooks/useWindowData";
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { contentsAdSlots } from "@/data/profileAds";
@@ -83,6 +84,7 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set());
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [viewOrientation, setViewOrientation] = useState<"horizontal" | "vertical">("vertical");
   const { toast } = useToast();
   
   // Media Gallery states
@@ -273,17 +275,40 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
             All Contents <span className="text-muted-foreground">({sortedPosts.length})</span>
           </h2>
           
-          {/* Sort Dropdown */}
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">Most Recent</SelectItem>
-              <SelectItem value="popular">Most Popular</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            {/* Orientation Toggle */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setViewOrientation(viewOrientation === "horizontal" ? "vertical" : "horizontal")}
+              className="gap-1.5 transition-all duration-200"
+              title={viewOrientation === "horizontal" ? "Switch to Vertical View" : "Switch to Horizontal View"}
+            >
+              {viewOrientation === "horizontal" ? (
+                <>
+                  <MoveHorizontal className="h-4 w-4" />
+                  <span className="text-xs hidden sm:inline">Horizontal</span>
+                </>
+              ) : (
+                <>
+                  <MoveVertical className="h-4 w-4" />
+                  <span className="text-xs hidden sm:inline">Vertical</span>
+                </>
+              )}
+            </Button>
+            
+            {/* Sort Dropdown */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="popular">Most Popular</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Content Type Filters */}
@@ -344,142 +369,200 @@ export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps
         </div>
       </div>
 
-      {/* Content List with Ads and People Suggestions */}
-      <div className="space-y-3">
-        {visiblePosts.map((post, index) => {
-          // Calculate if we should show People You May Know (every 12 posts)
-          const shouldShowPeopleSuggestions = (index + 1) % 12 === 0 && index < visiblePosts.length - 1;
-          
-          // Calculate if we should show an ad after this post (every 6 posts, but NOT when people suggestions show)
-          const shouldShowAd = (index + 1) % 6 === 0 && !shouldShowPeopleSuggestions && index < visiblePosts.length - 1 && premiumAdSlots.length > 0;
-          const adSlotIndex = Math.floor((index + 1) / 6) - 1;
-          
-          return (
-            <React.Fragment key={post.id}>
-              {/* Content Card */}
-              <Card 
-                className="overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
-                onClick={() => openMediaGallery(post, index)}
-              >
-                {/* Top: Full-Width Thumbnail or Icon */}
-                <div className="w-full aspect-[4/3] sm:aspect-video bg-muted flex items-center justify-center">
+      {/* Content Display - Horizontal Carousel or Vertical List */}
+      {viewOrientation === "horizontal" ? (
+        <Carousel
+          opts={{
+            align: "start",
+            loop: false,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {visiblePosts.map((post, index) => (
+              <CarouselItem key={post.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-[60%] md:basis-[45%] lg:basis-[35%]">
+                <Card 
+                  className="h-[65vh] overflow-hidden relative group cursor-pointer"
+                  onClick={() => openMediaGallery(post, index)}
+                >
                   {post.imageUrl ? (
                     <img 
                       src={post.imageUrl} 
-                      alt={post.title} 
-                      className="w-full h-full object-cover"
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     />
                   ) : (
-                    getContentTypeIcon(post.type)
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      {getContentTypeIcon(post.type)}
+                    </div>
                   )}
-                </div>
-
-                {/* Bottom: Content Info */}
-                <div className="p-3 sm:p-4 space-y-2.5">
-                  {/* Title */}
-                  <h3 className="font-semibold text-base sm:text-lg line-clamp-2 leading-snug">
-                    {post.title}
-                  </h3>
-                  
-                  {/* Badge directly under title */}
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs font-medium w-fit"
-                  >
+                  <Badge className="absolute top-2 left-2 z-10 text-xs" variant="secondary">
                     {post.type}
                   </Badge>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4">
+                    <h3 className="text-white text-sm sm:text-base font-semibold line-clamp-2">{post.title}</h3>
+                    {post.subtitle && (
+                      <p className="text-white/80 text-xs sm:text-sm line-clamp-2 mt-1">{post.subtitle}</p>
+                    )}
+                    <div className="flex items-center gap-3 mt-2 text-white/90 text-xs">
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5" />
+                        {post.views}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Heart className={`h-3.5 w-3.5 ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                        {post.likes}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        {post.comments}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="hidden md:flex -left-4" />
+          <CarouselNext className="hidden md:flex -right-4" />
+        </Carousel>
+      ) : (
+        <div className="space-y-3">
+          {visiblePosts.map((post, index) => {
+            // Calculate if we should show People You May Know (every 12 posts)
+            const shouldShowPeopleSuggestions = (index + 1) % 12 === 0 && index < visiblePosts.length - 1;
+            
+            // Calculate if we should show an ad after this post (every 6 posts, but NOT when people suggestions show)
+            const shouldShowAd = (index + 1) % 6 === 0 && !shouldShowPeopleSuggestions && index < visiblePosts.length - 1 && premiumAdSlots.length > 0;
+            const adSlotIndex = Math.floor((index + 1) / 6) - 1;
+            
+            return (
+              <React.Fragment key={post.id}>
+                {/* Content Card */}
+                <Card 
+                  className="overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
+                  onClick={() => openMediaGallery(post, index)}
+                >
+                  {/* Top: Full-Width Thumbnail or Icon */}
+                  <div className="w-full aspect-[4/3] sm:aspect-video bg-muted flex items-center justify-center">
+                    {post.imageUrl ? (
+                      <img 
+                        src={post.imageUrl} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      getContentTypeIcon(post.type)
+                    )}
+                  </div>
 
-                  {/* Description (2-3 lines max) */}
-                  {post.subtitle && (
-                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                      {post.subtitle}
-                    </p>
-                  )}
+                  {/* Bottom: Content Info */}
+                  <div className="p-3 sm:p-4 space-y-2.5">
+                    {/* Title */}
+                    <h3 className="font-semibold text-base sm:text-lg line-clamp-2 leading-snug">
+                      {post.title}
+                    </h3>
+                    
+                    {/* Badge directly under title */}
+                    <Badge 
+                      variant="secondary" 
+                      className="text-xs font-medium w-fit"
+                    >
+                      {post.type}
+                    </Badge>
 
-                  {/* Metadata Row */}
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap pt-2">
-                    <span className="flex items-center gap-1.5">
-                      <Eye className="h-4 w-4" />
-                      <span className="font-medium">{post.views}</span>
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleLike(post.id, e)}
-                      className={`flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors ${
-                        likedPosts.has(post.id) ? 'text-red-500 hover:text-red-600' : ''
-                      }`}
-                    >
-                      <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                      <span className="font-medium">{post.likes}</span>
-                    </Button>
-                    <button
-                      className="flex items-center gap-1.5 hover:underline transition-all"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openCommentDialog(post);
-                      }}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      <span className="font-medium">{post.comments}</span>
-                    </button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openShareDialog(post);
-                      }}
-                      className="flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors"
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                    {post.followers && !post.isOwner && (
+                    {/* Description (2-3 lines max) */}
+                    {post.subtitle && (
+                      <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                        {post.subtitle}
+                      </p>
+                    )}
+
+                    {/* Metadata Row */}
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap pt-2">
+                      <span className="flex items-center gap-1.5">
+                        <Eye className="h-4 w-4" />
+                        <span className="font-medium">{post.views}</span>
+                      </span>
                       <Button
-                        variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleLike(post.id, e)}
+                        className={`flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors ${
+                          likedPosts.has(post.id) ? 'text-red-500 hover:text-red-600' : ''
+                        }`}
+                      >
+                        <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
+                        <span className="font-medium">{post.likes}</span>
+                      </Button>
+                      <button
+                        className="flex items-center gap-1.5 hover:underline transition-all"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCommentDialog(post);
+                        }}
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        <span className="font-medium">{post.comments}</span>
+                      </button>
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleFollowAuthor(post.userId);
+                          openShareDialog(post);
                         }}
-                        className="gap-1.5 h-7 px-3 text-xs ml-auto"
-                        aria-label={followingAuthors.has(post.userId) ? "Unfollow" : "Follow"}
+                        className="flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors"
                       >
-                        <UserPlus className="h-3.5 w-3.5" />
-                        <span>{followingAuthors.has(post.userId) ? "Following" : "Follow"}</span>
-                        <span className="opacity-75">({formatFollowerCount(post.followers)})</span>
+                        <Share2 className="h-4 w-4" />
                       </Button>
-                    )}
-                    {post.fee && (
-                      <span className={`font-semibold text-base text-emerald-600 dark:text-emerald-400 ${post.followers && !post.isOwner ? '' : 'ml-auto'}`}>
-                        {post.fee}
-                      </span>
-                    )}
+                      {post.followers && !post.isOwner && (
+                        <Button
+                          variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFollowAuthor(post.userId);
+                          }}
+                          className="gap-1.5 h-7 px-3 text-xs ml-auto"
+                          aria-label={followingAuthors.has(post.userId) ? "Unfollow" : "Follow"}
+                        >
+                          <UserPlus className="h-3.5 w-3.5" />
+                          <span>{followingAuthors.has(post.userId) ? "Following" : "Follow"}</span>
+                          <span className="opacity-75">({formatFollowerCount(post.followers)})</span>
+                        </Button>
+                      )}
+                      {post.fee && (
+                        <span className={`font-semibold text-base text-emerald-600 dark:text-emerald-400 ${post.followers && !post.isOwner ? '' : 'ml-auto'}`}>
+                          {post.fee}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Card>
-              
-              {/* Premium Ad after every 6 posts */}
-              {shouldShowAd && (
-                <div className="w-full my-4">
-                  <PremiumAdRotation
-                    slotId={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.slotId}
-                    ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
-                    context="profile"
-                  />
-                </div>
-              )}
-              
-              {/* People You May Know after every 12 posts */}
-              {shouldShowPeopleSuggestions && (
-                <div className="w-full my-4">
-                  <PeopleYouMayKnow />
-                </div>
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
+                </Card>
+                
+                {/* Premium Ad after every 6 posts */}
+                {shouldShowAd && (
+                  <div className="w-full my-4">
+                    <PremiumAdRotation
+                      slotId={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.slotId}
+                      ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
+                      context="profile"
+                    />
+                  </div>
+                )}
+                
+                {/* People You May Know after every 12 posts */}
+                {shouldShowPeopleSuggestions && (
+                  <div className="w-full my-4">
+                    <PeopleYouMayKnow />
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      )}
 
       {/* Pagination Buttons */}
       {(hasMore || canShowLess) && (

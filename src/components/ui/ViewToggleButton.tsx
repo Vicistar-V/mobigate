@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Grid3x3, LayoutList } from "lucide-react";
+import { MoveHorizontal, MoveVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ViewMode = "carousel" | "grid";
@@ -8,25 +8,34 @@ interface ViewToggleButtonProps {
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
   className?: string;
+  showLabel?: boolean;
 }
 
-export function ViewToggleButton({ view, onViewChange, className }: ViewToggleButtonProps) {
+export function ViewToggleButton({ view, onViewChange, className, showLabel = false }: ViewToggleButtonProps) {
   const toggleView = () => {
     onViewChange(view === "carousel" ? "grid" : "carousel");
   };
 
+  const isHorizontal = view === "carousel";
+
   return (
     <Button
-      variant="ghost"
-      size="icon"
+      variant="outline"
+      size="sm"
       onClick={toggleView}
-      className={cn("h-8 w-8", className)}
-      title={view === "carousel" ? "Switch to grid view" : "Switch to carousel view"}
+      className={cn("gap-1.5 transition-all duration-200", className)}
+      title={isHorizontal ? "Switch to Vertical View" : "Switch to Horizontal View"}
     >
-      {view === "carousel" ? (
-        <Grid3x3 className="h-4 w-4" />
+      {isHorizontal ? (
+        <>
+          <MoveHorizontal className="h-4 w-4" />
+          {showLabel && <span className="text-xs">Horizontal</span>}
+        </>
       ) : (
-        <LayoutList className="h-4 w-4" />
+        <>
+          <MoveVertical className="h-4 w-4" />
+          {showLabel && <span className="text-xs">Vertical</span>}
+        </>
       )}
     </Button>
   );
