@@ -26,7 +26,7 @@ export const MeetingVideoGrid = ({
         <div className="relative w-full h-full">
           {/* Video Cell - Expanded */}
           <div className="relative w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <Avatar className="w-72 h-72 border-[6px] border-primary">
+            <Avatar className="w-72 h-72 border-[6px] border-primary animate-scale-in">
               <AvatarImage src={expandedParticipant.avatar} alt={expandedParticipant.name} />
               <AvatarFallback className="text-8xl">{expandedParticipant.name[0]}</AvatarFallback>
             </Avatar>
@@ -37,7 +37,7 @@ export const MeetingVideoGrid = ({
             )}
 
             {/* Name Badge */}
-            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-6 py-3 rounded-full">
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-6 py-3 rounded-full animate-fade-in" style={{ animationDelay: '0.15s' }}>
               <p className="text-white font-semibold text-xl">{expandedParticipant.name}</p>
               <p className="text-white/70 text-base text-center">{expandedParticipant.position}</p>
             </div>
