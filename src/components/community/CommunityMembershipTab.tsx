@@ -804,7 +804,7 @@ export function CommunityMembershipTab() {
           filter="all"
           onViewChange={setBirthdayView}
           onFilterChange={() => {}}
-          showViewToggle={false}
+          showViewToggle={true}
           showFilterCounts={false}
           showFilters={false}
         />

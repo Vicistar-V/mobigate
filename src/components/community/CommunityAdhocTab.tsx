@@ -108,7 +108,7 @@ export const CommunityAdhocTab = () => {
       <ExecutiveMembersCarousel
         title={`Ad-hoc Committee Members ${adHocFilter !== "all" ? `- ${adHocFilter}` : ""}`}
         members={filteredAdHocMembers}
-        showViewToggle={false}
+        showViewToggle={true}
         onMemberClick={handleMemberClick}
       />
 
@@ -119,7 +119,7 @@ export const CommunityAdhocTab = () => {
       <ExecutiveMembersCarousel
         title="Ad-hoc Committee Members"
         members={adHocMembers.slice(0, 6)}
-        showViewToggle={false}
+        showViewToggle={true}
         onMemberClick={handleMemberClick}
       />
 
