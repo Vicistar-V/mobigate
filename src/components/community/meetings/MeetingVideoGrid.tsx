@@ -26,7 +26,7 @@ export const MeetingVideoGrid = ({
         <div className="relative w-full h-full">
           {/* Video Cell - Expanded */}
           <div className="relative w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-          <Avatar className="w-72 h-72 border-[6px] border-primary">
+            <Avatar className="w-72 h-72 border-[6px] border-primary">
               <AvatarImage src={expandedParticipant.avatar} alt={expandedParticipant.name} />
               <AvatarFallback className="text-8xl">{expandedParticipant.name[0]}</AvatarFallback>
             </Avatar>
