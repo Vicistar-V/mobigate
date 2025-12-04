@@ -106,7 +106,7 @@ export const CommunityStaffTab = () => {
       <ExecutiveMembersCarousel
         title="Staff & Employees"
         members={staffMembers}
-        showViewToggle={false}
+        showViewToggle={true}
         onMemberClick={handleMemberClick}
       />
 
@@ -117,7 +117,7 @@ export const CommunityStaffTab = () => {
       <ExecutiveMembersCarousel
         title="Staff & Employees"
         members={staffMembers.slice(0, 4)}
-        showViewToggle={false}
+        showViewToggle={true}
         onMemberClick={handleMemberClick}
       />
 
