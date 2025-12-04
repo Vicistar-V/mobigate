@@ -16,7 +16,9 @@ import {
   Ban,
   Flag,
   Grid3x3,
-  LayoutList
+  LayoutList,
+  MoveHorizontal,
+  MoveVertical
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -738,8 +740,21 @@ export function CommunityMembershipTab() {
 
       {/* 5. Members' Birthdays Section */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <h2 className="text-lg sm:text-xl font-semibold">Members' Birthdays</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setBirthdayView(birthdayView === "normal" ? "large" : "normal")}
+            className="gap-1.5 transition-all duration-200"
+            title={birthdayView === "normal" ? "Switch to Vertical View" : "Switch to Horizontal View"}
+          >
+            {birthdayView === "normal" ? (
+              <MoveHorizontal className="h-4 w-4" />
+            ) : (
+              <MoveVertical className="h-4 w-4" />
+            )}
+          </Button>
         </div>
 
         {/* Birthday Filter Tabs */}
@@ -789,7 +804,7 @@ export function CommunityMembershipTab() {
           filter="all"
           onViewChange={setBirthdayView}
           onFilterChange={() => {}}
-          showViewToggle={true}
+          showViewToggle={false}
           showFilterCounts={false}
           showFilters={false}
         />
