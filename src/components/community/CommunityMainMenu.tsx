@@ -15,7 +15,7 @@ import { GuestLoginDialog } from "./GuestLoginDialog";
 import { MemberLoginDialog } from "./MemberLoginDialog";
 import { AdminLoginDialog } from "./AdminLoginDialog";
 import { ChatMembersDialog } from "./ChatMembersDialog";
-import { GiftMembersDialog } from "./GiftMembersDialog";
+import { CommunityGiftDrawer } from "./CommunityGiftDrawer";
 import { BlockManagementDrawer } from "./BlockManagementDrawer";
 import { AddFriendsDialog } from "./AddFriendsDialog";
 import { InviteMembersDialog } from "./InviteMembersDialog";
@@ -938,7 +938,7 @@ export function CommunityMainMenu({
 
       {/* Membership & Social Dialogs */}
       <ChatMembersDialog open={showChatMembers} onOpenChange={setShowChatMembers} />
-      <GiftMembersDialog open={showGiftMembers} onOpenChange={setShowGiftMembers} />
+      <CommunityGiftDrawer open={showGiftMembers} onOpenChange={setShowGiftMembers} />
       <BlockManagementDrawer open={showBlockMembers} onOpenChange={setShowBlockMembers} />
       <AddFriendsDialog open={showAddFriends} onOpenChange={setShowAddFriends} />
       <InviteMembersDialog open={showInviteMembers} onOpenChange={setShowInviteMembers} />
