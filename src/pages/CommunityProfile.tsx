@@ -73,6 +73,12 @@ import { ArticlesPage } from "@/pages/ArticlesPage";
 import { InsideCommunityPage } from "@/pages/InsideCommunityPage";
 import { MembershipApplicationDrawer } from "@/components/community/MembershipApplicationDrawer";
 import { ExitCommunityDialog } from "@/components/community/ExitCommunityDialog";
+import { CreatePostTypeSelector, PostType } from "@/components/community/CreatePostTypeSelector";
+import { CreateVibeDialog } from "@/components/community/CreateVibeDialog";
+import { CreateCommunityContentDialog } from "@/components/community/CreateCommunityContentDialog";
+import { CreateSpecialEventDialog } from "@/components/community/CreateSpecialEventDialog";
+import { ArticleEditorDialog } from "@/components/community/ArticleEditorDialog";
+import { MediaUploadDialog } from "@/components/community/MediaUploadDialog";
 import { CommunityGallerySection } from "@/components/community/CommunityGallerySection";
 
 const CommunityProfile = () => {
@@ -87,7 +93,13 @@ const CommunityProfile = () => {
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [galleryFilter, setGalleryFilter] = useState<string>("all");
   const [showDonationDialog, setShowDonationDialog] = useState(false);
-  const [showPostDialog, setShowPostDialog] = useState(false);
+  const [showPostTypeSelector, setShowPostTypeSelector] = useState(false);
+  const [showWallStatusDialog, setShowWallStatusDialog] = useState(false);
+  const [showGalleryUploadDialog, setShowGalleryUploadDialog] = useState(false);
+  const [showContentDialog, setShowContentDialog] = useState(false);
+  const [showArticleEditorDialog, setShowArticleEditorDialog] = useState(false);
+  const [showVibeDialog, setShowVibeDialog] = useState(false);
+  const [showSpecialEventDialog, setShowSpecialEventDialog] = useState(false);
   const [showMembershipApplication, setShowMembershipApplication] = useState(false);
   const [showExitCommunity, setShowExitCommunity] = useState(false);
   const { toast } = useToast();
@@ -395,6 +407,29 @@ const CommunityProfile = () => {
     setShowDonationDialog(true);
   };
 
+  const handlePostTypeSelect = (type: PostType) => {
+    switch (type) {
+      case "gallery":
+        setShowGalleryUploadDialog(true);
+        break;
+      case "wall-status":
+        setShowWallStatusDialog(true);
+        break;
+      case "contents":
+        setShowContentDialog(true);
+        break;
+      case "articles":
+        setShowArticleEditorDialog(true);
+        break;
+      case "vibes":
+        setShowVibeDialog(true);
+        break;
+      case "special-events":
+        setShowSpecialEventDialog(true);
+        break;
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -489,7 +524,7 @@ const CommunityProfile = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowPostDialog(true)}
+                onClick={() => setShowPostTypeSelector(true)}
               >
                 Create Post
               </Button>
@@ -539,7 +574,7 @@ const CommunityProfile = () => {
               {/* 3. Create Post Button */}
               <div className="space-y-2">
                 <Button
-                  onClick={() => setShowPostDialog(true)}
+                  onClick={() => setShowPostTypeSelector(true)}
                   className="w-full"
                   variant="outline"
                 >
@@ -984,10 +1019,53 @@ const CommunityProfile = () => {
         onOpenChange={setShowDonationDialog} 
       />
       
-      {/* Community Post Dialog */}
+      {/* Post Type Selector */}
+      <CreatePostTypeSelector
+        open={showPostTypeSelector}
+        onOpenChange={setShowPostTypeSelector}
+        onSelectType={handlePostTypeSelect}
+      />
+
+      {/* Wall Status Dialog */}
       <CommunityPostDialog 
-        open={showPostDialog} 
-        onOpenChange={setShowPostDialog} 
+        open={showWallStatusDialog} 
+        onOpenChange={setShowWallStatusDialog} 
+      />
+
+      {/* Gallery Upload Dialog */}
+      <MediaUploadDialog
+        open={showGalleryUploadDialog}
+        onOpenChange={setShowGalleryUploadDialog}
+        onUploadComplete={(files) => {
+          toast({
+            title: "Gallery Updated",
+            description: `${files.length} file(s) uploaded to community gallery`,
+          });
+        }}
+      />
+
+      {/* Monetized Content Dialog */}
+      <CreateCommunityContentDialog
+        open={showContentDialog}
+        onOpenChange={setShowContentDialog}
+      />
+
+      {/* Article Editor Dialog */}
+      <ArticleEditorDialog
+        open={showArticleEditorDialog}
+        onOpenChange={setShowArticleEditorDialog}
+      />
+
+      {/* Vibe Dialog */}
+      <CreateVibeDialog
+        open={showVibeDialog}
+        onOpenChange={setShowVibeDialog}
+      />
+
+      {/* Special Event Dialog */}
+      <CreateSpecialEventDialog
+        open={showSpecialEventDialog}
+        onOpenChange={setShowSpecialEventDialog}
       />
 
       {/* Membership Application Drawer */}
