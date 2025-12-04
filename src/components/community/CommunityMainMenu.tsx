@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { MoreVertical, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
+
 import { GuestLoginDialog } from "./GuestLoginDialog";
 import { MemberLoginDialog } from "./MemberLoginDialog";
 import { AdminLoginDialog } from "./AdminLoginDialog";
@@ -226,63 +226,73 @@ export function CommunityMainMenu({
       </div>
       
       <ScrollArea className="flex-1">
-        <div className="pb-6">
-          {/* Direct Menu Items */}
-          <div className="px-4 py-2 space-y-1">
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("Articles")}
-            >
-              Articles
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("news", true)}
-            >
-              News Info
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("events", true)}
-            >
-              Events
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("vibes", true)}
-            >
-              Community Vibes
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("gallery", true)}
-            >
-              Community Gallery
-            </Button>
-          </div>
+        <div className="pb-6 pt-2">
+          <Accordion type="single" collapsible className="w-full px-4 space-y-1">
+            {/* Community Content - New unified section for top items */}
+            <AccordionItem value="community-content" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
+              <AccordionTrigger className="text-base font-semibold">
+                Community Content
+              </AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("Articles")}
+                >
+                  Articles
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("news", true)}
+                >
+                  News Info
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("events", true)}
+                >
+                  Events
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("vibes", true)}
+                >
+                  Community Vibes
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("gallery", true)}
+                >
+                  Community Gallery
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("Inside Community")}
+                >
+                  Inside Community
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
-          <Separator className="my-2" />
-
-          <Accordion type="multiple" className="w-full px-4">
             {/* Guests Section */}
-            <AccordionItem value="guests">
+            <AccordionItem value="guests" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">Guests</AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("E-Mail Login")}
                 >
                   E-Mail Login [OTP]
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Join Community")}
                 >
                   Join Community
@@ -291,18 +301,18 @@ export function CommunityMainMenu({
             </AccordionItem>
 
             {/* Members Section */}
-            <AccordionItem value="members">
+            <AccordionItem value="members" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">Members</AccordionTrigger>
               <AccordionContent>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Login/Logout")}
                 >
                   Login/Logout
                 </Button>
                 
-                <Accordion type="multiple" className="pl-2 mt-1">
+                <Accordion type="single" collapsible className="pl-2 mt-1">
                   <AccordionItem value="exit-community" className="border-none">
                     <AccordionTrigger className="text-sm py-2">Exit Community</AccordionTrigger>
                     <AccordionContent className="space-y-1">
@@ -320,10 +330,10 @@ export function CommunityMainMenu({
             </AccordionItem>
 
             {/* MEMBERSHIP Section */}
-            <AccordionItem value="membership">
+            <AccordionItem value="membership" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base font-semibold">MEMBERSHIP</AccordionTrigger>
               <AccordionContent>
-                <Accordion type="multiple" className="pl-2">
+                <Accordion type="single" collapsible className="pl-2">
                   <AccordionItem value="view-members" className="border-none">
                     <AccordionTrigger className="text-sm py-2">View Members</AccordionTrigger>
                     <AccordionContent className="space-y-1">
@@ -361,13 +371,13 @@ export function CommunityMainMenu({
                 
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-2 mt-1"
+                  className="w-full justify-start pl-2 mt-1 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Add Friends")}
                 >
                   Add Friends
                 </Button>
                 
-                <Accordion type="multiple" className="pl-2 mt-1">
+                <Accordion type="single" collapsible className="pl-2 mt-1">
                   <AccordionItem value="invite-members" className="border-none">
                     <AccordionTrigger className="text-sm py-2">Invite Members</AccordionTrigger>
                     <AccordionContent className="space-y-1">
@@ -392,7 +402,7 @@ export function CommunityMainMenu({
                 {(isAdmin || isOwner) && (
                   <Button
                     variant="ghost"
-                    className="w-full justify-start pl-2 mt-1 text-primary"
+                    className="w-full justify-start pl-2 mt-1 text-primary h-9 transition-colors duration-200"
                     onClick={() => {
                       setShowManageMembershipRequests(true);
                       setOpen(false);
@@ -406,7 +416,7 @@ export function CommunityMainMenu({
                 {(isAdmin || isOwner) && (
                   <Button
                     variant="ghost"
-                    className="w-full justify-start pl-2 mt-1 text-primary"
+                    className="w-full justify-start pl-2 mt-1 text-primary h-9 transition-colors duration-200"
                     onClick={() => {
                       setShowManageGallery(true);
                       setOpen(false);
@@ -421,19 +431,19 @@ export function CommunityMainMenu({
 
             {/* Admins Section */}
             {(isAdmin || isOwner) && (
-              <AccordionItem value="admins">
+              <AccordionItem value="admins" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
                 <AccordionTrigger className="text-base">Admins</AccordionTrigger>
                 <AccordionContent className="space-y-1">
                   <Button
                     variant="ghost"
-                    className="w-full justify-start pl-4"
+                    className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                     onClick={() => handleMenuClick("Admin Login")}
                   >
                     Login
                   </Button>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start pl-4"
+                    className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                     onClick={() => handleMenuClick("Admin Logout")}
                   >
                     Logout
@@ -443,35 +453,35 @@ export function CommunityMainMenu({
             )}
 
             {/* Administration/Leadership */}
-            <AccordionItem value="administration">
+            <AccordionItem value="administration" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">
                 Administration/Leadership
               </AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("executive", true)}
                 >
                   Management/Executive Committee
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("tenure", true)}
                 >
                   Office Tenure
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("adhoc", true)}
                 >
                   Ad-hoc Committees
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("staff", true)}
                 >
                   Staff & Employees
@@ -479,7 +489,7 @@ export function CommunityMainMenu({
                 {(isAdmin || isOwner) && (
                   <Button
                     variant="ghost"
-                    className="w-full justify-start pl-4 text-primary"
+                    className="w-full justify-start pl-4 text-primary h-9 transition-colors duration-200"
                     onClick={() => {
                       setShowManageLeadership(true);
                       setOpen(false);
@@ -493,33 +503,33 @@ export function CommunityMainMenu({
             </AccordionItem>
 
             {/* FundRaiser */}
-            <AccordionItem value="fundraiser">
+            <AccordionItem value="fundraiser" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">FundRaiser</AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("fundraiser-raise", true)}
                 >
                   Raise Campaign
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("fundraiser-campaigns", true)}
                 >
                   View Campaigns
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("fundraiser-donors", true)}
                 >
                   View Donors
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("fundraiser-celebrity", true)}
                 >
                   View Celebrity Donors
@@ -528,298 +538,286 @@ export function CommunityMainMenu({
             </AccordionItem>
 
             {/* Election/Voting */}
-            <AccordionItem value="election">
+            <AccordionItem value="election" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">
                 Election/Voting
               </AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-campaigns", true)}
                 >
                   Campaigns
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-voting", true)}
                 >
                   Start Voting
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-results", true)}
                 >
                   View Results
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-winners", true)}
                 >
                   View Winners
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-opinions", true)}
                 >
                   Public Opinions
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-accreditation", true)}
                 >
                   Accreditation
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-clearances", true)}
                 >
                   Clearances
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-primaries", true)}
                 >
                   Nomination Primaries
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("election-accredited-voters", true)}
                 >
                   Accredited Voters
                 </Button>
               </AccordionContent>
             </AccordionItem>
-          </Accordion>
 
-          <Separator className="my-2" />
+            {/* Community Meetings - Now includes Roll-Calls */}
+            <AccordionItem value="meetings-main" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
+              <AccordionTrigger className="text-base font-semibold">
+                Community Meetings
+              </AccordionTrigger>
+              <AccordionContent>
+                <Accordion type="single" collapsible className="pl-2">
+                  <AccordionItem value="recent-meetings" className="border-none">
+                    <AccordionTrigger className="text-sm py-2">
+                      + Recent Meetings
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-proceedings", true)}
+                      >
+                        Download Meeting Proceedings
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-headline", true)}
+                      >
+                        Meeting Headline/Theme
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-resolutions", true)}
+                      >
+                        Meeting Resolutions
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-conflicts", true)}
+                      >
+                        Conflicts of Interests
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-chats", true)}
+                      >
+                        Meeting Chats
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-vote-notes", true)}
+                      >
+                        Meeting Vote Notes
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-lighter-moods", true)}
+                      >
+                        Lighter Moods
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-attendance", true)}
+                      >
+                        Attendance Roll-Calls
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
 
-          {/* Community Meetings */}
-          <Accordion type="multiple" className="w-full px-4">
-            <AccordionItem value="meetings-main">
-            <AccordionTrigger className="text-base font-semibold">
-              Community Meetings
-            </AccordionTrigger>
-            <AccordionContent>
-              <Accordion type="multiple" className="pl-2">
-                <AccordionItem value="recent-meetings" className="border-none">
-                  <AccordionTrigger className="text-sm py-2">
-                    + Recent Meetings
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-1">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-proceedings", true)}
-                    >
-                      Download Meeting Proceedings
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-headline", true)}
-                    >
-                      Meeting Headline/Theme
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-resolutions", true)}
-                    >
-                      Meeting Resolutions
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-conflicts", true)}
-                    >
-                      Conflicts of Interests
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-chats", true)}
-                    >
-                      Meeting Chats
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-vote-notes", true)}
-                    >
-                      Meeting Vote Notes
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-lighter-moods", true)}
-                    >
-                      Lighter Moods
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-attendance", true)}
-                    >
-                      Attendance Roll-Calls
-                    </Button>
-                  </AccordionContent>
-                </AccordionItem>
+                  <AccordionItem value="previous-meetings" className="border-none">
+                    <AccordionTrigger className="text-sm py-2">
+                      + Previous Meetings
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-proceedings", true)}
+                      >
+                        Download Meeting Proceedings
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-headline", true)}
+                      >
+                        Meeting Headline/Theme
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-resolutions", true)}
+                      >
+                        Meeting Resolutions
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-conflicts", true)}
+                      >
+                        Conflicts of Interests
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-chats", true)}
+                      >
+                        Meeting Chats
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-vote-notes", true)}
+                      >
+                        Meeting Vote Notes
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-lighter-moods", true)}
+                      >
+                        Lighter Moods
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-attendance", true)}
+                      >
+                        Attendance Roll-Calls
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
 
-                <AccordionItem value="previous-meetings" className="border-none">
-                  <AccordionTrigger className="text-sm py-2">
-                    + Previous Meetings
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-1">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-proceedings", true)}
-                    >
-                      Download Meeting Proceedings
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-headline", true)}
-                    >
-                      Meeting Headline/Theme
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-resolutions", true)}
-                    >
-                      Meeting Resolutions
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-conflicts", true)}
-                    >
-                      Conflicts of Interests
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-chats", true)}
-                    >
-                      Meeting Chats
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-vote-notes", true)}
-                    >
-                      Meeting Vote Notes
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-lighter-moods", true)}
-                    >
-                      Lighter Moods
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start pl-4 text-sm h-8"
-                      onClick={() => handleMenuClick("meeting-attendance", true)}
-                    >
-                      Attendance Roll-Calls
-                    </Button>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-2 mt-2 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("meetings", true)}
+                >
+                  Join Live Meeting
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-2 mt-1 h-9 transition-colors duration-200"
+                  onClick={() => handleMenuClick("rollcalls", true)}
+                >
+                  Roll-Calls
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
-              <Button
-                variant="ghost"
-                className="w-full justify-start pl-2 mt-2"
-                onClick={() => handleMenuClick("meetings", true)}
-              >
-                Join Live Meeting
-              </Button>
-            </AccordionContent>
-          </AccordionItem>
-          </Accordion>
-
-          {/* Roll-Calls */}
-          <div className="px-4 mt-2">
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("rollcalls", true)}
-            >
-              Roll-Calls
-            </Button>
-          </div>
-
-          <Separator className="my-2" />
-
-          <Accordion type="multiple" className="w-full px-4">
             {/* Finance */}
-            <AccordionItem value="finance">
+            <AccordionItem value="finance" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">Finance</AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("community-accounts", true)}
                 >
                   CAM [Community Account Manager]
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Financial Overview/Wallet")}
                 >
                   Financial Overview/Wallet
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Financial Obligations")}
                 >
                   Financial Obligations
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Financial Status Checker")}
                 >
                   Financial Status Checker
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Automated Financial Audit")}
                 >
                   Automated Financial Audit
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("finance-summary", true)}
                 >
                   Financial Summary
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("finance-clearances", true)}
                 >
                   Financial Clearances
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("finance-accreditation", true)}
                 >
                   Financial Accreditation
@@ -828,14 +826,14 @@ export function CommunityMainMenu({
             </AccordionItem>
 
             {/* Constitution & By-laws */}
-            <AccordionItem value="constitution">
+            <AccordionItem value="constitution" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">
                 Constitution & By-laws
               </AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("View Constitution")}
                 >
                   View Constitution
@@ -844,14 +842,14 @@ export function CommunityMainMenu({
             </AccordionItem>
 
             {/* Community Resources */}
-            <AccordionItem value="resources">
+            <AccordionItem value="resources" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">
                 Community Resources
               </AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => {
                     setShowResources(true);
                     setOpen(false);
@@ -862,7 +860,7 @@ export function CommunityMainMenu({
                 {(isAdmin || isOwner) && (
                   <Button
                     variant="ghost"
-                    className="w-full justify-start pl-4 text-primary"
+                    className="w-full justify-start pl-4 text-primary h-9 transition-colors duration-200"
                     onClick={() => {
                       setShowManageResources(true);
                       setOpen(false);
@@ -876,19 +874,19 @@ export function CommunityMainMenu({
             </AccordionItem>
 
             {/* Mobi-Merchant */}
-            <AccordionItem value="mobi-merchant">
+            <AccordionItem value="mobi-merchant" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">Mobi-Merchant</AccordionTrigger>
               <AccordionContent className="space-y-1">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Create Mobi Quiz-Games")}
                 >
                   Create Mobi Quiz-Games
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
                   onClick={() => handleMenuClick("Subscribe for Voucher Bundles")}
                 >
                   Subscribe for Voucher Bundles
@@ -896,19 +894,6 @@ export function CommunityMainMenu({
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-
-          <Separator className="my-2" />
-
-          {/* Inside Community */}
-          <div className="px-4 pb-6">
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => handleMenuClick("Inside Community")}
-            >
-              Inside Community
-            </Button>
-          </div>
         </div>
       </ScrollArea>
     </div>
