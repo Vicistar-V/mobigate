@@ -1,8 +1,11 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { MoveHorizontal, MoveVertical } from "lucide-react";
 import React, { useState } from "react";
 import { MediaViewer } from "@/components/MediaViewer";
-import { ViewToggleButton, ViewMode } from "@/components/ui/ViewToggleButton";
+
+type ViewMode = "carousel" | "grid";
 
 interface PersonImage {
   id: string;
@@ -30,7 +33,25 @@ export const OurPeopleCarousel = ({ items }: OurPeopleCarouselProps) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Our People, Our Strength</h2>
-        <ViewToggleButton view={viewMode} onViewChange={setViewMode} />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setViewMode(viewMode === "carousel" ? "grid" : "carousel")}
+          className="gap-1.5 transition-all duration-200"
+          title={viewMode === "carousel" ? "Switch to Vertical View" : "Switch to Horizontal View"}
+        >
+          {viewMode === "carousel" ? (
+            <>
+              <MoveHorizontal className="h-4 w-4" />
+              <span className="text-xs hidden sm:inline">Horizontal</span>
+            </>
+          ) : (
+            <>
+              <MoveVertical className="h-4 w-4" />
+              <span className="text-xs hidden sm:inline">Vertical</span>
+            </>
+          )}
+        </Button>
       </div>
       
       {viewMode === "carousel" ? (

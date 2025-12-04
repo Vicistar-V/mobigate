@@ -13,7 +13,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Send,
-  Bookmark
+  Bookmark,
+  MoveHorizontal,
+  MoveVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import {
   Dialog,
   DialogContent,
@@ -65,6 +68,7 @@ export function CommunityGallerySection({
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [visibleCount, setVisibleCount] = useState(9);
+  const [viewOrientation, setViewOrientation] = useState<"horizontal" | "vertical">("horizontal");
 
   // Filter items based on privacy
   const canViewItem = (item: GalleryItem) => {
@@ -455,7 +459,28 @@ export function CommunityGallerySection({
           <ImageIcon className="h-5 w-5 text-primary" />
           <h2 className="font-semibold text-lg">Community Gallery</h2>
         </div>
-        <Badge variant="secondary">{filteredItems.length} items</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">{filteredItems.length} items</Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewOrientation(viewOrientation === "horizontal" ? "vertical" : "horizontal")}
+            className="gap-1.5 transition-all duration-200"
+            title={viewOrientation === "horizontal" ? "Switch to Vertical View" : "Switch to Horizontal View"}
+          >
+            {viewOrientation === "horizontal" ? (
+              <>
+                <MoveHorizontal className="h-4 w-4" />
+                <span className="text-xs hidden sm:inline">Horizontal</span>
+              </>
+            ) : (
+              <>
+                <MoveVertical className="h-4 w-4" />
+                <span className="text-xs hidden sm:inline">Vertical</span>
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -540,11 +565,31 @@ export function CommunityGallerySection({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {filteredItems.slice(0, visibleCount).map(item => (
-              <GalleryItemCard key={item.id} item={item} />
-            ))}
-          </div>
+          {viewOrientation === "horizontal" ? (
+            <Carousel
+              opts={{
+                align: "start",
+                loop: false,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {filteredItems.slice(0, visibleCount).map(item => (
+                  <CarouselItem key={item.id} className="pl-2 md:pl-4 basis-[75%] sm:basis-[50%] md:basis-[35%] lg:basis-[25%]">
+                    <GalleryItemCard item={item} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex -left-4" />
+              <CarouselNext className="hidden md:flex -right-4" />
+            </Carousel>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {filteredItems.slice(0, visibleCount).map(item => (
+                <GalleryItemCard key={item.id} item={item} />
+              ))}
+            </div>
+          )}
 
           {filteredItems.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">

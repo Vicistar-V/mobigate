@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Grid3x3, LayoutList, ArrowLeft } from "lucide-react";
+import { MoveHorizontal, MoveVertical, ArrowLeft } from "lucide-react";
 import { ExecutiveMemberCard } from "./ExecutiveMemberCard";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { Button } from "@/components/ui/button";
@@ -32,15 +32,21 @@ export const ExecutiveMembersCarousel = ({
         {showViewToggle && (
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={toggleView}
-            className="h-7 w-7 text-primary-foreground hover:bg-primary-foreground/20"
-            title={viewMode === "carousel" ? "Switch to grid view" : "Switch to carousel view"}
+            className="h-7 gap-1.5 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+            title={viewMode === "carousel" ? "Switch to Vertical View" : "Switch to Horizontal View"}
           >
             {viewMode === "carousel" ? (
-              <Grid3x3 className="h-4 w-4" />
+              <>
+                <MoveHorizontal className="h-4 w-4" />
+                <span className="text-xs hidden sm:inline">Horizontal</span>
+              </>
             ) : (
-              <LayoutList className="h-4 w-4" />
+              <>
+                <MoveVertical className="h-4 w-4" />
+                <span className="text-xs hidden sm:inline">Vertical</span>
+              </>
             )}
           </Button>
         )}

@@ -9,7 +9,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
-import { Columns2, LayoutGrid } from "lucide-react";
+import { MoveHorizontal, MoveVertical } from "lucide-react";
 import React, { useState } from "react";
 import { useCurrentUserId } from "@/hooks/useWindowData";
 
@@ -128,12 +128,19 @@ export const WallStatusCarousel = ({
               variant="outline"
               size="sm"
               onClick={() => onViewChange(view === "normal" ? "large" : "normal")}
-              className="gap-1"
+              className="gap-1.5 transition-all duration-200"
+              title={view === "normal" ? "Switch to Vertical View" : "Switch to Horizontal View"}
             >
               {view === "normal" ? (
-                <Columns2 className="h-4 w-4" />
+                <>
+                  <MoveHorizontal className="h-4 w-4" />
+                  <span className="text-xs hidden sm:inline">Horizontal</span>
+                </>
               ) : (
-                <LayoutGrid className="h-4 w-4" />
+                <>
+                  <MoveVertical className="h-4 w-4" />
+                  <span className="text-xs hidden sm:inline">Vertical</span>
+                </>
               )}
             </Button>
           )}
