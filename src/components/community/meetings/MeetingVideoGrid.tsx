@@ -26,9 +26,9 @@ export const MeetingVideoGrid = ({
         <div className="relative w-full h-full">
           {/* Video Cell - Expanded */}
           <div className="relative w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <Avatar className="w-48 h-48 border-4 border-primary">
+          <Avatar className="w-72 h-72 border-[6px] border-primary">
               <AvatarImage src={expandedParticipant.avatar} alt={expandedParticipant.name} />
-              <AvatarFallback className="text-6xl">{expandedParticipant.name[0]}</AvatarFallback>
+              <AvatarFallback className="text-8xl">{expandedParticipant.name[0]}</AvatarFallback>
             </Avatar>
 
             {/* Speaking Indicator */}
@@ -37,9 +37,9 @@ export const MeetingVideoGrid = ({
             )}
 
             {/* Name Badge */}
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full">
-              <p className="text-white font-medium text-lg">{expandedParticipant.name}</p>
-              <p className="text-white/70 text-sm text-center">{expandedParticipant.position}</p>
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-6 py-3 rounded-full">
+              <p className="text-white font-semibold text-xl">{expandedParticipant.name}</p>
+              <p className="text-white/70 text-base text-center">{expandedParticipant.position}</p>
             </div>
 
             {/* Status Indicators */}
