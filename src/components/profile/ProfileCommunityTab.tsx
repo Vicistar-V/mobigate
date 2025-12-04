@@ -61,22 +61,22 @@ function CommunityCard({ community, onClick }: CommunityCardProps) {
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-sm truncate">{community.name}</h4>
           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+            <Badge variant="outline" className="text-xs px-2 py-0.5 h-5">
               {community.type}
             </Badge>
             {community.role && (
-              <Badge variant={getRoleBadgeVariant(community.role)} className="text-[10px] px-1.5 py-0 h-4">
+              <Badge variant={getRoleBadgeVariant(community.role)} className="text-xs px-2 py-0.5 h-5">
                 {community.role}
               </Badge>
             )}
-            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-              <Users className="h-3 w-3" />
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Users className="h-3.5 w-3.5" />
               {formatMemberCount(community.memberCount)}
             </span>
           </div>
           {community.location && (
-            <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-0.5 truncate">
-              <MapPin className="h-2.5 w-2.5 shrink-0" />
+            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 truncate">
+              <MapPin className="h-3 w-3 shrink-0" />
               {community.location}
             </p>
           )}
@@ -173,7 +173,7 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
           <div className="flex items-center gap-2 px-1">
             <Crown className="h-4 w-4 text-amber-500" />
             <h3 className="font-semibold text-sm">My Communities</h3>
-            <Badge variant="secondary" className="text-[10px] h-4">
+            <Badge variant="secondary" className="text-xs h-5 px-2">
               {ownedCommunities.length}
             </Badge>
           </div>
@@ -205,7 +205,7 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
           <div className="flex items-center gap-2 px-1">
             <Users className="h-4 w-4 text-primary" />
             <h3 className="font-semibold text-sm">Communities I Joined</h3>
-            <Badge variant="secondary" className="text-[10px] h-4">
+            <Badge variant="secondary" className="text-xs h-5 px-2">
               {joinedCommunities.length}
             </Badge>
           </div>
