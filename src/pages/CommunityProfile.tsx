@@ -92,6 +92,7 @@ const CommunityProfile = () => {
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [galleryFilter, setGalleryFilter] = useState<string>("all");
+  const [galleryView, setGalleryView] = useState<"normal" | "large">("normal");
   const [showDonationDialog, setShowDonationDialog] = useState(false);
   const [showPostTypeSelector, setShowPostTypeSelector] = useState(false);
   const [showWallStatusDialog, setShowWallStatusDialog] = useState(false);
@@ -559,15 +560,15 @@ const CommunityProfile = () => {
               {/* 1. Our People, Our Strength - Images only, no filters */}
               <OurPeopleCarousel items={communityPeople} />
 
-              {/* 2. Recommended Community Gallery - Filters without counts, no grid toggle */}
+              {/* 2. Recommended Community Gallery - Filters without counts, with grid toggle */}
               <WallStatusCarousel
                 items={wallStatusPostsForCarousel}
                 title="Recommended Community Gallery"
-                view="normal"
+                view={galleryView}
                 filter={galleryFilter}
-                onViewChange={() => {}}
+                onViewChange={setGalleryView}
                 onFilterChange={setGalleryFilter}
-                showViewToggle={false}
+                showViewToggle={true}
                 showFilterCounts={false}
               />
 
