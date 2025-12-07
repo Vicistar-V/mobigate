@@ -43,47 +43,47 @@ interface CommunityCardProps {
 function CommunityCard({ community, onClick }: CommunityCardProps) {
   return (
     <Card 
-      className="p-3 cursor-pointer hover:bg-accent/50 transition-colors active:scale-[0.98]"
+      className="p-4 cursor-pointer hover:bg-accent/50 transition-colors active:scale-[0.98] rounded-xl"
       onClick={onClick}
     >
-      <div className="flex items-center gap-3">
-        {/* Avatar/Icon */}
-        <Avatar className="h-12 w-12 rounded-lg">
+      <div className="flex items-center gap-3.5">
+        {/* Avatar/Icon - Increased to 64x64 */}
+        <Avatar className="h-16 w-16 rounded-xl">
           {community.coverImage ? (
             <AvatarImage src={community.coverImage} alt={community.name} className="object-cover" />
           ) : null}
-          <AvatarFallback className="rounded-lg bg-primary/10 text-lg">
+          <AvatarFallback className="rounded-xl bg-primary/10 text-2xl">
             {getTypeIcon(community.type)}
           </AvatarFallback>
         </Avatar>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-sm truncate">{community.name}</h4>
-          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-            <Badge variant="outline" className="text-xs px-2 py-0.5 h-5">
+          <h4 className="font-semibold text-base truncate">{community.name}</h4>
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <Badge variant="outline" className="text-xs px-2.5 py-0.5 h-6">
               {community.type}
             </Badge>
             {community.role && (
-              <Badge variant={getRoleBadgeVariant(community.role)} className="text-xs px-2 py-0.5 h-5">
+              <Badge variant={getRoleBadgeVariant(community.role)} className="text-xs px-2.5 py-0.5 h-6">
                 {community.role}
               </Badge>
             )}
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Users className="h-3.5 w-3.5" />
+            <span className="text-sm text-muted-foreground flex items-center gap-1">
+              <Users className="h-4 w-4" />
               {formatMemberCount(community.memberCount)}
             </span>
           </div>
           {community.location && (
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 truncate">
-              <MapPin className="h-3 w-3 shrink-0" />
+            <p className="text-sm text-muted-foreground mt-1.5 flex items-center gap-1 truncate">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
               {community.location}
             </p>
           )}
         </div>
 
         {/* Arrow */}
-        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
       </div>
     </Card>
   );
@@ -136,11 +136,11 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
   return (
     <div className="space-y-4">
       {/* Header with Create and View All buttons */}
-      <Card className="p-3">
+      <Card className="p-4 rounded-xl">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-primary" />
-            <span className="font-medium text-sm">
+          <div className="flex items-center gap-2.5">
+            <Building2 className="h-6 w-6 text-primary" />
+            <span className="font-semibold text-base">
               {totalCommunities} {totalCommunities === 1 ? "Community" : "Communities"}
             </span>
           </div>
@@ -149,7 +149,7 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
               variant="outline" 
               size="sm"
               onClick={handleCreateCommunity}
-              className="h-8"
+              className="h-9 text-sm"
             >
               <Plus className="h-4 w-4 mr-1" />
               Create
@@ -158,7 +158,7 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
               variant="default" 
               size="sm"
               onClick={handleViewAll}
-              className="h-8"
+              className="h-9 text-sm"
             >
               View All
               <ChevronRight className="h-4 w-4 ml-1" />
@@ -169,15 +169,15 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
 
       {/* My Communities (Owned) */}
       {ownedCommunities.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 px-1">
-            <Crown className="h-4 w-4 text-amber-500" />
-            <h3 className="font-semibold text-sm">My Communities</h3>
-            <Badge variant="secondary" className="text-xs h-5 px-2">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2.5 px-1">
+            <Crown className="h-5 w-5 text-amber-500" />
+            <h3 className="font-semibold text-base">My Communities</h3>
+            <Badge variant="secondary" className="text-sm h-6 px-2.5">
               {ownedCommunities.length}
             </Badge>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {displayedOwned.map((community) => (
               <CommunityCard
                 key={community.id}
@@ -189,7 +189,7 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="w-full text-xs h-8"
+                className="w-full text-sm h-10"
                 onClick={handleViewAll}
               >
                 See {ownedCommunities.length - 3} more owned communities
@@ -201,15 +201,15 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
 
       {/* Communities I Joined */}
       {joinedCommunities.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 px-1">
-            <Users className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm">Communities I Joined</h3>
-            <Badge variant="secondary" className="text-xs h-5 px-2">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2.5 px-1">
+            <Users className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold text-base">Communities I Joined</h3>
+            <Badge variant="secondary" className="text-sm h-6 px-2.5">
               {joinedCommunities.length}
             </Badge>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {displayedJoined.map((community) => (
               <CommunityCard
                 key={community.id}
@@ -221,7 +221,7 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="w-full text-xs h-8"
+                className="w-full text-sm h-10"
                 onClick={handleViewAll}
               >
                 See {joinedCommunities.length - 4} more joined communities
@@ -232,13 +232,13 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
       )}
 
       {/* Bottom View All Link */}
-      <Card className="p-3 bg-accent/30">
+      <Card className="p-4 bg-accent/30 rounded-xl">
         <Button 
           variant="outline" 
-          className="w-full"
+          className="w-full h-12 text-base rounded-xl"
           onClick={handleViewAll}
         >
-          <Building2 className="h-4 w-4 mr-2" />
+          <Building2 className="h-5 w-5 mr-2" />
           View All {totalCommunities} Communities
         </Button>
       </Card>
