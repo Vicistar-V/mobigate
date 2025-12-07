@@ -478,8 +478,8 @@ const CommunityProfile = () => {
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
                   {community.name}
                 </h1>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {community.followers.toLocaleString()} Followers | {community.likes.toLocaleString()} Likes
+                <p className="text-base sm:text-lg font-semibold text-muted-foreground mb-3">
+                  {community.memberCount.toLocaleString()} Members  |  {community.followers.toLocaleString()} Followers  |  {community.likes.toLocaleString()} Likes
                 </p>
               </div>
 
