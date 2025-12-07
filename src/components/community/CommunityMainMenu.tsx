@@ -207,6 +207,14 @@ export function CommunityMainMenu({
       return;
     }
 
+    if (action === "Members") {
+      if (onNavigate) {
+        onNavigate("membership");
+      }
+      setOpen(false);
+      return;
+    }
+
     if (isNavigable && onNavigate) {
       onNavigate(action);
       setOpen(false);
