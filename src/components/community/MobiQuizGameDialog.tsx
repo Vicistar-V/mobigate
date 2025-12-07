@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Trophy, Clock, Users, Play, Book, Award, Inbox } from "lucide-react";
+import { X, Trophy, Clock, Users, Play, Book, Award, Inbox, Wallet, Lock, Globe, BarChart3, History } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { activeQuizzes, leaderboard, quizRules } from "@/data/quizGameData";
+import { activeQuizzes, leaderboard, quizRules, gameHistory, quizStatistics, playerQuizStats, communityQuizWallet, isQuizAvailable, Quiz } from "@/data/quizGameData";
+import { QuizGamePlayDialog } from "./QuizGamePlayDialog";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface MobiQuizGameDialogProps {
   open: boolean;
@@ -17,326 +19,306 @@ interface MobiQuizGameDialogProps {
 
 export function MobiQuizGameDialog({ open, onOpenChange }: MobiQuizGameDialogProps) {
   const [activeTab, setActiveTab] = useState("quizzes");
+  const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
+  const [showGamePlay, setShowGamePlay] = useState(false);
   const { toast } = useToast();
 
-  const handleStartQuiz = (quizId: string) => {
+  // Mock wallet balance
+  const playerWalletBalance = 15000;
+
+  const handleStartQuiz = (quiz: Quiz) => {
+    const availability = isQuizAvailable(quiz, communityQuizWallet.balance);
+    
+    if (!availability.available) {
+      toast({
+        title: "Quiz Unavailable",
+        description: availability.reason,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (playerWalletBalance < quiz.stakeAmount) {
+      toast({
+        title: "Insufficient Balance",
+        description: `You need at least ${quiz.currency} ${quiz.stakeAmount.toLocaleString()} to play.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSelectedQuiz(quiz);
+    setShowGamePlay(true);
+  };
+
+  const handleGameComplete = (result: { questionsCorrect: number; winningPercentage: number; amountWon: number; stakePaid: number }) => {
     toast({
-      title: "Starting Quiz",
-      description: "Quiz game feature will be fully functional soon!",
+      title: result.amountWon > 0 ? "Congratulations!" : "Game Over",
+      description: result.amountWon > 0 
+        ? `You won NGN ${result.amountWon.toLocaleString()}!` 
+        : "Better luck next time!",
     });
+    setShowGamePlay(false);
+    setSelectedQuiz(null);
   };
 
   const availableQuizzes = activeQuizzes.filter(q => q.status === "active");
   const upcomingQuizzes = activeQuizzes.filter(q => q.status === "upcoming");
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-        <DialogHeader className="p-4 sm:p-6 pb-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-              <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              Mobi-Quiz Game
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0">
+          <DialogHeader className="p-4 pb-3 sticky top-0 bg-background z-10 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Trophy className="h-5 w-5 text-primary" />
+                <div>
+                  <DialogTitle className="text-lg font-bold">Mobi-Quiz Game</DialogTitle>
+                  <p className="text-xs text-muted-foreground">Win prizes by answering questions!</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-          <div className="px-4 sm:px-6">
-            <TabsList className="w-full grid grid-cols-3 h-auto">
-              <TabsTrigger value="quizzes" className="text-xs sm:text-sm py-2">
-                Active Quizzes
-              </TabsTrigger>
-              <TabsTrigger value="leaderboard" className="text-xs sm:text-sm py-2">
-                Leaderboard
-              </TabsTrigger>
-              <TabsTrigger value="rules" className="text-xs sm:text-sm py-2">
-                Rules
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+            <div className="px-4 pt-2">
+              <TabsList className="w-full grid grid-cols-4 h-auto">
+                <TabsTrigger value="quizzes" className="text-xs py-2">Quizzes</TabsTrigger>
+                <TabsTrigger value="leaderboard" className="text-xs py-2">Leaders</TabsTrigger>
+                <TabsTrigger value="stats" className="text-xs py-2">Stats</TabsTrigger>
+                <TabsTrigger value="rules" className="text-xs py-2">Rules</TabsTrigger>
+              </TabsList>
+            </div>
 
-          <ScrollArea className="h-full max-h-[calc(90vh-12rem)]">
-            <div className="p-4 sm:p-6">
-              <TabsContent value="quizzes" className="mt-0 space-y-4">
-                {activeQuizzes.length === 0 ? (
-                  <Card>
-                    <CardContent className="p-8 sm:p-12">
-                      <div className="flex flex-col items-center justify-center text-center space-y-4">
-                        <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted flex items-center justify-center">
-                          <Inbox className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="font-semibold text-lg sm:text-xl">No Quizzes Available</h3>
-                          <p className="text-sm text-muted-foreground max-w-sm">
-                            There are currently no quiz games available. Check back soon for exciting new challenges!
-                          </p>
-                        </div>
+            <ScrollArea className="flex-1 max-h-[calc(95vh-140px)]">
+              <div className="p-4">
+                {/* Quizzes Tab */}
+                <TabsContent value="quizzes" className="mt-0 space-y-4">
+                  {/* Wallet Balance Card */}
+                  <Card className="bg-primary/5 border-primary/20">
+                    <CardContent className="p-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-primary" />
+                        <span className="text-sm">Your Wallet</span>
                       </div>
+                      <span className="font-bold">NGN {playerWalletBalance.toLocaleString()}</span>
                     </CardContent>
                   </Card>
-                ) : (
-                  <>
-                    {availableQuizzes.length > 0 && (
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                          Active Now
-                        </h3>
-                        {availableQuizzes.map((quiz) => (
-                          <Card key={quiz.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                            <CardContent className="p-4 sm:p-6">
-                              <div className="space-y-4">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1 space-y-2">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <h3 className="font-semibold text-base sm:text-lg">{quiz.title}</h3>
-                                      <Badge variant="default">Active</Badge>
-                                      <Badge variant="outline" className="text-xs">
-                                        {quiz.difficulty}
-                                      </Badge>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">{quiz.description}</p>
+
+                  {availableQuizzes.length === 0 && upcomingQuizzes.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Inbox className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                        <h3 className="font-semibold">No Quizzes Available</h3>
+                        <p className="text-sm text-muted-foreground">Check back soon!</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <>
+                      {availableQuizzes.map((quiz) => {
+                        const availability = isQuizAvailable(quiz, communityQuizWallet.balance);
+                        return (
+                          <Card key={quiz.id} className="overflow-hidden">
+                            <CardContent className="p-4 space-y-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                                    <h3 className="font-semibold text-sm">{quiz.title}</h3>
+                                    <Badge variant="default" className="text-[10px]">Active</Badge>
+                                    <Badge variant="outline" className="text-[10px]">{quiz.difficulty}</Badge>
                                   </div>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">{quiz.description}</p>
                                 </div>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Trophy className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Prize Pool</p>
-                                      <p className="font-semibold">{quiz.currency} {quiz.prizePool.toLocaleString()}</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Book className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Questions</p>
-                                      <p className="font-semibold">{quiz.totalQuestions}</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Clock className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Time Limit</p>
-                                      <p className="font-semibold">{quiz.timeLimit} mins</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Users className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Participants</p>
-                                      <p className="font-semibold">{quiz.participants}</p>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <Button 
-                                  className="w-full sm:w-auto"
-                                  onClick={() => handleStartQuiz(quiz.id)}
-                                >
-                                  <Play className="h-4 w-4 mr-2" />
-                                  Start Playing
-                                </Button>
+                                {quiz.privacySetting === "members_only" ? (
+                                  <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                                ) : (
+                                  <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+                                )}
                               </div>
+
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="p-2 bg-destructive/10 rounded-lg text-center">
+                                  <p className="text-[10px] text-muted-foreground">Stake</p>
+                                  <p className="font-bold text-sm text-destructive">{quiz.currency} {quiz.stakeAmount.toLocaleString()}</p>
+                                </div>
+                                <div className="p-2 bg-green-500/10 rounded-lg text-center">
+                                  <p className="text-[10px] text-muted-foreground">Win Up To</p>
+                                  <p className="font-bold text-sm text-green-600">{quiz.currency} {quiz.winningAmount.toLocaleString()}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />{quiz.timeLimitPerQuestion}s/question
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />{quiz.participants} players
+                                </span>
+                              </div>
+
+                              <Button 
+                                className="w-full" 
+                                size="sm"
+                                onClick={() => handleStartQuiz(quiz)}
+                                disabled={!availability.available || playerWalletBalance < quiz.stakeAmount}
+                              >
+                                <Play className="h-4 w-4 mr-2" />
+                                {playerWalletBalance < quiz.stakeAmount ? "Insufficient Balance" : "Start Playing"}
+                              </Button>
                             </CardContent>
                           </Card>
-                        ))}
-                      </div>
-                    )}
+                        );
+                      })}
 
-                    {upcomingQuizzes.length > 0 && (
-                      <div className="space-y-4 mt-6">
-                        <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                          Coming Soon
-                        </h3>
-                        {upcomingQuizzes.map((quiz) => (
-                          <Card key={quiz.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                            <CardContent className="p-4 sm:p-6">
-                              <div className="space-y-4">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1 space-y-2">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <h3 className="font-semibold text-base sm:text-lg">{quiz.title}</h3>
-                                      <Badge variant="secondary">Upcoming</Badge>
-                                      <Badge variant="outline" className="text-xs">
-                                        {quiz.difficulty}
-                                      </Badge>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">{quiz.description}</p>
-                                  </div>
+                      {upcomingQuizzes.length > 0 && (
+                        <div className="space-y-3 pt-2">
+                          <h3 className="text-xs font-semibold text-muted-foreground uppercase">Coming Soon</h3>
+                          {upcomingQuizzes.map((quiz) => (
+                            <Card key={quiz.id} className="opacity-75">
+                              <CardContent className="p-4 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold text-sm">{quiz.title}</h3>
+                                  <Badge variant="secondary" className="text-[10px]">Upcoming</Badge>
                                 </div>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Trophy className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Prize Pool</p>
-                                      <p className="font-semibold">{quiz.currency} {quiz.prizePool.toLocaleString()}</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Book className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Questions</p>
-                                      <p className="font-semibold">{quiz.totalQuestions}</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Clock className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Time Limit</p>
-                                      <p className="font-semibold">{quiz.timeLimit} mins</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <Users className="h-4 w-4 text-primary" />
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Participants</p>
-                                      <p className="font-semibold">{quiz.participants}</p>
-                                    </div>
-                                  </div>
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                  <span>Stake: {quiz.currency} {quiz.stakeAmount.toLocaleString()}</span>
+                                  <span>Win: {quiz.currency} {quiz.winningAmount.toLocaleString()}</span>
                                 </div>
-
-                                <Button 
-                                  className="w-full sm:w-auto"
-                                  variant="outline"
-                                  disabled
-                                >
+                                <Button variant="outline" size="sm" className="w-full" disabled>
                                   <Clock className="h-4 w-4 mr-2" />
                                   Starts {quiz.startDate ? new Date(quiz.startDate).toLocaleDateString() : "Soon"}
                                 </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-
-                    {availableQuizzes.length === 0 && upcomingQuizzes.length > 0 && (
-                      <Card className="border-dashed">
-                        <CardContent className="p-6">
-                          <div className="flex flex-col items-center justify-center text-center space-y-3">
-                            <Clock className="h-8 w-8 text-muted-foreground" />
-                            <div className="space-y-1">
-                              <p className="font-medium">No Active Quizzes Right Now</p>
-                              <p className="text-sm text-muted-foreground">
-                                Check the upcoming quizzes below!
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </>
-                )}
-              </TabsContent>
-
-              <TabsContent value="leaderboard" className="mt-0 space-y-4">
-                <Card>
-                  <CardContent className="p-4 sm:p-6">
-                    {leaderboard.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
-                        <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted flex items-center justify-center">
-                          <Award className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="font-semibold text-lg sm:text-xl">No Scores Yet</h3>
-                          <p className="text-sm text-muted-foreground max-w-sm">
-                            The leaderboard is empty. Be the first to play and top the charts!
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Award className="h-5 w-5 text-primary" />
-                          <h3 className="font-semibold text-lg">Top Players</h3>
-                        </div>
-
-                        <div className="space-y-3">
-                          {leaderboard.map((entry) => (
-                            <div 
-                              key={entry.id}
-                              className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                            >
-                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 font-bold text-primary text-sm">
-                                {entry.rank}
-                              </div>
-
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage src={entry.playerAvatar} alt={entry.playerName} />
-                                <AvatarFallback>{entry.playerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                              </Avatar>
-
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{entry.playerName}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  Time: {entry.completionTime}
-                                </p>
-                              </div>
-
-                              <div className="text-right">
-                                <p className="font-bold text-primary">{entry.score}</p>
-                                <p className="text-xs text-muted-foreground">points</p>
-                              </div>
-                            </div>
+                              </CardContent>
+                            </Card>
                           ))}
                         </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                      )}
+                    </>
+                  )}
+                </TabsContent>
 
-              <TabsContent value="rules" className="mt-0">
-                <Card>
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Book className="h-5 w-5 text-primary" />
-                        <h3 className="font-semibold text-lg">Quiz Rules & Guidelines</h3>
+                {/* Leaderboard Tab */}
+                <TabsContent value="leaderboard" className="mt-0 space-y-3">
+                  {leaderboard.map((entry) => (
+                    <div key={entry.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <div className={cn(
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold",
+                        entry.rank === 1 && "bg-yellow-500 text-yellow-950",
+                        entry.rank === 2 && "bg-gray-300 text-gray-700",
+                        entry.rank === 3 && "bg-amber-600 text-amber-950",
+                        entry.rank > 3 && "bg-muted text-muted-foreground"
+                      )}>
+                        {entry.rank}
                       </div>
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={entry.playerAvatar} />
+                        <AvatarFallback>{entry.playerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{entry.playerName}</p>
+                        <p className="text-xs text-muted-foreground">{entry.questionsCorrect}/10 • {entry.completionTime}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-primary text-sm">₦{entry.amountWon.toLocaleString()}</p>
+                        <p className="text-[10px] text-muted-foreground">{entry.winningPercentage}% win</p>
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
 
-                      <ul className="space-y-3">
+                {/* Statistics Tab */}
+                <TabsContent value="stats" className="mt-0 space-y-4">
+                  {/* Your Stats */}
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold text-sm flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4" />Your Stats
+                      </h3>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="p-2 bg-muted/50 rounded-lg">
+                          <p className="font-bold text-lg">{playerQuizStats.gamesPlayed}</p>
+                          <p className="text-[10px] text-muted-foreground">Played</p>
+                        </div>
+                        <div className="p-2 bg-green-500/10 rounded-lg">
+                          <p className="font-bold text-lg text-green-600">{playerQuizStats.gamesWon}</p>
+                          <p className="text-[10px] text-muted-foreground">Won</p>
+                        </div>
+                        <div className="p-2 bg-yellow-500/10 rounded-lg">
+                          <p className="font-bold text-lg text-yellow-600">{playerQuizStats.partialWins}</p>
+                          <p className="text-[10px] text-muted-foreground">Partial</p>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm p-2 bg-primary/5 rounded-lg">
+                        <span>Net Profit</span>
+                        <span className={cn("font-bold", playerQuizStats.netProfit >= 0 ? "text-green-600" : "text-destructive")}>
+                          {playerQuizStats.netProfit >= 0 ? "+" : ""}₦{playerQuizStats.netProfit.toLocaleString()}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Recent Games */}
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold text-sm flex items-center gap-2">
+                        <History className="h-4 w-4" />Recent Games
+                      </h3>
+                      {gameHistory.map((game) => (
+                        <div key={game.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                          <div>
+                            <p className="text-sm font-medium">{game.quizTitle}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {game.questionsCorrect}/10 • {new Date(game.playedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Badge variant={game.status === "won" ? "default" : game.status === "partial_win" ? "secondary" : "destructive"}>
+                            {game.status === "won" ? `+₦${game.amountWon.toLocaleString()}` : 
+                             game.status === "partial_win" ? `+₦${game.amountWon.toLocaleString()}` : "Lost"}
+                          </Badge>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Rules Tab */}
+                <TabsContent value="rules" className="mt-0">
+                  <Card>
+                    <CardContent className="p-4 space-y-3">
+                      <h3 className="font-semibold text-sm flex items-center gap-2">
+                        <Book className="h-4 w-4" />Quiz Rules
+                      </h3>
+                      <ul className="space-y-2">
                         {quizRules.map((rule, idx) => (
-                          <li key={idx} className="flex items-start gap-3 text-sm">
-                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs flex-shrink-0">
+                          <li key={idx} className="flex items-start gap-2 text-xs">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary font-semibold text-[10px] shrink-0">
                               {idx + 1}
                             </span>
                             <span className="text-muted-foreground pt-0.5">{rule}</span>
                           </li>
                         ))}
                       </ul>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </div>
+            </ScrollArea>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
 
-                      <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                        <p className="text-sm text-muted-foreground">
-                          <strong className="text-foreground">Note:</strong> All quiz results are final and 
-                          disputes must be raised within 48 hours of result publication. 
-                          Fair play is expected from all participants.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </div>
-          </ScrollArea>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+      {/* Quiz Gameplay Dialog */}
+      <QuizGamePlayDialog
+        open={showGamePlay}
+        onOpenChange={setShowGamePlay}
+        quiz={selectedQuiz}
+        playerWalletBalance={playerWalletBalance}
+        onGameComplete={handleGameComplete}
+      />
+    </>
   );
 }
