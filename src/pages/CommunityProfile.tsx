@@ -13,6 +13,7 @@ import {
   UserMinus,
   DollarSign,
   ArrowLeft,
+  Bell,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -80,6 +81,8 @@ import { CreateSpecialEventDialog } from "@/components/community/CreateSpecialEv
 import { ArticleEditorDialog } from "@/components/community/ArticleEditorDialog";
 import { MediaUploadDialog } from "@/components/community/MediaUploadDialog";
 import { CommunityGallerySection } from "@/components/community/CommunityGallerySection";
+import { CommunityNotificationsSheet } from "@/components/community/CommunityNotificationsSheet";
+import { communityNotifications } from "@/data/communityNotificationsData";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -103,7 +106,13 @@ const CommunityProfile = () => {
   const [showSpecialEventDialog, setShowSpecialEventDialog] = useState(false);
   const [showMembershipApplication, setShowMembershipApplication] = useState(false);
   const [showExitCommunity, setShowExitCommunity] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { toast } = useToast();
+  
+  // Calculate unread notifications count
+  const unreadNotificationsCount = communityNotifications.filter(
+    n => !n.isRead && (n.communityId === communityId || n.communityId === "1")
+  ).length;
   const tabsSectionRef = useRef<HTMLDivElement>(null);
 
   // Get community data
@@ -474,16 +483,33 @@ const CommunityProfile = () => {
                 </p>
               </div>
 
-              {/* Donate Button */}
-              {community.donationEnabled && (
+              {/* Donate Button and Notifications */}
+              <div className="flex items-center gap-2 self-start sm:self-end">
+                {community.donationEnabled && (
+                  <Button
+                    onClick={handleDonate}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Donate To Community
+                  </Button>
+                )}
+                
+                {/* Notification Bell */}
                 <Button
-                  onClick={handleDonate}
-                  className="bg-green-600 hover:bg-green-700 self-start sm:self-end"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowNotifications(true)}
+                  className="relative"
                 >
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Donate To Community
+                  <Bell className="h-4 w-4" />
+                  {unreadNotificationsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-medium">
+                      {unreadNotificationsCount > 9 ? "9+" : unreadNotificationsCount}
+                    </span>
+                  )}
                 </Button>
-              )}
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -1079,6 +1105,13 @@ const CommunityProfile = () => {
       <ExitCommunityDialog
         open={showExitCommunity}
         onOpenChange={setShowExitCommunity}
+      />
+
+      {/* Community Notifications Sheet */}
+      <CommunityNotificationsSheet
+        open={showNotifications}
+        onOpenChange={setShowNotifications}
+        communityId={communityId || "1"}
       />
     </div>
   );
