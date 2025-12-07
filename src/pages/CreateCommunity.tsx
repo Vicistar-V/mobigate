@@ -389,16 +389,16 @@ export default function CreateCommunity() {
                       placeholder="Brief description of your community..."
                       value={formData.shortDescription}
                       onChange={(e) => {
-                        if (e.target.value.length <= 200) {
+                        if (e.target.value.length <= 500) {
                           updateField("shortDescription", e.target.value);
                         }
                       }}
-                      maxLength={200}
+                      maxLength={500}
                       rows={3}
                       className="resize-none"
                     />
                     <p className="text-xs text-muted-foreground text-right">
-                      {formData.shortDescription.length}/200 characters
+                      {formData.shortDescription.length}/500 characters
                     </p>
                   </div>
                 </div>
