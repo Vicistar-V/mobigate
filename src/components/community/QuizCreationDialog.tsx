@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Plus, Trash2, Award } from "lucide-react";
+import { X, Award, AlertCircle, Lock, Globe } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { quizCategories } from "@/data/quizGameData";
+import { Badge } from "@/components/ui/badge";
+import { quizCategories, ANSWER_LABELS } from "@/data/quizGameData";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface QuizCreationDialogProps {
   open: boolean;
@@ -20,10 +22,25 @@ interface QuizCreationDialogProps {
 interface QuizQuestion {
   id: string;
   question: string;
-  options: string[];
-  correctAnswer: number;
+  options: string[]; // 8 options (A-H)
+  correctAnswer: number; // 0-7
+  correctAnswerLabel: string; // A-H
+  timeLimit: number; // seconds per question
   points: number;
 }
+
+const createEmptyQuestion = (index: number): QuizQuestion => ({
+  id: `q${index}`,
+  question: "",
+  options: ["", "", "", "", "", "", "", ""], // 8 empty options
+  correctAnswer: 0,
+  correctAnswerLabel: "A",
+  timeLimit: 30,
+  points: 10
+});
+
+// Initialize with exactly 10 questions
+const initialQuestions: QuizQuestion[] = Array.from({ length: 10 }, (_, i) => createEmptyQuestion(i + 1));
 
 export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogProps) {
   const { toast } = useToast();
@@ -31,34 +48,24 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
   const [quizDescription, setQuizDescription] = useState("");
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState<"Easy" | "Medium" | "Hard">("Medium");
-  const [timeLimit, setTimeLimit] = useState("15");
-  const [prizePool, setPrizePool] = useState("");
-  const [questions, setQuestions] = useState<QuizQuestion[]>([
-    { id: "q1", question: "", options: ["", "", "", ""], correctAnswer: 0, points: 10 }
-  ]);
+  const [timeLimitPerQuestion, setTimeLimitPerQuestion] = useState("30");
+  const [stakeAmount, setStakeAmount] = useState("");
+  const [winningAmount, setWinningAmount] = useState("");
+  const [privacySetting, setPrivacySetting] = useState<"members_only" | "public">("members_only");
+  const [questions, setQuestions] = useState<QuizQuestion[]>(initialQuestions);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  const addQuestion = () => {
-    const newQuestion: QuizQuestion = {
-      id: `q${questions.length + 1}`,
-      question: "",
-      options: ["", "", "", ""],
-      correctAnswer: 0,
-      points: 10
-    };
-    setQuestions([...questions, newQuestion]);
+  const currentQuestion = questions[currentQuestionIndex];
+
+  const updateQuestion = (field: keyof QuizQuestion, value: any) => {
+    setQuestions(questions.map((q, idx) => 
+      idx === currentQuestionIndex ? { ...q, [field]: value } : q
+    ));
   };
 
-  const removeQuestion = (id: string) => {
-    setQuestions(questions.filter(q => q.id !== id));
-  };
-
-  const updateQuestion = (id: string, field: keyof QuizQuestion, value: any) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q));
-  };
-
-  const updateOption = (questionId: string, optionIndex: number, value: string) => {
-    setQuestions(questions.map(q => {
-      if (q.id === questionId) {
+  const updateOption = (optionIndex: number, value: string) => {
+    setQuestions(questions.map((q, idx) => {
+      if (idx === currentQuestionIndex) {
         const newOptions = [...q.options];
         newOptions[optionIndex] = value;
         return { ...q, options: newOptions };
@@ -67,21 +74,59 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
     }));
   };
 
-  const handlePublish = () => {
-    if (!quizTitle || !category || questions.some(q => !q.question || q.options.some(o => !o))) {
-      toast({
-        title: "Incomplete Quiz",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
+  const setCorrectAnswer = (answerIndex: number) => {
+    setQuestions(questions.map((q, idx) => 
+      idx === currentQuestionIndex 
+        ? { ...q, correctAnswer: answerIndex, correctAnswerLabel: ANSWER_LABELS[answerIndex] }
+        : q
+    ));
+  };
+
+  const isQuestionComplete = (q: QuizQuestion): boolean => {
+    return q.question.trim() !== "" && 
+           q.options.every(opt => opt.trim() !== "");
+  };
+
+  const completedQuestionsCount = questions.filter(isQuestionComplete).length;
+  const allQuestionsComplete = completedQuestionsCount === 10;
+
+  const validateQuiz = (): boolean => {
+    if (!quizTitle.trim()) {
+      toast({ title: "Missing Title", description: "Please enter a quiz title", variant: "destructive" });
+      return false;
     }
+    if (!category) {
+      toast({ title: "Missing Category", description: "Please select a category", variant: "destructive" });
+      return false;
+    }
+    if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
+      toast({ title: "Invalid Stake", description: "Please enter a valid stake amount", variant: "destructive" });
+      return false;
+    }
+    if (!winningAmount || parseFloat(winningAmount) <= 0) {
+      toast({ title: "Invalid Winning Amount", description: "Please enter a valid winning amount", variant: "destructive" });
+      return false;
+    }
+    if (!allQuestionsComplete) {
+      toast({ 
+        title: "Incomplete Questions", 
+        description: `Only ${completedQuestionsCount}/10 questions are complete. All 10 questions with 8 options are required.`, 
+        variant: "destructive" 
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const handlePublish = () => {
+    if (!validateQuiz()) return;
 
     toast({
       title: "Quiz Published!",
-      description: `${quizTitle} is now live for members to play`,
+      description: `"${quizTitle}" is now live for ${privacySetting === "public" ? "everyone" : "members only"} to play`,
     });
     onOpenChange(false);
+    resetForm();
   };
 
   const handleSaveDraft = () => {
@@ -91,16 +136,32 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
     });
   };
 
+  const resetForm = () => {
+    setQuizTitle("");
+    setQuizDescription("");
+    setCategory("");
+    setDifficulty("Medium");
+    setTimeLimitPerQuestion("30");
+    setStakeAmount("");
+    setWinningAmount("");
+    setPrivacySetting("members_only");
+    setQuestions(initialQuestions);
+    setCurrentQuestionIndex(0);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[95vh] p-0">
-        <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10 border-b">
+      <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0">
+        <DialogHeader className="p-4 pb-3 sticky top-0 bg-background z-10 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-primary/10 p-2 rounded-lg">
                 <Award className="h-5 w-5 text-primary" />
               </div>
-              <DialogTitle className="text-xl font-bold">Create Mobi Quiz Game</DialogTitle>
+              <div>
+                <DialogTitle className="text-lg font-bold">Create Quiz Game</DialogTitle>
+                <p className="text-xs text-muted-foreground">10 Questions • 8 Options (A-H)</p>
+              </div>
             </div>
             <Button
               variant="ghost"
@@ -113,38 +174,40 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
           </div>
         </DialogHeader>
 
-        <ScrollArea className="h-[calc(95vh-140px)]">
-          <div className="p-4 sm:p-6 space-y-6">
-            {/* Quiz Details */}
+        <ScrollArea className="flex-1 max-h-[calc(95vh-180px)]">
+          <div className="p-4 space-y-5">
+            {/* Quiz Details Section */}
             <Card>
               <CardContent className="p-4 space-y-4">
-                <h3 className="font-semibold">Quiz Details</h3>
+                <h3 className="font-semibold text-sm">Quiz Details</h3>
                 
                 <div>
-                  <Label>Quiz Title *</Label>
+                  <Label className="text-xs">Quiz Title *</Label>
                   <Input
                     placeholder="e.g., Community Heritage Quiz"
                     value={quizTitle}
                     onChange={(e) => setQuizTitle(e.target.value)}
+                    className="mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label>Description *</Label>
+                  <Label className="text-xs">Description</Label>
                   <Textarea
                     placeholder="Describe what this quiz is about..."
                     value={quizDescription}
                     onChange={(e) => setQuizDescription(e.target.value)}
-                    rows={3}
+                    rows={2}
+                    className="mt-1"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Category *</Label>
+                    <Label className="text-xs">Category *</Label>
                     <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
                         {quizCategories.map((cat) => (
@@ -155,9 +218,9 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
                   </div>
 
                   <div>
-                    <Label>Difficulty</Label>
+                    <Label className="text-xs">Difficulty</Label>
                     <Select value={difficulty} onValueChange={(v: any) => setDifficulty(v)}>
-                      <SelectTrigger>
+                      <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -168,110 +231,213 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
                     </Select>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
+            {/* Stake & Winning Section */}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-4 space-y-4">
+                <h3 className="font-semibold text-sm">Stake & Winning Amounts</h3>
+                
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Time Limit (minutes)</Label>
+                    <Label className="text-xs">Stake Amount (NGN) *</Label>
                     <Input
                       type="number"
-                      value={timeLimit}
-                      onChange={(e) => setTimeLimit(e.target.value)}
-                      min="5"
-                      max="60"
+                      placeholder="e.g., 500"
+                      value={stakeAmount}
+                      onChange={(e) => setStakeAmount(e.target.value)}
+                      min="0"
+                      className="mt-1"
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1">Amount charged to play</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Winning Amount (NGN) *</Label>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 5000"
+                      value={winningAmount}
+                      onChange={(e) => setWinningAmount(e.target.value)}
+                      min="0"
+                      className="mt-1"
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1">Amount for 10/10 correct</p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-background rounded-lg text-xs space-y-1">
+                  <p className="font-medium">Stake Distribution:</p>
+                  <p className="text-muted-foreground">• 70% to Community Wallet</p>
+                  <p className="text-muted-foreground">• 30% to Mobigate</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Privacy & Time Settings */}
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <h3 className="font-semibold text-sm">Settings</h3>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Time per Question (seconds)</Label>
+                    <Input
+                      type="number"
+                      value={timeLimitPerQuestion}
+                      onChange={(e) => setTimeLimitPerQuestion(e.target.value)}
+                      min="10"
+                      max="120"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <Label>Prize Pool (NGN)</Label>
-                    <Input
-                      type="number"
-                      placeholder="e.g., 50000"
-                      value={prizePool}
-                      onChange={(e) => setPrizePool(e.target.value)}
-                    />
+                    <Label className="text-xs">Privacy Setting *</Label>
+                    <Select value={privacySetting} onValueChange={(v: any) => setPrivacySetting(v)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="members_only">
+                          <span className="flex items-center gap-2">
+                            <Lock className="h-3 w-3" />
+                            Members Only
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="public">
+                          <span className="flex items-center gap-2">
+                            <Globe className="h-3 w-3" />
+                            Public
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Questions */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Questions ({questions.length})</h3>
-                <Button onClick={addQuestion} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Question
-                </Button>
-              </div>
+            {/* Questions Section */}
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-sm">Questions</h3>
+                  <Badge variant={allQuestionsComplete ? "default" : "secondary"}>
+                    {completedQuestionsCount}/10 Complete
+                  </Badge>
+                </div>
 
-              <div className="space-y-4">
-                {questions.map((question, qIndex) => (
-                  <Card key={question.id}>
-                    <CardContent className="p-4 space-y-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-medium text-sm">Question {qIndex + 1}</h4>
-                        {questions.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeQuestion(question.id)}
-                            className="h-8 w-8 shrink-0"
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
-                      </div>
+                {/* Question Navigation */}
+                <div className="grid grid-cols-5 gap-2">
+                  {questions.map((q, idx) => (
+                    <button
+                      key={q.id}
+                      onClick={() => setCurrentQuestionIndex(idx)}
+                      className={cn(
+                        "h-10 rounded-lg text-xs font-medium transition-all",
+                        "border-2",
+                        idx === currentQuestionIndex && "border-primary bg-primary/10",
+                        idx !== currentQuestionIndex && isQuestionComplete(q) && "border-green-500 bg-green-500/10 text-green-600",
+                        idx !== currentQuestionIndex && !isQuestionComplete(q) && "border-border bg-muted/50"
+                      )}
+                    >
+                      Q{idx + 1}
+                    </button>
+                  ))}
+                </div>
 
-                      <div>
-                        <Label>Question Text *</Label>
-                        <Textarea
-                          placeholder="Enter your question..."
-                          value={question.question}
-                          onChange={(e) => updateQuestion(question.id, "question", e.target.value)}
-                          rows={2}
-                        />
-                      </div>
+                {/* Current Question Editor */}
+                <div className="space-y-4 pt-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Question {currentQuestionIndex + 1}</Label>
+                    {!isQuestionComplete(currentQuestion) && (
+                      <span className="flex items-center gap-1 text-xs text-destructive">
+                        <AlertCircle className="h-3 w-3" />
+                        Incomplete
+                      </span>
+                    )}
+                  </div>
 
-                      <div>
-                        <Label className="mb-2 block">Answer Options *</Label>
-                        <RadioGroup
-                          value={question.correctAnswer.toString()}
-                          onValueChange={(v) => updateQuestion(question.id, "correctAnswer", parseInt(v))}
-                        >
-                          <div className="space-y-2">
-                            {question.options.map((option, oIndex) => (
-                              <div key={oIndex} className="flex items-center gap-2">
-                                <RadioGroupItem value={oIndex.toString()} id={`${question.id}-${oIndex}`} />
-                                <Input
-                                  placeholder={`Option ${oIndex + 1}`}
-                                  value={option}
-                                  onChange={(e) => updateOption(question.id, oIndex, e.target.value)}
-                                  className="flex-1"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </RadioGroup>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Select the radio button next to the correct answer
-                        </p>
-                      </div>
+                  <div>
+                    <Label className="text-xs">Question Text *</Label>
+                    <Textarea
+                      placeholder="Enter your question..."
+                      value={currentQuestion.question}
+                      onChange={(e) => updateQuestion("question", e.target.value)}
+                      rows={2}
+                      className="mt-1"
+                    />
+                  </div>
 
-                      <div>
-                        <Label>Points</Label>
-                        <Input
-                          type="number"
-                          value={question.points}
-                          onChange={(e) => updateQuestion(question.id, "points", parseInt(e.target.value))}
-                          min="1"
-                          className="w-24"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+                  {/* 8 Answer Options */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-xs">Answer Options (A-H) *</Label>
+                      <span className="text-xs text-muted-foreground">
+                        Correct: <span className="font-bold text-primary">{currentQuestion.correctAnswerLabel}</span>
+                      </span>
+                    </div>
+                    
+                    <RadioGroup
+                      value={currentQuestion.correctAnswer.toString()}
+                      onValueChange={(v) => setCorrectAnswer(parseInt(v))}
+                      className="space-y-2"
+                    >
+                      {currentQuestion.options.map((option, oIndex) => (
+                        <div key={oIndex} className="flex items-center gap-2">
+                          <RadioGroupItem 
+                            value={oIndex.toString()} 
+                            id={`${currentQuestion.id}-opt-${oIndex}`}
+                            className="shrink-0"
+                          />
+                          <span className={cn(
+                            "flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold shrink-0",
+                            currentQuestion.correctAnswer === oIndex 
+                              ? "bg-primary text-primary-foreground" 
+                              : "bg-muted"
+                          )}>
+                            {ANSWER_LABELS[oIndex]}
+                          </span>
+                          <Input
+                            placeholder={`Option ${ANSWER_LABELS[oIndex]}`}
+                            value={option}
+                            onChange={(e) => updateOption(oIndex, e.target.value)}
+                            className="flex-1"
+                          />
+                        </div>
+                      ))}
+                    </RadioGroup>
+                    <p className="text-[10px] text-muted-foreground mt-2">
+                      Select the radio button next to the correct answer
+                    </p>
+                  </div>
+
+                  {/* Question Navigation Buttons */}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                      disabled={currentQuestionIndex === 0}
+                      className="flex-1"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentQuestionIndex(Math.min(9, currentQuestionIndex + 1))}
+                      disabled={currentQuestionIndex === 9}
+                      className="flex-1"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </ScrollArea>
 
