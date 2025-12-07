@@ -443,38 +443,38 @@ export function CommunityMembershipTab() {
       {/* 2. View All Members Section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-semibold">View All Members</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">View All Members (527)</h2>
           <button
             onClick={toggleMembersView}
             className="p-2 rounded-md hover:bg-muted transition-colors"
             title={membersViewMode === "carousel" ? "Switch to grid view" : "Switch to carousel view"}
           >
             {membersViewMode === "carousel" ? (
-              <Grid3x3 className="h-4 w-4" />
+              <Grid3x3 className="h-5 w-5" />
             ) : (
-              <LayoutList className="h-4 w-4" />
+              <LayoutList className="h-5 w-5" />
             )}
           </button>
         </div>
 
         {/* Gender Filter Tabs */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Button
             variant={memberGenderFilter === "men" ? "default" : "outline"}
             size="sm"
             onClick={() => setMemberGenderFilter("men")}
-            className="rounded-full"
+            className="rounded-full text-base font-semibold px-4"
           >
-            Men
+            Men (312)
           </Button>
-          <span className="text-muted-foreground font-medium">|</span>
+          <span className="text-lg font-bold text-muted-foreground">|</span>
           <Button
             variant={memberGenderFilter === "women" ? "default" : "outline"}
             size="sm"
             onClick={() => setMemberGenderFilter("women")}
-            className="rounded-full"
+            className="rounded-full text-base font-semibold px-4"
           >
-            Women
+            Women (215)
           </Button>
           {memberGenderFilter !== "all" && (
             <>
