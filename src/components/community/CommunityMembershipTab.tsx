@@ -498,7 +498,7 @@ export function CommunityMembershipTab() {
               {filteredMembers.map((member) => (
                 <Card 
                   key={member.id} 
-                  className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 space-y-3 hover:shadow-lg transition-shadow"
+                  className="flex-shrink-0 w-[170px] sm:w-[190px] p-4 space-y-3 hover:shadow-lg transition-shadow"
                 >
                   {/* Avatar */}
                   <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
@@ -513,15 +513,15 @@ export function CommunityMembershipTab() {
 
                   {/* Name & Info */}
                   <div className="text-center space-y-1">
-                    <h4 className="font-semibold text-sm truncate" title={member.name}>
+                    <h4 className="font-bold text-base truncate" title={member.name}>
                       {member.name}
                     </h4>
-                    <p className="text-xs text-muted-foreground">
-                      Member since {member.memberSince}
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Since {member.memberSince}
                     </p>
                     {member.mutualFriends && (
-                      <p className="text-xs text-primary">
-                        {member.mutualFriends} mutual friends
+                      <p className="text-sm font-semibold text-primary">
+                        {member.mutualFriends} mutual
                       </p>
                     )}
                   </div>
@@ -532,20 +532,20 @@ export function CommunityMembershipTab() {
                       <Button 
                         size="sm" 
                         variant="secondary" 
-                        className="flex-1 text-xs"
+                        className="flex-1 text-sm font-semibold"
                         disabled
                       >
-                        <UserCheck className="h-3 w-3 mr-1" />
+                        <UserCheck className="h-4 w-4 mr-1" />
                         Sent
                       </Button>
                     ) : (
                       <Button
                         size="sm"
-                        className="flex-1 text-xs"
+                        className="flex-1 text-sm font-semibold"
                         onClick={() => handleAddFriend(member.id, member.name)}
                       >
-                        <UserPlus className="h-3 w-3 mr-1" />
-                        Add Friend
+                        <UserPlus className="h-4 w-4 mr-1" />
+                        Add
                       </Button>
                     )}
                     
@@ -553,7 +553,7 @@ export function CommunityMembershipTab() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button size="sm" variant="outline" className="px-2">
-                          <MoreVertical className="h-3 w-3" />
+                          <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-40">
