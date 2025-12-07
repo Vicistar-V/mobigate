@@ -37,28 +37,28 @@ export const MeetingVideoGrid = ({
             )}
 
             {/* Name Badge */}
-            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-6 py-3 rounded-full animate-fade-in" style={{ animationDelay: '0.15s' }}>
-              <p className="text-white font-semibold text-xl">{expandedParticipant.name}</p>
+            <div className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-8 py-2 rounded-xl animate-fade-in" style={{ animationDelay: '0.15s' }}>
+              <p className="text-white font-semibold text-xl whitespace-nowrap text-center">{expandedParticipant.name}</p>
               <p className="text-white/70 text-base text-center">{expandedParticipant.position}</p>
             </div>
 
-            {/* Status Indicators */}
-            <div className="absolute bottom-20 right-4 flex gap-2">
+            {/* Status Indicators - Centered below name badge */}
+            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-3">
               {expandedParticipant.isMuted ? (
-                <div className="bg-red-500 p-2 rounded-full">
+                <div className="bg-red-500 p-3 rounded-full">
                   <MicOff className="w-5 h-5 text-white" />
                 </div>
               ) : (
-                <div className="bg-green-500 p-2 rounded-full">
+                <div className="bg-green-500 p-3 rounded-full">
                   <Mic className="w-5 h-5 text-white" />
                 </div>
               )}
               {expandedParticipant.isCameraOff ? (
-                <div className="bg-red-500 p-2 rounded-full">
+                <div className="bg-red-500 p-3 rounded-full">
                   <VideoOff className="w-5 h-5 text-white" />
                 </div>
               ) : (
-                <div className="bg-green-500 p-2 rounded-full">
+                <div className="bg-green-500 p-3 rounded-full">
                   <Video className="w-5 h-5 text-white" />
                 </div>
               )}
