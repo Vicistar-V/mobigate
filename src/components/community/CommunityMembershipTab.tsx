@@ -37,6 +37,8 @@ import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { communityPeople } from "@/data/communityPeopleData";
 import { wallStatusPosts, feedPosts } from "@/data/posts";
 import { CreateSpecialEventDialog } from "@/components/community/CreateSpecialEventDialog";
+import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { ActiveCallDialog } from "@/components/chat/ActiveCallDialog";
 
 // Profile images
 import profile1 from "@/assets/profile-photo.jpg";
@@ -394,6 +396,14 @@ export function CommunityMembershipTab() {
   // View All Members view mode
   const [membersViewMode, setMembersViewMode] = useState<"carousel" | "grid">("carousel");
 
+  // Gift Dialog states
+  const [giftDialogOpen, setGiftDialogOpen] = useState(false);
+  const [selectedMemberForGift, setSelectedMemberForGift] = useState<{ id: string; name: string; avatar: string } | null>(null);
+
+  // Call Dialog states
+  const [callDialogOpen, setCallDialogOpen] = useState(false);
+  const [selectedMemberForCall, setSelectedMemberForCall] = useState<{ id: string; name: string; avatar: string } | null>(null);
+
   const toggleMembersView = () => {
     setMembersViewMode(membersViewMode === "carousel" ? "grid" : "carousel");
   };
@@ -412,7 +422,37 @@ export function CommunityMembershipTab() {
     toast.success(`Friend request sent to ${memberName}`);
   };
 
-  // Handle member actions
+  // Handle Chat - Opens MobiChat Interface
+  const handleChat = (memberId: string, memberName: string) => {
+    window.dispatchEvent(new CustomEvent('openChatWithUser', {
+      detail: { 
+        userId: memberId,
+        userName: memberName 
+      }
+    }));
+  };
+
+  // Handle Send Gift - Opens Gift Dialog
+  const handleSendGift = (memberId: string, memberName: string, memberAvatar: string) => {
+    setSelectedMemberForGift({ id: memberId, name: memberName, avatar: memberAvatar });
+    setGiftDialogOpen(true);
+  };
+
+  const handleGiftSent = (giftData: GiftSelection) => {
+    if (selectedMemberForGift) {
+      toast.success(`Gift sent to ${selectedMemberForGift.name}!`);
+    }
+    setGiftDialogOpen(false);
+    setSelectedMemberForGift(null);
+  };
+
+  // Handle Call - Opens Active Call Dialog
+  const handleCall = (memberId: string, memberName: string, memberAvatar: string) => {
+    setSelectedMemberForCall({ id: memberId, name: memberName, avatar: memberAvatar });
+    setCallDialogOpen(true);
+  };
+
+  // Handle member actions (for other actions like Follow, Like, etc.)
   const handleMemberAction = (action: string, memberName: string) => {
     toast.success(`${action} ${memberName}`);
   };
@@ -565,15 +605,15 @@ export function CommunityMembershipTab() {
                           <Heart className="h-4 w-4 mr-2" />
                           Like
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Chatting with", member.name)}>
+                        <DropdownMenuItem onClick={() => handleChat(member.id, member.name)}>
                           <MessageCircle className="h-4 w-4 mr-2" />
                           Chat
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Calling", member.name)}>
+                        <DropdownMenuItem onClick={() => handleCall(member.id, member.name, member.avatar)}>
                           <Phone className="h-4 w-4 mr-2" />
                           Call
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Sending gift to", member.name)}>
+                        <DropdownMenuItem onClick={() => handleSendGift(member.id, member.name, member.avatar)}>
                           <Gift className="h-4 w-4 mr-2" />
                           Send Gift
                         </DropdownMenuItem>
@@ -673,15 +713,15 @@ export function CommunityMembershipTab() {
                           <Heart className="h-4 w-4 mr-2" />
                           Like
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Chatting with", member.name)}>
+                        <DropdownMenuItem onClick={() => handleChat(member.id, member.name)}>
                           <MessageCircle className="h-4 w-4 mr-2" />
                           Chat
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Calling", member.name)}>
+                        <DropdownMenuItem onClick={() => handleCall(member.id, member.name, member.avatar)}>
                           <Phone className="h-4 w-4 mr-2" />
                           Call
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Sending gift to", member.name)}>
+                        <DropdownMenuItem onClick={() => handleSendGift(member.id, member.name, member.avatar)}>
                           <Gift className="h-4 w-4 mr-2" />
                           Send Gift
                         </DropdownMenuItem>
@@ -725,6 +765,28 @@ export function CommunityMembershipTab() {
       </button>
       
       <CreateSpecialEventDialog open={showSpecialEventDialog} onOpenChange={setShowSpecialEventDialog} />
+
+      {/* Send Gift Dialog */}
+      <SendGiftDialog
+        isOpen={giftDialogOpen}
+        onClose={() => {
+          setGiftDialogOpen(false);
+          setSelectedMemberForGift(null);
+        }}
+        recipientName={selectedMemberForGift?.name || ""}
+        onSendGift={handleGiftSent}
+      />
+
+      {/* Active Call Dialog */}
+      <ActiveCallDialog
+        isOpen={callDialogOpen}
+        onClose={() => {
+          setCallDialogOpen(false);
+          setSelectedMemberForCall(null);
+        }}
+        recipientName={selectedMemberForCall?.name || ""}
+        recipientAvatar={selectedMemberForCall?.avatar}
+      />
 
         {/* 4. Special Events Section */}
         <WallStatusCarousel
