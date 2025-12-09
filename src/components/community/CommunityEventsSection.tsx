@@ -563,14 +563,20 @@ export function CommunityEventsSection({
                     </div>
                   )}
 
+                  {/* Views Count - Separate Row */}
+                  <div className="flex items-center gap-1.5 text-muted-foreground text-xs pt-2 border-t">
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>{event.views.toLocaleString()} views</span>
+                  </div>
+
                   {/* Interactive Engagement Bar */}
-                  <div className="flex items-center gap-2 pt-2 border-t">
+                  <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => handleLike(event.id, e)}
                       className={cn(
-                        "gap-1.5 hover:bg-accent",
+                        "flex-1 gap-1.5 hover:bg-accent",
                         likedEvents.has(event.id) && "text-red-500"
                       )}
                     >
@@ -578,7 +584,7 @@ export function CommunityEventsSection({
                       <span>{(eventLikes[event.id] ?? event.likes).toLocaleString()}</span>
                     </Button>
                     
-                    <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-accent">
+                    <Button variant="ghost" size="sm" className="flex-1 gap-1.5 hover:bg-accent">
                       <MessageSquare className="h-4 w-4" />
                       <span>{event.comments.toLocaleString()}</span>
                     </Button>
@@ -587,16 +593,11 @@ export function CommunityEventsSection({
                       variant="ghost"
                       size="sm"
                       onClick={(e) => handleShare(event, e)}
-                      className="gap-1.5 hover:bg-accent"
+                      className="flex-1 gap-1.5 hover:bg-accent"
                     >
                       <Share2 className="h-4 w-4" />
                       <span>{event.shares.toLocaleString()}</span>
                     </Button>
-                    
-                    <div className="ml-auto flex items-center gap-1.5 text-muted-foreground text-sm">
-                      <Eye className="h-4 w-4" />
-                      <span>{event.views.toLocaleString()}</span>
-                    </div>
                   </div>
                 </div>
               </Card>
