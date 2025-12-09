@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface ContributionsDialogProps {
   member: ExecutiveMember | null;
@@ -94,7 +96,51 @@ export const ContributionsDialog = ({
   open,
   onOpenChange,
 }: ContributionsDialogProps) => {
+  const { toast } = useToast();
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
+
   if (!member) return null;
+
+  const handleLikePost = (postId: string) => {
+    setLikedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+        toast({ title: "Like removed" });
+      } else {
+        newSet.add(postId);
+        toast({ title: "Post liked!" });
+      }
+      return newSet;
+    });
+  };
+
+  const handleCommentPost = (postId: string) => {
+    toast({ title: "Opening comments...", description: "Comment section will open" });
+  };
+
+  const handleSharePost = (postId: string) => {
+    toast({ title: "Share options", description: "Post ready to share" });
+  };
+
+  const handleLikeComment = (commentId: string) => {
+    setLikedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
+        newSet.delete(commentId);
+        toast({ title: "Like removed" });
+      } else {
+        newSet.add(commentId);
+        toast({ title: "Comment liked!" });
+      }
+      return newSet;
+    });
+  };
+
+  const handleOpenPost = (postTitle: string) => {
+    toast({ title: "Opening post", description: postTitle });
+  };
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -154,17 +200,40 @@ export const ContributionsDialog = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-sm">{post.content}</p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
-                    <span className="flex items-center gap-1">
-                      <Heart className="h-3 w-3" /> {post.likes}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3" /> {post.comments}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Share2 className="h-3 w-3" /> {post.shares}
-                    </span>
+                  <p 
+                    className="text-sm cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => handleOpenPost(post.content.substring(0, 50) + "...")}
+                  >
+                    {post.content}
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs gap-1"
+                      onClick={() => handleLikePost(post.id)}
+                    >
+                      <Heart className={`h-3.5 w-3.5 ${likedPosts.has(post.id) ? "fill-red-500 text-red-500" : ""}`} />
+                      {post.likes + (likedPosts.has(post.id) ? 1 : 0)}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs gap-1"
+                      onClick={() => handleCommentPost(post.id)}
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      {post.comments}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs gap-1"
+                      onClick={() => handleSharePost(post.id)}
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      {post.shares}
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -174,13 +243,28 @@ export const ContributionsDialog = ({
             <TabsContent value="comments" className="px-5 py-4 space-y-3 m-0">
               {mockContributions.comments.map((comment) => (
                 <div key={comment.id} className="bg-muted/30 rounded-lg p-3 space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    {format(comment.date, "MMM d, yyyy")}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {format(comment.date, "MMM d, yyyy")}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs gap-1"
+                      onClick={() => handleLikeComment(comment.id)}
+                    >
+                      <Heart className={`h-3 w-3 ${likedComments.has(comment.id) ? "fill-red-500 text-red-500" : ""}`} />
+                    </Button>
                   </div>
                   <p className="text-sm">{comment.content}</p>
                   <p className="text-xs text-muted-foreground">
-                    On: <span className="text-primary">{comment.postTitle}</span>
+                    On: <span 
+                      className="text-primary cursor-pointer hover:underline"
+                      onClick={() => handleOpenPost(comment.postTitle)}
+                    >
+                      {comment.postTitle}
+                    </span>
                   </p>
                 </div>
               ))}
@@ -204,7 +288,12 @@ export const ContributionsDialog = ({
                       {format(reaction.date, "MMM d, yyyy")}
                     </span>
                   </div>
-                  <p className="text-sm text-primary">{reaction.postTitle}</p>
+                  <p 
+                    className="text-sm text-primary cursor-pointer hover:underline"
+                    onClick={() => handleOpenPost(reaction.postTitle)}
+                  >
+                    {reaction.postTitle}
+                  </p>
                 </div>
               ))}
             </TabsContent>
