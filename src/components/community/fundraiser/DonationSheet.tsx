@@ -6,10 +6,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FundRaiserCampaign, currencyRates } from "@/data/fundraiserData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign } from "lucide-react";
+import { DollarSign, AlertTriangle, Heart } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DonationSheetProps {
   open: boolean;
@@ -27,6 +37,7 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
   const [currency, setCurrency] = useState<'USD' | 'MOBI'>('USD');
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const { toast } = useToast();
 
   const getConvertedAmount = () => {
@@ -35,6 +46,15 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
       return `M ${(amt * currencyRates.USD_TO_MOBI).toLocaleString()}`;
     } else {
       return `$${(amt * currencyRates.MOBI_TO_USD).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    }
+  };
+
+  const getFormattedAmount = () => {
+    const amt = parseFloat(amount) || 0;
+    if (currency === 'USD') {
+      return `M${(amt * currencyRates.USD_TO_MOBI).toLocaleString()}`;
+    } else {
+      return `M${amt.toLocaleString()}`;
     }
   };
 
@@ -49,6 +69,13 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
       return;
     }
 
+    // Show confirmation dialog instead of processing directly
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmDonate = () => {
+    const amt = parseFloat(amount);
+    
     toast({
       title: "Donation Successful!",
       description: `Thank you for donating ${currency === 'USD' ? '$' : 'M'}${amt.toLocaleString()} to ${campaign.theme}`,
@@ -58,6 +85,7 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
     setAmount("");
     setMessage("");
     setIsAnonymous(false);
+    setShowConfirmation(false);
     onOpenChange(false);
   };
 
@@ -167,6 +195,35 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
           </p>
         </div>
       </ScrollArea>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-2">
+              <div className="bg-amber-500/10 p-3 rounded-full">
+                <AlertTriangle className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center">Confirm Donation</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              You are sending a monetary Donation of{" "}
+              <span className="font-bold text-foreground">{getFormattedAmount()}</span> to this Community. 
+              This action cannot be reversed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDonate}
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              Donate Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
