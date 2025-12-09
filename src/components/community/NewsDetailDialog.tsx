@@ -218,19 +218,19 @@ export const NewsDetailDialog = ({
       </ScrollArea>
 
       {/* Fixed Bottom Action Bar - Mobile */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 max-w-full bg-card/95 backdrop-blur-sm border-t border-border px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
-        <div className="flex items-center justify-around max-w-md mx-auto gap-2">
+      <div className="md:hidden fixed bottom-0 inset-x-0 max-w-full bg-card/95 backdrop-blur-sm border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
+        <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
           <button
             onClick={handleLike}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
+            className="flex items-center justify-center gap-2 py-2.5 px-3 bg-muted/50 rounded-lg touch-manipulation active:scale-95 transition-transform"
           >
             <Heart 
               className={cn(
-                "h-6 w-6 transition-colors",
+                "h-5 w-5 transition-colors",
                 isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"
               )} 
             />
-            <span className="text-xs text-muted-foreground font-medium">{likeCount.toLocaleString()}</span>
+            <span className="text-sm text-muted-foreground font-medium">{likeCount.toLocaleString()}</span>
           </button>
           
           <button
@@ -241,23 +241,23 @@ export const NewsDetailDialog = ({
                 commentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }
             }}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
+            className="flex items-center justify-center gap-2 py-2.5 px-3 bg-muted/50 rounded-lg touch-manipulation active:scale-95 transition-transform"
           >
-            <MessageCircle className="h-6 w-6 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-medium">{news.comments.toLocaleString()}</span>
+            <MessageCircle className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground font-medium">{news.comments.toLocaleString()}</span>
           </button>
           
           <button
             onClick={handleShare}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
+            className="flex items-center justify-center gap-2 py-2.5 px-3 bg-muted/50 rounded-lg touch-manipulation active:scale-95 transition-transform"
           >
-            <Share2 className="h-6 w-6 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-medium">Share</span>
+            <Share2 className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground font-medium">Share</span>
           </button>
           
-          <div className="flex flex-col items-center gap-1 min-w-[60px]">
-            <Eye className="h-6 w-6 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-medium">{news.views.toLocaleString()}</span>
+          <div className="flex items-center justify-center gap-2 py-2.5 px-3 bg-muted/50 rounded-lg">
+            <Eye className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground font-medium">{news.views.toLocaleString()}</span>
           </div>
         </div>
       </div>
