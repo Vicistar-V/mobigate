@@ -2,6 +2,7 @@ import { CommunityFormData, AccessLevel } from "@/types/communityForm";
 import { accessLevelOptions } from "@/data/communityFormOptions";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface PrivacySettingsSectionProps {
   formData: CommunityFormData;
@@ -14,6 +15,23 @@ export function PrivacySettingsSection({
   updateField,
   errors,
 }: PrivacySettingsSectionProps) {
+  const showAdminSelector = 
+    formData.privacyCommunityFinances === "specified-admin" ||
+    formData.privacyMembersFinancialStatus === "specified-admin" ||
+    formData.privacyMembersComplaints === "specified-admin" ||
+    formData.privacyRecordingMeetings === "specified-admin" ||
+    formData.privacySeeGeneralPosts === "specified-admin" ||
+    formData.privacySeeMembersComments === "specified-admin";
+
+  const toggleAdmin = (adminNum: number) => {
+    const currentSelection = formData.specifiedAdminNumbers || [];
+    if (currentSelection.includes(adminNum)) {
+      updateField("specifiedAdminNumbers", currentSelection.filter(n => n !== adminNum));
+    } else {
+      updateField("specifiedAdminNumbers", [...currentSelection, adminNum]);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div className="text-sm text-muted-foreground">
@@ -134,6 +152,36 @@ export function PrivacySettingsSection({
             </SelectContent>
           </Select>
         </div>
+
+        {showAdminSelector && (
+          <div className="space-y-3 pt-4 border-t border-border">
+            <div>
+              <Label className="text-base font-medium">Specified Admin Numbers</Label>
+              <p className="text-sm text-muted-foreground mt-1">
+                Select one or more admins who can access these settings
+              </p>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+                <Button
+                  key={num}
+                  type="button"
+                  variant={(formData.specifiedAdminNumbers || []).includes(num) ? "default" : "outline"}
+                  size="sm"
+                  className="h-10 text-xs"
+                  onClick={() => toggleAdmin(num)}
+                >
+                  Admin-{num}
+                </Button>
+              ))}
+            </div>
+            {(formData.specifiedAdminNumbers || []).length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                Selected: {(formData.specifiedAdminNumbers || []).sort((a, b) => a - b).join(", ")}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
