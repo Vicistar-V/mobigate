@@ -6,37 +6,63 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface EventsActivitiesSectionProps {
   formData: CommunityFormData;
   addEvent: (event: CommunityEvent) => void;
   removeEvent: (eventId: string) => void;
+  updateEvent: (eventId: string, updates: Partial<CommunityEvent>) => void;
   errors: Partial<Record<keyof CommunityFormData, string>>;
 }
+
+const defaultEventState: Partial<CommunityEvent> = {
+  name: "",
+  nature: "cultural",
+  approvedDues: 0,
+  contraventions: "",
+  contraventionCount: 0,
+  timeframe: "",
+  validityDate: "",
+  attendance: "voluntary",
+  penaltyAbsentPercent: 0,
+  penaltyOwingPercent: 0,
+};
 
 export function EventsActivitiesSection({
   formData,
   addEvent,
   removeEvent,
+  updateEvent,
   errors,
 }: EventsActivitiesSectionProps) {
   const [showEventsList, setShowEventsList] = useState(false);
-  const [newEvent, setNewEvent] = useState<Partial<CommunityEvent>>({
-    name: "",
-    nature: "cultural",
-    approvedDues: 0,
-    contraventions: "",
-    contraventionCount: 0,
-    timeframe: "",
-    validityDate: "",
-    attendance: "voluntary",
-    penaltyAbsentPercent: 0,
-    penaltyOwingPercent: 0,
-  });
+  const [editingEvent, setEditingEvent] = useState<CommunityEvent | null>(null);
+  const [newEvent, setNewEvent] = useState<Partial<CommunityEvent>>(defaultEventState);
 
-  const handleCreateEvent = () => {
+  const handleEditEvent = (event: CommunityEvent) => {
+    setEditingEvent(event);
+    setNewEvent({
+      name: event.name,
+      nature: event.nature,
+      approvedDues: event.approvedDues,
+      contraventions: event.contraventions,
+      contraventionCount: event.contraventionCount,
+      timeframe: event.timeframe,
+      validityDate: event.validityDate,
+      attendance: event.attendance,
+      penaltyAbsentPercent: event.penaltyAbsentPercent,
+      penaltyOwingPercent: event.penaltyOwingPercent,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEvent(null);
+    setNewEvent(defaultEventState);
+  };
+
+  const handleCreateOrUpdateEvent = () => {
     if (!newEvent.name?.trim()) {
       toast({
         title: "Validation Error",
@@ -46,40 +72,52 @@ export function EventsActivitiesSection({
       return;
     }
 
-    const event: CommunityEvent = {
-      id: `event-${Date.now()}`,
-      name: newEvent.name,
-      nature: (newEvent.nature as EventNature) || "cultural",
-      approvedDues: newEvent.approvedDues || 0,
-      contraventions: newEvent.contraventions || "",
-      contraventionCount: newEvent.contraventionCount || 0,
-      timeframe: newEvent.timeframe || "",
-      validityDate: newEvent.validityDate || "",
-      attendance: (newEvent.attendance as EventAttendance) || "voluntary",
-      penaltyAbsentPercent: newEvent.penaltyAbsentPercent || 0,
-      penaltyOwingPercent: newEvent.penaltyOwingPercent || 0,
-    };
+    if (editingEvent) {
+      // Update existing event
+      updateEvent(editingEvent.id, {
+        name: newEvent.name,
+        nature: (newEvent.nature as EventNature) || "cultural",
+        approvedDues: newEvent.approvedDues || 0,
+        contraventions: newEvent.contraventions || "",
+        contraventionCount: newEvent.contraventionCount || 0,
+        timeframe: newEvent.timeframe || "",
+        validityDate: newEvent.validityDate || "",
+        attendance: (newEvent.attendance as EventAttendance) || "voluntary",
+        penaltyAbsentPercent: newEvent.penaltyAbsentPercent || 0,
+        penaltyOwingPercent: newEvent.penaltyOwingPercent || 0,
+      });
+      
+      setEditingEvent(null);
+      setNewEvent(defaultEventState);
+      
+      toast({
+        title: "Event Updated",
+        description: "Event has been updated successfully",
+      });
+    } else {
+      // Create new event
+      const event: CommunityEvent = {
+        id: `event-${Date.now()}`,
+        name: newEvent.name,
+        nature: (newEvent.nature as EventNature) || "cultural",
+        approvedDues: newEvent.approvedDues || 0,
+        contraventions: newEvent.contraventions || "",
+        contraventionCount: newEvent.contraventionCount || 0,
+        timeframe: newEvent.timeframe || "",
+        validityDate: newEvent.validityDate || "",
+        attendance: (newEvent.attendance as EventAttendance) || "voluntary",
+        penaltyAbsentPercent: newEvent.penaltyAbsentPercent || 0,
+        penaltyOwingPercent: newEvent.penaltyOwingPercent || 0,
+      };
 
-    addEvent(event);
-    
-    // Reset form
-    setNewEvent({
-      name: "",
-      nature: "cultural",
-      approvedDues: 0,
-      contraventions: "",
-      contraventionCount: 0,
-      timeframe: "",
-      validityDate: "",
-      attendance: "voluntary",
-      penaltyAbsentPercent: 0,
-      penaltyOwingPercent: 0,
-    });
-
-    toast({
-      title: "Event Created",
-      description: "Event has been added successfully",
-    });
+      addEvent(event);
+      setNewEvent(defaultEventState);
+      
+      toast({
+        title: "Event Created",
+        description: "Event has been added successfully",
+      });
+    }
   };
 
   const formatSerialNumber = (index: number) => {
@@ -102,9 +140,11 @@ export function EventsActivitiesSection({
 
   return (
     <div className="space-y-5">
-      {/* Create New Event Form */}
+      {/* Create/Edit Event Form */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium">Create New Event/Activity</h3>
+        <h3 className="text-sm font-medium">
+          {editingEvent ? `Edit Event: "${editingEvent.name}"` : "Create New Event/Activity"}
+        </h3>
 
         <div className="space-y-2">
           <Label htmlFor="event-name">Event Name</Label>
@@ -233,9 +273,16 @@ export function EventsActivitiesSection({
           />
         </div>
 
-        <Button type="button" onClick={handleCreateEvent} className="w-full">
-          Create Now
-        </Button>
+        <div className="flex gap-2">
+          {editingEvent && (
+            <Button type="button" variant="outline" onClick={handleCancelEdit} className="flex-1">
+              Cancel
+            </Button>
+          )}
+          <Button type="button" onClick={handleCreateOrUpdateEvent} className="flex-1">
+            {editingEvent ? "Save Changes" : "Create Now"}
+          </Button>
+        </div>
       </div>
 
       {/* Events List */}
@@ -294,15 +341,25 @@ export function EventsActivitiesSection({
                       <td className="border border-border p-3 text-cyan-400">
                         {formatDate(event.validityDate)}
                       </td>
-                      <td className="border border-border p-3 text-center">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeEvent(event.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                      <td className="border border-border p-3">
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditEvent(event)}
+                          >
+                            <Pencil className="h-4 w-4 text-primary" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeEvent(event.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

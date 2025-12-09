@@ -578,6 +578,7 @@ export default function CreateCommunity() {
                     formData={formData}
                     addEvent={addEvent}
                     removeEvent={removeEvent}
+                    updateEvent={updateEvent}
                     errors={errors}
                   />
                 </div>
