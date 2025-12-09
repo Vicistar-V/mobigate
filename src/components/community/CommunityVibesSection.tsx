@@ -8,6 +8,7 @@ import { Heart, MessageCircle, Share2, Eye, UserPlus, Video, Image as ImageIcon,
 import { toast } from "sonner";
 import { CreateVibeForm } from "@/components/community/CreateVibeForm";
 import { VibeDetailDialog } from "@/components/community/VibeDetailDialog";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
@@ -15,6 +16,7 @@ import { mockVibesData, VibeItem } from "@/data/communityVibesData";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ViewToggleButton, ViewMode } from "@/components/ui/ViewToggleButton";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 // Mock community members for invite carousel
 import profile1 from "@/assets/community-person-1.jpg";
@@ -84,6 +86,23 @@ export const CommunityVibesSection = ({
   const [isVibeDialogOpen, setIsVibeDialogOpen] = useState(false);
   const [inviteStatus, setInviteStatus] = useState<Record<string, boolean>>({});
   const [inviteViewMode, setInviteViewMode] = useState<ViewMode>("carousel");
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+
+  const convertToExecutiveMember = (member: CommunityMember): ExecutiveMember => ({
+    id: member.id,
+    name: member.name,
+    position: `${member.mutualFriends} mutual friends`,
+    tenure: "Member",
+    imageUrl: member.avatar,
+    level: "officer",
+    committee: "executive",
+  });
+
+  const handleMemberClick = (member: CommunityMember) => {
+    setSelectedMember(convertToExecutiveMember(member));
+    setShowMemberPreview(true);
+  };
 
   const canPost = isOwner || isAdmin;
 
@@ -148,18 +167,23 @@ export const CommunityVibesSection = ({
                   key={member.id} 
                   className="flex-shrink-0 w-[160px] sm:w-[180px] p-3 space-y-3 hover:shadow-lg transition-shadow"
                 >
-                  <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
-                    <Avatar className="w-full h-full border-2 border-primary/20">
-                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
-                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => handleMemberClick(member)}
+                  >
+                    <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
+                      <Avatar className="w-full h-full border-2 border-primary/20 hover:border-primary transition-colors">
+                        <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <h3 className="text-sm font-semibold text-center line-clamp-2 min-h-[2.5rem] mt-3 hover:text-primary transition-colors">
+                      {member.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground text-center">
+                      {member.mutualFriends} mutual friends
+                    </p>
                   </div>
-                  <h3 className="text-sm font-semibold text-center line-clamp-2 min-h-[2.5rem]">
-                    {member.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground text-center">
-                    {member.mutualFriends} mutual friends
-                  </p>
                   <Button
                     size="sm"
                     onClick={() => handleInvite(member.id, member.name)}
@@ -182,18 +206,23 @@ export const CommunityVibesSection = ({
                   key={member.id} 
                   className="p-3 space-y-3 hover:shadow-lg transition-shadow"
                 >
-                  <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
-                    <Avatar className="w-full h-full border-2 border-primary/20">
-                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
-                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => handleMemberClick(member)}
+                  >
+                    <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
+                      <Avatar className="w-full h-full border-2 border-primary/20 hover:border-primary transition-colors">
+                        <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <h3 className="text-sm font-semibold text-center line-clamp-2 min-h-[2.5rem] mt-3 hover:text-primary transition-colors">
+                      {member.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground text-center">
+                      {member.mutualFriends} mutual friends
+                    </p>
                   </div>
-                  <h3 className="text-sm font-semibold text-center line-clamp-2 min-h-[2.5rem]">
-                    {member.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground text-center">
-                    {member.mutualFriends} mutual friends
-                  </p>
                   <Button
                     size="sm"
                     onClick={() => handleInvite(member.id, member.name)}
@@ -410,6 +439,15 @@ export const CommunityVibesSection = ({
           onLike={handleLike}
           isLiked={likedVibes[selectedVibe.id] || false}
           likeCount={selectedVibe.likes + (likedVibes[selectedVibe.id] ? 1 : 0)}
+        />
+      )}
+
+      {/* Member Preview Dialog */}
+      {selectedMember && (
+        <MemberPreviewDialog
+          member={selectedMember}
+          open={showMemberPreview}
+          onOpenChange={setShowMemberPreview}
         />
       )}
     </div>
