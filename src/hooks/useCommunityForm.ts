@@ -56,16 +56,16 @@ export function useCommunityForm() {
     }));
   };
 
-  const addMeeting = (type: "general" | "executive", meeting: MeetingSchedule) => {
-    const field = type === "general" ? "generalMeetings" : "executiveMeetings";
+  const addMeeting = (type: "general" | "executive" | "custom", meeting: MeetingSchedule) => {
+    const field = type === "general" ? "generalMeetings" : type === "executive" ? "executiveMeetings" : "customMeetings";
     setFormData(prev => ({
       ...prev,
       [field]: [...prev[field], meeting]
     }));
   };
 
-  const removeMeeting = (type: "general" | "executive", meetingId: string) => {
-    const field = type === "general" ? "generalMeetings" : "executiveMeetings";
+  const removeMeeting = (type: "general" | "executive" | "custom", meetingId: string) => {
+    const field = type === "general" ? "generalMeetings" : type === "executive" ? "executiveMeetings" : "customMeetings";
     setFormData(prev => ({
       ...prev,
       [field]: prev[field].filter(m => m.id !== meetingId)
@@ -73,11 +73,11 @@ export function useCommunityForm() {
   };
 
   const updateMeeting = (
-    type: "general" | "executive", 
+    type: "general" | "executive" | "custom", 
     meetingId: string, 
     updates: Partial<MeetingSchedule>
   ) => {
-    const field = type === "general" ? "generalMeetings" : "executiveMeetings";
+    const field = type === "general" ? "generalMeetings" : type === "executive" ? "executiveMeetings" : "customMeetings";
     setFormData(prev => ({
       ...prev,
       [field]: prev[field].map(m => 

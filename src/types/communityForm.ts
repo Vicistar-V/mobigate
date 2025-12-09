@@ -16,7 +16,10 @@ export type CommunityCategory =
   | "military"
   | "law-enforcement"
   | "co-operative"
-  | "social";
+  | "social"
+  | "professional-body"
+  | "association"
+  | "other";
 
 export type CommunityInterest = "personal" | "public";
 
@@ -90,7 +93,8 @@ export interface OfficialPosition {
 
 export interface MeetingSchedule {
   id: string;
-  type: "general" | "executive";
+  type: "general" | "executive" | "custom";
+  customTypeName?: string;
   frequency: MeetingFrequency;
   monthOfYear?: MonthOfYear;
   weekOfMonth?: WeekOfMonth;
@@ -121,6 +125,7 @@ export interface CommunityFormData {
   classification: CommunityClassification | "";
   customClassification: string;
   category: CommunityCategory | "";
+  customCategory: string;
   interest: CommunityInterest;
   designation: string;
   
@@ -148,6 +153,7 @@ export interface CommunityFormData {
   // Meetings
   generalMeetings: MeetingSchedule[];
   executiveMeetings: MeetingSchedule[];
+  customMeetings: MeetingSchedule[];
   attendanceRegister: boolean;
   
   // Offices & Positions
@@ -216,6 +222,7 @@ export const defaultCommunityFormData: CommunityFormData = {
   classification: "",
   customClassification: "",
   category: "",
+  customCategory: "",
   interest: "public",
   designation: "",
   founderId: "user-123", // Will be replaced with actual user ID
@@ -233,6 +240,7 @@ export const defaultCommunityFormData: CommunityFormData = {
   maxAdminsAllowed: 1,
   generalMeetings: [],
   executiveMeetings: [],
+  customMeetings: [],
   attendanceRegister: true,
   positions: [],
   events: [],
