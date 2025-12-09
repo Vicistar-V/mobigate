@@ -461,13 +461,13 @@ export function CommunityNewsSection({
                   )}
 
                   {/* Interactive Engagement Bar */}
-                  <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 pt-2 border-t">
+                  <div className="flex items-center gap-2 pt-2 border-t">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => handleLike(news.id, e)}
                       className={cn(
-                        "gap-1.5 hover:bg-accent justify-start",
+                        "gap-1.5 hover:bg-accent",
                         likedNews.has(news.id) && "text-red-500"
                       )}
                     >
@@ -475,7 +475,7 @@ export function CommunityNewsSection({
                       <span>{(newsLikes[news.id] ?? news.likes).toLocaleString()}</span>
                     </Button>
                     
-                    <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-accent justify-start">
+                    <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-accent">
                       <MessageSquare className="h-4 w-4" />
                       <span>{news.comments.toLocaleString()}</span>
                     </Button>
@@ -484,13 +484,13 @@ export function CommunityNewsSection({
                       variant="ghost"
                       size="sm"
                       onClick={(e) => handleShare(news, e)}
-                      className="gap-1.5 hover:bg-accent justify-start"
+                      className="gap-1.5 hover:bg-accent"
                     >
                       <Share2 className="h-4 w-4" />
                       <span>{news.shares.toLocaleString()}</span>
                     </Button>
                     
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-sm sm:ml-auto justify-start">
+                    <div className="ml-auto flex items-center gap-1.5 text-muted-foreground text-sm">
                       <Eye className="h-4 w-4" />
                       <span>{news.views.toLocaleString()}</span>
                     </div>
