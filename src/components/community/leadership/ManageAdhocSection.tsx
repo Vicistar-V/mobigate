@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { adHocMembers } from "@/data/communityExecutivesData";
-import { adhocCommittees } from "@/data/leadershipChangeHistory";
 import { AddMemberDialog } from "./AddMemberDialog";
 import { EditMemberDialog } from "./EditMemberDialog";
 import { Plus, MoreVertical, Pencil, Trash2, ArrowRightLeft, UserCog } from "lucide-react";
@@ -44,9 +43,11 @@ export function ManageAdhocSection() {
   const [selectedMember, setSelectedMember] = useState<typeof adHocMembers[0] | null>(null);
   const [committeeFilter, setCommitteeFilter] = useState<string>("all");
 
+  const uniqueDepartments = [...new Set(adHocMembers.map(m => m.adHocDepartment).filter(Boolean))];
+
   const filteredMembers = committeeFilter === "all" 
     ? adHocMembers 
-    : adHocMembers.filter(m => m.committee === committeeFilter);
+    : adHocMembers.filter(m => m.adHocDepartment === committeeFilter);
 
   const handleViewProfile = (memberId: string) => {
     navigate(`/profile/${memberId}`);
@@ -100,9 +101,9 @@ export function ManageAdhocSection() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Committees</SelectItem>
-          {adhocCommittees.map((committee) => (
-            <SelectItem key={committee} value={committee}>
-              {committee}
+          {uniqueDepartments.map((dept) => (
+            <SelectItem key={dept} value={dept}>
+              {dept} Committee
             </SelectItem>
           ))}
         </SelectContent>
