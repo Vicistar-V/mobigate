@@ -194,10 +194,7 @@ export const ExecutiveDetailSheet = ({
         </DrawerClose>
 
         {/* ========== STATIC HEADER SEGMENT ========== */}
-        <div 
-          className="flex-shrink-0 px-5 pt-4 pb-3 cursor-pointer hover:bg-muted/30 transition-colors"
-          onClick={handleHeaderClick}
-        >
+        <div className="flex-shrink-0 px-4 pt-4 pb-3">
           {/* Admin Role Badge - Only visible to own profile */}
           {isOwn && member.adminRole && (
             <div className="pb-2">
@@ -205,19 +202,26 @@ export const ExecutiveDetailSheet = ({
             </div>
           )}
 
-          {/* Photo, Name, Position - Clickable to navigate to main profile */}
-          <div className="flex flex-col items-center gap-2">
-            <div className="relative">
-              <Avatar className="h-20 w-20 border-3 border-primary/20">
-                <AvatarImage
-                  src={displayImage}
-                  alt={member.name}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-2xl">
-                  {member.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+          {/* Horizontal Layout: Photo on Left, Text on Right */}
+          <div 
+            className="flex items-start gap-4 cursor-pointer hover:bg-muted/30 transition-colors rounded-lg p-2 -mx-2"
+            onClick={handleHeaderClick}
+          >
+            {/* Larger Rectangular Photo with Rounded Corners */}
+            <div className="relative flex-shrink-0">
+              <div className="h-28 w-24 rounded-lg overflow-hidden border-2 border-primary/20 bg-muted">
+                {displayImage ? (
+                  <img
+                    src={displayImage}
+                    alt={member.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center bg-muted text-2xl font-semibold text-muted-foreground">
+                    {member.name.charAt(0)}
+                  </div>
+                )}
+              </div>
               {isOwn && (
                 <Button
                   variant="secondary"
@@ -232,34 +236,36 @@ export const ExecutiveDetailSheet = ({
                 </Button>
               )}
             </div>
-            <div className="text-center">
-              <h2 className="text-lg font-bold leading-tight">{member.name}</h2>
-              <p className="text-sm text-primary font-semibold mt-0.5">
+
+            {/* Text Content: Name, Position, Tenure */}
+            <div className="flex-1 min-w-0 pt-1">
+              <h2 className="text-lg font-bold leading-tight truncate">{member.name}</h2>
+              <p className="text-sm text-primary font-semibold mt-1">
                 {member.position}
               </p>
               {member.tenure && (
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-muted-foreground mt-1">
                   {member.tenure}
                 </p>
               )}
+              
+              {/* Edit Profile Button - Only visible to own profile */}
+              {isOwn && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEditProfile(true);
+                  }}
+                >
+                  <Pencil className="h-3.5 w-3.5 mr-2" />
+                  Edit Profile
+                </Button>
+              )}
             </div>
           </div>
-
-          {/* Edit Profile Button - Only visible to own profile */}
-          {isOwn && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full mt-3"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowEditProfile(true);
-              }}
-            >
-              <Pencil className="h-3.5 w-3.5 mr-2" />
-              Edit Community Profile
-            </Button>
-          )}
         </div>
 
         <Separator />
