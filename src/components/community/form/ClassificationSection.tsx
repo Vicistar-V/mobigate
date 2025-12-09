@@ -40,6 +40,21 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
         )}
       </div>
 
+      {formData.classification === "other" && (
+        <div className="space-y-2">
+          <Label htmlFor="customClassification" className="text-sm font-medium">
+            Specify Classification <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="customClassification"
+            placeholder="Enter your custom classification"
+            value={formData.customClassification}
+            onChange={(e) => updateField("customClassification", e.target.value)}
+            className="h-11"
+          />
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="category" className="text-sm font-medium">
           Type/Category <span className="text-destructive">*</span>

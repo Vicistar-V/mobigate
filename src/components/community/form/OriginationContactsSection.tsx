@@ -43,12 +43,22 @@ export function OriginationContactsSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="origin-city">City/County of Origin</Label>
+          <Label htmlFor="origin-local-govt">Local Government/County of Origin</Label>
           <Input
-            id="origin-city"
-            placeholder="Enter city or county"
-            value={formData.originCity}
-            onChange={(e) => updateField("originCity", e.target.value)}
+            id="origin-local-govt"
+            placeholder="Enter local government or county"
+            value={formData.originLocalGovernment}
+            onChange={(e) => updateField("originLocalGovernment", e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="origin-city-town">City/Town of Origin</Label>
+          <Input
+            id="origin-city-town"
+            placeholder="Enter city or town"
+            value={formData.originCityTown}
+            onChange={(e) => updateField("originCityTown", e.target.value)}
           />
         </div>
 
