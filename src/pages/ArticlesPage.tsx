@@ -273,12 +273,12 @@ export const ArticlesPage = () => {
                 <Separator />
 
                 {/* Engagement Actions */}
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleLike(selectedArticle.id)}
-                    className="flex-1"
+                    className="w-full"
                   >
                     <ThumbsUp className="h-4 w-4 mr-2" />
                     Like ({selectedArticle.likes})
@@ -287,7 +287,7 @@ export const ArticlesPage = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleComment(selectedArticle.id)}
-                    className="flex-1"
+                    className="w-full"
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Comment ({selectedArticle.comments})
@@ -296,7 +296,7 @@ export const ArticlesPage = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleShare(selectedArticle.id)}
-                    className="flex-1"
+                    className="w-full"
                   >
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
