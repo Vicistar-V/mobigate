@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ import {
 
 export function ManageAdhocSection() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRemoveAlert, setShowRemoveAlert] = useState(false);
@@ -45,6 +47,10 @@ export function ManageAdhocSection() {
   const filteredMembers = committeeFilter === "all" 
     ? adHocMembers 
     : adHocMembers.filter(m => m.committee === committeeFilter);
+
+  const handleViewProfile = (memberId: string) => {
+    navigate(`/profile/${memberId}`);
+  };
 
   const handleEdit = (member: typeof adHocMembers[0]) => {
     setSelectedMember(member);
@@ -108,21 +114,26 @@ export function ManageAdhocSection() {
             <Card key={member.id} className="overflow-hidden">
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={member.imageUrl} alt={member.name} />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm truncate">{member.name}</h4>
-                    <p className="text-xs text-primary truncate">{member.position}</p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <Badge variant="outline" className="text-xs">
-                        {member.committee}
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {member.tenure}
-                      </Badge>
+                  <div 
+                    className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
+                    onClick={() => handleViewProfile(member.id)}
+                  >
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={member.imageUrl} alt={member.name} />
+                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm truncate">{member.name}</h4>
+                      <p className="text-xs text-primary truncate">{member.position}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <Badge variant="outline" className="text-xs">
+                          {member.committee}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {member.tenure}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
 
