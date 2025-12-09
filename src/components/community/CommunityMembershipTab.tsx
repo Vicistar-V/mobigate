@@ -59,6 +59,8 @@ import { wallStatusPosts, feedPosts } from "@/data/posts";
 import { CreateSpecialEventDialog } from "@/components/community/CreateSpecialEventDialog";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { ActiveCallDialog } from "@/components/chat/ActiveCallDialog";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 // Profile images
 import profile1 from "@/assets/profile-photo.jpg";
@@ -434,8 +436,29 @@ export function CommunityMembershipTab() {
   const [reportReason, setReportReason] = useState<string>("");
   const [reportDetails, setReportDetails] = useState<string>("");
 
+  // Member Preview states
+  const [selectedMemberForPreview, setSelectedMemberForPreview] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+
   const toggleMembersView = () => {
     setMembersViewMode(membersViewMode === "carousel" ? "grid" : "carousel");
+  };
+
+  // Convert CommunityMember to ExecutiveMember for preview
+  const convertToExecutiveMember = (member: CommunityMember): ExecutiveMember => ({
+    id: member.id,
+    name: member.name,
+    position: `${member.mutualFriends || 0} mutual friends`,
+    tenure: `Member since ${member.memberSince}`,
+    imageUrl: member.avatar,
+    level: "officer",
+    committee: "executive"
+  });
+
+  // Handle member card click
+  const handleMemberClick = (member: CommunityMember) => {
+    setSelectedMemberForPreview(convertToExecutiveMember(member));
+    setShowMemberPreview(true);
   };
 
   // Filter members by gender
@@ -617,30 +640,36 @@ export function CommunityMembershipTab() {
                   key={member.id} 
                   className="flex-shrink-0 w-[170px] sm:w-[190px] p-4 space-y-3 hover:shadow-lg transition-shadow"
                 >
-                  {/* Avatar */}
-                  <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
-                    <Avatar className="w-full h-full border-2 border-primary/20">
-                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
-                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    {member.isOnline && (
-                      <div className="absolute bottom-1 right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
-                    )}
-                  </div>
+                  {/* Clickable Avatar & Info */}
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => handleMemberClick(member)}
+                  >
+                    {/* Avatar */}
+                    <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
+                      <Avatar className="w-full h-full border-2 border-primary/20">
+                        <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      {member.isOnline && (
+                        <div className="absolute bottom-1 right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                      )}
+                    </div>
 
-                  {/* Name & Info */}
-                  <div className="text-center space-y-1">
-                    <h4 className="font-bold text-base truncate" title={member.name}>
-                      {member.name}
-                    </h4>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Since {member.memberSince}
-                    </p>
-                    {member.mutualFriends && (
-                      <p className="text-sm font-semibold text-primary">
-                        {member.mutualFriends} mutual
+                    {/* Name & Info */}
+                    <div className="text-center space-y-1 mt-3">
+                      <h4 className="font-bold text-base truncate" title={member.name}>
+                        {member.name}
+                      </h4>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Since {member.memberSince}
                       </p>
-                    )}
+                      {member.mutualFriends && (
+                        <p className="text-sm font-semibold text-primary">
+                          {member.mutualFriends} mutual
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Action Buttons */}
@@ -725,30 +754,36 @@ export function CommunityMembershipTab() {
                   key={member.id} 
                   className="p-3 space-y-2 hover:shadow-lg transition-shadow"
                 >
-                  {/* Avatar */}
-                  <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20">
-                    <Avatar className="w-full h-full border-2 border-primary/20">
-                      <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
-                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    {member.isOnline && (
-                      <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
-                    )}
-                  </div>
+                  {/* Clickable Avatar & Info */}
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => handleMemberClick(member)}
+                  >
+                    {/* Avatar */}
+                    <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20">
+                      <Avatar className="w-full h-full border-2 border-primary/20">
+                        <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
+                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      {member.isOnline && (
+                        <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                      )}
+                    </div>
 
-                  {/* Name & Info */}
-                  <div className="text-center space-y-0.5">
-                    <h4 className="font-semibold text-xs sm:text-sm truncate" title={member.name}>
-                      {member.name}
-                    </h4>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">
-                      Since {member.memberSince}
-                    </p>
-                    {member.mutualFriends && (
-                      <p className="text-[10px] sm:text-xs text-primary">
-                        {member.mutualFriends} mutual
+                    {/* Name & Info */}
+                    <div className="text-center space-y-0.5 mt-2">
+                      <h4 className="font-semibold text-xs sm:text-sm truncate" title={member.name}>
+                        {member.name}
+                      </h4>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">
+                        Since {member.memberSince}
                       </p>
-                    )}
+                      {member.mutualFriends && (
+                        <p className="text-[10px] sm:text-xs text-primary">
+                          {member.mutualFriends} mutual
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Action Buttons */}
@@ -1106,6 +1141,13 @@ export function CommunityMembershipTab() {
             </Button>
           </div>
         )}
+
+        {/* Member Preview Dialog */}
+        <MemberPreviewDialog
+          member={selectedMemberForPreview}
+          open={showMemberPreview}
+          onOpenChange={setShowMemberPreview}
+        />
     </div>
   );
 }
