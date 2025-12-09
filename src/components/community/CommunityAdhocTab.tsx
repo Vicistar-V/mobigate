@@ -1,5 +1,3 @@
-import { Card } from "@/components/ui/card";
-import { Grid3x3 } from "lucide-react";
 import { ExecutiveMembersCarousel } from "./ExecutiveMembersCarousel";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdCard } from "@/components/PremiumAdCard";
@@ -81,35 +79,30 @@ export const CommunityAdhocTab = () => {
     duration: 15,
   };
 
+  const filterDropdown = (
+    <Select value={adHocFilter} onValueChange={setAdHocFilter}>
+      <SelectTrigger className="h-7 w-[120px] bg-primary-foreground text-primary text-xs">
+        <SelectValue placeholder="Filter" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All Committees</SelectItem>
+        <SelectItem value="Finance">Finance</SelectItem>
+        <SelectItem value="Welfare">Welfare</SelectItem>
+        <SelectItem value="Protocol">Protocol</SelectItem>
+        <SelectItem value="Education">Education</SelectItem>
+        <SelectItem value="Sports">Sports</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <div className="bg-primary text-primary-foreground p-3 flex items-center justify-between">
-          <h3 className="font-semibold text-sm">Ad-hoc Committee Members</h3>
-          <div className="flex items-center gap-2">
-            <Grid3x3 className="h-4 w-4" />
-            <Select value={adHocFilter} onValueChange={setAdHocFilter}>
-              <SelectTrigger className="h-8 w-[130px] bg-primary-foreground text-primary text-xs">
-                <SelectValue placeholder="Filter" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Committees</SelectItem>
-                <SelectItem value="Finance">Finance</SelectItem>
-                <SelectItem value="Welfare">Welfare</SelectItem>
-                <SelectItem value="Protocol">Protocol</SelectItem>
-                <SelectItem value="Education">Education</SelectItem>
-                <SelectItem value="Sports">Sports</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </Card>
-
       <ExecutiveMembersCarousel
         title={`Ad-hoc Committee Members ${adHocFilter !== "all" ? `- ${adHocFilter}` : ""}`}
         members={filteredAdHocMembers}
         showViewToggle={true}
         onMemberClick={handleMemberClick}
+        headerExtra={filterDropdown}
       />
 
       {/* Advertisement */}
