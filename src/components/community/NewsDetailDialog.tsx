@@ -99,7 +99,7 @@ export const NewsDetailDialog = ({
 
   // Shared content component for both mobile and desktop
   const NewsContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-x-hidden w-full">
       {/* Close button - top right */}
       <button
         onClick={() => onOpenChange(false)}
@@ -132,7 +132,7 @@ export const NewsDetailDialog = ({
           )}
 
           {/* Content Container */}
-          <div className="px-5 sm:px-6 py-4 space-y-4">
+          <div className="px-5 sm:px-6 py-4 space-y-4 overflow-x-hidden">
             {/* Category and Media Type Badges */}
             <div className="flex flex-wrap items-center gap-2">
               <Badge className={getCategoryColor(news.category)}>
@@ -151,7 +151,7 @@ export const NewsDetailDialog = ({
             </div>
 
             {/* Title */}
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight break-words">
               {news.title}
             </h2>
 
@@ -218,7 +218,7 @@ export const NewsDetailDialog = ({
       </ScrollArea>
 
       {/* Fixed Bottom Action Bar - Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
+      <div className="md:hidden fixed bottom-0 inset-x-0 max-w-full bg-card/95 backdrop-blur-sm border-t border-border px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
         <div className="flex items-center justify-around max-w-md mx-auto gap-2">
           <button
             onClick={handleLike}
