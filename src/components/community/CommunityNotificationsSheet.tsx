@@ -233,6 +233,7 @@ export function CommunityNotificationsSheet({
         open={detailDrawerOpen}
         onOpenChange={setDetailDrawerOpen}
         notification={selectedNotification}
+        onCloseAll={() => onOpenChange(false)}
       />
     </>
   );
