@@ -74,7 +74,7 @@ export const InsideCommunityPage = () => {
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center text-center gap-2">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Users className="h-5 w-5 text-primary" />
               </div>
@@ -86,7 +86,7 @@ export const InsideCommunityPage = () => {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center text-center gap-2">
               <div className="p-2 bg-green-500/10 rounded-lg">
                 <UserPlus className="h-5 w-5 text-green-600" />
               </div>
@@ -98,7 +98,7 @@ export const InsideCommunityPage = () => {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center text-center gap-2">
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <Activity className="h-5 w-5 text-blue-600" />
               </div>
@@ -110,7 +110,7 @@ export const InsideCommunityPage = () => {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center text-center gap-2">
               <div className="p-2 bg-yellow-500/10 rounded-lg">
                 <TrendingUp className="h-5 w-5 text-yellow-600" />
               </div>
