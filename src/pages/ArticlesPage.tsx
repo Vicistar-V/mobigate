@@ -194,18 +194,16 @@ export const ArticlesPage = () => {
                     <Separator />
 
                     {/* Engagement Stats */}
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <ThumbsUp className="h-4 w-4" />
-                          {article.likes}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle className="h-4 w-4" />
-                          {article.comments}
-                        </span>
-                      </div>
-                      <Button variant="ghost" size="sm">
+                    <div className="grid grid-cols-3 gap-2 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <ThumbsUp className="h-4 w-4" />
+                        {article.likes}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="h-4 w-4" />
+                        {article.comments}
+                      </span>
+                      <Button variant="ghost" size="sm" className="justify-end h-auto p-0">
                         <Eye className="h-4 w-4 mr-1" />
                         Read
                       </Button>
