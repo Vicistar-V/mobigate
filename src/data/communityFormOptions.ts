@@ -14,7 +14,8 @@ export const classificationOptions: { value: CommunityClassification; label: str
   { value: "association", label: "Association" },
   { value: "institution", label: "Institution" },
   { value: "community", label: "Community" },
-  { value: "government", label: "Government" }
+  { value: "government", label: "Government" },
+  { value: "other", label: "Other" }
 ];
 
 export const categoryOptions: { value: CommunityCategory; label: string }[] = [

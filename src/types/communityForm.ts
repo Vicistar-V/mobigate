@@ -1,4 +1,4 @@
-export type CommunityClassification = "association" | "institution" | "community" | "government";
+export type CommunityClassification = "association" | "institution" | "community" | "government" | "other";
 
 export type CommunityCategory = 
   | "religious"
@@ -119,6 +119,7 @@ export interface CommunityFormData {
   
   // Classification & Type
   classification: CommunityClassification | "";
+  customClassification: string;
   category: CommunityCategory | "";
   interest: CommunityInterest;
   designation: string;
@@ -158,7 +159,8 @@ export interface CommunityFormData {
   // Origination
   originCountry: string;
   originState: string;
-  originCity: string;
+  originLocalGovernment: string;
+  originCityTown: string;
   visionStatement: string;
   
   // Official Contacts
@@ -212,6 +214,7 @@ export const defaultCommunityFormData: CommunityFormData = {
   name: "",
   shortDescription: "",
   classification: "",
+  customClassification: "",
   category: "",
   interest: "public",
   designation: "",
@@ -235,7 +238,8 @@ export const defaultCommunityFormData: CommunityFormData = {
   events: [],
   originCountry: "",
   originState: "",
-  originCity: "",
+  originLocalGovernment: "",
+  originCityTown: "",
   visionStatement: "",
   officeAddress: "",
   telephone: "",
