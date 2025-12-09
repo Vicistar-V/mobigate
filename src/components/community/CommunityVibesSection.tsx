@@ -182,16 +182,16 @@ export const CommunityVibesSection = ({
                   key={member.id} 
                   className="p-3 space-y-3 hover:shadow-lg transition-shadow"
                 >
-                  <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20">
+                  <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24">
                     <Avatar className="w-full h-full border-2 border-primary/20">
                       <AvatarImage src={member.avatar} alt={member.name} className="object-cover" />
                       <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                   </div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-center line-clamp-2 min-h-[2rem]">
+                  <h3 className="text-sm font-semibold text-center line-clamp-2 min-h-[2.5rem]">
                     {member.name}
                   </h3>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
+                  <p className="text-xs text-muted-foreground text-center">
                     {member.mutualFriends} mutual friends
                   </p>
                   <Button
@@ -199,11 +199,11 @@ export const CommunityVibesSection = ({
                     onClick={() => handleInvite(member.id, member.name)}
                     disabled={inviteStatus[member.id]}
                     className={cn(
-                      "w-full gap-1 text-xs transition-all",
+                      "w-full gap-2 transition-all",
                       inviteStatus[member.id] && "bg-green-600 hover:bg-green-700"
                     )}
                   >
-                    <UserPlus className="w-3 h-3" />
+                    <UserPlus className="w-4 h-4" />
                     {inviteStatus[member.id] ? "INVITED" : "INVITE"}
                   </Button>
                 </Card>
