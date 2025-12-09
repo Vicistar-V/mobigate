@@ -467,7 +467,7 @@ export function CommunityNewsSection({
                   </div>
 
                   {/* Interactive Engagement Bar */}
-                  <div className="flex items-center gap-1 pt-2">
+                  <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
