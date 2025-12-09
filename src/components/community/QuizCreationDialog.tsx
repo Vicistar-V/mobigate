@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Award, AlertCircle, Lock, Globe } from "lucide-react";
+import { X, Award, AlertCircle, Lock, Globe, Upload, Image } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ interface QuizQuestion {
   correctAnswerLabel: string; // A-H
   timeLimit: number; // seconds per question
   points: number;
+  questionImage?: string; // Optional image for the question
 }
 
 const createEmptyQuestion = (index: number): QuizQuestion => ({
@@ -36,7 +37,8 @@ const createEmptyQuestion = (index: number): QuizQuestion => ({
   correctAnswer: 0,
   correctAnswerLabel: "A",
   timeLimit: 30,
-  points: 10
+  points: 10,
+  questionImage: undefined
 });
 
 // Initialize with exactly 10 questions
@@ -54,6 +56,9 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
   const [privacySetting, setPrivacySetting] = useState<"members_only" | "public">("members_only");
   const [questions, setQuestions] = useState<QuizQuestion[]>(initialQuestions);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  
+  // Quiz cover image state
+  const [coverImage, setCoverImage] = useState<string>("");
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -80,6 +85,48 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
         ? { ...q, correctAnswer: answerIndex, correctAnswerLabel: ANSWER_LABELS[answerIndex] }
         : q
     ));
+  };
+
+  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({ title: "Invalid file", description: "Please upload an image file", variant: "destructive" });
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ title: "File too large", description: "Image must be under 10MB", variant: "destructive" });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleQuestionImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({ title: "Invalid file", description: "Please upload an image file", variant: "destructive" });
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast({ title: "File too large", description: "Image must be under 5MB", variant: "destructive" });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateQuestion("questionImage", reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeQuestionImage = () => {
+    updateQuestion("questionImage", undefined);
   };
 
   const isQuestionComplete = (q: QuizQuestion): boolean => {
@@ -147,6 +194,7 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
     setPrivacySetting("members_only");
     setQuestions(initialQuestions);
     setCurrentQuestionIndex(0);
+    setCoverImage("");
   };
 
   return (
@@ -200,6 +248,33 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
                     rows={2}
                     className="mt-1"
                   />
+                </div>
+
+                {/* Quiz Cover Image */}
+                <div>
+                  <Label className="text-xs">Quiz Cover Image (Optional)</Label>
+                  {coverImage ? (
+                    <div className="relative mt-1 aspect-video rounded-lg overflow-hidden bg-muted">
+                      <img src={coverImage} alt="Quiz cover" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => setCoverImage("")}
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center h-24 mt-1 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/30">
+                      <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                      <span className="text-xs text-muted-foreground">Upload cover image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCoverImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -369,6 +444,33 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
                       rows={2}
                       className="mt-1"
                     />
+                  </div>
+
+                  {/* Question Image (Optional) */}
+                  <div>
+                    <Label className="text-xs">Question Image (Optional)</Label>
+                    {currentQuestion.questionImage ? (
+                      <div className="relative mt-1 aspect-video rounded-lg overflow-hidden bg-muted">
+                        <img src={currentQuestion.questionImage} alt="Question" className="w-full h-full object-cover" />
+                        <button
+                          onClick={removeQuestionImage}
+                          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex items-center justify-center gap-2 h-16 mt-1 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/30">
+                        <Image className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Add image for this question</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleQuestionImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
                   </div>
 
                   {/* 8 Answer Options */}
