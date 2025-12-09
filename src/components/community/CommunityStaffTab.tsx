@@ -1,5 +1,3 @@
-import { Card } from "@/components/ui/card";
-import { Grid3x3 } from "lucide-react";
 import { ExecutiveMembersCarousel } from "./ExecutiveMembersCarousel";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdCard } from "@/components/PremiumAdCard";
@@ -81,33 +79,28 @@ export const CommunityStaffTab = () => {
     duration: 15,
   };
 
+  const filterDropdown = (
+    <Select value={staffFilter} onValueChange={setStaffFilter}>
+      <SelectTrigger className="h-7 w-[120px] bg-primary-foreground text-primary text-xs">
+        <SelectValue placeholder="Filter" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All Staff</SelectItem>
+        <SelectItem value="management">Management</SelectItem>
+        <SelectItem value="administrative">Administrative</SelectItem>
+        <SelectItem value="support">Support</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden">
-        <div className="bg-primary text-primary-foreground p-3 flex items-center justify-between">
-          <h3 className="font-semibold text-sm">Staff & Employees</h3>
-          <div className="flex items-center gap-2">
-            <Grid3x3 className="h-4 w-4" />
-            <Select value={staffFilter} onValueChange={setStaffFilter}>
-              <SelectTrigger className="h-8 w-[130px] bg-primary-foreground text-primary text-xs">
-                <SelectValue placeholder="Filter" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Staff</SelectItem>
-                <SelectItem value="management">Management</SelectItem>
-                <SelectItem value="administrative">Administrative</SelectItem>
-                <SelectItem value="support">Support</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </Card>
-
       <ExecutiveMembersCarousel
         title="Staff & Employees"
         members={staffMembers}
         showViewToggle={true}
         onMemberClick={handleMemberClick}
+        headerExtra={filterDropdown}
       />
 
       {/* Advertisement */}
