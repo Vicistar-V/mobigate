@@ -137,33 +137,34 @@ export function ProfileCommunityTab({ userName }: ProfileCommunityTabProps) {
     <div className="space-y-4">
       {/* Header with Create and View All buttons */}
       <Card className="p-4 rounded-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Building2 className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-base">
-              {totalCommunities} {totalCommunities === 1 ? "Community" : "Communities"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleCreateCommunity}
-              className="h-9 text-sm"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Create
-            </Button>
-            <Button 
-              variant="default" 
-              size="sm"
-              onClick={handleViewAll}
-              className="h-9 text-sm"
-            >
-              View All
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
+        {/* Title Row */}
+        <div className="flex items-center gap-2.5 mb-3">
+          <Building2 className="h-6 w-6 text-primary" />
+          <span className="font-semibold text-base">
+            {totalCommunities} {totalCommunities === 1 ? "Community" : "Communities"}
+          </span>
+        </div>
+        
+        {/* Buttons Row - Full width */}
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleCreateCommunity}
+            className="flex-1 h-10 text-sm"
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            Create
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={handleViewAll}
+            className="flex-1 h-10 text-sm"
+          >
+            View All
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
         </div>
       </Card>
 
