@@ -277,23 +277,6 @@ export function ArticleEditorDialog({ open, onOpenChange }: ArticleEditorDialogP
                     </Select>
                   </div>
 
-                  {/* Excerpt */}
-                  <div className="space-y-2">
-                    <Label htmlFor="excerpt">
-                      Excerpt <span className="text-muted-foreground">(Optional)</span>
-                    </Label>
-                    <Textarea
-                      id="excerpt"
-                      placeholder="A brief summary of your article (shown in previews)..."
-                      value={excerpt}
-                      onChange={(e) => setExcerpt(e.target.value)}
-                      rows={2}
-                      maxLength={200}
-                    />
-                    <p className="text-xs text-muted-foreground text-right">
-                      {excerpt.length}/200 characters
-                    </p>
-                  </div>
 
                   {/* Featured/Cover Image */}
                   <div className="space-y-2">
@@ -451,6 +434,24 @@ export function ArticleEditorDialog({ open, onOpenChange }: ArticleEditorDialogP
                         </p>
                       )}
                     </div>
+                  </div>
+
+                  {/* Excerpt - MOVED DOWN after media sections */}
+                  <div className="space-y-2">
+                    <Label htmlFor="excerpt">
+                      Excerpt <span className="text-muted-foreground">(Optional)</span>
+                    </Label>
+                    <Textarea
+                      id="excerpt"
+                      placeholder="A brief summary of your article (shown in previews)..."
+                      value={excerpt}
+                      onChange={(e) => setExcerpt(e.target.value)}
+                      rows={2}
+                      maxLength={200}
+                    />
+                    <p className="text-xs text-muted-foreground text-right">
+                      {excerpt.length}/200 characters
+                    </p>
                   </div>
 
                   {/* Content */}
