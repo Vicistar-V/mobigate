@@ -22,6 +22,7 @@ import {
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { CommentSectionDialog } from "@/components/community/CommentSectionDialog";
 
 interface ContributionsDialogProps {
   member: ExecutiveMember | null;
@@ -99,6 +100,8 @@ export const ContributionsDialog = ({
   const { toast } = useToast();
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<{id: string, title: string} | null>(null);
 
   if (!member) return null;
 
@@ -116,8 +119,9 @@ export const ContributionsDialog = ({
     });
   };
 
-  const handleCommentPost = (postId: string) => {
-    toast({ title: "Opening comments...", description: "Comment section will open" });
+  const handleCommentPost = (postId: string, postTitle: string) => {
+    setSelectedPost({ id: postId, title: postTitle });
+    setCommentDialogOpen(true);
   };
 
   const handleSharePost = (postId: string) => {
@@ -220,7 +224,7 @@ export const ContributionsDialog = ({
                       variant="ghost"
                       size="sm"
                       className="h-7 px-2 text-xs gap-1"
-                      onClick={() => handleCommentPost(post.id)}
+                      onClick={() => handleCommentPost(post.id, post.content.substring(0, 40) + "...")}
                     >
                       <MessageSquare className="h-3.5 w-3.5" />
                       {post.comments}
@@ -299,6 +303,14 @@ export const ContributionsDialog = ({
             </TabsContent>
           </ScrollArea>
         </Tabs>
+
+        {/* Comment Section Dialog */}
+        <CommentSectionDialog
+          open={commentDialogOpen}
+          onOpenChange={setCommentDialogOpen}
+          title={selectedPost?.title || "Comments"}
+          contextId={selectedPost?.id || ""}
+        />
       </DrawerContent>
     </Drawer>
   );
