@@ -26,6 +26,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
@@ -404,6 +424,16 @@ export function CommunityMembershipTab() {
   const [callDialogOpen, setCallDialogOpen] = useState(false);
   const [selectedMemberForCall, setSelectedMemberForCall] = useState<{ id: string; name: string; avatar: string } | null>(null);
 
+  // Block Dialog states
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [selectedMemberForBlock, setSelectedMemberForBlock] = useState<{ id: string; name: string } | null>(null);
+
+  // Report Dialog states
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [selectedMemberForReport, setSelectedMemberForReport] = useState<{ id: string; name: string } | null>(null);
+  const [reportReason, setReportReason] = useState<string>("");
+  const [reportDetails, setReportDetails] = useState<string>("");
+
   const toggleMembersView = () => {
     setMembersViewMode(membersViewMode === "carousel" ? "grid" : "carousel");
   };
@@ -450,6 +480,53 @@ export function CommunityMembershipTab() {
   const handleCall = (memberId: string, memberName: string, memberAvatar: string) => {
     setSelectedMemberForCall({ id: memberId, name: memberName, avatar: memberAvatar });
     setCallDialogOpen(true);
+  };
+
+  // Handle Add to Circle - Simple toast
+  const handleAddToCircle = (memberName: string) => {
+    toast.success(`Added ${memberName} to your circle`);
+  };
+
+  // Handle Block - Opens confirmation dialog
+  const handleBlock = (memberId: string, memberName: string) => {
+    setSelectedMemberForBlock({ id: memberId, name: memberName });
+    setBlockDialogOpen(true);
+  };
+
+  const confirmBlock = () => {
+    if (selectedMemberForBlock) {
+      toast.success(`You have blocked ${selectedMemberForBlock.name}`);
+    }
+    setBlockDialogOpen(false);
+    setSelectedMemberForBlock(null);
+  };
+
+  const handleBlockAndReport = () => {
+    if (selectedMemberForBlock) {
+      toast.success(`You have blocked ${selectedMemberForBlock.name}`);
+      setSelectedMemberForReport({ id: selectedMemberForBlock.id, name: selectedMemberForBlock.name });
+      setBlockDialogOpen(false);
+      setSelectedMemberForBlock(null);
+      setReportDialogOpen(true);
+    }
+  };
+
+  // Handle Report - Opens report dialog
+  const handleReport = (memberId: string, memberName: string) => {
+    setSelectedMemberForReport({ id: memberId, name: memberName });
+    setReportDialogOpen(true);
+  };
+
+  const submitReport = () => {
+    if (selectedMemberForReport && reportReason) {
+      toast.success(`Report submitted for ${selectedMemberForReport.name}`);
+      setReportDialogOpen(false);
+      setSelectedMemberForReport(null);
+      setReportReason("");
+      setReportDetails("");
+    } else {
+      toast.error("Please select a reason for reporting");
+    }
   };
 
   // Handle member actions (for other actions like Follow, Like, etc.)
@@ -617,19 +694,19 @@ export function CommunityMembershipTab() {
                           <Gift className="h-4 w-4 mr-2" />
                           Send Gift
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Adding to circle", member.name)}>
+                        <DropdownMenuItem onClick={() => handleAddToCircle(member.name)}>
                           <UsersIcon className="h-4 w-4 mr-2" />
                           Add to Circle
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleMemberAction("Blocked", member.name)}
+                          onClick={() => handleBlock(member.id, member.name)}
                           className="text-destructive"
                         >
                           <Ban className="h-4 w-4 mr-2" />
                           Block
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleMemberAction("Reported", member.name)}
+                          onClick={() => handleReport(member.id, member.name)}
                           className="text-destructive"
                         >
                           <Flag className="h-4 w-4 mr-2" />
@@ -725,19 +802,19 @@ export function CommunityMembershipTab() {
                           <Gift className="h-4 w-4 mr-2" />
                           Send Gift
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleMemberAction("Adding to circle", member.name)}>
+                        <DropdownMenuItem onClick={() => handleAddToCircle(member.name)}>
                           <UsersIcon className="h-4 w-4 mr-2" />
                           Add to Circle
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleMemberAction("Blocked", member.name)}
+                          onClick={() => handleBlock(member.id, member.name)}
                           className="text-destructive"
                         >
                           <Ban className="h-4 w-4 mr-2" />
                           Block
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          onClick={() => handleMemberAction("Reported", member.name)}
+                          onClick={() => handleReport(member.id, member.name)}
                           className="text-destructive"
                         >
                           <Flag className="h-4 w-4 mr-2" />
@@ -787,6 +864,96 @@ export function CommunityMembershipTab() {
         recipientName={selectedMemberForCall?.name || ""}
         recipientAvatar={selectedMemberForCall?.avatar}
       />
+
+      {/* Block Confirmation Dialog */}
+      <AlertDialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Ban className="h-5 w-5 text-destructive" />
+              Block User
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left space-y-2">
+              <p>Are you sure you want to block <strong>{selectedMemberForBlock?.name}</strong>?</p>
+              <p className="text-sm text-muted-foreground">They will no longer be able to:</p>
+              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>See your posts</li>
+                <li>Send you messages</li>
+                <li>Find your profile</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmBlock} className="bg-destructive hover:bg-destructive/90">
+              Block
+            </AlertDialogAction>
+            <AlertDialogAction onClick={handleBlockAndReport} className="bg-destructive hover:bg-destructive/90">
+              Block & Report
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Report Dialog */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5 text-destructive" />
+              Report User
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">{selectedMemberForReport?.name}</p>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm font-medium">Why are you reporting this user?</p>
+            <RadioGroup value={reportReason} onValueChange={setReportReason} className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="spam" id="spam" />
+                <Label htmlFor="spam">Spam</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="harassment" id="harassment" />
+                <Label htmlFor="harassment">Harassment or bullying</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="inappropriate" id="inappropriate" />
+                <Label htmlFor="inappropriate">Inappropriate content</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="fake" id="fake" />
+                <Label htmlFor="fake">Fake or impersonation</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="scam" id="scam" />
+                <Label htmlFor="scam">Scam or fraud</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="other" id="other" />
+                <Label htmlFor="other">Other</Label>
+              </div>
+            </RadioGroup>
+            <div className="space-y-2">
+              <Label htmlFor="details">Additional details (optional)</Label>
+              <Textarea
+                id="details"
+                placeholder="Provide more context..."
+                value={reportDetails}
+                onChange={(e) => setReportDetails(e.target.value)}
+                className="min-h-[80px]"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setReportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={submitReport} className="bg-destructive hover:bg-destructive/90">
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
         {/* 4. Special Events Section */}
         <WallStatusCarousel
