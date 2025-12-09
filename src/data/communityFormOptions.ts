@@ -34,7 +34,10 @@ export const categoryOptions: { value: CommunityCategory; label: string }[] = [
   { value: "military", label: "Military" },
   { value: "law-enforcement", label: "Law Enforcement" },
   { value: "co-operative", label: "Co-operative" },
-  { value: "social", label: "Social" }
+  { value: "social", label: "Social" },
+  { value: "professional-body", label: "Professional Body" },
+  { value: "association", label: "Association" },
+  { value: "other", label: "Other" }
 ];
 
 export const genderOptions: { value: MembershipGender; label: string }[] = [

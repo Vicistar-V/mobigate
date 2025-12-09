@@ -27,7 +27,7 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
           <SelectTrigger id="classification" className={cn("h-11", errors.classification && "border-destructive focus-visible:ring-destructive")}>
             <SelectValue placeholder="Select classification" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-background border z-50">
             {classificationOptions.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
@@ -66,7 +66,7 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
           <SelectTrigger id="category" className={cn("h-11", errors.category && "border-destructive focus-visible:ring-destructive")}>
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-background border z-50">
             {categoryOptions.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
@@ -78,6 +78,21 @@ export function ClassificationSection({ formData, updateField, errors }: Classif
           <p className="text-xs text-destructive">{errors.category}</p>
         )}
       </div>
+
+      {formData.category === "other" && (
+        <div className="space-y-2">
+          <Label htmlFor="customCategory" className="text-sm font-medium">
+            Specify Category <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="customCategory"
+            placeholder="Enter your custom category"
+            value={formData.customCategory}
+            onChange={(e) => updateField("customCategory", e.target.value)}
+            className="h-11"
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">Community Interests</Label>

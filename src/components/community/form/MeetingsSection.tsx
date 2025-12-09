@@ -3,17 +3,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { CommunityFormData, MeetingSchedule } from "@/types/communityForm";
 import { meetingFrequencyOptions, dayOfWeekOptions, weekOfMonthOptions, monthOfYearOptions } from "@/data/communityFormOptions";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 interface MeetingsSectionProps {
   formData: CommunityFormData;
   updateField: <K extends keyof CommunityFormData>(field: K, value: CommunityFormData[K]) => void;
-  addMeeting: (type: "general" | "executive", meeting: MeetingSchedule) => void;
-  removeMeeting: (type: "general" | "executive", meetingId: string) => void;
-  updateMeeting: (type: "general" | "executive", meetingId: string, updates: Partial<MeetingSchedule>) => void;
+  addMeeting: (type: "general" | "executive" | "custom", meeting: MeetingSchedule) => void;
+  removeMeeting: (type: "general" | "executive" | "custom", meetingId: string) => void;
+  updateMeeting: (type: "general" | "executive" | "custom", meetingId: string, updates: Partial<MeetingSchedule>) => void;
 }
 
 export function MeetingsSection({ 
@@ -23,31 +25,72 @@ export function MeetingsSection({
   removeMeeting,
   updateMeeting 
 }: MeetingsSectionProps) {
-  const addNewMeeting = (type: "general" | "executive") => {
+  const [editingMeetingId, setEditingMeetingId] = useState<string | null>(null);
+
+  const addNewMeeting = (type: "general" | "executive" | "custom") => {
     const newMeeting: MeetingSchedule = {
       id: `meeting-${Date.now()}-${Math.random()}`,
       type,
+      customTypeName: type === "custom" ? "New Meeting" : undefined,
       frequency: "monthly",
       weekOfMonth: "first",
       dayOfWeek: "saturday"
     };
     addMeeting(type, newMeeting);
+    if (type === "custom") {
+      setEditingMeetingId(newMeeting.id);
+    }
   };
 
-  const renderMeetingCard = (meeting: MeetingSchedule, type: "general" | "executive") => (
+  const renderMeetingCard = (meeting: MeetingSchedule, type: "general" | "executive" | "custom") => {
+    const isEditing = editingMeetingId === meeting.id;
+    
+    return (
     <Card key={meeting.id} className="p-4 space-y-3">
       <div className="flex items-start justify-between">
-        <Badge variant={type === "general" ? "default" : "secondary"}>
-          {type === "general" ? "General Meeting" : "Executive Meeting"}
-        </Badge>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => removeMeeting(type, meeting.id)}
-        >
-          <Trash2 className="h-4 w-4 text-destructive" />
-        </Button>
+        {type === "custom" ? (
+          isEditing ? (
+            <Input
+              value={meeting.customTypeName || ""}
+              onChange={(e) => updateMeeting(type, meeting.id, { customTypeName: e.target.value })}
+              onBlur={() => setEditingMeetingId(null)}
+              onKeyDown={(e) => e.key === "Enter" && setEditingMeetingId(null)}
+              className="h-8 w-40 text-sm font-medium"
+              placeholder="Meeting name"
+              autoFocus
+            />
+          ) : (
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+              {meeting.customTypeName || "Custom Meeting"}
+            </Badge>
+          )
+        ) : (
+          <Badge variant={type === "general" ? "default" : "secondary"}>
+            {type === "general" ? "General Meeting" : "Executive Meeting"}
+          </Badge>
+        )}
+        <div className="flex items-center gap-1">
+          {type === "custom" && !isEditing && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setEditingMeetingId(meeting.id)}
+            >
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => removeMeeting(type, meeting.id)}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3">
@@ -60,7 +103,7 @@ export function MeetingsSection({
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border z-50">
               {meetingFrequencyOptions.map(opt => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
@@ -80,7 +123,7 @@ export function MeetingsSection({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border z-50">
                 {monthOfYearOptions.map(opt => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
@@ -101,7 +144,7 @@ export function MeetingsSection({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border z-50">
                 {weekOfMonthOptions.map(opt => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
@@ -121,7 +164,7 @@ export function MeetingsSection({
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border z-50">
               {dayOfWeekOptions.map(opt => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
@@ -133,6 +176,7 @@ export function MeetingsSection({
       </div>
     </Card>
   );
+  };
 
   return (
     <div className="space-y-5">
@@ -178,6 +222,29 @@ export function MeetingsSection({
         ) : (
           <div className="space-y-3">
             {formData.executiveMeetings.map(meeting => renderMeetingCard(meeting, "executive"))}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Custom Meetings</Label>
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => addNewMeeting("custom")}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Create Meeting
+          </Button>
+        </div>
+        
+        {formData.customMeetings.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No custom meetings configured</p>
+        ) : (
+          <div className="space-y-3">
+            {formData.customMeetings.map(meeting => renderMeetingCard(meeting, "custom"))}
           </div>
         )}
       </div>
