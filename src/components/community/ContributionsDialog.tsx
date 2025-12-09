@@ -23,6 +23,7 @@ import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { CommentSectionDialog } from "@/components/community/CommentSectionDialog";
+import { PostDetailDialog } from "@/components/community/PostDetailDialog";
 
 interface ContributionsDialogProps {
   member: ExecutiveMember | null;
@@ -102,6 +103,8 @@ export const ContributionsDialog = ({
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<{id: string, title: string} | null>(null);
+  const [postDetailOpen, setPostDetailOpen] = useState(false);
+  const [selectedPostDetail, setSelectedPostDetail] = useState<typeof mockContributions.posts[0] | null>(null);
 
   if (!member) return null;
 
@@ -142,8 +145,14 @@ export const ContributionsDialog = ({
     });
   };
 
-  const handleOpenPost = (postTitle: string) => {
-    toast({ title: "Opening post", description: postTitle });
+  const handleOpenPost = (postTitle: string, postData?: typeof mockContributions.posts[0]) => {
+    if (postData) {
+      setSelectedPostDetail(postData);
+      setPostDetailOpen(true);
+    } else {
+      // For reactions/comments tab where we don't have full post data
+      toast({ title: "Opening post", description: postTitle });
+    }
   };
 
   return (
@@ -206,7 +215,7 @@ export const ContributionsDialog = ({
                   </div>
                   <p 
                     className="text-sm cursor-pointer hover:text-primary transition-colors"
-                    onClick={() => handleOpenPost(post.content.substring(0, 50) + "...")}
+                    onClick={() => handleOpenPost(post.content.substring(0, 50) + "...", post)}
                   >
                     {post.content}
                   </p>
@@ -310,6 +319,13 @@ export const ContributionsDialog = ({
           onOpenChange={setCommentDialogOpen}
           title={selectedPost?.title || "Comments"}
           contextId={selectedPost?.id || ""}
+        />
+
+        {/* Post Detail Dialog */}
+        <PostDetailDialog
+          post={selectedPostDetail}
+          open={postDetailOpen}
+          onOpenChange={setPostDetailOpen}
         />
       </DrawerContent>
     </Drawer>
