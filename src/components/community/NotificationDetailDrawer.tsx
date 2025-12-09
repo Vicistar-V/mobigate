@@ -13,12 +13,14 @@ interface NotificationDetailDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   notification: CommunityNotification | null;
+  onCloseAll?: () => void;
 }
 
 export function NotificationDetailDrawer({
   open,
   onOpenChange,
-  notification
+  notification,
+  onCloseAll
 }: NotificationDetailDrawerProps) {
   const navigate = useNavigate();
   const [showGiftDialog, setShowGiftDialog] = useState(false);
@@ -28,41 +30,55 @@ export function NotificationDetailDrawer({
 
   const isPersonNotification = !!notification.avatar && !!notification.personName;
 
-  const handleChat = () => {
+  const closeAll = () => {
     onOpenChange(false);
-    toast.success(`Opening chat with ${notification.personName || "member"}...`);
-    // Navigate to chat or open chat dialog
+    onCloseAll?.();
+  };
+
+  const handleChat = () => {
+    closeAll();
+    // Dispatch event to open chat interface
+    window.dispatchEvent(new CustomEvent('openChatWithUser', {
+      detail: { 
+        userId: notification.id,
+        userName: notification.personName || "Member",
+        userAvatar: notification.avatar
+      }
+    }));
   };
 
   const handleCall = () => {
+    closeAll();
     setShowCallDialog(true);
   };
 
   const handleGift = () => {
+    closeAll();
     setShowGiftDialog(true);
   };
 
   const handleViewProfile = () => {
-    onOpenChange(false);
+    closeAll();
     navigate("/profile");
-    toast.info(`Viewing ${notification.personName || "member"}'s profile`);
   };
 
   const handleAddFriend = () => {
+    closeAll();
     toast.success(`Friend request sent to ${notification.personName || "member"}!`);
   };
 
   const handleAddToCircle = () => {
+    closeAll();
     toast.success(`${notification.personName || "Member"} added to your circle!`);
   };
 
   const handleViewEvent = () => {
-    onOpenChange(false);
+    closeAll();
     toast.info("Opening event details...");
   };
 
   const handleJoinMeeting = () => {
-    onOpenChange(false);
+    closeAll();
     toast.info("Joining meeting...");
   };
 
