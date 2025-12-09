@@ -1,6 +1,16 @@
 import { useState } from "react";
-import { X, Heart, CreditCard, Smartphone, Building, Wallet, Coins } from "lucide-react";
+import { X, Heart, CreditCard, Smartphone, Building, Wallet, Coins, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,6 +57,7 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("mobi-wallet");
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleSelectAmount = (value: number) => {
     setAmount(value.toString());
@@ -93,6 +104,13 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
       return;
     }
 
+    // Show confirmation dialog instead of processing directly
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmDonate = () => {
+    const donationAmount = customAmount || amount;
+    
     toast({
       title: "Thank You for Your Donation!",
       description: `Your donation of ${formatDualAmount(donationAmount)} will make a difference`,
@@ -103,6 +121,7 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
     setCustomAmount("");
     setMessage("");
     setIsAnonymous(false);
+    setShowConfirmation(false);
     onOpenChange(false);
   };
 
@@ -303,6 +322,35 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
           </Button>
         </div>
       </DialogContent>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-2">
+              <div className="bg-amber-500/10 p-3 rounded-full">
+                <AlertTriangle className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center">Confirm Donation</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              You are sending a monetary Donation of{" "}
+              <span className="font-bold text-foreground">{formatMobiAmount(currentAmount)}</span> to this Community. 
+              This action cannot be reversed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDonate}
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              Donate Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
