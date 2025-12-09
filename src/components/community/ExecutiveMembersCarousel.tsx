@@ -10,6 +10,7 @@ interface ExecutiveMembersCarouselProps {
   members: ExecutiveMember[];
   showViewToggle?: boolean;
   onMemberClick?: (member: ExecutiveMember) => void;
+  headerExtra?: React.ReactNode;
 }
 
 export const ExecutiveMembersCarousel = ({
@@ -17,6 +18,7 @@ export const ExecutiveMembersCarousel = ({
   members,
   showViewToggle = true,
   onMemberClick,
+  headerExtra,
 }: ExecutiveMembersCarouselProps) => {
   const [viewMode, setViewMode] = useState<"carousel" | "grid">("carousel");
 
@@ -29,7 +31,9 @@ export const ExecutiveMembersCarousel = ({
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-3 flex items-center justify-between">
         <h3 className="font-semibold text-sm">{title}</h3>
-        {showViewToggle && (
+        <div className="flex items-center gap-2">
+          {headerExtra}
+          {showViewToggle && (
           <Button
             variant="ghost"
             size="sm"
@@ -49,7 +53,8 @@ export const ExecutiveMembersCarousel = ({
               </>
             )}
           </Button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Scrolling Indicator - only show in carousel mode */}
