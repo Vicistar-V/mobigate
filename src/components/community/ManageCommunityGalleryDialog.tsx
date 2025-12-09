@@ -123,6 +123,10 @@ export function ManageCommunityGalleryDialog({
     privacy: "public" as "public" | "members-only" | "executives-only"
   });
 
+  // File upload state
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string>("");
+
   // Privacy settings
   const [privacySettings, setPrivacySettings] = useState({
     defaultPrivacy: "public",
@@ -197,20 +201,52 @@ export function ManageCommunityGalleryDialog({
     toast({ title: "Visibility Updated", description: "Album visibility has been changed." });
   };
 
+  // File upload handler
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+      if (!isImage && !isVideo) {
+        toast({ title: "Invalid File", description: "Please select an image or video file", variant: "destructive" });
+        return;
+      }
+      // Validate file size (50MB max)
+      if (file.size > 50 * 1024 * 1024) {
+        toast({ title: "File Too Large", description: "File must be under 50MB", variant: "destructive" });
+        return;
+      }
+      setUploadedFile(file);
+      const url = URL.createObjectURL(file);
+      setFilePreview(url);
+    }
+  };
+
+  const handleRemoveUploadedFile = () => {
+    setUploadedFile(null);
+    setFilePreview("");
+  };
+
   // Item handlers
   const handleUploadMedia = () => {
     if (!itemForm.title.trim() || !itemForm.albumId) {
       toast({ title: "Error", description: "Title and album are required", variant: "destructive" });
       return;
     }
+    if (!uploadedFile) {
+      toast({ title: "Error", description: "Please select a file to upload", variant: "destructive" });
+      return;
+    }
+    const isVideo = uploadedFile.type.startsWith("video/");
     const newItem: GalleryItem = {
       id: `item-${Date.now()}`,
       title: itemForm.title,
       caption: itemForm.caption,
       description: itemForm.description,
-      mediaType: "photo",
-      mediaUrl: "/placeholder.svg",
-      thumbnailUrl: "/placeholder.svg",
+      mediaType: isVideo ? "video" : "photo",
+      mediaUrl: filePreview,
+      thumbnailUrl: filePreview,
       albumId: itemForm.albumId,
       likes: 0,
       comments: 0,
@@ -228,6 +264,8 @@ export function ManageCommunityGalleryDialog({
     ));
     setShowUploadMedia(false);
     setItemForm({ title: "", caption: "", description: "", albumId: "", privacy: "public" });
+    setUploadedFile(null);
+    setFilePreview("");
     toast({ title: "Media Uploaded", description: "New media has been added to the gallery." });
   };
 
@@ -865,21 +903,74 @@ export function ManageCommunityGalleryDialog({
       </Dialog>
 
       {/* Upload Media Dialog */}
-      <Dialog open={showUploadMedia} onOpenChange={setShowUploadMedia}>
+      <Dialog open={showUploadMedia} onOpenChange={(open) => {
+        setShowUploadMedia(open);
+        if (!open) {
+          setUploadedFile(null);
+          setFilePreview("");
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Upload Media</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
-              <Camera className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground">
-                Click to select photos or videos
-              </p>
-              <Button variant="outline" className="mt-3">
-                <Upload className="h-4 w-4 mr-2" />
-                Select Files
-              </Button>
+            {/* File Upload Section */}
+            <div>
+              <Label className="flex items-center gap-2 mb-2">
+                <Upload className="h-4 w-4 text-primary" />
+                Select File *
+              </Label>
+              {filePreview ? (
+                <div className="relative rounded-lg overflow-hidden border bg-muted">
+                  {uploadedFile?.type.startsWith("video/") ? (
+                    <video 
+                      src={filePreview} 
+                      className="w-full h-48 object-cover"
+                      controls
+                    />
+                  ) : (
+                    <img 
+                      src={filePreview} 
+                      alt="Upload preview" 
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                    onClick={handleRemoveUploadedFile}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <div className="absolute bottom-2 left-2">
+                    <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
+                      {uploadedFile?.type.startsWith("video/") ? (
+                        <><Video className="h-3 w-3 mr-1" />Video</>
+                      ) : (
+                        <><ImageIcon className="h-3 w-3 mr-1" />Image</>
+                      )}
+                    </Badge>
+                  </div>
+                </div>
+              ) : (
+                <label className="block cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                  <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 hover:bg-muted/50 transition-all">
+                    <Camera className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-sm font-medium">Click to select file</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Images & Videos up to 50MB
+                    </p>
+                  </div>
+                </label>
+              )}
             </div>
             <div>
               <Label>Title *</Label>
