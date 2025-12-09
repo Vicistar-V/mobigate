@@ -33,6 +33,7 @@ import {
   Award
 } from "lucide-react";
 import { useState } from "react";
+import { MemberPreviewDialog } from "./MemberPreviewDialog";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ExecutiveMember, ExecutiveProfile } from "@/data/communityExecutivesData";
@@ -97,6 +98,7 @@ export const ExecutiveDetailSheet = ({
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showEditPhoto, setShowEditPhoto] = useState(false);
   const [showContributions, setShowContributions] = useState(false);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
   const [communityImage, setCommunityImage] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const { isOwnProfile } = useCommunityUser();
@@ -143,8 +145,7 @@ export const ExecutiveDetailSheet = ({
   };
 
   const handleHeaderClick = () => {
-    onOpenChange(false);
-    navigate(`/profile/${member.id}`);
+    setShowMemberPreview(true);
   };
 
   const handleSaveProfile = (updatedProfile: Partial<ExecutiveProfile>, updatedMilestones?: string[]) => {
@@ -665,6 +666,13 @@ export const ExecutiveDetailSheet = ({
         open={showContributions}
         onOpenChange={setShowContributions}
         member={member}
+      />
+
+      <MemberPreviewDialog
+        member={member}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
+        displayImage={displayImage}
       />
     </Drawer>
   );
