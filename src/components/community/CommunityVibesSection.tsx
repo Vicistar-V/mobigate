@@ -134,7 +134,7 @@ export const CommunityVibesSection = ({
 
       {/* 2. Invite Someone to Community */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h2 className="text-lg sm:text-xl font-semibold">Invite Someone to Community</h2>
           <ViewToggleButton view={inviteViewMode} onViewChange={setInviteViewMode} />
         </div>
