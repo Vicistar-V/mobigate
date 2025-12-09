@@ -12,11 +12,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X } from "lucide-react";
+import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X, Gift } from "lucide-react";
 import { MediaViewer } from "./MediaViewer";
 import { CommentSection } from "./CommentSection";
+import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 interface PostDetailDialogProps {
   open: boolean;
@@ -54,6 +56,7 @@ export const PostDetailDialog = ({
     post.followers ? parseInt(post.followers.replace(/[^0-9]/g, '')) || 0 : 0
   );
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
+  const [showGiftDialog, setShowGiftDialog] = useState(false);
 
   const handleLike = () => {
     if (isLiked) {
@@ -218,18 +221,18 @@ export const PostDetailDialog = ({
       </ScrollArea>
 
       {/* Fixed Bottom Action Bar - Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
-        <div className="flex items-center justify-around max-w-md mx-auto gap-2">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50">
+        <div className="grid grid-cols-5 gap-1 max-w-md mx-auto">
           <button
             onClick={handleLike}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center gap-0.5 py-1 touch-manipulation active:scale-95 transition-transform"
           >
             <Heart 
-              className={`h-6 w-6 transition-colors ${
+              className={`h-5 w-5 transition-colors ${
                 isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"
               }`} 
             />
-            <span className="text-xs text-muted-foreground font-medium">{likeCount}</span>
+            <span className="text-[10px] text-muted-foreground font-medium truncate">{likeCount}</span>
           </button>
           
           <button
@@ -240,35 +243,41 @@ export const PostDetailDialog = ({
                 commentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }
             }}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center gap-0.5 py-1 touch-manipulation active:scale-95 transition-transform"
           >
-            <MessageCircle className="h-6 w-6 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-medium">{post.comments}</span>
+            <MessageCircle className="h-5 w-5 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground font-medium truncate">{post.comments}</span>
+          </button>
+          
+          <button
+            onClick={() => setShowGiftDialog(true)}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 touch-manipulation active:scale-95 transition-transform"
+          >
+            <Gift className="h-5 w-5 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground font-medium truncate">Gift</span>
           </button>
           
           <button
             onClick={handleShare}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center gap-0.5 py-1 touch-manipulation active:scale-95 transition-transform"
           >
-            <Share2 className="h-6 w-6 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-medium">Share</span>
+            <Share2 className="h-5 w-5 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground font-medium truncate">Share</span>
           </button>
           
-          {post.followers && (
-            <button
-              onClick={handleFollow}
-              className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
-            >
-              <UserPlus 
-                className={`h-6 w-6 transition-colors ${
-                  isFollowing ? "text-primary" : "text-muted-foreground"
-                }`} 
-              />
-              <span className="text-xs text-muted-foreground font-medium">
-                {isFollowing ? formatFollowerCount(followerCount) : "Follow"}
-              </span>
-            </button>
-          )}
+          <button
+            onClick={handleFollow}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 touch-manipulation active:scale-95 transition-transform"
+          >
+            <UserPlus 
+              className={`h-5 w-5 transition-colors ${
+                isFollowing ? "text-primary" : "text-muted-foreground"
+              }`} 
+            />
+            <span className="text-[10px] text-muted-foreground font-medium truncate">
+              {isFollowing ? formatFollowerCount(followerCount) : "Follow"}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -297,6 +306,16 @@ export const PostDetailDialog = ({
         >
           <MessageCircle className="h-4 w-4" />
           Comment
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowGiftDialog(true)}
+          className="gap-2"
+        >
+          <Gift className="h-4 w-4" />
+          Gift
         </Button>
         
         <Button
@@ -342,6 +361,15 @@ export const PostDetailDialog = ({
         followers={post.followers}
         isLiked={isLiked}
         isOwner={false}
+      />
+
+      <SendGiftDialog
+        isOpen={showGiftDialog}
+        onClose={() => setShowGiftDialog(false)}
+        recipientName={post.author}
+        onSendGift={(gift) => {
+          toast.success(`Gift sent to ${post.author}!`);
+        }}
       />
 
       {isMobile ? (
