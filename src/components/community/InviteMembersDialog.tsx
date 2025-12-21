@@ -14,7 +14,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { mockOnlineMembers } from "@/data/membershipData";
 import { useToast } from "@/hooks/use-toast";
-
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 interface InviteMembersDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -29,7 +30,24 @@ export function InviteMembersDialog({ open, onOpenChange, communityName = "our c
   const [emailList, setEmailList] = useState("");
   const [phoneList, setPhoneList] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
   const { toast } = useToast();
+
+  const convertToExecutiveMember = (member: typeof mockOnlineMembers[0]): ExecutiveMember => ({
+    id: member.id,
+    name: member.name,
+    position: member.role || "Member",
+    tenure: "Active member",
+    imageUrl: member.avatar,
+    level: "officer",
+    committee: "executive"
+  });
+
+  const handleMemberClick = (member: typeof mockOnlineMembers[0]) => {
+    setSelectedMember(convertToExecutiveMember(member));
+    setShowMemberPreview(true);
+  };
 
   // Generate proper invite code
   const generateInviteCode = () => {
@@ -187,16 +205,21 @@ export function InviteMembersDialog({ open, onOpenChange, communityName = "our c
                         onCheckedChange={() => handleToggleMember(member.id)}
                       />
 
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={member.avatar} alt={member.name} />
-                        <AvatarFallback>
-                          {member.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div 
+                        className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:opacity-70"
+                        onClick={() => handleMemberClick(member)}
+                      >
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={member.avatar} alt={member.name} />
+                          <AvatarFallback>
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
 
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{member.name}</p>
-                        <p className="text-xs text-muted-foreground">{member.role}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">{member.role}</p>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -343,6 +366,12 @@ export function InviteMembersDialog({ open, onOpenChange, communityName = "our c
             </div>
           </ScrollArea>
         </Tabs>
+
+        <MemberPreviewDialog
+          member={selectedMember}
+          open={showMemberPreview}
+          onOpenChange={setShowMemberPreview}
+        />
       </DialogContent>
     </Dialog>
   );
