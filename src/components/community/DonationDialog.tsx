@@ -112,8 +112,8 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
     const donationAmount = customAmount || amount;
     
     toast({
-      title: "Thank You for Your Donation!",
-      description: `Your donation of ${formatDualAmount(donationAmount)} will make a difference`,
+      title: "Thank you for your Donation!",
+      description: `Your donation of ${formatDualAmount(donationAmount)} has been debited on your Mobi Wallet/Credit Wallet.`,
     });
     
     // Reset form
