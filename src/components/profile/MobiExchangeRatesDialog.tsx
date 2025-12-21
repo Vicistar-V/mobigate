@@ -9,27 +9,30 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
+// Exchange rates: 1 currency unit = X Mobi
+// Base: Nigerian Naira (NGN) is the community currency, ₦1 = M1
 const initialExchangeRates = [
-  { id: "NGN", currency: "Nigerian Naira", code: "NGN", symbol: "₦", mobiPerUnit: 1.00, flag: "🇳🇬" },
-  { id: "USD", currency: "US Dollar", code: "USD", symbol: "$", mobiPerUnit: 833.33, flag: "🇺🇸" },
-  { id: "EUR", currency: "Euro", code: "EUR", symbol: "€", mobiPerUnit: 909.09, flag: "🇪🇺" },
-  { id: "GBP", currency: "British Pound", code: "GBP", symbol: "£", mobiPerUnit: 1052.63, flag: "🇬🇧" },
-  { id: "GHS", currency: "Ghanaian Cedi", code: "GHS", symbol: "₵", mobiPerUnit: 52.63, flag: "🇬🇭" },
-  { id: "ZAR", currency: "South African Rand", code: "ZAR", symbol: "R", mobiPerUnit: 45.45, flag: "🇿🇦" },
-  { id: "KES", currency: "Kenyan Shilling", code: "KES", symbol: "KSh", mobiPerUnit: 6.25, flag: "🇰🇪" },
-  { id: "JPY", currency: "Japanese Yen", code: "JPY", symbol: "¥", mobiPerUnit: 5.56, flag: "🇯🇵" },
-  { id: "CNY", currency: "Chinese Yuan", code: "CNY", symbol: "¥", mobiPerUnit: 115.74, flag: "🇨🇳" },
-  { id: "INR", currency: "Indian Rupee", code: "INR", symbol: "₹", mobiPerUnit: 10.00, flag: "🇮🇳" },
-  { id: "CAD", currency: "Canadian Dollar", code: "CAD", symbol: "C$", mobiPerUnit: 614.04, flag: "🇨🇦" },
-  { id: "AUD", currency: "Australian Dollar", code: "AUD", symbol: "A$", mobiPerUnit: 543.48, flag: "🇦🇺" },
-  { id: "AED", currency: "UAE Dirham", code: "AED", symbol: "د.إ", mobiPerUnit: 226.76, flag: "🇦🇪" },
-  { id: "SAR", currency: "Saudi Riyal", code: "SAR", symbol: "﷼", mobiPerUnit: 222.22, flag: "🇸🇦" },
-  { id: "EGP", currency: "Egyptian Pound", code: "EGP", symbol: "£", mobiPerUnit: 16.95, flag: "🇪🇬" },
-  { id: "BRL", currency: "Brazilian Real", code: "BRL", symbol: "R$", mobiPerUnit: 166.67, flag: "🇧🇷" },
-  { id: "MXN", currency: "Mexican Peso", code: "MXN", symbol: "$", mobiPerUnit: 48.78, flag: "🇲🇽" },
-  { id: "CHF", currency: "Swiss Franc", code: "CHF", symbol: "Fr", mobiPerUnit: 934.58, flag: "🇨🇭" },
-  { id: "SGD", currency: "Singapore Dollar", code: "SGD", symbol: "S$", mobiPerUnit: 617.28, flag: "🇸🇬" },
-  { id: "THB", currency: "Thai Baht", code: "THB", symbol: "฿", mobiPerUnit: 24.39, flag: "🇹🇭" }
+  { id: "NGN", currency: "Nigerian Naira", code: "NGN", symbol: "₦", mobiPerUnit: 1, flag: "🇳🇬" },
+  { id: "USD", currency: "US Dollar", code: "USD", symbol: "$", mobiPerUnit: 500, flag: "🇺🇸" },
+  { id: "GBP", currency: "British Pound", code: "GBP", symbol: "£", mobiPerUnit: 550, flag: "🇬🇧" },
+  { id: "CAD", currency: "Canadian Dollar", code: "CAD", symbol: "C$", mobiPerUnit: 350, flag: "🇨🇦" },
+  { id: "EUR", currency: "Euro", code: "EUR", symbol: "€", mobiPerUnit: 450, flag: "🇪🇺" },
+  { id: "XOF", currency: "West African CFA Franc", code: "XOF", symbol: "Fr", mobiPerUnit: 0.9, flag: "🌍" },
+  { id: "GHS", currency: "Ghanaian Cedi", code: "GHS", symbol: "₵", mobiPerUnit: 35, flag: "🇬🇭" },
+  { id: "ZAR", currency: "South African Rand", code: "ZAR", symbol: "R", mobiPerUnit: 27, flag: "🇿🇦" },
+  { id: "KES", currency: "Kenyan Shilling", code: "KES", symbol: "KSh", mobiPerUnit: 3.8, flag: "🇰🇪" },
+  { id: "JPY", currency: "Japanese Yen", code: "JPY", symbol: "¥", mobiPerUnit: 3.3, flag: "🇯🇵" },
+  { id: "CNY", currency: "Chinese Yuan", code: "CNY", symbol: "¥", mobiPerUnit: 69, flag: "🇨🇳" },
+  { id: "INR", currency: "Indian Rupee", code: "INR", symbol: "₹", mobiPerUnit: 6, flag: "🇮🇳" },
+  { id: "AUD", currency: "Australian Dollar", code: "AUD", symbol: "A$", mobiPerUnit: 320, flag: "🇦🇺" },
+  { id: "AED", currency: "UAE Dirham", code: "AED", symbol: "د.إ", mobiPerUnit: 136, flag: "🇦🇪" },
+  { id: "SAR", currency: "Saudi Riyal", code: "SAR", symbol: "﷼", mobiPerUnit: 133, flag: "🇸🇦" },
+  { id: "EGP", currency: "Egyptian Pound", code: "EGP", symbol: "£", mobiPerUnit: 10, flag: "🇪🇬" },
+  { id: "BRL", currency: "Brazilian Real", code: "BRL", symbol: "R$", mobiPerUnit: 100, flag: "🇧🇷" },
+  { id: "MXN", currency: "Mexican Peso", code: "MXN", symbol: "$", mobiPerUnit: 29, flag: "🇲🇽" },
+  { id: "CHF", currency: "Swiss Franc", code: "CHF", symbol: "Fr", mobiPerUnit: 560, flag: "🇨🇭" },
+  { id: "SGD", currency: "Singapore Dollar", code: "SGD", symbol: "S$", mobiPerUnit: 370, flag: "🇸🇬" },
+  { id: "THB", currency: "Thai Baht", code: "THB", symbol: "฿", mobiPerUnit: 14, flag: "🇹🇭" }
 ];
 
 const availableCurrencies = [

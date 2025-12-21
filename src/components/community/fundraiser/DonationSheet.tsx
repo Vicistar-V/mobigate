@@ -40,10 +40,11 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const { toast } = useToast();
 
+  // US$1 = M500
   const getConvertedAmount = () => {
     const amt = parseFloat(amount) || 0;
     if (currency === 'USD') {
-      return `M ${(amt * currencyRates.USD_TO_MOBI).toLocaleString()}`;
+      return `M${(amt * currencyRates.USD_TO_MOBI).toLocaleString()}`;
     } else {
       return `$${(amt * currencyRates.MOBI_TO_USD).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
     }
