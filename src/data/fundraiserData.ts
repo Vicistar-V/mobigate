@@ -244,11 +244,23 @@ export const mockCelebrityDonors: DonorRecord[] = [
   }
 ];
 
-// Currency conversion rates (mock)
+// Currency conversion rates
+// Base: Nigerian Naira (NGN) is the community currency, ₦1 = M1
 export const currencyRates = {
-  USD_TO_NGN: 1650,
-  USD_TO_MOBI: 1000000,
-  NGN_TO_MOBI: 606,
-  MOBI_TO_USD: 0.000001,
-  MOBI_TO_NGN: 0.00165
+  // Base rate: NGN to Mobi (1:1)
+  NGN_TO_MOBI: 1,
+  MOBI_TO_NGN: 1,
+  
+  // International rates (1 unit = X Mobi)
+  USD_TO_MOBI: 500,      // US$1 = M500
+  GBP_TO_MOBI: 550,      // £1 = M550
+  CAD_TO_MOBI: 350,      // CAD$1 = M350
+  EUR_TO_MOBI: 450,      // €1 = M450
+  XOF_TO_MOBI: 0.9,      // CFA1 = M0.9 (CFA1000 = M900)
+  
+  // Reverse rates (for display)
+  MOBI_TO_USD: 0.002,    // M1 = $0.002
+  MOBI_TO_GBP: 0.00182,  // M1 = £0.00182
+  MOBI_TO_CAD: 0.00286,  // M1 = CAD$0.00286
+  MOBI_TO_EUR: 0.00222,  // M1 = €0.00222
 };
