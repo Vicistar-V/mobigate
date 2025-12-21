@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { mockOnlineMembers, suggestedFriends } from "@/data/membershipData";
 import { useToast } from "@/hooks/use-toast";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 interface AddFriendsDialogProps {
   open: boolean;
@@ -19,6 +21,8 @@ interface AddFriendsDialogProps {
 export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingRequests, setPendingRequests] = useState<string[]>([]);
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
   const { toast } = useToast();
 
   const filteredMembers = mockOnlineMembers.filter(member =>
@@ -34,6 +38,21 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
   };
 
   const isPending = (memberId: string) => pendingRequests.includes(memberId);
+
+  const convertToExecutiveMember = (member: { id: string; name: string; avatar: string; role?: string; joinDate?: Date }): ExecutiveMember => ({
+    id: member.id,
+    name: member.name,
+    position: member.role || "Member",
+    tenure: member.joinDate ? `Joined ${member.joinDate.toLocaleDateString()}` : "Member",
+    imageUrl: member.avatar,
+    level: "officer",
+    committee: "executive"
+  });
+
+  const handleMemberClick = (member: { id: string; name: string; avatar: string; role?: string; joinDate?: Date }) => {
+    setSelectedMember(convertToExecutiveMember(member));
+    setShowMemberPreview(true);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -82,23 +101,28 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
                     <Card key={friend.id} className="overflow-hidden">
                       <CardContent className="p-4">
                         <div className="flex flex-col items-center text-center space-y-3">
-                          <Avatar className="h-16 w-16">
-                            <AvatarImage src={friend.avatar} alt={friend.name} />
-                            <AvatarFallback>
-                              {friend.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div 
+                            className="cursor-pointer active:scale-95 transition-transform"
+                            onClick={() => handleMemberClick(friend)}
+                          >
+                            <Avatar className="h-16 w-16">
+                              <AvatarImage src={friend.avatar} alt={friend.name} />
+                              <AvatarFallback>
+                                {friend.name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
 
-                          <div className="space-y-1">
-                            <p className="font-semibold text-sm">{friend.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Joined {friend.joinDate?.toLocaleDateString()}
-                            </p>
-                            {friend.role && (
-                              <Badge variant="outline" className="text-xs">
-                                {friend.role}
-                              </Badge>
-                            )}
+                            <div className="space-y-1 mt-3">
+                              <p className="font-semibold text-sm">{friend.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Joined {friend.joinDate?.toLocaleDateString()}
+                              </p>
+                              {friend.role && (
+                                <Badge variant="outline" className="text-xs">
+                                  {friend.role}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
 
                           <Button
@@ -143,16 +167,21 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
                       key={member.id}
                       className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                     >
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={member.avatar} alt={member.name} />
-                        <AvatarFallback>
-                          {member.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div 
+                        className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:scale-98 transition-transform"
+                        onClick={() => handleMemberClick(member)}
+                      >
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={member.avatar} alt={member.name} />
+                          <AvatarFallback>
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
 
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{member.name}</p>
-                        <p className="text-xs text-muted-foreground">{member.role}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">{member.role}</p>
+                        </div>
                       </div>
 
                       <Button
@@ -200,20 +229,25 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
                         <Card key={requestId}>
                           <CardContent className="p-4">
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage src={member.avatar} alt={member.name} />
-                                <AvatarFallback>
-                                  {member.name.split(' ').map(n => n[0]).join('')}
-                                </AvatarFallback>
-                              </Avatar>
+                              <div 
+                                className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:scale-98 transition-transform"
+                                onClick={() => handleMemberClick(member)}
+                              >
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage src={member.avatar} alt={member.name} />
+                                  <AvatarFallback>
+                                    {member.name.split(' ').map(n => n[0]).join('')}
+                                  </AvatarFallback>
+                                </Avatar>
 
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{member.name}</p>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <Clock className="h-3 w-3 text-muted-foreground" />
-                                  <p className="text-xs text-muted-foreground">
-                                    Request pending
-                                  </p>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{member.name}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <Clock className="h-3 w-3 text-muted-foreground" />
+                                    <p className="text-xs text-muted-foreground">
+                                      Request pending
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
 
@@ -232,6 +266,12 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
           </ScrollArea>
         </Tabs>
       </DialogContent>
+
+      <MemberPreviewDialog
+        member={selectedMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
+      />
     </Dialog>
   );
 }
