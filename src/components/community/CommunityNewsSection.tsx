@@ -33,7 +33,9 @@ const dateTimeFilters = [
   { value: "all", label: "All Time" },
   { value: "today", label: "Today" },
   { value: "week", label: "This Week" },
+  { value: "lastWeek", label: "Last Week" },
   { value: "month", label: "This Month" },
+  { value: "lastMonth", label: "Last Month" },
   { value: "year", label: "This Year" },
 ];
 
@@ -105,7 +107,9 @@ export function CommunityNewsSection({
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
       const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
       const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
       filtered = filtered.filter((item) => {
@@ -116,8 +120,12 @@ export function CommunityNewsSection({
             return itemDate >= today;
           case "week":
             return itemDate >= weekAgo;
+          case "lastWeek":
+            return itemDate >= twoWeeksAgo && itemDate < weekAgo;
           case "month":
             return itemDate >= monthAgo;
+          case "lastMonth":
+            return itemDate >= twoMonthsAgo && itemDate < monthAgo;
           case "year":
             return itemDate >= yearAgo;
           default:
