@@ -199,12 +199,12 @@ export const EditCommunityProfileDialog = ({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[95vh] flex flex-col">
+      <DrawerContent className="max-h-[95vh] flex flex-col touch-auto overflow-hidden">
         <DrawerHeader className="border-b pb-3 flex-shrink-0">
           <DrawerTitle className="text-center">Edit Community Profile</DrawerTitle>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto">
+        <ScrollArea className="flex-1 overflow-y-auto min-h-0 touch-auto">
           <div className="px-4 py-4 space-y-3">
             
             {/* PERSONAL INFORMATION */}

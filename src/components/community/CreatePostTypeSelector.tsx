@@ -98,7 +98,7 @@ export function CreatePostTypeSelector({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
+      <DrawerContent className="max-h-[85vh] flex flex-col touch-auto overflow-hidden">
         <DrawerHeader className="text-center pb-2">
           <DrawerTitle className="text-xl font-bold">Create Post</DrawerTitle>
           <DrawerDescription className="text-sm">
@@ -106,7 +106,7 @@ export function CreatePostTypeSelector({
           </DrawerDescription>
         </DrawerHeader>
 
-        <ScrollArea className="px-4 pb-6 max-h-[60vh]">
+        <ScrollArea className="px-4 pb-6 max-h-[60vh] min-h-0 touch-auto">
           <div className="space-y-2">
             {postTypeOptions.map((option) => (
               <button

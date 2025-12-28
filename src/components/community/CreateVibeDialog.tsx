@@ -114,7 +114,7 @@ export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVi
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
+      <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
         <DrawerHeader className="border-b pb-3">
           <div className="flex items-center justify-between">
             <DrawerTitle className="text-lg font-bold">Create Community Vibe</DrawerTitle>
@@ -124,7 +124,7 @@ export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVi
           </div>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 max-h-[calc(90vh-140px)]">
+        <ScrollArea className="flex-1 max-h-[calc(90vh-140px)] min-h-0 touch-auto">
           {!isPreviewMode ? (
             <div className="p-4 space-y-4">
               {/* Title */}

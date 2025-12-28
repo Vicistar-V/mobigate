@@ -96,7 +96,7 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
         <h2 className="text-lg font-semibold">Make a Donation</h2>
       </div>
 
-      <ScrollArea className="flex-1 px-4">
+      <ScrollArea className="flex-1 px-4 min-h-0 touch-auto">
         <div className="space-y-6 pb-6">
           {/* Campaign Info */}
           <div className="bg-muted p-4 rounded-lg">
@@ -241,7 +241,7 @@ export const DonationSheet = ({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] overflow-hidden">
+        <DrawerContent className="h-[90vh] overflow-hidden touch-auto">
           <DonationContent campaign={campaign} onOpenChange={onOpenChange} />
         </DrawerContent>
       </Drawer>

@@ -252,7 +252,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh] flex flex-col">
+        <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
           <DrawerHeader className="border-b pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -274,7 +274,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
             </div>
           </DrawerHeader>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
             <div className="px-4 pt-3">
               <TabsList className="w-full grid grid-cols-3 h-auto p-1">
                 <TabsTrigger 
@@ -301,7 +301,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
               </TabsList>
             </div>
 
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0 touch-auto">
               <div className="p-4 space-y-4">
                 {/* BLOCKED USERS TAB */}
                 <TabsContent value="blocked" className="mt-0 space-y-4">

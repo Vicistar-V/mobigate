@@ -373,7 +373,7 @@ export const EventDetailDialog = ({
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden p-0">
+          <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden p-0 touch-auto">
             <EventContent />
           </DrawerContent>
         </Drawer>

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ApplyElectionResultsSection } from "./ApplyElectionResultsSection";
 import { ManageExecutivesSection } from "./ManageExecutivesSection";
@@ -64,13 +65,13 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh]">
+        <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
           <DrawerHeader>
             <DrawerTitle>Manage Leadership</DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 pb-6 overflow-y-auto">
+          <ScrollArea className="flex-1 px-4 pb-6 overflow-y-auto min-h-0 touch-auto">
             {content}
-          </div>
+          </ScrollArea>
         </DrawerContent>
       </Drawer>
     );
