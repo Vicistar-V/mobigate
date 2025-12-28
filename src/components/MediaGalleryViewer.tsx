@@ -108,9 +108,11 @@ export const MediaGalleryViewer = ({
     if (isFollowing) {
       setFollowerCount(followerCount - 1);
       setIsFollowing(false);
+      toast({ description: `Unfollowed ${currentItem?.author || 'user'}` });
     } else {
       setFollowerCount(followerCount + 1);
       setIsFollowing(true);
+      toast({ description: `Now following ${currentItem?.author || 'user'}` });
     }
   };
 

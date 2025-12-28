@@ -330,7 +330,10 @@ export const VibeDetailDialog = ({
           </button>
           
           <button
-            onClick={() => setShowGiftDialog(true)}
+            onClick={() => {
+              onOpenChange(false);
+              setTimeout(() => setShowGiftDialog(true), 150);
+            }}
             className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
           >
             <Gift className="h-6 w-6 text-muted-foreground" />
@@ -377,7 +380,10 @@ export const VibeDetailDialog = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setShowGiftDialog(true)}
+          onClick={() => {
+            onOpenChange(false);
+            setTimeout(() => setShowGiftDialog(true), 150);
+          }}
           className="gap-2"
         >
           <Gift className="h-4 w-4" />
