@@ -25,8 +25,15 @@ export const CommentSection = ({
   className = "",
   showHeader = true 
 }: CommentSectionProps) => {
-  const { comments, loading, addComment, deleteComment, likeComment } =
-    useComments(postId);
+  const { 
+    comments, 
+    loading, 
+    addComment, 
+    deleteComment, 
+    likeComment,
+    shareComment,
+    replyToComment 
+  } = useComments(postId);
   const [sortBy, setSortBy] = useState<CommentSortOption>("newest");
 
   const sortedComments = sortComments(comments, sortBy);
@@ -125,6 +132,8 @@ export const CommentSection = ({
               comment={comment}
               onLike={likeComment}
               onDelete={deleteComment}
+              onShare={shareComment}
+              onReply={replyToComment}
             />
           ))
         )}

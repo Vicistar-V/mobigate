@@ -29,6 +29,9 @@ export const useComments = (postId: string) => {
           timestamp: new Date().toISOString(),
           likes: 0,
           isLiked: false,
+          shares: 0,
+          isShared: false,
+          replyCount: 0,
           isOwner: true,
         };
 
@@ -71,11 +74,45 @@ export const useComments = (postId: string) => {
     []
   );
 
+  const shareComment = useCallback(
+    (commentId: string) => {
+      setComments((prev) =>
+        prev.map((comment) => {
+          if (comment.id === commentId) {
+            const newIsShared = !comment.isShared;
+            return {
+              ...comment,
+              isShared: newIsShared,
+              shares: newIsShared ? comment.shares + 1 : Math.max(0, comment.shares - 1),
+            };
+          }
+          return comment;
+        })
+      );
+      toast({
+        description: "Shared successfully",
+      });
+    },
+    [toast]
+  );
+
+  const replyToComment = useCallback(
+    (commentId: string) => {
+      // For now, just show a toast - in a real app this would open a reply input
+      toast({
+        description: "Reply feature coming soon",
+      });
+    },
+    [toast]
+  );
+
   return {
     comments,
     loading,
     addComment,
     deleteComment,
     likeComment,
+    shareComment,
+    replyToComment,
   };
 };
