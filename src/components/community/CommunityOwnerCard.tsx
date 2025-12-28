@@ -46,7 +46,7 @@ export function CommunityOwnerCard({ community }: CommunityOwnerCardProps) {
 
         {/* Content */}
         <div className="p-4 space-y-2">
-          <h3 className="font-semibold text-foreground line-clamp-1">
+          <h3 className="font-semibold text-foreground line-clamp-2 leading-tight">
             {community.name}
           </h3>
           
