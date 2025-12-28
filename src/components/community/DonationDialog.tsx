@@ -184,7 +184,7 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
                       <span className="text-xs sm:text-sm font-bold">
                         M{preset.toLocaleString()}
                       </span>
-                      <span className="text-[10px] sm:text-xs opacity-70">
+                      <span className="text-xs sm:text-sm opacity-70">
                         ({COMMUNITY_LOCAL_CURRENCY.symbol}{(preset * COMMUNITY_LOCAL_CURRENCY.mobiExchangeRate).toLocaleString()})
                       </span>
                     </Button>
