@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MoreVertical, Trash2 } from "lucide-react";
+import { Heart, MoreVertical, Trash2, MessageCircle, Share2 } from "lucide-react";
 import { formatCommentTime } from "@/lib/commentUtils";
 import { Comment } from "@/types/comments";
 import {
@@ -15,9 +15,17 @@ interface CommentItemProps {
   comment: Comment;
   onLike: (commentId: string) => void;
   onDelete: (commentId: string) => void;
+  onShare?: (commentId: string) => void;
+  onReply?: (commentId: string) => void;
 }
 
-export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => {
+export const CommentItem = ({ 
+  comment, 
+  onLike, 
+  onDelete,
+  onShare,
+  onReply 
+}: CommentItemProps) => {
   return (
     <div className="flex gap-2 group animate-fade-in">
       <Link 
@@ -73,19 +81,45 @@ export const CommentItem = ({ comment, onLike, onDelete }: CommentItemProps) => 
           )}
         </div>
 
-        <div className="flex items-center gap-3 pt-0.5">
+        {/* Engagement Buttons */}
+        <div className="flex items-center gap-4 pt-1">
+          {/* Like Button */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onLike(comment.id)}
-            className={`h-auto p-0 hover:bg-transparent gap-1 text-xs ${
-              comment.isLiked ? "text-red-500" : "text-muted-foreground"
+            className={`h-auto p-0 hover:bg-transparent gap-1.5 text-xs ${
+              comment.isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
             }`}
           >
             <Heart
               className={`h-3.5 w-3.5 ${comment.isLiked ? "fill-current" : ""}`}
             />
             <span className="font-medium">{comment.likes}</span>
+          </Button>
+
+          {/* Reply Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onReply?.(comment.id)}
+            className="h-auto p-0 hover:bg-transparent gap-1.5 text-xs text-muted-foreground hover:text-primary"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            <span className="font-medium">{comment.replyCount}</span>
+          </Button>
+
+          {/* Share Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onShare?.(comment.id)}
+            className={`h-auto p-0 hover:bg-transparent gap-1.5 text-xs ${
+              comment.isShared ? "text-primary" : "text-muted-foreground hover:text-primary"
+            }`}
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            <span className="font-medium">{comment.shares}</span>
           </Button>
         </div>
       </div>

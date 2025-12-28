@@ -11,6 +11,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T14:32:00Z",
     likes: 45,
     isLiked: false,
+    shares: 12,
+    isShared: false,
+    replyCount: 3,
     isOwner: false,
   },
   {
@@ -23,6 +26,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T15:45:00Z",
     likes: 23,
     isLiked: false,
+    shares: 5,
+    isShared: false,
+    replyCount: 1,
     isOwner: false,
   },
   {
@@ -35,6 +41,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T16:20:00Z",
     likes: 18,
     isLiked: false,
+    shares: 2,
+    isShared: false,
+    replyCount: 0,
     isOwner: false,
   },
   {
@@ -47,6 +56,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T10:15:00Z",
     likes: 67,
     isLiked: false,
+    shares: 18,
+    isShared: false,
+    replyCount: 4,
     isOwner: false,
   },
   {
@@ -59,6 +71,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T11:30:00Z",
     likes: 34,
     isLiked: false,
+    shares: 8,
+    isShared: false,
+    replyCount: 2,
     isOwner: false,
   },
   {
@@ -71,6 +86,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T09:00:00Z",
     likes: 89,
     isLiked: false,
+    shares: 24,
+    isShared: false,
+    replyCount: 6,
     isOwner: false,
   },
   {
@@ -83,6 +101,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T09:45:00Z",
     likes: 42,
     isLiked: false,
+    shares: 10,
+    isShared: false,
+    replyCount: 1,
     isOwner: false,
   },
   {
@@ -95,6 +116,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T13:20:00Z",
     likes: 156,
     isLiked: false,
+    shares: 45,
+    isShared: false,
+    replyCount: 12,
     isOwner: false,
   },
   {
@@ -107,6 +131,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T14:05:00Z",
     likes: 98,
     isLiked: false,
+    shares: 22,
+    isShared: false,
+    replyCount: 5,
     isOwner: false,
   },
   {
@@ -119,6 +146,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T18:30:00Z",
     likes: 78,
     isLiked: false,
+    shares: 15,
+    isShared: false,
+    replyCount: 3,
     isOwner: false,
   },
   {
@@ -131,6 +161,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T19:15:00Z",
     likes: 45,
     isLiked: false,
+    shares: 7,
+    isShared: false,
+    replyCount: 2,
     isOwner: false,
   },
   {
@@ -143,6 +176,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T08:00:00Z",
     likes: 134,
     isLiked: false,
+    shares: 38,
+    isShared: false,
+    replyCount: 8,
     isOwner: false,
   },
   {
@@ -155,6 +191,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T07:30:00Z",
     likes: 56,
     isLiked: false,
+    shares: 14,
+    isShared: false,
+    replyCount: 2,
     isOwner: false,
   },
   {
@@ -167,6 +206,9 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T12:00:00Z",
     likes: 92,
     isLiked: false,
+    shares: 28,
+    isShared: false,
+    replyCount: 4,
     isOwner: false,
   },
   {
@@ -179,14 +221,148 @@ export const mockComments: Comment[] = [
     timestamp: "2025-01-10T16:45:00Z",
     likes: 67,
     isLiked: false,
+    shares: 19,
+    isShared: false,
+    replyCount: 3,
+    isOwner: false,
+  },
+];
+
+// Birthday Wishes mock data
+export const mockBirthdayWishes: Comment[] = [
+  {
+    id: "bday_1",
+    postId: "birthday_notification",
+    userId: "2",
+    author: "SARAH OKAFOR",
+    authorProfileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
+    content: "Happy Birthday! 🎂🎉 Wishing you all the best on your special day! May this year bring you endless joy, success, and beautiful memories!",
+    timestamp: "2025-01-10T08:00:00Z",
+    likes: 124,
+    isLiked: false,
+    shares: 32,
+    isShared: false,
+    replyCount: 8,
+    isOwner: false,
+  },
+  {
+    id: "bday_2",
+    postId: "birthday_notification",
+    userId: "3",
+    author: "JAMES ADEWALE",
+    authorProfileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
+    content: "Many happy returns of the day! 🎈🥳 May God bless you with good health, prosperity, and happiness. Have an amazing birthday!",
+    timestamp: "2025-01-10T08:15:00Z",
+    likes: 89,
+    isLiked: false,
+    shares: 18,
+    isShared: false,
+    replyCount: 5,
+    isOwner: false,
+  },
+  {
+    id: "bday_3",
+    postId: "birthday_notification",
+    userId: "4",
+    author: "CHIOMA EZE",
+    authorProfileImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80",
+    content: "Cheers to another year of greatness! 🎊🎁 Happy Birthday! May all your dreams and wishes come true this year. You deserve all the best!",
+    timestamp: "2025-01-10T08:30:00Z",
+    likes: 67,
+    isLiked: false,
+    shares: 12,
+    isShared: false,
+    replyCount: 3,
+    isOwner: false,
+  },
+  {
+    id: "bday_4",
+    postId: "birthday_notification",
+    userId: "6",
+    author: "DR. AMINA YUSUF",
+    authorProfileImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80",
+    content: "Wishing you a fabulous birthday filled with love and laughter! 🎂✨ May this new chapter of your life be the best one yet!",
+    timestamp: "2025-01-10T09:00:00Z",
+    likes: 156,
+    isLiked: false,
+    shares: 45,
+    isShared: false,
+    replyCount: 12,
+    isOwner: false,
+  },
+  {
+    id: "bday_5",
+    postId: "birthday_notification",
+    userId: "8",
+    author: "CHEF NGOZI",
+    authorProfileImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80",
+    content: "Happy Birthday to an amazing person! 🥳🎉 May your day be as wonderful as you are. Enjoy every moment of your special day!",
+    timestamp: "2025-01-10T09:30:00Z",
+    likes: 98,
+    isLiked: false,
+    shares: 24,
+    isShared: false,
+    replyCount: 6,
+    isOwner: false,
+  },
+  {
+    id: "bday_6",
+    postId: "birthday_notification",
+    userId: "9",
+    author: "TUNDE BAKARE",
+    authorProfileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
+    content: "Happy Birthday! 🎈🎊 Another year older, another year wiser! May this year bring you new opportunities, adventures, and blessings!",
+    timestamp: "2025-01-10T10:00:00Z",
+    likes: 78,
+    isLiked: false,
+    shares: 15,
+    isShared: false,
+    replyCount: 4,
+    isOwner: false,
+  },
+  {
+    id: "bday_7",
+    postId: "birthday_notification",
+    userId: "10",
+    author: "FOLAKE JOHNSON",
+    authorProfileImage: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80",
+    content: "Warmest birthday wishes! 🎂🌟 May your special day be filled with love, joy, and all the things that make you happy. God bless you abundantly!",
+    timestamp: "2025-01-10T10:30:00Z",
+    likes: 112,
+    isLiked: false,
+    shares: 28,
+    isShared: false,
+    replyCount: 7,
+    isOwner: false,
+  },
+  {
+    id: "bday_8",
+    postId: "birthday_notification",
+    userId: "11",
+    author: "EMEKA OKONKWO",
+    authorProfileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+    content: "Happy Birthday! 🥳🎁 Sending you lots of love and warm wishes on your special day. May you continue to shine brighter every year!",
+    timestamp: "2025-01-10T11:00:00Z",
+    likes: 84,
+    isLiked: false,
+    shares: 19,
+    isShared: false,
+    replyCount: 5,
     isOwner: false,
   },
 ];
 
 export const getCommentsByPostId = (postId: string): Comment[] => {
+  if (postId === "birthday_notification") {
+    return mockBirthdayWishes;
+  }
   return mockComments.filter((comment) => comment.postId === postId);
 };
 
 export const getCommentCount = (postId: string): number => {
   return getCommentsByPostId(postId).length;
+};
+
+export const getBirthdayWishes = (): Comment[] => {
+  return mockBirthdayWishes;
 };

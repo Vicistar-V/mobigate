@@ -8,6 +8,9 @@ export interface Comment {
   timestamp: string;
   likes: number;
   isLiked: boolean;
+  shares: number;
+  isShared: boolean;
+  replyCount: number;
   replies?: Comment[];
   isOwner?: boolean;
 }
