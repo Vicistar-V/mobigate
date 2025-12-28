@@ -10,6 +10,7 @@ import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { CommentDialog } from "@/components/CommentDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { generateShareUrl } from "@/lib/shareUtils";
+import { toast } from "sonner";
 
 interface FeedPostProps {
   id?: string;
@@ -75,10 +76,13 @@ export const FeedPost = ({
   const handleFollow = () => {
     if (isFollowing) {
       setFollowerCount(followerCount - 1);
+      setIsFollowing(false);
+      toast.success(`Unfollowed ${author}`);
     } else {
       setFollowerCount(followerCount + 1);
+      setIsFollowing(true);
+      toast.success(`Now following ${author}`);
     }
-    setIsFollowing(!isFollowing);
   };
 
   const formatFollowerCount = (count: number): string => {
