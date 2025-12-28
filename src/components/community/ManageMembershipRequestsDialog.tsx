@@ -319,18 +319,15 @@ export function ManageMembershipRequestsDialog({
                 <XCircle className="h-3.5 w-3.5 mr-1" />
                 Reject
               </Button>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={() => handleMarkUnderReview(application.id)}
+              >
+                <Clock className="h-3.5 w-3.5 mr-1" />
+                Review
+              </Button>
             </>
-          )}
-          
-          {application.status === "pending" && (
-            <Button 
-              variant="secondary" 
-              size="sm"
-              onClick={() => handleMarkUnderReview(application.id)}
-            >
-              <Clock className="h-3.5 w-3.5 mr-1" />
-              Review
-            </Button>
           )}
 
           {application.status === "under-review" && (
@@ -359,27 +356,47 @@ export function ManageMembershipRequestsDialog({
             </>
           )}
 
+          {/* Show Approved status button when approved */}
           {application.status === "approved" && (
             <Button 
-              variant="outline" 
+              variant="default" 
               size="sm" 
-              className="text-destructive border-destructive hover:bg-destructive/10"
-              onClick={() => handleRevokeApproval(application.id)}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 cursor-default pointer-events-none"
+              disabled
             >
-              <RefreshCw className="h-3.5 w-3.5 mr-1" />
-              Revoke
+              <Check className="h-3.5 w-3.5 mr-1" />
+              Approved
             </Button>
           )}
 
+          {/* Show Rejected status button when rejected */}
           {application.status === "rejected" && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handleReconsider(application.id)}
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1" />
-              Reconsider
-            </Button>
+            <>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                className="flex-1 cursor-default pointer-events-none"
+                disabled
+              >
+                <XCircle className="h-3.5 w-3.5 mr-1" />
+                Rejected
+              </Button>
+              {/* Admin-only: Show rejection reason indicator */}
+              {application.rejectionReason && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-muted-foreground"
+                  onClick={() => {
+                    setSelectedApplication(application);
+                    setShowDetailDialog(true);
+                  }}
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1" />
+                  View Reason
+                </Button>
+              )}
+            </>
           )}
         </div>
       </CardContent>
