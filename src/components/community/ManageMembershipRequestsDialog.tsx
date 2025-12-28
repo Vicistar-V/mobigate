@@ -653,8 +653,8 @@ export function ManageMembershipRequestsDialog({
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <div className="px-4 pt-2">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
+        <div className="px-4 pt-2 flex-shrink-0">
           <TabsList className="w-full grid grid-cols-4 h-auto">
             <TabsTrigger value="pending" className="text-xs px-2 py-2 flex-col gap-1">
               <span>Pending</span>
@@ -675,7 +675,7 @@ export function ManageMembershipRequestsDialog({
           </TabsList>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0 touch-auto">
           <div className="p-4">
             {/* Pending Tab */}
             <TabsContent value="pending" className="mt-0 space-y-2">
@@ -813,7 +813,7 @@ export function ManageMembershipRequestsDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[95vh] flex flex-col">
+        <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
           <Content />
         </DrawerContent>
       </Drawer>
