@@ -152,7 +152,7 @@ export const MemberPreviewDialog = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="px-5 pb-6 space-y-3">
+          <div className="px-5 pb-12 space-y-3">
             {/* Primary Button - View Main Profile */}
             <Button
               className="w-full"
