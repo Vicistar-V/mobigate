@@ -49,9 +49,9 @@ export const CommentInput = ({
   return (
     <div className="space-y-2">
       <div className="flex gap-2 sm:gap-3">
-        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
+        <Avatar className="h-7 w-7 sm:h-9 sm:w-9 flex-shrink-0">
           <AvatarImage src={userAvatar} alt={userName} />
-          <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
+          <AvatarFallback className="text-xs">{userName.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 space-y-2">
           <Textarea
@@ -59,36 +59,36 @@ export const CommentInput = ({
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="min-h-[60px] sm:min-h-[80px] resize-none"
+            className="min-h-[48px] sm:min-h-[64px] resize-none text-sm"
             disabled={loading}
           />
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 sm:justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span
-              className={`text-sm sm:text-base ${
+              className={`text-xs ${
                 isOverLimit
-                  ? "text-red-600 font-semibold"
+                  ? "text-destructive font-semibold"
                   : remainingChars < 50
                   ? "text-orange-600"
                   : "text-muted-foreground"
               }`}
             >
-              {remainingChars} characters remaining
+              {remainingChars} left
             </span>
             <Button
               onClick={handleSubmit}
               disabled={loading || content.trim().length === 0 || isOverLimit}
               size="sm"
-              className="gap-2 w-full sm:w-auto"
+              className="h-7 sm:h-8 gap-1.5 text-xs px-2.5 sm:px-3"
             >
-              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              {loading ? "Posting..." : "Post Comment"}
+              <Send className="h-3 w-3" />
+              <span className="hidden xs:inline sm:inline">{loading ? "Posting..." : "Post"}</span>
             </Button>
           </div>
-          {error && <p className="text-base text-red-600">{error}</p>}
+          {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
       </div>
-      <p className="text-sm sm:text-base text-muted-foreground pl-0 sm:pl-[52px] hidden sm:block">
-        Tip: Press Ctrl+Enter (Cmd+Enter on Mac) to submit
+      <p className="text-xs text-muted-foreground pl-9 sm:pl-12 hidden sm:block">
+        Tip: Press Ctrl+Enter to submit
       </p>
     </div>
   );
