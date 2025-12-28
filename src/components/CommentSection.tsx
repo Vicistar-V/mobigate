@@ -17,9 +17,14 @@ import { Separator } from "@/components/ui/separator";
 interface CommentSectionProps {
   postId: string;
   className?: string;
+  showHeader?: boolean;
 }
 
-export const CommentSection = ({ postId, className = "" }: CommentSectionProps) => {
+export const CommentSection = ({ 
+  postId, 
+  className = "",
+  showHeader = true 
+}: CommentSectionProps) => {
   const { comments, loading, addComment, deleteComment, likeComment } =
     useComments(postId);
   const [sortBy, setSortBy] = useState<CommentSortOption>("newest");
@@ -40,19 +45,49 @@ export const CommentSection = ({ postId, className = "" }: CommentSectionProps) 
   };
 
   return (
-    <div className={`space-y-4 sm:space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
-        <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
-          Comments ({comments.length})
-        </h3>
-        {comments.length > 0 && (
+    <div className={`space-y-3 sm:space-y-4 ${className}`}>
+      {/* Header - Only show if showHeader is true */}
+      {showHeader && (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm sm:text-base font-semibold flex items-center gap-1.5 sm:gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Comments ({comments.length})
+            </h3>
+            {comments.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 sm:h-8 gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3">
+                    <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{getSortLabel(sortBy)}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setSortBy("newest")}>
+                    Newest First
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy("oldest")}>
+                    Oldest First
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy("popular")}>
+                    Most Popular
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+          <Separator />
+        </>
+      )}
+
+      {/* Sort dropdown when header is hidden but comments exist */}
+      {!showHeader && comments.length > 0 && (
+        <div className="flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1 sm:gap-2">
-                <ArrowUpDown className="h-4 w-4" />
-                <span className="hidden sm:inline">{getSortLabel(sortBy)}</span>
+              <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs px-2">
+                <ArrowUpDown className="h-3 w-3" />
+                <span>{getSortLabel(sortBy)}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -67,23 +102,19 @@ export const CommentSection = ({ postId, className = "" }: CommentSectionProps) 
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
-      </div>
-
-      <Separator />
+        </div>
+      )}
 
       {/* Comment Input */}
       <CommentInput onSubmit={addComment} loading={loading} />
 
-      <Separator />
-
       {/* Comments List */}
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-3 sm:space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <h4 className="text-base sm:text-lg font-medium mb-2">No comments yet</h4>
-            <p className="text-base text-muted-foreground">
+          <div className="text-center py-6 sm:py-10 px-4">
+            <MessageSquare className="h-8 w-8 sm:h-10 sm:w-10 mx-auto text-muted-foreground/50 mb-2 sm:mb-3" />
+            <h4 className="text-sm sm:text-base font-medium mb-1">No comments yet</h4>
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-[180px] sm:max-w-[220px] mx-auto leading-relaxed">
               Be the first to share your thoughts!
             </p>
           </div>

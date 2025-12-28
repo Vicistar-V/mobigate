@@ -272,12 +272,12 @@ export const EventDetailDialog = ({
             <div className="border-t border-border" />
 
             {/* Comments Section */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
                 <MessageCircle className="h-4 w-4" />
                 Comments ({event.comments})
               </h3>
-              <CommentSection postId={event.id} className="border-none p-0" />
+              <CommentSection postId={event.id} className="border-none p-0" showHeader={false} />
             </div>
           </div>
         </div>
