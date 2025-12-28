@@ -89,7 +89,7 @@ export const PostDetailDialog = ({
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden">
+        <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden touch-auto">
           {/* Header */}
           <DrawerHeader className="flex-shrink-0 border-b pb-3">
             <DrawerClose asChild>
@@ -106,7 +106,7 @@ export const PostDetailDialog = ({
             </DrawerTitle>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 overflow-y-auto">
+          <ScrollArea className="flex-1 overflow-y-auto min-h-0 touch-auto">
             <div className="p-4 space-y-4">
               {/* Author Info */}
               <div className="flex items-center gap-3">

@@ -23,7 +23,7 @@ const IndebtednessContent = () => {
         </p>
       </div>
       
-      <ScrollArea className="flex-1 px-4">
+      <ScrollArea className="flex-1 px-4 min-h-0 touch-auto">
         <div className="pb-6">
           {/* Numbered list of indebtedness items */}
           <div className="space-y-3 py-4">
@@ -91,7 +91,7 @@ export const CheckIndebtednessSheet = ({ open, onOpenChange }: CheckIndebtedness
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] overflow-hidden">
+        <DrawerContent className="h-[90vh] overflow-hidden touch-auto">
           <IndebtednessContent />
         </DrawerContent>
       </Drawer>

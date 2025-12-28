@@ -152,7 +152,7 @@ export function CommunityGiftDrawer({ open, onOpenChange }: CommunityGiftDrawerP
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[95vh] max-h-[95vh] flex flex-col">
+      <DrawerContent className="h-[95vh] max-h-[95vh] flex flex-col touch-auto overflow-hidden">
         {/* Compact Header */}
         <DrawerHeader className="border-b pb-2 pt-0 shrink-0">
           <div className="flex items-center justify-between">
@@ -169,7 +169,7 @@ export function CommunityGiftDrawer({ open, onOpenChange }: CommunityGiftDrawerP
         </DrawerHeader>
 
         {/* Scrollable Content Area */}
-        <ScrollArea className="flex-1 overflow-y-auto">
+        <ScrollArea className="flex-1 overflow-y-auto min-h-0 touch-auto">
           <div className="p-4 space-y-4">
             {/* Wallet Balance - Optimized */}
             <div className="flex items-center justify-between bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-3">

@@ -182,7 +182,7 @@ export const ExecutiveDetailSheet = ({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden">
+      <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden touch-auto">
         {/* Close Button - Absolute positioned */}
         <DrawerClose asChild>
           <Button
@@ -272,7 +272,7 @@ export const ExecutiveDetailSheet = ({
         <Separator />
 
         {/* ========== SCROLLABLE MIDDLE SEGMENT ========== */}
-        <ScrollArea className="flex-1 overflow-y-auto">
+        <ScrollArea className="flex-1 overflow-y-auto min-h-0 touch-auto">
           <div className="px-5 py-4 space-y-4">
             
             {/* LEADERSHIP/ADMINISTRATIVE MILESTONES SECTION */}

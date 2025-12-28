@@ -915,7 +915,7 @@ export function CommunityMainMenu({
 
       {isMobile ? (
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent className="h-[85vh] overflow-hidden">
+          <DrawerContent className="h-[85vh] overflow-hidden touch-auto">
             <MenuContent />
           </DrawerContent>
         </Drawer>

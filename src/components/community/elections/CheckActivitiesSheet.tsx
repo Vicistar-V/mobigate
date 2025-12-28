@@ -17,7 +17,7 @@ const ActivitiesContent = () => {
         <h2 className="text-xl font-bold">Check All Activities Index [=&gt; 60%]:</h2>
       </div>
       
-      <ScrollArea className="flex-1 px-4">
+      <ScrollArea className="flex-1 px-4 min-h-0 touch-auto">
         <div className="pb-6">
           {/* Meetings Attendance Section */}
           <div className="py-4 border-b">
@@ -124,7 +124,7 @@ export const CheckActivitiesSheet = ({ open, onOpenChange }: CheckActivitiesShee
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] overflow-hidden">
+        <DrawerContent className="h-[90vh] overflow-hidden touch-auto">
           <ActivitiesContent />
         </DrawerContent>
       </Drawer>

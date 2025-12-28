@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Drawer,
   DrawerContent,
@@ -139,7 +140,7 @@ export function MembershipApplicationDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
+      <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
         <DrawerHeader className="bg-zinc-900 text-white rounded-t-lg">
           <div className="flex items-center justify-between">
             <DrawerTitle className="text-white">Apply for Membership</DrawerTitle>
@@ -154,7 +155,7 @@ export function MembershipApplicationDrawer({
           </div>
         </DrawerHeader>
 
-        <div className="overflow-y-auto p-4 space-y-4">
+        <ScrollArea className="flex-1 overflow-y-auto min-h-0 touch-auto p-4 space-y-4">
           {/* Photo Upload */}
           <div className="flex flex-col items-center mb-4">
             <Label className="mb-2 text-sm">Passport Photograph</Label>
@@ -358,7 +359,7 @@ export function MembershipApplicationDrawer({
               "Submit Application"
             )}
           </Button>
-        </div>
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   );

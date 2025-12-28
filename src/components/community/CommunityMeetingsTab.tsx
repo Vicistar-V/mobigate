@@ -289,7 +289,7 @@ export const CommunityMeetingsTab = () => {
               {/* Chat Panel - Drawer on mobile, Dialog on desktop */}
               {isMobile ? (
                 <Drawer open={isChatOpen} onOpenChange={setIsChatOpen}>
-                  <DrawerContent className="h-[80vh] overflow-hidden">
+                  <DrawerContent className="h-[80vh] overflow-hidden touch-auto">
                     <ChatPanelContent />
                   </DrawerContent>
                 </Drawer>

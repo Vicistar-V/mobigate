@@ -157,7 +157,7 @@ export const ContributionsDialog = ({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh] h-[90vh] flex flex-col overflow-hidden">
+      <DrawerContent className="max-h-[90vh] h-[90vh] flex flex-col overflow-hidden touch-auto">
         {/* Header */}
         <DrawerHeader className="flex-shrink-0 border-b pb-3">
           <DrawerClose asChild>
@@ -182,7 +182,7 @@ export const ContributionsDialog = ({
         </DrawerHeader>
 
         {/* Content */}
-        <Tabs defaultValue="posts" className="flex-1 flex flex-col overflow-hidden">
+        <Tabs defaultValue="posts" className="flex-1 flex flex-col overflow-hidden min-h-0">
           <TabsList className="grid w-full grid-cols-3 mx-5 mt-3 max-w-[calc(100%-2.5rem)]">
             <TabsTrigger value="posts" className="text-xs">
               <FileText className="h-3.5 w-3.5 mr-1" />
@@ -198,7 +198,7 @@ export const ContributionsDialog = ({
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 overflow-y-auto">
+          <ScrollArea className="flex-1 overflow-y-auto min-h-0 touch-auto">
             {/* Posts Tab */}
             <TabsContent value="posts" className="px-5 py-4 space-y-3 m-0">
               {mockContributions.posts.map((post) => (

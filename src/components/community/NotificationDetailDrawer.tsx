@@ -172,12 +172,12 @@ export function NotificationDetailDrawer({
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh]">
+        <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="sr-only">Notification Details</DrawerTitle>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 max-h-[calc(90vh-60px)]">
+          <ScrollArea className="flex-1 max-h-[calc(90vh-60px)] min-h-0 touch-auto">
             <div className="px-4 pb-8 space-y-4">
               {/* Person Avatar or Icon */}
               <div className="flex flex-col items-center">
