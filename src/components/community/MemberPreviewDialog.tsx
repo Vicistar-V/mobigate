@@ -12,13 +12,15 @@ import {
   MessageSquare,
   Users,
   Calendar,
-  Circle
+  Circle,
+  Expand
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { AddToCircleDialog } from "@/components/AddToCircleDialog";
+import { MediaViewer } from "@/components/MediaViewer";
 
 interface MemberPreviewDialogProps {
   member: ExecutiveMember | null;
@@ -35,6 +37,7 @@ export const MemberPreviewDialog = ({
 }: MemberPreviewDialogProps) => {
   const [requestSent, setRequestSent] = useState(false);
   const [showAddToCircle, setShowAddToCircle] = useState(false);
+  const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -46,6 +49,11 @@ export const MemberPreviewDialog = ({
   const memberSince = "2015";
   const mutualFriends = 45;
   const isOnline = true;
+  
+  // Mock interaction data for photo
+  const photoLikes = 128;
+  const photoComments = 24;
+  const photoFollowers = "1.2K";
 
   const handleAddFriend = () => {
     if (member.isFriend) {
@@ -104,9 +112,12 @@ export const MemberPreviewDialog = ({
           </DrawerClose>
 
           <div className="px-5 py-6 flex flex-col items-center">
-            {/* Larger Photo with Online Status */}
+            {/* Larger Photo with Online Status - Clickable */}
             <div className="relative mb-4">
-              <div className="h-32 w-28 rounded-xl overflow-hidden border-3 border-primary/20 bg-muted shadow-lg">
+              <div 
+                className="h-32 w-28 rounded-xl overflow-hidden border-3 border-primary/20 bg-muted shadow-lg cursor-pointer hover:ring-2 hover:ring-primary/40 transition-all relative group"
+                onClick={() => setShowPhotoViewer(true)}
+              >
                 {imageUrl ? (
                   <img
                     src={imageUrl}
@@ -118,6 +129,10 @@ export const MemberPreviewDialog = ({
                     {member.name.charAt(0)}
                   </div>
                 )}
+                {/* Expand overlay on hover */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-all">
+                  <Expand className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                </div>
               </div>
               {/* Online Status Indicator */}
               {isOnline && (
@@ -202,6 +217,21 @@ export const MemberPreviewDialog = ({
         open={showAddToCircle}
         onOpenChange={setShowAddToCircle}
         userName={member.name}
+      />
+
+      {/* Photo Expanded View */}
+      <MediaViewer
+        open={showPhotoViewer}
+        onOpenChange={setShowPhotoViewer}
+        mediaUrl={imageUrl || ""}
+        mediaType="Photo"
+        title={`${member.name}'s Photo`}
+        author={member.name}
+        authorUserId={member.id}
+        likes={photoLikes}
+        comments={photoComments}
+        followers={photoFollowers}
+        showActions={true}
       />
     </>
   );
