@@ -65,7 +65,7 @@ export function JoinedCommunityRow({ community }: JoinedCommunityRowProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="font-semibold text-foreground line-clamp-1 text-sm">
+              <h3 className="font-semibold text-foreground line-clamp-2 text-sm leading-tight">
                 {community.name}
               </h3>
               <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
