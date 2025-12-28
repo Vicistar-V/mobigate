@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, CheckCircle2, Loader2, X } from "lucide-react";
-import { howHeardOptions, genderOptions, nigerianStates } from "@/data/membershipData";
+import { howHeardOptions, genderOptions, nigerianStates, countriesList } from "@/data/membershipData";
 
 interface MembershipApplicationDrawerProps {
   open: boolean;
@@ -43,6 +43,10 @@ export function MembershipApplicationDrawer({
     phone: "",
     dateOfBirth: "",
     gender: "",
+    nationality: "",
+    countryOfResidence: "",
+    stateOfResidence: "",
+    lgaOfResidence: "",
     stateOfOrigin: "",
     cityOfResidence: "",
     occupation: "",
@@ -90,6 +94,10 @@ export function MembershipApplicationDrawer({
       phone: "",
       dateOfBirth: "",
       gender: "",
+      nationality: "",
+      countryOfResidence: "",
+      stateOfResidence: "",
+      lgaOfResidence: "",
       stateOfOrigin: "",
       cityOfResidence: "",
       occupation: "",
@@ -102,11 +110,16 @@ export function MembershipApplicationDrawer({
     onOpenChange(false);
   };
 
+  // Show Nigerian states if Nigeria is selected as country of residence
+  const showNigerianStates = formData.countryOfResidence === "Nigeria";
+
   const isFormValid = 
     formData.fullName && 
     formData.email && 
     formData.phone && 
     formData.gender &&
+    formData.nationality &&
+    formData.countryOfResidence &&
     formData.motivation && 
     acceptTerms;
 
@@ -243,25 +256,92 @@ export function MembershipApplicationDrawer({
 
           {/* Location */}
           <div className="space-y-3">
+            {/* Nationality */}
             <div>
-              <Label className="text-sm">State of Origin</Label>
+              <Label className="text-sm">Nationality *</Label>
               <Select
-                value={formData.stateOfOrigin}
-                onValueChange={(value) => handleInputChange("stateOfOrigin", value)}
+                value={formData.nationality}
+                onValueChange={(value) => handleInputChange("nationality", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select state" />
+                  <SelectValue placeholder="Select your nationality" />
                 </SelectTrigger>
-                <SelectContent>
-                  {nigerianStates.map((state) => (
-                    <SelectItem key={state} value={state}>
-                      {state}
+                <SelectContent className="max-h-[280px]">
+                  {countriesList.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
+            {/* Country of Residence */}
+            <div>
+              <Label className="text-sm">Country of Residence *</Label>
+              <Select
+                value={formData.countryOfResidence}
+                onValueChange={(value) => {
+                  handleInputChange("countryOfResidence", value);
+                  // Reset state/province when country changes
+                  if (value !== "Nigeria") {
+                    handleInputChange("stateOfResidence", "");
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select country of residence" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[280px]">
+                  {countriesList.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* State/Province of Residence */}
+            <div>
+              <Label className="text-sm">State/Province of Residence</Label>
+              {showNigerianStates ? (
+                <Select
+                  value={formData.stateOfResidence}
+                  onValueChange={(value) => handleInputChange("stateOfResidence", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[280px]">
+                    {nigerianStates.map((state) => (
+                      <SelectItem key={state} value={state}>
+                        {state}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  placeholder="Enter your state or province"
+                  value={formData.stateOfResidence}
+                  onChange={(e) => handleInputChange("stateOfResidence", e.target.value)}
+                />
+              )}
+            </div>
+
+            {/* Local Government/County of Residence */}
+            <div>
+              <Label htmlFor="lga" className="text-sm">Local Government/County of Residence</Label>
+              <Input
+                id="lga"
+                placeholder={showNigerianStates ? "Enter your LGA" : "Enter your county or district"}
+                value={formData.lgaOfResidence}
+                onChange={(e) => handleInputChange("lgaOfResidence", e.target.value)}
+              />
+            </div>
+
+            {/* City/Town of Residence */}
             <div>
               <Label htmlFor="city" className="text-sm">City/Town of Residence</Label>
               <Input
@@ -271,6 +351,28 @@ export function MembershipApplicationDrawer({
                 onChange={(e) => handleInputChange("cityOfResidence", e.target.value)}
               />
             </div>
+
+            {/* State of Origin (only for Nigeria) */}
+            {formData.nationality === "Nigeria" && (
+              <div>
+                <Label className="text-sm">State of Origin</Label>
+                <Select
+                  value={formData.stateOfOrigin}
+                  onValueChange={(value) => handleInputChange("stateOfOrigin", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select state of origin" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[280px]">
+                    {nigerianStates.map((state) => (
+                      <SelectItem key={state} value={state}>
+                        {state}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {/* Professional */}
@@ -340,7 +442,7 @@ export function MembershipApplicationDrawer({
               onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
             />
             <Label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
-              I accept the community's Terms & Conditions and agree to abide by the community rules
+              I accept the Community's Terms & Conditions and agree to abide by the Community rules
             </Label>
           </div>
 
