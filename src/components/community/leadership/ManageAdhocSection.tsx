@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { adHocMembers } from "@/data/communityExecutivesData";
 import { AddMemberDialog } from "./AddMemberDialog";
 import { EditMemberDialog } from "./EditMemberDialog";
+import { MemberPreviewDialog } from "../MemberPreviewDialog";
 import { Plus, MoreVertical, Pencil, Trash2, ArrowRightLeft, UserCog } from "lucide-react";
 import {
   AlertDialog,
@@ -36,12 +36,13 @@ import {
 
 export function ManageAdhocSection() {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRemoveAlert, setShowRemoveAlert] = useState(false);
   const [selectedMember, setSelectedMember] = useState<typeof adHocMembers[0] | null>(null);
   const [committeeFilter, setCommitteeFilter] = useState<string>("all");
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+  const [previewMember, setPreviewMember] = useState<typeof adHocMembers[0] | null>(null);
 
   const uniqueDepartments = [...new Set(adHocMembers.map(m => m.adHocDepartment).filter(Boolean))];
 
@@ -49,8 +50,9 @@ export function ManageAdhocSection() {
     ? adHocMembers 
     : adHocMembers.filter(m => m.adHocDepartment === committeeFilter);
 
-  const handleViewProfile = (memberId: string) => {
-    navigate(`/profile/${memberId}`);
+  const handleMemberClick = (member: typeof adHocMembers[0]) => {
+    setPreviewMember(member);
+    setShowMemberPreview(true);
   };
 
   const handleEdit = (member: typeof adHocMembers[0]) => {
@@ -117,7 +119,7 @@ export function ManageAdhocSection() {
                 <div className="flex items-center gap-3">
                   <div 
                     className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
-                    onClick={() => handleViewProfile(member.id)}
+                    onClick={() => handleMemberClick(member)}
                   >
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={member.imageUrl} alt={member.name} />
@@ -182,6 +184,12 @@ export function ManageAdhocSection() {
           member={selectedMember}
         />
       )}
+
+      <MemberPreviewDialog
+        member={previewMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
+      />
 
       <AlertDialog open={showRemoveAlert} onOpenChange={setShowRemoveAlert}>
         <AlertDialogContent>

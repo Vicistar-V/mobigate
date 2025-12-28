@@ -153,14 +153,14 @@ export const MemberPreviewDialog = ({
 
           {/* Action Buttons */}
           <div className="px-5 pb-12 space-y-3">
-            {/* Primary Button - View Main Profile */}
+            {/* Primary Button - View Profile */}
             <Button
               className="w-full"
               size="lg"
               onClick={handleViewMainProfile}
             >
               <User className="h-4 w-4 mr-2" />
-              View Main Profile
+              View Profile
             </Button>
 
             {/* Secondary Actions Row */}
