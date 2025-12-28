@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { executiveMembers } from "@/data/communityExecutivesData";
 import { AddMemberDialog } from "./AddMemberDialog";
 import { EditMemberDialog } from "./EditMemberDialog";
+import { MemberPreviewDialog } from "../MemberPreviewDialog";
 import { Plus, MoreVertical, Pencil, Trash2, ArrowRightLeft, Users } from "lucide-react";
 import {
   AlertDialog,
@@ -29,16 +29,18 @@ import {
 
 export function ManageExecutivesSection() {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRemoveAlert, setShowRemoveAlert] = useState(false);
   const [selectedMember, setSelectedMember] = useState<typeof executiveMembers[0] | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+  const [previewMember, setPreviewMember] = useState<typeof executiveMembers[0] | null>(null);
   
   const executives = executiveMembers.filter(m => m.level === "topmost" || m.level === "deputy" || m.level === "officer");
 
-  const handleViewProfile = (memberId: string) => {
-    navigate(`/profile/${memberId}`);
+  const handleMemberClick = (member: typeof executiveMembers[0]) => {
+    setPreviewMember(member);
+    setShowMemberPreview(true);
   };
 
   const handleEdit = (member: typeof executiveMembers[0]) => {
@@ -91,7 +93,7 @@ export function ManageExecutivesSection() {
                 <div className="flex items-center gap-3">
                   <div 
                     className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
-                    onClick={() => handleViewProfile(member.id)}
+                    onClick={() => handleMemberClick(member)}
                   >
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={member.imageUrl} alt={member.name} />
@@ -159,6 +161,12 @@ export function ManageExecutivesSection() {
           member={selectedMember}
         />
       )}
+
+      <MemberPreviewDialog
+        member={previewMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
+      />
 
       <AlertDialog open={showRemoveAlert} onOpenChange={setShowRemoveAlert}>
         <AlertDialogContent>
