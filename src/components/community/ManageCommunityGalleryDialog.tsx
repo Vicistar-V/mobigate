@@ -409,7 +409,7 @@ export function ManageCommunityGalleryDialog({
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
         <div className="px-4 pt-2">
           <TabsList className="w-full grid grid-cols-4 h-auto">
             <TabsTrigger value="albums" className="text-xs py-2 flex-col gap-1">
@@ -431,7 +431,7 @@ export function ManageCommunityGalleryDialog({
           </TabsList>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0 touch-auto">
           <div className="p-4">
             {/* Albums Tab */}
             <TabsContent value="albums" className="mt-0 space-y-4">
@@ -1189,7 +1189,7 @@ export function ManageCommunityGalleryDialog({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[95vh] flex flex-col">
+        <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
           <Content />
         </DrawerContent>
       </Drawer>
