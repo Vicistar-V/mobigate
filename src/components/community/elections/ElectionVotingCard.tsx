@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, MessageSquare, ChevronDown } from "lucide-react";
-import { ElectionOffice } from "@/data/electionData";
+import { Check, MessageSquare, ChevronDown, FileText } from "lucide-react";
+import { ElectionOffice, ElectionCandidate } from "@/data/electionData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
+import { ManifestoViewerDialog } from "./ManifestoViewerDialog";
 
 interface ElectionVotingCardProps {
   office: ElectionOffice;
@@ -22,6 +23,8 @@ export const ElectionVotingCard = ({ office, onVote }: ElectionVotingCardProps) 
   const [comments, setComments] = useState<Record<string, string>>({});
   const [customComment, setCustomComment] = useState("");
   const [showCustomComment, setShowCustomComment] = useState<string | null>(null);
+  const [manifestoCandidate, setManifestoCandidate] = useState<ElectionCandidate | null>(null);
+  const [showManifesto, setShowManifesto] = useState(false);
 
   const predefinedComments = [
     "Excellent choice!",
@@ -146,9 +149,30 @@ export const ElectionVotingCard = ({ office, onVote }: ElectionVotingCardProps) 
                 </div>
               </div>
             )}
+
+            {/* View Campaign Manifesto Button */}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="w-full mt-3 text-primary hover:text-primary hover:bg-primary/10"
+              onClick={() => {
+                setManifestoCandidate(candidate);
+                setShowManifesto(true);
+              }}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              View Campaign Manifesto
+            </Button>
           </div>
         ))}
       </div>
+      {/* Manifesto Viewer Dialog */}
+      <ManifestoViewerDialog
+        open={showManifesto}
+        onOpenChange={setShowManifesto}
+        candidate={manifestoCandidate}
+        officeName={office.name}
+      />
     </Card>
   );
 };
