@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MoreVertical, Settings } from "lucide-react";
+import { MoreVertical, Settings, Play } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import { GuestLoginDialog } from "./GuestLoginDialog";
@@ -33,6 +33,7 @@ import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
+import { MobiQuizGameDialog } from "./MobiQuizGameDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -77,6 +78,7 @@ export function CommunityMainMenu({
   const [showManageResources, setShowManageResources] = useState(false);
   const [showManageMembershipRequests, setShowManageMembershipRequests] = useState(false);
   const [showManageGallery, setShowManageGallery] = useState(false);
+  const [showQuizGame, setShowQuizGame] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -507,6 +509,24 @@ export function CommunityMainMenu({
                     Manage Leadership (Admin)
                   </Button>
                 )}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Quiz Game - Positioned above FundRaiser */}
+            <AccordionItem value="quiz-game" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
+              <AccordionTrigger className="text-base">Quiz Game</AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:hover:bg-green-900/40"
+                  onClick={() => {
+                    setShowQuizGame(true);
+                    setOpen(false);
+                  }}
+                >
+                  <Play className="h-4 w-4 mr-2 text-green-600" />
+                  <span className="text-green-700 dark:text-green-400 font-medium">Play Now to Win Instant Money</span>
+                </Button>
               </AccordionContent>
             </AccordionItem>
 
@@ -997,6 +1017,12 @@ export function CommunityMainMenu({
         open={showManageGallery} 
         onOpenChange={setShowManageGallery}
         isOwner={isOwner}
+      />
+
+      {/* Quiz Game Dialog */}
+      <MobiQuizGameDialog 
+        open={showQuizGame} 
+        onOpenChange={setShowQuizGame}
       />
     </>
   );
