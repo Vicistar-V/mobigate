@@ -148,6 +148,10 @@ const CommunityAdminDashboard = () => {
             communityName="Ndigbo Unity Association"
             communityLogo={communityPerson1}
             stats={mockAdminStats}
+            onMembersClick={() => setShowMembershipRequests(true)}
+            onPendingClick={() => setShowMembershipRequests(true)}
+            onElectionsClick={() => navigate(`/community/${communityId}/admin/elections`)}
+            onBalanceClick={() => setShowFinancialOverview(true)}
           />
 
           {/* Quick Actions */}

@@ -11,10 +11,14 @@ interface StatCardProps {
   trend?: number;
   urgent?: boolean;
   prefix?: string;
+  onClick?: () => void;
 }
 
-const StatCard = ({ icon: Icon, value, label, trend, urgent, prefix }: StatCardProps) => (
-  <Card className={`${urgent ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20' : ''} overflow-hidden`}>
+const StatCard = ({ icon: Icon, value, label, trend, urgent, prefix, onClick }: StatCardProps) => (
+  <Card 
+    className={`${urgent ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20' : ''} overflow-hidden ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''}`}
+    onClick={onClick}
+  >
     <CardContent className="p-3">
       <div className="flex items-start justify-between gap-1">
         <div className={`p-1.5 rounded-lg ${urgent ? 'bg-amber-500/20' : 'bg-primary/10'} shrink-0`}>
@@ -46,9 +50,21 @@ interface AdminDashboardHeaderProps {
   communityName: string;
   communityLogo?: string;
   stats: AdminStats;
+  onMembersClick?: () => void;
+  onPendingClick?: () => void;
+  onElectionsClick?: () => void;
+  onBalanceClick?: () => void;
 }
 
-export function AdminDashboardHeader({ communityName, communityLogo, stats }: AdminDashboardHeaderProps) {
+export function AdminDashboardHeader({ 
+  communityName, 
+  communityLogo, 
+  stats,
+  onMembersClick,
+  onPendingClick,
+  onElectionsClick,
+  onBalanceClick,
+}: AdminDashboardHeaderProps) {
   return (
     <div className="space-y-3 w-full max-w-full overflow-hidden">
       {/* Community Info - Compact header row */}
@@ -76,23 +92,27 @@ export function AdminDashboardHeader({ communityName, communityLogo, stats }: Ad
           value={stats.totalMembers}
           label="Members"
           trend={stats.memberTrend}
+          onClick={onMembersClick}
         />
         <StatCard
           icon={Clock}
           value={stats.pendingRequests}
           label="Pending"
           urgent={stats.pendingRequests > 0}
+          onClick={onPendingClick}
         />
         <StatCard
           icon={Vote}
           value={stats.activeElections}
           label="Elections"
+          onClick={onElectionsClick}
         />
         <StatCard
           icon={Wallet}
           value={stats.walletBalance}
           label="Balance"
           prefix="M"
+          onClick={onBalanceClick}
         />
       </div>
     </div>
