@@ -17,26 +17,26 @@ const StatCard = ({ icon: Icon, value, label, trend, urgent, prefix }: StatCardP
   <Card className={`${urgent ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20' : ''} overflow-hidden`}>
     <CardContent className="p-3">
       <div className="flex items-start justify-between gap-1">
-        <div className={`p-2 rounded-lg ${urgent ? 'bg-amber-500/20' : 'bg-primary/10'} shrink-0`}>
+        <div className={`p-1.5 rounded-lg ${urgent ? 'bg-amber-500/20' : 'bg-primary/10'} shrink-0`}>
           <Icon className={`h-4 w-4 ${urgent ? 'text-amber-600' : 'text-primary'}`} />
         </div>
         {trend !== undefined && (
-          <div className={`flex items-center gap-0.5 text-xs ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`flex items-center gap-0.5 text-xs font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {trend >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
             <span>{trend >= 0 ? '+' : ''}{trend}</span>
           </div>
         )}
         {urgent && !trend && (
-          <Badge variant="destructive" className="text-xs px-1.5 shrink-0">
+          <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 shrink-0">
             Urgent
           </Badge>
         )}
       </div>
-      <div className="mt-2">
-        <p className="text-xl font-bold truncate">
+      <div className="mt-1.5">
+        <p className="text-lg font-bold leading-tight truncate">
           {prefix}{typeof value === 'number' ? value.toLocaleString() : value}
         </p>
-        <p className="text-sm text-muted-foreground truncate">{label}</p>
+        <p className="text-xs text-muted-foreground truncate">{label}</p>
       </div>
     </CardContent>
   </Card>
@@ -50,27 +50,27 @@ interface AdminDashboardHeaderProps {
 
 export function AdminDashboardHeader({ communityName, communityLogo, stats }: AdminDashboardHeaderProps) {
   return (
-    <div className="space-y-4 w-full max-w-full overflow-hidden">
-      {/* Community Info */}
-      <div className="flex items-center gap-3 max-w-full">
+    <div className="space-y-3 w-full max-w-full overflow-hidden">
+      {/* Community Info - Compact header row */}
+      <div className="flex items-start gap-3 max-w-full">
         {communityLogo && (
           <img
             src={communityLogo}
             alt={communityName}
-            className="h-12 w-12 rounded-lg object-cover shrink-0"
+            className="h-11 w-11 rounded-full object-cover shrink-0 border-2 border-primary/20"
           />
         )}
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-bold truncate">{communityName}</h1>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
+          <h1 className="text-base font-bold leading-tight line-clamp-2">{communityName}</h1>
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
             <AdminRoleBadge adminRole="Community Admin" />
-            <span className="text-sm text-muted-foreground">Dashboard</span>
           </div>
+          <p className="text-xs text-muted-foreground mt-0.5">Dashboard</p>
         </div>
       </div>
 
-      {/* Stats Grid - 2x2 on mobile */}
-      <div className="grid grid-cols-2 gap-3 w-full">
+      {/* Stats Grid - 2x2 compact layout */}
+      <div className="grid grid-cols-2 gap-2 w-full">
         <StatCard
           icon={Users}
           value={stats.totalMembers}
