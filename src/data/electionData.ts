@@ -6,7 +6,7 @@ export interface ElectionSettings {
 }
 
 export const defaultElectionSettings: ElectionSettings = {
-  voteChangeTimeframeMinutes: 5,
+  voteChangeTimeframeMinutes: 30,
   allowVoteChange: true,
   showVoteChangeCountdown: true
 };
