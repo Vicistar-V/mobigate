@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Menu, Download, Calendar, Users, Mail, AlertTriangle } from "lucide-react";
+import { Menu, Download, Calendar, Users, Mail, AlertTriangle, Loader2, CheckCircle2 } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
@@ -37,10 +37,24 @@ export const ElectionAccreditationTab = () => {
   const [debtsChecked, setDebtsChecked] = useState(false);
   const [receiptsChecked, setReceiptsChecked] = useState(false);
   const [isAccredited, setIsAccredited] = useState(false);
+  const [isAccreditationLoading, setIsAccreditationLoading] = useState(false);
+  const [accreditationNumber, setAccreditationNumber] = useState<string | null>(null);
 
-  const handleGetAccreditation = () => {
-    toast.success("Accreditation successful! Check your email for your accreditation number.");
+  const handleGetAccreditation = async () => {
+    if (isAccredited) return;
+    
+    setIsAccreditationLoading(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Generate mock accreditation number
+    const generatedNumber = `ACC-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    setAccreditationNumber(generatedNumber);
     setIsAccredited(true);
+    setIsAccreditationLoading(false);
+    
+    toast.success("Accreditation successful! Check your email for your accreditation number.");
   };
 
   const handleDebtsClearing = () => {
@@ -231,17 +245,45 @@ export const ElectionAccreditationTab = () => {
       
       {/* Get Accreditation Now button */}
       <Button 
-        className="w-full bg-green-600 hover:bg-green-700 text-xl font-bold py-8"
+        className={`w-full text-xl font-bold py-8 transition-all duration-300 ${
+          isAccredited 
+            ? "bg-green-700 hover:bg-green-700 cursor-default" 
+            : isAccreditationLoading 
+            ? "bg-green-500 hover:bg-green-500 cursor-wait" 
+            : "bg-green-600 hover:bg-green-700"
+        }`}
         onClick={handleGetAccreditation}
+        disabled={isAccreditationLoading || isAccredited}
       >
-        Get Accreditation<br/>Now!
+        {isAccreditationLoading ? (
+          <div className="flex items-center justify-center gap-3">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Processing Accreditation...</span>
+          </div>
+        ) : isAccredited ? (
+          <div className="flex items-center justify-center gap-3">
+            <CheckCircle2 className="h-6 w-6" />
+            <span>Accreditation Complete!</span>
+          </div>
+        ) : (
+          <>Get Accreditation<br/>Now!</>
+        )}
       </Button>
       
       {/* Success message */}
       {isAccredited && (
-        <div className="p-4 bg-green-50 border-2 border-green-600 rounded-lg">
-          <p className="text-sm text-center leading-relaxed font-semibold text-green-800">
-            ✓ Accreditation Successful! Check your email for your accreditation number.
+        <div className="p-4 bg-green-50 border-2 border-green-600 rounded-lg animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <p className="text-sm font-bold text-green-800">Accreditation Successful!</p>
+          </div>
+          {accreditationNumber && (
+            <p className="text-center text-sm font-mono bg-green-100 py-2 px-3 rounded border border-green-300 text-green-900">
+              Your Number: <span className="font-bold">{accreditationNumber}</span>
+            </p>
+          )}
+          <p className="text-xs text-center text-green-700 mt-2">
+            Check your email for your accreditation number.
           </p>
         </div>
       )}
