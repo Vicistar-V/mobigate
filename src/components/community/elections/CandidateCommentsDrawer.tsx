@@ -65,8 +65,8 @@ export const CandidateCommentsDrawer = ({
 }: CandidateCommentsDrawerProps) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh] touch-auto overflow-hidden">
-        <div className="flex flex-col h-full max-h-[90vh] overflow-hidden">
+      <DrawerContent className="h-[90vh] max-h-[90vh] w-full max-w-[100vw] overflow-hidden overflow-x-hidden touch-auto overscroll-contain">
+        <div className="flex min-h-0 flex-col h-full w-full overflow-hidden">
           {/* Fixed Header */}
           <DrawerHeader className="flex-shrink-0 px-4 pb-2 border-b">
             <div className="flex items-center justify-between">
@@ -90,8 +90,8 @@ export const CandidateCommentsDrawer = ({
           </DrawerHeader>
 
           {/* Scrollable Content Area */}
-          <ScrollArea className="flex-1 min-h-0 touch-auto">
-            <div className="px-4 py-4">
+          <ScrollArea className="flex-1 min-h-0 touch-auto w-full">
+            <div className="px-4 py-4 w-full">
               {comments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="p-4 rounded-full bg-muted mb-4">
