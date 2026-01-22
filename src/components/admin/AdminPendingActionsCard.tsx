@@ -31,14 +31,14 @@ const PendingItem = ({ action, onClick }: PendingItemProps) => {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
+      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left max-w-full"
     >
       <div className={`p-2 rounded-lg shrink-0 ${action.urgent ? 'bg-amber-500/20' : 'bg-muted'}`}>
         <Icon className={`h-4 w-4 ${action.urgent ? 'text-amber-600' : 'text-muted-foreground'}`} />
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm truncate">{action.title}</span>
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-medium text-sm break-words line-clamp-1">{action.title}</span>
           <Badge 
             variant={action.urgent ? "destructive" : "secondary"} 
             className="text-xs px-1.5 shrink-0"
@@ -46,7 +46,7 @@ const PendingItem = ({ action, onClick }: PendingItemProps) => {
             {action.count}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground truncate">{action.description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-1">{action.description}</p>
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
     </button>
@@ -67,9 +67,9 @@ export function AdminPendingActionsCard({ actions, onActionClick }: AdminPending
   }
 
   return (
-    <Card className="border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10 overflow-hidden">
+    <Card className="border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10 overflow-hidden w-full max-w-full">
       <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="text-base flex items-center gap-2">
+        <CardTitle className="text-base flex items-center gap-2 flex-wrap">
           <div className="p-1.5 rounded-lg bg-amber-500/20 shrink-0">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
           </div>

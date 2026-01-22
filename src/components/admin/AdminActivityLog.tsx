@@ -88,11 +88,11 @@ interface AdminActivityLogProps {
 
 export function AdminActivityLog({ activities, maxHeight = "300px" }: AdminActivityLogProps) {
   return (
-    <Card>
+    <Card className="w-full max-w-full overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          Recent Admin Activity
+          <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="truncate">Recent Admin Activity</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">

@@ -101,10 +101,10 @@ interface StatBadgeProps {
 }
 
 const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
-  <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50 min-w-0">
-    <Icon className="h-4 w-4 text-muted-foreground mb-1" />
-    <span className="text-lg font-bold">{value}</span>
-    <span className="text-sm text-muted-foreground truncate">{label}</span>
+  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
+    <Icon className="h-3.5 w-3.5 text-muted-foreground mb-0.5" />
+    <span className="text-base font-bold">{value}</span>
+    <span className="text-xs text-muted-foreground truncate w-full text-center">{label}</span>
   </div>
 );
 
@@ -148,9 +148,9 @@ export function AdminContentSection({
     : recentContent.filter(c => c.type === filter);
 
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full max-w-full">
       <AccordionItem value="content" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline">
+        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-lg bg-purple-500/10 shrink-0">
               <FileText className="h-5 w-5 text-purple-600" />
@@ -165,9 +165,9 @@ export function AdminContentSection({
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full overflow-hidden">
+          <div className="space-y-4 w-full max-w-full overflow-hidden">
             {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="grid grid-cols-4 gap-1.5 w-full">
               <StatBadge value={stats.totalNews} label="News" icon={Newspaper} />
               <StatBadge value={stats.totalEvents} label="Events" icon={Calendar} />
               <StatBadge value={stats.totalArticles} label="Articles" icon={BookOpen} />
