@@ -106,12 +106,15 @@ export interface Campaign {
 // Winner
 export interface ElectionWinner {
   id: string;
+  memberId: string;
   candidateName: string;
   office: string;
   votes: number;
   percentage: number;
-  image?: string;
+  image: string;
   announcedAt: Date;
+  electionName: string;
+  electionType: 'general' | 'emergency' | 'by-election';
 }
 
 // Accredited Voter
@@ -570,47 +573,156 @@ export const mockCampaigns: Campaign[] = [
   }
 ];
 
-// Mock Election Winners
+// Mock Election Winners - Comprehensive list with photos
 export const mockElectionWinners: ElectionWinner[] = [
+  // 2025 General Election Winners
   {
     id: "winner-1",
+    memberId: "member-1",
     candidateName: "Paulson Chinedu Okonkwo",
     office: "President General",
     votes: 527,
     percentage: 50.1,
-    announcedAt: new Date("2025-03-15T18:00:00")
+    image: "/src/assets/profile-james-wilson.jpg",
+    announcedAt: new Date("2025-03-15T18:00:00"),
+    electionName: "2025 General Election",
+    electionType: "general"
   },
   {
     id: "winner-2",
+    memberId: "member-2",
     candidateName: "Grace Adaeze Okafor",
     office: "Vice President",
     votes: 412,
     percentage: 37.8,
-    announcedAt: new Date("2025-03-15T18:15:00")
+    image: "/src/assets/profile-sarah-johnson.jpg",
+    announcedAt: new Date("2025-03-15T18:15:00"),
+    electionName: "2025 General Election",
+    electionType: "general"
   },
   {
     id: "winner-3",
+    memberId: "member-3",
     candidateName: "Daniel Obiora Chibueze",
     office: "Secretary",
     votes: 523,
     percentage: 52.2,
-    announcedAt: new Date("2025-03-15T18:30:00")
+    image: "/src/assets/profile-michael-chen.jpg",
+    announcedAt: new Date("2025-03-15T18:30:00"),
+    electionName: "2025 General Election",
+    electionType: "general"
   },
   {
     id: "winner-4",
+    memberId: "member-4",
     candidateName: "Benjamin Uchenna Okoro",
     office: "Treasurer",
     votes: 567,
     percentage: 44.8,
-    announcedAt: new Date("2025-03-15T18:45:00")
+    image: "/src/assets/profile-robert-brown.jpg",
+    announcedAt: new Date("2025-03-15T18:45:00"),
+    electionName: "2025 General Election",
+    electionType: "general"
   },
   {
     id: "winner-5",
+    memberId: "member-5",
     candidateName: "Anthony Chijioke Oguike",
     office: "Financial Secretary",
     votes: 489,
     percentage: 52.4,
-    announcedAt: new Date("2025-03-15T19:00:00")
+    image: "/src/assets/profile-david-martinez.jpg",
+    announcedAt: new Date("2025-03-15T19:00:00"),
+    electionName: "2025 General Election",
+    electionType: "general"
+  },
+  // 2024 General Election Winners
+  {
+    id: "winner-6",
+    memberId: "member-6",
+    candidateName: "John Doe",
+    office: "President General",
+    votes: 612,
+    percentage: 52.9,
+    image: "/src/assets/profile-photo.jpg",
+    announcedAt: new Date("2024-03-15T18:00:00"),
+    electionName: "2024 General Election",
+    electionType: "general"
+  },
+  {
+    id: "winner-7",
+    memberId: "member-7",
+    candidateName: "Jennifer Taylor",
+    office: "Vice President",
+    votes: 478,
+    percentage: 41.3,
+    image: "/src/assets/profile-jennifer-taylor.jpg",
+    announcedAt: new Date("2024-03-15T18:15:00"),
+    electionName: "2024 General Election",
+    electionType: "general"
+  },
+  {
+    id: "winner-8",
+    memberId: "member-8",
+    candidateName: "Emily Davis",
+    office: "Secretary",
+    votes: 534,
+    percentage: 46.2,
+    image: "/src/assets/profile-emily-davis.jpg",
+    announcedAt: new Date("2024-03-15T18:30:00"),
+    electionName: "2024 General Election",
+    electionType: "general"
+  },
+  // 2024 Emergency Election Winner
+  {
+    id: "winner-9",
+    memberId: "member-9",
+    candidateName: "Jane Smith",
+    office: "Secretary",
+    votes: 445,
+    percentage: 49.9,
+    image: "/src/assets/profile-lisa-anderson.jpg",
+    announcedAt: new Date("2024-09-22T17:00:00"),
+    electionName: "2024 Emergency Secretary Election",
+    electionType: "emergency"
+  },
+  // 2024 By-Election Winner
+  {
+    id: "winner-10",
+    memberId: "member-10",
+    candidateName: "Robert Brown",
+    office: "Treasurer",
+    votes: 372,
+    percentage: 49.9,
+    image: "/src/assets/profile-robert-brown.jpg",
+    announcedAt: new Date("2024-06-10T16:30:00"),
+    electionName: "2024 By-Election Treasurer",
+    electionType: "by-election"
+  },
+  // 2023 General Election Winners
+  {
+    id: "winner-11",
+    memberId: "member-11",
+    candidateName: "David Martinez",
+    office: "President General",
+    votes: 589,
+    percentage: 57.0,
+    image: "/src/assets/profile-david-martinez.jpg",
+    announcedAt: new Date("2023-03-15T18:00:00"),
+    electionName: "2023 General Election",
+    electionType: "general"
+  },
+  {
+    id: "winner-12",
+    memberId: "member-12",
+    candidateName: "Lisa Anderson",
+    office: "Vice President",
+    votes: 461,
+    percentage: 50.1,
+    image: "/src/assets/profile-lisa-anderson.jpg",
+    announcedAt: new Date("2023-07-20T17:30:00"),
+    electionName: "2023 Emergency VP Election",
+    electionType: "emergency"
   }
 ];
 
