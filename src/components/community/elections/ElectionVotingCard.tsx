@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw } from "lucide-react";
+import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle } from "lucide-react";
 import { ElectionOffice, ElectionCandidate, defaultElectionSettings } from "@/data/electionData";
 import {
   DropdownMenu,
@@ -14,11 +14,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { ManifestoViewerDialog } from "./ManifestoViewerDialog";
 import { VoteConfirmationDialog } from "./VoteConfirmationDialog";
 import { ChangeVoteDialog } from "./ChangeVoteDialog";
+import { AdminRemarkDrawer } from "./AdminRemarkDrawer";
+import { CandidateCommentsDrawer } from "./CandidateCommentsDrawer";
 
 interface ElectionVotingCardProps {
   office: ElectionOffice;
   onVote?: (candidateId: string, comment?: string) => void;
   settings?: typeof defaultElectionSettings;
+}
+
+interface CandidateComment {
+  id: string;
+  candidateName: string;
+  candidateColor: string;
+  comment: string;
+  timestamp: Date;
 }
 
 export const ElectionVotingCard = ({ 
@@ -36,6 +46,12 @@ export const ElectionVotingCard = ({
   const [pendingVoteCandidate, setPendingVoteCandidate] = useState<ElectionCandidate | null>(null);
   const [showChangeDialog, setShowChangeDialog] = useState(false);
   const [pendingChangeCandidate, setPendingChangeCandidate] = useState<ElectionCandidate | null>(null);
+  
+  // Admin remark drawer state
+  const [showRemarkDrawer, setShowRemarkDrawer] = useState(false);
+  
+  // Comments drawer state
+  const [showCommentsDrawer, setShowCommentsDrawer] = useState(false);
   
   // Comment state
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -144,9 +160,39 @@ export const ElectionVotingCard = ({
     return colorMap[color as keyof typeof colorMap] || (type === 'bg' ? 'bg-gray-500' : 'border-gray-500');
   };
 
+  const getButtonColorClasses = (color: string, isVoted: boolean) => {
+    if (isVoted) {
+      const colorMap = {
+        green: 'bg-green-600 hover:bg-green-700 text-white',
+        purple: 'bg-purple-600 hover:bg-purple-700 text-white',
+        magenta: 'bg-pink-600 hover:bg-pink-700 text-white',
+        orange: 'bg-orange-600 hover:bg-orange-700 text-white',
+        blue: 'bg-blue-600 hover:bg-blue-700 text-white',
+      };
+      return colorMap[color as keyof typeof colorMap] || 'bg-primary text-white';
+    }
+    return 'bg-primary/10 hover:bg-primary/20 text-primary border-primary/30';
+  };
+
   const getVotedCandidate = () => {
     return office.candidates.find(c => c.id === selectedCandidate) || null;
   };
+
+  // Get all comments for the drawer
+  const getAllComments = (): CandidateComment[] => {
+    return Object.entries(comments).map(([candidateId, comment], index) => {
+      const candidate = office.candidates.find(c => c.id === candidateId);
+      return {
+        id: `comment-${candidateId}`,
+        candidateName: candidate?.name || "Unknown",
+        candidateColor: candidate?.color || "gray",
+        comment,
+        timestamp: new Date(Date.now() - (index * 300000)) // Stagger timestamps
+      };
+    });
+  };
+
+  const totalComments = Object.keys(comments).length;
 
   return (
     <Card className="p-4 mb-4">
@@ -158,8 +204,28 @@ export const ElectionVotingCard = ({
             Code: {office.shortCode} | Voters: {office.totalAccreditedVoters}
           </p>
         </div>
-        <Badge variant="secondary">Remark</Badge>
+        <Badge 
+          variant="secondary" 
+          className="cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+          onClick={() => setShowRemarkDrawer(true)}
+        >
+          Remark
+        </Badge>
       </div>
+
+      {/* Comment Stats Bar - Clickable */}
+      <button 
+        className="w-full flex items-center justify-between p-3 bg-muted/50 rounded-lg mb-4 hover:bg-muted transition-colors"
+        onClick={() => setShowCommentsDrawer(true)}
+      >
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">
+            {totalComments} voter comment{totalComments !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      </button>
 
       {/* Candidates List */}
       <div className="space-y-4">
@@ -178,27 +244,34 @@ export const ElectionVotingCard = ({
               }`}
             >
               {/* Row 1: Full Name - Full Width */}
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-2">
                 <span className={`w-4 h-4 rounded-full flex-shrink-0 ${getCandidateColorClass(candidate.color)}`} />
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="text-base font-semibold text-foreground">+</span>
-                  <span className="text-base font-semibold text-foreground break-words">
+                  <span className="text-base font-semibold text-foreground break-words leading-tight">
                     {candidate.name}
                   </span>
                 </div>
               </div>
 
-              {/* Row 2: Action Buttons */}
+              {/* Row 2: View Campaign Manifesto - Directly below name */}
+              <button
+                className="w-full flex items-center justify-center gap-2 py-2 mb-3 text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors text-sm font-medium"
+                onClick={() => {
+                  setManifestoCandidate(candidate);
+                  setShowManifesto(true);
+                }}
+              >
+                <FileText className="w-4 h-4" />
+                View Campaign Manifesto
+              </button>
+
+              {/* Row 3: Action Buttons - Colored and prominent */}
               <div className="flex gap-2 mb-3">
                 <Button
                   size="default"
-                  variant={isVoted ? "default" : "outline"}
-                  className={`flex-1 h-11 ${
-                    isVoted
-                      ? `${getCandidateColorClass(candidate.color)} text-white hover:opacity-90`
-                      : isDisabled
-                        ? "opacity-50"
-                        : ""
+                  className={`flex-1 h-12 font-semibold border ${getButtonColorClasses(candidate.color, isVoted)} ${
+                    isDisabled ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={() => handleVoteClick(candidate)}
                   disabled={isDisabled}
@@ -208,8 +281,6 @@ export const ElectionVotingCard = ({
                       <Check className="w-5 h-5 mr-2" />
                       Voted
                     </>
-                  ) : isOtherCandidate && canChangeVote ? (
-                    "Vote"
                   ) : (
                     "Vote"
                   )}
@@ -217,7 +288,10 @@ export const ElectionVotingCard = ({
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="default" variant="outline" className="flex-1 h-11">
+                    <Button 
+                      size="default" 
+                      className="flex-1 h-12 font-semibold bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                    >
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Comment
                       <ChevronDown className="w-4 h-4 ml-2" />
@@ -239,24 +313,10 @@ export const ElectionVotingCard = ({
                 </DropdownMenu>
               </div>
 
-              {/* Row 3: View Campaign Manifesto Button */}
-              <Button
-                size="default"
-                variant="ghost"
-                className="w-full h-10 text-primary hover:text-primary hover:bg-primary/10 mb-2"
-                onClick={() => {
-                  setManifestoCandidate(candidate);
-                  setShowManifesto(true);
-                }}
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                View Campaign Manifesto
-              </Button>
-
               {/* Row 4: Comment Display */}
               {comments[candidate.id] && (
                 <div className="text-sm text-muted-foreground p-3 bg-muted rounded-lg mb-2">
-                  <span className="font-medium">Comment:</span> {comments[candidate.id]}
+                  <span className="font-medium">Your comment:</span> {comments[candidate.id]}
                 </div>
               )}
 
@@ -306,6 +366,22 @@ export const ElectionVotingCard = ({
           );
         })}
       </div>
+
+      {/* Admin Remark Drawer */}
+      <AdminRemarkDrawer
+        open={showRemarkDrawer}
+        onOpenChange={setShowRemarkDrawer}
+        officeName={office.name}
+        remark={office.adminRemark || "No admin remarks available for this position."}
+      />
+
+      {/* Candidate Comments Drawer */}
+      <CandidateCommentsDrawer
+        open={showCommentsDrawer}
+        onOpenChange={setShowCommentsDrawer}
+        officeName={office.name}
+        comments={getAllComments()}
+      />
 
       {/* Vote Confirmation Dialog */}
       <VoteConfirmationDialog

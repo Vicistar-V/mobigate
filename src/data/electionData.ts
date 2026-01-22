@@ -18,6 +18,7 @@ export interface ElectionOffice {
   shortCode: string; // e.g., "PG" for President General
   totalAccreditedVoters: number;
   candidates: ElectionCandidate[];
+  adminRemark?: string; // Admin message/insight about this election position
 }
 
 // Candidate running for an office
@@ -186,7 +187,8 @@ export const mockElectionOffice: ElectionOffice = {
   name: "President General",
   shortCode: "PG",
   totalAccreditedVoters: 1200,
-  candidates: mockCandidates
+  candidates: mockCandidates,
+  adminRemark: "Dear Members,\n\nThis is a crucial election for our community. The President General is the highest office and requires your careful consideration.\n\nPlease take time to review each candidate's manifesto before casting your vote. Your vote is your voice - exercise it wisely.\n\nRemember, if you don't vote, you forfeit your right to criticize any decisions made by the elected leadership. Let's all participate actively in shaping our community's future.\n\n— Community Administration"
 };
 
 // Vice President Office with FULL NAMES
@@ -232,7 +234,8 @@ export const mockVicePresidentOffice: ElectionOffice = {
       manifesto: "I believe in servant leadership. As your Vice President, I will work diligently to support our community goals, foster unity, and ensure that our administration remains accountable to every member.",
       keyPriorities: ["Transparency in governance", "Community unity initiatives", "Leadership development", "Accountability measures"]
     }
-  ]
+  ],
+  adminRemark: "The Vice President works closely with the President General and represents the community in their absence.\n\nThis role requires someone with excellent interpersonal skills and a collaborative spirit. Consider which candidate best demonstrates these qualities.\n\n— Community Administration"
 };
 
 // Secretary Office with FULL NAMES
@@ -266,7 +269,8 @@ export const mockSecretaryOffice: ElectionOffice = {
       manifesto: "I am passionate about documentation and communication. As Secretary, I will ensure that every meeting is well-documented, every decision is properly recorded, and every member has access to important community information.",
       keyPriorities: ["Comprehensive documentation", "Member communication", "Archive digitization", "Transparent reporting"]
     }
-  ]
+  ],
+  adminRemark: "The Secretary is responsible for all community records, meeting minutes, and official correspondence.\n\nThis position requires someone with excellent organizational skills and attention to detail. Vote for the candidate you trust to keep our records accurate and up-to-date.\n\n— Community Administration"
 };
 
 // Treasurer Office with FULL NAMES
@@ -312,7 +316,8 @@ export const mockTreasurerOffice: ElectionOffice = {
       manifesto: "Fiscal responsibility is my watchword. As Treasurer, I will ensure meticulous record-keeping, regular financial audits, and complete transparency in all financial matters. Our community deserves nothing less.",
       keyPriorities: ["Meticulous record keeping", "Regular financial audits", "Cost efficiency", "Quarterly financial reports"]
     }
-  ]
+  ],
+  adminRemark: "The Treasurer manages all community funds and financial transactions.\n\nThis is a position of great trust and responsibility. Choose wisely - the person you elect will be responsible for managing our collective resources and ensuring financial accountability.\n\n— Community Administration"
 };
 
 // Financial Secretary Office with FULL NAMES
@@ -346,7 +351,8 @@ export const mockFinSecOffice: ElectionOffice = {
       manifesto: "I am passionate about financial organization and member service. As Financial Secretary, I will implement efficient systems for tracking contributions, issuing receipts, and maintaining financial records that serve our community's needs.",
       keyPriorities: ["Efficient record systems", "Digital payment solutions", "Receipt management", "Member financial support"]
     }
-  ]
+  ],
+  adminRemark: "The Financial Secretary works alongside the Treasurer to maintain financial records and track member contributions.\n\nThis role requires meticulous attention to detail and excellent organizational skills. Your vote will determine who handles the day-to-day financial documentation of our community.\n\n— Community Administration"
 };
 
 // Mock Vote Records
