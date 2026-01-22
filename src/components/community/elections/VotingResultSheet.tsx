@@ -77,13 +77,13 @@ export const VotingResultSheet = ({
           <div className="text-xs text-muted-foreground flex items-center gap-1 px-3 pb-2">
             <span>Scroll for more →</span>
           </div>
-          <table className="min-w-[750px] border-collapse border-spacing-0">
+          <table className="min-w-[400px] border-collapse border-spacing-0">
             <thead>
               <tr>
-                <th className="bg-pink-200 p-3 text-left min-w-[160px] sticky left-0 z-20 border border-gray-300">
-                  <div className="text-sm leading-tight">
-                    Voting/Voters for<br />
-                    <span className="font-bold text-base">{office.name}</span> [{office.shortCode}] [{office.totalAccreditedVoters}]
+                <th className="bg-pink-200 p-2 text-left min-w-[100px] max-w-[120px] sticky left-0 z-20 border border-gray-300">
+                  <div className="text-xs leading-tight break-words">
+                    Voters for<br />
+                    <span className="font-bold text-xs">{office.shortCode}</span> [{office.totalAccreditedVoters}]
                   </div>
                 </th>
                 {office.candidates.map((candidate, index) => {
@@ -91,10 +91,10 @@ export const VotingResultSheet = ({
                   return (
                     <th
                       key={candidate.id}
-                      className={`${colors.header} p-3 text-center min-w-[180px] border border-gray-300`}
+                      className={`${colors.header} p-2 text-center min-w-[90px] border border-gray-300`}
                     >
-                      <div className="text-sm font-bold leading-tight">
-                        {candidate.name.split(' ').map((part, i) => (
+                      <div className="text-xs font-bold leading-tight">
+                        {candidate.name.split(' ').slice(0, 2).map((part, i) => (
                           <div key={i}>{part}</div>
                         ))}
                       </div>
@@ -107,15 +107,15 @@ export const VotingResultSheet = ({
             <tbody>
               {/* Performance Row */}
               <tr>
-                <td className="bg-pink-200 p-3 font-bold sticky left-0 z-20 border border-gray-300">
-                  <div className="text-sm leading-tight">
-                    Candidates'<br />Performance
+                <td className="bg-pink-200 p-2 font-bold sticky left-0 z-20 border border-gray-300 min-w-[100px] max-w-[120px]">
+                  <div className="text-xs leading-tight">
+                    Performance
                   </div>
                 </td>
                 {office.candidates.map((candidate, index) => {
                   const colors = getCandidateColors(index);
                   return (
-                    <td key={candidate.id} className="p-3 text-center border border-gray-300 bg-white">
+                    <td key={candidate.id} className="p-2 text-center border border-gray-300 bg-white">
                       <VoteBoxGroup
                         values={[candidate.votes, candidate.losses, candidate.vct]}
                         labels={['Votes', 'Loss', 'VCT']}
@@ -131,14 +131,14 @@ export const VotingResultSheet = ({
               {/* Voter Rows */}
               {filteredRecords.map((record, recordIndex) => (
                 <tr key={record.id}>
-                  <td className="bg-pink-200 p-3 sticky left-0 z-20 border border-gray-300">
-                    <div className="font-semibold text-sm">+ {record.voterName}</div>
-                    <div className="text-xs text-gray-600 mt-0.5">{record.voterRegistration}</div>
+                  <td className="bg-pink-200 p-2 sticky left-0 z-20 border border-gray-300 min-w-[100px] max-w-[120px]">
+                    <div className="font-semibold text-xs line-clamp-1">+ {record.voterName}</div>
+                    <div className="text-[10px] text-gray-600">{record.voterRegistration}</div>
                   </td>
                   {office.candidates.map((candidate) => {
                     const vote = record.votes.find((v) => v.candidateId === candidate.id);
                     return (
-                      <td key={candidate.id} className="p-3 text-center border border-gray-300 bg-white">
+                      <td key={candidate.id} className="p-2 text-center border border-gray-300 bg-white">
                         <VoteBoxGroup
                           values={[vote?.vote || 0, vote?.loss, vote?.vct || 0]}
                           labels={['Vote', 'Loss', 'VCT']}
