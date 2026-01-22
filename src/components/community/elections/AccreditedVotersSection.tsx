@@ -19,14 +19,14 @@ export const AccreditedVotersSection = () => {
         <div className="border-2 border-t-0 border-black bg-white">
           <Button
             variant="ghost"
-            className={`w-full justify-start py-3 px-4 rounded-none hover:bg-gray-100 ${viewType === 'current' ? 'bg-green-50 border-l-4 border-l-green-600 font-semibold text-green-800' : ''}`}
+            className={`w-full justify-start py-3 px-4 rounded-none hover:bg-gray-100 h-auto whitespace-normal text-left ${viewType === 'current' ? 'bg-green-50 border-l-4 border-l-green-600 font-semibold text-green-800' : ''}`}
             onClick={() => setViewType('current')}
           >
             Currently Accredited [Valid Voters]
           </Button>
           <Button
             variant="ghost"
-            className={`w-full justify-start py-3 px-4 rounded-none hover:bg-gray-100 ${viewType === 'previous' ? 'bg-green-50 border-l-4 border-l-green-600 font-semibold text-green-800' : ''}`}
+            className={`w-full justify-start py-3 px-4 rounded-none hover:bg-gray-100 h-auto whitespace-normal text-left ${viewType === 'previous' ? 'bg-green-50 border-l-4 border-l-green-600 font-semibold text-green-800' : ''}`}
             onClick={() => setViewType('previous')}
           >
             Previously Accredited [Invalid Voters]
