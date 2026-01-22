@@ -25,8 +25,8 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
   const [activeTab, setActiveTab] = useState("election");
 
   const content = (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col overflow-hidden min-h-0">
-      {/* Tab Navigation - Sticky on mobile */}
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
+      {/* Tab Navigation */}
       <div className="shrink-0 bg-background pb-2">
         <TabsList className="w-full h-auto p-1 bg-muted/60">
           <div className="grid grid-cols-4 w-full gap-1">
@@ -62,18 +62,18 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
         </TabsList>
       </div>
 
-      {/* Tab Content */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <TabsContent value="election" className="m-0 h-full overflow-y-auto">
+      {/* Tab Content - Scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto touch-auto">
+        <TabsContent value="election" className="m-0 mt-0">
           <ApplyElectionResultsSection />
         </TabsContent>
-        <TabsContent value="executives" className="m-0 h-full overflow-y-auto">
+        <TabsContent value="executives" className="m-0 mt-0">
           <ManageExecutivesSection />
         </TabsContent>
-        <TabsContent value="adhoc" className="m-0 h-full overflow-y-auto">
+        <TabsContent value="adhoc" className="m-0 mt-0">
           <ManageAdhocSection />
         </TabsContent>
-        <TabsContent value="history" className="m-0 h-full overflow-y-auto">
+        <TabsContent value="history" className="m-0 mt-0">
           <LeadershipChangeHistory />
         </TabsContent>
       </div>
@@ -83,11 +83,11 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh] flex flex-col touch-auto overflow-hidden">
+        <DrawerContent className="max-h-[92vh] h-[92vh] flex flex-col touch-auto overflow-hidden">
           <DrawerHeader className="shrink-0 pb-2">
             <DrawerTitle className="text-lg font-semibold">Manage Leadership</DrawerTitle>
           </DrawerHeader>
-          <div className="flex-1 min-h-0 overflow-hidden px-4 pb-6">
+          <div className="flex-1 min-h-0 overflow-hidden px-4 pb-8">
             {content}
           </div>
         </DrawerContent>
@@ -97,7 +97,7 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[85vh] h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader className="shrink-0">
           <DialogTitle>Manage Leadership</DialogTitle>
         </DialogHeader>
