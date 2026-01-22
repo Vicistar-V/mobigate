@@ -91,10 +91,18 @@ const CommunityProfile = () => {
   // Get active tab from URL or default to "status"
   const activeTab = searchParams.get("tab") || "status";
   
-  // Function to change tab via URL parameter
+  // Get active subtab from URL (for nested tabs like Finance)
+  const activeSubtab = searchParams.get("subtab") || "summary";
+  
+  // Function to change tab via URL parameter (clears subtab when changing main tab)
   const handleTabChange = useCallback((newTab: string) => {
     setSearchParams({ tab: newTab }, { replace: true });
   }, [setSearchParams]);
+  
+  // Function to change subtab while keeping main tab
+  const handleSubtabChange = useCallback((newSubtab: string) => {
+    setSearchParams({ tab: activeTab, subtab: newSubtab }, { replace: true });
+  }, [setSearchParams, activeTab]);
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -716,7 +724,7 @@ const CommunityProfile = () => {
           {/* Hidden Tabs Content - Not in TabsList but still accessible */}
           {activeTab === "finance" && (
             <div className="mt-6">
-              <Tabs defaultValue="summary" className="w-full">
+              <Tabs value={activeSubtab} onValueChange={handleSubtabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4">
                   <TabsTrigger value="summary" className="text-sm sm:text-base py-2.5">Summary</TabsTrigger>
                   <TabsTrigger value="clearances" className="text-sm sm:text-base py-2.5">Clearances</TabsTrigger>
