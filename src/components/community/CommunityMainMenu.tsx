@@ -515,17 +515,28 @@ export function CommunityMainMenu({
             {/* Quiz Game - Positioned above FundRaiser */}
             <AccordionItem value="quiz-game" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">Quiz Game</AccordionTrigger>
-              <AccordionContent className="space-y-1">
+              <AccordionContent className="space-y-2">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:hover:bg-green-900/40"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:hover:bg-blue-900/40"
                   onClick={() => {
                     setShowQuizGame(true);
                     setOpen(false);
                   }}
                 >
-                  <Play className="h-4 w-4 mr-2 text-green-600" />
-                  <span className="text-green-700 dark:text-green-400 font-medium">Play Now to Win Instant Money</span>
+                  <Play className="h-4 w-4 mr-2 text-blue-600" />
+                  <span className="text-blue-700 dark:text-blue-400 font-medium">Play Community Quiz</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40"
+                  onClick={() => {
+                    setShowQuizGame(true);
+                    setOpen(false);
+                  }}
+                >
+                  <Play className="h-4 w-4 mr-2 text-amber-600" />
+                  <span className="text-amber-700 dark:text-amber-400 font-medium">Play Mobigate Quiz</span>
                 </Button>
               </AccordionContent>
             </AccordionItem>
