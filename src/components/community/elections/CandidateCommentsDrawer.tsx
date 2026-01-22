@@ -65,12 +65,13 @@ export const CandidateCommentsDrawer = ({
 }: CandidateCommentsDrawerProps) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
-        <div className="mx-auto w-full max-w-lg">
-          <DrawerHeader className="text-left pb-2">
+      <DrawerContent className="max-h-[90vh] touch-auto overflow-hidden">
+        <div className="flex flex-col h-full max-h-[90vh] overflow-hidden">
+          {/* Fixed Header */}
+          <DrawerHeader className="flex-shrink-0 px-4 pb-2 border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-full bg-primary/10">
+                <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
                   <MessageSquare className="w-5 h-5 text-primary" />
                 </div>
                 <DrawerTitle className="text-lg">
@@ -78,64 +79,67 @@ export const CandidateCommentsDrawer = ({
                 </DrawerTitle>
               </div>
               <DrawerClose asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
                   <X className="h-4 w-4" />
                 </Button>
               </DrawerClose>
             </div>
-            <DrawerDescription className="mt-1">
-              {officeName} • {comments.length} comment{comments.length !== 1 ? 's' : ''}
+            <DrawerDescription className="mt-1 text-left">
+              {officeName} • {comments.length} Comment{comments.length !== 1 ? 's' : ''}
             </DrawerDescription>
           </DrawerHeader>
 
-          <ScrollArea className="h-[50vh] px-4 pb-6">
-            {comments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="p-4 rounded-full bg-muted mb-4">
-                  <MessageSquare className="w-8 h-8 text-muted-foreground" />
+          {/* Scrollable Content Area */}
+          <ScrollArea className="flex-1 min-h-0 touch-auto">
+            <div className="px-4 py-4">
+              {comments.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="p-4 rounded-full bg-muted mb-4">
+                    <MessageSquare className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground px-4">
+                    No comments yet. Be the first to share your thoughts!
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  No comments yet. Be the first to share your thoughts!
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {comments.map((comment, index) => (
-                  <div 
-                    key={comment.id} 
-                    className="bg-muted/50 rounded-xl p-4 border border-border"
-                  >
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-full bg-muted">
-                          <User className="w-3.5 h-3.5 text-muted-foreground" />
+              ) : (
+                <div className="space-y-3">
+                  {comments.map((comment, index) => (
+                    <div 
+                      key={comment.id} 
+                      className="bg-muted/50 rounded-xl p-4 border border-border"
+                    >
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-full bg-muted flex-shrink-0">
+                            <User className="w-3.5 h-3.5 text-muted-foreground" />
+                          </div>
+                          <span className="text-sm font-medium text-foreground">
+                            {getVoterIdentifier(index)}
+                          </span>
                         </div>
-                        <span className="text-sm font-medium text-foreground">
-                          {getVoterIdentifier(index)}
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                          {getTimeAgo(comment.timestamp)}
                         </span>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {getTimeAgo(comment.timestamp)}
-                      </span>
+                      
+                      {/* Candidate Badge */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getCandidateColorClass(comment.candidateColor)}`} />
+                        <span className="text-xs text-muted-foreground">
+                          on <span className="font-medium text-foreground">{comment.candidateName}</span>
+                        </span>
+                      </div>
+                      
+                      {/* Comment */}
+                      <p className="text-sm text-foreground leading-relaxed break-words">
+                        "{comment.comment}"
+                      </p>
                     </div>
-                    
-                    {/* Candidate Badge */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${getCandidateColorClass(comment.candidateColor)}`} />
-                      <span className="text-xs text-muted-foreground">
-                        on <span className="font-medium text-foreground">{comment.candidateName}</span>
-                      </span>
-                    </div>
-                    
-                    {/* Comment */}
-                    <p className="text-sm text-foreground leading-relaxed">
-                      "{comment.comment}"
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </ScrollArea>
         </div>
       </DrawerContent>
