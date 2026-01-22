@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,21 +83,23 @@ export function ManageAdhocSection() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
+    <div className="space-y-4 pb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <UserCog className="h-5 w-5 text-primary" />
-          <span className="font-medium">Ad-hoc Committees</span>
-          <Badge variant="secondary">{filteredMembers.length}</Badge>
+          <span className="font-semibold text-base">Ad-hoc Committees</span>
+          <Badge variant="secondary" className="text-sm">{filteredMembers.length}</Badge>
         </div>
-        <Button size="sm" onClick={() => setShowAddDialog(true)}>
+        <Button size="sm" onClick={() => setShowAddDialog(true)} className="h-9">
           <Plus className="h-4 w-4 mr-1" />
-          Add Member
+          Add
         </Button>
       </div>
 
+      {/* Filter Dropdown */}
       <Select value={committeeFilter} onValueChange={setCommitteeFilter}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full h-11 text-sm">
           <SelectValue placeholder="Filter by committee" />
         </SelectTrigger>
         <SelectContent>
@@ -111,65 +112,69 @@ export function ManageAdhocSection() {
         </SelectContent>
       </Select>
 
-      <ScrollArea className="h-[350px]">
-        <div className="space-y-2">
-          {filteredMembers.map((member) => (
-            <Card key={member.id} className="overflow-hidden">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors"
-                    onClick={() => handleMemberClick(member)}
-                  >
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={member.imageUrl} alt={member.name} />
-                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">{member.name}</h4>
-                      <p className="text-xs text-primary truncate">{member.position}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <Badge variant="outline" className="text-xs">
-                          {member.committee}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">
-                          {member.tenure}
-                        </Badge>
-                      </div>
-                    </div>
+      {/* Members List */}
+      <div className="space-y-3">
+        {filteredMembers.map((member) => (
+          <Card key={member.id} className="overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                {/* Avatar */}
+                <Avatar 
+                  className="h-14 w-14 cursor-pointer shrink-0" 
+                  onClick={() => handleMemberClick(member)}
+                >
+                  <AvatarImage src={member.imageUrl} alt={member.name} />
+                  <AvatarFallback className="text-lg">{member.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                
+                {/* Info */}
+                <div 
+                  className="flex-1 min-w-0 cursor-pointer"
+                  onClick={() => handleMemberClick(member)}
+                >
+                  <h4 className="font-semibold text-base leading-tight">{member.name}</h4>
+                  <p className="text-sm text-primary mt-0.5">{member.position}</p>
+                  
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-xs">
+                      {member.committee}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {member.tenure}
+                    </Badge>
                   </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(member)}>
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleTransfer(member)}>
-                        <ArrowRightLeft className="h-4 w-4 mr-2" />
-                        Transfer to Executive
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleRemove(member)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Remove
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </ScrollArea>
+
+                {/* Actions Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => handleEdit(member)} className="py-2.5">
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit Member
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleTransfer(member)} className="py-2.5">
+                      <ArrowRightLeft className="h-4 w-4 mr-2" />
+                      Transfer to Executive
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleRemove(member)}
+                      className="text-destructive focus:text-destructive py-2.5"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <AddMemberDialog 
         open={showAddDialog} 

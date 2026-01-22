@@ -25,37 +25,55 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
   const [activeTab, setActiveTab] = useState("election");
 
   const content = (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4 h-auto">
-        <TabsTrigger value="election" className="flex flex-col gap-1 py-2 text-xs">
-          <Vote className="h-4 w-4" />
-          <span className="hidden sm:inline">Election</span>
-        </TabsTrigger>
-        <TabsTrigger value="executives" className="flex flex-col gap-1 py-2 text-xs">
-          <Users className="h-4 w-4" />
-          <span className="hidden sm:inline">Executives</span>
-        </TabsTrigger>
-        <TabsTrigger value="adhoc" className="flex flex-col gap-1 py-2 text-xs">
-          <UserCog className="h-4 w-4" />
-          <span className="hidden sm:inline">Ad-hoc</span>
-        </TabsTrigger>
-        <TabsTrigger value="history" className="flex flex-col gap-1 py-2 text-xs">
-          <History className="h-4 w-4" />
-          <span className="hidden sm:inline">History</span>
-        </TabsTrigger>
-      </TabsList>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col overflow-hidden min-h-0">
+      {/* Tab Navigation - Sticky on mobile */}
+      <div className="shrink-0 bg-background pb-2">
+        <TabsList className="w-full h-auto p-1 bg-muted/60">
+          <div className="grid grid-cols-4 w-full gap-1">
+            <TabsTrigger 
+              value="election" 
+              className="flex flex-col items-center gap-1 py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <Vote className="h-5 w-5" />
+              <span className="text-xs font-medium">Election</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="executives" 
+              className="flex flex-col items-center gap-1 py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <Users className="h-5 w-5" />
+              <span className="text-xs font-medium">Executives</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="adhoc" 
+              className="flex flex-col items-center gap-1 py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <UserCog className="h-5 w-5" />
+              <span className="text-xs font-medium">Ad-hoc</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="history" 
+              className="flex flex-col items-center gap-1 py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <History className="h-5 w-5" />
+              <span className="text-xs font-medium">History</span>
+            </TabsTrigger>
+          </div>
+        </TabsList>
+      </div>
 
-      <div className="mt-4">
-        <TabsContent value="election" className="m-0">
+      {/* Tab Content */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <TabsContent value="election" className="m-0 h-full overflow-y-auto">
           <ApplyElectionResultsSection />
         </TabsContent>
-        <TabsContent value="executives" className="m-0">
+        <TabsContent value="executives" className="m-0 h-full overflow-y-auto">
           <ManageExecutivesSection />
         </TabsContent>
-        <TabsContent value="adhoc" className="m-0">
+        <TabsContent value="adhoc" className="m-0 h-full overflow-y-auto">
           <ManageAdhocSection />
         </TabsContent>
-        <TabsContent value="history" className="m-0">
+        <TabsContent value="history" className="m-0 h-full overflow-y-auto">
           <LeadershipChangeHistory />
         </TabsContent>
       </div>
@@ -65,13 +83,13 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
-          <DrawerHeader>
-            <DrawerTitle>Manage Leadership</DrawerTitle>
+        <DrawerContent className="max-h-[92vh] flex flex-col touch-auto overflow-hidden">
+          <DrawerHeader className="shrink-0 pb-2">
+            <DrawerTitle className="text-lg font-semibold">Manage Leadership</DrawerTitle>
           </DrawerHeader>
-          <ScrollArea className="flex-1 px-4 pb-6 overflow-y-auto min-h-0 touch-auto">
+          <div className="flex-1 min-h-0 overflow-hidden px-4 pb-6">
             {content}
-          </ScrollArea>
+          </div>
         </DrawerContent>
       </Drawer>
     );
@@ -79,11 +97,13 @@ export function ManageLeadershipDialog({ open, onOpenChange }: ManageLeadershipD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle>Manage Leadership</DialogTitle>
         </DialogHeader>
-        {content}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {content}
+        </div>
       </DialogContent>
     </Dialog>
   );
