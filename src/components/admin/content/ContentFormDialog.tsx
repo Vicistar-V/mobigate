@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Upload, Image, Video, Music, Images, Plus, Trash2 } from "lucide-react";
+import { X, Video, Music, Images, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ContentType, AdminContentItem } from "@/data/adminContentData";
+import { ImageUpload } from "./ImageUpload";
+import { Image as ImageIcon } from "lucide-react";
 
 interface ContentFormDialogProps {
   open: boolean;
@@ -264,7 +266,7 @@ export function ContentFormDialog({
               <Label>Media Type</Label>
               <div className="grid grid-cols-4 gap-2">
                 {mediaTypes.map(type => {
-                  const icons = { video: Video, photo: Image, audio: Music, gallery: Images };
+                  const icons = { video: Video, photo: ImageIcon, audio: Music, gallery: Images };
                   const Icon = icons[type];
                   return (
                     <Button
@@ -337,17 +339,38 @@ export function ContentFormDialog({
               </div>
             )}
 
-            {/* Thumbnail Upload */}
+            {/* Thumbnail / Media Upload */}
             <div className="space-y-2">
               <Label>{contentType === "vibe" ? "Media Upload" : "Thumbnail"}</Label>
-              <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">Click to upload or drag and drop</p>
-                <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 10MB</p>
-                <Button variant="outline" size="sm" className="mt-3">
-                  Choose File
-                </Button>
-              </div>
+              <ImageUpload
+                value={formData.thumbnail || ""}
+                onChange={(value) => setFormData(prev => ({ 
+                  ...prev, 
+                  thumbnail: Array.isArray(value) ? value[0] : value 
+                }))}
+                mediaType={contentType === "vibe" 
+                  ? (formData.mediaType === "video" ? "video" 
+                    : formData.mediaType === "audio" ? "audio" 
+                    : formData.mediaType === "gallery" ? "any" 
+                    : "image")
+                  : "image"
+                }
+                multiple={contentType === "vibe" && formData.mediaType === "gallery"}
+                maxFiles={contentType === "vibe" && formData.mediaType === "gallery" ? 10 : 1}
+                maxSize={contentType === "vibe" && formData.mediaType === "video" ? 50 : 10}
+                aspectRatio={contentType === "vibe" ? "video" : "banner"}
+                label={contentType === "vibe" 
+                  ? `Upload ${formData.mediaType === "gallery" ? "Photos" : formData.mediaType || "Media"}`
+                  : "Upload Thumbnail"
+                }
+                helperText={
+                  contentType === "vibe" && formData.mediaType === "video"
+                    ? "MP4, WebM up to 50MB"
+                    : contentType === "vibe" && formData.mediaType === "audio"
+                    ? "MP3, WAV up to 10MB"
+                    : "PNG, JPG, GIF up to 10MB"
+                }
+              />
             </div>
 
             {/* Type-specific fields */}
