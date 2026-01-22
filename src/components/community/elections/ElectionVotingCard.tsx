@@ -291,7 +291,7 @@ export const ElectionVotingCard = ({
               <div className="flex items-center gap-2 ml-7 mb-3">
                 <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                  {candidate.votes.toLocaleString()} Votes
+                  {candidate.votes.toLocaleString()} {candidate.votes === 1 ? 'Vote' : 'Votes'}
                 </span>
               </div>
 
