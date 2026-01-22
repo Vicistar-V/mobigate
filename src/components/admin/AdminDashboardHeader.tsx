@@ -50,9 +50,9 @@ interface AdminDashboardHeaderProps {
 
 export function AdminDashboardHeader({ communityName, communityLogo, stats }: AdminDashboardHeaderProps) {
   return (
-    <div className="space-y-4 w-full overflow-hidden">
+    <div className="space-y-4 w-full max-w-full overflow-hidden">
       {/* Community Info */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 max-w-full">
         {communityLogo && (
           <img
             src={communityLogo}
@@ -62,7 +62,7 @@ export function AdminDashboardHeader({ communityName, communityLogo, stats }: Ad
         )}
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-bold truncate">{communityName}</h1>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
             <AdminRoleBadge adminRole="Community Admin" />
             <span className="text-sm text-muted-foreground">Dashboard</span>
           </div>
@@ -74,7 +74,7 @@ export function AdminDashboardHeader({ communityName, communityLogo, stats }: Ad
         <StatCard
           icon={Users}
           value={stats.totalMembers}
-          label="Total Members"
+          label="Members"
           trend={stats.memberTrend}
         />
         <StatCard
@@ -86,7 +86,7 @@ export function AdminDashboardHeader({ communityName, communityLogo, stats }: Ad
         <StatCard
           icon={Vote}
           value={stats.activeElections}
-          label="Active Elections"
+          label="Elections"
         />
         <StatCard
           icon={Wallet}

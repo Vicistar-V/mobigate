@@ -56,9 +56,9 @@ export function AdminLeadershipSection({
   onViewExecutive,
 }: AdminLeadershipSectionProps) {
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full max-w-full">
       <AccordionItem value="leadership" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline">
+        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-lg bg-indigo-500/10 shrink-0">
               <Crown className="h-5 w-5 text-indigo-600" />
@@ -72,7 +72,7 @@ export function AdminLeadershipSection({
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full overflow-hidden">
+          <div className="space-y-4 w-full max-w-full overflow-hidden">
             {/* Current Executive Carousel */}
             <Card className="overflow-hidden">
               <CardHeader className="pb-2 pt-3 px-4">
@@ -121,18 +121,18 @@ export function AdminLeadershipSection({
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50">
-                <span className="text-lg font-bold">{executives.length}</span>
-                <span className="text-sm text-muted-foreground">Executives</span>
+            <div className="grid grid-cols-3 gap-1.5">
+              <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
+                <span className="text-base font-bold">{executives.length}</span>
+                <span className="text-xs text-muted-foreground truncate w-full text-center">Executives</span>
               </div>
-              <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50">
-                <span className="text-lg font-bold">3</span>
-                <span className="text-sm text-muted-foreground">Committees</span>
+              <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
+                <span className="text-base font-bold">3</span>
+                <span className="text-xs text-muted-foreground truncate w-full text-center">Committees</span>
               </div>
-              <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50">
-                <span className="text-lg font-bold">12</span>
-                <span className="text-sm text-muted-foreground">Staff</span>
+              <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
+                <span className="text-base font-bold">12</span>
+                <span className="text-xs text-muted-foreground truncate w-full text-center">Staff</span>
               </div>
             </div>
           </div>

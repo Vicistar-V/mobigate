@@ -113,12 +113,12 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, icon: Icon, trend }: StatCardProps) => (
-  <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50 min-w-0">
-    <div className="flex items-center gap-1 mb-1">
-      <Icon className={`h-4 w-4 ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-muted-foreground'}`} />
+  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
+    <div className="flex items-center gap-1 mb-0.5">
+      <Icon className={`h-3.5 w-3.5 ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-muted-foreground'}`} />
     </div>
-    <span className="text-base font-bold truncate">{value}</span>
-    <span className="text-sm text-muted-foreground truncate">{label}</span>
+    <span className="text-sm font-bold truncate w-full text-center">{value}</span>
+    <span className="text-xs text-muted-foreground truncate w-full text-center">{label}</span>
   </div>
 );
 
@@ -140,9 +140,9 @@ export function AdminFinanceSection({
   onViewObligations,
 }: AdminFinanceSectionProps) {
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full max-w-full">
       <AccordionItem value="finance" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline">
+        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-lg bg-amber-500/10 shrink-0">
               <Wallet className="h-5 w-5 text-amber-600" />
@@ -157,9 +157,9 @@ export function AdminFinanceSection({
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full overflow-hidden">
+          <div className="space-y-4 w-full max-w-full overflow-hidden">
             {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="grid grid-cols-4 gap-1.5 w-full">
               <StatCard label="Balance" value={`M${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
               <StatCard label="Income" value={`M${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
               <StatCard label="Expense" value={`M${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />

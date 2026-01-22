@@ -30,9 +30,9 @@ export function AdminSettingsSection({
   onCommunityRules,
 }: AdminSettingsSectionProps) {
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full max-w-full">
       <AccordionItem value="settings" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline">
+        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-lg bg-gray-500/10 shrink-0">
               <Settings className="h-5 w-5 text-gray-600" />
@@ -46,7 +46,7 @@ export function AdminSettingsSection({
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full overflow-hidden">
+          <div className="space-y-4 w-full max-w-full overflow-hidden">
             {/* Profile Settings */}
             <Card className="overflow-hidden">
               <CardHeader className="pb-2 pt-3 px-4">

@@ -112,10 +112,10 @@ const CommunityAdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
       {/* Fixed Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="flex items-center gap-3 px-3 py-3">
+        <div className="flex items-center gap-3 px-3 py-3 max-w-full">
           <Button
             variant="ghost"
             size="icon"
@@ -142,7 +142,7 @@ const CommunityAdminDashboard = () => {
 
       {/* Main Content */}
       <ScrollArea className="h-[calc(100vh-64px)] touch-auto">
-        <div className="px-3 py-4 space-y-4 pb-24 w-full overflow-hidden">
+        <div className="px-3 py-4 space-y-4 pb-24 w-full max-w-full overflow-hidden box-border">
           {/* Dashboard Header with Stats */}
           <AdminDashboardHeader
             communityName="Ndigbo Unity Association"

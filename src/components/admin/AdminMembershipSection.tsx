@@ -68,9 +68,9 @@ interface StatBadgeProps {
 }
 
 const StatBadge = ({ value, label }: StatBadgeProps) => (
-  <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50 min-w-0">
-    <span className="text-lg font-bold">{value.toLocaleString()}</span>
-    <span className="text-sm text-muted-foreground truncate">{label}</span>
+  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
+    <span className="text-base font-bold">{value.toLocaleString()}</span>
+    <span className="text-xs text-muted-foreground truncate w-full text-center">{label}</span>
   </div>
 );
 
@@ -114,9 +114,9 @@ export function AdminMembershipSection({
   };
 
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full max-w-full">
       <AccordionItem value="membership" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline">
+        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-lg bg-blue-500/10 shrink-0">
               <Users className="h-5 w-5 text-blue-600" />
@@ -130,9 +130,9 @@ export function AdminMembershipSection({
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full overflow-hidden">
+          <div className="space-y-4 w-full max-w-full overflow-hidden">
             {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="grid grid-cols-4 gap-1.5 w-full">
               <StatBadge value={stats.totalMembers} label="Total" />
               <StatBadge value={stats.activeMembers} label="Active" />
               <StatBadge value={stats.pendingRequests} label="Pending" />
