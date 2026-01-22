@@ -20,12 +20,12 @@ export const PreviousResultsSection = () => {
   
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-lg">Previous Election<br/>Results</h3>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-blue-600 font-semibold">Dates</span>
+      <div className="flex flex-col gap-1 mb-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg">Previous Election Results</h3>
           <Menu className="h-4 w-4" />
         </div>
+        <span className="text-sm text-blue-600 font-semibold">Dates</span>
       </div>
       
       <div className="flex flex-col gap-2 mb-3 text-sm">
