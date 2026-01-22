@@ -49,7 +49,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
     if (playerWalletBalance < quiz.stakeAmount) {
       toast({
         title: "Insufficient Balance",
-        description: `You need at least ${quiz.currency} ${quiz.stakeAmount.toLocaleString()} to play.`,
+        description: `You need at least M${quiz.stakeAmount.toLocaleString()} to play.`,
         variant: "destructive"
       });
       return;
@@ -63,7 +63,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
     toast({
       title: result.amountWon > 0 ? "🔥 Amazing Win!" : "Game Over",
       description: result.amountWon > 0 
-        ? `You won NGN ${result.amountWon.toLocaleString()} on Mobigate!` 
+        ? `You won M${result.amountWon.toLocaleString()} on Mobigate!` 
         : "Better luck next time!",
     });
     setShowGamePlay(false);
@@ -120,7 +120,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                           <Wallet className="h-4 w-4 text-amber-600" />
                           <span className="text-sm text-amber-700 dark:text-amber-300">Your Wallet</span>
                         </div>
-                        <span className="font-bold text-amber-700 dark:text-amber-300">NGN {playerWalletBalance.toLocaleString()}</span>
+                        <span className="font-bold text-amber-700 dark:text-amber-300">M{playerWalletBalance.toLocaleString()}</span>
                       </div>
                       <div className="grid grid-cols-3 gap-2 mt-3 pt-2 border-t border-amber-200 dark:border-amber-700">
                         <div className="text-center">
@@ -135,7 +135,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                         </div>
                         <div className="text-center">
                           <p className="text-[10px] text-amber-600">Net Profit</p>
-                          <p className="font-bold text-sm text-green-600">+₦{mobigatePlayerStats.netProfit.toLocaleString()}</p>
+                          <p className="font-bold text-sm text-green-600">+M{mobigatePlayerStats.netProfit.toLocaleString()}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -179,18 +179,18 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                               {quiz.prizePool && (
                                 <div className="p-2 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg text-center border border-amber-200">
                                   <p className="text-[10px] text-amber-600">🏆 Prize Pool</p>
-                                  <p className="font-bold text-lg text-amber-700">{quiz.currency} {quiz.prizePool.toLocaleString()}</p>
+                                  <p className="font-bold text-lg text-amber-700">M{quiz.prizePool.toLocaleString()}</p>
                                 </div>
                               )}
 
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-white dark:bg-background rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">{quiz.currency} {quiz.stakeAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-red-600">M{quiz.stakeAmount.toLocaleString()}</p>
                                 </div>
                                 <div className="p-2 bg-white dark:bg-background rounded-lg text-center border border-green-200 dark:border-green-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-green-600">{quiz.currency} {quiz.winningAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-green-600">M{quiz.winningAmount.toLocaleString()}</p>
                                 </div>
                               </div>
 
@@ -258,11 +258,11 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">{quiz.currency} {quiz.stakeAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-red-600">M{quiz.stakeAmount.toLocaleString()}</p>
                                 </div>
                                 <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded-lg text-center border border-green-200 dark:border-green-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-green-600">{quiz.currency} {quiz.winningAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-green-600">M{quiz.winningAmount.toLocaleString()}</p>
                                 </div>
                               </div>
 
@@ -307,7 +307,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                             </div>
                             <p className="text-xs text-muted-foreground">{quiz.description}</p>
                             {quiz.prizePool && (
-                              <p className="text-xs text-amber-600 font-semibold">🏆 Prize Pool: {quiz.currency} {quiz.prizePool.toLocaleString()}</p>
+                              <p className="text-xs text-amber-600 font-semibold">🏆 Prize Pool: M{quiz.prizePool.toLocaleString()}</p>
                             )}
                             <Button variant="outline" size="sm" className="w-full border-amber-300 text-amber-600" disabled>
                               <Clock className="h-4 w-4 mr-2" />
@@ -360,7 +360,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-amber-600 text-sm">₦{entry.amountWon.toLocaleString()}</p>
+                        <p className="font-bold text-amber-600 text-sm">M{entry.amountWon.toLocaleString()}</p>
                         <p className="text-[10px] text-muted-foreground">{entry.winningPercentage}% win</p>
                       </div>
                     </div>
@@ -427,7 +427,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                       <div className="flex justify-between text-sm p-3 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-950/50 dark:to-orange-900/30 rounded-lg border border-amber-200">
                         <span className="text-amber-700">Net Profit</span>
                         <span className={cn("font-bold", mobigatePlayerStats.netProfit >= 0 ? "text-green-600" : "text-destructive")}>
-                          {mobigatePlayerStats.netProfit >= 0 ? "+" : ""}₦{mobigatePlayerStats.netProfit.toLocaleString()}
+                          {mobigatePlayerStats.netProfit >= 0 ? "+" : ""}M{mobigatePlayerStats.netProfit.toLocaleString()}
                         </span>
                       </div>
                     </CardContent>
@@ -442,11 +442,11 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                       <div className="grid grid-cols-2 gap-2">
                         <div className="p-3 bg-white dark:bg-background rounded-lg border border-green-200">
                           <p className="text-xs text-muted-foreground">Total Won</p>
-                          <p className="font-bold text-lg text-green-600">₦{mobigatePlayerStats.totalAmountWon.toLocaleString()}</p>
+                          <p className="font-bold text-lg text-green-600">M{mobigatePlayerStats.totalAmountWon.toLocaleString()}</p>
                         </div>
                         <div className="p-3 bg-white dark:bg-background rounded-lg border border-red-200">
                           <p className="text-xs text-muted-foreground">Total Staked</p>
-                          <p className="font-bold text-lg text-red-600">₦{mobigatePlayerStats.totalStakePaid.toLocaleString()}</p>
+                          <p className="font-bold text-lg text-red-600">M{mobigatePlayerStats.totalStakePaid.toLocaleString()}</p>
                         </div>
                       </div>
                     </CardContent>
