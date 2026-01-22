@@ -15,6 +15,7 @@ import Community from "./pages/Community";
 import CreateCommunity from "./pages/CreateCommunity";
 import CommunityProfile from "./pages/CommunityProfile";
 import CommunityMembershipApplication from "./pages/CommunityMembershipApplication";
+import CommunityAdminDashboard from "./pages/CommunityAdminDashboard";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -54,6 +55,7 @@ const App = () => {
                   <Route path="/community" element={<Community />} />
                   <Route path="/community/:communityId" element={<CommunityProfile />} />
                   <Route path="/community/:communityId/join" element={<CommunityMembershipApplication />} />
+                  <Route path="/community/:communityId/admin" element={<CommunityAdminDashboard />} />
                   <Route path="/create-community" element={<CreateCommunity />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
