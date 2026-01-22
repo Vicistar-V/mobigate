@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle, Users, Vote } from "lucide-react";
+import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle, Users, Vote, TrendingUp } from "lucide-react";
 import { ElectionOffice, ElectionCandidate, defaultElectionSettings } from "@/data/electionData";
 import {
   DropdownMenu,
@@ -277,7 +277,7 @@ export const ElectionVotingCard = ({
               }`}
             >
               {/* Row 1: Full Name - Full Width */}
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-1">
                 <span className={`w-4 h-4 rounded-full flex-shrink-0 ${getCandidateColorClass(candidate.color)}`} />
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="text-base font-semibold text-foreground">+</span>
@@ -285,6 +285,14 @@ export const ElectionVotingCard = ({
                     {candidate.name}
                   </span>
                 </div>
+              </div>
+
+              {/* Row 1.5: Current Votes Stat */}
+              <div className="flex items-center gap-2 ml-7 mb-3">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  {candidate.votes.toLocaleString()} Votes
+                </span>
               </div>
 
               {/* Row 2: View Campaign Manifesto - Directly below name */}
