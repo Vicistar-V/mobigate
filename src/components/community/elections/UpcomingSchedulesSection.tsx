@@ -36,16 +36,19 @@ export const UpcomingSchedulesSection = () => {
   
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-lg">Upcoming Meeting<br/>Schedules</h3>
+      <div className="flex flex-col gap-1 mb-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg">Upcoming Meeting Schedules</h3>
+          <Menu className="h-4 w-4" />
+        </div>
         <span className="text-blue-600 font-semibold text-sm">Dates</span>
       </div>
       
       {/* Tabs */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <Button 
           size="sm" 
-          className={activeTab === 'meetings' ? 'bg-purple-800 hover:bg-purple-900' : 'bg-gray-200 text-black hover:bg-gray-300'}
+          className={`h-auto py-2 px-3 whitespace-normal ${activeTab === 'meetings' ? 'bg-purple-800 hover:bg-purple-900' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
           onClick={() => {
             setActiveTab('meetings');
             setCurrentPage(0);
@@ -55,7 +58,7 @@ export const UpcomingSchedulesSection = () => {
         </Button>
         <Button 
           size="sm" 
-          className={activeTab === 'events' ? 'bg-purple-800 hover:bg-purple-900' : 'bg-gray-200 text-black hover:bg-gray-300'}
+          className={`h-auto py-2 px-3 whitespace-normal ${activeTab === 'events' ? 'bg-purple-800 hover:bg-purple-900' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
           onClick={() => {
             setActiveTab('events');
             setCurrentPage(0);
@@ -65,7 +68,7 @@ export const UpcomingSchedulesSection = () => {
         </Button>
         <Button 
           size="sm" 
-          className={activeTab === 'invitations' ? 'bg-purple-800 hover:bg-purple-900' : 'bg-gray-200 text-black hover:bg-gray-300'}
+          className={`h-auto py-2 px-3 whitespace-normal ${activeTab === 'invitations' ? 'bg-purple-800 hover:bg-purple-900' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
           onClick={() => {
             setActiveTab('invitations');
             setCurrentPage(0);
@@ -73,7 +76,6 @@ export const UpcomingSchedulesSection = () => {
         >
           Invitations
         </Button>
-        <Menu className="h-4 w-4 ml-auto" />
       </div>
       
       {/* Schedule list */}
