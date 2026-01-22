@@ -33,7 +33,8 @@ import { QuizCreationDialog } from "./QuizCreationDialog";
 import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
-import { MobiQuizGameDialog } from "./MobiQuizGameDialog";
+import { CommunityQuizDialog } from "./CommunityQuizDialog";
+import { MobigateQuizDialog } from "./MobigateQuizDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -78,7 +79,8 @@ export function CommunityMainMenu({
   const [showManageResources, setShowManageResources] = useState(false);
   const [showManageMembershipRequests, setShowManageMembershipRequests] = useState(false);
   const [showManageGallery, setShowManageGallery] = useState(false);
-  const [showQuizGame, setShowQuizGame] = useState(false);
+  const [showCommunityQuiz, setShowCommunityQuiz] = useState(false);
+  const [showMobigateQuiz, setShowMobigateQuiz] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -520,7 +522,7 @@ export function CommunityMainMenu({
                   variant="ghost"
                   className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:hover:bg-blue-900/40"
                   onClick={() => {
-                    setShowQuizGame(true);
+                    setShowCommunityQuiz(true);
                     setOpen(false);
                   }}
                 >
@@ -531,7 +533,7 @@ export function CommunityMainMenu({
                   variant="ghost"
                   className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40"
                   onClick={() => {
-                    setShowQuizGame(true);
+                    setShowMobigateQuiz(true);
                     setOpen(false);
                   }}
                 >
@@ -1030,10 +1032,16 @@ export function CommunityMainMenu({
         isOwner={isOwner}
       />
 
-      {/* Quiz Game Dialog */}
-      <MobiQuizGameDialog 
-        open={showQuizGame} 
-        onOpenChange={setShowQuizGame}
+      {/* Community Quiz Dialog */}
+      <CommunityQuizDialog 
+        open={showCommunityQuiz} 
+        onOpenChange={setShowCommunityQuiz}
+      />
+
+      {/* Mobigate Quiz Dialog */}
+      <MobigateQuizDialog 
+        open={showMobigateQuiz} 
+        onOpenChange={setShowMobigateQuiz}
       />
     </>
   );
