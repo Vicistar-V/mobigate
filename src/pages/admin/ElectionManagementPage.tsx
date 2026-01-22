@@ -33,29 +33,29 @@ export default function ElectionManagementPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="campaigns" className="w-full">
-        <div className="border-b overflow-x-auto">
-          <TabsList className="h-10 sm:h-11 bg-transparent w-max min-w-full px-3 sm:px-4 justify-start">
+        <div className="border-b overflow-x-auto bg-background">
+          <TabsList className="h-10 sm:h-11 bg-muted/50 w-max min-w-full px-3 sm:px-4 justify-start gap-1">
             <TabsTrigger 
               value="campaigns" 
-              className="text-xs sm:text-sm data-[state=active]:bg-green-500/10 px-2.5 sm:px-4"
+              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
             >
               Campaigns
             </TabsTrigger>
             <TabsTrigger 
               value="accreditation" 
-              className="text-xs sm:text-sm data-[state=active]:bg-green-500/10 px-2.5 sm:px-4"
+              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
             >
               Accreditation
             </TabsTrigger>
             <TabsTrigger 
               value="clearances" 
-              className="text-xs sm:text-sm data-[state=active]:bg-green-500/10 px-2.5 sm:px-4"
+              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
             >
               Clearances
             </TabsTrigger>
             <TabsTrigger 
               value="winners" 
-              className="text-xs sm:text-sm data-[state=active]:bg-green-500/10 px-2.5 sm:px-4"
+              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
             >
               Winners
             </TabsTrigger>
