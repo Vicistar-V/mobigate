@@ -76,8 +76,27 @@ const IndebtednessContent = () => {
             </div>
           </div>
           
+          {/* Debts Clearance Now explanation */}
+          <div className="mt-8 space-y-4">
+            <h3 className="text-xl font-bold">'Debts Clearance Now'</h3>
+            <p className="text-sm leading-relaxed">
+              Clicking on this Button will do the following:
+            </p>
+            <ol className="list-decimal pl-5 space-y-3 text-sm leading-relaxed">
+              <li>
+                Pull out funds from <strong>Members' User Wallet</strong> to pay off Member's any outstanding Debts to the Community.
+              </li>
+              <li>
+                If the <strong>Wallet Balance</strong> is insufficient, it will still pull out whatever amount that's in it; and this will reduce the Member's total indebtedness by that amount so-pulled out from the <strong>Member's Wallet</strong>. Remaining <strong>Indebted Balance</strong> will automatically be calculated and noted.
+              </li>
+            </ol>
+            <p className="text-sm mt-4 leading-relaxed">
+              The <strong>System</strong> should send a <strong>Request</strong> to the <strong>Member</strong> to <strong>'Fund Wallet'</strong> adequately to proceed with the <strong>Account Clearance</strong> and <strong>Voter Accreditation Process</strong>.
+            </p>
+          </div>
+          
           {/* Clear Debt Now Button */}
-          <div className="mt-8">
+          <div className="mt-6">
             {!isCleared ? (
               <Button 
                 className="w-full bg-red-600 hover:bg-red-700 text-lg font-bold py-6"
@@ -102,10 +121,6 @@ const IndebtednessContent = () => {
                 Debt Cleared Successfully
               </Button>
             )}
-            
-            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-              Clicking this button will debit <strong>M{totalWithPenalty.toLocaleString()}</strong> from your Mobi Wallet to clear all outstanding debts. If your wallet balance is insufficient, the available amount will be deducted and the remaining balance will be noted.
-            </p>
           </div>
           
           {/* Get Accreditation Now button */}
