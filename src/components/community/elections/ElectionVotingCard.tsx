@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle } from "lucide-react";
+import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle, Users, Vote } from "lucide-react";
 import { ElectionOffice, ElectionCandidate, defaultElectionSettings } from "@/data/electionData";
 import {
   DropdownMenu,
@@ -197,11 +197,11 @@ export const ElectionVotingCard = ({
   return (
     <Card className="p-4 mb-4">
       {/* Office Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <div>
           <h3 className="text-lg font-semibold">{office.name}</h3>
           <p className="text-sm text-muted-foreground">
-            Code: {office.shortCode} | Voters: {office.totalAccreditedVoters}
+            Code: {office.shortCode}
           </p>
         </div>
         <Badge 
@@ -213,6 +213,39 @@ export const ElectionVotingCard = ({
         </Badge>
       </div>
 
+      {/* Stats Row - Accredited Voters & Voted */}
+      <div className="flex gap-3 mb-4">
+        <button 
+          className="flex-1 flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+          onClick={() => {
+            // Could navigate to accredited voters list
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+              Accredited Voters: {office.totalAccreditedVoters?.toLocaleString() || "1,200"}
+            </span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+        </button>
+        
+        <button 
+          className="flex-1 flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/30 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+          onClick={() => {
+            // Could show voting progress
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Vote className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <span className="text-sm font-medium text-green-700 dark:text-green-300">
+              Voted: {office.votedCount?.toLocaleString() || "320"}
+            </span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-green-500 dark:text-green-400" />
+        </button>
+      </div>
+
       {/* Comment Stats Bar - Clickable */}
       <button 
         className="w-full flex items-center justify-between p-3 bg-muted/50 rounded-lg mb-4 hover:bg-muted transition-colors"
@@ -221,7 +254,7 @@ export const ElectionVotingCard = ({
         <div className="flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium">
-            {totalComments} voter comment{totalComments !== 1 ? 's' : ''}
+            {totalComments} Voter Comment{totalComments !== 1 ? 's' : ''}
           </span>
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />

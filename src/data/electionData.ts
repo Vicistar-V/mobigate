@@ -17,6 +17,7 @@ export interface ElectionOffice {
   name: string;
   shortCode: string; // e.g., "PG" for President General
   totalAccreditedVoters: number;
+  votedCount?: number; // Number of people who have voted for this office
   candidates: ElectionCandidate[];
   adminRemark?: string; // Admin message/insight about this election position
 }
@@ -187,6 +188,7 @@ export const mockElectionOffice: ElectionOffice = {
   name: "President General",
   shortCode: "PG",
   totalAccreditedVoters: 1200,
+  votedCount: 320,
   candidates: mockCandidates,
   adminRemark: "Dear Members,\n\nThis is a crucial election for our community. The President General is the highest office and requires your careful consideration.\n\nPlease take time to review each candidate's manifesto before casting your vote. Your vote is your voice - exercise it wisely.\n\nRemember, if you don't vote, you forfeit your right to criticize any decisions made by the elected leadership. Let's all participate actively in shaping our community's future.\n\n— Community Administration"
 };
@@ -197,6 +199,7 @@ export const mockVicePresidentOffice: ElectionOffice = {
   name: "Vice President",
   shortCode: "VP",
   totalAccreditedVoters: 1200,
+  votedCount: 285,
   candidates: [
     { 
       id: "vp-cand-1", 
@@ -244,6 +247,7 @@ export const mockSecretaryOffice: ElectionOffice = {
   name: "Secretary",
   shortCode: "SEC",
   totalAccreditedVoters: 1200,
+  votedCount: 312,
   candidates: [
     { 
       id: "sec-cand-1", 
@@ -279,6 +283,7 @@ export const mockTreasurerOffice: ElectionOffice = {
   name: "Treasurer",
   shortCode: "TRS",
   totalAccreditedVoters: 1200,
+  votedCount: 298,
   candidates: [
     { 
       id: "trs-cand-1", 
@@ -326,6 +331,7 @@ export const mockFinSecOffice: ElectionOffice = {
   name: "Financial Secretary",
   shortCode: "FS",
   totalAccreditedVoters: 1200,
+  votedCount: 275,
   candidates: [
     { 
       id: "fs-cand-1", 
