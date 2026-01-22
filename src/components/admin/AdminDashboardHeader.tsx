@@ -15,28 +15,28 @@ interface StatCardProps {
 
 const StatCard = ({ icon: Icon, value, label, trend, urgent, prefix }: StatCardProps) => (
   <Card className={`${urgent ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20' : ''} overflow-hidden`}>
-    <CardContent className="p-2 sm:p-3">
+    <CardContent className="p-3">
       <div className="flex items-start justify-between gap-1">
-        <div className={`p-1.5 sm:p-2 rounded-lg ${urgent ? 'bg-amber-500/20' : 'bg-primary/10'} shrink-0`}>
-          <Icon className={`h-3 w-3 sm:h-4 sm:w-4 ${urgent ? 'text-amber-600' : 'text-primary'}`} />
+        <div className={`p-2 rounded-lg ${urgent ? 'bg-amber-500/20' : 'bg-primary/10'} shrink-0`}>
+          <Icon className={`h-4 w-4 ${urgent ? 'text-amber-600' : 'text-primary'}`} />
         </div>
         {trend !== undefined && (
-          <div className={`flex items-center gap-0.5 text-[10px] sm:text-xs ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {trend >= 0 ? <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> : <TrendingDown className="h-2.5 w-2.5 sm:h-3 sm:w-3" />}
+          <div className={`flex items-center gap-0.5 text-xs ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {trend >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
             <span>{trend >= 0 ? '+' : ''}{trend}</span>
           </div>
         )}
         {urgent && !trend && (
-          <Badge variant="destructive" className="text-[8px] sm:text-[10px] px-1 py-0 shrink-0">
+          <Badge variant="destructive" className="text-xs px-1.5 shrink-0">
             Urgent
           </Badge>
         )}
       </div>
-      <div className="mt-1.5 sm:mt-2">
-        <p className="text-base sm:text-xl font-bold truncate">
+      <div className="mt-2">
+        <p className="text-xl font-bold truncate">
           {prefix}{typeof value === 'number' ? value.toLocaleString() : value}
         </p>
-        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{label}</p>
+        <p className="text-sm text-muted-foreground truncate">{label}</p>
       </div>
     </CardContent>
   </Card>
@@ -50,27 +50,27 @@ interface AdminDashboardHeaderProps {
 
 export function AdminDashboardHeader({ communityName, communityLogo, stats }: AdminDashboardHeaderProps) {
   return (
-    <div className="space-y-3 w-full overflow-hidden">
+    <div className="space-y-4 w-full overflow-hidden">
       {/* Community Info */}
       <div className="flex items-center gap-3">
         {communityLogo && (
           <img
             src={communityLogo}
             alt={communityName}
-            className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg object-cover shrink-0"
+            className="h-12 w-12 rounded-lg object-cover shrink-0"
           />
         )}
         <div className="flex-1 min-w-0">
-          <h1 className="text-base sm:text-lg font-bold truncate">{communityName}</h1>
-          <div className="flex items-center gap-2 mt-0.5">
+          <h1 className="text-lg font-bold truncate">{communityName}</h1>
+          <div className="flex items-center gap-2 mt-1">
             <AdminRoleBadge adminRole="Community Admin" />
-            <span className="text-[10px] sm:text-xs text-muted-foreground">Dashboard</span>
+            <span className="text-sm text-muted-foreground">Dashboard</span>
           </div>
         </div>
       </div>
 
       {/* Stats Grid - 2x2 on mobile */}
-      <div className="grid grid-cols-2 gap-2 w-full">
+      <div className="grid grid-cols-2 gap-3 w-full">
         <StatCard
           icon={Users}
           value={stats.totalMembers}

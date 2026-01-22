@@ -40,11 +40,11 @@ const getTransactionColor = (type: RecentTransaction['type']) => {
 const getStatusBadge = (status: RecentTransaction['status']) => {
   switch (status) {
     case 'completed':
-      return <Badge className="bg-green-500/10 text-green-600 text-[9px] px-1">Done</Badge>;
+      return <Badge className="bg-green-500/10 text-green-600 text-xs px-1.5">Done</Badge>;
     case 'pending':
-      return <Badge className="bg-amber-500/10 text-amber-600 text-[9px] px-1">Pending</Badge>;
+      return <Badge className="bg-amber-500/10 text-amber-600 text-xs px-1.5">Pending</Badge>;
     case 'failed':
-      return <Badge variant="destructive" className="text-[9px] px-1">Failed</Badge>;
+      return <Badge variant="destructive" className="text-xs px-1.5">Failed</Badge>;
     default:
       return null;
   }
@@ -59,19 +59,19 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
   const colorClass = getTransactionColor(transaction.type);
   
   return (
-    <div className="flex items-center gap-2 py-2">
-      <div className="p-1.5 rounded-lg bg-muted shrink-0">
-        <Icon className={`h-3.5 w-3.5 ${colorClass}`} />
+    <div className="flex items-center gap-3 py-3">
+      <div className="p-2 rounded-lg bg-muted shrink-0">
+        <Icon className={`h-4 w-4 ${colorClass}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-xs truncate">{transaction.description}</p>
-        <p className="text-[10px] text-muted-foreground truncate">
+        <p className="font-medium text-sm truncate">{transaction.description}</p>
+        <p className="text-sm text-muted-foreground truncate">
           {transaction.memberName && `${transaction.memberName} • `}
           {formatRelativeTime(transaction.date)}
         </p>
       </div>
-      <div className="flex flex-col items-end gap-0.5 shrink-0">
-        <span className={`font-semibold text-xs ${colorClass}`}>
+      <div className="flex flex-col items-end gap-1 shrink-0">
+        <span className={`font-semibold text-sm ${colorClass}`}>
           {transaction.type === 'expense' ? '-' : '+'}M{transaction.amount.toLocaleString()}
         </span>
         {getStatusBadge(transaction.status)}
@@ -85,20 +85,20 @@ interface DefaultingMemberItemProps {
 }
 
 const DefaultingMemberItem = ({ member }: DefaultingMemberItemProps) => (
-  <div className="flex items-center gap-2 py-2">
-    <Avatar className="h-7 w-7 shrink-0">
+  <div className="flex items-center gap-3 py-3">
+    <Avatar className="h-9 w-9 shrink-0">
       <AvatarImage src={member.avatar} alt={member.name} />
-      <AvatarFallback className="text-[10px]">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+      <AvatarFallback className="text-sm">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
     </Avatar>
     <div className="flex-1 min-w-0">
-      <p className="font-medium text-xs truncate">{member.name}</p>
-      <p className="text-[10px] text-muted-foreground truncate">{member.obligation}</p>
+      <p className="font-medium text-sm truncate">{member.name}</p>
+      <p className="text-sm text-muted-foreground truncate">{member.obligation}</p>
     </div>
     <div className="flex flex-col items-end shrink-0">
-      <span className="font-semibold text-xs text-destructive">
+      <span className="font-semibold text-sm text-destructive">
         M{member.amountOwed.toLocaleString()}
       </span>
-      <span className="text-[9px] text-muted-foreground">
+      <span className="text-sm text-muted-foreground">
         Due {formatRelativeTime(member.dueDate)}
       </span>
     </div>
@@ -113,12 +113,12 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, icon: Icon, trend }: StatCardProps) => (
-  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0">
-    <div className="flex items-center gap-0.5 mb-0.5">
-      <Icon className={`h-3 w-3 ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-muted-foreground'}`} />
+  <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50 min-w-0">
+    <div className="flex items-center gap-1 mb-1">
+      <Icon className={`h-4 w-4 ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-muted-foreground'}`} />
     </div>
-    <span className="text-sm sm:text-base font-bold truncate">{value}</span>
-    <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{label}</span>
+    <span className="text-base font-bold truncate">{value}</span>
+    <span className="text-sm text-muted-foreground truncate">{label}</span>
   </div>
 );
 
@@ -142,24 +142,24 @@ export function AdminFinanceSection({
   return (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="finance" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-3 hover:no-underline">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-amber-500/10 shrink-0">
-              <Wallet className="h-4 w-4 text-amber-600" />
+        <AccordionTrigger className="px-4 hover:no-underline">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 rounded-lg bg-amber-500/10 shrink-0">
+              <Wallet className="h-5 w-5 text-amber-600" />
             </div>
             <div className="text-left min-w-0">
-              <h3 className="font-semibold text-sm sm:text-base truncate">Finance</h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+              <h3 className="font-semibold text-base truncate">Finance</h3>
+              <p className="text-sm text-muted-foreground truncate">
                 M{stats.walletBalance.toLocaleString()}
                 {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} pending`}
               </p>
             </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="px-3 pb-3">
-          <div className="space-y-3 w-full overflow-hidden">
+        <AccordionContent className="px-4 pb-4">
+          <div className="space-y-4 w-full overflow-hidden">
             {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-1.5 w-full">
+            <div className="grid grid-cols-4 gap-2 w-full">
               <StatCard label="Balance" value={`M${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
               <StatCard label="Income" value={`M${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
               <StatCard label="Expense" value={`M${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
@@ -168,21 +168,21 @@ export function AdminFinanceSection({
 
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-9 text-xs" onClick={onViewOverview}>
-                <Wallet className="h-3.5 w-3.5 mr-1.5" />
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewOverview}>
+                <Wallet className="h-4 w-4 mr-2" />
                 Overview
               </Button>
-              <Button variant="outline" size="sm" className="h-9 text-xs" onClick={onViewAudit}>
-                <FileText className="h-3.5 w-3.5 mr-1.5" />
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewAudit}>
+                <FileText className="h-4 w-4 mr-2" />
                 Audit
               </Button>
             </div>
 
-            <Button variant="outline" size="sm" className="w-full h-9 text-xs" onClick={onViewObligations}>
-              <Users className="h-3.5 w-3.5 mr-1.5" />
+            <Button variant="outline" size="sm" className="w-full h-10 text-sm" onClick={onViewObligations}>
+              <Users className="h-4 w-4 mr-2" />
               Member Obligations
               {stats.pendingPayments > 0 && (
-                <Badge variant="destructive" className="ml-1.5 text-[9px] px-1">
+                <Badge variant="destructive" className="ml-2 text-xs px-1.5">
                   {stats.pendingPayments}
                 </Badge>
               )}
@@ -190,16 +190,16 @@ export function AdminFinanceSection({
 
             {/* Recent Transactions */}
             <Card className="overflow-hidden">
-              <CardHeader className="pb-1.5 pt-2.5 px-2.5">
-                <CardTitle className="text-xs flex items-center justify-between">
+              <CardHeader className="pb-2 pt-3 px-4">
+                <CardTitle className="text-sm flex items-center justify-between">
                   Recent Transactions
-                  <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={onViewOverview}>
+                  <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onViewOverview}>
                     View All
-                    <ChevronRight className="h-3 w-3 ml-0.5" />
+                    <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-2.5 pb-2.5 pt-0">
+              <CardContent className="px-4 pb-4 pt-0">
                 <div className="divide-y divide-border">
                   {recentTransactions.slice(0, 4).map((transaction) => (
                     <TransactionItem key={transaction.id} transaction={transaction} />
@@ -211,16 +211,16 @@ export function AdminFinanceSection({
             {/* Defaulting Members */}
             {defaultingMembers.length > 0 && (
               <Card className="border-red-200 bg-red-50/30 dark:bg-red-950/10 overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2.5 px-2.5">
-                  <CardTitle className="text-xs flex items-center gap-1.5 text-destructive">
-                    <AlertTriangle className="h-3.5 w-3.5" />
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
                     Defaulting
-                    <Badge variant="destructive" className="ml-auto text-[9px] px-1">
+                    <Badge variant="destructive" className="ml-auto text-xs px-1.5">
                       {defaultingMembers.length}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-2.5 pb-2.5 pt-0">
+                <CardContent className="px-4 pb-4 pt-0">
                   <div className="divide-y divide-border">
                     {defaultingMembers.slice(0, 3).map((member) => (
                       <DefaultingMemberItem key={member.id} member={member} />

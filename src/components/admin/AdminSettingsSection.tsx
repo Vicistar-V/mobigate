@@ -32,34 +32,34 @@ export function AdminSettingsSection({
   return (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="settings" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-3 hover:no-underline">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-gray-500/10 shrink-0">
-              <Settings className="h-4 w-4 text-gray-600" />
+        <AccordionTrigger className="px-4 hover:no-underline">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 rounded-lg bg-gray-500/10 shrink-0">
+              <Settings className="h-5 w-5 text-gray-600" />
             </div>
             <div className="text-left min-w-0">
-              <h3 className="font-semibold text-sm sm:text-base truncate">Settings</h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+              <h3 className="font-semibold text-base truncate">Settings</h3>
+              <p className="text-sm text-muted-foreground truncate">
                 Profile, privacy & config
               </p>
             </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="px-3 pb-3">
-          <div className="space-y-3 w-full overflow-hidden">
+        <AccordionContent className="px-4 pb-4">
+          <div className="space-y-4 w-full overflow-hidden">
             {/* Profile Settings */}
             <Card className="overflow-hidden">
-              <CardHeader className="pb-1.5 pt-2.5 px-2.5">
-                <CardTitle className="text-xs">Profile</CardTitle>
+              <CardHeader className="pb-2 pt-3 px-4">
+                <CardTitle className="text-sm">Profile</CardTitle>
               </CardHeader>
-              <CardContent className="px-2.5 pb-2.5 pt-0">
-                <div className="grid grid-cols-2 gap-1.5">
-                  <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onEditProfile}>
-                    <User className="h-3 w-3 mr-1" />
+              <CardContent className="px-4 pb-4 pt-0">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onEditProfile}>
+                    <User className="h-4 w-4 mr-2" />
                     Edit Profile
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onEditPhotos}>
-                    <Image className="h-3 w-3 mr-1" />
+                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onEditPhotos}>
+                    <Image className="h-4 w-4 mr-2" />
                     Edit Photos
                   </Button>
                 </div>
@@ -68,21 +68,21 @@ export function AdminSettingsSection({
 
             {/* Documents & Resources */}
             <Card className="overflow-hidden">
-              <CardHeader className="pb-1.5 pt-2.5 px-2.5">
-                <CardTitle className="text-xs">Documents</CardTitle>
+              <CardHeader className="pb-2 pt-3 px-4">
+                <CardTitle className="text-sm">Documents</CardTitle>
               </CardHeader>
-              <CardContent className="px-2.5 pb-2.5 pt-0">
-                <div className="grid grid-cols-2 gap-1.5">
-                  <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onManageConstitution}>
-                    <FileText className="h-3 w-3 mr-1" />
+              <CardContent className="px-4 pb-4 pt-0">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageConstitution}>
+                    <FileText className="h-4 w-4 mr-2" />
                     Constitution
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onManageResources}>
-                    <FolderOpen className="h-3 w-3 mr-1" />
+                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageResources}>
+                    <FolderOpen className="h-4 w-4 mr-2" />
                     Resources
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-[10px] col-span-2" onClick={onCommunityRules}>
-                    <BookOpen className="h-3 w-3 mr-1" />
+                  <Button variant="outline" size="sm" className="h-10 text-sm col-span-2" onClick={onCommunityRules}>
+                    <BookOpen className="h-4 w-4 mr-2" />
                     Rules & Guidelines
                   </Button>
                 </div>
@@ -91,42 +91,42 @@ export function AdminSettingsSection({
 
             {/* Quick Toggles */}
             <Card className="overflow-hidden">
-              <CardHeader className="pb-1.5 pt-2.5 px-2.5">
-                <CardTitle className="text-xs">Quick Settings</CardTitle>
+              <CardHeader className="pb-2 pt-3 px-4">
+                <CardTitle className="text-sm">Quick Settings</CardTitle>
               </CardHeader>
-              <CardContent className="px-2.5 pb-2.5 pt-0 space-y-2">
+              <CardContent className="px-4 pb-4 pt-0 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Shield className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <Label htmlFor="private-community" className="text-[11px] truncate">Private</Label>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Shield className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Label htmlFor="private-community" className="text-sm truncate">Private Community</Label>
                   </div>
-                  <Switch id="private-community" defaultChecked className="scale-90" />
+                  <Switch id="private-community" defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Bell className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <Label htmlFor="member-notifications" className="text-[11px] truncate">Notifications</Label>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Bell className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Label htmlFor="member-notifications" className="text-sm truncate">Notifications</Label>
                   </div>
-                  <Switch id="member-notifications" defaultChecked className="scale-90" />
+                  <Switch id="member-notifications" defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <Label htmlFor="auto-approve" className="text-[11px] truncate">Auto-approve</Label>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Label htmlFor="auto-approve" className="text-sm truncate">Auto-approve Members</Label>
                   </div>
-                  <Switch id="auto-approve" className="scale-90" />
+                  <Switch id="auto-approve" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Advanced Settings */}
-            <div className="grid grid-cols-2 gap-1.5">
-              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onPrivacySettings}>
-                <Shield className="h-3 w-3 mr-1" />
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onPrivacySettings}>
+                <Shield className="h-4 w-4 mr-2" />
                 Privacy
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onNotificationSettings}>
-                <Bell className="h-3 w-3 mr-1" />
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onNotificationSettings}>
+                <Bell className="h-4 w-4 mr-2" />
                 Notifications
               </Button>
             </div>

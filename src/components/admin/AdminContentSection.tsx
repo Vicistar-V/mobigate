@@ -53,41 +53,41 @@ const ContentItem = ({ content, onEdit, onRemove }: ContentItemProps) => {
   const Icon = getContentTypeIcon(content.type);
   
   return (
-    <div className="flex items-start gap-2 py-2">
-      <div className="p-1.5 rounded-lg bg-muted shrink-0">
-        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+    <div className="flex items-start gap-3 py-3">
+      <div className="p-2 rounded-lg bg-muted shrink-0">
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-xs truncate">{content.title}</p>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <Avatar className="h-3.5 w-3.5">
+        <p className="font-medium text-sm truncate">{content.title}</p>
+        <div className="flex items-center gap-2 mt-1">
+          <Avatar className="h-5 w-5">
             <AvatarImage src={content.authorAvatar} alt={content.author} />
-            <AvatarFallback className="text-[6px]">{content.author[0]}</AvatarFallback>
+            <AvatarFallback className="text-xs">{content.author[0]}</AvatarFallback>
           </Avatar>
-          <span className="text-[10px] text-muted-foreground truncate">{content.author}</span>
-          <span className="text-[10px] text-muted-foreground">•</span>
-          <span className="text-[10px] text-muted-foreground">{formatRelativeTime(content.createdAt)}</span>
+          <span className="text-sm text-muted-foreground truncate">{content.author}</span>
+          <span className="text-sm text-muted-foreground">•</span>
+          <span className="text-sm text-muted-foreground">{formatRelativeTime(content.createdAt)}</span>
         </div>
       </div>
-      <div className="flex items-center gap-0.5 shrink-0">
-        <Badge className={`text-[9px] px-1 ${getStatusColor(content.status)}`}>
+      <div className="flex items-center gap-1 shrink-0">
+        <Badge className={`text-xs px-1.5 ${getStatusColor(content.status)}`}>
           {content.status}
         </Badge>
         <Button
           size="icon"
           variant="ghost"
-          className="h-6 w-6"
+          className="h-8 w-8"
           onClick={() => onEdit(content.id)}
         >
-          <Edit className="h-3 w-3" />
+          <Edit className="h-4 w-4" />
         </Button>
         <Button
           size="icon"
           variant="ghost"
-          className="h-6 w-6 text-destructive"
+          className="h-8 w-8 text-destructive"
           onClick={() => onRemove(content.id)}
         >
-          <Trash2 className="h-3 w-3" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -101,10 +101,10 @@ interface StatBadgeProps {
 }
 
 const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
-  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0">
-    <Icon className="h-3.5 w-3.5 text-muted-foreground mb-0.5" />
-    <span className="text-base sm:text-lg font-bold">{value}</span>
-    <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{label}</span>
+  <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50 min-w-0">
+    <Icon className="h-4 w-4 text-muted-foreground mb-1" />
+    <span className="text-lg font-bold">{value}</span>
+    <span className="text-sm text-muted-foreground truncate">{label}</span>
   </div>
 );
 
@@ -150,24 +150,24 @@ export function AdminContentSection({
   return (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="content" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-3 hover:no-underline">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10 shrink-0">
-              <FileText className="h-4 w-4 text-purple-600" />
+        <AccordionTrigger className="px-4 hover:no-underline">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 rounded-lg bg-purple-500/10 shrink-0">
+              <FileText className="h-5 w-5 text-purple-600" />
             </div>
             <div className="text-left min-w-0">
-              <h3 className="font-semibold text-sm sm:text-base truncate">Content</h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+              <h3 className="font-semibold text-base truncate">Content</h3>
+              <p className="text-sm text-muted-foreground truncate">
                 {stats.totalNews + stats.totalEvents + stats.totalArticles + stats.totalVibes} posts
                 {stats.pendingContent > 0 && ` • ${stats.pendingContent} pending`}
               </p>
             </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="px-3 pb-3">
-          <div className="space-y-3 w-full overflow-hidden">
+        <AccordionContent className="px-4 pb-4">
+          <div className="space-y-4 w-full overflow-hidden">
             {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-1.5 w-full">
+            <div className="grid grid-cols-4 gap-2 w-full">
               <StatBadge value={stats.totalNews} label="News" icon={Newspaper} />
               <StatBadge value={stats.totalEvents} label="Events" icon={Calendar} />
               <StatBadge value={stats.totalArticles} label="Articles" icon={BookOpen} />
@@ -175,21 +175,21 @@ export function AdminContentSection({
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-1.5">
-              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onManageNews}>
-                <Newspaper className="h-3 w-3 mr-1" />
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageNews}>
+                <Newspaper className="h-4 w-4 mr-2" />
                 News
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onManageEvents}>
-                <Calendar className="h-3 w-3 mr-1" />
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageEvents}>
+                <Calendar className="h-4 w-4 mr-2" />
                 Events
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onManageGallery}>
-                <Image className="h-3 w-3 mr-1" />
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageGallery}>
+                <Image className="h-4 w-4 mr-2" />
                 Gallery
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-[10px]" onClick={onManageResources}>
-                <FolderOpen className="h-3 w-3 mr-1" />
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageResources}>
+                <FolderOpen className="h-4 w-4 mr-2" />
                 Resources
               </Button>
             </div>
@@ -197,12 +197,12 @@ export function AdminContentSection({
             {/* Content Filters */}
             <ScrollArea className="w-full touch-auto">
               <Tabs value={filter} onValueChange={setFilter}>
-                <TabsList className="flex w-max h-7 bg-muted/50">
-                  <TabsTrigger value="all" className="text-[10px] px-2 h-6">All</TabsTrigger>
-                  <TabsTrigger value="news" className="text-[10px] px-2 h-6">News</TabsTrigger>
-                  <TabsTrigger value="event" className="text-[10px] px-2 h-6">Events</TabsTrigger>
-                  <TabsTrigger value="article" className="text-[10px] px-2 h-6">Articles</TabsTrigger>
-                  <TabsTrigger value="vibe" className="text-[10px] px-2 h-6">Vibes</TabsTrigger>
+                <TabsList className="flex w-max h-9 bg-muted/50">
+                  <TabsTrigger value="all" className="text-sm px-3 h-7">All</TabsTrigger>
+                  <TabsTrigger value="news" className="text-sm px-3 h-7">News</TabsTrigger>
+                  <TabsTrigger value="event" className="text-sm px-3 h-7">Events</TabsTrigger>
+                  <TabsTrigger value="article" className="text-sm px-3 h-7">Articles</TabsTrigger>
+                  <TabsTrigger value="vibe" className="text-sm px-3 h-7">Vibes</TabsTrigger>
                 </TabsList>
               </Tabs>
               <ScrollBar orientation="horizontal" />
@@ -211,16 +211,16 @@ export function AdminContentSection({
             {/* Recent Content */}
             {filteredContent.length > 0 && (
               <Card className="overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2.5 px-2.5">
-                  <CardTitle className="text-xs flex items-center justify-between">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm flex items-center justify-between">
                     Recent Content
-                    <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2">
+                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2">
                       View All
-                      <ChevronRight className="h-3 w-3 ml-0.5" />
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-2.5 pb-2.5 pt-0">
+                <CardContent className="px-4 pb-4 pt-0">
                   <div className="divide-y divide-border">
                     {filteredContent.slice(0, 3).map((content) => (
                       <ContentItem
