@@ -58,7 +58,7 @@ export const ElectionAccreditationTab = () => {
   };
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20 px-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Voters Accreditation</h1>
