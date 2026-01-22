@@ -31,24 +31,24 @@ const PendingItem = ({ action, onClick }: PendingItemProps) => {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
+      className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
     >
-      <div className={`p-2 rounded-lg ${action.urgent ? 'bg-amber-500/20' : 'bg-muted'}`}>
-        <Icon className={`h-4 w-4 ${action.urgent ? 'text-amber-600' : 'text-muted-foreground'}`} />
+      <div className={`p-1.5 rounded-lg shrink-0 ${action.urgent ? 'bg-amber-500/20' : 'bg-muted'}`}>
+        <Icon className={`h-3.5 w-3.5 ${action.urgent ? 'text-amber-600' : 'text-muted-foreground'}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm truncate">{action.title}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-medium text-xs truncate">{action.title}</span>
           <Badge 
             variant={action.urgent ? "destructive" : "secondary"} 
-            className="text-[10px] px-1.5 py-0 shrink-0"
+            className="text-[9px] px-1 py-0 shrink-0"
           >
             {action.count}
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground truncate">{action.description}</p>
+        <p className="text-[10px] text-muted-foreground truncate">{action.description}</p>
       </div>
-      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
     </button>
   );
 };
@@ -67,21 +67,21 @@ export function AdminPendingActionsCard({ actions, onActionClick }: AdminPending
   }
 
   return (
-    <Card className="border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-amber-500/20">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
+    <Card className="border-amber-500/50 bg-gradient-to-br from-amber-50/50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10 overflow-hidden">
+      <CardHeader className="pb-1.5 pt-3 px-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <div className="p-1 rounded-lg bg-amber-500/20 shrink-0">
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
           </div>
-          <span>Needs Your Attention</span>
+          <span className="truncate">Needs Attention</span>
           {urgentCount > 0 && (
-            <Badge variant="destructive" className="ml-auto text-[10px]">
+            <Badge variant="destructive" className="ml-auto text-[9px] px-1 shrink-0">
               {urgentCount} Urgent
             </Badge>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 px-3 pb-3">
         <div className="divide-y divide-border/50">
           {actions.filter(a => a.count > 0).map((action) => (
             <PendingItem

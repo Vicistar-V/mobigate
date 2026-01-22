@@ -11,18 +11,18 @@ interface QuickActionButtonProps {
 const QuickActionButton = ({ icon: Icon, label, onClick, badge }: QuickActionButtonProps) => (
   <Button
     variant="outline"
-    className="h-auto py-4 px-3 flex flex-col items-center gap-2 relative"
+    className="h-auto py-3 px-2 flex flex-col items-center gap-1.5 relative w-full min-w-0"
     onClick={onClick}
   >
     <div className="relative">
-      <Icon className="h-6 w-6 text-primary" />
+      <Icon className="h-5 w-5 text-primary" />
       {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+        <span className="absolute -top-1.5 -right-2 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
           {badge > 9 ? '9+' : badge}
         </span>
       )}
     </div>
-    <span className="text-xs font-medium">{label}</span>
+    <span className="text-[10px] sm:text-xs font-medium text-center truncate w-full">{label}</span>
   </Button>
 );
 
@@ -48,9 +48,9 @@ export function AdminQuickActions({
   pendingContent,
 }: AdminQuickActionsProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-full overflow-hidden">
       <h2 className="text-sm font-semibold text-muted-foreground">Quick Actions</h2>
-      <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
+      <div className="grid grid-cols-3 gap-2 w-full">
         <QuickActionButton
           icon={Users}
           label="Members"
