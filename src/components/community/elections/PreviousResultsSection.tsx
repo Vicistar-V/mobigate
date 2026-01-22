@@ -28,8 +28,8 @@ export const PreviousResultsSection = () => {
         </div>
       </div>
       
-      <div className="flex items-center justify-between mb-3 text-sm">
-        <span className="font-semibold bg-gray-200 px-3 py-1 rounded">Chat Messages</span>
+      <div className="flex flex-col gap-2 mb-3 text-sm">
+        <span className="font-semibold bg-gray-200 px-3 py-1 rounded w-fit">Chat Messages</span>
         <span className="text-blue-600 underline cursor-pointer hover:text-blue-800">
           Download Meeting Chat
         </span>
