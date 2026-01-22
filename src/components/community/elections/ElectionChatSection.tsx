@@ -14,9 +14,9 @@ export const ElectionChatSection = ({ messages, onDownload }: ElectionChatSectio
   return (
     <Card className="p-4 mb-4">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2">
           <h3 className="text-lg font-semibold">Chat Messages</h3>
-          <Button variant="outline" size="sm" onClick={onDownload}>
+          <Button variant="outline" size="sm" className="w-fit" onClick={onDownload}>
             <Download className="w-4 h-4 mr-2" />
             Download Meeting Chat
           </Button>
