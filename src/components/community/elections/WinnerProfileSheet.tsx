@@ -14,16 +14,18 @@ import {
   Calendar,
   Award,
   Vote,
-  TrendingUp
+  TrendingUp,
+  UserCheck,
+  UserPlus,
+  CheckCircle2
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ElectionWinner } from "@/data/electionData";
 import { format } from "date-fns";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 import { AddToCircleDialog } from "@/components/AddToCircleDialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WinnerProfileSheetProps {
   winner: ElectionWinner | null;
@@ -37,8 +39,18 @@ export const WinnerProfileSheet = ({
   onOpenChange,
 }: WinnerProfileSheetProps) => {
   const [showAddToCircle, setShowAddToCircle] = useState(false);
+  const [friendRequestSent, setFriendRequestSent] = useState(false);
+  const [addedToCircle, setAddedToCircle] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Reset states when winner changes or drawer closes
+  useEffect(() => {
+    if (!open) {
+      setFriendRequestSent(false);
+      setAddedToCircle(false);
+    }
+  }, [open, winner?.id]);
 
   if (!winner) return null;
 
@@ -47,18 +59,24 @@ export const WinnerProfileSheet = ({
     navigate(`/profile/${winner.memberId}`);
   };
 
-  const handleMessage = () => {
-    toast({
-      title: "Opening Chat",
-      description: `Starting conversation with ${winner.candidateName}`,
-    });
-  };
-
   const handleAddFriend = () => {
+    setFriendRequestSent(true);
     toast({
       title: "Request Sent",
       description: `Friend request sent to ${winner.candidateName}`,
     });
+  };
+
+  const handleAddToCircle = () => {
+    setShowAddToCircle(true);
+  };
+
+  const handleCircleDialogClose = (isOpen: boolean) => {
+    setShowAddToCircle(isOpen);
+    if (!isOpen) {
+      // Assume circle was added when dialog closes
+      setAddedToCircle(true);
+    }
   };
 
   const margin = winner.votes - Math.floor(winner.votes * (1 - winner.percentage / 100) * 0.6);
@@ -91,7 +109,7 @@ export const WinnerProfileSheet = ({
             </Button>
           </DrawerClose>
 
-          <ScrollArea className="flex-1 min-h-0 touch-auto">
+          <div className="flex-1 overflow-y-auto overscroll-contain touch-auto min-h-0">
             <div className="px-5 py-6 pb-28">
               {/* Winner Photo with Trophy Overlay */}
               <div className="flex justify-center mb-5">
@@ -170,45 +188,59 @@ export const WinnerProfileSheet = ({
                   View Full Profile
                 </Button>
 
-                {/* Secondary Actions Row */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Friend Request Button - Full Width when request not sent */}
+                {!friendRequestSent ? (
                   <Button
                     variant="outline"
-                    size="default"
+                    size="lg"
+                    className="w-full"
                     onClick={handleAddFriend}
                   >
-                    <Users className="h-4 w-4 mr-2" />
+                    <UserPlus className="h-4 w-4 mr-2" />
                     Add Friend
                   </Button>
+                ) : (
                   <Button
-                    variant="outline"
-                    size="default"
-                    onClick={handleMessage}
+                    variant="secondary"
+                    size="lg"
+                    className="w-full"
+                    disabled
                   >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Message
+                    <UserCheck className="h-4 w-4 mr-2" />
+                    Friend Request Sent
                   </Button>
-                </div>
+                )}
 
                 {/* Add to Circle Button */}
-                <Button
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => setShowAddToCircle(true)}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Add to Circle
-                </Button>
+                {!addedToCircle ? (
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={handleAddToCircle}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Add to Circle
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="w-full text-green-600"
+                    disabled
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Added to Circle
+                  </Button>
+                )}
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </DrawerContent>
       </Drawer>
 
       {/* Add to Circle Dialog */}
       <AddToCircleDialog
         open={showAddToCircle}
-        onOpenChange={setShowAddToCircle}
+        onOpenChange={handleCircleDialogClose}
         userName={winner.candidateName}
       />
     </>
