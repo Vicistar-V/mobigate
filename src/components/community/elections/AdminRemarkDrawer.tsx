@@ -20,8 +20,8 @@ export const AdminRemarkDrawer = ({
 }: AdminRemarkDrawerProps) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh] touch-auto overflow-hidden">
-        <div className="flex flex-col h-full max-h-[85vh] overflow-hidden">
+      <DrawerContent className="h-[85vh] max-h-[85vh] w-full max-w-[100vw] overflow-hidden overflow-x-hidden touch-auto overscroll-contain">
+        <div className="flex min-h-0 flex-col h-full w-full overflow-hidden">
           {/* Fixed Header */}
           <DrawerHeader className="flex-shrink-0 px-4 pb-2 border-b">
             <div className="flex items-center justify-between">
@@ -45,8 +45,8 @@ export const AdminRemarkDrawer = ({
           </DrawerHeader>
 
           {/* Scrollable Content Area */}
-          <ScrollArea className="flex-1 min-h-0 touch-auto">
-            <div className="px-4 py-4">
+          <ScrollArea className="flex-1 min-h-0 touch-auto w-full">
+            <div className="px-4 py-4 w-full">
               {/* Admin Message Card */}
               <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
                 <div className="flex items-start gap-3">

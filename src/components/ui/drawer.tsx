@@ -36,7 +36,9 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-[70] mt-24 flex h-auto flex-col rounded-t-[10px] border bg-card touch-none select-none",
+        // NOTE: `touch-none` blocks native scrolling on mobile/trackpads.
+        // Keep drawers scroll-friendly by default; individual drawers can still override.
+        "fixed inset-x-0 bottom-0 z-[70] mt-24 flex h-auto flex-col rounded-t-[10px] border bg-card touch-auto select-none",
         className,
       )}
       {...props}
