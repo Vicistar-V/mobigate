@@ -81,17 +81,17 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
                     <Badge 
                       variant="secondary" 
-                      className={`text-[10px] px-1.5 py-0.5 ${getElectionTypeBadgeStyle(winner.electionType)}`}
+                      className={`text-xs px-2 py-0.5 ${getElectionTypeBadgeStyle(winner.electionType)}`}
                     >
                       {winner.electionType.charAt(0).toUpperCase() + winner.electionType.slice(1).replace('-', ' ')}
                     </Badge>
-                    <span className="text-[10px] text-muted-foreground truncate">
+                    <span className="text-xs text-muted-foreground">
                       {winner.electionName}
                     </span>
                   </div>
 
                   {/* Vote Stats - Compact */}
-                  <div className="flex items-center gap-4 mt-3 text-xs">
+                  <div className="flex items-center gap-4 mt-3 text-sm">
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Votes:</span>
                       <span className="font-semibold text-yellow-600">{winner.votes}</span>
@@ -103,7 +103,7 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
                   </div>
 
                   {/* Date */}
-                  <p className="text-[10px] text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     {format(winner.announcedAt, "MMM dd, yyyy")}
                   </p>
                 </div>
