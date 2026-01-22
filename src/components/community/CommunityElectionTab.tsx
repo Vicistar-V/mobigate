@@ -15,7 +15,6 @@ import { ElectionVotingCard } from "./elections/ElectionVotingCard";
 import { AnonymousVotingSection } from "./elections/AnonymousVotingSection";
 import { ElectionControlBar } from "./elections/ElectionControlBar";
 import { VotingResultSheet } from "./elections/VotingResultSheet";
-import { ElectionChatSection } from "./elections/ElectionChatSection";
 import { PreviousElectionsList } from "./elections/PreviousElectionsList";
 import { CampaignsView } from "./elections/CampaignsView";
 import { WinnersView } from "./elections/WinnersView";
@@ -30,7 +29,6 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import {
   mockElection,
   mockVoteRecords,
-  mockElectionChatMessages,
   mockPreviousElections,
   mockCampaigns,
   mockWinners,
@@ -181,7 +179,6 @@ export const CommunityElectionTab = () => {
             <AnonymousVotingSection />
             <ElectionControlBar isActive={true} />
             <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-voting" />
-            <ElectionChatSection messages={mockElectionChatMessages} />
             <PeopleYouMayKnow />
           </>
         )}
@@ -197,7 +194,6 @@ export const CommunityElectionTab = () => {
               />
             )}
             <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-results" />
-            <ElectionChatSection messages={mockElectionChatMessages} />
             <PeopleYouMayKnow />
             <PreviousElectionsList elections={mockPreviousElections} />
           </>

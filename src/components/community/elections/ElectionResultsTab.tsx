@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import { VotingResultSheet } from "./VotingResultSheet";
-import { ElectionChatSection } from "./ElectionChatSection";
 import { PreviousElectionsList } from "./PreviousElectionsList";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import {
   mockElection,
   mockVoteRecords,
-  mockElectionChatMessages,
   mockPreviousElections,
 } from "@/data/electionData";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
@@ -37,9 +35,6 @@ export const ElectionResultsTab = () => {
 
       {/* Ads */}
       <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-results" />
-
-      {/* Chat Section */}
-      <ElectionChatSection messages={mockElectionChatMessages} />
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
