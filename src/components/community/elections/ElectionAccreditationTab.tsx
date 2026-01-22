@@ -13,6 +13,7 @@ import { AccreditedVotersSection } from "./AccreditedVotersSection";
 import { UpcomingElectionsSection } from "./UpcomingElectionsSection";
 import { PreviousResultsSection } from "./PreviousResultsSection";
 import { UpcomingSchedulesSection } from "./UpcomingSchedulesSection";
+import { FinancialStatusDialog } from "@/components/community/finance/FinancialStatusDialog";
 import { toast } from "sonner";
 
 // Mock activities data
@@ -32,6 +33,7 @@ export const ElectionAccreditationTab = () => {
   const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities'>('financial');
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
   const [showActivitiesSheet, setShowActivitiesSheet] = useState(false);
+  const [showFinancialStatusDialog, setShowFinancialStatusDialog] = useState(false);
   const [debtsChecked, setDebtsChecked] = useState(false);
   const [receiptsChecked, setReceiptsChecked] = useState(false);
   const [isAccredited, setIsAccredited] = useState(false);
@@ -131,7 +133,7 @@ export const ElectionAccreditationTab = () => {
             
             <Button 
               className="bg-yellow-400 text-black hover:bg-yellow-500 font-bold py-6"
-              onClick={() => toast.info("Generating financial status report...")}
+              onClick={() => setShowFinancialStatusDialog(true)}
             >
               Financial Status Report
             </Button>
@@ -274,6 +276,10 @@ export const ElectionAccreditationTab = () => {
       <CheckActivitiesSheet 
         open={showActivitiesSheet} 
         onOpenChange={setShowActivitiesSheet} 
+      />
+      <FinancialStatusDialog
+        open={showFinancialStatusDialog}
+        onOpenChange={setShowFinancialStatusDialog}
       />
     </div>
   );
