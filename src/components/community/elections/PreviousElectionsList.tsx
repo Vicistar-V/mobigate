@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, ChevronLeft, ChevronRight, Download, Trophy } from "lucide-react";
 import { PreviousElection } from "@/data/electionData";
 import { format } from "date-fns";
@@ -85,85 +84,72 @@ export const PreviousElectionsList = ({
     <>
       <Card className="p-4 mb-4">
         <div className="space-y-4">
-          <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Previous Election Results</h3>
-            <Button variant="outline" size="sm" className="w-fit">
+            <Button variant="outline" size="sm">
               <Calendar className="w-4 h-4 mr-2" />
-              Filter by Date
+              Dates
             </Button>
           </div>
 
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="list">Election List</TabsTrigger>
-              <TabsTrigger value="chat">Chat Messages</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="list" className="space-y-2 mt-4">
-              {elections.map((election) => (
-                <div
-                  key={election.id}
-                  className="p-3 border rounded-lg hover:bg-muted cursor-pointer transition-colors active:bg-muted/80"
-                  onClick={() => handleCardClick(election.id)}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm leading-tight">{election.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(election.date, "MMMM dd, yyyy")} • {election.type}
+          <div className="space-y-2">
+            {elections.map((election) => (
+              <div
+                key={election.id}
+                className="p-3 border rounded-lg hover:bg-muted cursor-pointer transition-colors active:bg-muted/80"
+                onClick={() => handleCardClick(election.id)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-sm leading-tight">{election.name}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(election.date, "MMMM dd, yyyy")} • {election.type}
+                    </p>
+                    {election.winner && (
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <Trophy className="w-3 h-3 text-yellow-500" />
+                        <span className="text-xs text-green-600 font-medium">
+                          Winner: {election.winner}
+                        </span>
+                      </div>
+                    )}
+                    {election.totalVotes && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Total Votes: {election.totalVotes.toLocaleString()}
                       </p>
-                      {election.winner && (
-                        <div className="flex items-center gap-1 mt-1.5">
-                          <Trophy className="w-3 h-3 text-yellow-500" />
-                          <span className="text-xs text-green-600 font-medium">
-                            Winner: {election.winner}
-                          </span>
-                        </div>
-                      )}
-                      {election.totalVotes && (
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Total Votes: {election.totalVotes.toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex-shrink-0 h-8 w-8 p-0"
-                      onClick={(e) => handleDownload(e, election.id, election.name)}
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
+                    )}
                   </div>
-                  <div className="text-[10px] text-muted-foreground mt-2 text-center">
-                    Tap to view full results
-                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="flex-shrink-0 h-8 w-8 p-0"
+                    onClick={(e) => handleDownload(e, election.id, election.name)}
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
                 </div>
-              ))}
-
-              {elections.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No previous elections found.
+                <div className="text-[10px] text-muted-foreground mt-2 text-center">
+                  Tap to view full results
                 </div>
-              )}
-
-              <div className="flex justify-center gap-2 pt-4">
-                <Button variant="outline" size="sm">
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="flex items-center px-4 text-sm">Page 1 of 1</span>
-                <Button variant="outline" size="sm">
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
               </div>
-            </TabsContent>
+            ))}
 
-            <TabsContent value="chat" className="mt-4">
+            {elections.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                Select an election to view its chat messages.
+                No previous elections found.
               </div>
-            </TabsContent>
-          </Tabs>
+            )}
+
+            <div className="flex justify-center gap-2 pt-4">
+              <Button variant="outline" size="sm">
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="flex items-center px-4 text-sm">Page 1 of 1</span>
+              <Button variant="outline" size="sm">
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
 
