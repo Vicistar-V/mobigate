@@ -48,12 +48,15 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
               className="p-4 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99]"
               onClick={() => handleWinnerClick(winner)}
             >
-              {/* Winner Badge - Top */}
-              <div className="mb-3">
+              {/* Winner Badge + Date Row - Top */}
+              <div className="flex items-center justify-between mb-3">
                 <Badge className="bg-yellow-500 text-black text-xs px-2 py-1">
                   <Award className="w-3 h-3 mr-1" />
                   Winner
                 </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {format(winner.announcedAt, "MMM dd, yyyy")}
+                </span>
               </div>
 
               {/* Photo + Name Row */}
@@ -95,21 +98,16 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
                   </span>
                 </div>
 
-                {/* Vote Stats + Date Row */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/50">
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground">Votes:</span>
-                      <span className="font-semibold text-yellow-600">{winner.votes}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground">Share:</span>
-                      <span className="font-semibold text-yellow-600">{winner.percentage.toFixed(1)}%</span>
-                    </div>
+                {/* Vote Stats Row */}
+                <div className="flex items-center gap-4 text-sm pt-2 border-t border-border/50">
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Votes:</span>
+                    <span className="font-semibold text-yellow-600">{winner.votes}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {format(winner.announcedAt, "MMM dd, yyyy")}
-                  </p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Share:</span>
+                    <span className="font-semibold text-yellow-600">{winner.percentage.toFixed(1)}%</span>
+                  </div>
                 </div>
               </div>
             </Card>
