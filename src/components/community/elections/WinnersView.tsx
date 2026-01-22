@@ -48,7 +48,16 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
               className="p-4 hover:shadow-lg transition-all cursor-pointer active:scale-[0.99]"
               onClick={() => handleWinnerClick(winner)}
             >
-              <div className="flex gap-4">
+              {/* Winner Badge - Top */}
+              <div className="mb-3">
+                <Badge className="bg-yellow-500 text-black text-xs px-2 py-1">
+                  <Award className="w-3 h-3 mr-1" />
+                  Winner
+                </Badge>
+              </div>
+
+              {/* Photo + Name Row */}
+              <div className="flex gap-4 items-start">
                 {/* Winner Photo */}
                 <div className="relative flex-shrink-0">
                   <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-yellow-500 shadow-md">
@@ -64,34 +73,31 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
                   </div>
                 </div>
 
-                {/* Winner Info */}
+                {/* Name and Office */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-base truncate">{winner.candidateName}</h3>
-                      <p className="text-sm text-primary font-medium">{winner.office}</p>
-                    </div>
-                    <Badge className="bg-yellow-500 text-black text-[10px] px-1.5 py-0.5 flex-shrink-0">
-                      <Award className="w-2.5 h-2.5 mr-0.5" />
-                      Winner
-                    </Badge>
-                  </div>
+                  <h3 className="font-bold text-base leading-tight">{winner.candidateName}</h3>
+                  <p className="text-sm text-primary font-medium mt-1">{winner.office}</p>
+                </div>
+              </div>
 
-                  {/* Election Info */}
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    <Badge 
-                      variant="secondary" 
-                      className={`text-xs px-2 py-0.5 ${getElectionTypeBadgeStyle(winner.electionType)}`}
-                    >
-                      {winner.electionType.charAt(0).toUpperCase() + winner.electionType.slice(1).replace('-', ' ')}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {winner.electionName}
-                    </span>
-                  </div>
+              {/* Full Width Details Section */}
+              <div className="mt-4 space-y-2">
+                {/* Election Info */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge 
+                    variant="secondary" 
+                    className={`text-xs px-2 py-0.5 ${getElectionTypeBadgeStyle(winner.electionType)}`}
+                  >
+                    {winner.electionType.charAt(0).toUpperCase() + winner.electionType.slice(1).replace('-', ' ')}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {winner.electionName}
+                  </span>
+                </div>
 
-                  {/* Vote Stats - Compact */}
-                  <div className="flex items-center gap-4 mt-3 text-sm">
+                {/* Vote Stats + Date Row */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/50">
+                  <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Votes:</span>
                       <span className="font-semibold text-yellow-600">{winner.votes}</span>
@@ -101,9 +107,7 @@ export const WinnersView = ({ winners }: WinnersViewProps) => {
                       <span className="font-semibold text-yellow-600">{winner.percentage.toFixed(1)}%</span>
                     </div>
                   </div>
-
-                  {/* Date */}
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-sm text-muted-foreground">
                     {format(winner.announcedAt, "MMM dd, yyyy")}
                   </p>
                 </div>
