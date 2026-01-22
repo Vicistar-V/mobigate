@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MoreVertical, Settings, Play } from "lucide-react";
+import { MoreVertical, Settings, Play, LayoutDashboard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import { GuestLoginDialog } from "./GuestLoginDialog";
@@ -288,6 +289,19 @@ export function CommunityMainMenu({
                 >
                   Inside Community
                 </Button>
+                {(isAdmin || isOwner) && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-4 text-primary h-9 transition-colors duration-200"
+                    onClick={() => {
+                      navigate(`/community/${communityId}/admin/content`);
+                      setOpen(false);
+                    }}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Content (Admin)
+                  </Button>
+                )}
               </AccordionContent>
             </AccordionItem>
 
@@ -445,7 +459,18 @@ export function CommunityMainMenu({
             {(isAdmin || isOwner) && (
               <AccordionItem value="admins" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
                 <AccordionTrigger className="text-base">Admins</AccordionTrigger>
-                <AccordionContent className="space-y-1">
+                <AccordionContent className="space-y-2">
+                  <Button
+                    className="w-full justify-start gap-2 bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => {
+                      navigate(`/community/${communityId}/admin`);
+                      setOpen(false);
+                    }}
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Admin Dashboard
+                    <Badge variant="secondary" className="ml-auto text-[10px] bg-white/20">5</Badge>
+                  </Button>
                   <Button
                     variant="ghost"
                     className="w-full justify-start pl-4 h-9 transition-colors duration-200"
@@ -647,6 +672,19 @@ export function CommunityMainMenu({
                 >
                   Accredited Voters
                 </Button>
+                {(isAdmin || isOwner) && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-4 text-primary h-9 transition-colors duration-200"
+                    onClick={() => {
+                      navigate(`/community/${communityId}/admin/elections`);
+                      setOpen(false);
+                    }}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Elections (Admin)
+                  </Button>
+                )}
               </AccordionContent>
             </AccordionItem>
 
