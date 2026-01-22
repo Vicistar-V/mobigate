@@ -1,3 +1,16 @@
+// Election Settings - Configurable by Community Admin
+export interface ElectionSettings {
+  voteChangeTimeframeMinutes: number; // Default: 5 minutes
+  allowVoteChange: boolean;
+  showVoteChangeCountdown: boolean;
+}
+
+export const defaultElectionSettings: ElectionSettings = {
+  voteChangeTimeframeMinutes: 5,
+  allowVoteChange: true,
+  showVoteChangeCountdown: true
+};
+
 // Election Office (position being voted for)
 export interface ElectionOffice {
   id: string;
@@ -109,11 +122,11 @@ export interface AccreditedVoter {
   membershipId: string;
 }
 
-// Mock Candidates
+// Mock Candidates - President General with FULL NAMES
 export const mockCandidates: ElectionCandidate[] = [
   {
     id: "cand-1",
-    name: "Paulson",
+    name: "Paulson Chinedu Okonkwo",
     officeId: "office-1",
     votes: 527,
     losses: 473,
@@ -131,7 +144,7 @@ export const mockCandidates: ElectionCandidate[] = [
   },
   {
     id: "cand-2",
-    name: "Jerome",
+    name: "Jerome Ifeanyi Adebayo",
     officeId: "office-1",
     votes: 316,
     losses: 684,
@@ -149,7 +162,7 @@ export const mockCandidates: ElectionCandidate[] = [
   },
   {
     id: "cand-3",
-    name: "Jude",
+    name: "Jude Emeka Nwosu",
     officeId: "office-1",
     votes: 209,
     losses: 791,
@@ -176,7 +189,7 @@ export const mockElectionOffice: ElectionOffice = {
   candidates: mockCandidates
 };
 
-// Vice President Office
+// Vice President Office with FULL NAMES
 export const mockVicePresidentOffice: ElectionOffice = {
   id: "office-2",
   name: "Vice President",
@@ -185,7 +198,7 @@ export const mockVicePresidentOffice: ElectionOffice = {
   candidates: [
     { 
       id: "vp-cand-1", 
-      name: "Grace", 
+      name: "Grace Adaeze Okafor", 
       officeId: "office-2", 
       votes: 412, 
       losses: 588, 
@@ -197,7 +210,7 @@ export const mockVicePresidentOffice: ElectionOffice = {
     },
     { 
       id: "vp-cand-2", 
-      name: "Emmanuel", 
+      name: "Emmanuel Chukwuemeka Ibe", 
       officeId: "office-2", 
       votes: 389, 
       losses: 611, 
@@ -209,7 +222,7 @@ export const mockVicePresidentOffice: ElectionOffice = {
     },
     { 
       id: "vp-cand-3", 
-      name: "Patricia", 
+      name: "Patricia Ngozi Udeh", 
       officeId: "office-2", 
       votes: 287, 
       losses: 713, 
@@ -222,7 +235,7 @@ export const mockVicePresidentOffice: ElectionOffice = {
   ]
 };
 
-// Secretary Office
+// Secretary Office with FULL NAMES
 export const mockSecretaryOffice: ElectionOffice = {
   id: "office-3",
   name: "Secretary",
@@ -231,7 +244,7 @@ export const mockSecretaryOffice: ElectionOffice = {
   candidates: [
     { 
       id: "sec-cand-1", 
-      name: "Daniel", 
+      name: "Daniel Obiora Chibueze", 
       officeId: "office-3", 
       votes: 523, 
       losses: 477, 
@@ -243,7 +256,7 @@ export const mockSecretaryOffice: ElectionOffice = {
     },
     { 
       id: "sec-cand-2", 
-      name: "Monica", 
+      name: "Monica Nneka Obi", 
       officeId: "office-3", 
       votes: 478, 
       losses: 522, 
@@ -256,7 +269,7 @@ export const mockSecretaryOffice: ElectionOffice = {
   ]
 };
 
-// Treasurer Office
+// Treasurer Office with FULL NAMES
 export const mockTreasurerOffice: ElectionOffice = {
   id: "office-4",
   name: "Treasurer",
@@ -265,7 +278,7 @@ export const mockTreasurerOffice: ElectionOffice = {
   candidates: [
     { 
       id: "trs-cand-1", 
-      name: "Benjamin", 
+      name: "Benjamin Uchenna Okoro", 
       officeId: "office-4", 
       votes: 567, 
       losses: 433, 
@@ -277,7 +290,7 @@ export const mockTreasurerOffice: ElectionOffice = {
     },
     { 
       id: "trs-cand-2", 
-      name: "Victoria", 
+      name: "Victoria Chiamaka Eze", 
       officeId: "office-4", 
       votes: 401, 
       losses: 599, 
@@ -289,7 +302,7 @@ export const mockTreasurerOffice: ElectionOffice = {
     },
     { 
       id: "trs-cand-3", 
-      name: "Kenneth", 
+      name: "Kenneth Obinna Nwachukwu", 
       officeId: "office-4", 
       votes: 298, 
       losses: 702, 
@@ -302,7 +315,7 @@ export const mockTreasurerOffice: ElectionOffice = {
   ]
 };
 
-// Financial Secretary Office
+// Financial Secretary Office with FULL NAMES
 export const mockFinSecOffice: ElectionOffice = {
   id: "office-5",
   name: "Financial Secretary",
@@ -311,7 +324,7 @@ export const mockFinSecOffice: ElectionOffice = {
   candidates: [
     { 
       id: "fs-cand-1", 
-      name: "Anthony", 
+      name: "Anthony Chijioke Oguike", 
       officeId: "office-5", 
       votes: 489, 
       losses: 511, 
@@ -323,7 +336,7 @@ export const mockFinSecOffice: ElectionOffice = {
     },
     { 
       id: "fs-cand-2", 
-      name: "Rebecca", 
+      name: "Rebecca Chidinma Anyanwu", 
       officeId: "office-5", 
       votes: 445, 
       losses: 555, 
@@ -500,76 +513,92 @@ export const mockPreviousElections: PreviousElection[] = [
   },
   {
     id: "prev-5",
-    name: "Vice President Election 2023",
-    date: new Date("2023-08-18"),
-    type: "Special Election",
+    name: "Emergency VP Election",
+    date: new Date("2023-07-20"),
+    type: "Emergency Election",
     winner: "Lisa Anderson",
-    totalVotes: 678
-  },
-  {
-    id: "prev-6",
-    name: "General Election 2022",
-    date: new Date("2022-03-15"),
-    type: "General Election",
-    winner: "Jennifer Taylor",
-    totalVotes: 923
-  },
-  {
-    id: "prev-7",
-    name: "Secretary By-Election 2022",
-    date: new Date("2022-11-05"),
-    type: "By-Election",
-    winner: "Theodore Nwannunu",
-    totalVotes: 567
+    totalVotes: 921
   }
 ];
 
 // Mock Campaigns
 export const mockCampaigns: Campaign[] = [
   {
-    id: "camp-1",
+    id: "campaign-1",
     candidateId: "cand-1",
-    candidateName: "Paulson",
+    candidateName: "Paulson Chinedu Okonkwo",
     office: "President General",
-    description: "Building a stronger, more united community together",
-    manifesto: "Focus on transparency, accountability, and community development. Will implement monthly town halls and improve communication channels.",
+    description: "A campaign focused on transparency and community development.",
+    manifesto: "As your President General, I am committed to leading with transparency, accountability, and a deep respect for our community values. My vision is to create a more inclusive and prosperous community where every member has a voice.",
     startDate: new Date("2025-02-01"),
     endDate: new Date("2025-03-14"),
     status: "active"
   },
   {
-    id: "camp-2",
+    id: "campaign-2",
     candidateId: "cand-2",
-    candidateName: "Jerome",
+    candidateName: "Jerome Ifeanyi Adebayo",
     office: "President General",
-    description: "Innovation and progress for all members",
-    manifesto: "Modernize our processes, embrace technology, and create more opportunities for member engagement and growth.",
+    description: "Innovation and digital transformation for our community's future.",
+    manifesto: "The future of our community depends on our ability to adapt and innovate. I believe in leveraging technology to improve our operations and make our community more efficient and accessible.",
     startDate: new Date("2025-02-01"),
     endDate: new Date("2025-03-14"),
     status: "active"
   },
   {
-    id: "camp-3",
-    candidateId: "cand-3",
-    candidateName: "Jude",
-    office: "President General",
-    description: "Tradition meets tomorrow - preserving our values while moving forward",
-    manifesto: "Balance our rich heritage with modern needs. Strengthen community bonds while expanding our reach and impact.",
+    id: "campaign-3",
+    candidateId: "vp-cand-1",
+    candidateName: "Grace Adaeze Okafor",
+    office: "Vice President",
+    description: "Dedicated to member welfare and community service.",
+    manifesto: "As Vice President, I will support the President General while ensuring every member's voice is heard. My focus will be on welfare programs and conflict resolution.",
     startDate: new Date("2025-02-01"),
     endDate: new Date("2025-03-14"),
     status: "active"
   }
 ];
 
-// Mock Winners
-export const mockWinners: ElectionWinner[] = [
+// Mock Election Winners
+export const mockElectionWinners: ElectionWinner[] = [
   {
     id: "winner-1",
-    candidateName: "Paulson",
+    candidateName: "Paulson Chinedu Okonkwo",
     office: "President General",
     votes: 527,
-    percentage: 43.9,
+    percentage: 50.1,
     announcedAt: new Date("2025-03-15T18:00:00")
+  },
+  {
+    id: "winner-2",
+    candidateName: "Grace Adaeze Okafor",
+    office: "Vice President",
+    votes: 412,
+    percentage: 37.8,
+    announcedAt: new Date("2025-03-15T18:15:00")
+  },
+  {
+    id: "winner-3",
+    candidateName: "Daniel Obiora Chibueze",
+    office: "Secretary",
+    votes: 523,
+    percentage: 52.2,
+    announcedAt: new Date("2025-03-15T18:30:00")
+  },
+  {
+    id: "winner-4",
+    candidateName: "Benjamin Uchenna Okoro",
+    office: "Treasurer",
+    votes: 567,
+    percentage: 44.8,
+    announcedAt: new Date("2025-03-15T18:45:00")
+  },
+  {
+    id: "winner-5",
+    candidateName: "Anthony Chijioke Oguike",
+    office: "Financial Secretary",
+    votes: 489,
+    percentage: 52.4,
+    announcedAt: new Date("2025-03-15T19:00:00")
   }
 ];
 
@@ -578,81 +607,68 @@ export const mockAccreditedVoters: AccreditedVoter[] = [
   {
     id: "av-1",
     name: "Mark Anthony Orji",
-    avatar: "/src/assets/profile-james-wilson.jpg",
-    dateAccredited: "2025-02-15",
+    avatar: "/src/assets/profile-photo.jpg",
+    dateAccredited: "2025-03-10",
     status: "valid",
-    membershipId: "MEM-2024/001234"
+    membershipId: "MEM-2024/001"
   },
   {
     id: "av-2",
     name: "Theodore Ike Nwannunu",
-    avatar: "/src/assets/profile-michael-chen.jpg",
-    dateAccredited: "2025-02-14",
+    avatar: "/src/assets/profile-james-wilson.jpg",
+    dateAccredited: "2025-03-10",
     status: "valid",
-    membershipId: "MEM-2024/001235"
+    membershipId: "MEM-2024/002"
   },
   {
     id: "av-3",
     name: "Sarah Johnson",
     avatar: "/src/assets/profile-sarah-johnson.jpg",
-    dateAccredited: "2025-02-13",
+    dateAccredited: "2025-03-11",
     status: "valid",
-    membershipId: "MEM-2024/001236"
+    membershipId: "MEM-2024/003"
   },
   {
     id: "av-4",
     name: "Michael Chen",
     avatar: "/src/assets/profile-michael-chen.jpg",
-    dateAccredited: "2025-02-12",
+    dateAccredited: "2025-03-11",
     status: "valid",
-    membershipId: "MEM-2024/001237"
+    membershipId: "MEM-2024/004"
   },
   {
     id: "av-5",
     name: "Emily Davis",
     avatar: "/src/assets/profile-emily-davis.jpg",
-    dateAccredited: "2025-02-11",
+    dateAccredited: "2025-03-12",
     status: "valid",
-    membershipId: "MEM-2024/001238"
+    membershipId: "MEM-2024/005"
   },
   {
     id: "av-6",
-    name: "James Wilson",
-    avatar: "/src/assets/profile-james-wilson.jpg",
-    dateAccredited: "2025-02-10",
-    status: "valid",
-    membershipId: "MEM-2024/001239"
+    name: "Robert Brown",
+    avatar: "/src/assets/profile-robert-brown.jpg",
+    dateAccredited: "2025-03-12",
+    status: "invalid",
+    membershipId: "MEM-2024/006"
   },
   {
     id: "av-7",
-    name: "Lisa Anderson",
-    avatar: "/src/assets/profile-lisa-anderson.jpg",
-    dateAccredited: "2024-03-15",
-    status: "invalid",
-    membershipId: "MEM-2023/000891"
+    name: "Jennifer Taylor",
+    avatar: "/src/assets/profile-jennifer-taylor.jpg",
+    dateAccredited: "2025-03-12",
+    status: "valid",
+    membershipId: "MEM-2024/007"
   },
   {
     id: "av-8",
-    name: "Robert Brown",
-    avatar: "/src/assets/profile-robert-brown.jpg",
-    dateAccredited: "2024-03-14",
-    status: "invalid",
-    membershipId: "MEM-2023/000892"
-  },
-  {
-    id: "av-9",
-    name: "Jennifer Taylor",
-    avatar: "/src/assets/profile-jennifer-taylor.jpg",
-    dateAccredited: "2024-03-13",
-    status: "invalid",
-    membershipId: "MEM-2023/000893"
-  },
-  {
-    id: "av-10",
     name: "David Martinez",
     avatar: "/src/assets/profile-david-martinez.jpg",
-    dateAccredited: "2024-03-12",
-    status: "invalid",
-    membershipId: "MEM-2023/000894"
+    dateAccredited: "2025-03-13",
+    status: "valid",
+    membershipId: "MEM-2024/008"
   }
 ];
+
+// Alias for backward compatibility
+export const mockWinners = mockElectionWinners;
