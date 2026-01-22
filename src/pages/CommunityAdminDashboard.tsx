@@ -93,10 +93,10 @@ const CommunityAdminDashboard = () => {
         setShowMembershipRequests(true);
         break;
       case 'content':
-        toast({ title: "Content Moderation", description: "Opening content moderation..." });
+        navigate(`/community/${communityId}/admin/content`);
         break;
       case 'clearance':
-        toast({ title: "Election Clearances", description: "Opening clearance management..." });
+        navigate(`/community/${communityId}/admin/elections`);
         break;
       case 'finance':
         setShowFinancialObligations(true);
@@ -112,10 +112,10 @@ const CommunityAdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background w-full overflow-x-hidden">
       {/* Fixed Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex items-center gap-3 px-3 py-3">
           <Button
             variant="ghost"
             size="icon"
@@ -124,13 +124,14 @@ const CommunityAdminDashboard = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="font-semibold">Admin Dashboard</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-semibold truncate">Admin Dashboard</h1>
             <p className="text-xs text-muted-foreground">Manage your community</p>
           </div>
           <Button
             variant="ghost"
             size="icon"
+            className="shrink-0"
             onClick={handleRefresh}
             disabled={isRefreshing}
           >
@@ -141,7 +142,7 @@ const CommunityAdminDashboard = () => {
 
       {/* Main Content */}
       <ScrollArea className="h-[calc(100vh-64px)] touch-auto">
-        <div className="p-4 space-y-4 pb-20">
+        <div className="px-3 py-4 space-y-4 pb-24 w-full overflow-hidden">
           {/* Dashboard Header with Stats */}
           <AdminDashboardHeader
             communityName="Ndigbo Unity Association"
@@ -153,8 +154,8 @@ const CommunityAdminDashboard = () => {
           <AdminQuickActions
             onManageMembers={() => setShowMembershipRequests(true)}
             onViewFinances={() => setShowFinancialOverview(true)}
-            onManageElections={() => showToast("Elections", "Navigating to election management...")}
-            onManageContent={() => showToast("Content", "Opening content management...")}
+            onManageElections={() => navigate(`/community/${communityId}/admin/elections`)}
+            onManageContent={() => navigate(`/community/${communityId}/admin/content`)}
             onManageLeadership={() => setShowLeadershipDialog(true)}
             onCommunitySettings={() => showToast("Settings", "Opening community settings...")}
             pendingMembers={mockAdminStats.pendingRequests}
@@ -168,7 +169,7 @@ const CommunityAdminDashboard = () => {
           />
 
           {/* Admin Sections */}
-          <div className="space-y-3">
+          <div className="space-y-3 w-full overflow-hidden">
             {/* Membership Management */}
             <AdminMembershipSection
               stats={mockAdminStats}
@@ -182,8 +183,8 @@ const CommunityAdminDashboard = () => {
             <AdminContentSection
               stats={mockAdminStats}
               recentContent={mockRecentContent}
-              onManageNews={() => showToast("News", "Opening news management...")}
-              onManageEvents={() => showToast("Events", "Opening events management...")}
+              onManageNews={() => navigate(`/community/${communityId}/admin/content`)}
+              onManageEvents={() => navigate(`/community/${communityId}/admin/content`)}
               onManageGallery={() => setShowGalleryDialog(true)}
               onManageResources={() => setShowResourcesDialog(true)}
             />
@@ -202,12 +203,12 @@ const CommunityAdminDashboard = () => {
             <AdminElectionSection
               stats={mockAdminStats}
               electionActivities={mockElectionActivities}
-              onViewCampaigns={() => showToast("Campaigns", "Opening campaigns...")}
-              onViewResults={() => showToast("Results", "Opening election results...")}
-              onManageAccreditation={() => showToast("Accreditation", "Opening accreditation...")}
-              onProcessClearances={() => showToast("Clearances", "Opening clearances...")}
-              onConfigureVoting={() => showToast("Voting Rules", "Opening voting configuration...")}
-              onAnnounceWinners={() => showToast("Winners", "Opening winners announcement...")}
+              onViewCampaigns={() => navigate(`/community/${communityId}/admin/elections`)}
+              onViewResults={() => navigate(`/community/${communityId}/admin/elections`)}
+              onManageAccreditation={() => navigate(`/community/${communityId}/admin/elections`)}
+              onProcessClearances={() => navigate(`/community/${communityId}/admin/elections`)}
+              onConfigureVoting={() => navigate(`/community/${communityId}/admin/elections`)}
+              onAnnounceWinners={() => navigate(`/community/${communityId}/admin/elections`)}
             />
 
             {/* Meeting Management */}
