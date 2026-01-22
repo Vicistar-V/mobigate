@@ -15,8 +15,8 @@ import {
   ArrowLeft,
   Bell,
 } from "lucide-react";
-import { useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { WallStatusCarousel } from "@/components/WallStatusCarousel";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { ELibrarySection } from "@/components/ELibrarySection";
@@ -34,7 +34,7 @@ import { CommunityEventsSection } from "@/components/community/CommunityEventsSe
 import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks";
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useEffect } from "react";
+
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 import { CommunityVibesSection } from "@/components/community/CommunityVibesSection";
 import { CommunityExecutiveTab } from "@/components/community/CommunityExecutiveTab";
@@ -86,7 +86,15 @@ import { communityNotifications } from "@/data/communityNotificationsData";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
-  const [activeTab, setActiveTab] = useState<string>("status");
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get active tab from URL or default to "status"
+  const activeTab = searchParams.get("tab") || "status";
+  
+  // Function to change tab via URL parameter
+  const handleTabChange = useCallback((newTab: string) => {
+    setSearchParams({ tab: newTab }, { replace: true });
+  }, [setSearchParams]);
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -560,7 +568,7 @@ const CommunityProfile = () => {
                 isOwner={community.isOwner}
                 isAdmin={community.role === "Admin"}
                 isMember={community.isMember || isMember}
-                onNavigate={(section) => setActiveTab(section)}
+                onNavigate={(section) => handleTabChange(section)}
               />
             </div>
           </div>
@@ -568,7 +576,7 @@ const CommunityProfile = () => {
 
         {/* Tabs Section */}
         <div ref={tabsSectionRef}>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-4">
             <TabsList className="w-full grid grid-cols-3 h-auto">
               <TabsTrigger value="status" className="text-sm sm:text-base py-2.5 px-4">
                 Status
@@ -794,7 +802,7 @@ const CommunityProfile = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => setActiveTab("status")}
+                onClick={() => handleTabChange("status")}
                 className="mb-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -911,7 +919,7 @@ const CommunityProfile = () => {
                       Access your community ID card and request new cards
                     </p>
                     <Button onClick={() => {
-                      setActiveTab("resources");
+                      handleTabChange("resources");
                       toast({ title: "ID Card Feature", description: "View and manage your community ID card" });
                     }}>
                       View ID Card Resources
@@ -959,7 +967,7 @@ const CommunityProfile = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => setActiveTab("status")}
+                onClick={() => handleTabChange("status")}
                 className="mb-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -985,7 +993,7 @@ const CommunityProfile = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => setActiveTab("status")}
+                onClick={() => handleTabChange("status")}
                 className="mb-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
