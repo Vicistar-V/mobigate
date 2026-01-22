@@ -1,6 +1,16 @@
 import { useState } from "react";
-import { X, CheckCircle2, AlertTriangle, TrendingUp, Calendar, DollarSign } from "lucide-react";
+import { X, CheckCircle2, AlertTriangle, TrendingUp, Calendar, CreditCard, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,7 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { mockFinancialStatus } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
-import { PaymentPlanDialog } from "./PaymentPlanDialog";
 
 interface FinancialStatusDialogProps {
   open: boolean;
@@ -18,17 +27,26 @@ interface FinancialStatusDialogProps {
 export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDialogProps) {
   const { toast } = useToast();
   const [status] = useState(mockFinancialStatus);
-  const [showPaymentPlanDialog, setShowPaymentPlanDialog] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  const handleRequestWaiver = () => {
-    toast({
-      title: "Waiver Request Submitted",
-      description: "Your request will be reviewed by the finance committee",
-    });
+  const handlePayNow = () => {
+    setShowConfirmation(true);
   };
 
-  const handlePaymentPlan = () => {
-    setShowPaymentPlanDialog(true);
+  const handleConfirmPayment = async () => {
+    setIsProcessingPayment(true);
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    toast({
+      title: "Payment Successful!",
+      description: `Your payment of M${status.outstandingBalance.toLocaleString()} (₦${status.outstandingBalance.toLocaleString()}) has been debited from your Mobi Wallet.`,
+    });
+    
+    setIsProcessingPayment(false);
+    setShowConfirmation(false);
+    onOpenChange(false);
   };
 
   const getStandingColor = (standing: string) => {
@@ -58,154 +76,195 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0">
-        <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold">Financial Status</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] p-0">
+          <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-bold">Financial Status</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
 
-        <ScrollArea className="h-[calc(90vh-80px)]">
-          <div className="p-4 sm:p-6 space-y-4">
-            {/* Financial Standing Card */}
-            <Card className={`border-2 ${
-              status.standing === "good" 
-                ? "border-green-500/30 bg-green-500/5" 
-                : "border-yellow-500/30 bg-yellow-500/5"
-            }`}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      {getStandingIcon(status.standing)}
-                      <div>
-                        <p className="text-sm text-muted-foreground">Your Financial Standing</p>
-                        <h3 className="text-2xl font-bold capitalize">{status.standing} Standing</h3>
+          <ScrollArea className="h-[calc(90vh-80px)]">
+            <div className="p-4 sm:p-6 space-y-4">
+              {/* Financial Standing Card */}
+              <Card className={`border-2 ${
+                status.standing === "good" 
+                  ? "border-green-500/30 bg-green-500/5" 
+                  : "border-yellow-500/30 bg-yellow-500/5"
+              }`}>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        {getStandingIcon(status.standing)}
+                        <div>
+                          <p className="text-sm text-muted-foreground">Your Financial Standing</p>
+                          <h3 className="text-2xl font-bold capitalize">{status.standing} Standing</h3>
+                        </div>
                       </div>
+                      {status.standing === "good" ? (
+                        <p className="text-sm text-muted-foreground">
+                          You are in good financial standing with the community
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Please clear your outstanding obligations to maintain good standing
+                        </p>
+                      )}
                     </div>
-                    {status.standing === "good" ? (
-                      <p className="text-sm text-muted-foreground">
-                        You are in good financial standing with the community
-                      </p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        Please clear your outstanding obligations to maintain good standing
-                      </p>
-                    )}
-                  </div>
-                  <Badge className={getStandingColor(status.standing)}>
-                    {status.standing}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Outstanding Balance */}
-            {status.outstandingBalance > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                    Outstanding Balance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center p-4 bg-yellow-500/10 rounded-lg">
-                    <p className="text-3xl font-bold text-yellow-700">
-                      {status.currency} {status.outstandingBalance.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Amount due
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button onClick={handlePaymentPlan} variant="outline" size="sm">
-                      <DollarSign className="h-4 w-4 mr-2" />
-                      Payment Plan
-                    </Button>
-                    <Button onClick={handleRequestWaiver} variant="outline" size="sm">
-                      Request Waiver
-                    </Button>
+                    <Badge className={getStandingColor(status.standing)}>
+                      {status.standing}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Compliance Rate */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  Payment Compliance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium">Compliance Rate</span>
-                    <span className="text-sm font-bold">{status.complianceRate}%</span>
-                  </div>
-                  <Progress value={status.complianceRate} className="h-3" />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {status.complianceRate >= 90 
-                      ? "Excellent payment record!" 
-                      : status.complianceRate >= 70 
-                      ? "Good payment record" 
-                      : "Please improve your payment record"}
-                  </p>
-                </div>
+              {/* Outstanding Balance */}
+              {status.outstandingBalance > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                      Outstanding Balance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-center p-4 bg-yellow-500/10 rounded-lg">
+                      <p className="text-3xl font-bold text-yellow-700">
+                        M{status.outstandingBalance.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        (₦{status.outstandingBalance.toLocaleString()}) Amount due
+                      </p>
+                    </div>
+                    
+                    {/* Single Pay Now Button */}
+                    <Button 
+                      onClick={handlePayNow} 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      size="lg"
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Pay Now - M{status.outstandingBalance.toLocaleString()}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
 
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              {/* Compliance Rate */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Payment Compliance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Total Paid</p>
-                    <p className="text-lg font-bold text-green-600">
-                      {status.currency} {status.totalPaid.toLocaleString()}
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium">Compliance Rate</span>
+                      <span className="text-sm font-bold">{status.complianceRate}%</span>
+                    </div>
+                    <Progress value={status.complianceRate} className="h-3" />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {status.complianceRate >= 90 
+                        ? "Excellent payment record!" 
+                        : status.complianceRate >= 70 
+                        ? "Good payment record" 
+                        : "Please improve your payment record"}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Total Due</p>
-                    <p className="text-lg font-bold">
-                      {status.currency} {status.totalDue.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Last Payment */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Calendar className="h-5 w-5 text-primary" />
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Total Paid</p>
+                      <p className="text-lg font-bold text-green-600">
+                        M{status.totalPaid.toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Total Due</p>
+                      <p className="text-lg font-bold">
+                        M{status.totalDue.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Last Payment</p>
-                    <p className="font-semibold">{status.lastPaymentDate.toLocaleDateString()}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+                </CardContent>
+              </Card>
 
-    {/* Payment Plan Dialog */}
-    <PaymentPlanDialog 
-      open={showPaymentPlanDialog} 
-      onOpenChange={setShowPaymentPlanDialog}
-      outstandingBalance={status.outstandingBalance}
-    />
+              {/* Last Payment */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-3 rounded-full">
+                      <Calendar className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Last Payment</p>
+                      <p className="font-semibold">{status.lastPaymentDate.toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Confirmation Dialog */}
+      <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-2">
+              <div className="bg-amber-500/10 p-3 rounded-full">
+                <AlertTriangle className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center">Confirm Payment</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              You are paying{" "}
+              <span className="font-bold text-foreground">
+                M{status.outstandingBalance.toLocaleString()}
+              </span>{" "}
+              (₦{status.outstandingBalance.toLocaleString()}) to clear your outstanding balance.
+              This amount will be debited from your Mobi Wallet.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="w-full sm:w-auto" disabled={isProcessingPayment}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirmPayment();
+              }}
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+              disabled={isProcessingPayment}
+            >
+              {isProcessingPayment ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Pay Now
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
