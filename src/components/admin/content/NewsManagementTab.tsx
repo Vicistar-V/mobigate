@@ -159,11 +159,11 @@ export function NewsManagementTab({
         ) : (
           filtered.map(item => (
             <Card key={item.id} className="overflow-hidden">
-              <CardContent className="p-3">
-                <div className="flex gap-3">
-                  {/* Thumbnail */}
+              <CardContent className="p-4">
+                {/* Top Row - Thumbnail + Status Badge */}
+                <div className="flex items-start gap-3">
                   <div 
-                    className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center shrink-0 cursor-pointer"
+                    className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0 cursor-pointer"
                     onClick={() => onPreview(item)}
                   >
                     {item.thumbnail ? (
@@ -172,78 +172,78 @@ export function NewsManagementTab({
                       <Newspaper className="h-6 w-6 text-muted-foreground" />
                     )}
                   </div>
-
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <h4 
-                          className="font-medium text-sm line-clamp-1 cursor-pointer hover:text-primary"
-                          onClick={() => onPreview(item)}
-                        >
-                          {item.title}
-                        </h4>
-                        {item.featured && (
-                          <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
-                        )}
-                      </div>
-                      <Badge className={`text-[10px] shrink-0 ${getStatusColor(item.status)}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge className={`text-xs px-2 py-0.5 ${getStatusColor(item.status)}`}>
                         {item.status}
                       </Badge>
+                      {item.featured && (
+                        <Star className="h-4 w-4 text-amber-500 fill-amber-500 shrink-0" />
+                      )}
                     </div>
-
                     {item.category && (
-                      <Badge variant="outline" className="text-[10px] mt-1 capitalize">
+                      <Badge variant="outline" className="text-xs px-2 py-0.5 mt-1.5 capitalize">
                         {item.category}
                       </Badge>
                     )}
+                  </div>
+                </div>
 
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <Avatar className="h-4 w-4">
-                        <AvatarImage src={item.authorAvatar} />
-                        <AvatarFallback className="text-[8px]">{item.authorName[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs text-muted-foreground">{item.authorName}</span>
-                      <span className="text-xs text-muted-foreground">•</span>
-                      <span className="text-xs text-muted-foreground">
-                        {item.publishedAt ? format(item.publishedAt, "MMM d") : "Draft"}
-                      </span>
-                    </div>
+                {/* Title - Full Width */}
+                <h4 
+                  className="font-semibold text-base mt-3 line-clamp-2 cursor-pointer hover:text-primary leading-snug"
+                  onClick={() => onPreview(item)}
+                >
+                  {item.title}
+                </h4>
 
-                    {/* Stats */}
-                    {item.status === "published" && (
-                      <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
-                        <span>{item.views.toLocaleString()} views</span>
-                        <span>{item.likes} likes</span>
-                        <span>{item.comments} comments</span>
-                      </div>
-                    )}
+                {/* Author Row */}
+                <div className="flex items-center gap-2 mt-2">
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage src={item.authorAvatar} />
+                    <AvatarFallback className="text-[10px]">{item.authorName[0]}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-muted-foreground">{item.authorName}</span>
+                  <span className="text-sm text-muted-foreground">•</span>
+                  <span className="text-sm text-muted-foreground">
+                    {item.publishedAt ? format(item.publishedAt, "MMM d") : "Draft"}
+                  </span>
+                </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-1 mt-2">
-                      {item.status === 'pending' && (
-                        <>
-                          <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 text-green-600" onClick={() => onApprove(item.id)}>
-                            <Check className="h-3 w-3" /> Approve
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 text-red-600" onClick={() => onReject(item.id)}>
-                            <X className="h-3 w-3" /> Reject
-                          </Button>
-                        </>
-                      )}
-                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => onPreview(item)}>
-                        <Eye className="h-3 w-3" />
+                {/* Stats Row */}
+                {item.status === "published" && (
+                  <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                    <span>{item.views.toLocaleString()} views</span>
+                    <span>{item.likes} likes</span>
+                    <span>{item.comments} comments</span>
+                  </div>
+                )}
+
+                {/* Actions Row */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {item.status === 'pending' && (
+                    <>
+                      <Button size="sm" variant="outline" className="h-9 text-sm gap-1.5 text-green-600" onClick={() => onApprove(item.id)}>
+                        <Check className="h-4 w-4" /> Approve
                       </Button>
-                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => onEdit(item)}>
-                        <Edit className="h-3 w-3" />
+                      <Button size="sm" variant="outline" className="h-9 text-sm gap-1.5 text-red-600" onClick={() => onReject(item.id)}>
+                        <X className="h-4 w-4" /> Reject
                       </Button>
-                      <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={() => onToggleFeatured(item.id)}>
-                        <Star className={`h-3 w-3 ${item.featured ? "fill-amber-500 text-amber-500" : ""}`} />
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-7 text-[10px] text-destructive" onClick={() => onDelete(item.id)}>
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    </>
+                  )}
+                  <div className="flex gap-1 ml-auto">
+                    <Button size="sm" variant="ghost" className="h-9 w-9 p-0" onClick={() => onPreview(item)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-9 w-9 p-0" onClick={() => onEdit(item)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-9 w-9 p-0" onClick={() => onToggleFeatured(item.id)}>
+                      <Star className={`h-4 w-4 ${item.featured ? "fill-amber-500 text-amber-500" : ""}`} />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-9 w-9 p-0 text-destructive" onClick={() => onDelete(item.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
