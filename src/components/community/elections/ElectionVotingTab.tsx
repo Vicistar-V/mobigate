@@ -4,10 +4,9 @@ import { Menu } from "lucide-react";
 import { ElectionVotingCard } from "./ElectionVotingCard";
 import { AnonymousVotingSection } from "./AnonymousVotingSection";
 import { ElectionControlBar } from "./ElectionControlBar";
-import { ElectionChatSection } from "./ElectionChatSection";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { mockElection, mockElectionChatMessages } from "@/data/electionData";
+import { mockElection } from "@/data/electionData";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
 
 export const ElectionVotingTab = () => {
@@ -54,9 +53,6 @@ export const ElectionVotingTab = () => {
 
       {/* Ads */}
       <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-voting" />
-
-      {/* Chat Section */}
-      <ElectionChatSection messages={mockElectionChatMessages} />
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
