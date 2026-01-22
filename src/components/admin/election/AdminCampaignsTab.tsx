@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar } from "lucide-react";
+import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar as CalendarIcon, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { mockAdminCampaigns, AdminCampaign } from "@/data/adminElectionData";
 import { useToast } from "@/hooks/use-toast";
 import { CampaignFormDialog } from "./CampaignFormDialog";
-import { format } from "date-fns";
+import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 const getStatusColor = (status: AdminCampaign['status']) => {
   switch (status) {
@@ -46,12 +50,31 @@ export function AdminCampaignsTab() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showFormDialog, setShowFormDialog] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<AdminCampaign | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.candidateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           campaign.office.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || campaign.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // Date range filter
+    let matchesDate = true;
+    if (dateRange?.from) {
+      const campaignStart = startOfDay(campaign.startDate);
+      const campaignEnd = endOfDay(campaign.endDate);
+      const filterStart = startOfDay(dateRange.from);
+      const filterEnd = dateRange.to ? endOfDay(dateRange.to) : filterStart;
+      
+      // Check if campaign overlaps with the selected date range
+      matchesDate = (
+        isWithinInterval(campaignStart, { start: filterStart, end: filterEnd }) ||
+        isWithinInterval(campaignEnd, { start: filterStart, end: filterEnd }) ||
+        isWithinInterval(filterStart, { start: campaignStart, end: campaignEnd })
+      );
+    }
+    
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const stats = {
@@ -90,6 +113,10 @@ export function AdminCampaignsTab() {
     setShowFormDialog(true);
   };
 
+  const clearDateFilter = () => {
+    setDateRange(undefined);
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4 pb-20 overflow-hidden">
       {/* Stats Row */}
@@ -106,11 +133,100 @@ export function AdminCampaignsTab() {
           <Plus className="h-4 w-4" />
           <span className="hidden xs:inline">Create</span> Campaign
         </Button>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Calendar className="h-4 w-4" />
-          <span className="hidden sm:inline">Calendar</span>
-        </Button>
+        
+        {/* Date Range Picker */}
+        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant={dateRange?.from ? "default" : "outline"} 
+              size="sm" 
+              className={cn(
+                "gap-1.5 min-w-0",
+                dateRange?.from && "bg-green-600 hover:bg-green-700"
+              )}
+            >
+              <CalendarIcon className="h-4 w-4 shrink-0" />
+              {dateRange?.from ? (
+                <span className="hidden sm:inline text-xs truncate">
+                  {format(dateRange.from, "MMM d")}
+                  {dateRange.to && ` - ${format(dateRange.to, "MMM d")}`}
+                </span>
+              ) : (
+                <span className="hidden sm:inline">Filter Dates</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 bg-background border shadow-lg z-50" align="start">
+            <div className="p-3 border-b">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-sm">Filter by Date Range</h4>
+                {dateRange?.from && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-xs text-muted-foreground"
+                    onClick={clearDateFilter}
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Clear
+                  </Button>
+                )}
+              </div>
+              {dateRange?.from && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {format(dateRange.from, "MMM d, yyyy")}
+                  {dateRange.to && ` - ${format(dateRange.to, "MMM d, yyyy")}`}
+                </p>
+              )}
+            </div>
+            <Calendar
+              mode="range"
+              selected={dateRange}
+              onSelect={setDateRange}
+              numberOfMonths={1}
+              className={cn("p-3 pointer-events-auto")}
+              initialFocus
+            />
+            <div className="p-3 border-t flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 text-xs"
+                onClick={() => setIsCalendarOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                size="sm" 
+                className="flex-1 text-xs bg-green-600 hover:bg-green-700"
+                onClick={() => setIsCalendarOpen(false)}
+              >
+                Apply Filter
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
+
+      {/* Active Date Filter Badge */}
+      {dateRange?.from && (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="gap-1.5 text-xs py-1">
+            <CalendarIcon className="h-3 w-3" />
+            {format(dateRange.from, "MMM d")}
+            {dateRange.to && ` - ${format(dateRange.to, "MMM d")}`}
+            <button 
+              onClick={clearDateFilter}
+              className="ml-1 hover:bg-muted rounded-full p-0.5"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''} found
+          </span>
+        </div>
+      )}
 
       {/* Search and Filter */}
       <div className="flex gap-2">
@@ -127,7 +243,7 @@ export function AdminCampaignsTab() {
           <SelectTrigger className="w-[100px] sm:w-[130px] h-9 text-sm">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-background border shadow-lg z-50">
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -142,11 +258,20 @@ export function AdminCampaignsTab() {
         {filteredCampaigns.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center">
-              <p className="text-muted-foreground text-sm">No campaigns found</p>
-              <Button onClick={handleCreate} variant="outline" size="sm" className="mt-4">
-                <Plus className="h-4 w-4 mr-2" />
-                Create First Campaign
-              </Button>
+              <p className="text-muted-foreground text-sm">
+                {dateRange?.from ? "No campaigns found in selected date range" : "No campaigns found"}
+              </p>
+              {dateRange?.from ? (
+                <Button onClick={clearDateFilter} variant="outline" size="sm" className="mt-4">
+                  <X className="h-4 w-4 mr-2" />
+                  Clear Date Filter
+                </Button>
+              ) : (
+                <Button onClick={handleCreate} variant="outline" size="sm" className="mt-4">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Campaign
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
