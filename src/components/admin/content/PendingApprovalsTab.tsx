@@ -188,86 +188,81 @@ export function PendingApprovalsTab({
                 key={item.id} 
                 className={`transition-colors ${isSelected ? 'ring-2 ring-primary' : ''}`}
               >
-                <CardContent className="p-3">
-                  <div className="flex gap-3">
-                    {/* Checkbox */}
-                    <div className="flex items-start pt-1">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => toggleSelect(item.id)}
-                      />
-                    </div>
-
-                    {/* Type Icon */}
+                <CardContent className="p-4">
+                  {/* Header Row - Checkbox + Icon + Badges */}
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleSelect(item.id)}
+                      className="mt-1"
+                    />
                     <div 
-                      className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${getTypeColor(item.type)}`}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getTypeColor(item.type)}`}
                     >
                       <TypeIcon className="h-5 w-5" />
                     </div>
-
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4 
-                            className="font-medium text-sm line-clamp-1 cursor-pointer hover:text-primary"
-                            onClick={() => onPreview(item)}
-                          >
-                            {item.title}
-                          </h4>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <Badge variant="outline" className={`text-[9px] capitalize ${getTypeColor(item.type)}`}>
-                              {item.type}
-                            </Badge>
-                            {item.category && (
-                              <Badge variant="secondary" className="text-[9px] capitalize">
-                                {item.category}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-2">
-                        <Avatar className="h-4 w-4">
-                          <AvatarImage src={item.authorAvatar} />
-                          <AvatarFallback className="text-[8px]">{item.authorName[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs text-muted-foreground">{item.authorName}</span>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground">
-                          Submitted {item.submittedAt ? format(item.submittedAt, "MMM d, h:mm a") : "recently"}
-                        </span>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-1 mt-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="h-7 text-[10px] gap-1 text-green-600 flex-1"
-                          onClick={() => onApprove(item.id)}
-                        >
-                          <Check className="h-3 w-3" /> Approve
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="h-7 text-[10px] gap-1 text-red-600 flex-1"
-                          onClick={() => onReject(item.id)}
-                        >
-                          <X className="h-3 w-3" /> Reject
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="h-7 text-[10px]"
-                          onClick={() => onPreview(item)}
-                        >
-                          <Eye className="h-3 w-3" />
-                        </Button>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className={`text-xs px-2 py-0.5 capitalize ${getTypeColor(item.type)}`}>
+                          {item.type}
+                        </Badge>
+                        {item.category && (
+                          <Badge variant="secondary" className="text-xs px-2 py-0.5 capitalize">
+                            {item.category}
+                          </Badge>
+                        )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Title - Full Width */}
+                  <h4 
+                    className="font-semibold text-base mt-3 line-clamp-2 cursor-pointer hover:text-primary leading-snug"
+                    onClick={() => onPreview(item)}
+                  >
+                    {item.title}
+                  </h4>
+
+                  {/* Author Row */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage src={item.authorAvatar} />
+                      <AvatarFallback className="text-[10px]">{item.authorName[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-muted-foreground">{item.authorName}</span>
+                  </div>
+
+                  {/* Submitted Date */}
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Submitted • {item.submittedAt ? format(item.submittedAt, "MMM d, h:mm a") : "recently"}
+                  </p>
+
+                  {/* Actions Row */}
+                  <div className="flex gap-2 mt-3">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-9 text-sm gap-1.5 text-green-600 flex-1"
+                      onClick={() => onApprove(item.id)}
+                    >
+                      <Check className="h-4 w-4" /> Approve
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-9 text-sm gap-1.5 text-red-600 flex-1"
+                      onClick={() => onReject(item.id)}
+                    >
+                      <X className="h-4 w-4" /> Reject
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-9 w-9 p-0 shrink-0"
+                      onClick={() => onPreview(item)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
