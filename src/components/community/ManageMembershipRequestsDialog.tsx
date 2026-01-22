@@ -8,7 +8,6 @@ import {
   Clock, 
   UserPlus,
   UserMinus,
-  RefreshCw,
   Calendar,
   Mail,
   Phone,
@@ -42,7 +41,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
@@ -152,41 +151,6 @@ export function ManageMembershipRequestsDialog({
     });
   };
 
-  const handleReconsider = (applicationId: string) => {
-    setApplications(prev => prev.map(app => 
-      app.id === applicationId 
-        ? { 
-            ...app, 
-            status: "pending" as const, 
-            reviewedAt: undefined, 
-            reviewedBy: undefined,
-            rejectionReason: undefined 
-          }
-        : app
-    ));
-    toast({
-      title: "Application Reconsidered",
-      description: "The application has been reopened for review.",
-    });
-  };
-
-  const handleRevokeApproval = (applicationId: string) => {
-    setApplications(prev => prev.map(app => 
-      app.id === applicationId 
-        ? { 
-            ...app, 
-            status: "pending" as const, 
-            reviewedAt: undefined, 
-            reviewedBy: undefined 
-          }
-        : app
-    ));
-    toast({
-      title: "Approval Revoked",
-      description: "The membership approval has been revoked.",
-    });
-  };
-
   const handleAssignManager = () => {
     if (!selectedNewManager) {
       toast({
@@ -227,13 +191,13 @@ export function ManageMembershipRequestsDialog({
   const getStatusBadge = (status: MembershipApplication["status"]) => {
     switch (status) {
       case "pending":
-        return <Badge variant="secondary" className="bg-amber-500/20 text-amber-600">Pending</Badge>;
+        return <Badge variant="secondary" className="bg-amber-500/20 text-amber-600 text-xs">Pending</Badge>;
       case "under-review":
-        return <Badge variant="secondary" className="bg-blue-500/20 text-blue-600">Under Review</Badge>;
+        return <Badge variant="secondary" className="bg-blue-500/20 text-blue-600 text-xs">Under Review</Badge>;
       case "approved":
-        return <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-600">Approved</Badge>;
+        return <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-600 text-xs">Approved</Badge>;
       case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>;
+        return <Badge variant="destructive" className="text-xs">Rejected</Badge>;
     }
   };
 
@@ -245,158 +209,184 @@ export function ManageMembershipRequestsDialog({
     });
   };
 
+  // Mobile-optimized Application Card
   const ApplicationCard = ({ application }: { application: MembershipApplication }) => (
-    <Card className="mb-3">
+    <Card className="overflow-hidden">
       <CardContent className="p-4">
+        {/* Header: Avatar + Name + Status */}
         <div className="flex items-start gap-3">
-          <Avatar className="h-12 w-12 border">
+          <Avatar className="h-14 w-14 border shrink-0">
             <AvatarImage src={application.photo} alt={application.fullName} />
-            <AvatarFallback>{application.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            <AvatarFallback className="text-lg">{application.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
           </Avatar>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <h4 className="font-semibold text-sm truncate">{application.fullName}</h4>
-              {getStatusBadge(application.status)}
-            </div>
-            
-            <p className="text-xs text-muted-foreground font-mono mb-1">
+            <h4 className="font-semibold text-base leading-tight">{application.fullName}</h4>
+            <p className="text-sm text-muted-foreground font-mono mt-0.5">
               {application.referenceNumber}
             </p>
-            
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {formatDate(application.submittedAt)}
-              </span>
-              {application.sponsorName && (
-                <span className="flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {application.sponsorName}
-                </span>
-              )}
-              {application.invitationCode && (
-                <Badge variant="outline" className="text-xs">Invited</Badge>
-              )}
+            <div className="mt-2">
+              {getStatusBadge(application.status)}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-3">
+        {/* Info Row */}
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Calendar className="h-4 w-4 shrink-0" />
+            <span>Submitted {formatDate(application.submittedAt)}</span>
+          </div>
+          {application.sponsorName && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Users className="h-4 w-4 shrink-0" />
+              <span>Sponsor: {application.sponsorName}</span>
+            </div>
+          )}
+          {application.invitationCode && (
+            <Badge variant="outline" className="text-xs">Invited via Code</Badge>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-4 space-y-2">
+          {/* View Button - Always visible */}
           <Button 
             variant="outline" 
             size="sm" 
-            className="flex-1"
+            className="w-full h-10 text-sm"
             onClick={() => {
               setSelectedApplication(application);
               setShowDetailDialog(true);
             }}
           >
-            <Eye className="h-3.5 w-3.5 mr-1" />
-            View
+            <Eye className="h-4 w-4 mr-2" />
+            View Full Application
           </Button>
           
+          {/* Pending Actions */}
           {application.status === "pending" && (
-            <>
+            <div className="grid grid-cols-2 gap-2">
               <Button 
                 variant="default" 
                 size="sm" 
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                className="h-10 text-sm bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => handleApprove(application.id)}
               >
-                <Check className="h-3.5 w-3.5 mr-1" />
+                <Check className="h-4 w-4 mr-1" />
                 Approve
               </Button>
               <Button 
                 variant="destructive" 
                 size="sm" 
-                className="flex-1"
+                className="h-10 text-sm"
                 onClick={() => {
                   setSelectedApplication(application);
                   setShowRejectDialog(true);
                 }}
               >
-                <XCircle className="h-3.5 w-3.5 mr-1" />
+                <XCircle className="h-4 w-4 mr-1" />
                 Reject
               </Button>
-              <Button 
-                variant="secondary" 
-                size="sm"
-                onClick={() => handleMarkUnderReview(application.id)}
-              >
-                <Clock className="h-3.5 w-3.5 mr-1" />
-                Review
-              </Button>
-            </>
+            </div>
           )}
 
+          {application.status === "pending" && (
+            <Button 
+              variant="secondary" 
+              size="sm"
+              className="w-full h-10 text-sm"
+              onClick={() => handleMarkUnderReview(application.id)}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Mark for Review
+            </Button>
+          )}
+
+          {/* Under Review Actions */}
           {application.status === "under-review" && (
-            <>
+            <div className="grid grid-cols-2 gap-2">
               <Button 
                 variant="default" 
                 size="sm" 
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                className="h-10 text-sm bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => handleApprove(application.id)}
               >
-                <Check className="h-3.5 w-3.5 mr-1" />
+                <Check className="h-4 w-4 mr-1" />
                 Approve
               </Button>
               <Button 
                 variant="destructive" 
                 size="sm" 
-                className="flex-1"
+                className="h-10 text-sm"
                 onClick={() => {
                   setSelectedApplication(application);
                   setShowRejectDialog(true);
                 }}
               >
-                <XCircle className="h-3.5 w-3.5 mr-1" />
+                <XCircle className="h-4 w-4 mr-1" />
                 Reject
               </Button>
-            </>
+            </div>
           )}
 
-          {/* Show Approved status button when approved */}
+          {/* Approved Status */}
           {application.status === "approved" && (
             <Button 
               variant="default" 
               size="sm" 
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 cursor-default pointer-events-none"
+              className="w-full h-10 text-sm bg-emerald-600 cursor-default pointer-events-none"
               disabled
             >
-              <Check className="h-3.5 w-3.5 mr-1" />
+              <Check className="h-4 w-4 mr-2" />
               Approved
             </Button>
           )}
 
-          {/* Show Rejected status button when rejected */}
+          {/* Rejected Status */}
           {application.status === "rejected" && (
-            <>
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                className="flex-1 cursor-default pointer-events-none"
-                disabled
-              >
-                <XCircle className="h-3.5 w-3.5 mr-1" />
-                Rejected
-              </Button>
-              {/* Admin-only: Show rejection reason indicator */}
-              {application.rejectionReason && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-muted-foreground"
-                  onClick={() => {
-                    setSelectedApplication(application);
-                    setShowDetailDialog(true);
-                  }}
-                >
-                  <FileText className="h-3.5 w-3.5 mr-1" />
-                  View Reason
-                </Button>
-              )}
-            </>
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              className="w-full h-10 text-sm cursor-default pointer-events-none"
+              disabled
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Rejected
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Manager Card - Mobile optimized
+  const ManagerCard = ({ manager }: { manager: MembershipManager }) => (
+    <Card className="overflow-hidden">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <Avatar className="h-14 w-14 border shrink-0">
+            <AvatarImage src={manager.photo} />
+            <AvatarFallback className="text-lg">{manager.name[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-base leading-tight">{manager.name}</h4>
+            <p className="text-sm text-muted-foreground mt-1">
+              Assigned: {formatDate(manager.assignedDate)}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              By: {manager.assignedBy}
+            </p>
+          </div>
+          {isOwner && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-10 w-10 text-destructive hover:text-destructive shrink-0"
+              onClick={() => handleRemoveManager(manager.id)}
+            >
+              <UserMinus className="h-5 w-5" />
+            </Button>
           )}
         </div>
       </CardContent>
@@ -408,53 +398,55 @@ export function ManageMembershipRequestsDialog({
 
     return (
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent className="max-w-lg max-h-[90vh] p-0">
-          <DialogHeader className="p-4 pb-0">
-            <DialogTitle>Application Details</DialogTitle>
+        <DialogContent className="max-w-lg max-h-[90vh] p-0 flex flex-col">
+          <DialogHeader className="p-4 pb-2 shrink-0">
+            <DialogTitle className="text-lg">Application Details</DialogTitle>
           </DialogHeader>
           
-          <ScrollArea className="max-h-[70vh] px-4 pb-4">
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4">
             <div className="space-y-4">
               {/* Applicant Header */}
               <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
-                <Avatar className="h-16 w-16 border-2">
+                <Avatar className="h-16 w-16 border-2 shrink-0">
                   <AvatarImage src={selectedApplication.photo} />
-                  <AvatarFallback className="text-lg">
+                  <AvatarFallback className="text-xl">
                     {selectedApplication.fullName.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <h3 className="font-semibold text-lg">{selectedApplication.fullName}</h3>
-                  <p className="text-sm font-mono text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg leading-tight">{selectedApplication.fullName}</h3>
+                  <p className="text-sm font-mono text-muted-foreground mt-0.5">
                     {selectedApplication.referenceNumber}
                   </p>
-                  {getStatusBadge(selectedApplication.status)}
+                  <div className="mt-2">
+                    {getStatusBadge(selectedApplication.status)}
+                  </div>
                 </div>
               </div>
 
               {/* Contact Information */}
               <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm">Contact Information</CardTitle>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">Contact Information</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 pt-0">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                <CardContent className="space-y-3 pt-0 px-4 pb-4">
+                  <div className="flex items-center gap-3 text-sm">
+                    <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
                     <span>{selectedApplication.email}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex items-center gap-3 text-sm">
+                    <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
                     <span>{selectedApplication.phone}</span>
                   </div>
                   {selectedApplication.cityOfResidence && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center gap-3 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span>{selectedApplication.cityOfResidence}, {selectedApplication.stateOfOrigin}</span>
                     </div>
                   )}
                   {selectedApplication.occupation && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center gap-3 text-sm">
+                      <Briefcase className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span>{selectedApplication.occupation}</span>
                     </div>
                   )}
@@ -463,50 +455,50 @@ export function ManageMembershipRequestsDialog({
 
               {/* Application Details */}
               <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm">Application Details</CardTitle>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">Application Details</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 pt-0">
+                <CardContent className="space-y-3 pt-0 px-4 pb-4">
                   <div>
-                    <Label className="text-xs text-muted-foreground">Date of Birth</Label>
-                    <p className="text-sm">{selectedApplication.dateOfBirth || "Not provided"}</p>
+                    <Label className="text-sm text-muted-foreground">Date of Birth</Label>
+                    <p className="text-sm font-medium">{selectedApplication.dateOfBirth || "Not provided"}</p>
                   </div>
                   <div>
-                    <Label className="text-xs text-muted-foreground">Gender</Label>
-                    <p className="text-sm capitalize">{selectedApplication.gender}</p>
+                    <Label className="text-sm text-muted-foreground">Gender</Label>
+                    <p className="text-sm font-medium capitalize">{selectedApplication.gender}</p>
                   </div>
                   <div>
-                    <Label className="text-xs text-muted-foreground">How they heard about us</Label>
-                    <p className="text-sm capitalize">{selectedApplication.howHeard.replace('-', ' ')}</p>
+                    <Label className="text-sm text-muted-foreground">How they heard about us</Label>
+                    <p className="text-sm font-medium capitalize">{selectedApplication.howHeard.replace('-', ' ')}</p>
                   </div>
                   {selectedApplication.sponsorName && (
                     <div>
-                      <Label className="text-xs text-muted-foreground">Sponsor/Guarantor</Label>
-                      <p className="text-sm">{selectedApplication.sponsorName}</p>
+                      <Label className="text-sm text-muted-foreground">Sponsor/Guarantor</Label>
+                      <p className="text-sm font-medium">{selectedApplication.sponsorName}</p>
                     </div>
                   )}
                   {selectedApplication.invitationCode && (
                     <div>
-                      <Label className="text-xs text-muted-foreground">Invitation Code</Label>
-                      <p className="text-sm font-mono">{selectedApplication.invitationCode}</p>
+                      <Label className="text-sm text-muted-foreground">Invitation Code</Label>
+                      <p className="text-sm font-mono font-medium">{selectedApplication.invitationCode}</p>
                     </div>
                   )}
                   <div>
-                    <Label className="text-xs text-muted-foreground">Submitted</Label>
-                    <p className="text-sm">{formatDate(selectedApplication.submittedAt)}</p>
+                    <Label className="text-sm text-muted-foreground">Submitted</Label>
+                    <p className="text-sm font-medium">{formatDate(selectedApplication.submittedAt)}</p>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Motivation */}
               <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <FileText className="h-4 w-4" />
                     Motivation Statement
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 px-4 pb-4">
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {selectedApplication.motivation}
                   </p>
@@ -516,21 +508,21 @@ export function ManageMembershipRequestsDialog({
               {/* Review Information (if reviewed) */}
               {selectedApplication.reviewedAt && (
                 <Card>
-                  <CardHeader className="py-3">
-                    <CardTitle className="text-sm">Review Information</CardTitle>
+                  <CardHeader className="py-3 px-4">
+                    <CardTitle className="text-base">Review Information</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 pt-0">
+                  <CardContent className="space-y-2 pt-0 px-4 pb-4">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Reviewed By</Label>
-                      <p className="text-sm">{selectedApplication.reviewedBy}</p>
+                      <Label className="text-sm text-muted-foreground">Reviewed By</Label>
+                      <p className="text-sm font-medium">{selectedApplication.reviewedBy}</p>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Review Date</Label>
-                      <p className="text-sm">{formatDate(selectedApplication.reviewedAt)}</p>
+                      <Label className="text-sm text-muted-foreground">Review Date</Label>
+                      <p className="text-sm font-medium">{formatDate(selectedApplication.reviewedAt)}</p>
                     </div>
                     {selectedApplication.rejectionReason && (
                       <div>
-                        <Label className="text-xs text-muted-foreground">Rejection Reason</Label>
+                        <Label className="text-sm text-muted-foreground">Rejection Reason</Label>
                         <p className="text-sm text-destructive">{selectedApplication.rejectionReason}</p>
                       </div>
                     )}
@@ -538,28 +530,30 @@ export function ManageMembershipRequestsDialog({
                 </Card>
               )}
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Action Buttons */}
           {(selectedApplication.status === "pending" || selectedApplication.status === "under-review") && (
-            <DialogFooter className="p-4 pt-0 flex-row gap-2">
-              <Button 
-                variant="default" 
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => handleApprove(selectedApplication.id)}
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Approve
-              </Button>
-              <Button 
-                variant="destructive" 
-                className="flex-1"
-                onClick={() => setShowRejectDialog(true)}
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Reject
-              </Button>
-            </DialogFooter>
+            <div className="p-4 pt-2 border-t shrink-0">
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="default" 
+                  className="h-11 text-sm bg-emerald-600 hover:bg-emerald-700"
+                  onClick={() => handleApprove(selectedApplication.id)}
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Approve
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  className="h-11 text-sm"
+                  onClick={() => setShowRejectDialog(true)}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Reject
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
@@ -570,14 +564,14 @@ export function ManageMembershipRequestsDialog({
     <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Reject Application</DialogTitle>
+          <DialogTitle className="text-lg">Reject Application</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Please provide a reason for rejecting this application. The applicant will be notified.
+            Please provide a reason for rejecting this application. This reason is kept internal for admin management.
           </p>
           <div>
-            <Label>Rejection Reason *</Label>
+            <Label className="text-sm">Reason for Rejection *</Label>
             <Textarea
               placeholder="Enter the reason for rejection..."
               value={rejectionReason}
@@ -588,10 +582,10 @@ export function ManageMembershipRequestsDialog({
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+          <Button variant="outline" onClick={() => setShowRejectDialog(false)} className="h-10">
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleReject}>
+          <Button variant="destructive" onClick={handleReject} className="h-10">
             Confirm Rejection
           </Button>
         </DialogFooter>
@@ -603,16 +597,16 @@ export function ManageMembershipRequestsDialog({
     <Dialog open={showAssignManagerDialog} onOpenChange={setShowAssignManagerDialog}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Assign Membership Manager</DialogTitle>
+          <DialogTitle className="text-lg">Assign Membership Manager</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Select a community member to assign as a Membership Manager.
           </p>
           <div>
-            <Label>Select Member</Label>
+            <Label className="text-sm">Select Member</Label>
             <Select value={selectedNewManager} onValueChange={setSelectedNewManager}>
-              <SelectTrigger className="mt-2">
+              <SelectTrigger className="mt-2 h-11">
                 <SelectValue placeholder="Choose a member" />
               </SelectTrigger>
               <SelectContent>
@@ -634,10 +628,10 @@ export function ManageMembershipRequestsDialog({
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => setShowAssignManagerDialog(false)}>
+          <Button variant="outline" onClick={() => setShowAssignManagerDialog(false)} className="h-10">
             Cancel
           </Button>
-          <Button onClick={handleAssignManager}>
+          <Button onClick={handleAssignManager} className="h-10">
             Assign Manager
           </Button>
         </DialogFooter>
@@ -646,13 +640,15 @@ export function ManageMembershipRequestsDialog({
   );
 
   const Content = () => (
-    <>
-      <div className="p-4 border-b space-y-3">
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="shrink-0 p-4 border-b space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Manage Membership Requests</h2>
           <Button 
             variant="ghost" 
             size="icon" 
+            className="h-10 w-10"
             onClick={() => onOpenChange(false)}
           >
             <X className="h-5 w-5" />
@@ -665,92 +661,118 @@ export function ManageMembershipRequestsDialog({
             placeholder="Search by name, reference, or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-10 h-11"
           />
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
-        <div className="px-4 pt-2 flex-shrink-0">
-          <TabsList className="w-full grid grid-cols-4 h-auto">
-            <TabsTrigger value="pending" className="text-xs px-2 py-2 flex-col gap-1">
-              <span>Pending</span>
-              <Badge variant="secondary" className="text-xs">{pendingApplications.length + underReviewApplications.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="approved" className="text-xs px-2 py-2 flex-col gap-1">
-              <span>Approved</span>
-              <Badge variant="secondary" className="text-xs">{approvedApplications.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="rejected" className="text-xs px-2 py-2 flex-col gap-1">
-              <span>Rejected</span>
-              <Badge variant="secondary" className="text-xs">{rejectedApplications.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="managers" className="text-xs px-2 py-2 flex-col gap-1">
-              <span>Managers</span>
-              <Badge variant="secondary" className="text-xs">{managers.length}</Badge>
-            </TabsTrigger>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+        <div className="shrink-0 px-4 pt-3 pb-2 bg-background">
+          <TabsList className="w-full h-auto p-1 bg-muted/60">
+            <div className="grid grid-cols-4 w-full gap-1">
+              <TabsTrigger 
+                value="pending" 
+                className="flex flex-col items-center py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <span className="text-xs font-medium">Pending</span>
+                <Badge variant="secondary" className="mt-1 text-xs bg-background/50">{pendingApplications.length + underReviewApplications.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="approved" 
+                className="flex flex-col items-center py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <span className="text-xs font-medium">Approved</span>
+                <Badge variant="secondary" className="mt-1 text-xs bg-background/50">{approvedApplications.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="rejected" 
+                className="flex flex-col items-center py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <span className="text-xs font-medium">Rejected</span>
+                <Badge variant="secondary" className="mt-1 text-xs bg-background/50">{rejectedApplications.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="managers" 
+                className="flex flex-col items-center py-2.5 px-1 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <span className="text-xs font-medium">Managers</span>
+                <Badge variant="secondary" className="mt-1 text-xs bg-background/50">{managers.length}</Badge>
+              </TabsTrigger>
+            </div>
           </TabsList>
         </div>
 
-        <ScrollArea className="flex-1 min-h-0 touch-auto">
-          <div className="p-4">
+        {/* Tab Content - Scrollable */}
+        <div className="flex-1 min-h-0 overflow-y-auto touch-auto">
+          <div className="p-4 pb-8">
             {/* Pending Tab */}
-            <TabsContent value="pending" className="mt-0 space-y-2">
+            <TabsContent value="pending" className="mt-0">
               {filterApplications([...pendingApplications, ...underReviewApplications]).length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No pending applications</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Users className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-base font-medium">No pending applications</p>
+                  <p className="text-sm mt-1">New applications will appear here</p>
                 </div>
               ) : (
-                filterApplications([...pendingApplications, ...underReviewApplications]).map(app => (
-                  <ApplicationCard key={app.id} application={app} />
-                ))
+                <div className="space-y-3">
+                  {filterApplications([...pendingApplications, ...underReviewApplications]).map(app => (
+                    <ApplicationCard key={app.id} application={app} />
+                  ))}
+                </div>
               )}
             </TabsContent>
 
             {/* Approved Tab */}
-            <TabsContent value="approved" className="mt-0 space-y-2">
+            <TabsContent value="approved" className="mt-0">
               {filterApplications(approvedApplications).length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Check className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No approved applications</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Check className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-base font-medium">No approved applications</p>
+                  <p className="text-sm mt-1">Approved members will appear here</p>
                 </div>
               ) : (
-                filterApplications(approvedApplications).map(app => (
-                  <ApplicationCard key={app.id} application={app} />
-                ))
+                <div className="space-y-3">
+                  {filterApplications(approvedApplications).map(app => (
+                    <ApplicationCard key={app.id} application={app} />
+                  ))}
+                </div>
               )}
             </TabsContent>
 
             {/* Rejected Tab */}
-            <TabsContent value="rejected" className="mt-0 space-y-2">
+            <TabsContent value="rejected" className="mt-0">
               {filterApplications(rejectedApplications).length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <XCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No rejected applications</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <XCircle className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-base font-medium">No rejected applications</p>
+                  <p className="text-sm mt-1">Rejected applications will appear here</p>
                 </div>
               ) : (
-                filterApplications(rejectedApplications).map(app => (
-                  <ApplicationCard key={app.id} application={app} />
-                ))
+                <div className="space-y-3">
+                  {filterApplications(rejectedApplications).map(app => (
+                    <ApplicationCard key={app.id} application={app} />
+                  ))}
+                </div>
               )}
             </TabsContent>
 
             {/* Managers Tab */}
             <TabsContent value="managers" className="mt-0 space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-medium">Membership Managers</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Users who can approve or reject membership applications
+                  <h3 className="font-semibold text-base">Membership Managers</h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Users who can approve or reject applications
                   </p>
                 </div>
                 {isOwner && (
                   <Button 
                     size="sm" 
+                    className="h-9 shrink-0"
                     onClick={() => setShowAssignManagerDialog(true)}
                   >
-                    <UserPlus className="h-4 w-4 mr-2" />
+                    <UserPlus className="h-4 w-4 mr-1" />
                     Assign
                   </Button>
                 )}
@@ -759,13 +781,13 @@ export function ManageMembershipRequestsDialog({
               <Separator />
 
               {managers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Settings className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>No managers assigned</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Settings className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <p className="text-base font-medium">No managers assigned</p>
                   {isOwner && (
                     <Button 
                       variant="outline" 
-                      className="mt-4"
+                      className="mt-4 h-10"
                       onClick={() => setShowAssignManagerDialog(true)}
                     >
                       Assign First Manager
@@ -775,62 +797,32 @@ export function ManageMembershipRequestsDialog({
               ) : (
                 <div className="space-y-3">
                   {managers.map(manager => (
-                    <Card key={manager.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-12 w-12 border">
-                              <AvatarImage src={manager.photo} />
-                              <AvatarFallback>{manager.name[0]}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h4 className="font-medium">{manager.name}</h4>
-                              <p className="text-xs text-muted-foreground">
-                                Assigned: {formatDate(manager.assignedDate)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                By: {manager.assignedBy}
-                              </p>
-                            </div>
-                          </div>
-                          {isOwner && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => handleRemoveManager(manager.id)}
-                            >
-                              <UserMinus className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <ManagerCard key={manager.id} manager={manager} />
                   ))}
                 </div>
               )}
 
               {!isOwner && (
-                <p className="text-xs text-center text-muted-foreground italic">
+                <p className="text-sm text-center text-muted-foreground italic pt-4">
                   Only the Community Owner can assign or remove Membership Managers
                 </p>
               )}
             </TabsContent>
           </div>
-        </ScrollArea>
+        </div>
       </Tabs>
 
       {/* Sub-dialogs */}
       <ApplicationDetailDialog />
       <RejectDialog />
       <AssignManagerDialog />
-    </>
+    </div>
   );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
+        <DrawerContent className="max-h-[92vh] h-[92vh] flex flex-col touch-auto overflow-hidden">
           <Content />
         </DrawerContent>
       </Drawer>
@@ -839,7 +831,7 @@ export function ManageMembershipRequestsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[90vh] h-[85vh] p-0 flex flex-col overflow-hidden">
         <Content />
       </DialogContent>
     </Dialog>
