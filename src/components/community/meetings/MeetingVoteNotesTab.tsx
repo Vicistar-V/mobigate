@@ -123,9 +123,9 @@ export const MeetingVoteNotesTab = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Meeting Vote Notes</h2>
+          <h2 className="text-2xl font-bold">Meeting Voice Notes</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Detailed voting records with member notes and comments
+            Voice recordings with member notes and comments
           </p>
         </div>
         <Button size="sm" onClick={handleExport}>
@@ -210,9 +210,9 @@ export const MeetingVoteNotesTab = () => {
       {displayedVotes.length === 0 && (
         <Card className="p-12 text-center">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Vote Notes Found</h3>
+          <h3 className="text-lg font-semibold mb-2">No Voice Notes Found</h3>
           <p className="text-sm text-muted-foreground">
-            No voting records match your current filter criteria.
+            No voice recordings match your current filter criteria.
           </p>
         </Card>
       )}

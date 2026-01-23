@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,15 +18,33 @@ import {
 import { mockAttendance, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { useState } from "react";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
+import { MemberPreviewDialog } from "../MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 export const MeetingAttendanceTab = () => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"list" | "table">("table");
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const itemsPerPage = 5;
+
+  // Handle member click to show profile preview
+  const handleMemberClick = (attendance: any) => {
+    const member: ExecutiveMember = {
+      id: attendance.id,
+      name: attendance.memberName,
+      position: attendance.position || "Community Member",
+      tenure: "",
+      imageUrl: attendance.avatar,
+      level: "officer",
+      committee: "executive"
+    };
+    setSelectedMember(member);
+    setShowMemberPreview(true);
+  };
 
   // Get completed meetings
   const completedMeetings = mockMeetings.filter((m) => m.status === "completed");
@@ -333,7 +352,10 @@ export const MeetingAttendanceTab = () => {
                     {filteredAttendance.map((attendance) => (
                       <tr key={attendance.id}>
                         <td className="bg-pink-200 p-2 sticky left-0 z-10 border border-gray-300">
-                          <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleMemberClick(attendance)}
+                            className="flex items-center gap-2 text-left hover:bg-pink-300/50 rounded-md p-1 -m-1 transition-colors cursor-pointer w-full"
+                          >
                             <Avatar className="h-8 w-8">
                               <AvatarImage
                                 src={attendance.avatar}
@@ -344,14 +366,14 @@ export const MeetingAttendanceTab = () => {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-semibold text-sm">
+                              <div className="font-semibold text-sm text-primary hover:underline">
                                 {attendance.memberName}
                               </div>
                               <div className="text-xs text-muted-foreground">
                                 {attendance.position}
                               </div>
                             </div>
-                          </div>
+                          </button>
                         </td>
                         <td className="p-2 border border-gray-300">
                           <div className="flex justify-center">
@@ -388,18 +410,28 @@ export const MeetingAttendanceTab = () => {
               {filteredAttendance.map((attendance) => (
                 <Card key={attendance.id} className="p-4">
                   <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        src={attendance.avatar}
-                        alt={attendance.memberName}
-                      />
-                      <AvatarFallback>
-                        {attendance.memberName.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <button 
+                      onClick={() => handleMemberClick(attendance)}
+                      className="cursor-pointer"
+                    >
+                      <Avatar className="h-12 w-12 hover:ring-2 hover:ring-primary transition-all">
+                        <AvatarImage
+                          src={attendance.avatar}
+                          alt={attendance.memberName}
+                        />
+                        <AvatarFallback>
+                          {attendance.memberName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
 
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium">{attendance.memberName}</h4>
+                      <button 
+                        onClick={() => handleMemberClick(attendance)}
+                        className="text-left cursor-pointer"
+                      >
+                        <h4 className="font-medium text-primary hover:underline">{attendance.memberName}</h4>
+                      </button>
                       <p className="text-sm text-muted-foreground">
                         {attendance.position}
                       </p>
@@ -489,6 +521,13 @@ export const MeetingAttendanceTab = () => {
           )}
         </div>
       )}
+
+      {/* Member Preview Dialog */}
+      <MemberPreviewDialog
+        member={selectedMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
+      />
     </div>
   );
 };

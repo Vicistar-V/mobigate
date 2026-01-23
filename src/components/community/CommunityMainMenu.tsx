@@ -740,7 +740,7 @@ export function CommunityMainMenu({
                         className="w-full justify-start pl-4 text-sm h-8"
                         onClick={() => handleMenuClick("meeting-vote-notes", true)}
                       >
-                        Meeting Vote Notes
+                        Meeting Voice Notes
                       </Button>
                       <Button
                         variant="ghost"
@@ -804,7 +804,7 @@ export function CommunityMainMenu({
                         className="w-full justify-start pl-4 text-sm h-8"
                         onClick={() => handleMenuClick("meeting-vote-notes", true)}
                       >
-                        Meeting Vote Notes
+                        Meeting Voice Notes
                       </Button>
                       <Button
                         variant="ghost"
