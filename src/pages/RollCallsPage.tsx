@@ -169,7 +169,10 @@ export const RollCallsPage = () => {
                 <div className="flex-1">
                   <p className="text-sm font-medium">Time Remaining</p>
                   <p className="text-xs text-muted-foreground">
-                    Closes {formatDistanceToNow(currentRollCall.endTime, { addSuffix: true })}
+                    {new Date() < currentRollCall.endTime 
+                      ? `Closes in ${formatDistanceToNow(currentRollCall.endTime)}`
+                      : `Closed ${formatDistanceToNow(currentRollCall.endTime, { addSuffix: true })}`
+                    }
                   </p>
                 </div>
               </div>
