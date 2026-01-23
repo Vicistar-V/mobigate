@@ -2,7 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Vote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AdminCampaignsTab } from "@/components/admin/election/AdminCampaignsTab";
+import { AdminElectionProcessesTab } from "@/components/admin/election/AdminElectionProcessesTab";
 import { AdminAccreditationTab } from "@/components/admin/election/AdminAccreditationTab";
 import { AdminClearancesTab } from "@/components/admin/election/AdminClearancesTab";
 import { AdminWinnersAnnouncementTab } from "@/components/admin/election/AdminWinnersAnnouncementTab";
@@ -33,38 +35,50 @@ export default function ElectionManagementPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="campaigns" className="w-full">
-        <div className="border-b overflow-x-auto bg-background">
-          <TabsList className="h-10 sm:h-11 bg-muted/50 w-max min-w-full px-3 sm:px-4 justify-start gap-1">
-            <TabsTrigger 
-              value="campaigns" 
-              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
-            >
-              Campaigns
-            </TabsTrigger>
-            <TabsTrigger 
-              value="accreditation" 
-              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
-            >
-              Accreditation
-            </TabsTrigger>
-            <TabsTrigger 
-              value="clearances" 
-              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
-            >
-              Clearances
-            </TabsTrigger>
-            <TabsTrigger 
-              value="winners" 
-              className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium"
-            >
-              Winners
-            </TabsTrigger>
-          </TabsList>
+        <div className="border-b bg-background">
+          <ScrollArea className="w-full">
+            <TabsList className="h-10 sm:h-11 bg-muted/50 w-max min-w-full px-3 sm:px-4 justify-start gap-1">
+              <TabsTrigger 
+                value="campaigns" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                Campaigns
+              </TabsTrigger>
+              <TabsTrigger 
+                value="processes" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                Election Processes
+              </TabsTrigger>
+              <TabsTrigger 
+                value="accreditation" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                Accreditation
+              </TabsTrigger>
+              <TabsTrigger 
+                value="clearances" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                Clearances
+              </TabsTrigger>
+              <TabsTrigger 
+                value="winners" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                Winners
+              </TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" className="invisible" />
+          </ScrollArea>
         </div>
 
         <div className="p-3 sm:p-4 overflow-hidden">
           <TabsContent value="campaigns" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminCampaignsTab />
+          </TabsContent>
+          <TabsContent value="processes" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <AdminElectionProcessesTab />
           </TabsContent>
           <TabsContent value="accreditation" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminAccreditationTab />
