@@ -39,10 +39,12 @@ import {
   Minus,
   Clock,
   Info,
+  ChevronRight,
 } from "lucide-react";
 import { mockYearlyAudits, YearlyFinancialAudit } from "@/data/financialManagementData";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { IncomeSourceDetailSheet } from "./IncomeSourceDetailSheet";
 
 interface AdminFinancialAuditDialogProps {
   open: boolean;
@@ -57,6 +59,10 @@ export const AdminFinancialAuditDialog = ({
   const isMobile = useIsMobile();
   const [selectedYear, setSelectedYear] = useState<string>("2025");
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedIncomeSource, setSelectedIncomeSource] = useState<{
+    key: string;
+    amount: number;
+  } | null>(null);
 
   const currentAudit = mockYearlyAudits.find((a) => a.year === parseInt(selectedYear));
 
@@ -289,22 +295,46 @@ export const AdminFinancialAuditDialog = ({
                 <TrendingUp className="h-4 w-4 text-green-600" />
                 Income Sources
               </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                Tap on any source to view payment details
+              </p>
               <div className="space-y-3">
                 {Object.entries(currentAudit.breakdown.income).map(([key, value]) => {
                   const percentage = Math.round((value / currentAudit.totalFundsReceived) * 100);
                   const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
                   
+                  // Color mapping for income sources
+                  const colorMap: Record<string, string> = {
+                    duesCollected: "bg-blue-100",
+                    leviesCollected: "bg-cyan-100",
+                    donations: "bg-pink-100",
+                    fundraisers: "bg-purple-100",
+                    eventRevenue: "bg-yellow-100",
+                    minutesDownloadRevenue: "bg-green-100",
+                    otherIncome: "bg-gray-100",
+                  };
+                  const bgColor = colorMap[key] || "bg-gray-100";
+                  
                   return (
-                    <div key={key} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{label}</span>
-                        <span className="font-medium">{formatCurrency(value)}</span>
+                    <button
+                      key={key}
+                      className={`w-full text-left p-3 rounded-lg ${bgColor} hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer`}
+                      onClick={() => setSelectedIncomeSource({ key, amount: value })}
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground">{label}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-semibold text-sm">{formatCurrency(value)}</span>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Progress value={percentage} className="h-1.5 flex-1" />
+                          <span className="text-xs text-muted-foreground w-8">{percentage}%</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Progress value={percentage} className="h-1.5 flex-1" />
-                        <span className="text-xs text-muted-foreground w-8">{percentage}%</span>
-                      </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -358,29 +388,51 @@ export const AdminFinancialAuditDialog = ({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh]">
-          <DrawerHeader className="border-b">
-            <DrawerTitle>Financial Audit</DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
-          </ScrollArea>
-        </DrawerContent>
-      </Drawer>
+      <>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="max-h-[92vh]">
+            <DrawerHeader className="border-b">
+              <DrawerTitle>Financial Audit</DrawerTitle>
+            </DrawerHeader>
+            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+              <Content />
+            </ScrollArea>
+          </DrawerContent>
+        </Drawer>
+        
+        {selectedIncomeSource && (
+          <IncomeSourceDetailSheet
+            open={!!selectedIncomeSource}
+            onOpenChange={(open) => !open && setSelectedIncomeSource(null)}
+            sourceKey={selectedIncomeSource.key}
+            totalAmount={selectedIncomeSource.amount}
+          />
+        )}
+      </>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Financial Audit</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="flex-1 pr-4">
-          <Content />
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Financial Audit</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="flex-1 pr-4">
+            <Content />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+      
+      {selectedIncomeSource && (
+        <IncomeSourceDetailSheet
+          open={!!selectedIncomeSource}
+          onOpenChange={(open) => !open && setSelectedIncomeSource(null)}
+          sourceKey={selectedIncomeSource.key}
+          totalAmount={selectedIncomeSource.amount}
+        />
+      )}
+    </>
   );
 };
