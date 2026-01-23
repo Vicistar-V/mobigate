@@ -64,13 +64,13 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
   const colorClass = getTransactionColor(transaction.type);
   
   return (
-    <div className="flex items-center gap-3 py-3">
+    <div className="flex items-start gap-3 py-3">
       <div className="p-2 rounded-lg bg-muted shrink-0">
         <Icon className={`h-4 w-4 ${colorClass}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{transaction.description}</p>
-        <p className="text-sm text-muted-foreground truncate">
+        <p className="font-medium text-sm line-clamp-1">{transaction.description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-1">
           {transaction.memberName && `${transaction.memberName} • `}
           {formatRelativeTime(transaction.date)}
         </p>
@@ -90,20 +90,20 @@ interface DefaultingMemberItemProps {
 }
 
 const DefaultingMemberItem = ({ member }: DefaultingMemberItemProps) => (
-  <div className="flex items-center gap-3 py-3">
+  <div className="flex items-start gap-3 py-3">
     <Avatar className="h-9 w-9 shrink-0">
       <AvatarImage src={member.avatar} alt={member.name} />
       <AvatarFallback className="text-sm">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
     </Avatar>
     <div className="flex-1 min-w-0">
-      <p className="font-medium text-sm truncate">{member.name}</p>
-      <p className="text-sm text-muted-foreground truncate">{member.obligation}</p>
+      <p className="font-medium text-sm line-clamp-1">{member.name}</p>
+      <p className="text-sm text-muted-foreground line-clamp-1">{member.obligation}</p>
     </div>
     <div className="flex flex-col items-end shrink-0">
       <span className="font-semibold text-sm text-destructive">
         M{member.amountOwed.toLocaleString()}
       </span>
-      <span className="text-sm text-muted-foreground">
+      <span className="text-xs text-muted-foreground whitespace-nowrap">
         Due {formatRelativeTime(member.dueDate)}
       </span>
     </div>
@@ -118,12 +118,12 @@ interface StatCardProps {
 }
 
 const StatCard = ({ label, value, icon: Icon, trend }: StatCardProps) => (
-  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
+  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50">
     <div className="flex items-center gap-1 mb-0.5">
       <Icon className={`h-3.5 w-3.5 ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-muted-foreground'}`} />
     </div>
-    <span className="text-sm font-bold truncate w-full text-center">{value}</span>
-    <span className="text-xs text-muted-foreground truncate w-full text-center">{label}</span>
+    <span className="text-sm font-bold text-center">{value}</span>
+    <span className="text-xs text-muted-foreground text-center">{label}</span>
   </div>
 );
 
@@ -156,118 +156,119 @@ export function AdminFinanceSection({
       <AccountStatementsDialog open={showStatements} onOpenChange={setShowStatements} />
       <MembersFinancialReportsDialog open={showMemberReports} onOpenChange={setShowMemberReports} />
       <AdminFinancialAuditDialog open={showAudit} onOpenChange={setShowAudit} />
-    <Accordion type="single" collapsible className="w-full max-w-full">
-      <AccordionItem value="finance" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 rounded-lg bg-amber-500/10 shrink-0">
-              <Wallet className="h-5 w-5 text-amber-600" />
+      
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="finance" className="border rounded-lg">
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-lg bg-amber-500/10 shrink-0">
+                <Wallet className="h-5 w-5 text-amber-600" />
+              </div>
+              <div className="text-left min-w-0">
+                <h3 className="font-semibold text-base">Finance</h3>
+                <p className="text-sm text-muted-foreground">
+                  M{stats.walletBalance.toLocaleString()}
+                  {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} pending`}
+                </p>
+              </div>
             </div>
-            <div className="text-left min-w-0">
-              <h3 className="font-semibold text-base truncate">Finance</h3>
-              <p className="text-sm text-muted-foreground truncate">
-                M{stats.walletBalance.toLocaleString()}
-                {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} pending`}
-              </p>
-            </div>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full max-w-full overflow-hidden">
-            {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-1.5 w-full">
-              <StatCard label="Balance" value={`M${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
-              <StatCard label="Income" value={`M${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
-              <StatCard label="Expense" value={`M${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
-              <StatCard label="Pending" value={String(stats.pendingPayments)} icon={Clock} />
-            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <div className="space-y-4">
+              {/* Stats Row - 4 columns, compact */}
+              <div className="grid grid-cols-4 gap-2">
+                <StatCard label="Balance" value={`M${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
+                <StatCard label="Income" value={`M${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
+                <StatCard label="Expense" value={`M${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
+                <StatCard label="Pending" value={String(stats.pendingPayments)} icon={Clock} />
+              </div>
 
-            {/* Action Buttons - Row 1 */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowDuesLevies(true)}>
-                <Settings className="h-4 w-4 mr-2" />
-                Dues & Levies
-              </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowStatements(true)}>
-                <Receipt className="h-4 w-4 mr-2" />
-                Statements
-              </Button>
-            </div>
-
-            {/* Action Buttons - Row 2 */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowMemberReports(true)}>
-                <Users className="h-4 w-4 mr-2" />
-                Member Reports
-              </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowAudit(true)}>
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Financial Audit
-              </Button>
-            </div>
-
-            {/* Legacy buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewOverview}>
-                <Wallet className="h-4 w-4 mr-2" />
-                Overview
-              </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewObligations}>
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                Obligations
-                {stats.pendingPayments > 0 && (
-                  <Badge variant="destructive" className="ml-1 text-xs px-1.5">
-                    {stats.pendingPayments}
-                  </Badge>
-                )}
-              </Button>
-            </div>
-
-            {/* Recent Transactions */}
-            <Card className="overflow-hidden">
-              <CardHeader className="pb-2 pt-3 px-4">
-                <CardTitle className="text-sm flex items-center justify-between">
-                  Recent Transactions
-                  <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onViewOverview}>
-                    View All
-                    <ChevronRight className="h-4 w-4 ml-1" />
+              {/* Action Buttons - Stacked vertically for mobile safety */}
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowDuesLevies(true)}>
+                    <Settings className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Dues & Levies</span>
                   </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4 pt-0">
-                <div className="divide-y divide-border">
-                  {recentTransactions.slice(0, 4).map((transaction) => (
-                    <TransactionItem key={transaction.id} transaction={transaction} />
-                  ))}
+                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowStatements(true)}>
+                    <Receipt className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Statements</span>
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Defaulting Members */}
-            {defaultingMembers.length > 0 && (
-              <Card className="border-red-200 bg-red-50/30 dark:bg-red-950/10 overflow-hidden">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowMemberReports(true)}>
+                    <Users className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Member Reports</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowAudit(true)}>
+                    <BarChart3 className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Financial Audit</span>
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={onViewOverview}>
+                    <Wallet className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Overview</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={onViewObligations}>
+                    <AlertTriangle className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="truncate">Obligations</span>
+                    {stats.pendingPayments > 0 && (
+                      <Badge variant="destructive" className="ml-1 text-xs px-1.5 shrink-0">
+                        {stats.pendingPayments}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Recent Transactions */}
+              <Card>
                 <CardHeader className="pb-2 pt-3 px-4">
-                  <CardTitle className="text-sm flex items-center gap-2 text-destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    Defaulting
-                    <Badge variant="destructive" className="ml-auto text-xs px-1.5">
-                      {defaultingMembers.length}
-                    </Badge>
+                  <CardTitle className="text-sm flex items-center justify-between">
+                    <span>Recent Transactions</span>
+                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onViewOverview}>
+                      View All
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 pb-4 pt-0">
                   <div className="divide-y divide-border">
-                    {defaultingMembers.slice(0, 3).map((member) => (
-                      <DefaultingMemberItem key={member.id} member={member} />
+                    {recentTransactions.slice(0, 4).map((transaction) => (
+                      <TransactionItem key={transaction.id} transaction={transaction} />
                     ))}
                   </div>
                 </CardContent>
               </Card>
-            )}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+
+              {/* Defaulting Members */}
+              {defaultingMembers.length > 0 && (
+                <Card className="border-red-200 bg-red-50/30 dark:bg-red-950/10">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <CardTitle className="text-sm flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                      <span>Defaulting</span>
+                      <Badge variant="destructive" className="ml-auto text-xs px-1.5">
+                        {defaultingMembers.length}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4 pt-0">
+                    <div className="divide-y divide-border">
+                      {defaultingMembers.slice(0, 3).map((member) => (
+                        <DefaultingMemberItem key={member.id} member={member} />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </>
   );
 }
