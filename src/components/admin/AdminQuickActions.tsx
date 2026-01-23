@@ -11,7 +11,7 @@ interface QuickActionButtonProps {
 const QuickActionButton = ({ icon: Icon, label, onClick, badge }: QuickActionButtonProps) => (
   <Button
     variant="outline"
-    className="h-auto py-3 px-3 flex flex-col items-center gap-2 relative w-full min-w-0"
+    className="h-auto py-3 px-2 flex flex-col items-center gap-2 relative"
     onClick={onClick}
   >
     <div className="relative">
@@ -22,7 +22,7 @@ const QuickActionButton = ({ icon: Icon, label, onClick, badge }: QuickActionBut
         </span>
       )}
     </div>
-    <span className="text-sm font-medium text-center break-words w-full leading-tight">{label}</span>
+    <span className="text-sm font-medium text-center leading-tight">{label}</span>
   </Button>
 );
 
@@ -48,9 +48,9 @@ export function AdminQuickActions({
   pendingContent,
 }: AdminQuickActionsProps) {
   return (
-    <div className="space-y-3 w-full overflow-hidden">
+    <div className="space-y-3">
       <h2 className="text-base font-semibold text-muted-foreground">Quick Actions</h2>
-      <div className="grid grid-cols-2 gap-3 w-full">
+      <div className="grid grid-cols-3 gap-2">
         <QuickActionButton
           icon={Users}
           label="Members"

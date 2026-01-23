@@ -114,14 +114,14 @@ const CommunityAdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background w-full overflow-x-hidden">
       {/* Fixed Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="flex items-center gap-3 px-3 py-3 max-w-full">
+        <div className="flex items-center gap-3 px-4 py-3">
           <Button
             variant="ghost"
             size="icon"
-            className="shrink-0"
+            className="shrink-0 h-9 w-9"
             onClick={() => navigate(`/community/${communityId}`)}
           >
             <ArrowLeft className="h-5 w-5" />
@@ -133,7 +133,7 @@ const CommunityAdminDashboard = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="shrink-0"
+            className="shrink-0 h-9 w-9"
             onClick={handleRefresh}
             disabled={isRefreshing}
           >
@@ -142,9 +142,9 @@ const CommunityAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Safe horizontal padding */}
       <ScrollArea className="h-[calc(100vh-64px)] touch-auto">
-        <div className="px-3 py-4 space-y-4 pb-24 w-full max-w-full overflow-hidden box-border">
+        <div className="px-4 py-4 space-y-4 pb-24">
           {/* Dashboard Header with Stats */}
           <AdminDashboardHeader
             communityName="Ndigbo Unity Association"
@@ -175,7 +175,7 @@ const CommunityAdminDashboard = () => {
           />
 
           {/* Admin Sections */}
-          <div className="space-y-3 w-full overflow-hidden">
+          <div className="space-y-3">
             {/* Membership Management */}
             <AdminMembershipSection
               stats={mockAdminStats}

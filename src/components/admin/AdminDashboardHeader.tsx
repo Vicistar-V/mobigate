@@ -16,7 +16,7 @@ interface StatCardProps {
 
 const StatCard = ({ icon: Icon, value, label, trend, urgent, prefix, onClick }: StatCardProps) => (
   <Card 
-    className={`${urgent ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20' : ''} overflow-hidden ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''}`}
+    className={`${urgent ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20' : ''} ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''}`}
     onClick={onClick}
   >
     <CardContent className="p-3">
@@ -66,9 +66,9 @@ export function AdminDashboardHeader({
   onBalanceClick,
 }: AdminDashboardHeaderProps) {
   return (
-    <div className="space-y-3 w-full max-w-full overflow-hidden">
+    <div className="space-y-3">
       {/* Community Info - Compact header row */}
-      <div className="flex items-start gap-3 max-w-full">
+      <div className="flex items-start gap-3">
         {communityLogo && (
           <img
             src={communityLogo}
@@ -85,8 +85,8 @@ export function AdminDashboardHeader({
         </div>
       </div>
 
-      {/* Stats Grid - 2x2 compact layout */}
-      <div className="grid grid-cols-2 gap-2 w-full">
+      {/* Stats Grid - 2x2 on mobile, 4-col on tablet+ */}
+      <div className="grid grid-cols-2 gap-2">
         <StatCard
           icon={Users}
           value={stats.totalMembers}
