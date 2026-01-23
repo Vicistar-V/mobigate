@@ -83,6 +83,7 @@ import { MediaUploadDialog } from "@/components/community/MediaUploadDialog";
 import { CommunityGallerySection } from "@/components/community/CommunityGallerySection";
 import { CommunityNotificationsSheet } from "@/components/community/CommunityNotificationsSheet";
 import { communityNotifications } from "@/data/communityNotificationsData";
+import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
 
 const CommunityProfile = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -599,6 +600,13 @@ const CommunityProfile = () => {
 
             {/* Status Tab */}
             <TabsContent value="status" className="space-y-6 mt-6">
+              {/* Campaign Banners for Community Interface */}
+              <CampaignBannerRotation 
+                audienceType="community_interface" 
+                compact={false}
+                maxBanners={3}
+              />
+              
               {/* 1. Our People, Our Strength - Images only, no filters */}
               <OurPeopleCarousel items={communityPeople} />
 

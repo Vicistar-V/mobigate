@@ -12,6 +12,7 @@ import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { ChatWithFriendsDialog } from "@/components/chat/ChatWithFriendsDialog";
+import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle } from "lucide-react";
@@ -358,6 +359,13 @@ const Index = () => {
 
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6 min-w-0">
+            {/* Campaign Banners for Mobigate Interface */}
+            <CampaignBannerRotation 
+              audienceType="mobigate_interface" 
+              compact={false}
+              maxBanners={3}
+            />
+            
             {/* Create Monetized Post - Directly above Wall Status */}
             <CreatePostDialog />
             

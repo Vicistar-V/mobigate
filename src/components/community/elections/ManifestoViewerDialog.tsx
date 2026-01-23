@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { FileText, Quote, Target, CheckCircle2 } from "lucide-react";
+import { FileText, Quote, Target, CheckCircle2, MessageSquare } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ElectionCandidate } from "@/data/electionData";
 
@@ -12,6 +12,7 @@ interface ManifestoViewerDialogProps {
   onOpenChange: (open: boolean) => void;
   candidate: ElectionCandidate | null;
   officeName: string;
+  onWriteFeedback?: () => void;
 }
 
 export const ManifestoViewerDialog = ({
@@ -19,6 +20,7 @@ export const ManifestoViewerDialog = ({
   onOpenChange,
   candidate,
   officeName,
+  onWriteFeedback,
 }: ManifestoViewerDialogProps) => {
   const isMobile = useIsMobile();
 
@@ -96,10 +98,23 @@ export const ManifestoViewerDialog = ({
         </div>
       </ScrollArea>
 
-      {/* Close Button */}
-      <div className="p-4 border-t">
+      {/* Action Buttons */}
+      <div className="p-4 border-t flex gap-2">
+        {onWriteFeedback && (
+          <Button 
+            className="flex-1" 
+            variant="default"
+            onClick={() => {
+              onOpenChange(false);
+              onWriteFeedback();
+            }}
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Write Feedback
+          </Button>
+        )}
         <Button 
-          className="w-full" 
+          className={onWriteFeedback ? "" : "w-full"} 
           variant="outline"
           onClick={() => onOpenChange(false)}
         >
