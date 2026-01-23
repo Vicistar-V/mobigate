@@ -58,6 +58,7 @@ import { MeetingChatsTab } from "@/components/community/meetings/MeetingChatsTab
 import { MeetingVoteNotesTab } from "@/components/community/meetings/MeetingVoteNotesTab";
 import { MeetingLighterMoodsTab } from "@/components/community/meetings/MeetingLighterMoodsTab";
 import { MeetingAttendanceTab } from "@/components/community/meetings/MeetingAttendanceTab";
+import { MeetingMinutesTab } from "@/components/community/meetings/MeetingMinutesTab";
 import { FinancialSummaryTab } from "@/components/community/finance/FinancialSummaryTab";
 import { FinancialClearancesTab } from "@/components/community/finance/FinancialClearancesTab";
 import { FinancialAccreditationTab } from "@/components/community/finance/FinancialAccreditationTab";
@@ -810,6 +811,12 @@ const CommunityProfile = () => {
           {activeTab === "meeting-attendance" && (
             <div className="mt-6">
               <MeetingAttendanceTab />
+            </div>
+          )}
+
+          {activeTab === "meeting-minutes" && (
+            <div className="mt-6">
+              <MeetingMinutesTab />
             </div>
           )}
 

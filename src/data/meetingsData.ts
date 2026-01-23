@@ -107,6 +107,60 @@ export interface LighterMood {
   createdAt: Date;
 }
 
+// Meeting Minutes Interfaces
+export interface MeetingMinutes {
+  id: string;
+  meetingId: string;
+  meetingName: string;
+  meetingDate: Date;
+  uploadedBy: string;
+  uploadedByAvatar: string;
+  uploadedAt: Date;
+  fileUrl: string;
+  fileName: string;
+  fileSize: string;
+  fileType: 'PDF' | 'DOC' | 'DOCX';
+  status: 'pending_adoption' | 'adopted' | 'rejected';
+  adoptionPercentage: number;
+  totalVoters: number;
+  adoptedVotes: number;
+  rejectedVotes: number;
+  adoptionThreshold: number; // 60-70% threshold
+  adoptedAt?: Date;
+  downloadFee: number; // in Mobi
+  downloadCount: number;
+  // 90 days after adoption, downloads don't mark attendance
+  attendanceDeadline?: Date;
+}
+
+export interface MinutesAdoption {
+  id: string;
+  minutesId: string;
+  memberId: string;
+  memberName: string;
+  memberAvatar: string;
+  vote: 'adopt' | 'reject';
+  votedAt: Date;
+  comment?: string;
+}
+
+export interface MinutesDownload {
+  id: string;
+  minutesId: string;
+  memberId: string;
+  memberName: string;
+  memberAvatar: string;
+  downloadedAt: Date;
+  feePaid: number;
+  markedAttendance: boolean; // true if within 90 days of adoption
+}
+
+export interface MeetingMinutesSettings {
+  downloadFeeDefault: number; // in Mobi
+  adoptionThreshold: number; // percentage (60-70%)
+  attendanceGracePeriodDays: number; // 90 days
+}
+
 export interface AttendanceRollCall {
   id: string;
   meetingId: string;
@@ -128,6 +182,7 @@ export interface ExtendedMeeting extends Meeting {
   voteNotes: MeetingVoteNote[];
   lighterMoods: LighterMood[];
   rollCalls: AttendanceRollCall[];
+  minutes?: MeetingMinutes;
 }
 
 export const mockParticipants: MeetingParticipant[] = [
@@ -561,5 +616,172 @@ export const mockInvitations = [
     name: "Regional Conference",
     date: new Date(Date.now() + 86400000 * 21),
     from: "Regional Office",
+  },
+];
+
+// Meeting Minutes Settings
+export const mockMinutesSettings: MeetingMinutesSettings = {
+  downloadFeeDefault: 50, // M50 default download fee
+  adoptionThreshold: 66, // 66% (2/3 majority)
+  attendanceGracePeriodDays: 90,
+};
+
+// Mock Meeting Minutes Data
+export const mockMeetingMinutes: MeetingMinutes[] = [
+  {
+    id: "min1",
+    meetingId: "meet3",
+    meetingName: "General Meeting",
+    meetingDate: new Date(Date.now() - 86400000 * 7),
+    uploadedBy: "Michael Chen",
+    uploadedByAvatar: profileMichael,
+    uploadedAt: new Date(Date.now() - 86400000 * 6),
+    fileUrl: "#",
+    fileName: "General_Meeting_Minutes_Jan_2025.pdf",
+    fileSize: "1.2 MB",
+    fileType: "PDF",
+    status: "adopted",
+    adoptionPercentage: 78,
+    totalVoters: 45,
+    adoptedVotes: 35,
+    rejectedVotes: 10,
+    adoptionThreshold: 66,
+    adoptedAt: new Date(Date.now() - 86400000 * 4),
+    downloadFee: 50,
+    downloadCount: 28,
+    attendanceDeadline: new Date(Date.now() + 86400000 * 86), // 86 days remaining
+  },
+  {
+    id: "min2",
+    meetingId: "meet2",
+    meetingName: "Executive Meeting",
+    meetingDate: new Date(Date.now() - 86400000 * 14),
+    uploadedBy: "Michael Chen",
+    uploadedByAvatar: profileMichael,
+    uploadedAt: new Date(Date.now() - 86400000 * 13),
+    fileUrl: "#",
+    fileName: "Executive_Meeting_Minutes_Jan_2025.pdf",
+    fileSize: "0.8 MB",
+    fileType: "PDF",
+    status: "adopted",
+    adoptionPercentage: 85,
+    totalVoters: 12,
+    adoptedVotes: 10,
+    rejectedVotes: 2,
+    adoptionThreshold: 66,
+    adoptedAt: new Date(Date.now() - 86400000 * 10),
+    downloadFee: 50,
+    downloadCount: 10,
+    attendanceDeadline: new Date(Date.now() + 86400000 * 80),
+  },
+  {
+    id: "min3",
+    meetingId: "meet4",
+    meetingName: "Exco Meeting",
+    meetingDate: new Date(Date.now() - 86400000 * 21),
+    uploadedBy: "Michael Chen",
+    uploadedByAvatar: profileMichael,
+    uploadedAt: new Date(Date.now() - 86400000 * 20),
+    fileUrl: "#",
+    fileName: "Exco_Meeting_Minutes_Dec_2024.pdf",
+    fileSize: "0.6 MB",
+    fileType: "PDF",
+    status: "pending_adoption",
+    adoptionPercentage: 45,
+    totalVoters: 45,
+    adoptedVotes: 20,
+    rejectedVotes: 5,
+    adoptionThreshold: 66,
+    downloadFee: 50,
+    downloadCount: 0,
+  },
+  {
+    id: "min4",
+    meetingId: "meet5",
+    meetingName: "Annual General Meeting",
+    meetingDate: new Date(Date.now() - 86400000 * 120),
+    uploadedBy: "Michael Chen",
+    uploadedByAvatar: profileMichael,
+    uploadedAt: new Date(Date.now() - 86400000 * 119),
+    fileUrl: "#",
+    fileName: "AGM_Minutes_Oct_2024.pdf",
+    fileSize: "2.4 MB",
+    fileType: "PDF",
+    status: "adopted",
+    adoptionPercentage: 92,
+    totalVoters: 78,
+    adoptedVotes: 72,
+    rejectedVotes: 6,
+    adoptionThreshold: 66,
+    adoptedAt: new Date(Date.now() - 86400000 * 115),
+    downloadFee: 75,
+    downloadCount: 65,
+    attendanceDeadline: new Date(Date.now() - 86400000 * 25), // expired (no attendance marking)
+  },
+];
+
+// Mock Minutes Adoptions
+export const mockMinutesAdoptions: MinutesAdoption[] = [
+  {
+    id: "adopt1",
+    minutesId: "min1",
+    memberId: "p1",
+    memberName: "Sarah Johnson",
+    memberAvatar: profileSarah,
+    vote: "adopt",
+    votedAt: new Date(Date.now() - 86400000 * 5),
+    comment: "Minutes accurately reflect the proceedings.",
+  },
+  {
+    id: "adopt2",
+    minutesId: "min1",
+    memberId: "p4",
+    memberName: "David Martinez",
+    memberAvatar: profileDavid,
+    vote: "adopt",
+    votedAt: new Date(Date.now() - 86400000 * 5),
+  },
+  {
+    id: "adopt3",
+    minutesId: "min3",
+    memberId: "p1",
+    memberName: "Sarah Johnson",
+    memberAvatar: profileSarah,
+    vote: "adopt",
+    votedAt: new Date(Date.now() - 86400000 * 19),
+  },
+];
+
+// Mock Minutes Downloads
+export const mockMinutesDownloads: MinutesDownload[] = [
+  {
+    id: "dl1",
+    minutesId: "min1",
+    memberId: "p1",
+    memberName: "Sarah Johnson",
+    memberAvatar: profileSarah,
+    downloadedAt: new Date(Date.now() - 86400000 * 3),
+    feePaid: 50,
+    markedAttendance: true,
+  },
+  {
+    id: "dl2",
+    minutesId: "min1",
+    memberId: "p4",
+    memberName: "David Martinez",
+    memberAvatar: profileDavid,
+    downloadedAt: new Date(Date.now() - 86400000 * 2),
+    feePaid: 50,
+    markedAttendance: true,
+  },
+  {
+    id: "dl3",
+    minutesId: "min4",
+    memberId: "p1",
+    memberName: "Sarah Johnson",
+    memberAvatar: profileSarah,
+    downloadedAt: new Date(Date.now() - 86400000 * 1),
+    feePaid: 75,
+    markedAttendance: false, // downloaded after 90 day deadline
   },
 ];

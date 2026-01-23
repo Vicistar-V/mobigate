@@ -767,6 +767,13 @@ export function CommunityMainMenu({
                       <Button
                         variant="ghost"
                         className="w-full justify-start pl-4 text-sm h-8"
+                        onClick={() => handleMenuClick("meeting-minutes", true)}
+                      >
+                        Meeting Minutes
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start pl-4 text-sm h-8"
                         onClick={() => handleMenuClick("meeting-proceedings", true)}
                       >
                         Download Meeting Proceedings
