@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Search, CheckCircle2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TransactionAuthorizationPanel } from "./TransactionAuthorizationPanel";
 
 interface WalletTransferDialogProps {
   open: boolean;
@@ -35,7 +36,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
   const [selectedMember, setSelectedMember] = useState<typeof mockMembers[0] | null>(null);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  const [step, setStep] = useState<"select" | "details" | "confirm">("select");
+  const [step, setStep] = useState<"select" | "details" | "confirm" | "authorize">("select");
   const { toast } = useToast();
 
   const walletBalance = 50000; // Mock balance
@@ -83,10 +84,14 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
     setStep("confirm");
   };
 
-  const handleConfirm = () => {
+  const handleProceedToAuthorize = () => {
+    setStep("authorize");
+  };
+
+  const handleConfirmTransfer = () => {
     toast({
       title: "Transfer Successful!",
-      description: `₦${parseFloat(amount).toLocaleString()} sent to ${selectedMember?.name}`,
+      description: `M${parseFloat(amount).toLocaleString()} sent to ${selectedMember?.name}`,
     });
     onOpenChange(false);
     // Reset
@@ -97,6 +102,15 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
       setDescription("");
       setStep("select");
     }, 300);
+  };
+
+  const handleAuthorizationExpired = () => {
+    toast({
+      title: "Authorization Expired",
+      description: "The 24-hour authorization window has expired. Please start again.",
+      variant: "destructive",
+    });
+    handleClose();
   };
 
   const handleClose = () => {
@@ -112,7 +126,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Send className="h-5 w-5 text-primary" />
@@ -177,7 +191,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               <Label htmlFor="amount">Transfer Amount</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  ₦
+                  M
                 </span>
                 <Input
                   id="amount"
@@ -190,7 +204,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                Available balance: ₦{walletBalance.toLocaleString()}
+                Available balance: M{walletBalance.toLocaleString()}
               </p>
             </div>
 
@@ -226,7 +240,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               </div>
               <h3 className="text-xl font-bold">Confirm Transfer</h3>
               <p className="text-sm text-muted-foreground">
-                Please review the details before confirming
+                Please review the details before proceeding
               </p>
             </div>
 
@@ -237,7 +251,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold text-lg">₦{parseFloat(amount).toLocaleString()}</span>
+                <span className="font-bold text-lg">M{parseFloat(amount).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Description</span>
@@ -249,7 +263,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
 
             <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                <strong>Note:</strong> This transaction cannot be reversed once confirmed. Please verify all details.
+                <strong>Note:</strong> This transaction requires multi-signature authorization from community executives.
               </p>
             </div>
 
@@ -257,12 +271,23 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               <Button variant="outline" onClick={() => setStep("details")} className="w-full sm:w-auto">
                 Back
               </Button>
-              <Button onClick={handleConfirm} className="w-full sm:w-auto">
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Confirm Transfer
+              <Button onClick={handleProceedToAuthorize} className="w-full sm:w-auto">
+                Proceed to Authorization
               </Button>
             </DialogFooter>
           </div>
+        )}
+
+        {step === "authorize" && selectedMember && (
+          <TransactionAuthorizationPanel
+            transactionType="transfer"
+            amount={parseFloat(amount)}
+            recipient={selectedMember.name}
+            description={description}
+            onConfirm={handleConfirmTransfer}
+            onBack={() => setStep("confirm")}
+            onExpire={handleAuthorizationExpired}
+          />
         )}
       </DialogContent>
     </Dialog>
