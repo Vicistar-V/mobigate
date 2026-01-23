@@ -10,7 +10,9 @@ export type NotificationType =
   | "fundraiser"
   | "membership_approved"
   | "post_liked"
-  | "post_commented";
+  | "post_commented"
+  | "minutes_adoption_required"
+  | "minutes_adopted";
 
 export interface CommunityNotification {
   id: string;
@@ -127,6 +129,26 @@ export const communityNotifications: CommunityNotification[] = [
     timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
     isRead: true,
   },
+  {
+    id: "notif-11",
+    type: "minutes_adoption_required",
+    title: "Minutes Require Adoption 📋",
+    message: "New meeting minutes uploaded for 'Annual General Meeting'. Please review and cast your adoption vote.",
+    communityId: "1",
+    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+    isRead: false,
+    actionUrl: "/community/1/meeting-minutes",
+  },
+  {
+    id: "notif-12",
+    type: "minutes_adopted",
+    title: "Minutes Adopted ✓",
+    message: "Meeting minutes for 'Monthly Planning Session' have been adopted. You can now download them.",
+    communityId: "1",
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    isRead: true,
+    actionUrl: "/community/1/meeting-minutes",
+  },
 ];
 
 // Helper function to get notification icon based on type
@@ -151,6 +173,10 @@ export const getNotificationIcon = (type: NotificationType): string => {
       return "❤️";
     case "post_commented":
       return "💬";
+    case "minutes_adoption_required":
+      return "📋";
+    case "minutes_adopted":
+      return "✅";
     default:
       return "🔔";
   }

@@ -85,7 +85,7 @@ export const MinutesDownloadDialog = ({
   const handleDownload = async () => {
     setIsDownloading(true);
     
-    // Simulate download process
+    // Simulate download process and wallet deduction
     await new Promise((resolve) => setTimeout(resolve, 1500));
     
     setIsDownloading(false);
@@ -103,13 +103,30 @@ export const MinutesDownloadDialog = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
+    // Show wallet debit toast first
     toast({
-      title: "Download Complete",
-      description: canMarkAttendance
-        ? "Minutes downloaded and your attendance has been marked!"
-        : "Minutes downloaded. Attendance was not marked (past 90-day deadline).",
+      title: "Payment Processed",
+      description: `M${minutes.downloadFee} debited from your Mobi Wallet.`,
     });
+
+    // Show community credit toast
+    setTimeout(() => {
+      toast({
+        title: "Community Wallet Credited",
+        description: `M${minutes.downloadFee} credited to Community Wallet from your download.`,
+      });
+    }, 500);
+    
+    // Show final status toast
+    setTimeout(() => {
+      toast({
+        title: "Download Complete",
+        description: canMarkAttendance
+          ? "Minutes downloaded and your attendance has been marked!"
+          : "Minutes downloaded. Attendance was not marked (past 90-day deadline).",
+      });
+    }, 1000);
   };
 
   const Content = () => (

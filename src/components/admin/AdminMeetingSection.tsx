@@ -1,4 +1,5 @@
-import { Calendar, Users, CheckCircle, Clock, FileText, Scale, ChevronRight, Video } from "lucide-react";
+import { useState } from "react";
+import { Calendar, Users, CheckCircle, Clock, FileText, Scale, ChevronRight, Video, Settings } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { AdminMinutesSettings } from "./settings/AdminMinutesSettings";
 import { AdminStats, UpcomingMeeting, formatFutureTime } from "@/data/adminDashboardData";
 
 interface MeetingItemProps {
@@ -69,7 +71,14 @@ export function AdminMeetingSection({
   onViewConflicts,
   onManageRollCall,
 }: AdminMeetingSectionProps) {
+  const [showMinutesSettings, setShowMinutesSettings] = useState(false);
+
   return (
+    <>
+      <AdminMinutesSettings
+        open={showMinutesSettings}
+        onOpenChange={setShowMinutesSettings}
+      />
     <Accordion type="single" collapsible className="w-full max-w-full">
       <AccordionItem value="meeting" className="border rounded-lg overflow-hidden">
         <AccordionTrigger className="px-4 hover:no-underline max-w-full">
@@ -135,6 +144,17 @@ export function AdminMeetingSection({
               </Button>
             </div>
 
+            {/* Minutes Settings Button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-10 text-sm w-full" 
+              onClick={() => setShowMinutesSettings(true)}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Minutes Settings
+            </Button>
+
             {/* Upcoming Meetings */}
             {upcomingMeetings.length > 0 && (
               <Card className="overflow-hidden">
@@ -164,5 +184,6 @@ export function AdminMeetingSection({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
+    </>
   );
 }

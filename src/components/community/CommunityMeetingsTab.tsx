@@ -20,10 +20,13 @@ import {
   mockUpcomingMeetings,
   mockParticipants,
   mockChatMessages,
+  mockMeetingMinutes,
   MeetingParticipant,
   MeetingChatMessage,
   Meeting,
 } from "@/data/meetingsData";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type MeetingView = "lobby" | "live" | "history";
 type MeetingType = "executive" | "general";
@@ -40,7 +43,21 @@ export const CommunityMeetingsTab = () => {
   const [chatMessages, setChatMessages] = useState<MeetingChatMessage[]>(mockChatMessages);
   const [participants] = useState<MeetingParticipant[]>(mockParticipants);
 
+  // Check if previous meeting minutes are pending adoption
+  const pendingMinutes = mockMeetingMinutes.find(
+    (m) => m.status === "pending_adoption"
+  );
+  const canStartNewMeeting = !pendingMinutes;
+
   const handleJoinMeeting = () => {
+    if (!canStartNewMeeting) {
+      toast({
+        title: "Meeting Locked",
+        description: "Previous meeting minutes must be adopted before joining new meetings.",
+        variant: "destructive",
+      });
+      return;
+    }
     setMeetingView("live");
     setIsMeetingActive(true);
     toast({
@@ -191,14 +208,36 @@ export const CommunityMeetingsTab = () => {
       {/* Lobby View */}
       {meetingView === "lobby" && (
         <div className="space-y-4">
+          {/* Meeting Lock Alert */}
+          {!canStartNewMeeting && pendingMinutes && (
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800 text-sm">
+                <strong>New Meetings Locked:</strong> The minutes from "{pendingMinutes.meetingName}" 
+                must be adopted before new meetings can proceed.{" "}
+                <span className="font-medium">
+                  ({pendingMinutes.adoptionPercentage}% of {pendingMinutes.adoptionThreshold}% required)
+                </span>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Join Meeting Button */}
           <Button
             onClick={handleJoinMeeting}
             size="lg"
-            className="w-full gap-2 h-14 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            disabled={!canStartNewMeeting}
+            className={`w-full gap-2 h-14 text-lg ${
+              canStartNewMeeting
+                ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                : "bg-muted text-muted-foreground cursor-not-allowed"
+            }`}
           >
             <Video className="w-6 h-6" />
-            Join {selectedMeetingType === "executive" ? "Executive" : "General"} Meeting Now
+            {canStartNewMeeting 
+              ? `Join ${selectedMeetingType === "executive" ? "Executive" : "General"} Meeting Now`
+              : "Meeting Locked - Adopt Previous Minutes"
+            }
           </Button>
 
           {/* Premium Ad */}
