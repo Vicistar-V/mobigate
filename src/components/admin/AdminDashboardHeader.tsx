@@ -2,7 +2,6 @@ import { Users, Clock, Vote, Wallet, TrendingUp, TrendingDown } from "lucide-rea
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AdminStats } from "@/data/adminDashboardData";
-import { AdminRoleBadge } from "@/components/community/AdminRoleBadge";
 
 interface StatCardProps {
   icon: React.ElementType;
@@ -78,10 +77,7 @@ export function AdminDashboardHeader({
         )}
         <div className="flex-1 min-w-0">
           <h1 className="text-base font-bold leading-tight line-clamp-2">{communityName}</h1>
-          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-            <AdminRoleBadge adminRole="Community Admin" />
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">Dashboard</p>
+          <p className="text-xs text-muted-foreground mt-1">Dashboard</p>
         </div>
       </div>
 
