@@ -14,9 +14,10 @@ import {
   ChevronRight,
   Table,
   List,
+  FileText,
 } from "lucide-react";
-import { mockAttendance, mockMeetings } from "@/data/meetingsData";
-import { format } from "date-fns";
+import { mockAttendance, mockMeetings, mockMinutesDownloads, mockMeetingMinutes } from "@/data/meetingsData";
+import { format, differenceInDays } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 import { MemberPreviewDialog } from "../MemberPreviewDialog";
@@ -97,7 +98,16 @@ export const MeetingAttendanceTab = () => {
     },
   ];
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, isDownloadBased?: boolean) => {
+    if (isDownloadBased) {
+      return (
+        <Badge className="bg-purple-500/10 text-purple-500">
+          <Download className="h-3 w-3 mr-1" />
+          Via Download
+        </Badge>
+      );
+    }
+
     switch (status) {
       case "present":
         return (
@@ -127,6 +137,13 @@ export const MeetingAttendanceTab = () => {
             Excused
           </Badge>
         );
+      case "present_via_download":
+        return (
+          <Badge className="bg-purple-500/10 text-purple-500">
+            <Download className="h-3 w-3 mr-1" />
+            Via Download
+          </Badge>
+        );
       default:
         return null;
     }
@@ -142,9 +159,23 @@ export const MeetingAttendanceTab = () => {
         return "border-yellow-500 bg-yellow-50";
       case "excused":
         return "border-blue-500 bg-blue-50";
+      case "present_via_download":
+        return "border-purple-500 bg-purple-50";
       default:
         return "border-gray-300";
     }
+  };
+
+  // Calculate download-based attendance for a meeting
+  const getDownloadBasedAttendance = (meetingId: string) => {
+    // Find the minutes for this meeting
+    const meetingMinutes = mockMeetingMinutes.find(m => m.meetingId === meetingId);
+    if (!meetingMinutes || meetingMinutes.status !== "adopted") return [];
+    
+    // Get downloads that marked attendance (within 90 days)
+    return mockMinutesDownloads.filter(
+      d => d.minutesId === meetingMinutes.id && d.markedAttendance
+    );
   };
 
   const calculateStats = () => {
@@ -153,8 +184,13 @@ export const MeetingAttendanceTab = () => {
     const late = meetingAttendance.filter((a) => a.status === "late").length;
     const absent = meetingAttendance.filter((a) => a.status === "absent").length;
     const excused = meetingAttendance.filter((a) => a.status === "excused").length;
+    
+    // Count download-based attendance
+    const downloadAttendance = selectedMeetingId 
+      ? getDownloadBasedAttendance(selectedMeetingId).length 
+      : 0;
 
-    return { total, present, late, absent, excused };
+    return { total, present, late, absent, excused, downloadAttendance };
   };
 
   const handleExport = () => {
@@ -233,7 +269,7 @@ export const MeetingAttendanceTab = () => {
             </div>
 
             {/* Statistics */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-4">
               {(() => {
                 const stats = calculateStats();
                 return (
@@ -266,10 +302,46 @@ export const MeetingAttendanceTab = () => {
                       </div>
                       <div className="text-xs text-muted-foreground">Excused</div>
                     </div>
+                    <div className="text-center p-3 bg-purple-500/10 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {stats.downloadAttendance}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Via Download</div>
+                    </div>
                   </>
                 );
               })()}
             </div>
+
+            {/* Minutes Download Info */}
+            {selectedMeetingId && (() => {
+              const meetingMinutes = mockMeetingMinutes.find(m => m.meetingId === selectedMeetingId);
+              if (!meetingMinutes) return null;
+              
+              const daysRemaining = meetingMinutes.attendanceDeadline 
+                ? differenceInDays(meetingMinutes.attendanceDeadline, new Date())
+                : 0;
+              
+              return (
+                <Card className={`p-3 mb-4 ${daysRemaining > 0 ? "bg-green-50 border-green-200" : "bg-gray-50"}`}>
+                  <div className="flex items-center gap-3 text-sm">
+                    <FileText className="h-5 w-5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <span className="font-medium">Minutes Status: </span>
+                      {meetingMinutes.status === "adopted" ? (
+                        <span className="text-green-600">
+                          Adopted • {daysRemaining > 0 
+                            ? `${daysRemaining} days left for attendance via download` 
+                            : "Attendance marking expired"}
+                        </span>
+                      ) : (
+                        <span className="text-amber-600">Pending Adoption</span>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })()}
 
             {/* Status Filter */}
             <div className="flex gap-2 flex-wrap mb-4">

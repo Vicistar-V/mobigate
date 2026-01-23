@@ -112,12 +112,39 @@ export const SecretaryUploadMinutesDialog = ({
     setIsUploading(false);
     setUploadComplete(true);
 
+    // Show upload success toast
     toast({
       title: "Minutes Uploaded Successfully",
-      description: sendNotification
-        ? "All members have been notified to adopt the minutes."
-        : "Minutes uploaded. Members were not notified.",
+      description: "Meeting minutes have been uploaded and are pending adoption.",
     });
+
+    // If notifications enabled, show notification sent toast
+    if (sendNotification) {
+      setTimeout(() => {
+        toast({
+          title: "Notifications Sent",
+          description: "All community members have been notified to adopt the minutes.",
+        });
+      }, 500);
+
+      // Simulate creating notification entries
+      // In a real app, this would add to the notifications data
+      console.log("[Minutes Upload] Creating notification entries for all members:", {
+        type: "minutes_adoption_required",
+        meetingId: selectedMeeting,
+        downloadFee: parseInt(downloadFee),
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Show meeting lock notice
+    setTimeout(() => {
+      toast({
+        title: "Meeting Lock Active",
+        description: "New meetings are locked until these minutes are adopted.",
+        variant: "default",
+      });
+    }, 1000);
   };
 
   const handleClose = () => {
