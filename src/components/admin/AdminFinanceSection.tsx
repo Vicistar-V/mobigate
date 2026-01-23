@@ -1,4 +1,5 @@
-import { Wallet, TrendingUp, TrendingDown, Clock, FileText, Users, AlertTriangle, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Wallet, TrendingUp, TrendingDown, Clock, FileText, Users, AlertTriangle, ChevronRight, Settings, Receipt, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +11,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AdminStats, RecentTransaction, DefaultingMember, formatRelativeTime } from "@/data/adminDashboardData";
+import { ManageDuesLeviesDialog } from "./finance/ManageDuesLeviesDialog";
+import { AccountStatementsDialog } from "./finance/AccountStatementsDialog";
+import { MembersFinancialReportsDialog } from "./finance/MembersFinancialReportsDialog";
+import { AdminFinancialAuditDialog } from "./finance/AdminFinancialAuditDialog";
 
 const getTransactionIcon = (type: RecentTransaction['type']) => {
   switch (type) {
@@ -139,7 +144,18 @@ export function AdminFinanceSection({
   onViewAudit,
   onViewObligations,
 }: AdminFinanceSectionProps) {
+  const [showDuesLevies, setShowDuesLevies] = useState(false);
+  const [showStatements, setShowStatements] = useState(false);
+  const [showMemberReports, setShowMemberReports] = useState(false);
+  const [showAudit, setShowAudit] = useState(false);
+
   return (
+    <>
+      {/* Dialogs */}
+      <ManageDuesLeviesDialog open={showDuesLevies} onOpenChange={setShowDuesLevies} />
+      <AccountStatementsDialog open={showStatements} onOpenChange={setShowStatements} />
+      <MembersFinancialReportsDialog open={showMemberReports} onOpenChange={setShowMemberReports} />
+      <AdminFinancialAuditDialog open={showAudit} onOpenChange={setShowAudit} />
     <Accordion type="single" collapsible className="w-full max-w-full">
       <AccordionItem value="finance" className="border rounded-lg overflow-hidden">
         <AccordionTrigger className="px-4 hover:no-underline max-w-full">
@@ -166,27 +182,46 @@ export function AdminFinanceSection({
               <StatCard label="Pending" value={String(stats.pendingPayments)} icon={Clock} />
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons - Row 1 */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowDuesLevies(true)}>
+                <Settings className="h-4 w-4 mr-2" />
+                Dues & Levies
+              </Button>
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowStatements(true)}>
+                <Receipt className="h-4 w-4 mr-2" />
+                Statements
+              </Button>
+            </div>
+
+            {/* Action Buttons - Row 2 */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowMemberReports(true)}>
+                <Users className="h-4 w-4 mr-2" />
+                Member Reports
+              </Button>
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={() => setShowAudit(true)}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Financial Audit
+              </Button>
+            </div>
+
+            {/* Legacy buttons */}
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewOverview}>
                 <Wallet className="h-4 w-4 mr-2" />
                 Overview
               </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewAudit}>
-                <FileText className="h-4 w-4 mr-2" />
-                Audit
+              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewObligations}>
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Obligations
+                {stats.pendingPayments > 0 && (
+                  <Badge variant="destructive" className="ml-1 text-xs px-1.5">
+                    {stats.pendingPayments}
+                  </Badge>
+                )}
               </Button>
             </div>
-
-            <Button variant="outline" size="sm" className="w-full h-10 text-sm" onClick={onViewObligations}>
-              <Users className="h-4 w-4 mr-2" />
-              Member Obligations
-              {stats.pendingPayments > 0 && (
-                <Badge variant="destructive" className="ml-2 text-xs px-1.5">
-                  {stats.pendingPayments}
-                </Badge>
-              )}
-            </Button>
 
             {/* Recent Transactions */}
             <Card className="overflow-hidden">
@@ -233,5 +268,6 @@ export function AdminFinanceSection({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
+    </>
   );
 }
