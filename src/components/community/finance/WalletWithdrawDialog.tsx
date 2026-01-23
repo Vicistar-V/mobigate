@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Building2, Plus, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { TransactionAuthorizationPanel } from "./TransactionAuthorizationPanel";
 
 interface WalletWithdrawDialogProps {
   open: boolean;
@@ -41,7 +42,7 @@ const mockBankAccounts = [
 export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialogProps) {
   const [amount, setAmount] = useState("");
   const [selectedAccount, setSelectedAccount] = useState(mockBankAccounts[0].id);
-  const [step, setStep] = useState<"amount" | "account" | "confirm">("amount");
+  const [step, setStep] = useState<"amount" | "account" | "confirm" | "authorize">("amount");
   const [showAddAccount, setShowAddAccount] = useState(false);
   const { toast } = useToast();
 
@@ -63,7 +64,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
     if (withdrawAmount < minWithdrawal) {
       toast({
         title: "Amount Too Low",
-        description: `Minimum withdrawal amount is ₦${minWithdrawal.toLocaleString()}`,
+        description: `Minimum withdrawal amount is M${minWithdrawal.toLocaleString()}`,
         variant: "destructive",
       });
       return;
@@ -85,11 +86,15 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
     setStep("confirm");
   };
 
-  const handleConfirm = () => {
+  const handleProceedToAuthorize = () => {
+    setStep("authorize");
+  };
+
+  const handleConfirmWithdrawal = () => {
     const account = mockBankAccounts.find((acc) => acc.id === selectedAccount);
     toast({
-      title: "Withdrawal Initiated!",
-      description: `₦${parseFloat(amount).toLocaleString()} will be sent to ${account?.bankName}`,
+      title: "Withdrawal Successful!",
+      description: `M${parseFloat(amount).toLocaleString()} has been sent to ${account?.bankName}`,
     });
     onOpenChange(false);
     // Reset
@@ -99,6 +104,15 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
       setStep("amount");
       setShowAddAccount(false);
     }, 300);
+  };
+
+  const handleAuthorizationExpired = () => {
+    toast({
+      title: "Authorization Expired",
+      description: "The 24-hour authorization window has expired. Please start again.",
+      variant: "destructive",
+    });
+    handleClose();
   };
 
   const handleClose = () => {
@@ -123,7 +137,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wallet className="h-5 w-5 text-primary" />
@@ -135,14 +149,14 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
           <div className="space-y-4">
             <Card className="p-4 bg-muted">
               <p className="text-sm text-muted-foreground">Available Balance</p>
-              <p className="text-2xl font-bold">₦{walletBalance.toLocaleString()}</p>
+              <p className="text-2xl font-bold">M{walletBalance.toLocaleString()}</p>
             </Card>
 
             <div className="space-y-2">
               <Label htmlFor="withdraw-amount">Withdrawal Amount</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  ₦
+                  M
                 </span>
                 <Input
                   id="withdraw-amount"
@@ -155,7 +169,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                Minimum withdrawal: ₦{minWithdrawal.toLocaleString()}
+                Minimum withdrawal: M{minWithdrawal.toLocaleString()}
               </p>
             </div>
 
@@ -181,7 +195,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">Withdrawal Amount</p>
-              <p className="text-2xl font-bold">₦{parseFloat(amount).toLocaleString()}</p>
+              <p className="text-2xl font-bold">M{parseFloat(amount).toLocaleString()}</p>
             </div>
 
             <div className="space-y-2">
@@ -246,14 +260,14 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               </div>
               <h3 className="text-xl font-bold">Confirm Withdrawal</h3>
               <p className="text-sm text-muted-foreground">
-                Please review the details before confirming
+                Please review the details before proceeding
               </p>
             </div>
 
             <Card className="p-4 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold text-lg">₦{parseFloat(amount).toLocaleString()}</span>
+                <span className="font-bold text-lg">M{parseFloat(amount).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Bank</span>
@@ -273,7 +287,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               <div className="flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
                 <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                  <strong>Note:</strong> Processing may take 1-3 business days. Ensure your bank details are correct.
+                  <strong>Note:</strong> This transaction requires multi-signature authorization from community executives.
                 </p>
               </div>
             </div>
@@ -282,12 +296,23 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               <Button variant="outline" onClick={() => setStep("account")} className="w-full sm:w-auto">
                 Back
               </Button>
-              <Button onClick={handleConfirm} className="w-full sm:w-auto">
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Confirm Withdrawal
+              <Button onClick={handleProceedToAuthorize} className="w-full sm:w-auto">
+                Proceed to Authorization
               </Button>
             </DialogFooter>
           </div>
+        )}
+
+        {step === "authorize" && selectedAccountDetails && (
+          <TransactionAuthorizationPanel
+            transactionType="withdrawal"
+            amount={parseFloat(amount)}
+            bankName={selectedAccountDetails.bankName}
+            accountNumber={selectedAccountDetails.accountNumber}
+            onConfirm={handleConfirmWithdrawal}
+            onBack={() => setStep("confirm")}
+            onExpire={handleAuthorizationExpired}
+          />
         )}
 
         {/* Add Account Modal */}
