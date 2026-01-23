@@ -104,6 +104,25 @@ export const MinutesDownloadDialog = ({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
+    // Simulate transaction entry for community ledger
+    // In a real implementation, this would call an API to record:
+    // {
+    //   type: "credit",
+    //   category: "minutes_download",
+    //   description: `Meeting Minutes Download - ${minutes.meetingName}`,
+    //   reference: `MIN-${Date.now()}`,
+    //   amount: minutes.downloadFee,
+    //   memberName: "Current User",
+    //   status: "completed"
+    // }
+    console.log("Transaction recorded:", {
+      type: "credit",
+      category: "minutes_download",
+      description: `Meeting Minutes Download - ${minutes.meetingName}`,
+      amount: minutes.downloadFee,
+      timestamp: new Date().toISOString(),
+    });
+
     // Show wallet debit toast first
     toast({
       title: "Payment Processed",

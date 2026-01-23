@@ -57,6 +57,7 @@ export const AccountStatementsDialog = ({
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -79,11 +80,12 @@ export const AccountStatementsDialog = ({
   // Filter transactions
   const filteredTransactions = mockAccountTransactions.filter((txn) => {
     const matchesType = typeFilter === "all" || txn.type === typeFilter;
+    const matchesCategory = categoryFilter === "all" || txn.category === categoryFilter;
     const matchesSearch =
       searchQuery === "" ||
       txn.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       txn.reference.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
+    return matchesType && matchesCategory && matchesSearch;
   });
 
   const handleExport = () => {
@@ -185,7 +187,7 @@ export const AccountStatementsDialog = ({
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Type" />
@@ -196,6 +198,29 @@ export const AccountStatementsDialog = ({
                 <SelectItem value="debit">Debits Only</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="dues_payment">Dues Payment</SelectItem>
+                <SelectItem value="levy_payment">Levy Payment</SelectItem>
+                <SelectItem value="donation">Donation</SelectItem>
+                <SelectItem value="fundraiser">Fundraiser</SelectItem>
+                <SelectItem value="event_revenue">Event Revenue</SelectItem>
+                <SelectItem value="operational_expense">Operations</SelectItem>
+                <SelectItem value="project_expense">Project</SelectItem>
+                <SelectItem value="welfare_disbursement">Welfare</SelectItem>
+                <SelectItem value="administrative_expense">Admin</SelectItem>
+                <SelectItem value="minutes_download">Minutes Fees</SelectItem>
+                <SelectItem value="transfer_in">Transfer In</SelectItem>
+                <SelectItem value="transfer_out">Transfer Out</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
             <Input
               type="date"
               value={dateFrom}
