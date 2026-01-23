@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar as CalendarIcon, X } from "lucide-react";
+import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar as CalendarIcon, X, Globe, Users, UserCircle, Store, UsersRound, Wallet, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { mockAdminCampaigns, AdminCampaign } from "@/data/adminElectionData";
+import { mockEnhancedCampaigns, getCampaignStats } from "@/data/campaignSystemData";
+import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
+import { CampaignAudience } from "@/types/campaignSystem";
 import { useToast } from "@/hooks/use-toast";
 import { CampaignFormDialog } from "./CampaignFormDialog";
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
@@ -30,13 +33,22 @@ const getStatusColor = (status: AdminCampaign['status']) => {
   }
 };
 
+const audienceIcons: Record<CampaignAudience, React.ReactNode> = {
+  community_interface: <Users className="h-3 w-3" />,
+  members_interface: <UserCircle className="h-3 w-3" />,
+  mobigate_interface: <Globe className="h-3 w-3" />,
+  mobigate_users: <UsersRound className="h-3 w-3" />,
+  mobi_store_marketplace: <Store className="h-3 w-3" />
+};
+
 interface StatCardProps {
-  value: number;
+  value: number | string;
   label: string;
   color: string;
+  icon?: React.ReactNode;
 }
 
-const StatCard = ({ value, label, color }: StatCardProps) => (
+const StatCard = ({ value, label, color, icon }: StatCardProps) => (
   <div className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg ${color} min-w-0`}>
     <span className="text-lg sm:text-2xl font-bold">{value}</span>
     <span className="text-[10px] sm:text-xs text-muted-foreground truncate">{label}</span>
@@ -117,6 +129,9 @@ export function AdminCampaignsTab() {
     setDateRange(undefined);
   };
 
+  // Get enhanced campaign stats
+  const campaignStats = getCampaignStats();
+
   return (
     <div className="space-y-3 sm:space-y-4 pb-20 overflow-hidden">
       {/* Stats Row */}
@@ -126,6 +141,30 @@ export function AdminCampaignsTab() {
         <StatCard value={stats.paused} label="Paused" color="bg-amber-500/10" />
         <StatCard value={stats.ended} label="Ended" color="bg-red-500/10" />
       </div>
+
+      {/* Fee Summary Card */}
+      <Card className="bg-primary/5 border-primary/20">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Wallet className="h-4 w-4 text-primary" />
+            <span className="font-semibold text-sm">Campaign Fee Summary</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="bg-background rounded-lg p-2">
+              <p className="text-xs text-muted-foreground">Total Collected</p>
+              <p className="font-bold text-sm text-primary">{formatMobiAmount(campaignStats.totalFees)}</p>
+            </div>
+            <div className="bg-background rounded-lg p-2">
+              <p className="text-xs text-muted-foreground">Community Share</p>
+              <p className="font-bold text-sm text-green-600">{formatMobiAmount(campaignStats.totalCommunityShare)}</p>
+            </div>
+            <div className="bg-background rounded-lg p-2">
+              <p className="text-xs text-muted-foreground">Mobigate Share</p>
+              <p className="font-bold text-sm text-orange-500">{formatMobiAmount(campaignStats.totalMobigateShare)}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Action Bar */}
       <div className="flex gap-2">

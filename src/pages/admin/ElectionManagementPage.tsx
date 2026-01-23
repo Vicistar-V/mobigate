@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Vote } from "lucide-react";
+import { ArrowLeft, Vote, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -8,6 +8,7 @@ import { AdminElectionProcessesTab } from "@/components/admin/election/AdminElec
 import { AdminAccreditationTab } from "@/components/admin/election/AdminAccreditationTab";
 import { AdminClearancesTab } from "@/components/admin/election/AdminClearancesTab";
 import { AdminWinnersAnnouncementTab } from "@/components/admin/election/AdminWinnersAnnouncementTab";
+import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 
 export default function ElectionManagementPage() {
   const { communityId } = useParams();
@@ -68,6 +69,13 @@ export default function ElectionManagementPage() {
               >
                 Winners
               </TabsTrigger>
+              <TabsTrigger 
+                value="settings" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                <Settings className="h-3.5 w-3.5 mr-1" />
+                Settings
+              </TabsTrigger>
             </TabsList>
             <ScrollBar orientation="horizontal" className="invisible" />
           </ScrollArea>
@@ -88,6 +96,15 @@ export default function ElectionManagementPage() {
           </TabsContent>
           <TabsContent value="winners" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminWinnersAnnouncementTab />
+          </TabsContent>
+          <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Campaign Settings
+              </h2>
+              <CampaignFeeDistributionSettings />
+            </div>
           </TabsContent>
         </div>
       </Tabs>

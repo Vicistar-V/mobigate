@@ -140,7 +140,6 @@ export const CommunityElectionTab = () => {
         {activeView === "campaigns" && (
           <>
             <CampaignsView 
-              campaigns={mockCampaigns} 
               onLaunchCampaign={() => setShowLaunchDialog(true)} 
             />
             <LaunchCampaignDialog 
