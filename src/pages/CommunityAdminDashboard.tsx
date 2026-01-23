@@ -21,6 +21,7 @@ import { AdminSettingsSection } from "@/components/admin/AdminSettingsSection";
 // Existing Community Dialogs
 import { ManageMembershipRequestsDialog } from "@/components/community/ManageMembershipRequestsDialog";
 import { BlockManagementDrawer } from "@/components/community/BlockManagementDrawer";
+import { AllMembersDrawer } from "@/components/community/AllMembersDrawer";
 import { ManageLeadershipDialog } from "@/components/community/leadership/ManageLeadershipDialog";
 import { ManageCommunityGalleryDialog } from "@/components/community/ManageCommunityGalleryDialog";
 import { ManageCommunityResourcesDialog } from "@/components/community/ManageCommunityResourcesDialog";
@@ -68,6 +69,7 @@ const CommunityAdminDashboard = () => {
 
   // Dialog States
   const [showMembershipRequests, setShowMembershipRequests] = useState(false);
+  const [showAllMembers, setShowAllMembers] = useState(false);
   const [showBlockManagement, setShowBlockManagement] = useState(false);
   const [showLeadershipDialog, setShowLeadershipDialog] = useState(false);
   const [showGalleryDialog, setShowGalleryDialog] = useState(false);
@@ -148,7 +150,7 @@ const CommunityAdminDashboard = () => {
             communityName="Ndigbo Unity Association"
             communityLogo={communityPerson1}
             stats={mockAdminStats}
-            onMembersClick={() => setShowMembershipRequests(true)}
+            onMembersClick={() => setShowAllMembers(true)}
             onPendingClick={() => setShowMembershipRequests(true)}
             onElectionsClick={() => navigate(`/community/${communityId}/admin/elections`)}
             onBalanceClick={() => setShowFinancialOverview(true)}
@@ -178,7 +180,7 @@ const CommunityAdminDashboard = () => {
             <AdminMembershipSection
               stats={mockAdminStats}
               recentRequests={mockRecentMemberRequests}
-              onViewAllMembers={() => showToast("Members", "Opening member list...")}
+              onViewAllMembers={() => setShowAllMembers(true)}
               onManageRequests={() => setShowMembershipRequests(true)}
               onViewBlocked={() => setShowBlockManagement(true)}
             />
@@ -263,6 +265,11 @@ const CommunityAdminDashboard = () => {
       <BlockManagementDrawer
         open={showBlockManagement}
         onOpenChange={setShowBlockManagement}
+      />
+
+      <AllMembersDrawer
+        open={showAllMembers}
+        onOpenChange={setShowAllMembers}
       />
 
       <ManageLeadershipDialog
