@@ -26,7 +26,7 @@ import { ManageLeadershipDialog } from "@/components/community/leadership/Manage
 import { ManageCommunityGalleryDialog } from "@/components/community/ManageCommunityGalleryDialog";
 import { ManageCommunityResourcesDialog } from "@/components/community/ManageCommunityResourcesDialog";
 import { FinancialOverviewDialog } from "@/components/community/finance/FinancialOverviewDialog";
-import { FinancialAuditDialog } from "@/components/community/finance/FinancialAuditDialog";
+// FinancialAuditDialog removed - now handled by AdminFinancialAuditDialog in AdminFinanceSection
 import { FinancialObligationsDialog } from "@/components/community/finance/FinancialObligationsDialog";
 import { ConstitutionViewer } from "@/components/community/ConstitutionViewer";
 
@@ -75,7 +75,7 @@ const CommunityAdminDashboard = () => {
   const [showGalleryDialog, setShowGalleryDialog] = useState(false);
   const [showResourcesDialog, setShowResourcesDialog] = useState(false);
   const [showFinancialOverview, setShowFinancialOverview] = useState(false);
-  const [showFinancialAudit, setShowFinancialAudit] = useState(false);
+  // showFinancialAudit removed - now handled by AdminFinanceSection's AdminFinancialAuditDialog
   const [showFinancialObligations, setShowFinancialObligations] = useState(false);
   const [showConstitution, setShowConstitution] = useState(false);
 
@@ -201,7 +201,7 @@ const CommunityAdminDashboard = () => {
               recentTransactions={mockRecentTransactions}
               defaultingMembers={mockDefaultingMembers}
               onViewOverview={() => setShowFinancialOverview(true)}
-              onViewAudit={() => setShowFinancialAudit(true)}
+              onViewAudit={() => {}}
               onViewObligations={() => setShowFinancialObligations(true)}
             />
 
@@ -292,10 +292,7 @@ const CommunityAdminDashboard = () => {
         onOpenChange={setShowFinancialOverview}
       />
 
-      <FinancialAuditDialog
-        open={showFinancialAudit}
-        onOpenChange={setShowFinancialAudit}
-      />
+      {/* FinancialAuditDialog removed - unified into AdminFinancialAuditDialog in AdminFinanceSection */}
 
       <FinancialObligationsDialog
         open={showFinancialObligations}

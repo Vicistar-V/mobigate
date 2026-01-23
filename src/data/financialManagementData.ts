@@ -521,6 +521,7 @@ export interface YearlyFinancialAudit {
       donations: number;
       fundraisers: number;
       eventRevenue: number;
+      minutesDownloadRevenue: number;
       otherIncome: number;
     };
     expenses: {
@@ -559,6 +560,7 @@ export const mockYearlyAudits: YearlyFinancialAudit[] = [
         donations: 350000,
         fundraisers: 300000,
         eventRevenue: 150000,
+        minutesDownloadRevenue: 12500,
         otherIncome: 50000,
       },
       expenses: {
@@ -595,6 +597,7 @@ export const mockYearlyAudits: YearlyFinancialAudit[] = [
         donations: 500000,
         fundraisers: 450000,
         eventRevenue: 200000,
+        minutesDownloadRevenue: 8500,
         otherIncome: 50000,
       },
       expenses: {
@@ -631,6 +634,7 @@ export const mockYearlyAudits: YearlyFinancialAudit[] = [
         donations: 300000,
         fundraisers: 250000,
         eventRevenue: 100000,
+        minutesDownloadRevenue: 5000,
         otherIncome: 50000,
       },
       expenses: {
