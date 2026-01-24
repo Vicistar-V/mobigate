@@ -1,0 +1,168 @@
+import { ReactNode } from "react";
+import { Shield, Users, Wallet, Vote, FileText, Crown, Settings } from "lucide-react";
+import { AuthorizationModule } from "@/types/adminAuthorization";
+
+interface ActionConfig {
+  title: string;
+  description: string;
+  icon: ReactNode;
+}
+
+// Pre-configured action templates for common administrative actions
+export const MODULE_ACTION_CONFIGS: Record<AuthorizationModule, Record<string, ActionConfig>> = {
+  members: {
+    approve_member: {
+      title: "Approve Member Request",
+      description: "Multi-signature authorization to approve new membership",
+      icon: <Users className="h-5 w-5 text-blue-600" />,
+    },
+    reject_member: {
+      title: "Reject Member Request",
+      description: "Multi-signature authorization to reject membership application",
+      icon: <Users className="h-5 w-5 text-red-600" />,
+    },
+    remove_member: {
+      title: "Remove Member",
+      description: "Multi-signature authorization to remove existing member",
+      icon: <Users className="h-5 w-5 text-red-600" />,
+    },
+    block_member: {
+      title: "Block User",
+      description: "Multi-signature authorization to block a user",
+      icon: <Shield className="h-5 w-5 text-red-600" />,
+    },
+    unblock_member: {
+      title: "Unblock User",
+      description: "Multi-signature authorization to unblock a user",
+      icon: <Shield className="h-5 w-5 text-green-600" />,
+    },
+  },
+  finances: {
+    transfer: {
+      title: "Transfer Authorization",
+      description: "Multi-signature authorization for fund transfer",
+      icon: <Wallet className="h-5 w-5 text-primary" />,
+    },
+    withdrawal: {
+      title: "Withdrawal Authorization",
+      description: "Multi-signature authorization for fund withdrawal",
+      icon: <Wallet className="h-5 w-5 text-primary" />,
+    },
+    disbursement: {
+      title: "Disbursement Authorization",
+      description: "Multi-signature authorization for fund disbursement",
+      icon: <Wallet className="h-5 w-5 text-primary" />,
+    },
+    budget_approval: {
+      title: "Budget Approval",
+      description: "Multi-signature authorization to approve budget",
+      icon: <Wallet className="h-5 w-5 text-green-600" />,
+    },
+  },
+  elections: {
+    announce_results: {
+      title: "Announce Election Results",
+      description: "Multi-signature authorization to publish election results",
+      icon: <Vote className="h-5 w-5 text-green-600" />,
+    },
+    clear_candidate: {
+      title: "Clear Candidate",
+      description: "Multi-signature authorization to clear election candidate",
+      icon: <Vote className="h-5 w-5 text-blue-600" />,
+    },
+    disqualify_candidate: {
+      title: "Disqualify Candidate",
+      description: "Multi-signature authorization to disqualify candidate",
+      icon: <Vote className="h-5 w-5 text-red-600" />,
+    },
+    start_voting: {
+      title: "Start Voting Session",
+      description: "Multi-signature authorization to open voting",
+      icon: <Vote className="h-5 w-5 text-primary" />,
+    },
+    end_voting: {
+      title: "End Voting Session",
+      description: "Multi-signature authorization to close voting",
+      icon: <Vote className="h-5 w-5 text-amber-600" />,
+    },
+  },
+  content: {
+    publish_news: {
+      title: "Publish News",
+      description: "Multi-signature authorization to publish news",
+      icon: <FileText className="h-5 w-5 text-purple-600" />,
+    },
+    publish_event: {
+      title: "Publish Event",
+      description: "Multi-signature authorization to publish event",
+      icon: <FileText className="h-5 w-5 text-purple-600" />,
+    },
+    publish_announcement: {
+      title: "Publish Announcement",
+      description: "Multi-signature authorization for public announcement",
+      icon: <FileText className="h-5 w-5 text-primary" />,
+    },
+    remove_content: {
+      title: "Remove Content",
+      description: "Multi-signature authorization to remove published content",
+      icon: <FileText className="h-5 w-5 text-red-600" />,
+    },
+  },
+  leadership: {
+    apply_results: {
+      title: "Apply Election Results",
+      description: "Multi-signature authorization to update leadership from election",
+      icon: <Crown className="h-5 w-5 text-indigo-600" />,
+    },
+    add_executive: {
+      title: "Add Executive Member",
+      description: "Multi-signature authorization to add executive",
+      icon: <Crown className="h-5 w-5 text-green-600" />,
+    },
+    remove_executive: {
+      title: "Remove Executive Member",
+      description: "Multi-signature authorization to remove executive",
+      icon: <Crown className="h-5 w-5 text-red-600" />,
+    },
+    assign_adhoc: {
+      title: "Assign Ad-hoc Committee",
+      description: "Multi-signature authorization for ad-hoc appointment",
+      icon: <Crown className="h-5 w-5 text-blue-600" />,
+    },
+  },
+  settings: {
+    update_constitution: {
+      title: "Update Constitution",
+      description: "Multi-signature authorization to modify constitution",
+      icon: <Settings className="h-5 w-5 text-gray-600" />,
+    },
+    change_privacy: {
+      title: "Change Privacy Settings",
+      description: "Multi-signature authorization for privacy changes",
+      icon: <Shield className="h-5 w-5 text-gray-600" />,
+    },
+    update_rules: {
+      title: "Update Community Rules",
+      description: "Multi-signature authorization to update rules",
+      icon: <Settings className="h-5 w-5 text-gray-600" />,
+    },
+    enable_feature: {
+      title: "Enable Feature",
+      description: "Multi-signature authorization to enable system feature",
+      icon: <Settings className="h-5 w-5 text-green-600" />,
+    },
+    disable_feature: {
+      title: "Disable Feature",
+      description: "Multi-signature authorization to disable system feature",
+      icon: <Settings className="h-5 w-5 text-red-600" />,
+    },
+  },
+};
+
+// Helper to get action config
+export function getActionConfig(
+  module: AuthorizationModule,
+  action: string
+): ActionConfig | undefined {
+  return MODULE_ACTION_CONFIGS[module]?.[action];
+}
