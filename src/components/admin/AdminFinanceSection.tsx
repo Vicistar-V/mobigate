@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Wallet, TrendingUp, TrendingDown, Clock, FileText, Users, AlertTriangle, ChevronRight, Settings, Receipt, BarChart3 } from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown, Clock, FileText, Users, AlertTriangle, ChevronRight, Settings, Receipt, BarChart3, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +15,8 @@ import { ManageDuesLeviesDialog } from "./finance/ManageDuesLeviesDialog";
 import { AccountStatementsDialog } from "./finance/AccountStatementsDialog";
 import { MembersFinancialReportsDialog } from "./finance/MembersFinancialReportsDialog";
 import { AdminFinancialAuditDialog } from "./finance/AdminFinancialAuditDialog";
+import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { useToast } from "@/hooks/use-toast";
 
 const getTransactionIcon = (type: RecentTransaction['type']) => {
   switch (type) {
@@ -57,9 +59,10 @@ const getStatusBadge = (status: RecentTransaction['status']) => {
 
 interface TransactionItemProps {
   transaction: RecentTransaction;
+  onAuthorize?: (transaction: RecentTransaction) => void;
 }
 
-const TransactionItem = ({ transaction }: TransactionItemProps) => {
+const TransactionItem = ({ transaction, onAuthorize }: TransactionItemProps) => {
   const Icon = getTransactionIcon(transaction.type);
   const colorClass = getTransactionColor(transaction.type);
   
@@ -79,7 +82,19 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
         <span className={`font-semibold text-sm ${colorClass}`}>
           {transaction.type === 'expense' ? '-' : '+'}M{transaction.amount.toLocaleString()}
         </span>
-        {getStatusBadge(transaction.status)}
+        {transaction.status === 'pending' && onAuthorize ? (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-6 text-xs px-2"
+            onClick={() => onAuthorize(transaction)}
+          >
+            <Shield className="h-3 w-3 mr-1" />
+            Authorize
+          </Button>
+        ) : (
+          getStatusBadge(transaction.status)
+        )}
       </div>
     </div>
   );
@@ -144,10 +159,57 @@ export function AdminFinanceSection({
   onViewAudit,
   onViewObligations,
 }: AdminFinanceSectionProps) {
+  const { toast } = useToast();
   const [showDuesLevies, setShowDuesLevies] = useState(false);
   const [showStatements, setShowStatements] = useState(false);
   const [showMemberReports, setShowMemberReports] = useState(false);
   const [showAudit, setShowAudit] = useState(false);
+
+  // Authorization state
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [authTransaction, setAuthTransaction] = useState<RecentTransaction | null>(null);
+
+  const handleAuthorizeTransaction = (transaction: RecentTransaction) => {
+    setAuthTransaction(transaction);
+    setAuthDrawerOpen(true);
+  };
+
+  const handleAuthorizationComplete = () => {
+    if (authTransaction) {
+      toast({
+        title: "Transaction Authorized",
+        description: `${authTransaction.description} has been authorized successfully.`,
+      });
+    }
+    setAuthTransaction(null);
+  };
+
+  const getAuthActionDetails = () => {
+    if (!authTransaction) return null;
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-amber-500/10">
+            <Wallet className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <p className="font-medium text-sm line-clamp-1">{authTransaction.description}</p>
+            <p className="text-xs text-muted-foreground">Financial Transaction</p>
+          </div>
+        </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">Amount</span>
+          <span className="font-bold">M{authTransaction.amount.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-muted-foreground">
+            Action: {authTransaction.type.charAt(0).toUpperCase() + authTransaction.type.slice(1)} Authorization
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -156,6 +218,18 @@ export function AdminFinanceSection({
       <AccountStatementsDialog open={showStatements} onOpenChange={setShowStatements} />
       <MembersFinancialReportsDialog open={showMemberReports} onOpenChange={setShowMemberReports} />
       <AdminFinancialAuditDialog open={showAudit} onOpenChange={setShowAudit} />
+
+      {/* Authorization Drawer */}
+      <ModuleAuthorizationDrawer
+        open={authDrawerOpen}
+        onOpenChange={setAuthDrawerOpen}
+        module="finances"
+        actionTitle={authTransaction?.type === "transfer" ? "Transfer Authorization" : "Transaction Authorization"}
+        actionDescription="Multi-signature authorization required for financial transactions"
+        actionDetails={getAuthActionDetails()}
+        initiatorRole="treasurer"
+        onAuthorized={handleAuthorizationComplete}
+      />
       
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="finance" className="border rounded-lg">
@@ -238,7 +312,11 @@ export function AdminFinanceSection({
                 <CardContent className="px-4 pb-4 pt-0">
                   <div className="divide-y divide-border">
                     {recentTransactions.slice(0, 4).map((transaction) => (
-                      <TransactionItem key={transaction.id} transaction={transaction} />
+                      <TransactionItem 
+                        key={transaction.id} 
+                        transaction={transaction}
+                        onAuthorize={handleAuthorizeTransaction}
+                      />
                     ))}
                   </div>
                 </CardContent>
@@ -265,6 +343,14 @@ export function AdminFinanceSection({
                   </CardContent>
                 </Card>
               )}
+
+              {/* Authorization Info */}
+              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  Finance: 3 signatories if President initiates, 4 otherwise
+                </span>
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>

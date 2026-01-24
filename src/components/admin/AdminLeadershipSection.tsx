@@ -1,4 +1,5 @@
-import { Crown, Users, History, Trophy, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Crown, Users, History, Trophy, ChevronRight, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,6 +10,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { useToast } from "@/hooks/use-toast";
 
 interface ExecutiveMember {
   id: string;
@@ -55,89 +58,168 @@ export function AdminLeadershipSection({
   onManageAdhoc,
   onViewExecutive,
 }: AdminLeadershipSectionProps) {
+  const { toast } = useToast();
+
+  // Authorization state
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [authAction, setAuthAction] = useState<{
+    type: "apply_results" | "add_executive" | "remove_executive";
+    details?: string;
+  } | null>(null);
+
+  const handleApplyResultsWithAuth = () => {
+    setAuthAction({
+      type: "apply_results",
+      details: "2025 Election Results",
+    });
+    setAuthDrawerOpen(true);
+  };
+
+  const handleAuthorizationComplete = () => {
+    if (authAction) {
+      toast({
+        title: "Leadership Action Authorized",
+        description: `${authAction.type.replace(/_/g, " ")} has been authorized successfully.`,
+      });
+      if (authAction.type === "apply_results") {
+        onApplyElectionResults();
+      }
+    }
+    setAuthAction(null);
+  };
+
+  const getAuthActionDetails = () => {
+    if (!authAction) return null;
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-indigo-500/10">
+            <Crown className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div>
+            <p className="font-medium text-sm">{authAction.details}</p>
+            <p className="text-xs text-muted-foreground">Leadership Action</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-muted-foreground">
+            Action: {authAction.type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+          </span>
+        </div>
+      </div>
+    );
+  };
   return (
-    <Accordion type="single" collapsible className="w-full max-w-full">
-      <AccordionItem value="leadership" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 rounded-lg bg-indigo-500/10 shrink-0">
-              <Crown className="h-5 w-5 text-indigo-600" />
-            </div>
-            <div className="text-left min-w-0">
-              <h3 className="font-semibold text-base truncate">Leadership</h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {executives.length} executives • 3 ad-hoc
-              </p>
-            </div>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full max-w-full overflow-hidden">
-            {/* Current Executive Carousel */}
-            <Card className="overflow-hidden">
-              <CardHeader className="pb-2 pt-3 px-4">
-                <CardTitle className="text-sm flex items-center justify-between">
-                  Current Executive
-                  <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onManageLeadership}>
-                    View All
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4 pt-0">
-                <ScrollArea className="w-full touch-auto">
-                  <div className="flex gap-3 pb-2">
-                    {executives.slice(0, 6).map((member) => (
-                      <ExecutiveCard
-                        key={member.id}
-                        member={member}
-                        onClick={onViewExecutive}
-                      />
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-              </CardContent>
-            </Card>
+    <>
+      {/* Authorization Drawer */}
+      <ModuleAuthorizationDrawer
+        open={authDrawerOpen}
+        onOpenChange={setAuthDrawerOpen}
+        module="leadership"
+        actionTitle={authAction?.type === "apply_results" ? "Apply Election Results" : "Leadership Action"}
+        actionDescription="Multi-signature authorization required for leadership changes"
+        actionDetails={getAuthActionDetails()}
+        initiatorRole="secretary"
+        onAuthorized={handleAuthorizationComplete}
+      />
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageLeadership}>
-                <Crown className="h-4 w-4 mr-2" />
-                Manage
-              </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onApplyElectionResults}>
-                <Trophy className="h-4 w-4 mr-2" />
-                Apply Results
-              </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewChangeHistory}>
-                <History className="h-4 w-4 mr-2" />
-                History
-              </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageAdhoc}>
-                <Users className="h-4 w-4 mr-2" />
-                Ad-hoc
-              </Button>
+      <Accordion type="single" collapsible className="w-full max-w-full">
+        <AccordionItem value="leadership" className="border rounded-lg overflow-hidden">
+          <AccordionTrigger className="px-4 hover:no-underline max-w-full">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-lg bg-indigo-500/10 shrink-0">
+                <Crown className="h-5 w-5 text-indigo-600" />
+              </div>
+              <div className="text-left min-w-0">
+                <h3 className="font-semibold text-base truncate">Leadership</h3>
+                <p className="text-sm text-muted-foreground truncate">
+                  {executives.length} executives • 3 ad-hoc
+                </p>
+              </div>
             </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <div className="space-y-4 w-full max-w-full overflow-hidden">
+              {/* Current Executive Carousel */}
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm flex items-center justify-between">
+                    Current Executive
+                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onManageLeadership}>
+                      View All
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  <ScrollArea className="w-full touch-auto">
+                    <div className="flex gap-3 pb-2">
+                      {executives.slice(0, 6).map((member) => (
+                        <ExecutiveCard
+                          key={member.id}
+                          member={member}
+                          onClick={onViewExecutive}
+                        />
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </CardContent>
+              </Card>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-1.5">
-              <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
-                <span className="text-base font-bold">{executives.length}</span>
-                <span className="text-xs text-muted-foreground truncate w-full text-center">Executives</span>
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageLeadership}>
+                  <Crown className="h-4 w-4 mr-2" />
+                  Manage
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="h-10 text-sm" 
+                  onClick={handleApplyResultsWithAuth}
+                >
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Apply Results
+                </Button>
+                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewChangeHistory}>
+                  <History className="h-4 w-4 mr-2" />
+                  History
+                </Button>
+                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageAdhoc}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Ad-hoc
+                </Button>
               </div>
-              <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
-                <span className="text-base font-bold">3</span>
-                <span className="text-xs text-muted-foreground truncate w-full text-center">Committees</span>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-1.5">
+                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
+                  <span className="text-base font-bold">{executives.length}</span>
+                  <span className="text-xs text-muted-foreground truncate w-full text-center">Executives</span>
+                </div>
+                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
+                  <span className="text-base font-bold">3</span>
+                  <span className="text-xs text-muted-foreground truncate w-full text-center">Committees</span>
+                </div>
+                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
+                  <span className="text-base font-bold">12</span>
+                  <span className="text-xs text-muted-foreground truncate w-full text-center">Staff</span>
+                </div>
               </div>
-              <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
-                <span className="text-base font-bold">12</span>
-                <span className="text-xs text-muted-foreground truncate w-full text-center">Staff</span>
+
+              {/* Authorization Info */}
+              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  Leadership changes require President + Secretary + (PRO OR Dir. Socials)
+                </span>
               </div>
             </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
   );
 }

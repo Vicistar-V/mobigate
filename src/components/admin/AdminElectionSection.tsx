@@ -1,4 +1,5 @@
-import { Vote, Users, CheckCircle, Clock, Trophy, FileText, Settings, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Vote, Users, CheckCircle, Clock, Trophy, FileText, Settings, ChevronRight, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AdminStats, ElectionActivity, formatRelativeTime } from "@/data/adminDashboardData";
+import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { useToast } from "@/hooks/use-toast";
 
 interface ElectionActivityItemProps {
   activity: ElectionActivity;
@@ -69,101 +72,180 @@ export function AdminElectionSection({
   onConfigureVoting,
   onAnnounceWinners,
 }: AdminElectionSectionProps) {
+  const { toast } = useToast();
+  
+  // Authorization state
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [authAction, setAuthAction] = useState<{
+    type: "announce_results" | "clear_candidate" | "start_voting" | "end_voting";
+    details?: string;
+  } | null>(null);
+
+  const handleAnnounceWithAuth = () => {
+    setAuthAction({
+      type: "announce_results",
+      details: "2025 Community Elections",
+    });
+    setAuthDrawerOpen(true);
+  };
+
+  const handleAuthorizationComplete = () => {
+    if (authAction) {
+      toast({
+        title: "Action Authorized",
+        description: `${authAction.type.replace(/_/g, " ")} has been authorized successfully.`,
+      });
+      if (authAction.type === "announce_results") {
+        onAnnounceWinners();
+      }
+    }
+    setAuthAction(null);
+  };
+
+  const getAuthActionDetails = () => {
+    if (!authAction) return null;
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-green-500/10">
+            <Trophy className="h-5 w-5 text-green-600" />
+          </div>
+          <div>
+            <p className="font-medium text-sm">{authAction.details}</p>
+            <p className="text-xs text-muted-foreground">Election Action</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-muted-foreground">
+            Action: {authAction.type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+          </span>
+        </div>
+      </div>
+    );
+  };
   return (
-    <Accordion type="single" collapsible className="w-full max-w-full">
-      <AccordionItem value="election" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
-              <Vote className="h-5 w-5 text-green-600" />
-            </div>
-            <div className="text-left min-w-0">
-              <h3 className="font-semibold text-base truncate">Elections</h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {stats.activeElections} active • {stats.accreditedVoters} accredited
-              </p>
-            </div>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full max-w-full overflow-hidden">
-            {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-1.5 w-full">
-              <StatBadge value={stats.activeElections} label="Active" icon={Vote} />
-              <StatBadge value={stats.accreditedVoters} label="Accredited" icon={Users} />
-              <StatBadge value={stats.clearedCandidates} label="Cleared" icon={CheckCircle} />
-              <StatBadge value={3} label="Pending" icon={Clock} />
-            </div>
+    <>
+      {/* Authorization Drawer */}
+      <ModuleAuthorizationDrawer
+        open={authDrawerOpen}
+        onOpenChange={setAuthDrawerOpen}
+        module="elections"
+        actionTitle={authAction?.type === "announce_results" ? "Announce Election Results" : "Election Action"}
+        actionDescription="Multi-signature authorization required for election management"
+        actionDetails={getAuthActionDetails()}
+        initiatorRole="secretary"
+        onAuthorized={handleAuthorizationComplete}
+      />
 
-            {/* Current Election Management */}
-            <Card className="overflow-hidden">
-              <CardHeader className="pb-2 pt-3 px-4">
-                <CardTitle className="text-sm">Manage Election</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4 pt-0">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewCampaigns}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Campaigns
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewResults}>
-                    <Trophy className="h-4 w-4 mr-2" />
-                    Results
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageAccreditation}>
-                    <Users className="h-4 w-4 mr-2" />
-                    Accreditation
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onProcessClearances}>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Clearances
-                    <Badge variant="destructive" className="ml-1 text-xs px-1.5">3</Badge>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+      <Accordion type="single" collapsible className="w-full max-w-full">
+        <AccordionItem value="election" className="border rounded-lg overflow-hidden">
+          <AccordionTrigger className="px-4 hover:no-underline max-w-full">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
+                <Vote className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="text-left min-w-0">
+                <h3 className="font-semibold text-base truncate">Elections</h3>
+                <p className="text-sm text-muted-foreground truncate">
+                  {stats.activeElections} active • {stats.accreditedVoters} accredited
+                </p>
+              </div>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <div className="space-y-4 w-full max-w-full overflow-hidden">
+              {/* Stats Row */}
+              <div className="grid grid-cols-4 gap-1.5 w-full">
+                <StatBadge value={stats.activeElections} label="Active" icon={Vote} />
+                <StatBadge value={stats.accreditedVoters} label="Accredited" icon={Users} />
+                <StatBadge value={stats.clearedCandidates} label="Cleared" icon={CheckCircle} />
+                <StatBadge value={3} label="Pending" icon={Clock} />
+              </div>
 
-            {/* Election Settings */}
-            <Card className="overflow-hidden">
-              <CardHeader className="pb-2 pt-3 px-4">
-                <CardTitle className="text-sm">Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4 pt-0">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onConfigureVoting}>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Voting Rules
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onAnnounceWinners}>
-                    <Trophy className="h-4 w-4 mr-2" />
-                    Announce
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Current Election Management */}
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm">Manage Election</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewCampaigns}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Campaigns
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewResults}>
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Results
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageAccreditation}>
+                      <Users className="h-4 w-4 mr-2" />
+                      Accreditation
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onProcessClearances}>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Clearances
+                      <Badge variant="destructive" className="ml-1 text-xs px-1.5">3</Badge>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Recent Election Activity */}
-            <Card className="overflow-hidden">
-              <CardHeader className="pb-2 pt-3 px-4">
-                <CardTitle className="text-sm flex items-center justify-between">
-                  Recent Activity
-                  <Button variant="ghost" size="sm" className="h-8 text-sm px-2">
-                    View All
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4 pt-0">
-                <div className="divide-y divide-border">
-                  {electionActivities.slice(0, 3).map((activity) => (
-                    <ElectionActivityItem key={activity.id} activity={activity} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+              {/* Election Settings */}
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm">Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onConfigureVoting}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Voting Rules
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="h-10 text-sm" 
+                      onClick={handleAnnounceWithAuth}
+                    >
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Announce
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Election Activity */}
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm flex items-center justify-between">
+                    Recent Activity
+                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2">
+                      View All
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0">
+                  <div className="divide-y divide-border">
+                    {electionActivities.slice(0, 3).map((activity) => (
+                      <ElectionActivityItem key={activity.id} activity={activity} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Authorization Info */}
+              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  Election actions require President + Secretary + (PRO OR Dir. Socials)
+                </span>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
   );
 }
