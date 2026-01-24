@@ -14,6 +14,7 @@ import {
 import { AdminStats, RecentMemberRequest, formatRelativeTime } from "@/data/adminDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 
 interface MemberRequestItemProps {
   request: RecentMemberRequest;
@@ -75,6 +76,9 @@ const StatBadge = ({ value, label }: StatBadgeProps) => (
   </div>
 );
 
+// Action types for membership module
+type MemberActionType = "approve_member" | "reject_member" | "block_member" | "unblock_member" | "remove_member";
+
 interface AdminMembershipSectionProps {
   stats: AdminStats;
   recentRequests: RecentMemberRequest[];
@@ -96,17 +100,19 @@ export function AdminMembershipSection({
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [authAction, setAuthAction] = useState<{
-    type: "approve" | "reject" | "block" | "unblock";
+    type: MemberActionType;
     memberId: string;
     memberName: string;
+    memberAvatar?: string;
   } | null>(null);
 
   const handleApprove = (id: string) => {
     const member = recentRequests.find(r => r.id === id);
     setAuthAction({
-      type: "approve",
+      type: "approve_member",
       memberId: id,
       memberName: member?.name || "Member",
+      memberAvatar: member?.avatar,
     });
     setAuthDrawerOpen(true);
   };
@@ -114,9 +120,10 @@ export function AdminMembershipSection({
   const handleReject = (id: string) => {
     const member = recentRequests.find(r => r.id === id);
     setAuthAction({
-      type: "reject",
+      type: "reject_member",
       memberId: id,
       memberName: member?.name || "Member",
+      memberAvatar: member?.avatar,
     });
     setAuthDrawerOpen(true);
   };
@@ -130,46 +137,42 @@ export function AdminMembershipSection({
 
   const handleAuthorizationComplete = () => {
     if (authAction) {
+      const config = getActionConfig("members", authAction.type);
       toast({
-        title: authAction.type === "approve" ? "Member Approved" : "Request Rejected",
-        description: `${authAction.memberName}'s request has been ${authAction.type === "approve" ? "approved" : "rejected"} successfully.`,
+        title: config?.title || "Action Complete",
+        description: `${authAction.memberName}'s request has been processed successfully.`,
       });
     }
     setAuthAction(null);
   };
 
+  // Get action config and render details using centralized templates
+  const actionConfig = authAction ? getActionConfig("members", authAction.type) : null;
+  
   const getAuthActionDetails = () => {
-    if (!authAction) return null;
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback>{authAction.memberName.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-medium text-sm">{authAction.memberName}</p>
-            <p className="text-xs text-muted-foreground">Membership Request</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">
-            Action: {authAction.type === "approve" ? "Approve Membership" : "Reject Application"}
-          </span>
-        </div>
-      </div>
-    );
+    if (!authAction || !actionConfig) return null;
+    
+    return renderActionDetails({
+      config: actionConfig,
+      primaryText: authAction.memberName,
+      secondaryText: "Membership Request",
+      module: "members",
+      avatar: {
+        src: authAction.memberAvatar,
+        fallback: authAction.memberName.charAt(0),
+      },
+    });
   };
 
   return (
     <>
-      {/* Authorization Drawer */}
+      {/* Authorization Drawer - Now using centralized config */}
       <ModuleAuthorizationDrawer
         open={authDrawerOpen}
         onOpenChange={setAuthDrawerOpen}
         module="members"
-        actionTitle={authAction?.type === "approve" ? "Approve Member Request" : "Reject Member Request"}
-        actionDescription="Multi-signature authorization required for membership actions"
+        actionTitle={actionConfig?.title || "Member Action"}
+        actionDescription={actionConfig?.description || "Multi-signature authorization required for membership actions"}
         actionDetails={getAuthActionDetails()}
         initiatorRole="secretary"
         onAuthorized={handleAuthorizationComplete}

@@ -11,6 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExecutiveMember {
@@ -41,6 +42,9 @@ const ExecutiveCard = ({ member, onClick }: ExecutiveCardProps) => (
   </button>
 );
 
+// Action types for leadership module
+type LeadershipActionType = "apply_results" | "add_executive" | "remove_executive" | "assign_adhoc";
+
 interface AdminLeadershipSectionProps {
   executives: ExecutiveMember[];
   onManageLeadership: () => void;
@@ -63,8 +67,8 @@ export function AdminLeadershipSection({
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [authAction, setAuthAction] = useState<{
-    type: "apply_results" | "add_executive" | "remove_executive";
-    details?: string;
+    type: LeadershipActionType;
+    details: string;
   } | null>(null);
 
   const handleApplyResultsWithAuth = () => {
@@ -75,11 +79,28 @@ export function AdminLeadershipSection({
     setAuthDrawerOpen(true);
   };
 
+  const handleAddExecutiveWithAuth = () => {
+    setAuthAction({
+      type: "add_executive",
+      details: "New Executive Member",
+    });
+    setAuthDrawerOpen(true);
+  };
+
+  const handleAssignAdhocWithAuth = () => {
+    setAuthAction({
+      type: "assign_adhoc",
+      details: "Ad-hoc Committee Assignment",
+    });
+    setAuthDrawerOpen(true);
+  };
+
   const handleAuthorizationComplete = () => {
     if (authAction) {
+      const config = getActionConfig("leadership", authAction.type);
       toast({
-        title: "Leadership Action Authorized",
-        description: `${authAction.type.replace(/_/g, " ")} has been authorized successfully.`,
+        title: config?.title || "Leadership Action Authorized",
+        description: `${authAction.details} has been authorized successfully.`,
       });
       if (authAction.type === "apply_results") {
         onApplyElectionResults();
@@ -88,37 +109,29 @@ export function AdminLeadershipSection({
     setAuthAction(null);
   };
 
+  // Get action config using centralized templates
+  const actionConfig = authAction ? getActionConfig("leadership", authAction.type) : null;
+
   const getAuthActionDetails = () => {
-    if (!authAction) return null;
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-indigo-500/10">
-            <Crown className="h-5 w-5 text-indigo-600" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">{authAction.details}</p>
-            <p className="text-xs text-muted-foreground">Leadership Action</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">
-            Action: {authAction.type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-          </span>
-        </div>
-      </div>
-    );
+    if (!authAction || !actionConfig) return null;
+    
+    return renderActionDetails({
+      config: actionConfig,
+      primaryText: authAction.details,
+      secondaryText: "Leadership Action",
+      module: "leadership",
+    });
   };
+
   return (
     <>
-      {/* Authorization Drawer */}
+      {/* Authorization Drawer - Now using centralized config */}
       <ModuleAuthorizationDrawer
         open={authDrawerOpen}
         onOpenChange={setAuthDrawerOpen}
         module="leadership"
-        actionTitle={authAction?.type === "apply_results" ? "Apply Election Results" : "Leadership Action"}
-        actionDescription="Multi-signature authorization required for leadership changes"
+        actionTitle={actionConfig?.title || "Leadership Action"}
+        actionDescription={actionConfig?.description || "Multi-signature authorization required for leadership changes"}
         actionDetails={getAuthActionDetails()}
         initiatorRole="secretary"
         onAuthorized={handleAuthorizationComplete}
@@ -187,7 +200,7 @@ export function AdminLeadershipSection({
                   <History className="h-4 w-4 mr-2" />
                   History
                 </Button>
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageAdhoc}>
+                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={handleAssignAdhocWithAuth}>
                   <Users className="h-4 w-4 mr-2" />
                   Ad-hoc
                 </Button>
