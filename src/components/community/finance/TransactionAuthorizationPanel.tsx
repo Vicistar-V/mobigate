@@ -9,7 +9,8 @@ import {
   AlertCircle, 
   Send, 
   Wallet,
-  ArrowLeft
+  ArrowLeft,
+  Info
 } from "lucide-react";
 import { OfficerAuthorizationCard } from "./OfficerAuthorizationCard";
 import { AuthorizationTimer } from "./AuthorizationTimer";
@@ -21,7 +22,7 @@ import {
 } from "@/types/transactionAuthorization";
 import { cn } from "@/lib/utils";
 
-// Mock officer data for authorization
+// Mock officer data for authorization - Finance module uses 4 officers
 const AUTHORIZATION_OFFICERS: {
   role: OfficerRole;
   displayTitle: string;
@@ -33,25 +34,29 @@ const AUTHORIZATION_OFFICERS: {
     role: "president",
     displayTitle: "President/Chairman",
     name: "Dr. Mark Anthony Onwudinjo",
-    isRequired: true,
-  },
-  {
-    role: "secretary",
-    displayTitle: "Secretary",
-    name: "Barr. Ngozi Okonkwo",
-    isRequired: false,
+    imageUrl: "https://i.pravatar.cc/150?u=president",
+    isRequired: true, // MANDATORY for finance
   },
   {
     role: "treasurer",
     displayTitle: "Treasurer",
     name: "Mr. Chidi Adebayo",
-    isRequired: true, // Alternative required
+    imageUrl: "https://i.pravatar.cc/150?u=treasurer",
+    isRequired: true, // MANDATORY for finance
+  },
+  {
+    role: "secretary",
+    displayTitle: "Secretary",
+    name: "Barr. Ngozi Okonkwo",
+    imageUrl: "https://i.pravatar.cc/150?u=secretary",
+    isRequired: false, // Alternative - pick one
   },
   {
     role: "financial_secretary",
     displayTitle: "Financial Secretary",
     name: "Mrs. Amara Diallo",
-    isRequired: true, // Alternative required
+    imageUrl: "https://i.pravatar.cc/150?u=finsec",
+    isRequired: false, // Alternative - pick one
   },
 ];
 
@@ -62,6 +67,7 @@ interface TransactionAuthorizationPanelProps {
   description?: string;
   bankName?: string;
   accountNumber?: string;
+  initiatorRole?: OfficerRole; // Track who initiated - affects signatory count
   onConfirm: () => void;
   onBack: () => void;
   onExpire?: () => void;
@@ -74,10 +80,14 @@ export function TransactionAuthorizationPanel({
   description,
   bankName,
   accountNumber,
+  initiatorRole = "secretary", // Default to non-president initiator
   onConfirm,
   onBack,
   onExpire,
 }: TransactionAuthorizationPanelProps) {
+  // Determine if president initiated (affects signatory count)
+  const isPresidentInitiator = initiatorRole === "president";
+  const requiredSignatories = isPresidentInitiator ? 3 : 4;
   const [officers, setOfficers] = useState<AuthorizationOfficer[]>(
     AUTHORIZATION_OFFICERS.map((o) => ({
       role: o.role,
@@ -203,12 +213,19 @@ export function TransactionAuthorizationPanel({
       </Card>
 
       {/* Authorization Requirements Info */}
-      <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
         <div className="flex items-start gap-2">
-          <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-blue-800 dark:text-blue-200">
-            <strong>Requires:</strong> 3+ authorizations including President AND (Treasurer OR Financial Secretary)
-          </p>
+          <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="space-y-1">
+            <p className="text-xs text-blue-800 dark:text-blue-200">
+              <strong>Requires:</strong> {requiredSignatories} authorizations including President AND (Treasurer OR Financial Secretary)
+            </p>
+            {!isPresidentInitiator && (
+              <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded">
+                ⚠️ President did not initiate - 4 signatories required
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -256,7 +273,7 @@ export function TransactionAuthorizationPanel({
               : "text-muted-foreground"
           )}
         >
-          {authorizedCount}/4 Authorized • {validation.message}
+          {authorizedCount}/{requiredSignatories} Authorized • {validation.message}
         </span>
       </div>
 

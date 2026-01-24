@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, UserPlus, UserX, Search, Check, X, ChevronRight, Eye } from "lucide-react";
+import { Users, UserPlus, UserX, Search, Check, X, ChevronRight, Eye, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { AdminStats, RecentMemberRequest, formatRelativeTime } from "@/data/adminDashboardData";
 import { useToast } from "@/hooks/use-toast";
+import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 
 interface MemberRequestItemProps {
   request: RecentMemberRequest;
@@ -91,19 +92,33 @@ export function AdminMembershipSection({
 }: AdminMembershipSectionProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  
+  // Authorization state
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [authAction, setAuthAction] = useState<{
+    type: "approve" | "reject" | "block" | "unblock";
+    memberId: string;
+    memberName: string;
+  } | null>(null);
 
   const handleApprove = (id: string) => {
-    toast({
-      title: "Member Approved",
-      description: "The membership request has been approved.",
+    const member = recentRequests.find(r => r.id === id);
+    setAuthAction({
+      type: "approve",
+      memberId: id,
+      memberName: member?.name || "Member",
     });
+    setAuthDrawerOpen(true);
   };
 
   const handleReject = (id: string) => {
-    toast({
-      title: "Request Rejected",
-      description: "The membership request has been rejected.",
+    const member = recentRequests.find(r => r.id === id);
+    setAuthAction({
+      type: "reject",
+      memberId: id,
+      memberName: member?.name || "Member",
     });
+    setAuthDrawerOpen(true);
   };
 
   const handleView = (id: string) => {
@@ -113,100 +128,155 @@ export function AdminMembershipSection({
     });
   };
 
-  return (
-    <Accordion type="single" collapsible className="w-full max-w-full">
-      <AccordionItem value="membership" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 rounded-lg bg-blue-500/10 shrink-0">
-              <Users className="h-5 w-5 text-blue-600" />
-            </div>
-            <div className="text-left min-w-0">
-              <h3 className="font-semibold text-base truncate">Membership</h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {stats.totalMembers.toLocaleString()} members • {stats.pendingRequests} pending
-              </p>
-            </div>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full max-w-full overflow-hidden">
-            {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-1.5 w-full">
-              <StatBadge value={stats.totalMembers} label="Total" />
-              <StatBadge value={stats.activeMembers} label="Active" />
-              <StatBadge value={stats.pendingRequests} label="Pending" />
-              <StatBadge value={stats.blockedUsers} label="Blocked" />
-            </div>
+  const handleAuthorizationComplete = () => {
+    if (authAction) {
+      toast({
+        title: authAction.type === "approve" ? "Member Approved" : "Request Rejected",
+        description: `${authAction.memberName}'s request has been ${authAction.type === "approve" ? "approved" : "rejected"} successfully.`,
+      });
+    }
+    setAuthAction(null);
+  };
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewAllMembers}>
-                <Users className="h-4 w-4 mr-2" />
-                View All
-              </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageRequests}>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Requests
-                {stats.pendingRequests > 0 && (
-                  <Badge variant="destructive" className="ml-2 text-xs px-1.5">
-                    {stats.pendingRequests}
+  const getAuthActionDetails = () => {
+    if (!authAction) return null;
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarFallback>{authAction.memberName.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-medium text-sm">{authAction.memberName}</p>
+            <p className="text-xs text-muted-foreground">Membership Request</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-muted-foreground">
+            Action: {authAction.type === "approve" ? "Approve Membership" : "Reject Application"}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {/* Authorization Drawer */}
+      <ModuleAuthorizationDrawer
+        open={authDrawerOpen}
+        onOpenChange={setAuthDrawerOpen}
+        module="members"
+        actionTitle={authAction?.type === "approve" ? "Approve Member Request" : "Reject Member Request"}
+        actionDescription="Multi-signature authorization required for membership actions"
+        actionDetails={getAuthActionDetails()}
+        initiatorRole="secretary"
+        onAuthorized={handleAuthorizationComplete}
+      />
+
+      <Accordion type="single" collapsible className="w-full max-w-full">
+        <AccordionItem value="membership" className="border rounded-lg overflow-hidden">
+          <AccordionTrigger className="px-4 hover:no-underline max-w-full">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-lg bg-blue-500/10 shrink-0">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="text-left min-w-0">
+                <h3 className="font-semibold text-base truncate">Membership</h3>
+                <p className="text-sm text-muted-foreground truncate">
+                  {stats.totalMembers.toLocaleString()} members • {stats.pendingRequests} pending
+                </p>
+              </div>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <div className="space-y-4 w-full max-w-full overflow-hidden">
+              {/* Stats Row */}
+              <div className="grid grid-cols-4 gap-1.5 w-full">
+                <StatBadge value={stats.totalMembers} label="Total" />
+                <StatBadge value={stats.activeMembers} label="Active" />
+                <StatBadge value={stats.pendingRequests} label="Pending" />
+                <StatBadge value={stats.blockedUsers} label="Blocked" />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewAllMembers}>
+                  <Users className="h-4 w-4 mr-2" />
+                  View All
+                </Button>
+                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageRequests}>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Requests
+                  {stats.pendingRequests > 0 && (
+                    <Badge variant="destructive" className="ml-2 text-xs px-1.5">
+                      {stats.pendingRequests}
+                    </Badge>
+                  )}
+                </Button>
+              </div>
+
+              <Button variant="outline" size="sm" className="w-full h-10 text-sm" onClick={onViewBlocked}>
+                <UserX className="h-4 w-4 mr-2" />
+                Blocked Users
+                {stats.blockedUsers > 0 && (
+                  <Badge variant="secondary" className="ml-2 text-xs px-1.5">
+                    {stats.blockedUsers}
                   </Badge>
                 )}
               </Button>
-            </div>
 
-            <Button variant="outline" size="sm" className="w-full h-10 text-sm" onClick={onViewBlocked}>
-              <UserX className="h-4 w-4 mr-2" />
-              Blocked Users
-              {stats.blockedUsers > 0 && (
-                <Badge variant="secondary" className="ml-2 text-xs px-1.5">
-                  {stats.blockedUsers}
-                </Badge>
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search members..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-10"
+                />
+              </div>
+
+              {/* Recent Requests */}
+              {recentRequests.length > 0 && (
+                <Card className="overflow-hidden">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <CardTitle className="text-sm flex items-center justify-between">
+                      Recent Requests
+                      <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onManageRequests}>
+                        View All
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4 pt-0">
+                    <div className="divide-y divide-border">
+                      {recentRequests.slice(0, 3).map((request) => (
+                        <MemberRequestItem
+                          key={request.id}
+                          request={request}
+                          onApprove={handleApprove}
+                          onReject={handleReject}
+                          onView={handleView}
+                        />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
-            </Button>
 
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search members..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10"
-              />
+              {/* Authorization Info */}
+              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  Member actions require President + (Secretary OR PRO) authorization
+                </span>
+              </div>
             </div>
-
-            {/* Recent Requests */}
-            {recentRequests.length > 0 && (
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-2 pt-3 px-4">
-                  <CardTitle className="text-sm flex items-center justify-between">
-                    Recent Requests
-                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onManageRequests}>
-                      View All
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
-                  <div className="divide-y divide-border">
-                    {recentRequests.slice(0, 3).map((request) => (
-                      <MemberRequestItem
-                        key={request.id}
-                        request={request}
-                        onApprove={handleApprove}
-                        onReject={handleReject}
-                        onView={handleView}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
   );
 }
