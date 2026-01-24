@@ -16,6 +16,7 @@ import { AccountStatementsDialog } from "./finance/AccountStatementsDialog";
 import { MembersFinancialReportsDialog } from "./finance/MembersFinancialReportsDialog";
 import { AdminFinancialAuditDialog } from "./finance/AdminFinancialAuditDialog";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
 
 const getTransactionIcon = (type: RecentTransaction['type']) => {
@@ -142,6 +143,9 @@ const StatCard = ({ label, value, icon: Icon, trend }: StatCardProps) => (
   </div>
 );
 
+// Action types for finances module - matches the config keys
+type FinanceActionType = "transfer" | "withdrawal" | "disbursement" | "budget_approval" | "income" | "expense";
+
 interface AdminFinanceSectionProps {
   stats: AdminStats;
   recentTransactions: RecentTransaction[];
@@ -167,48 +171,50 @@ export function AdminFinanceSection({
 
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
-  const [authTransaction, setAuthTransaction] = useState<RecentTransaction | null>(null);
+  const [authTransaction, setAuthTransaction] = useState<{
+    type: FinanceActionType;
+    description: string;
+    amount: number;
+  } | null>(null);
 
   const handleAuthorizeTransaction = (transaction: RecentTransaction) => {
-    setAuthTransaction(transaction);
+    // Map transaction type to action config key
+    const actionType: FinanceActionType = transaction.type as FinanceActionType;
+    setAuthTransaction({
+      type: actionType,
+      description: transaction.description,
+      amount: transaction.amount,
+    });
     setAuthDrawerOpen(true);
   };
 
   const handleAuthorizationComplete = () => {
     if (authTransaction) {
+      const config = getActionConfig("finances", authTransaction.type);
       toast({
-        title: "Transaction Authorized",
+        title: config?.title || "Transaction Authorized",
         description: `${authTransaction.description} has been authorized successfully.`,
       });
     }
     setAuthTransaction(null);
   };
 
+  // Get action config using centralized templates
+  const actionConfig = authTransaction ? getActionConfig("finances", authTransaction.type) : null;
+
   const getAuthActionDetails = () => {
-    if (!authTransaction) return null;
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-amber-500/10">
-            <Wallet className="h-5 w-5 text-amber-600" />
-          </div>
-          <div>
-            <p className="font-medium text-sm line-clamp-1">{authTransaction.description}</p>
-            <p className="text-xs text-muted-foreground">Financial Transaction</p>
-          </div>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">Amount</span>
-          <span className="font-bold">M{authTransaction.amount.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">
-            Action: {authTransaction.type.charAt(0).toUpperCase() + authTransaction.type.slice(1)} Authorization
-          </span>
-        </div>
-      </div>
-    );
+    if (!authTransaction || !actionConfig) return null;
+    
+    return renderActionDetails({
+      config: actionConfig,
+      primaryText: authTransaction.description,
+      secondaryText: "Financial Transaction",
+      module: "finances",
+      additionalInfo: {
+        label: "Amount",
+        value: `M${authTransaction.amount.toLocaleString()}`,
+      },
+    });
   };
 
   return (
@@ -219,13 +225,13 @@ export function AdminFinanceSection({
       <MembersFinancialReportsDialog open={showMemberReports} onOpenChange={setShowMemberReports} />
       <AdminFinancialAuditDialog open={showAudit} onOpenChange={setShowAudit} />
 
-      {/* Authorization Drawer */}
+      {/* Authorization Drawer - Now using centralized config */}
       <ModuleAuthorizationDrawer
         open={authDrawerOpen}
         onOpenChange={setAuthDrawerOpen}
         module="finances"
-        actionTitle={authTransaction?.type === "transfer" ? "Transfer Authorization" : "Transaction Authorization"}
-        actionDescription="Multi-signature authorization required for financial transactions"
+        actionTitle={actionConfig?.title || "Transaction Authorization"}
+        actionDescription={actionConfig?.description || "Multi-signature authorization required for financial transactions"}
         actionDetails={getAuthActionDetails()}
         initiatorRole="treasurer"
         onAuthorized={handleAuthorizationComplete}

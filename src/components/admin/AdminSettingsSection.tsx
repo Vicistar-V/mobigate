@@ -11,7 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
+
+// Action types for settings module
+type SettingsActionType = "update_constitution" | "change_privacy" | "update_rules" | "enable_feature" | "disable_feature";
 
 interface AdminSettingsSectionProps {
   onEditProfile: () => void;
@@ -37,8 +41,8 @@ export function AdminSettingsSection({
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [authAction, setAuthAction] = useState<{
-    type: "update_constitution" | "change_privacy" | "update_rules";
-    details?: string;
+    type: SettingsActionType;
+    details: string;
   } | null>(null);
 
   const handleConstitutionWithAuth = () => {
@@ -67,8 +71,9 @@ export function AdminSettingsSection({
 
   const handleAuthorizationComplete = () => {
     if (authAction) {
+      const config = getActionConfig("settings", authAction.type);
       toast({
-        title: "Settings Action Authorized",
+        title: config?.title || "Settings Action Authorized",
         description: `${authAction.details} has been authorized for update.`,
       });
       switch (authAction.type) {
@@ -86,43 +91,29 @@ export function AdminSettingsSection({
     setAuthAction(null);
   };
 
+  // Get action config using centralized templates
+  const actionConfig = authAction ? getActionConfig("settings", authAction.type) : null;
+
   const getAuthActionDetails = () => {
-    if (!authAction) return null;
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gray-500/10">
-            <Settings className="h-5 w-5 text-gray-600" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">{authAction.details}</p>
-            <p className="text-xs text-muted-foreground">Settings Action</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">
-            Action: {authAction.type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-          </span>
-        </div>
-      </div>
-    );
+    if (!authAction || !actionConfig) return null;
+    
+    return renderActionDetails({
+      config: actionConfig,
+      primaryText: authAction.details,
+      secondaryText: "Settings Action",
+      module: "settings",
+    });
   };
+
   return (
     <>
-      {/* Authorization Drawer */}
+      {/* Authorization Drawer - Now using centralized config */}
       <ModuleAuthorizationDrawer
         open={authDrawerOpen}
         onOpenChange={setAuthDrawerOpen}
         module="settings"
-        actionTitle={
-          authAction?.type === "update_constitution" 
-            ? "Update Constitution" 
-            : authAction?.type === "change_privacy"
-            ? "Change Privacy Settings"
-            : "Update Community Rules"
-        }
-        actionDescription="Multi-signature authorization required for settings changes"
+        actionTitle={actionConfig?.title || "Settings Action"}
+        actionDescription={actionConfig?.description || "Multi-signature authorization required for settings changes"}
         actionDetails={getAuthActionDetails()}
         initiatorRole="secretary"
         onAuthorized={handleAuthorizationComplete}

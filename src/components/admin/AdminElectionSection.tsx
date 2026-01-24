@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { AdminStats, ElectionActivity, formatRelativeTime } from "@/data/adminDashboardData";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
 
 interface ElectionActivityItemProps {
@@ -51,6 +52,9 @@ const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
   </div>
 );
 
+// Action types for elections module
+type ElectionActionType = "announce_results" | "clear_candidate" | "disqualify_candidate" | "start_voting" | "end_voting";
+
 interface AdminElectionSectionProps {
   stats: AdminStats;
   electionActivities: ElectionActivity[];
@@ -77,8 +81,8 @@ export function AdminElectionSection({
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [authAction, setAuthAction] = useState<{
-    type: "announce_results" | "clear_candidate" | "start_voting" | "end_voting";
-    details?: string;
+    type: ElectionActionType;
+    details: string;
   } | null>(null);
 
   const handleAnnounceWithAuth = () => {
@@ -89,11 +93,28 @@ export function AdminElectionSection({
     setAuthDrawerOpen(true);
   };
 
+  const handleStartVotingWithAuth = () => {
+    setAuthAction({
+      type: "start_voting",
+      details: "Open Voting Session",
+    });
+    setAuthDrawerOpen(true);
+  };
+
+  const handleEndVotingWithAuth = () => {
+    setAuthAction({
+      type: "end_voting",
+      details: "Close Voting Session",
+    });
+    setAuthDrawerOpen(true);
+  };
+
   const handleAuthorizationComplete = () => {
     if (authAction) {
+      const config = getActionConfig("elections", authAction.type);
       toast({
-        title: "Action Authorized",
-        description: `${authAction.type.replace(/_/g, " ")} has been authorized successfully.`,
+        title: config?.title || "Action Authorized",
+        description: `${authAction.details} has been authorized successfully.`,
       });
       if (authAction.type === "announce_results") {
         onAnnounceWinners();
@@ -102,37 +123,29 @@ export function AdminElectionSection({
     setAuthAction(null);
   };
 
+  // Get action config using centralized templates
+  const actionConfig = authAction ? getActionConfig("elections", authAction.type) : null;
+
   const getAuthActionDetails = () => {
-    if (!authAction) return null;
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-green-500/10">
-            <Trophy className="h-5 w-5 text-green-600" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">{authAction.details}</p>
-            <p className="text-xs text-muted-foreground">Election Action</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">
-            Action: {authAction.type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-          </span>
-        </div>
-      </div>
-    );
+    if (!authAction || !actionConfig) return null;
+    
+    return renderActionDetails({
+      config: actionConfig,
+      primaryText: authAction.details,
+      secondaryText: "Election Action",
+      module: "elections",
+    });
   };
+
   return (
     <>
-      {/* Authorization Drawer */}
+      {/* Authorization Drawer - Now using centralized config */}
       <ModuleAuthorizationDrawer
         open={authDrawerOpen}
         onOpenChange={setAuthDrawerOpen}
         module="elections"
-        actionTitle={authAction?.type === "announce_results" ? "Announce Election Results" : "Election Action"}
-        actionDescription="Multi-signature authorization required for election management"
+        actionTitle={actionConfig?.title || "Election Action"}
+        actionDescription={actionConfig?.description || "Multi-signature authorization required for election management"}
         actionDetails={getAuthActionDetails()}
         initiatorRole="secretary"
         onAuthorized={handleAuthorizationComplete}

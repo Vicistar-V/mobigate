@@ -15,6 +15,7 @@ import {
 import { AdminStats, RecentContent, formatRelativeTime } from "@/data/adminDashboardData";
 import { useToast } from "@/hooks/use-toast";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 
 const getContentTypeIcon = (type: RecentContent['type']) => {
   switch (type) {
@@ -109,6 +110,9 @@ const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
   </div>
 );
 
+// Action types for content module
+type ContentActionType = "publish" | "remove" | "publish_news" | "publish_event" | "publish_announcement" | "remove_content";
+
 interface AdminContentSectionProps {
   stats: AdminStats;
   recentContent: RecentContent[];
@@ -132,7 +136,7 @@ export function AdminContentSection({
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [authAction, setAuthAction] = useState<{
-    type: "publish" | "remove";
+    type: ContentActionType;
     contentId: string;
     contentTitle: string;
   } | null>(null);
@@ -147,7 +151,17 @@ export function AdminContentSection({
   const handleRemove = (id: string) => {
     const content = recentContent.find(c => c.id === id);
     setAuthAction({
-      type: "remove",
+      type: "remove_content",
+      contentId: id,
+      contentTitle: content?.title || "Content",
+    });
+    setAuthDrawerOpen(true);
+  };
+
+  const handlePublish = (id: string) => {
+    const content = recentContent.find(c => c.id === id);
+    setAuthAction({
+      type: "publish",
       contentId: id,
       contentTitle: content?.title || "Content",
     });
@@ -156,35 +170,27 @@ export function AdminContentSection({
 
   const handleAuthorizationComplete = () => {
     if (authAction) {
+      const config = getActionConfig("content", authAction.type);
       toast({
-        title: authAction.type === "publish" ? "Content Published" : "Content Removed",
-        description: `"${authAction.contentTitle}" has been ${authAction.type === "publish" ? "published" : "removed"} successfully.`,
+        title: config?.title || "Content Action Complete",
+        description: `"${authAction.contentTitle}" has been processed successfully.`,
       });
     }
     setAuthAction(null);
   };
 
+  // Get action config using centralized templates
+  const actionConfig = authAction ? getActionConfig("content", authAction.type) : null;
+
   const getAuthActionDetails = () => {
-    if (!authAction) return null;
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-purple-500/10">
-            <FileText className="h-5 w-5 text-purple-600" />
-          </div>
-          <div>
-            <p className="font-medium text-sm line-clamp-1">{authAction.contentTitle}</p>
-            <p className="text-xs text-muted-foreground">Content Action</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">
-            Action: {authAction.type === "publish" ? "Publish Content" : "Remove Content"}
-          </span>
-        </div>
-      </div>
-    );
+    if (!authAction || !actionConfig) return null;
+    
+    return renderActionDetails({
+      config: actionConfig,
+      primaryText: authAction.contentTitle,
+      secondaryText: "Content Action",
+      module: "content",
+    });
   };
 
   const filteredContent = filter === "all" 
@@ -193,13 +199,13 @@ export function AdminContentSection({
 
   return (
     <>
-      {/* Authorization Drawer */}
+      {/* Authorization Drawer - Now using centralized config */}
       <ModuleAuthorizationDrawer
         open={authDrawerOpen}
         onOpenChange={setAuthDrawerOpen}
         module="content"
-        actionTitle={authAction?.type === "publish" ? "Publish Content" : "Remove Content"}
-        actionDescription="Multi-signature authorization required for content actions"
+        actionTitle={actionConfig?.title || "Content Action"}
+        actionDescription={actionConfig?.description || "Multi-signature authorization required for content actions"}
         actionDetails={getAuthActionDetails()}
         initiatorRole="secretary"
         onAuthorized={handleAuthorizationComplete}
