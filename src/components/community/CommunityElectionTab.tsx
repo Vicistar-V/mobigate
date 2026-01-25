@@ -10,7 +10,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, Vote } from "lucide-react";
 import { ElectionVotingCard } from "./elections/ElectionVotingCard";
 import { AnonymousVotingSection } from "./elections/AnonymousVotingSection";
 import { ElectionControlBar } from "./elections/ElectionControlBar";
@@ -24,6 +24,8 @@ import { ElectionClearancesTab } from "./elections/ElectionClearancesTab";
 import { ElectionPrimariesTab } from "./elections/ElectionPrimariesTab";
 import { AccreditedVotersTab } from "./elections/AccreditedVotersTab";
 import { LaunchCampaignDialog } from "./elections/LaunchCampaignDialog";
+import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestSheet";
+import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import {
@@ -40,6 +42,8 @@ export const CommunityElectionTab = () => {
   const [showResultSheet, setShowResultSheet] = useState(false);
   const [viewMode, setViewMode] = useState<"offices" | "candidates">("offices");
   const [showLaunchDialog, setShowLaunchDialog] = useState(false);
+  const [showDeclarationSheet, setShowDeclarationSheet] = useState(false);
+  const [showCandidateDashboard, setShowCandidateDashboard] = useState(false);
 
   const handleNavigationClick = (view: string) => {
     setActiveView(view);
@@ -130,9 +134,31 @@ export const CommunityElectionTab = () => {
             <DropdownMenuItem onClick={() => handleNavigationClick("accredited-voters")}>
               Accredited Voters
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowDeclarationSheet(true)}>
+              Declare Interest
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowCandidateDashboard(true)}>
+              Candidate Dashboard
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Declaration & Candidate Sheets */}
+      <DeclarationOfInterestSheet
+        open={showDeclarationSheet}
+        onOpenChange={setShowDeclarationSheet}
+        memberName="John Doe"
+        walletBalance={75000}
+        onDeclarationComplete={(officeId, ref) => {
+          setShowDeclarationSheet(false);
+          setShowCandidateDashboard(true);
+        }}
+      />
+      <CandidateDashboardSheet
+        open={showCandidateDashboard}
+        onOpenChange={setShowCandidateDashboard}
+      />
 
       {/* Content Area */}
       <div className="space-y-6">
