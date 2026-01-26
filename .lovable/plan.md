@@ -1,156 +1,308 @@
 
-# Simplified Campaign Royalty System for Admin Dashboard
+# Nomination System Enhancement Plan
 
-## Understanding the Requirement
+## Overview
 
-The Admin Dashboard currently shows too much analytics (views, clicks, feedback stats) that are not necessary for community admins. What's actually needed is a focused **Candidates' Campaign Royalty** section that shows:
+This plan adds a comprehensive nomination feature that allows:
+1. **Self-Nomination**: Candidates can nominate themselves for any election office
+2. **Member Nomination**: Any community member can nominate another member for election
+3. **Proper Scrolling**: All sheets/drawers will properly scroll on both mobile and desktop devices
 
-1. The **community's share** of each candidate's campaign fees (the "royalty")
-2. Each candidate has different campaign parameters (audience reach, duration), so royalties vary
-3. Records tied to each candidate's campaign
-
----
-
-## Current Components Analysis
-
-| Component | Current Purpose | Keep/Simplify |
-|-----------|----------------|---------------|
-| `AdminCampaignsTab.tsx` | Campaign management with status stats + fee summary | Simplify - Remove aggregate fee summary card |
-| `CampaignRoyaltySection.tsx` | Aggregate totals + per-candidate list | Simplify - Focus only on Community Royalty |
-| `CampaignRoyaltyDetailSheet.tsx` | Full detail with analytics | Simplify - Remove Campaign Performance section |
-| `AdminElectionSection.tsx` | Uses CampaignRoyaltySection | Keep as-is (integration point) |
+The current system only has the "Declaration of Interest (EoI)" flow - this adds a separate **Nomination** flow which is distinct (EoI is a paid declaration, Nomination is a community endorsement).
 
 ---
 
-## Proposed Changes
+## Current Architecture Analysis
 
-### 1. Simplify CampaignRoyaltySection.tsx
+### Existing Components
+| Component | Purpose |
+|-----------|---------|
+| `AdminNominationsSection.tsx` | Admin view of all nominations with approval workflow |
+| `DeclarationOfInterestSheet.tsx` | Paid declaration flow for candidates |
+| `CandidateDashboardSheet.tsx` | Candidate's personal dashboard |
+| `Nomination` type | Stores nomination data including `nominatedBy`, `nominatedByName` |
 
-**Remove:**
-- Total Fees stat card (line 56-61)
-- Mobigate share stat card (line 70-77)
-- Distribution Ratio Card with "Configure" button (lines 80-104)
+### Key Insight from Screenshot
+The uploaded screenshot shows a "Nomination Details" drawer displaying:
+- Nominee: Chukwuemeka Obi
+- Office: President General
+- **Nominated By: Elder James Nwachukwu** (another member nominated them)
+- Date, Endorsements count, and Acceptance status
 
-**Keep:**
-- Community Royalty Total (prominently displayed)
-- Per-candidate royalty list with clear breakdown
+This confirms that nominations are community-driven endorsements, separate from the candidate's own declaration.
 
-**New Layout:**
+---
+
+## Implementation Plan
+
+### 1. Create NominateCandidateSheet Component
+
+**New File**: `src/components/community/elections/NominateCandidateSheet.tsx`
+
+This is the main user-facing component for nominating someone (or yourself).
+
+**Key Features:**
+- Toggle for "Nominate Myself" vs "Nominate Another Member"
+- Office selection dropdown
+- Member search/select (when nominating others)
+- Confirmation dialog before submission
+- Mobile (Drawer) and Desktop (Dialog) responsive wrapper
+
+**UI Flow:**
 ```text
 ┌─────────────────────────────────────────┐
-│  📊 Community Campaign Royalties        │
-│  ─────────────────────────────────────  │
-│  Total Earned: M8,502 (≈ ₦8,502)       │
-│  From 4 paid campaigns                  │
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ 👤 Chief Adebayo Okonkwo                │
-│    President • 21 days                  │
-│    Royalty: M2,550 (60% of M4,250)      │
-│    Audiences: Community, Members, Global│
-│                                    [>]  │
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ 👤 Dr. Amina Bello                      │
-│    Vice President • 14 days             │
-│    Royalty: M1,404 (60% of M2,340)      │
-│    Audiences: Community, Marketplace    │
-│                                    [>]  │
+│  📋 Nominate for Election               │
+├─────────────────────────────────────────┤
+│  [○] Nominate Myself                    │
+│  [●] Nominate Another Member            │
+├─────────────────────────────────────────┤
+│  Search Member: [________________]      │
+│                                         │
+│  👤 Elder James Nwachukwu    [Select]   │
+│  👤 Dr. Patricia Okafor      [Select]   │
+│  👤 Chief Emmanuel Nwosu     [Select]   │
+├─────────────────────────────────────────┤
+│  Select Office:                         │
+│  ┌──────────────────────────────────┐   │
+│  │ President General            ▾   │   │
+│  └──────────────────────────────────┘   │
+├─────────────────────────────────────────┤
+│                                         │
+│         [ Submit Nomination ]           │
+│                                         │
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-### 2. Simplify CampaignRoyaltyDetailSheet.tsx
+### 2. Create NominationDetailsSheet Component
 
-**Remove:**
-- Campaign Performance section (lines 204-227) with Views, Clicks, Feedback stats
-- These are analytics that belong to the candidate's dashboard, not admin
+**New File**: `src/components/community/elections/NominationDetailsSheet.tsx`
 
-**Keep:**
-- Candidate Info card
-- Campaign Parameters (duration, dates, audiences, tagline)
-- Fee Breakdown (base fee, audience premium, total)
-- Royalty Distribution (Community Share vs Mobigate Share)
-- Payment timestamp
-- Campaign ID
+A user-facing component to view nomination details (separate from admin view).
+
+**Key Features:**
+- Shows nominee info, nominator info, endorsement count
+- Endorsement button for other members
+- Acceptance status (for the nominee to accept/decline)
+- Mobile Drawer / Desktop Dialog pattern with proper scrolling
 
 ---
 
-### 3. Simplify AdminCampaignsTab.tsx
+### 3. Create NominationsListView Component
 
-**Remove:**
-- Fee Summary Card (lines 145-167) - duplicates CampaignRoyaltySection data
+**New File**: `src/components/community/elections/NominationsListView.tsx`
 
-**Keep:**
-- Stats Row (Active/Draft/Paused/Ended counts) - useful for management
-- Campaign list with status management actions
-- Views/Endorsements stats in cards - these are for the candidate's benefit
+A list of all community nominations visible to members.
+
+**Features:**
+- Filter by office
+- Search nominees
+- Click to view details
+- Shows endorsement counts
+
+---
+
+### 4. Update CommunityElectionTab.tsx
+
+Add "Nominations" to the navigation with access to:
+- View all nominations
+- "Nominate" button (opens NominateCandidateSheet)
 
 ---
 
-### 4. Add Unique Parameters Display Per Candidate
+### 5. Update AdminNominationsSection.tsx
 
-Each candidate card in the royalty list will clearly show:
-- Selected audience targets (Community Only, Members, Global, etc.)
-- Campaign duration (days)
-- Fee calculation: `Total Fee × 60% = Community Royalty`
-- Payment date
-
-This emphasizes that royalties vary based on candidate's choices.
+Fix the scrolling issue in the existing Nomination Details Sheet:
+- Change from `Sheet` to responsive Drawer/Dialog pattern
+- Add `useIsMobile()` hook
+- Use `max-h-[92vh]` on mobile Drawer
+- Use `max-h-[85vh]` on desktop Dialog
+- Add `overflow-y-auto touch-auto` to content areas
 
 ---
+
+### 6. Add Types
+
+**Update**: `src/types/electionProcesses.ts`
+
+Add:
+```typescript
+// Whether nomination is self or by another member
+export interface Nomination {
+  // existing fields...
+  isSelfNomination: boolean;  // NEW
+}
+```
+
+---
+
+## Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/components/community/elections/NominateCandidateSheet.tsx` | Self/member nomination flow with office selection |
+| `src/components/community/elections/NominationDetailsSheet.tsx` | View nomination details with endorsement action |
+| `src/components/community/elections/NominationsListView.tsx` | Browse all community nominations |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/components/admin/election/CampaignRoyaltySection.tsx` | Remove aggregate stats, simplify to Community Royalty focus |
-| `src/components/admin/election/CampaignRoyaltyDetailSheet.tsx` | Remove Campaign Performance analytics section |
-| `src/components/admin/election/AdminCampaignsTab.tsx` | Remove Fee Summary Card (already shown in Royalties section) |
-
----
-
-## Mobile-First UI Considerations
-
-- All cards remain touch-friendly with h-10+ targets
-- Per-candidate royalty cards show stacked layout for clear reading
-- Audience badges wrap properly on small screens
-- Community royalty amount is prominently displayed in green
+| `src/components/admin/election/AdminNominationsSection.tsx` | Fix scrolling with responsive Drawer/Dialog pattern |
+| `src/components/community/CommunityElectionTab.tsx` | Add Nominations view and Nominate button |
+| `src/data/electionProcessesData.ts` | Add `isSelfNomination` flag to mock data |
+| `src/types/electionProcesses.ts` | Add `isSelfNomination` to Nomination interface |
 
 ---
 
 ## Technical Details
 
-### Royalty Calculation (Already Implemented)
-```typescript
-// Each candidate's royalty is calculated based on their chosen parameters:
-communityShare = totalFeeInMobi * (communityPercentage / 100)
-// Default: 60% to Community, 40% to Mobigate
+### Responsive Drawer/Dialog Pattern
 
-// Example:
-// Candidate A: 21 days + 3 audiences = M4,250 total → M2,550 royalty
-// Candidate B: 7 days + 1 audience = M1,000 total → M600 royalty
+All nomination sheets will use this pattern for proper scrolling:
+
+```typescript
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+function MySheet({ open, onOpenChange, ...props }) {
+  const isMobile = useIsMobile();
+
+  const Content = () => (
+    <ScrollArea className="flex-1 overflow-y-auto touch-auto">
+      {/* Content here */}
+    </ScrollArea>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92vh]">
+          <DrawerHeader>
+            <DrawerTitle>Title</DrawerTitle>
+          </DrawerHeader>
+          <Content />
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Title</DialogTitle>
+        </DialogHeader>
+        <Content />
+      </DialogContent>
+    </Dialog>
+  );
+}
 ```
 
-### Data Flow (Unchanged)
+### Self-Nomination Logic
+
+When "Nominate Myself" is selected:
+- `nominatedBy` = current user ID
+- `nominatedByName` = current user name
+- `nomineeId` = current user ID
+- `isSelfNomination` = true
+- Automatic acceptance (`acceptedByNominee` = true)
+
+### Member Nomination Logic
+
+When nominating another member:
+- `nominatedBy` = current user ID
+- `nominatedByName` = current user name
+- `nomineeId` = selected member ID
+- `isSelfNomination` = false
+- Requires acceptance from nominee
+
+---
+
+## UI/UX Considerations
+
+### Mobile-First Design
+- All touch targets minimum 44x44px
+- Stacked layouts on mobile
+- Horizontal layouts on desktop where appropriate
+- Bottom sheet pattern on mobile (Drawer from bottom)
+- Side/center dialog on desktop
+
+### Self-Nomination Indicator
+Show a badge when viewing self-nominations:
 ```text
-mockEnhancedCampaigns → CampaignRoyaltySection → CampaignRoyaltyDetailSheet
-                     ↓
-           Filter: paymentStatus === "paid"
-                     ↓
-           Display: communityShare per candidate
+👤 Paulson Chinedu Okonkwo
+   President General
+   [Self-Nominated] [5 Endorsements]
+```
+
+### Endorsement Flow
+Members can endorse nominations:
+```text
+[👍 Endorse] → "You endorsed this candidate!" → [Endorsed ✓]
+```
+
+---
+
+## Navigation Updates
+
+### Election Tab Navigation
+Add "Nominations" as a new view:
+
+```text
+[Campaigns] [Voting] [Results ▾] [Winners] [...More ▾]
+                                            └── Nominations ← NEW
+                                            └── Nominate Someone ← NEW
+                                            └── Public Opinions
+                                            └── Accreditation
+                                            └── etc.
+```
+
+### Quick Action Button
+Add "Nominate" button next to "Declare for Election":
+
+```text
+[Declare for Election]  [Nominate Someone]
+```
+
+---
+
+## Mock Data Updates
+
+Add a self-nomination example:
+
+```typescript
+{
+  id: "nom-7",
+  nomineeId: "member-7",
+  nomineeName: "Paulson Chinedu Okonkwo",
+  nomineeAvatar: "/placeholder.svg",
+  officeId: "office-1",
+  officeName: "President General",
+  nominatedBy: "member-7", // Same as nominee
+  nominatedByName: "Paulson Chinedu Okonkwo", // Same person
+  nominatedAt: new Date("2025-01-15"),
+  status: "approved",
+  acceptedByNominee: true,
+  acceptedAt: new Date("2025-01-15"),
+  endorsementsCount: 45,
+  qualificationStatus: "qualified",
+  isSelfNomination: true
+}
 ```
 
 ---
 
 ## Summary
 
-This simplification:
-1. Removes redundant aggregate analytics from Admin view
-2. Focuses on **Community Campaign Royalties** - what admins actually need to see
-3. Keeps per-candidate detail showing how their unique parameters affected the royalty
-4. Removes campaign performance stats (Views/Clicks/Feedback) from admin detail view - those belong to candidates
-5. Maintains mobile-first responsive design throughout
+This implementation adds:
+1. **NominateCandidateSheet** - Allows self-nomination or nominating other members
+2. **NominationDetailsSheet** - User-facing details view with endorsement
+3. **NominationsListView** - Browse all nominations with filters
+4. **Proper scrolling** - All sheets use responsive Drawer/Dialog with overflow handling
+5. **Self-nomination support** - Track whether nomination is self or by another member
+6. **Navigation integration** - Added to Election Tab menu and quick actions
