@@ -1,24 +1,12 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Wallet, 
-  TrendingUp, 
-  Users, 
-  Settings,
-  ChevronRight,
-  PieChart,
-  ArrowUpRight,
-  ArrowDownRight
-} from "lucide-react";
-import { mockEnhancedCampaigns, getCampaignStats } from "@/data/campaignSystemData";
+import { ChevronRight, TrendingUp, Clock, Target } from "lucide-react";
+import { mockEnhancedCampaigns, getCampaignStats, campaignAudienceOptions } from "@/data/campaignSystemData";
 import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
+import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { CampaignRoyaltyDetailSheet } from "./CampaignRoyaltyDetailSheet";
-import { FeeDistributionConfigDialog } from "./FeeDistributionConfigDialog";
 
 interface CampaignRoyaltySectionProps {
   onViewFullReport?: () => void;
@@ -26,7 +14,6 @@ interface CampaignRoyaltySectionProps {
 
 export function CampaignRoyaltySection({ onViewFullReport }: CampaignRoyaltySectionProps) {
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
-  const [showConfigDialog, setShowConfigDialog] = useState(false);
   
   const stats = getCampaignStats();
   const paidCampaigns = mockEnhancedCampaigns.filter(c => c.paymentStatus === "paid");
@@ -34,6 +21,12 @@ export function CampaignRoyaltySection({ onViewFullReport }: CampaignRoyaltySect
   const selectedCampaign = selectedCampaignId 
     ? mockEnhancedCampaigns.find(c => c.id === selectedCampaignId)
     : null;
+
+  // Get short audience label
+  const getAudienceShortLabel = (audienceValue: string) => {
+    const audience = campaignAudienceOptions.find(a => a.value === audienceValue);
+    return audience?.label.split(' ')[0] || audienceValue;
+  };
 
   return (
     <>
@@ -44,124 +37,104 @@ export function CampaignRoyaltySection({ onViewFullReport }: CampaignRoyaltySect
         campaign={selectedCampaign}
       />
 
-      {/* Config Dialog */}
-      <FeeDistributionConfigDialog
-        open={showConfigDialog}
-        onOpenChange={setShowConfigDialog}
-      />
-
       <div className="space-y-4">
-        {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-2">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Total Fees</p>
-              <p className="text-sm font-bold">{formatMobiAmount(stats.totalFees)}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-green-500/5 border-green-500/20">
-            <CardContent className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Community</p>
-              <p className="text-sm font-bold text-green-600">
-                {formatMobiAmount(stats.totalCommunityShare)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-blue-500/5 border-blue-500/20">
-            <CardContent className="p-3 text-center">
-              <p className="text-xs text-muted-foreground">Mobigate</p>
-              <p className="text-sm font-bold text-blue-600">
-                {formatMobiAmount(stats.totalMobigateShare)}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Distribution Ratio Card */}
-        <Card>
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Current Distribution</p>
-                  <p className="text-xs text-muted-foreground">
-                    Community 60% : Mobigate 40%
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8"
-                onClick={() => setShowConfigDialog(true)}
-              >
-                <Settings className="h-3.5 w-3.5 mr-1" />
-                Configure
-              </Button>
+        {/* Community Royalty Total - Prominently Displayed */}
+        <Card className="bg-green-500/5 border-green-500/20">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+              <h3 className="font-semibold text-sm">Community Campaign Royalties</h3>
             </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-green-600">
+                {formatMobiAmount(stats.totalCommunityShare)}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                ≈ {formatLocalAmount(stats.totalCommunityShare, "NGN")}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              From {paidCampaigns.length} paid campaign{paidCampaigns.length !== 1 ? 's' : ''}
+            </p>
           </CardContent>
         </Card>
 
-        <Separator />
-
-        {/* Campaign Royalties List */}
+        {/* Per-Candidate Royalty List */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">Campaign Royalties</h3>
+            <h3 className="text-sm font-semibold">Candidates' Royalty Records</h3>
             <Badge variant="secondary" className="text-xs">
               {paidCampaigns.length} paid
             </Badge>
           </div>
 
           <div className="space-y-2">
-            {paidCampaigns.map((campaign) => (
-              <Card 
-                key={campaign.id}
-                className="cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => setSelectedCampaignId(campaign.id)}
-              >
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 shrink-0">
-                      <AvatarImage src={campaign.candidatePhoto} alt={campaign.candidateName} />
-                      <AvatarFallback>{campaign.candidateName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{campaign.candidateName}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {campaign.office} • {campaign.durationDays} days
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-primary">
-                        {formatMobiAmount(campaign.totalFeeInMobi)}
-                      </p>
-                      <div className="flex items-center gap-1 justify-end text-xs">
-                        <span className="text-green-600">
-                          +{formatMobiAmount(campaign.communityShare)}
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </div>
+            {paidCampaigns.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No paid campaigns yet
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              paidCampaigns.map((campaign) => (
+                <Card 
+                  key={campaign.id}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => setSelectedCampaignId(campaign.id)}
+                >
+                  <CardContent className="p-3">
+                    {/* Candidate Header */}
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarImage src={campaign.candidatePhoto} alt={campaign.candidateName} />
+                        <AvatarFallback>
+                          {campaign.candidateName.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{campaign.candidateName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {campaign.office} • {campaign.durationDays} days
+                        </p>
+                        
+                        {/* Royalty Amount - Prominently Displayed */}
+                        <div className="mt-2 p-2 bg-green-500/10 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Royalty</span>
+                            <span className="font-bold text-green-600">
+                              {formatMobiAmount(campaign.communityShare)}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            60% of {formatMobiAmount(campaign.totalFeeInMobi)} total fee
+                          </p>
+                        </div>
+                        
+                        {/* Audience Targets */}
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {campaign.audienceTargets.map((audience) => (
+                            <Badge 
+                              key={audience} 
+                              variant="outline" 
+                              className="text-[10px] px-1.5 py-0"
+                            >
+                              {getAudienceShortLabel(audience)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-3" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </div>
-
-        {/* View Full Report Button */}
-        {onViewFullReport && (
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={onViewFullReport}
-          >
-            View Full Royalty Report
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
-        )}
       </div>
     </>
   );

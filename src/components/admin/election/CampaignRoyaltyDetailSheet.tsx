@@ -9,14 +9,8 @@ import {
   TrendingUp, 
   Calendar,
   Clock,
-  Target,
-  Users,
-  Eye,
-  MousePointer,
-  MessageSquare,
   PieChart,
-  Receipt,
-  Globe
+  Receipt
 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -198,31 +192,6 @@ export function CampaignRoyaltyDetailSheet({
           <p className="text-xs text-muted-foreground text-center">
             Unique royalty based on candidate's selected parameters
           </p>
-        </CardContent>
-      </Card>
-
-      {/* Campaign Analytics */}
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <h4 className="font-semibold text-sm">Campaign Performance</h4>
-          
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-center p-2 bg-muted/50 rounded-lg">
-              <Eye className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-              <p className="text-lg font-bold">{campaign.views.toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Views</p>
-            </div>
-            <div className="text-center p-2 bg-muted/50 rounded-lg">
-              <MousePointer className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-              <p className="text-lg font-bold">{campaign.clicks.toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Clicks</p>
-            </div>
-            <div className="text-center p-2 bg-muted/50 rounded-lg">
-              <MessageSquare className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-              <p className="text-lg font-bold">{campaign.feedbackCount}</p>
-              <p className="text-xs text-muted-foreground">Feedback</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
