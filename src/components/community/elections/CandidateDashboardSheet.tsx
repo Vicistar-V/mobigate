@@ -126,11 +126,11 @@ export function CandidateDashboardSheet({
                 </CardContent>
               </Card>
 
-              {/* Create Campaign CTA - Prominently displayed */}
+              {/* Create Campaign CTA - Prominently displayed with animation */}
               {dashboard.canCreateCampaign && dashboard.campaignStatus === "not_created" && (
-                <Card className="border-primary border-2 bg-primary/5">
+                <Card className="border-primary border-2 bg-primary/5 shadow-lg animate-fade-in">
                   <CardContent className="p-4 text-center space-y-3">
-                    <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto">
+                    <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto animate-pulse">
                       <Megaphone className="h-8 w-8 text-primary" />
                     </div>
                     <div>
@@ -141,12 +141,35 @@ export function CandidateDashboardSheet({
                     </div>
                     <Button 
                       size="lg" 
-                      className="w-full"
+                      className="w-full bg-primary hover:bg-primary/90 shadow-md"
                       onClick={() => setShowCampaignSettings(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Create New Campaign
                     </Button>
+                    
+                    {/* Info card explaining campaign benefits */}
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg text-left space-y-2">
+                      <p className="text-xs font-medium text-foreground">What your campaign unlocks:</p>
+                      <ul className="text-xs text-muted-foreground space-y-1">
+                        <li className="flex items-center gap-2">
+                          <Eye className="h-3 w-3 text-primary" />
+                          Reach voters across selected audiences
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <FileText className="h-3 w-3 text-primary" />
+                          Share your manifesto & priorities
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <MessageSquare className="h-3 w-3 text-primary" />
+                          Receive anonymous voter feedback
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <TrendingUp className="h-3 w-3 text-primary" />
+                          Track engagement analytics
+                        </li>
+                      </ul>
+                    </div>
                   </CardContent>
                 </Card>
               )}
