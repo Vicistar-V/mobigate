@@ -55,6 +55,7 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface MembersFinancialReportsDialogProps {
   open: boolean;
@@ -206,7 +207,10 @@ export const MembersFinancialReportsDialog = ({
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-sm text-green-600">
-                        +M{payment.amountPaid.toLocaleString()}
+                        +{formatMobiAmount(payment.amountPaid)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ≈ {formatLocalAmount(payment.amountPaid, "NGN")}
                       </p>
                       <Badge
                         className={
@@ -261,7 +265,10 @@ export const MembersFinancialReportsDialog = ({
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-sm text-red-600">
-                        -M{disbursement.amount.toLocaleString()}
+                        -{formatMobiAmount(disbursement.amount)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ≈ {formatLocalAmount(disbursement.amount, "NGN")}
                       </p>
                       <Badge variant="outline" className="text-xs">
                         {getDisbursementTypeLabel(disbursement.disbursementType)}
@@ -333,10 +340,12 @@ export const MembersFinancialReportsDialog = ({
 
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span>
-                          M{obligation.amountPaid.toLocaleString()} / M
-                          {obligation.amountDue.toLocaleString()}
-                        </span>
+                        <div>
+                          <span>{formatMobiAmount(obligation.amountPaid)} / {formatMobiAmount(obligation.amountDue)}</span>
+                          <p className="text-muted-foreground">
+                            ≈ {formatLocalAmount(obligation.amountPaid, "NGN")} / {formatLocalAmount(obligation.amountDue, "NGN")}
+                          </p>
+                        </div>
                         <span className="text-muted-foreground">{progressPercentage}%</span>
                       </div>
                       <Progress value={progressPercentage} className="h-1.5" />

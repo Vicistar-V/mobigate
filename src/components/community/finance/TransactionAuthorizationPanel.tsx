@@ -21,6 +21,7 @@ import {
   validateAuthorizationRequirements,
 } from "@/types/transactionAuthorization";
 import { cn } from "@/lib/utils";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 // Mock officer data for authorization - Finance module uses 4 officers
 const AUTHORIZATION_OFFICERS: {
@@ -199,7 +200,12 @@ export function TransactionAuthorizationPanel({
           )}
           <div className="flex justify-between">
             <span className="text-muted-foreground">Amount</span>
-            <span className="font-bold text-base">M{amount.toLocaleString()}</span>
+            <div className="text-right">
+              <span className="font-bold text-base">{formatMobiAmount(amount)}</span>
+              <p className="text-xs text-muted-foreground">
+                ≈ {formatLocalAmount(amount, "NGN")}
+              </p>
+            </div>
           </div>
           {description && (
             <div className="flex justify-between">

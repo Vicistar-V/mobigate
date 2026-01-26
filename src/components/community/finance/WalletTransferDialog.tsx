@@ -17,6 +17,7 @@ import { Send, Search, CheckCircle2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TransactionAuthorizationPanel } from "./TransactionAuthorizationPanel";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface WalletTransferDialogProps {
   open: boolean;
@@ -204,7 +205,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                Available balance: M{walletBalance.toLocaleString()}
+                Available balance: {formatMobiAmount(walletBalance)} (≈ {formatLocalAmount(walletBalance, "NGN")})
               </p>
             </div>
 
@@ -251,7 +252,12 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold text-lg">M{parseFloat(amount).toLocaleString()}</span>
+                <div className="text-right">
+                  <span className="font-bold text-lg">{formatMobiAmount(parseFloat(amount))}</span>
+                  <p className="text-xs text-muted-foreground">
+                    ≈ {formatLocalAmount(parseFloat(amount), "NGN")}
+                  </p>
+                </div>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Description</span>
