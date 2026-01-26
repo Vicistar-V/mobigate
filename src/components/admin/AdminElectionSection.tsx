@@ -9,6 +9,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { AdminStats, ElectionActivity, formatRelativeTime } from "@/data/adminDashboardData";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
@@ -162,6 +164,23 @@ export function AdminElectionSection({
         open={showPrimaryManagement}
         onOpenChange={setShowPrimaryManagement}
       />
+
+      {/* Campaign Royalties Sheet */}
+      <Sheet open={showRoyaltySection} onOpenChange={setShowRoyaltySection}>
+        <SheetContent side="bottom" className="h-[92vh] rounded-t-2xl">
+          <SheetHeader className="pb-2">
+            <SheetTitle className="flex items-center gap-2">
+              <Coins className="h-5 w-5 text-primary" />
+              Campaign Royalties
+            </SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(100%-60px)] mt-4">
+            <div className="pr-2 pb-6">
+              <CampaignRoyaltySection />
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
 
       <Accordion type="single" collapsible className="w-full max-w-full">
         <AccordionItem value="election" className="border rounded-lg overflow-hidden">
