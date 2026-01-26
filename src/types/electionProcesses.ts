@@ -58,6 +58,7 @@ export interface PrimaryCandidate {
   votes: number;
   percentage: number;
   advancedToMain: boolean;
+  autoQualified?: boolean; // true if candidate met 25% threshold
 }
 
 // Primary election trigger configuration
@@ -123,6 +124,9 @@ export interface ElectionProcessSettings {
   primaryElectionEnabled: boolean;
   primaryAdvancementCount: number; // how many advance from primary to main
   primaryThreshold: number; // candidates needed to trigger primary (default: 20)
+  primaryAdvancementMinimum: number; // minimum candidates to advance (default: 2)
+  primaryAdvancementMaximum: number; // maximum candidates to advance (default: 4)
+  primaryAdvancementThreshold: number; // percentage threshold for auto-qualification (default: 25)
   minimumNominations: number;
   requireNomineeAcceptance: boolean;
   endorsementThreshold: number;
