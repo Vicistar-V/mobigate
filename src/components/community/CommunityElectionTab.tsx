@@ -10,7 +10,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu, Vote, Flag } from "lucide-react";
+import { ChevronDown, Menu, Vote, Flag, UserPlus } from "lucide-react";
 import { ElectionVotingCard } from "./elections/ElectionVotingCard";
 import { AnonymousVotingSection } from "./elections/AnonymousVotingSection";
 import { ElectionControlBar } from "./elections/ElectionControlBar";
@@ -26,6 +26,8 @@ import { AccreditedVotersTab } from "./elections/AccreditedVotersTab";
 import { LaunchCampaignDialog } from "./elections/LaunchCampaignDialog";
 import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestSheet";
 import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
+import { NominationsListView } from "./elections/NominationsListView";
+import { NominateCandidateSheet } from "./elections/NominateCandidateSheet";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import {
@@ -44,6 +46,7 @@ export const CommunityElectionTab = () => {
   const [showLaunchDialog, setShowLaunchDialog] = useState(false);
   const [showDeclarationSheet, setShowDeclarationSheet] = useState(false);
   const [showCandidateDashboard, setShowCandidateDashboard] = useState(false);
+  const [showNominateSheet, setShowNominateSheet] = useState(false);
 
   const handleNavigationClick = (view: string) => {
     setActiveView(view);
@@ -52,20 +55,32 @@ export const CommunityElectionTab = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header with Declare Button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Menu className="w-5 h-5" />
-          <h1 className="text-2xl font-bold">Elections & Voting</h1>
+      {/* Header with Action Buttons */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Menu className="w-5 h-5 shrink-0" />
+          <h1 className="text-xl sm:text-2xl font-bold truncate">Elections & Voting</h1>
         </div>
-        <Button 
-          onClick={() => setShowDeclarationSheet(true)}
-          className="bg-gradient-to-r from-primary to-primary/80 shadow-lg"
-          size="sm"
-        >
-          <Flag className="w-4 h-4 mr-1.5" />
-          Declare for Election
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button 
+            onClick={() => setShowNominateSheet(true)}
+            variant="outline"
+            size="sm"
+            className="hidden sm:flex"
+          >
+            <UserPlus className="w-4 h-4 mr-1.5" />
+            Nominate
+          </Button>
+          <Button 
+            onClick={() => setShowDeclarationSheet(true)}
+            className="bg-gradient-to-r from-primary to-primary/80 shadow-lg"
+            size="sm"
+          >
+            <Flag className="w-4 h-4 mr-1.5" />
+            <span className="hidden sm:inline">Declare for Election</span>
+            <span className="sm:hidden">Declare</span>
+          </Button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
@@ -76,6 +91,13 @@ export const CommunityElectionTab = () => {
           onClick={() => handleNavigationClick("campaigns")}
         >
           Campaigns
+        </Button>
+        <Button
+          variant={activeView === "nominations" ? "default" : "outline"}
+          size="sm"
+          onClick={() => handleNavigationClick("nominations")}
+        >
+          Nominations
         </Button>
         <Button
           variant={activeView === "voting" ? "default" : "outline"}
@@ -142,6 +164,9 @@ export const CommunityElectionTab = () => {
             <DropdownMenuItem onClick={() => handleNavigationClick("accredited-voters")}>
               Accredited Voters
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowNominateSheet(true)}>
+              Nominate Someone
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setShowDeclarationSheet(true)}>
               Declare Interest
             </DropdownMenuItem>
@@ -167,6 +192,13 @@ export const CommunityElectionTab = () => {
         open={showCandidateDashboard}
         onOpenChange={setShowCandidateDashboard}
       />
+      <NominateCandidateSheet
+        open={showNominateSheet}
+        onOpenChange={setShowNominateSheet}
+        onNominationComplete={() => {
+          setShowNominateSheet(false);
+        }}
+      />
 
       {/* Content Area */}
       <div className="space-y-6">
@@ -181,6 +213,15 @@ export const CommunityElectionTab = () => {
               onOpenChange={setShowLaunchDialog} 
             />
             <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-campaigns" />
+            <PeopleYouMayKnow />
+          </>
+        )}
+
+        {/* Nominations View */}
+        {activeView === "nominations" && (
+          <>
+            <NominationsListView />
+            <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-nominations" />
             <PeopleYouMayKnow />
           </>
         )}
