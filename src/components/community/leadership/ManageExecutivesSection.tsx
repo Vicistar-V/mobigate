@@ -3,18 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { executiveMembers } from "@/data/communityExecutivesData";
 import { AddMemberDialog } from "./AddMemberDialog";
 import { EditMemberDialog } from "./EditMemberDialog";
 import { MemberPreviewDialog } from "../MemberPreviewDialog";
-import { Plus, MoreVertical, Pencil, Trash2, ArrowRightLeft, Users } from "lucide-react";
+import { LeadershipMemberActionsMenu } from "./LeadershipMemberActionsMenu";
+import { Plus, Users } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -121,31 +116,14 @@ export function ManageExecutivesSection() {
                   </div>
                 </div>
 
-                {/* Actions Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => handleEdit(member)} className="py-2.5">
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Edit Member
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleTransfer(member)} className="py-2.5">
-                      <ArrowRightLeft className="h-4 w-4 mr-2" />
-                      Transfer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleRemove(member)}
-                      className="text-destructive focus:text-destructive py-2.5"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Remove
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {/* Actions Menu - Comprehensive with all member actions */}
+                <LeadershipMemberActionsMenu
+                  member={member}
+                  onEdit={handleEdit}
+                  onRemove={handleRemove}
+                  onTransfer={handleTransfer}
+                  showAdminActions={true}
+                />
               </div>
             </CardContent>
           </Card>
