@@ -34,6 +34,7 @@ export interface Nomination {
   endorsementsCount: number;
   qualificationStatus: 'pending' | 'qualified' | 'disqualified';
   disqualificationReason?: string;
+  isSelfNomination: boolean;
 }
 
 // Primary Election Types

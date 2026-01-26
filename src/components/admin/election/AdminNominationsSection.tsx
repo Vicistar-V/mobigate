@@ -10,7 +10,8 @@ import {
   ThumbsUp,
   AlertCircle,
   Calendar,
-  Eye
+  Eye,
+  User
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,11 +22,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { 
@@ -84,6 +92,7 @@ const StatCard = ({ icon, value, label, color }: StatCardProps) => (
 );
 
 export function AdminNominationsSection() {
+  const isMobile = useIsMobile();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -125,6 +134,135 @@ export function AdminNominationsSection() {
   };
 
   const uniqueOffices = [...new Set(mockNominations.map((n) => ({ id: n.officeId, name: n.officeName })))];
+
+  const DetailContent = () => (
+    <ScrollArea className="flex-1 overflow-y-auto touch-auto px-4 pb-6">
+      {selectedNomination && (
+        <div className="space-y-4">
+          {/* Nominee Info */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-14 w-14">
+                  <AvatarImage src={selectedNomination.nomineeAvatar} />
+                  <AvatarFallback>{selectedNomination.nomineeName[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h3 className="font-bold text-base">{selectedNomination.nomineeName}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedNomination.officeName}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {getStatusBadge(selectedNomination.status)}
+                    {selectedNomination.isSelfNomination && (
+                      <Badge variant="outline" className="text-[10px] border-blue-200 text-blue-600">
+                        <User className="h-2.5 w-2.5 mr-1" />
+                        Self-Nominated
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Nomination Info */}
+          <Card>
+            <CardContent className="p-4 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Nominated By</span>
+                <span className="font-medium">
+                  {selectedNomination.isSelfNomination ? "Self" : selectedNomination.nominatedByName}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Date Nominated</span>
+                <span className="font-medium">{format(selectedNomination.nominatedAt, "MMM d, yyyy")}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Endorsements</span>
+                <span className="font-medium flex items-center gap-1">
+                  <ThumbsUp className="h-3.5 w-3.5" />
+                  {selectedNomination.endorsementsCount}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Nominee Accepted</span>
+                <span className="font-medium">
+                  {selectedNomination.acceptedByNominee ? (
+                    <span className="text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Yes
+                    </span>
+                  ) : (
+                    <span className="text-amber-600 flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" /> Pending
+                    </span>
+                  )}
+                </span>
+              </div>
+              {selectedNomination.acceptedAt && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Accepted On</span>
+                  <span className="font-medium">{format(selectedNomination.acceptedAt, "MMM d, yyyy")}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Qualification Status */}
+          <Card>
+            <CardContent className="p-4">
+              <h4 className="font-semibold text-sm mb-2">Qualification Status</h4>
+              {selectedNomination.qualificationStatus === 'qualified' && (
+                <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span className="text-sm font-medium">Qualified for Election</span>
+                </div>
+              )}
+              {selectedNomination.qualificationStatus === 'pending' && (
+                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg">
+                  <Clock className="h-5 w-5" />
+                  <span className="text-sm font-medium">Qualification Pending</span>
+                </div>
+              )}
+              {selectedNomination.qualificationStatus === 'disqualified' && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-red-600 bg-red-50 dark:bg-red-950/30 p-3 rounded-lg">
+                    <XCircle className="h-5 w-5" />
+                    <span className="text-sm font-medium">Disqualified</span>
+                  </div>
+                  {selectedNomination.disqualificationReason && (
+                    <p className="text-xs text-muted-foreground p-2 bg-muted rounded-lg">
+                      <strong>Reason:</strong> {selectedNomination.disqualificationReason}
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          {selectedNomination.status === 'pending_approval' && (
+            <div className="flex gap-2 pt-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 h-12 text-red-600 border-red-200"
+                onClick={() => handleReject(selectedNomination)}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Reject
+              </Button>
+              <Button 
+                className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => handleApprove(selectedNomination)}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Approve
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </ScrollArea>
+  );
 
   return (
     <div className="space-y-4 pb-20">
@@ -255,7 +393,9 @@ export function AdminNominationsSection() {
                         {nomination.endorsementsCount}
                       </span>
                       <span>
-                        By: {nomination.nominatedByName.split(' ').slice(0, 2).join(' ')}
+                        {nomination.isSelfNomination 
+                          ? "Self-Nominated" 
+                          : `By: ${nomination.nominatedByName.split(' ').slice(0, 2).join(' ')}`}
                       </span>
                     </div>
 
@@ -272,6 +412,12 @@ export function AdminNominationsSection() {
                           Awaiting Response
                         </Badge>
                       )}
+                      {nomination.isSelfNomination && (
+                        <Badge variant="outline" className="text-[10px] py-0 text-blue-600 border-blue-200">
+                          <User className="h-2.5 w-2.5 mr-1" />
+                          Self
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
@@ -283,134 +429,32 @@ export function AdminNominationsSection() {
         )}
       </div>
 
-      {/* Nomination Detail Sheet */}
-      <Sheet open={showNominationSheet} onOpenChange={setShowNominationSheet}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-primary" />
-              Nomination Details
-            </SheetTitle>
-          </SheetHeader>
-
-          {selectedNomination && (
-            <ScrollArea className="h-[calc(85vh-120px)]">
-              <div className="space-y-4 px-1">
-                {/* Nominee Info */}
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-14 w-14">
-                        <AvatarImage src={selectedNomination.nomineeAvatar} />
-                        <AvatarFallback>{selectedNomination.nomineeName[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-base">{selectedNomination.nomineeName}</h3>
-                        <p className="text-sm text-muted-foreground">{selectedNomination.officeName}</p>
-                        <div className="mt-1">{getStatusBadge(selectedNomination.status)}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Nomination Info */}
-                <Card>
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Nominated By</span>
-                      <span className="font-medium">{selectedNomination.nominatedByName}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Date Nominated</span>
-                      <span className="font-medium">{format(selectedNomination.nominatedAt, "MMM d, yyyy")}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Endorsements</span>
-                      <span className="font-medium flex items-center gap-1">
-                        <ThumbsUp className="h-3.5 w-3.5" />
-                        {selectedNomination.endorsementsCount}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Nominee Accepted</span>
-                      <span className="font-medium">
-                        {selectedNomination.acceptedByNominee ? (
-                          <span className="text-emerald-600 flex items-center gap-1">
-                            <CheckCircle2 className="h-3.5 w-3.5" /> Yes
-                          </span>
-                        ) : (
-                          <span className="text-amber-600 flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" /> Pending
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                    {selectedNomination.acceptedAt && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Accepted On</span>
-                        <span className="font-medium">{format(selectedNomination.acceptedAt, "MMM d, yyyy")}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Qualification Status */}
-                <Card>
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-sm mb-2">Qualification Status</h4>
-                    {selectedNomination.qualificationStatus === 'qualified' && (
-                      <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg">
-                        <CheckCircle2 className="h-5 w-5" />
-                        <span className="text-sm font-medium">Qualified for Election</span>
-                      </div>
-                    )}
-                    {selectedNomination.qualificationStatus === 'pending' && (
-                      <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg">
-                        <Clock className="h-5 w-5" />
-                        <span className="text-sm font-medium">Qualification Pending</span>
-                      </div>
-                    )}
-                    {selectedNomination.qualificationStatus === 'disqualified' && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-red-600 bg-red-50 dark:bg-red-950/30 p-3 rounded-lg">
-                          <XCircle className="h-5 w-5" />
-                          <span className="text-sm font-medium">Disqualified</span>
-                        </div>
-                        {selectedNomination.disqualificationReason && (
-                          <p className="text-xs text-muted-foreground p-2 bg-muted rounded-lg">
-                            <strong>Reason:</strong> {selectedNomination.disqualificationReason}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Actions */}
-                {selectedNomination.status === 'pending_approval' && (
-                  <div className="flex gap-2 pt-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 text-red-600 border-red-200"
-                      onClick={() => handleReject(selectedNomination)}
-                    >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Reject
-                    </Button>
-                    <Button 
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                      onClick={() => handleApprove(selectedNomination)}
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                      Approve
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          )}
-        </SheetContent>
-      </Sheet>
+      {/* Nomination Detail Sheet - Responsive Drawer/Dialog */}
+      {isMobile ? (
+        <Drawer open={showNominationSheet} onOpenChange={setShowNominationSheet}>
+          <DrawerContent className="max-h-[92vh] flex flex-col">
+            <DrawerHeader className="pb-2">
+              <DrawerTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                Nomination Details
+              </DrawerTitle>
+            </DrawerHeader>
+            <DetailContent />
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={showNominationSheet} onOpenChange={setShowNominationSheet}>
+          <DialogContent className="max-h-[85vh] max-w-lg overflow-hidden flex flex-col">
+            <DialogHeader className="pb-2">
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                Nomination Details
+              </DialogTitle>
+            </DialogHeader>
+            <DetailContent />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
