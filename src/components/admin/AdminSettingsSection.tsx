@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings, User, Image, FileText, FolderOpen, Shield, Bell, BookOpen, Lock, Vote } from "lucide-react";
+import { Settings, User, Image, FileText, FolderOpen, Shield, Bell, BookOpen, Lock, Vote, AlertTriangle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Accordion,
@@ -10,9 +10,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
+import { mockAdminProposals, mockMemberRecommendations } from "@/data/communityDemocraticSettingsData";
+import { DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
 
 // Action types for settings module
 type SettingsActionType = "update_constitution" | "change_privacy" | "update_rules" | "enable_feature" | "disable_feature";
@@ -39,6 +42,12 @@ export function AdminSettingsSection({
   onDemocraticPrivacy,
 }: AdminSettingsSectionProps) {
   const { toast } = useToast();
+
+  // Democratic governance stats
+  const pendingProposals = mockAdminProposals.filter((p) => p.status === "pending_approval");
+  const activeOverrides = mockMemberRecommendations.filter(
+    (r) => r.supportPercentage >= DEMOCRATIC_SETTINGS_CONFIG.RECOMMENDATION_THRESHOLD
+  );
 
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
@@ -240,15 +249,15 @@ export function AdminSettingsSection({
                 </Button>
               </div>
 
-              {/* Democratic Privacy Settings */}
-              <Card className="overflow-hidden border-primary/20 bg-primary/5">
-                <CardContent className="p-3">
+              {/* Democratic Governance Status */}
+              <Card className="overflow-hidden border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
+                <CardContent className="p-3 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Vote className="h-4 w-4 text-primary" />
+                      <Vote className="h-4 w-4 text-emerald-600" />
                       <div>
-                        <p className="text-sm font-medium">Democratic Privacy</p>
-                        <p className="text-xs text-muted-foreground">Member-voted settings</p>
+                        <p className="text-sm font-medium">Democratic Governance</p>
+                        <p className="text-xs text-muted-foreground">60% member approval required</p>
                       </div>
                     </div>
                     <Button 
@@ -260,15 +269,44 @@ export function AdminSettingsSection({
                       View Votes
                     </Button>
                   </div>
+
+                  {/* Status Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    {pendingProposals.length > 0 && (
+                      <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        {pendingProposals.length} Pending Approval
+                      </Badge>
+                    )}
+                    {activeOverrides.length > 0 && (
+                      <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                        <Users className="h-3 w-3 mr-1" />
+                        {activeOverrides.length} Member Override
+                      </Badge>
+                    )}
+                    {pendingProposals.length === 0 && activeOverrides.length === 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        All settings approved
+                      </Badge>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Authorization Info */}
-              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-                <Lock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  Settings changes require President + Secretary + Legal Adviser
-                </span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Settings changes require President + Secretary + Legal Adviser
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  <span className="text-xs text-amber-700 dark:text-amber-300">
+                    All changes must receive 60% member approval to take effect
+                  </span>
+                </div>
               </div>
             </div>
           </AccordionContent>
