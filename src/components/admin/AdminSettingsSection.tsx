@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings, User, Image, FileText, FolderOpen, Shield, Bell, BookOpen, Lock } from "lucide-react";
+import { Settings, User, Image, FileText, FolderOpen, Shield, Bell, BookOpen, Lock, Vote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Accordion,
@@ -25,6 +25,7 @@ interface AdminSettingsSectionProps {
   onPrivacySettings: () => void;
   onNotificationSettings: () => void;
   onCommunityRules: () => void;
+  onDemocraticPrivacy?: () => void;
 }
 
 export function AdminSettingsSection({
@@ -35,6 +36,7 @@ export function AdminSettingsSection({
   onPrivacySettings,
   onNotificationSettings,
   onCommunityRules,
+  onDemocraticPrivacy,
 }: AdminSettingsSectionProps) {
   const { toast } = useToast();
 
@@ -237,6 +239,29 @@ export function AdminSettingsSection({
                   Notifications
                 </Button>
               </div>
+
+              {/* Democratic Privacy Settings */}
+              <Card className="overflow-hidden border-primary/20 bg-primary/5">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Vote className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">Democratic Privacy</p>
+                        <p className="text-xs text-muted-foreground">Member-voted settings</p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 text-xs"
+                      onClick={onDemocraticPrivacy}
+                    >
+                      View Votes
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Authorization Info */}
               <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">

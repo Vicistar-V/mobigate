@@ -102,3 +102,27 @@ export interface CandidateAnalytics {
   engagementRate: number;
   lastUpdated: Date;
 }
+
+/**
+ * Mobigate platform nomination configuration
+ * Only visible to Mobigate Admin (not Community Admins)
+ */
+export interface MobigateNominationConfig {
+  serviceChargePercent: number; // 15-30%
+  minimumServiceChargePercent: number; // 15
+  maximumServiceChargePercent: number; // 30
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+/**
+ * Calculate total nomination cost including service charge
+ */
+export interface NominationCostBreakdown {
+  nominationFee: number;
+  processingFee: number;
+  serviceCharge: number;
+  totalDebited: number;
+  communityReceives: number;
+  mobigateReceives: number;
+}

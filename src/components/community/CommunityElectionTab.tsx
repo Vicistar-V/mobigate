@@ -10,7 +10,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Menu, Vote } from "lucide-react";
+import { ChevronDown, Menu, Vote, Flag } from "lucide-react";
 import { ElectionVotingCard } from "./elections/ElectionVotingCard";
 import { AnonymousVotingSection } from "./elections/AnonymousVotingSection";
 import { ElectionControlBar } from "./elections/ElectionControlBar";
@@ -52,12 +52,20 @@ export const CommunityElectionTab = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
+      {/* Header with Declare Button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Menu className="w-5 h-5" />
           <h1 className="text-2xl font-bold">Elections & Voting</h1>
         </div>
+        <Button 
+          onClick={() => setShowDeclarationSheet(true)}
+          className="bg-gradient-to-r from-primary to-primary/80 shadow-lg"
+          size="sm"
+        >
+          <Flag className="w-4 h-4 mr-1.5" />
+          Declare for Election
+        </Button>
       </div>
 
       {/* Navigation Tabs */}

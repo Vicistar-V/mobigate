@@ -69,6 +69,9 @@ export function formatMobiAmount(amount: number): string {
   return `M${amount.toLocaleString()}`;
 }
 
+// Alias for convenience
+export const formatMobi = formatMobiAmount;
+
 /**
  * Format local currency amount with symbol
  */
