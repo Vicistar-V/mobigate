@@ -142,29 +142,7 @@ export function AdminCampaignsTab() {
         <StatCard value={stats.ended} label="Ended" color="bg-red-500/10" />
       </div>
 
-      {/* Fee Summary Card */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-3 sm:p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Wallet className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-sm">Campaign Fee Summary</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-background rounded-lg p-2">
-              <p className="text-xs text-muted-foreground">Total Collected</p>
-              <p className="font-bold text-sm text-primary">{formatMobiAmount(campaignStats.totalFees)}</p>
-            </div>
-            <div className="bg-background rounded-lg p-2">
-              <p className="text-xs text-muted-foreground">Community Share</p>
-              <p className="font-bold text-sm text-green-600">{formatMobiAmount(campaignStats.totalCommunityShare)}</p>
-            </div>
-            <div className="bg-background rounded-lg p-2">
-              <p className="text-xs text-muted-foreground">Mobigate Share</p>
-              <p className="font-bold text-sm text-orange-500">{formatMobiAmount(campaignStats.totalMobigateShare)}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Fee Summary removed - shown in Campaign Royalties section */}
 
       {/* Action Bar */}
       <div className="flex gap-2">
