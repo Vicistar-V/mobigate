@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet, Building2, Plus, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { TransactionAuthorizationPanel } from "./TransactionAuthorizationPanel";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface WalletWithdrawDialogProps {
   open: boolean;
@@ -64,7 +65,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
     if (withdrawAmount < minWithdrawal) {
       toast({
         title: "Amount Too Low",
-        description: `Minimum withdrawal amount is M${minWithdrawal.toLocaleString()}`,
+        description: `Minimum withdrawal amount is ${formatMobiAmount(minWithdrawal)} (≈ ${formatLocalAmount(minWithdrawal, "NGN")})`,
         variant: "destructive",
       });
       return;
@@ -94,7 +95,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
     const account = mockBankAccounts.find((acc) => acc.id === selectedAccount);
     toast({
       title: "Withdrawal Successful!",
-      description: `M${parseFloat(amount).toLocaleString()} has been sent to ${account?.bankName}`,
+      description: `${formatMobiAmount(parseFloat(amount))} (≈ ${formatLocalAmount(parseFloat(amount), "NGN")}) has been sent to ${account?.bankName}`,
     });
     onOpenChange(false);
     // Reset
@@ -149,7 +150,8 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
           <div className="space-y-4">
             <Card className="p-4 bg-muted">
               <p className="text-sm text-muted-foreground">Available Balance</p>
-              <p className="text-2xl font-bold">M{walletBalance.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatMobiAmount(walletBalance)}</p>
+              <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(walletBalance, "NGN")}</p>
             </Card>
 
             <div className="space-y-2">
@@ -169,7 +171,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                Minimum withdrawal: M{minWithdrawal.toLocaleString()}
+                Minimum withdrawal: {formatMobiAmount(minWithdrawal)} (≈ {formatLocalAmount(minWithdrawal, "NGN")})
               </p>
             </div>
 
@@ -195,7 +197,8 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
           <div className="space-y-4">
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">Withdrawal Amount</p>
-              <p className="text-2xl font-bold">M{parseFloat(amount).toLocaleString()}</p>
+              <p className="text-2xl font-bold">{formatMobiAmount(parseFloat(amount))}</p>
+              <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(parseFloat(amount), "NGN")}</p>
             </div>
 
             <div className="space-y-2">
@@ -267,7 +270,10 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
             <Card className="p-4 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold text-lg">M{parseFloat(amount).toLocaleString()}</span>
+                <div className="text-right">
+                  <span className="font-bold text-lg">{formatMobiAmount(parseFloat(amount))}</span>
+                  <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(parseFloat(amount), "NGN")}</p>
+                </div>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Bank</span>

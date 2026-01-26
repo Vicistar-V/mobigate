@@ -48,6 +48,7 @@ import {
 import { format, formatDistanceToNow, differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface MinutesDownloadDialogProps {
   open: boolean;
@@ -126,14 +127,14 @@ export const MinutesDownloadDialog = ({
     // Show wallet debit toast first
     toast({
       title: "Payment Processed",
-      description: `M${minutes.downloadFee} debited from your Mobi Wallet.`,
+      description: `${formatMobiAmount(minutes.downloadFee)} (≈ ${formatLocalAmount(minutes.downloadFee, "NGN")}) debited from your Mobi Wallet.`,
     });
 
     // Show community credit toast
     setTimeout(() => {
       toast({
         title: "Community Wallet Credited",
-        description: `M${minutes.downloadFee} credited to Community Wallet from your download.`,
+        description: `${formatMobiAmount(minutes.downloadFee)} credited to Community Wallet from your download.`,
       });
     }, 500);
     
@@ -176,7 +177,7 @@ export const MinutesDownloadDialog = ({
         </Card>
         <Card className="p-3 text-center">
           <Wallet className="h-5 w-5 mx-auto text-primary mb-1" />
-          <div className="text-lg font-bold">M{minutes.downloadFee}</div>
+          <div className="text-lg font-bold">{formatMobiAmount(minutes.downloadFee)}</div>
           <div className="text-xs text-muted-foreground">Download Fee</div>
         </Card>
       </div>
@@ -243,9 +244,12 @@ export const MinutesDownloadDialog = ({
               <Wallet className="h-5 w-5 text-primary" />
               <span className="font-medium">Your Wallet Balance</span>
             </div>
-            <Badge variant="outline" className="text-lg font-bold">
-              M{walletBalance.toLocaleString()}
-            </Badge>
+            <div className="text-right">
+              <Badge variant="outline" className="text-lg font-bold">
+                {formatMobiAmount(walletBalance)}
+              </Badge>
+              <p className="text-[10px] text-muted-foreground">≈ {formatLocalAmount(walletBalance, "NGN")}</p>
+            </div>
           </div>
           {walletBalance < minutes.downloadFee && (
             <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
@@ -269,7 +273,7 @@ export const MinutesDownloadDialog = ({
               htmlFor="terms"
               className="text-sm font-medium leading-normal cursor-pointer"
             >
-              I agree to pay M{minutes.downloadFee} from my wallet
+              I agree to pay {formatMobiAmount(minutes.downloadFee)} from my wallet
             </Label>
             <p className="text-xs text-muted-foreground">
               This fee will be deducted from your community wallet balance.
@@ -290,7 +294,7 @@ export const MinutesDownloadDialog = ({
           onClick={() => setShowConfirmation(true)}
         >
           <Download className="h-4 w-4" />
-          {userDownload ? "Download Again" : `Download Minutes (M${minutes.downloadFee})`}
+          {userDownload ? "Download Again" : `Download Minutes (${formatMobiAmount(minutes.downloadFee)})`}
         </Button>
       )}
 
@@ -327,7 +331,7 @@ export const MinutesDownloadDialog = ({
             <AlertDialogHeader>
               <AlertDialogTitle>Confirm Download</AlertDialogTitle>
               <AlertDialogDescription>
-                M{minutes.downloadFee} will be deducted from your wallet.
+                {formatMobiAmount(minutes.downloadFee)} (≈ {formatLocalAmount(minutes.downloadFee, "NGN")}) will be deducted from your wallet.
                 {canMarkAttendance && " Your attendance will be marked for this meeting."}
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -361,7 +365,7 @@ export const MinutesDownloadDialog = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Download</AlertDialogTitle>
             <AlertDialogDescription>
-              M{minutes.downloadFee} will be deducted from your wallet.
+              {formatMobiAmount(minutes.downloadFee)} (≈ {formatLocalAmount(minutes.downloadFee, "NGN")}) will be deducted from your wallet.
               {canMarkAttendance && " Your attendance will be marked for this meeting."}
             </AlertDialogDescription>
           </AlertDialogHeader>
