@@ -37,10 +37,12 @@ import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
 import { CommunityQuizDialog } from "./CommunityQuizDialog";
 import { MobigateQuizDialog } from "./MobigateQuizDialog";
 import { MemberPrivacyVotingSheet } from "./settings/MemberPrivacyVotingSheet";
+import { CommunitySettingsSheet } from "./settings/CommunitySettingsSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { Vote } from "lucide-react";
+import { Vote, Settings2 } from "lucide-react";
+import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
@@ -85,6 +87,9 @@ export function CommunityMainMenu({
   const [showCommunityQuiz, setShowCommunityQuiz] = useState(false);
   const [showMobigateQuiz, setShowMobigateQuiz] = useState(false);
   const [showPrivacyVoting, setShowPrivacyVoting] = useState(false);
+  const [showCommunitySettings, setShowCommunitySettings] = useState(false);
+
+  const pendingSettingsCount = getPendingProposalsCount();
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -1005,6 +1010,47 @@ export function CommunityMainMenu({
                 </Button>
               </AccordionContent>
             </AccordionItem>
+
+            {/* Community Settings - Democratic Governance */}
+            <AccordionItem value="community-settings" className="border rounded-lg px-3 data-[state=open]:bg-muted/30 border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
+              <AccordionTrigger className="text-base font-semibold">
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-emerald-600" />
+                  Community Settings
+                  {pendingSettingsCount > 0 && (
+                    <Badge variant="destructive" className="ml-auto mr-2 text-[10px] px-1.5">
+                      {pendingSettingsCount} Pending
+                    </Badge>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-2 pt-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-10 transition-colors duration-200 bg-emerald-100/50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50"
+                  onClick={() => {
+                    setShowCommunitySettings(true);
+                    setOpen(false);
+                  }}
+                >
+                  <Settings2 className="h-4 w-4 mr-2 text-emerald-600" />
+                  <span className="text-emerald-700 dark:text-emerald-300 font-medium">View All Settings</span>
+                  {pendingSettingsCount > 0 && (
+                    <Badge className="ml-auto bg-amber-500 text-white text-[10px]">
+                      {pendingSettingsCount}
+                    </Badge>
+                  )}
+                </Button>
+                <div className="px-4 py-2 rounded-lg bg-muted/30 space-y-1">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>60% approval</strong> required for all setting changes
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Members can approve, disapprove & recommend alternatives
+                  </p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         </div>
       </ScrollArea>
@@ -1119,6 +1165,12 @@ export function CommunityMainMenu({
       <MemberPrivacyVotingSheet
         open={showPrivacyVoting}
         onOpenChange={setShowPrivacyVoting}
+      />
+
+      {/* Community Settings Sheet - Democratic Governance */}
+      <CommunitySettingsSheet
+        open={showCommunitySettings}
+        onOpenChange={setShowCommunitySettings}
       />
     </>
   );
