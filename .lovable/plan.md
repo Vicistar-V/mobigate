@@ -1,262 +1,467 @@
 
-# Primary Election Advancement Rules Implementation
+# Community Settings - Democratic Governance System Implementation
 
 ## Overview
 
-This plan implements the new Primary Election advancement rules for the community election system. The rules state:
+This plan implements a comprehensive **Community Settings** section in the Community Menu that enables democratic governance of all community settings. The system follows these core principles:
 
-1. **Automatic Qualification**: Any candidate who secures **25% or more** of votes in Primary Elections automatically qualifies for the General Election
-2. **Maximum Candidates**: General Elections can only accommodate a **maximum of 4** candidates
-3. **Minimum Candidates**: General Elections require a **minimum of 2** candidates with the highest votes
+1. **All settings visible to valid members** for approval/disapproval
+2. **60% threshold** required for settings to become active
+3. **Admins manage settings**, but **members can disapprove and recommend alternatives**
+4. **Member-recommended settings with 60% majority automatically override admin settings**
+5. **Settings changes trigger prompts on all member panels** for approval/disapproval
+
+---
 
 ## Current State Analysis
 
-### Existing Implementation
-- `PrimaryCandidate` type has `advancedToMain: boolean` field
-- `ElectionProcessSettings` has `primaryAdvancementCount` (default: 2) and `primaryThreshold` (default: 20)
-- Mock data currently has 2 candidates advancing (top 2 by votes)
-- UI shows "Advances to Main" badge and green highlighting for advancing candidates
+### Existing Infrastructure
+- `communityPrivacyVoting.ts` - Types for democratic voting on privacy settings
+- `MemberPrivacyVotingSheet.tsx` - Member-facing voting UI for privacy settings only
+- `VotersListPrivacySettings.tsx` - Admin view of voting results
+- `AdminSettingsSection.tsx` - Admin settings management with multi-signature authorization
+- Privacy settings limited to 5 categories (voters list, member list, financial records, meeting minutes, election results)
 
-### Gap Identified
-- No logic for the **25% threshold** rule
-- No validation for the **min 2, max 4** candidate constraints
-- No UI to explain the advancement rules to users
-- Admin management sheet hardcodes 4 finalists without the 25% logic
+### Gaps Requiring Implementation
+1. **No "Community Settings" section in Community Menu** - Only "Member Settings" exists for privacy voting
+2. **No 60% threshold system** - Current system uses 50% majority
+3. **No disapproval mechanism** - Members can only vote, not disapprove admin changes
+4. **No recommendation system** - Members cannot propose alternative settings
+5. **No notification/prompt system** - Members aren't notified of admin setting changes
+6. **Limited setting scope** - Only privacy settings are votable, not all community settings
 
 ---
 
-## Implementation Plan
+## New Types & Data Structures
 
-### Phase 1: Update Types & Configuration
+### File: `src/types/communityDemocraticSettings.ts` (NEW)
 
-**File: `src/types/electionProcesses.ts`**
+```text
+Define comprehensive types for the democratic settings system:
 
-Add new fields to `ElectionProcessSettings`:
-```typescript
-export interface ElectionProcessSettings {
-  // ... existing fields
-  primaryAdvancementMinimum: number; // minimum candidates to advance (default: 2)
-  primaryAdvancementMaximum: number; // maximum candidates to advance (default: 4)
-  primaryAdvancementThreshold: number; // percentage threshold for auto-qualification (default: 25)
-}
+CommunitySettingCategory:
+  - privacy_settings
+  - general_settings
+  - election_settings
+  - finance_settings
+  - membership_settings
+  - posting_settings
+  - meeting_settings
+
+DemocraticSettingStatus:
+  - pending_approval (admin proposed, awaiting 60%)
+  - active (approved by 60%+ members)
+  - disapproved (60%+ members disapproved)
+  - member_override (member recommendation with 60%+ replaced admin setting)
+
+AdminSettingProposal:
+  - proposalId
+  - settingKey
+  - settingCategory
+  - currentValue
+  - proposedValue
+  - proposedBy (admin info)
+  - proposedAt
+  - approvalCount
+  - disapprovalCount
+  - approvalPercentage
+  - disapprovalPercentage
+  - status
+  - effectiveDate
+  - expiresAt (if not approved within X days)
+
+MemberRecommendation:
+  - recommendationId
+  - settingKey
+  - recommendedValue
+  - recommendedBy (member info)
+  - recommendedAt
+  - supportCount
+  - supportPercentage
+  - isActive
+
+MemberSettingVote:
+  - voteId
+  - proposalId / recommendationId
+  - memberId
+  - voteType: 'approve' | 'disapprove'
+  - recommendedAlternative (optional)
+  - votedAt
+  - updatedAt
 ```
 
-Add new fields to `PrimaryCandidate`:
-```typescript
-export interface PrimaryCandidate {
-  // ... existing fields
-  autoQualified: boolean; // true if candidate met 25% threshold
-}
+### File: `src/data/communityDemocraticSettingsData.ts` (NEW)
+
+```text
+Mock data for:
+- All community settings organized by category
+- Pending admin proposals awaiting approval
+- Member recommendations with support counts
+- Vote distribution for each setting
+- Notification queue for member prompts
 ```
 
-### Phase 2: Create Advancement Calculation Utility
+---
 
-**New File: `src/lib/primaryElectionUtils.ts`**
+## UI Components to Create
 
-Create utility functions for calculating advancement:
+### 1. Community Settings Sheet (Member-Facing)
+**File:** `src/components/community/settings/CommunitySettingsSheet.tsx`
+
+```text
+A full-height mobile sheet containing:
+
+HEADER:
+  - "Community Settings" title with Settings icon
+  - Badge showing pending approvals count
+
+SECTIONS (Accordion):
+  1. Pending Admin Changes (with notification badge)
+     - Cards for each pending admin proposal
+     - Approve/Disapprove buttons
+     - "Recommend Alternative" option
+     
+  2. Active Settings by Category
+     - Privacy Settings
+     - General Settings  
+     - Election Settings
+     - Finance Settings
+     - Membership Settings
+     - Posting Settings
+     - Meeting Settings
+     
+  3. Member Recommendations
+     - List of member-proposed alternatives
+     - Support/Unsupport buttons
+     - Progress toward 60% threshold
+
+FOOTER:
+  - Info card explaining 60% threshold rules
+  - "Members' votes determine all settings"
+```
+
+### 2. Admin Setting Proposal Card
+**File:** `src/components/community/settings/AdminSettingProposalCard.tsx`
+
+```text
+Mobile-optimized card for displaying pending admin proposals:
+
+LAYOUT:
+  - Setting name & category badge
+  - Current value vs Proposed value (visual comparison)
+  - Proposed by admin info + timestamp
+  - Approval progress bar (needs 60%)
+  - Disapproval count
+  
+ACTIONS:
+  - Approve button (green)
+  - Disapprove button (red)
+  - "Recommend Alternative" button (opens recommendation dialog)
+```
+
+### 3. Recommend Alternative Dialog
+**File:** `src/components/community/settings/RecommendAlternativeDialog.tsx`
+
+```text
+Dialog/Drawer for members to recommend alternative settings:
+
+CONTENT:
+  - Current setting value (read-only)
+  - Admin's proposed value (read-only)
+  - Input for member's recommended value
+  - Reason for recommendation (optional textarea)
+  
+ACTIONS:
+  - Submit Recommendation
+  - Cancel
+```
+
+### 4. Member Recommendations List
+**File:** `src/components/community/settings/MemberRecommendationsList.tsx`
+
+```text
+List of member-proposed alternatives:
+
+EACH ITEM:
+  - Setting name
+  - Recommended value
+  - Recommender info
+  - Support count + progress toward 60%
+  - Support/Unsupport toggle button
+  
+SPECIAL HANDLING:
+  - If recommendation reaches 60%, highlight with "Majority Reached" badge
+  - Show countdown if close to threshold
+```
+
+### 5. Settings Change Notification Banner
+**File:** `src/components/community/settings/SettingsChangeNotificationBanner.tsx`
+
+```text
+Sticky banner for pending approval prompts:
+
+DISPLAY:
+  - Alert icon + "X Settings Pending Your Approval"
+  - "Review Now" button
+  
+BEHAVIOR:
+  - Appears when user has unreviewed admin proposals
+  - Dismisses after user views Community Settings
+  - Re-appears for new proposals
+```
+
+### 6. Community Settings Admin View
+**File:** `src/components/admin/settings/CommunitySettingsAdminView.tsx`
+
+```text
+Enhanced admin settings panel showing:
+
+FOR EACH SETTING:
+  - Current value (with member approval status)
+  - Edit button (triggers multi-sig + member approval flow)
+  - Member approval percentage
+  - Active member recommendations
+  
+WARNING CARD:
+  - "Settings changes require 60% member approval to take effect"
+  - "Member recommendations with 60% support automatically override"
+```
+
+---
+
+## Integration Points
+
+### 1. Add to Community Menu
+**File:** `src/components/community/CommunityMainMenu.tsx`
+
+```text
+ADD new AccordionItem "Community Settings" as LAST item:
+
+Position: After "Mobi-Merchant" section (line ~1007)
+
+Content:
+  - "View All Settings" button → opens CommunitySettingsSheet
+  - Badge showing pending approval count
+  - "How Settings Work" info text
+
+State:
+  - Add showCommunitySettings state
+  - Add CommunitySettingsSheet to dialog renders
+```
+
+### 2. Add Notification Banner to Community Page
+**File:** `src/pages/Community.tsx` or `src/pages/CommunityDetail.tsx`
+
+```text
+Add SettingsChangeNotificationBanner component:
+  - Shows when member has pending setting approvals
+  - Positioned below header or as floating banner
+```
+
+### 3. Update Admin Settings Section
+**File:** `src/components/admin/AdminSettingsSection.tsx`
+
+```text
+Modify to integrate democratic approval:
+  - Show approval status for each setting
+  - Add "Pending Approval" badges
+  - Show member override warnings
+  - Link to view member recommendations
+```
+
+---
+
+## Logic & Calculation Utilities
+
+### File: `src/lib/democraticSettingsUtils.ts` (NEW)
 
 ```typescript
-interface AdvancementResult {
-  advancingCandidates: PrimaryCandidate[];
-  autoQualifiedCount: number;
-  topVoteCount: number;
-  totalAdvancing: number;
-  advancementReason: Map<string, 'auto_qualified' | 'top_votes'>;
-}
+// Core calculation functions:
 
 /**
- * Calculate which candidates advance from Primary to General Election
- * 
- * Rules:
- * 1. Candidates with ≥25% of votes automatically qualify
- * 2. Maximum 4 candidates can advance
- * 3. Minimum 2 candidates must advance (fill with top vote-getters)
- * 4. If more than 4 auto-qualify, take top 4 by votes
+ * Calculate if setting has reached 60% approval
  */
-export function calculateAdvancingCandidates(
-  candidates: PrimaryCandidate[],
-  config: {
-    autoQualifyThreshold: number; // default: 25
-    minimumAdvancing: number; // default: 2
-    maximumAdvancing: number; // default: 4
-  }
-): AdvancementResult
+function hasReached60PercentApproval(
+  approvalCount: number, 
+  totalValidMembers: number
+): boolean
 
 /**
- * Get advancement status text for a candidate
+ * Calculate if setting has reached 60% disapproval
  */
-export function getAdvancementReason(
-  candidate: PrimaryCandidate,
-  result: AdvancementResult
-): string // e.g., "Auto-qualified (34.2%)" or "Top 4 by votes"
+function hasReached60PercentDisapproval(
+  disapprovalCount: number, 
+  totalValidMembers: number
+): boolean
+
+/**
+ * Get winning recommendation (highest support among 60%+ recommendations)
+ */
+function getWinningRecommendation(
+  recommendations: MemberRecommendation[], 
+  totalValidMembers: number
+): MemberRecommendation | null
+
+/**
+ * Determine final setting value based on votes
+ */
+function determineFinalSettingValue(
+  adminProposal: AdminSettingProposal,
+  recommendations: MemberRecommendation[],
+  totalValidMembers: number
+): { value: any; source: 'admin' | 'member_recommendation' | 'unchanged' }
+
+/**
+ * Get all settings requiring member attention
+ */
+function getPendingSettingsForMember(
+  memberId: string,
+  proposals: AdminSettingProposal[]
+): AdminSettingProposal[]
 ```
-
-### Phase 3: Update Mock Data
-
-**File: `src/data/electionProcessesData.ts`**
-
-Update mock data to reflect the new rules:
-
-1. Update `mockPrimaryElections` candidates to include `autoQualified` field
-2. Apply the 25% rule to the existing data:
-   - Paulson (42.3%) - Auto-qualified ✅
-   - Jerome (34.2%) - Auto-qualified ✅
-   - Emmanuel (15.4%) - Does NOT meet 25%, but needs to check if we need more candidates
-   - Daniel (8.1%) - Does NOT qualify
-
-3. Update `mockElectionProcessSettings` with new fields:
-```typescript
-primaryAdvancementMinimum: 2,
-primaryAdvancementMaximum: 4,
-primaryAdvancementThreshold: 25,
-```
-
-### Phase 4: Update Admin Primary Elections Section UI
-
-**File: `src/components/admin/election/AdminPrimaryElectionsSection.tsx`**
-
-1. Import the new utility functions
-2. Update candidate cards to show advancement reason:
-   - Green badge: "Auto-Qualified (42.3%)" for candidates ≥25%
-   - Amber badge: "Advances (Top 4)" for candidates who advance by position
-   - No badge for candidates who don't advance
-
-3. Add info card explaining the rules:
-```text
-📋 Advancement Rules
-• ≥25% votes = Auto-qualifies for General Election
-• Maximum 4 candidates advance
-• Minimum 2 candidates required
-```
-
-### Phase 5: Update Admin Primary Management Sheet
-
-**File: `src/components/admin/election/AdminPrimaryManagementSheet.tsx`**
-
-1. Update the info card explaining the threshold:
-```text
-Primary Advancement Rules:
-• Candidates with 25%+ votes automatically qualify
-• Maximum 4 candidates can advance to General Election
-• Minimum 2 candidates required for General Election
-```
-
-2. Update the candidate selection logic:
-   - Auto-select candidates who meet 25% threshold
-   - Allow manual selection for remaining slots (up to max 4)
-   - Prevent reducing below minimum 2
-
-3. Add visual indicators:
-   - ⭐ Auto-Qualified badge for ≥25% candidates
-   - Checkbox for manual selection of remaining slots
-   - Progress indicator: "2/4 candidates advancing (2 auto-qualified)"
-
-### Phase 6: Update Primary Election Detail Sheet
-
-**File: `src/components/admin/election/AdminPrimaryElectionsSection.tsx`** (detail sheet section)
-
-1. Add advancement threshold line at 25% on progress bars
-2. Update badges to differentiate:
-   - "🏆 Auto-Qualified" (green) - ≥25%
-   - "📊 Advances to Main" (amber) - by position
-3. Add footer summary:
-   - "2 candidates auto-qualified (≥25%)"
-   - "Total advancing to General Election: 2"
 
 ---
 
-## Technical Details
+## Notification System
 
-### Advancement Calculation Algorithm
+### Member Prompt Behavior
 
-```typescript
-function calculateAdvancingCandidates(candidates, config) {
-  const { autoQualifyThreshold, minimumAdvancing, maximumAdvancing } = config;
-  
-  // Sort by votes (descending)
-  const sorted = [...candidates].sort((a, b) => b.votes - a.votes);
-  
-  // Step 1: Find auto-qualified candidates (≥25%)
-  const autoQualified = sorted.filter(c => c.percentage >= autoQualifyThreshold);
-  
-  // Step 2: If more than max auto-qualify, take top by votes
-  if (autoQualified.length > maximumAdvancing) {
-    return autoQualified.slice(0, maximumAdvancing);
-  }
-  
-  // Step 3: If auto-qualified meets or exceeds minimum, use them (up to max)
-  if (autoQualified.length >= minimumAdvancing) {
-    return autoQualified.slice(0, maximumAdvancing);
-  }
-  
-  // Step 4: Fill remaining slots from top vote-getters
-  const remaining = sorted.filter(c => !autoQualified.includes(c));
-  const slotsToFill = minimumAdvancing - autoQualified.length;
-  
-  return [...autoQualified, ...remaining.slice(0, slotsToFill)];
-}
-```
+1. **When Admin Changes Setting:**
+   - System creates `AdminSettingProposal` with `pending_approval` status
+   - All valid members receive notification
+   - Setting does NOT take effect until 60% approve
 
-### Example Scenarios
+2. **Member Reviews Setting:**
+   - Can Approve (adds to approval count)
+   - Can Disapprove (adds to disapproval count)
+   - Can Recommend Alternative (creates `MemberRecommendation`)
 
-**Scenario 1: Current Mock Data (President General)**
-- Paulson: 42.3% → Auto-qualified ✅
-- Jerome: 34.2% → Auto-qualified ✅
-- Emmanuel: 15.4% → Does NOT meet 25%
-- Daniel: 8.1% → Does NOT meet 25%
+3. **60% Approval Reached:**
+   - Setting becomes `active`
+   - Applied to both Admin Panel and Member Panels
+   - Notification sent: "Setting X has been approved"
 
-Result: 2 candidates advance (both auto-qualified)
+4. **60% Disapproval Reached:**
+   - If recommendations exist, the one with highest 60%+ support wins
+   - Setting becomes `member_override`
+   - Admin setting is replaced
+   - Notification sent: "Members have overridden admin setting"
 
-**Scenario 2: Only 1 candidate meets 25%**
-- Candidate A: 45% → Auto-qualified ✅
-- Candidate B: 20% → Top vote-getter (fills minimum)
-- Candidate C: 18%
-- Candidate D: 17%
-
-Result: 2 candidates advance (1 auto + 1 top)
-
-**Scenario 3: 5 candidates meet 25%**
-- All 5 candidates have ≥25%
-- Take top 4 by votes
-
-Result: 4 candidates advance (capped at maximum)
+5. **Disapproval Without Recommendation:**
+   - Setting remains unchanged (current value persists)
+   - Admin can propose new value
 
 ---
 
-## Files to Create
+## Settings Categories & Scope
+
+### Complete Settings Coverage
+
+| Category | Settings Included |
+|----------|-------------------|
+| **Privacy** | Community finances, member financial status, complaints, meeting recordings, general posts, member comments |
+| **General** | Handover time, account manager, download fees, access fees, complaint box fee, posting fee |
+| **Election** | Who can vote, view results, view accredited voters, download resources |
+| **Membership** | Who can add members, approve new members, remove/suspend/block |
+| **Posting** | Who can post, edit/pause/delete/approve content |
+| **Meeting** | Attendance register, meeting schedules, frequency |
+| **Promotion** | Community suggestion visibility, community visibility, guest access |
+
+---
+
+## UI/UX Mobile-First Design
+
+### Community Settings Sheet Layout
+
+```text
++--------------------------------+
+|  < Community Settings      X  |
+|  [3 Pending Approvals badge]  |
++--------------------------------+
+|                                |
+|  [!] PENDING ADMIN CHANGES (3) |
+|  +----------------------------+|
+|  | Privacy Setting Change     ||
+|  | Current: Valid Members     ||
+|  | → Proposed: All Members    ||
+|  | [====60%====     ] 45%    ||
+|  | [Approve] [Disapprove]     ||
+|  +----------------------------+|
+|                                |
+|  v ACTIVE SETTINGS             |
+|    > Privacy Settings          |
+|    > General Settings          |
+|    > Election Settings         |
+|    > Finance Settings          |
+|    > Membership Settings       |
+|                                |
+|  v MEMBER RECOMMENDATIONS (2)  |
+|  +----------------------------+|
+|  | Meeting Download Fee: M0   ||
+|  | By: John Doe | 52% support ||
+|  | [Support] [Unsupport]      ||
+|  +----------------------------+|
+|                                |
+|  +----------------------------+|
+|  | ℹ How Settings Work        ||
+|  | • 60% approval required    ||
+|  | • Members can recommend    ||
+|  | • Majority wins            ||
+|  +----------------------------+|
++--------------------------------+
+```
+
+---
+
+## Files to Create (Summary)
 
 | File | Purpose |
 |------|---------|
-| `src/lib/primaryElectionUtils.ts` | Advancement calculation utility functions |
+| `src/types/communityDemocraticSettings.ts` | Type definitions for democratic governance |
+| `src/data/communityDemocraticSettingsData.ts` | Mock data for all settings and proposals |
+| `src/lib/democraticSettingsUtils.ts` | Calculation and utility functions |
+| `src/components/community/settings/CommunitySettingsSheet.tsx` | Main member-facing settings sheet |
+| `src/components/community/settings/AdminSettingProposalCard.tsx` | Card for pending admin proposals |
+| `src/components/community/settings/RecommendAlternativeDialog.tsx` | Dialog for member recommendations |
+| `src/components/community/settings/MemberRecommendationsList.tsx` | List of member recommendations |
+| `src/components/community/settings/SettingsChangeNotificationBanner.tsx` | Notification banner component |
+| `src/components/community/settings/ActiveSettingsList.tsx` | List of active settings by category |
+| `src/components/admin/settings/CommunitySettingsAdminView.tsx` | Enhanced admin settings view |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/types/electionProcesses.ts` | Add new config fields and `autoQualified` to PrimaryCandidate |
-| `src/data/electionProcessesData.ts` | Update mock data with new fields |
-| `src/components/admin/election/AdminPrimaryElectionsSection.tsx` | Update UI with advancement rules |
-| `src/components/admin/election/AdminPrimaryManagementSheet.tsx` | Update management UI with rules |
+| `src/components/community/CommunityMainMenu.tsx` | Add "Community Settings" accordion section |
+| `src/components/admin/AdminSettingsSection.tsx` | Add approval status indicators |
+| `src/types/communityPrivacyVoting.ts` | Extend to support 60% threshold |
 
 ---
 
-## Mobile-First UI Considerations
+## Implementation Order
 
-- Compact badge display: "25%+ ✓" instead of full text on mobile
-- Stacked layout for advancement reason below candidate name
-- Touch-friendly selection checkboxes (min 44px)
-- Progress bar with 25% threshold marker
-- Collapsible rules info card
+1. **Phase 1: Types & Data**
+   - Create type definitions
+   - Create mock data with sample proposals
+   - Create utility functions
 
----
+2. **Phase 2: Core Components**
+   - CommunitySettingsSheet (main container)
+   - AdminSettingProposalCard
+   - ActiveSettingsList
+   - MemberRecommendationsList
 
-## Verification Checklist
+3. **Phase 3: Interactive Components**
+   - RecommendAlternativeDialog
+   - Vote handling logic
+   - Progress calculations
 
-After implementation, verify:
-- [ ] Candidates with ≥25% show "Auto-Qualified" badge
-- [ ] Maximum 4 candidates can advance regardless of 25% count
-- [ ] Minimum 2 candidates advance even if none meet 25%
-- [ ] Progress bars show 25% threshold line
-- [ ] Admin management sheet explains rules clearly
-- [ ] Advancement calculation works for all edge cases
-- [ ] Mock data correctly reflects new rules
+4. **Phase 4: Integration**
+   - Add to CommunityMainMenu
+   - Update AdminSettingsSection
+   - Add notification banner
+
+5. **Phase 5: Polish**
+   - Mobile optimization
+   - Animation/transitions
+   - Edge case handling
