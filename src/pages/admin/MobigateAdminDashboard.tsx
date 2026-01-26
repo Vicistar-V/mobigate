@@ -21,7 +21,8 @@ import {
 } from "lucide-react";
 import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
-import { formatMobi } from "@/lib/mobiCurrencyTranslation";
+import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
 // Mock platform stats
 const platformStats = {
@@ -128,8 +129,12 @@ export default function MobigateAdminDashboard() {
                       <div className="flex items-center gap-2 mb-2">
                         <Wallet className="h-4 w-4 text-emerald-500" />
                         <span className="text-xs text-muted-foreground">Revenue</span>
+                        <MobiExplainerTooltip size="sm" />
                       </div>
                       <p className="text-2xl font-bold">{formatMobi(platformStats.platformRevenue)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
+                      </p>
                       <p className="text-xs text-emerald-600">+12.5% this month</p>
                     </CardContent>
                   </Card>
@@ -214,7 +219,10 @@ export default function MobigateAdminDashboard() {
                           <p className="font-bold text-sm text-primary">
                             {formatMobi(community.revenue)}
                           </p>
-                          <Badge variant="secondary" className="text-xs">
+                          <p className="text-xs text-muted-foreground">
+                            ≈ {formatLocalAmount(community.revenue, "NGN")}
+                          </p>
+                          <Badge variant="secondary" className="text-xs mt-1">
                             {community.elections} elections
                           </Badge>
                         </div>
@@ -283,9 +291,15 @@ export default function MobigateAdminDashboard() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-muted-foreground">Total Platform Revenue</p>
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs text-muted-foreground">Total Platform Revenue</p>
+                          <MobiExplainerTooltip size="sm" />
+                        </div>
                         <p className="text-3xl font-bold text-emerald-600">
                           {formatMobi(platformStats.platformRevenue)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
                         </p>
                       </div>
                       <div className="flex items-center gap-1 text-emerald-600">
@@ -306,7 +320,12 @@ export default function MobigateAdminDashboard() {
                       <div key={index} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">{item.source}</span>
-                          <span className="font-medium">{formatMobi(item.amount)}</span>
+                          <div className="text-right">
+                            <span className="font-medium">{formatMobi(item.amount)}</span>
+                            <p className="text-xs text-muted-foreground">
+                              ≈ {formatLocalAmount(item.amount, "NGN")}
+                            </p>
+                          </div>
                         </div>
                         <div className="relative h-2 bg-muted rounded-full overflow-hidden">
                           <div
@@ -332,10 +351,12 @@ export default function MobigateAdminDashboard() {
                       <div className="p-3 bg-muted/30 rounded-lg">
                         <p className="text-xs text-muted-foreground">This Month</p>
                         <p className="font-bold text-emerald-600">{formatMobi(2800000)}</p>
+                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2800000, "NGN")}</p>
                       </div>
                       <div className="p-3 bg-muted/30 rounded-lg">
                         <p className="text-xs text-muted-foreground">Last Month</p>
                         <p className="font-bold">{formatMobi(2490000)}</p>
+                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2490000, "NGN")}</p>
                       </div>
                       <div className="p-3 bg-muted/30 rounded-lg">
                         <p className="text-xs text-muted-foreground">Growth</p>
@@ -359,24 +380,36 @@ export default function MobigateAdminDashboard() {
                         <p className="font-medium text-sm">Service Charges</p>
                         <p className="text-xs text-muted-foreground">From nomination fees</p>
                       </div>
-                      <p className="font-bold text-primary">{formatMobi(4500000)}</p>
+                      <div className="text-right">
+                        <p className="font-bold text-primary">{formatMobi(4500000)}</p>
+                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(4500000, "NGN")}</p>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                       <div>
                         <p className="font-medium text-sm">Campaign Royalties</p>
                         <p className="text-xs text-muted-foreground">40% platform share</p>
                       </div>
-                      <p className="font-bold text-primary">{formatMobi(3200000)}</p>
+                      <div className="text-right">
+                        <p className="font-bold text-primary">{formatMobi(3200000)}</p>
+                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(3200000, "NGN")}</p>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                       <div>
                         <p className="font-medium text-sm">Ad Revenue</p>
                         <p className="text-xs text-muted-foreground">Banner & promoted content</p>
                       </div>
-                      <p className="font-bold text-primary">{formatMobi(2800000)}</p>
+                      <div className="text-right">
+                        <p className="font-bold text-primary">{formatMobi(2800000)}</p>
+                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2800000, "NGN")}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Currency Info Banner */}
+                <MobiCurrencyInfoBanner currencyCode="NGN" />
               </div>
             </ScrollArea>
           </TabsContent>

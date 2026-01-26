@@ -28,11 +28,13 @@ import {
   Users,
   AlertCircle,
   CheckCircle2,
+  Globe,
 } from "lucide-react";
 import { nominationFeeStructures } from "@/data/nominationFeesData";
 import { NominationFeeStructure } from "@/types/nominationProcess";
-import { formatMobi } from "@/lib/mobiCurrencyTranslation";
+import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { ServiceChargeConfigCard } from "./ServiceChargeConfigCard";
+import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
 interface EditFeeDialogProps {
   open: boolean;
@@ -92,15 +94,24 @@ function EditFeeDialog({ open, onOpenChange, office, onSave }: EditFeeDialogProp
           <div className="bg-muted/30 p-3 rounded-lg space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Nomination Fee:</span>
-              <span>{formatMobi(newFee)}</span>
+              <div className="text-right">
+                <span>{formatMobi(newFee)}</span>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(newFee, "NGN")}</p>
+              </div>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Processing (5%):</span>
-              <span>{formatMobi(processingFee)}</span>
+              <div className="text-right">
+                <span>{formatMobi(processingFee)}</span>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(processingFee, "NGN")}</p>
+              </div>
             </div>
             <div className="flex justify-between font-bold pt-2 border-t">
               <span>Total:</span>
-              <span>{formatMobi(totalFee)}</span>
+              <div className="text-right">
+                <span>{formatMobi(totalFee)}</span>
+                <p className="text-xs font-normal text-muted-foreground">≈ {formatLocalAmount(totalFee, "NGN")}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -230,11 +241,19 @@ export function NominationFeeSettingsSection() {
                           <p className="text-xs text-muted-foreground mt-0.5">
                             Fee: {formatMobi(office.feeInMobi)} + {formatMobi(office.processingFee)} processing
                           </p>
+                          <p className="text-xs text-muted-foreground">
+                            ≈ {formatLocalAmount(office.feeInMobi + office.processingFee, "NGN")}
+                          </p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="font-bold text-primary">
-                            {formatMobi(office.totalFee)}
-                          </span>
+                          <div className="text-right">
+                            <span className="font-bold text-primary">
+                              {formatMobi(office.totalFee)}
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              ≈ {formatLocalAmount(office.totalFee, "NGN")}
+                            </p>
+                          </div>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -275,6 +294,9 @@ export function NominationFeeSettingsSection() {
           </ul>
         </div>
       </div>
+
+      {/* Currency Info Banner */}
+      <MobiCurrencyInfoBanner currencyCode="NGN" />
     </div>
   );
 }

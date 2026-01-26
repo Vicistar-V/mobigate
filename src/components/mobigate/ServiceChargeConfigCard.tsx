@@ -13,8 +13,10 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
+  Globe,
 } from "lucide-react";
-import { formatMobi } from "@/lib/mobiCurrencyTranslation";
+import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { MobiExplainerTooltip } from "@/components/common/MobiExplainerTooltip";
 
 interface ServiceChargeConfigCardProps {
   currentRate: number;
@@ -94,21 +96,33 @@ export function ServiceChargeConfigCard({
 
         {/* Preview Calculation */}
         <div className="space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">Preview Calculation</p>
+          <div className="flex items-center gap-1">
+            <p className="text-sm font-medium text-muted-foreground">Preview Calculation</p>
+            <MobiExplainerTooltip size="sm" />
+          </div>
           
           <div className="bg-muted/50 rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Nomination Fee:</span>
-              <span className="font-medium">{formatMobi(exampleFee)}</span>
+              <div className="text-right">
+                <span className="font-medium">{formatMobi(exampleFee)}</span>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(exampleFee, "NGN")}</p>
+              </div>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Service Charge ({rate}%):</span>
-              <span className="font-medium text-amber-600">{formatMobi(serviceCharge)}</span>
+              <div className="text-right">
+                <span className="font-medium text-amber-600">{formatMobi(serviceCharge)}</span>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(serviceCharge, "NGN")}</p>
+              </div>
             </div>
             <Separator />
             <div className="flex items-center justify-between text-base font-bold">
               <span>Total Debited:</span>
-              <span className="text-primary">{formatMobi(totalDebited)}</span>
+              <div className="text-right">
+                <span className="text-primary">{formatMobi(totalDebited)}</span>
+                <p className="text-xs font-normal text-muted-foreground">≈ {formatLocalAmount(totalDebited, "NGN")}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -123,6 +137,7 @@ export function ServiceChargeConfigCard({
             <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
               {formatMobi(exampleFee)}
             </p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-500">≈ {formatLocalAmount(exampleFee, "NGN")}</p>
             <p className="text-xs text-emerald-600 dark:text-emerald-500">Nomination Fee</p>
           </div>
           
@@ -134,6 +149,7 @@ export function ServiceChargeConfigCard({
             <p className="text-lg font-bold text-amber-700 dark:text-amber-400">
               {formatMobi(serviceCharge)}
             </p>
+            <p className="text-xs text-amber-600 dark:text-amber-500">≈ {formatLocalAmount(serviceCharge, "NGN")}</p>
             <p className="text-xs text-amber-600 dark:text-amber-500">Service Charge</p>
           </div>
         </div>

@@ -15,14 +15,17 @@ import {
   MousePointer,
   MessageSquare,
   PieChart,
-  Receipt
+  Receipt,
+  Globe
 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { EnhancedCampaign } from "@/types/campaignSystem";
 import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
+import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
 import { campaignAudienceOptions } from "@/data/campaignSystemData";
+import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
 interface CampaignRoyaltyDetailSheetProps {
   open: boolean;
@@ -117,23 +120,33 @@ export function CampaignRoyaltyDetailSheet({
           <div className="flex items-center gap-2">
             <Wallet className="h-4 w-4 text-primary" />
             <h4 className="font-semibold text-sm">Fee Breakdown</h4>
+            <MobiExplainerTooltip size="sm" />
           </div>
           
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Base Fee ({campaign.durationDays} days)</span>
-              <span>{formatMobiAmount(campaign.baseFee)}</span>
+              <div className="text-right">
+                <span>{formatMobiAmount(campaign.baseFee)}</span>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.baseFee, "NGN")}</p>
+              </div>
             </div>
             {campaign.audiencePremium > 0 && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Audience Premium</span>
-                <span>+{formatMobiAmount(campaign.audiencePremium)}</span>
+                <div className="text-right">
+                  <span>+{formatMobiAmount(campaign.audiencePremium)}</span>
+                  <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.audiencePremium, "NGN")}</p>
+                </div>
               </div>
             )}
             <Separator />
             <div className="flex justify-between font-bold">
               <span>Total Fee Paid</span>
-              <span className="text-primary">{formatMobiAmount(campaign.totalFeeInMobi)}</span>
+              <div className="text-right">
+                <span className="text-primary">{formatMobiAmount(campaign.totalFeeInMobi)}</span>
+                <p className="text-xs font-normal text-muted-foreground">≈ {formatLocalAmount(campaign.totalFeeInMobi, "NGN")}</p>
+              </div>
             </div>
           </div>
 
@@ -160,9 +173,12 @@ export function CampaignRoyaltyDetailSheet({
                 <div className="w-3 h-3 rounded-full bg-green-500" />
                 <span className="text-sm">Community Wallet (60%)</span>
               </div>
-              <span className="font-bold text-green-600">
-                {formatMobiAmount(campaign.communityShare)}
-              </span>
+              <div className="text-right">
+                <span className="font-bold text-green-600">
+                  {formatMobiAmount(campaign.communityShare)}
+                </span>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.communityShare, "NGN")}</p>
+              </div>
             </div>
             
             <div className="flex justify-between items-center p-2 bg-background rounded-lg">
@@ -170,9 +186,12 @@ export function CampaignRoyaltyDetailSheet({
                 <div className="w-3 h-3 rounded-full bg-blue-500" />
                 <span className="text-sm">Mobigate Account (40%)</span>
               </div>
-              <span className="font-bold text-blue-600">
-                {formatMobiAmount(campaign.mobigateShare)}
-              </span>
+              <div className="text-right">
+                <span className="font-bold text-blue-600">
+                  {formatMobiAmount(campaign.mobigateShare)}
+                </span>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.mobigateShare, "NGN")}</p>
+              </div>
             </div>
           </div>
 
@@ -218,6 +237,9 @@ export function CampaignRoyaltyDetailSheet({
           </div>
         </CardContent>
       </Card>
+
+      {/* Currency Info Banner */}
+      <MobiCurrencyInfoBanner currencyCode="NGN" />
     </div>
   );
 

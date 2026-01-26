@@ -51,6 +51,7 @@ import {
   Clock,
   Pause,
   Play,
+  Globe,
 } from "lucide-react";
 import {
   mockDuesAndLevies,
@@ -62,6 +63,8 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { MobiExplainerTooltip } from "@/components/common/MobiExplainerTooltip";
 
 interface ManageDuesLeviesDialogProps {
   open: boolean;
@@ -194,7 +197,10 @@ export const ManageDuesLeviesDialog = ({
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {getObligationTypeLabel(obligation.type)} • M{obligation.amount.toLocaleString()}
+                      {getObligationTypeLabel(obligation.type)} • {formatMobiAmount(obligation.amount)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      ≈ {formatLocalAmount(obligation.amount, "NGN")}
                     </p>
                   </div>
                   <Wallet className="h-6 w-6 text-muted-foreground flex-shrink-0" />
@@ -217,11 +223,19 @@ export const ManageDuesLeviesDialog = ({
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
-                    <span>Collection Progress</span>
-                    <span className="font-medium">
-                      M{obligation.totalCollected.toLocaleString()} / M{obligation.totalExpected.toLocaleString()}
+                    <span className="flex items-center gap-1">
+                      Collection Progress
+                      <MobiExplainerTooltip size="sm" />
                     </span>
+                    <div className="text-right">
+                      <span className="font-medium">
+                        {formatMobiAmount(obligation.totalCollected)} / {formatMobiAmount(obligation.totalExpected)}
+                      </span>
+                    </div>
                   </div>
+                  <p className="text-xs text-muted-foreground text-right">
+                    ≈ {formatLocalAmount(obligation.totalCollected, "NGN")} / {formatLocalAmount(obligation.totalExpected, "NGN")}
+                  </p>
                   <Progress value={progressPercentage} className="h-2" />
                   <p className="text-xs text-muted-foreground text-right">{progressPercentage}% collected</p>
                 </div>
