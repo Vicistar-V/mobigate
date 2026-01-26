@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { mockObligations } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface FinancialObligationsDialogProps {
   open: boolean;
@@ -86,7 +87,10 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
               <div>
                 <p className="text-sm text-muted-foreground">Amount</p>
                 <p className="text-xl font-bold text-foreground">
-                  M{obligation.amount.toLocaleString()}
+                  {formatMobiAmount(obligation.amount)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  ≈ {formatLocalAmount(obligation.amount, "NGN")}
                 </p>
               </div>
               <div className="text-right">
@@ -198,10 +202,10 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
                 <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Pending</span>
               </div>
               <p className="text-xl font-bold text-amber-800 dark:text-amber-300">
-                M{totalPending.toLocaleString()}
+                {formatMobiAmount(totalPending)}
               </p>
               <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
-                {pendingObligations.length} item(s)
+                ≈ {formatLocalAmount(totalPending, "NGN")} • {pendingObligations.length} item(s)
               </p>
             </CardContent>
           </Card>
@@ -213,10 +217,10 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
                 <span className="text-sm font-medium text-red-700 dark:text-red-400">Overdue</span>
               </div>
               <p className="text-xl font-bold text-red-800 dark:text-red-300">
-                M{totalOverdue.toLocaleString()}
+                {formatMobiAmount(totalOverdue)}
               </p>
               <p className="text-xs text-red-600 dark:text-red-500 mt-0.5">
-                {overdueObligations.length} item(s)
+                ≈ {formatLocalAmount(totalOverdue, "NGN")} • {overdueObligations.length} item(s)
               </p>
             </CardContent>
           </Card>

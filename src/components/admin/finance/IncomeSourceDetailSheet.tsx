@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 import communityPerson1 from "@/assets/community-person-1.jpg";
 import communityPerson2 from "@/assets/community-person-2.jpg";
@@ -205,9 +206,12 @@ export const IncomeSourceDetailSheet = ({
 
                 <div className="text-right flex-shrink-0">
                   <p className="font-semibold text-sm text-green-600">
-                    +M{payment.amount.toLocaleString()}
+                    +{formatMobiAmount(payment.amount)}
                   </p>
-                  <Badge 
+                  <p className="text-xs text-muted-foreground">
+                    ≈ {formatLocalAmount(payment.amount, "NGN")}
+                  </p>
+                  <Badge
                     className={`text-xs ${
                       payment.status === "completed" 
                         ? "bg-green-500/10 text-green-600" 

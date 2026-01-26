@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface PrimaryCandidate {
   id: string;
@@ -373,7 +374,8 @@ export function AdminPrimaryManagementSheet({
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{candidate.name}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>M{candidate.nominationFee.toLocaleString()}</span>
+                        <span>{formatMobiAmount(candidate.nominationFee)}</span>
+                        <span className="text-muted-foreground/60">(≈ {formatLocalAmount(candidate.nominationFee, "NGN")})</span>
                         <span>•</span>
                         <span>{format(candidate.declarationDate, "MMM d")}</span>
                       </div>

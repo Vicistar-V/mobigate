@@ -44,6 +44,7 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface AccountStatementsDialogProps {
   open: boolean;
@@ -156,7 +157,10 @@ export const AccountStatementsDialog = ({
             <div>
               <p className="text-xs text-muted-foreground">Total Credits</p>
               <p className="text-lg font-bold text-green-600">
-                M{totals.totalCredits.toLocaleString()}
+                {formatMobiAmount(totals.totalCredits)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ≈ {formatLocalAmount(totals.totalCredits, "NGN")}
               </p>
             </div>
           </div>
@@ -167,7 +171,10 @@ export const AccountStatementsDialog = ({
             <div>
               <p className="text-xs text-muted-foreground">Total Debits</p>
               <p className="text-lg font-bold text-red-600">
-                M{totals.totalDebits.toLocaleString()}
+                {formatMobiAmount(totals.totalDebits)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ≈ {formatLocalAmount(totals.totalDebits, "NGN")}
               </p>
             </div>
           </div>
@@ -299,10 +306,13 @@ export const AccountStatementsDialog = ({
                           txn.type === "credit" ? "text-green-600" : "text-red-600"
                         }`}
                       >
-                        {txn.type === "credit" ? "+" : "-"}M{txn.amount.toLocaleString()}
+                        {txn.type === "credit" ? "+" : "-"}{formatMobiAmount(txn.amount)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Bal: M{txn.balance.toLocaleString()}
+                        ≈ {formatLocalAmount(txn.amount, "NGN")}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Bal: {formatMobiAmount(txn.balance)}
                       </p>
                     </div>
                   </div>

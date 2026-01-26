@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { mockFinancialStatus } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface FinancialStatusDialogProps {
   open: boolean;
@@ -139,10 +140,10 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                   <CardContent className="space-y-4">
                     <div className="text-center p-4 bg-yellow-500/10 rounded-lg">
                       <p className="text-3xl font-bold text-yellow-700">
-                        M{status.outstandingBalance.toLocaleString()}
+                        {formatMobiAmount(status.outstandingBalance)}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        (₦{status.outstandingBalance.toLocaleString()}) Amount due
+                        ≈ {formatLocalAmount(status.outstandingBalance, "NGN")} Amount due
                       </p>
                     </div>
                     
@@ -153,7 +154,7 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                       size="lg"
                     >
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Pay Now - M{status.outstandingBalance.toLocaleString()}
+                      Pay Now - {formatMobiAmount(status.outstandingBalance)}
                     </Button>
                   </CardContent>
                 </Card>
@@ -187,13 +188,19 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Total Paid</p>
                       <p className="text-lg font-bold text-green-600">
-                        M{status.totalPaid.toLocaleString()}
+                        {formatMobiAmount(status.totalPaid)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ≈ {formatLocalAmount(status.totalPaid, "NGN")}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Total Due</p>
                       <p className="text-lg font-bold">
-                        M{status.totalDue.toLocaleString()}
+                        {formatMobiAmount(status.totalDue)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ≈ {formatLocalAmount(status.totalDue, "NGN")}
                       </p>
                     </div>
                   </div>
@@ -229,12 +236,12 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
               </div>
             </div>
             <AlertDialogTitle className="text-center">Confirm Payment</AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
+          <AlertDialogDescription className="text-center">
               You are paying{" "}
               <span className="font-bold text-foreground">
-                M{status.outstandingBalance.toLocaleString()}
+                {formatMobiAmount(status.outstandingBalance)}
               </span>{" "}
-              (₦{status.outstandingBalance.toLocaleString()}) to clear your outstanding balance.
+              (≈ {formatLocalAmount(status.outstandingBalance, "NGN")}) to clear your outstanding balance.
               This amount will be debited from your Mobi Wallet.
             </AlertDialogDescription>
           </AlertDialogHeader>
