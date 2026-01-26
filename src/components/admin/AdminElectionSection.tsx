@@ -303,7 +303,7 @@ export function AdminElectionSection({
               <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">
-                  Election actions require President + Secretary + (PRO OR Dir. Socials)
+                  Election actions require President + Secretary + (PRO or Dir. Socials)
                 </span>
               </div>
             </div>
