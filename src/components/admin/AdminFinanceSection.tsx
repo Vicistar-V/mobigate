@@ -15,6 +15,7 @@ import { ManageDuesLeviesDialog } from "./finance/ManageDuesLeviesDialog";
 import { AccountStatementsDialog } from "./finance/AccountStatementsDialog";
 import { MembersFinancialReportsDialog } from "./finance/MembersFinancialReportsDialog";
 import { AdminFinancialAuditDialog } from "./finance/AdminFinancialAuditDialog";
+import { LevyProgressCard } from "./finance/LevyProgressCard";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
@@ -303,6 +304,20 @@ export function AdminFinanceSection({
                   </Button>
                 </div>
               </div>
+              {/* Active Levy Progress */}
+              <LevyProgressCard
+                id="levy-2025-001"
+                name="Annual Dues 2025"
+                year="Fiscal Year 2025"
+                unitPrice={15000}
+                deadline={new Date("2025-03-31")}
+                paidCount={30}
+                totalMembers={50}
+                amountCollected={450000}
+                targetAmount={750000}
+                status="active"
+                onViewDetails={() => setShowDuesLevies(true)}
+              />
 
               {/* Recent Transactions */}
               <Card>

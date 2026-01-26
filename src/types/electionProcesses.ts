@@ -60,6 +60,18 @@ export interface PrimaryCandidate {
   advancedToMain: boolean;
 }
 
+// Primary election trigger configuration
+export interface PrimaryElectionConfig {
+  officeId: string;
+  officeName: string;
+  totalCandidates: number;
+  primaryThreshold: number; // Default: 20 candidates triggers primary
+  advancementSlots: number; // Default: 4 advance to main election
+  requiresPrimary: boolean;
+  primaryStatus: 'not_required' | 'pending' | 'scheduled' | 'ongoing' | 'completed';
+  scheduledDate?: Date;
+}
+
 // Main Election Types
 export interface MainElection {
   id: string;
@@ -110,8 +122,19 @@ export interface ElectionProcessSettings {
   nominationDurationDays: number;
   primaryElectionEnabled: boolean;
   primaryAdvancementCount: number; // how many advance from primary to main
+  primaryThreshold: number; // candidates needed to trigger primary (default: 20)
   minimumNominations: number;
   requireNomineeAcceptance: boolean;
   endorsementThreshold: number;
   votingDurationHours: number;
+  voterChangeTimeMinutes: number; // time allowed to change vote (default: 30)
+}
+
+// Voter transparency settings
+export interface VoterTransparencyConfig {
+  electionId: string;
+  displayMode: 'anonymous' | 'identified';
+  showAccreditationNumbers: boolean;
+  showVoterNames: boolean;
+  antiIntimidationNoticeEnabled: boolean;
 }

@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { Trophy, Crown, Megaphone, Calendar, Users, CheckCircle, Clock, FileText } from "lucide-react";
+import { Trophy, Crown, Megaphone, Calendar, Users, CheckCircle, Clock, FileText, Shield, Eye, EyeOff, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { mockCurrentElection, mockWinnerResults, ElectionWinnerResult } from "@/data/adminElectionData";
 import { useToast } from "@/hooks/use-toast";
 import { WinnerAnnouncementDialog } from "./WinnerAnnouncementDialog";
+import { CertificateOfReturnGenerator } from "./CertificateOfReturnGenerator";
 import { format } from "date-fns";
 
 interface StatCardProps {
@@ -29,6 +33,11 @@ export function AdminWinnersAnnouncementTab() {
   const [results, setResults] = useState<ElectionWinnerResult[]>(mockWinnerResults);
   const [selectedResult, setSelectedResult] = useState<ElectionWinnerResult | null>(null);
   const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
+  const [showCertificateGenerator, setShowCertificateGenerator] = useState(false);
+  
+  // Voter transparency settings
+  const [voterTransparency, setVoterTransparency] = useState<'anonymous' | 'identified'>('anonymous');
+  const [showAntiIntimidationNotice, setShowAntiIntimidationNotice] = useState(true);
 
   const election = mockCurrentElection;
   const announcedCount = results.filter(r => r.announced).length;
@@ -113,11 +122,75 @@ export function AdminWinnersAnnouncementTab() {
           <Megaphone className="h-3.5 w-3.5" />
           Announce All ({pendingCount})
         </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="gap-1.5 text-xs h-8"
+          onClick={() => setShowCertificateGenerator(true)}
+        >
+          <Award className="h-3.5 w-3.5" />
+          Certificates
+        </Button>
         <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
           <FileText className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Generate</span> Report
         </Button>
       </div>
+
+      {/* Voter Transparency Settings */}
+      <Card className="bg-muted/30">
+        <CardContent className="p-3 space-y-3">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            <h4 className="font-semibold text-sm">Voter Transparency Settings</h4>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {voterTransparency === 'anonymous' ? (
+                <EyeOff className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              )}
+              <div>
+                <Label className="text-sm">Display Voter Identity</Label>
+                <p className="text-xs text-muted-foreground">
+                  {voterTransparency === 'anonymous' 
+                    ? 'Show accreditation numbers only'
+                    : 'Show voter names publicly'}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={voterTransparency === 'identified'}
+              onCheckedChange={(checked) => {
+                setVoterTransparency(checked ? 'identified' : 'anonymous');
+                toast({
+                  title: checked ? "Voters Identified" : "Voters Anonymous",
+                  description: checked 
+                    ? "Voter names will be displayed publicly"
+                    : "Only accreditation numbers will be shown"
+                });
+              }}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm">Anti-Intimidation Notice</Label>
+              <p className="text-xs text-muted-foreground">
+                Display notice warning against voter intimidation
+              </p>
+            </div>
+            <Switch
+              checked={showAntiIntimidationNotice}
+              onCheckedChange={setShowAntiIntimidationNotice}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary */}
       <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
@@ -226,6 +299,11 @@ export function AdminWinnersAnnouncementTab() {
         onOpenChange={setShowAnnouncementDialog}
         result={selectedResult}
         onConfirm={handleConfirmAnnouncement}
+      />
+
+      <CertificateOfReturnGenerator
+        open={showCertificateGenerator}
+        onOpenChange={setShowCertificateGenerator}
       />
     </div>
   );

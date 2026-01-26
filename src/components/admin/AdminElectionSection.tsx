@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Vote, Users, CheckCircle, Clock, Trophy, FileText, Settings, ChevronRight, Shield } from "lucide-react";
+import { Vote, Users, CheckCircle, Clock, Trophy, FileText, Settings, ChevronRight, Shield, UserCheck, Coins } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,8 @@ import {
 import { AdminStats, ElectionActivity, formatRelativeTime } from "@/data/adminDashboardData";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
+import { AdminPrimaryManagementSheet } from "./election/AdminPrimaryManagementSheet";
+import { CampaignRoyaltySection } from "./election/CampaignRoyaltySection";
 import { useToast } from "@/hooks/use-toast";
 
 interface ElectionActivityItemProps {
@@ -84,6 +86,10 @@ export function AdminElectionSection({
     type: ElectionActionType;
     details: string;
   } | null>(null);
+  
+  // Primary management state
+  const [showPrimaryManagement, setShowPrimaryManagement] = useState(false);
+  const [showRoyaltySection, setShowRoyaltySection] = useState(false);
 
   const handleAnnounceWithAuth = () => {
     setAuthAction({
@@ -151,6 +157,12 @@ export function AdminElectionSection({
         onAuthorized={handleAuthorizationComplete}
       />
 
+      {/* Primary Election Management Sheet */}
+      <AdminPrimaryManagementSheet
+        open={showPrimaryManagement}
+        onOpenChange={setShowPrimaryManagement}
+      />
+
       <Accordion type="single" collapsible className="w-full max-w-full">
         <AccordionItem value="election" className="border rounded-lg overflow-hidden">
           <AccordionTrigger className="px-4 hover:no-underline max-w-full">
@@ -199,6 +211,26 @@ export function AdminElectionSection({
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Clearances
                       <Badge variant="destructive" className="ml-1 text-xs px-1.5">3</Badge>
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-10 text-sm" 
+                      onClick={() => setShowPrimaryManagement(true)}
+                    >
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Primaries
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-10 text-sm" 
+                      onClick={() => setShowRoyaltySection(true)}
+                    >
+                      <Coins className="h-4 w-4 mr-2" />
+                      Royalties
                     </Button>
                   </div>
                 </CardContent>
