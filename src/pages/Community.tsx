@@ -5,6 +5,9 @@ import { CreateCommunityCard } from "@/components/community/CreateCommunityCard"
 import { CommunityOwnerCard } from "@/components/community/CommunityOwnerCard";
 import { JoinedCommunityRow } from "@/components/community/JoinedCommunityRow";
 import { getOwnedCommunities, getJoinedCommunities } from "@/data/communityData";
+import { SettingsChangeNotificationBanner } from "@/components/community/settings/SettingsChangeNotificationBanner";
+import { CommunitySettingsSheet } from "@/components/community/settings/CommunitySettingsSheet";
+import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
 import {
   Carousel,
   CarouselContent,
@@ -19,10 +22,21 @@ export default function Community() {
   const ownedCommunities = getOwnedCommunities();
   const joinedCommunities = getJoinedCommunities();
   const [communitiesViewMode, setCommunitiesViewMode] = useState<ViewMode>("carousel");
+  const [showCommunitySettings, setShowCommunitySettings] = useState(false);
+  
+  const pendingSettingsCount = getPendingProposalsCount();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      
+      {/* Settings Change Notification Banner */}
+      {pendingSettingsCount > 0 && (
+        <SettingsChangeNotificationBanner
+          pendingCount={pendingSettingsCount}
+          onReviewClick={() => setShowCommunitySettings(true)}
+        />
+      )}
       
       <main className="flex-1 container mx-auto px-4 py-6 space-y-8">
         {/* Section 1: My Communities (Owned) - Carousel/Grid */}
@@ -129,6 +143,12 @@ export default function Community() {
       </main>
 
       <Footer />
+      
+      {/* Community Settings Sheet */}
+      <CommunitySettingsSheet
+        open={showCommunitySettings}
+        onOpenChange={setShowCommunitySettings}
+      />
     </div>
   );
 }

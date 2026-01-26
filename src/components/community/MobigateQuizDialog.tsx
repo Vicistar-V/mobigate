@@ -20,6 +20,7 @@ import {
 import { MobigateQuizPlayDialog } from "./MobigateQuizPlayDialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface MobigateQuizDialogProps {
   open: boolean;
@@ -49,7 +50,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
     if (playerWalletBalance < quiz.stakeAmount) {
       toast({
         title: "Insufficient Balance",
-        description: `You need at least M${quiz.stakeAmount.toLocaleString()} to play.`,
+        description: `You need at least ${formatMobiAmount(quiz.stakeAmount)} (≈ ${formatLocalAmount(quiz.stakeAmount, "NGN")}) to play.`,
         variant: "destructive"
       });
       return;
@@ -63,7 +64,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
     toast({
       title: result.amountWon > 0 ? "🔥 Amazing Win!" : "Game Over",
       description: result.amountWon > 0 
-        ? `You won M${result.amountWon.toLocaleString()} on Mobigate!` 
+        ? `You won ${formatMobiAmount(result.amountWon)} (≈ ${formatLocalAmount(result.amountWon, "NGN")}) on Mobigate!` 
         : "Better luck next time!",
     });
     setShowGamePlay(false);
@@ -120,7 +121,10 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                           <Wallet className="h-4 w-4 text-amber-600" />
                           <span className="text-sm text-amber-700 dark:text-amber-300">Your Wallet</span>
                         </div>
-                        <span className="font-bold text-amber-700 dark:text-amber-300">M{playerWalletBalance.toLocaleString()}</span>
+                        <div className="text-right">
+                          <span className="font-bold text-amber-700 dark:text-amber-300">{formatMobiAmount(playerWalletBalance)}</span>
+                          <p className="text-[10px] text-amber-500">≈ {formatLocalAmount(playerWalletBalance, "NGN")}</p>
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-2 mt-3 pt-2 border-t border-amber-200 dark:border-amber-700">
                         <div className="text-center">
@@ -135,7 +139,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                         </div>
                         <div className="text-center">
                           <p className="text-[10px] text-amber-600">Net Profit</p>
-                          <p className="font-bold text-sm text-green-600">+M{mobigatePlayerStats.netProfit.toLocaleString()}</p>
+                          <p className="font-bold text-sm text-green-600">+{formatMobiAmount(mobigatePlayerStats.netProfit)}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -179,18 +183,20 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                               {quiz.prizePool && (
                                 <div className="p-2 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg text-center border border-amber-200">
                                   <p className="text-[10px] text-amber-600">🏆 Prize Pool</p>
-                                  <p className="font-bold text-lg text-amber-700">M{quiz.prizePool.toLocaleString()}</p>
+                                  <p className="font-bold text-lg text-amber-700">{formatMobiAmount(quiz.prizePool)}</p>
                                 </div>
                               )}
 
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-white dark:bg-background rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">M{quiz.stakeAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-red-600">{formatMobiAmount(quiz.stakeAmount)}</p>
+                                  <p className="text-[9px] text-red-400">≈ {formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
                                 </div>
                                 <div className="p-2 bg-white dark:bg-background rounded-lg text-center border border-green-200 dark:border-green-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-green-600">M{quiz.winningAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-green-600">{formatMobiAmount(quiz.winningAmount)}</p>
+                                  <p className="text-[9px] text-green-400">≈ {formatLocalAmount(quiz.winningAmount, "NGN")}</p>
                                 </div>
                               </div>
 
@@ -258,11 +264,13 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">M{quiz.stakeAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-red-600">{formatMobiAmount(quiz.stakeAmount)}</p>
+                                  <p className="text-[9px] text-red-400">≈ {formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
                                 </div>
                                 <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded-lg text-center border border-green-200 dark:border-green-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-green-600">M{quiz.winningAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-green-600">{formatMobiAmount(quiz.winningAmount)}</p>
+                                  <p className="text-[9px] text-green-400">≈ {formatLocalAmount(quiz.winningAmount, "NGN")}</p>
                                 </div>
                               </div>
 
@@ -307,8 +315,12 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                             </div>
                             <p className="text-xs text-muted-foreground">{quiz.description}</p>
                             {quiz.prizePool && (
-                              <p className="text-xs text-amber-600 font-semibold">🏆 Prize Pool: M{quiz.prizePool.toLocaleString()}</p>
+                              <p className="text-xs text-amber-600 font-semibold">🏆 Prize Pool: {formatMobiAmount(quiz.prizePool)}</p>
                             )}
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>Stake: {formatMobiAmount(quiz.stakeAmount)}</span>
+                              <span className="text-green-600 font-semibold">Win: {formatMobiAmount(quiz.winningAmount)}</span>
+                            </div>
                             <Button variant="outline" size="sm" className="w-full border-amber-300 text-amber-600" disabled>
                               <Clock className="h-4 w-4 mr-2" />
                               Starts {quiz.startDate ? new Date(quiz.startDate).toLocaleDateString() : "Soon"}
@@ -318,62 +330,66 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                       ))}
                     </div>
                   )}
+
+                  {trendingQuizzes.length === 0 && availableQuizzes.length === 0 && upcomingQuizzes.length === 0 && (
+                    <Card>
+                      <CardContent className="p-8 text-center">
+                        <Inbox className="h-12 w-12 mx-auto text-amber-300 mb-3" />
+                        <h3 className="font-semibold text-amber-700">No Mobigate Quizzes Available</h3>
+                        <p className="text-sm text-muted-foreground">Check back soon for global competitions!</p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
 
-                {/* Global Leaderboard Tab */}
+                {/* Leaderboard Tab */}
                 <TabsContent value="leaderboard" className="mt-0 space-y-3">
                   <div className="flex items-center gap-2 mb-4">
-                    <Globe className="h-5 w-5 text-amber-600" />
-                    <h3 className="font-semibold text-amber-700 dark:text-amber-300">Global Champions</h3>
+                    <Trophy className="h-5 w-5 text-amber-600" />
+                    <h3 className="font-semibold text-amber-700 dark:text-amber-300">Global Leaderboard</h3>
                   </div>
                   {mobigateLeaderboard.map((entry) => (
                     <div key={entry.id} className={cn(
                       "flex items-center gap-3 p-3 rounded-lg",
-                      entry.rank === 1 && "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 border-2 border-yellow-300",
+                      entry.rank === 1 && "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 border border-yellow-200",
                       entry.rank === 2 && "bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30 border border-gray-200",
                       entry.rank === 3 && "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200",
                       entry.rank > 3 && "bg-amber-50/50 dark:bg-amber-950/20"
                     )}>
                       <div className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
-                        entry.rank === 1 && "bg-gradient-to-br from-yellow-400 to-amber-500 text-yellow-950",
-                        entry.rank === 2 && "bg-gradient-to-br from-gray-300 to-gray-400 text-gray-700",
-                        entry.rank === 3 && "bg-gradient-to-br from-amber-500 to-orange-600 text-amber-950",
+                        entry.rank === 1 && "bg-yellow-500 text-yellow-950",
+                        entry.rank === 2 && "bg-gray-300 text-gray-700",
+                        entry.rank === 3 && "bg-amber-600 text-amber-950",
                         entry.rank > 3 && "bg-amber-200 text-amber-700"
                       )}>
                         {entry.rank}
                       </div>
                       <Avatar className="h-10 w-10 border-2 border-amber-200">
                         <AvatarImage src={entry.playerAvatar} />
-                        <AvatarFallback className="bg-amber-100 text-amber-700">{entry.playerName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback className="bg-amber-100 text-amber-700">{entry.playerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-sm truncate">{entry.playerName}</p>
-                          <span className="text-sm">{entry.countryFlag}</span>
+                          {entry.countryFlag && <span className="text-sm">{entry.countryFlag}</span>}
                         </div>
-                        <p className="text-xs text-muted-foreground">{entry.questionsCorrect}/10 • {entry.completionTime}</p>
-                        {entry.streak && entry.streak > 0 && (
-                          <p className="text-[10px] text-amber-600 flex items-center gap-1">
-                            <Flame className="h-2.5 w-2.5" /> {entry.streak} win streak
-                          </p>
-                        )}
+                        <p className="text-xs text-muted-foreground">{entry.streak || 0} streak • {entry.questionsCorrect}/10</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-amber-600 text-sm">M{entry.amountWon.toLocaleString()}</p>
+                        <p className="font-bold text-amber-600 text-sm">{formatMobiAmount(entry.amountWon)}</p>
                         <p className="text-[10px] text-muted-foreground">{entry.winningPercentage}% win</p>
                       </div>
                     </div>
                   ))}
                 </TabsContent>
 
-                {/* Statistics Tab */}
+                {/* Stats Tab */}
                 <TabsContent value="stats" className="mt-0 space-y-4">
-                  {/* Your Stats */}
                   <Card className="border-amber-200 dark:border-amber-800">
                     <CardContent className="p-4 space-y-3">
                       <h3 className="font-semibold text-sm flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                        <BarChart3 className="h-4 w-4" />Your Mobigate Quiz Stats
+                        <BarChart3 className="h-4 w-4" />Your Mobigate Stats
                       </h3>
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div className="p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200">
@@ -385,69 +401,31 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                           <p className="text-[10px] text-muted-foreground">Won</p>
                         </div>
                         <div className="p-2 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200">
-                          <p className="font-bold text-lg text-orange-600">{mobigatePlayerStats.partialWins}</p>
-                          <p className="text-[10px] text-muted-foreground">Partial</p>
+                          <p className="font-bold text-lg text-orange-600">{mobigatePlayerStats.currentStreak}</p>
+                          <p className="text-[10px] text-muted-foreground">Streak</p>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-2">
                         <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200">
                           <div className="flex items-center gap-2 mb-1">
-                            <Globe className="h-4 w-4 text-amber-600" />
+                            <Star className="h-4 w-4 text-amber-600" />
+                            <span className="text-xs text-muted-foreground">Best Score</span>
+                          </div>
+                          <p className="font-bold text-lg text-amber-700">{mobigatePlayerStats.bestScore}/10</p>
+                        </div>
+                        <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Medal className="h-4 w-4 text-amber-600" />
                             <span className="text-xs text-muted-foreground">Global Rank</span>
                           </div>
                           <p className="font-bold text-lg text-amber-700">#{mobigatePlayerStats.globalRank}</p>
                         </div>
-                        <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Flame className="h-4 w-4 text-orange-600" />
-                            <span className="text-xs text-muted-foreground">Best Streak</span>
-                          </div>
-                          <p className="font-bold text-lg text-orange-700">{mobigatePlayerStats.longestStreak} wins</p>
-                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Star className="h-4 w-4 text-purple-600" />
-                            <span className="text-xs text-muted-foreground">Favorite</span>
-                          </div>
-                          <p className="font-bold text-sm text-purple-700">{mobigatePlayerStats.favoriteCategory}</p>
-                        </div>
-                        <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Medal className="h-4 w-4 text-blue-600" />
-                            <span className="text-xs text-muted-foreground">Best Score</span>
-                          </div>
-                          <p className="font-bold text-lg text-blue-700">{mobigatePlayerStats.bestScore}/10</p>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between text-sm p-3 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-950/50 dark:to-orange-900/30 rounded-lg border border-amber-200">
-                        <span className="text-amber-700">Net Profit</span>
-                        <span className={cn("font-bold", mobigatePlayerStats.netProfit >= 0 ? "text-green-600" : "text-destructive")}>
-                          {mobigatePlayerStats.netProfit >= 0 ? "+" : ""}M{mobigatePlayerStats.netProfit.toLocaleString()}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Earnings Summary */}
-                  <Card className="border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
-                    <CardContent className="p-4 space-y-3">
-                      <h3 className="font-semibold text-sm flex items-center gap-2 text-amber-700">
-                        <TrendingUp className="h-4 w-4" />Earnings Summary
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="p-3 bg-white dark:bg-background rounded-lg border border-green-200">
-                          <p className="text-xs text-muted-foreground">Total Won</p>
-                          <p className="font-bold text-lg text-green-600">M{mobigatePlayerStats.totalAmountWon.toLocaleString()}</p>
-                        </div>
-                        <div className="p-3 bg-white dark:bg-background rounded-lg border border-red-200">
-                          <p className="text-xs text-muted-foreground">Total Staked</p>
-                          <p className="font-bold text-lg text-red-600">M{mobigatePlayerStats.totalStakePaid.toLocaleString()}</p>
-                        </div>
+                      <div className="flex justify-between text-sm p-3 bg-gradient-to-r from-green-100 to-green-50 dark:from-green-950/50 dark:to-green-900/30 rounded-lg border border-green-200">
+                        <span className="text-green-700">Total Winnings</span>
+                        <span className="font-bold text-green-600">{formatMobiAmount(mobigatePlayerStats.totalAmountWon)}</span>
                       </div>
                     </CardContent>
                   </Card>

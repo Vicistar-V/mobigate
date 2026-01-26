@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface DonationSheetProps {
   open: boolean;
@@ -44,7 +45,7 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
   const getConvertedAmount = () => {
     const amt = parseFloat(amount) || 0;
     if (currency === 'USD') {
-      return `M${(amt * currencyRates.USD_TO_MOBI).toLocaleString()}`;
+      return formatMobiAmount(amt * currencyRates.USD_TO_MOBI);
     } else {
       return `$${(amt * currencyRates.MOBI_TO_USD).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
     }
@@ -53,9 +54,10 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
   const getFormattedAmount = () => {
     const amt = parseFloat(amount) || 0;
     if (currency === 'USD') {
-      return `M${(amt * currencyRates.USD_TO_MOBI).toLocaleString()}`;
+      const mobiAmount = amt * currencyRates.USD_TO_MOBI;
+      return `${formatMobiAmount(mobiAmount)} (≈ ${formatLocalAmount(mobiAmount, "NGN")})`;
     } else {
-      return `M${amt.toLocaleString()}`;
+      return `${formatMobiAmount(amt)} (≈ ${formatLocalAmount(amt, "NGN")})`;
     }
   };
 

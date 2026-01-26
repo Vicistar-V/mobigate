@@ -7,6 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface CheckIndebtednessSheetProps {
   open: boolean;
@@ -30,7 +31,7 @@ const IndebtednessContent = () => {
       setIsClearing(false);
       setIsCleared(true);
       toast.success(
-        `Debt Cleared! M${totalWithPenalty.toLocaleString()} (₦${totalWithPenalty.toLocaleString()}) has been debited from your Mobi Wallet.`,
+        `Debt Cleared! ${formatMobiAmount(totalWithPenalty)} (≈ ${formatLocalAmount(totalWithPenalty, "NGN")}) has been debited from your Mobi Wallet.`,
         { duration: 5000 }
       );
     }, 2000);
@@ -69,7 +70,7 @@ const IndebtednessContent = () => {
                   {index + 1}. <span className="text-blue-600 underline cursor-pointer hover:text-blue-800">{item.name}</span>
                 </span>
                 <span className="font-semibold text-sm whitespace-nowrap">
-                  = ₦{item.amount.toLocaleString()}.{' '}
+                  = {formatLocalAmount(item.amount, "NGN")}.{' '}
                   <span className="text-blue-600 cursor-pointer hover:text-blue-800">Details</span>
                 </span>
               </div>
@@ -80,15 +81,15 @@ const IndebtednessContent = () => {
           <div className="mt-6 p-4 bg-muted rounded-lg space-y-2">
             <div className="flex justify-between font-semibold">
               <span>Total Indebtedness:</span>
-              <span>₦{totalIndebtedness.toLocaleString()}</span>
+              <span>{formatLocalAmount(totalIndebtedness, "NGN")}</span>
             </div>
             <div className="flex justify-between text-destructive font-semibold">
               <span>Penalty (20%):</span>
-              <span>₦{(totalWithPenalty - totalIndebtedness).toLocaleString()}</span>
+              <span>{formatLocalAmount(totalWithPenalty - totalIndebtedness, "NGN")}</span>
             </div>
             <div className="flex justify-between text-lg font-bold border-t-2 border-foreground pt-2">
               <span>Total Amount Due:</span>
-              <span>₦{totalWithPenalty.toLocaleString()}</span>
+              <span>{formatLocalAmount(totalWithPenalty, "NGN")}</span>
             </div>
           </div>
           
@@ -121,7 +122,7 @@ const IndebtednessContent = () => {
             
             {!isCleared && (
               <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                This will debit <strong>M{totalWithPenalty.toLocaleString()}</strong> from your Mobi Wallet to clear all outstanding debts.
+                This will debit <strong>{formatMobiAmount(totalWithPenalty)}</strong> (≈ {formatLocalAmount(totalWithPenalty, "NGN")}) from your Mobi Wallet to clear all outstanding debts.
               </p>
             )}
           </div>

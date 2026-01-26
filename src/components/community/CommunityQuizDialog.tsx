@@ -19,6 +19,7 @@ import {
 import { CommunityQuizPlayDialog } from "./CommunityQuizPlayDialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface CommunityQuizDialogProps {
   open: boolean;
@@ -48,7 +49,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
     if (playerWalletBalance < quiz.stakeAmount) {
       toast({
         title: "Insufficient Balance",
-        description: `You need at least M${quiz.stakeAmount.toLocaleString()} to play.`,
+        description: `You need at least ${formatMobiAmount(quiz.stakeAmount)} (≈ ${formatLocalAmount(quiz.stakeAmount, "NGN")}) to play.`,
         variant: "destructive"
       });
       return;
@@ -62,7 +63,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
     toast({
       title: result.amountWon > 0 ? "🎉 Congratulations!" : "Game Over",
       description: result.amountWon > 0 
-        ? `You won M${result.amountWon.toLocaleString()} for the community!` 
+        ? `You won ${formatMobiAmount(result.amountWon)} (≈ ${formatLocalAmount(result.amountWon, "NGN")}) for the community!` 
         : "Better luck next time!",
     });
     setShowGamePlay(false);
@@ -116,7 +117,10 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                           <Wallet className="h-4 w-4 text-blue-600" />
                           <span className="text-sm text-blue-700 dark:text-blue-300">Your Wallet</span>
                         </div>
-                        <span className="font-bold text-blue-700 dark:text-blue-300">M{playerWalletBalance.toLocaleString()}</span>
+                        <div className="text-right">
+                          <span className="font-bold text-blue-700 dark:text-blue-300">{formatMobiAmount(playerWalletBalance)}</span>
+                          <p className="text-[10px] text-blue-500">≈ {formatLocalAmount(playerWalletBalance, "NGN")}</p>
+                        </div>
                       </div>
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
                         <div className="flex items-center gap-2">
@@ -174,11 +178,13 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">M{quiz.stakeAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-red-600">{formatMobiAmount(quiz.stakeAmount)}</p>
+                                  <p className="text-[9px] text-red-400">≈ {formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
                                 </div>
                                 <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-blue-600">M{quiz.winningAmount.toLocaleString()}</p>
+                                  <p className="font-bold text-sm text-blue-600">{formatMobiAmount(quiz.winningAmount)}</p>
+                                  <p className="text-[9px] text-blue-400">≈ {formatLocalAmount(quiz.winningAmount, "NGN")}</p>
                                 </div>
                               </div>
 
@@ -220,8 +226,8 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                                 </div>
                                 <p className="text-xs text-muted-foreground">{quiz.description}</p>
                                 <div className="flex justify-between text-xs text-muted-foreground">
-                                  <span>Stake: M{quiz.stakeAmount.toLocaleString()}</span>
-                                  <span className="text-blue-600 font-semibold">Win: M{quiz.winningAmount.toLocaleString()}</span>
+                                  <span>Stake: {formatMobiAmount(quiz.stakeAmount)}</span>
+                                  <span className="text-blue-600 font-semibold">Win: {formatMobiAmount(quiz.winningAmount)}</span>
                                 </div>
                                 <Button variant="outline" size="sm" className="w-full border-blue-300 text-blue-600" disabled>
                                   <Clock className="h-4 w-4 mr-2" />
@@ -271,7 +277,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-blue-600 text-sm">M{entry.amountWon.toLocaleString()}</p>
+                        <p className="font-bold text-blue-600 text-sm">{formatMobiAmount(entry.amountWon)}</p>
                         <p className="text-[10px] text-muted-foreground">{entry.winningPercentage}% win</p>
                       </div>
                     </div>
@@ -321,7 +327,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                       <div className="flex justify-between text-sm p-3 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-950/50 dark:to-blue-900/30 rounded-lg border border-blue-200">
                         <span className="text-blue-700">Net Profit</span>
                         <span className={cn("font-bold", communityQuizPlayerStats.netProfit >= 0 ? "text-green-600" : "text-destructive")}>
-                          {communityQuizPlayerStats.netProfit >= 0 ? "+" : ""}M{communityQuizPlayerStats.netProfit.toLocaleString()}
+                          {communityQuizPlayerStats.netProfit >= 0 ? "+" : ""}{formatMobiAmount(communityQuizPlayerStats.netProfit)}
                         </span>
                       </div>
                     </CardContent>
@@ -339,7 +345,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                       <div className="p-3 bg-white dark:bg-background rounded-lg border border-blue-200">
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Total Contributed</span>
-                          <span className="font-bold text-blue-600">M{(communityQuizPlayerStats.totalStakePaid * 0.7).toLocaleString()}</span>
+                          <span className="font-bold text-blue-600">{formatMobiAmount(communityQuizPlayerStats.totalStakePaid * 0.7)}</span>
                         </div>
                       </div>
                     </CardContent>
