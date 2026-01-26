@@ -1,467 +1,251 @@
 
-# Community Settings - Democratic Governance System Implementation
+# Comprehensive Implementation Plan: Community Settings Democratic Governance & Dual Currency Integration Fixes
 
-## Overview
+## Inspection Summary
 
-This plan implements a comprehensive **Community Settings** section in the Community Menu that enables democratic governance of all community settings. The system follows these core principles:
+### Community Settings Democratic Governance System - FULLY IMPLEMENTED
+The democratic governance system has been successfully implemented with all required components:
 
-1. **All settings visible to valid members** for approval/disapproval
-2. **60% threshold** required for settings to become active
-3. **Admins manage settings**, but **members can disapprove and recommend alternatives**
-4. **Member-recommended settings with 60% majority automatically override admin settings**
-5. **Settings changes trigger prompts on all member panels** for approval/disapproval
+**Created Files (All Complete):**
+| File | Status |
+|------|--------|
+| `src/types/communityDemocraticSettings.ts` | Complete - All types, interfaces, and 60% threshold config |
+| `src/lib/democraticSettingsUtils.ts` | Complete - 12 utility functions for threshold calculations |
+| `src/data/communityDemocraticSettingsData.ts` | Complete - Mock data for proposals, recommendations, settings |
+| `src/components/community/settings/CommunitySettingsSheet.tsx` | Complete - Main member-facing sheet with all features |
+| `src/components/community/settings/AdminSettingProposalCard.tsx` | Complete - Voting cards with progress bars and 60% marker |
+| `src/components/community/settings/ActiveSettingsList.tsx` | Complete - Settings display with approval status |
+| `src/components/community/settings/MemberRecommendationsList.tsx` | Complete - Support/unsupport with majority tracking |
+| `src/components/community/settings/RecommendAlternativeDialog.tsx` | Complete - Member recommendation submission |
+| `src/components/community/settings/SettingsChangeNotificationBanner.tsx` | Complete - Notification component (available but not yet integrated into main view) |
+| `src/components/admin/settings/CommunitySettingsAdminView.tsx` | Complete - Admin dashboard view (available but not yet used in admin panel) |
 
----
-
-## Current State Analysis
-
-### Existing Infrastructure
-- `communityPrivacyVoting.ts` - Types for democratic voting on privacy settings
-- `MemberPrivacyVotingSheet.tsx` - Member-facing voting UI for privacy settings only
-- `VotersListPrivacySettings.tsx` - Admin view of voting results
-- `AdminSettingsSection.tsx` - Admin settings management with multi-signature authorization
-- Privacy settings limited to 5 categories (voters list, member list, financial records, meeting minutes, election results)
-
-### Gaps Requiring Implementation
-1. **No "Community Settings" section in Community Menu** - Only "Member Settings" exists for privacy voting
-2. **No 60% threshold system** - Current system uses 50% majority
-3. **No disapproval mechanism** - Members can only vote, not disapprove admin changes
-4. **No recommendation system** - Members cannot propose alternative settings
-5. **No notification/prompt system** - Members aren't notified of admin setting changes
-6. **Limited setting scope** - Only privacy settings are votable, not all community settings
+**Modified Files (Integration Complete):**
+| File | Status |
+|------|--------|
+| `src/components/community/CommunityMainMenu.tsx` | Complete - "Community Settings" section added as last item with emerald styling, pending count badge, and sheet trigger |
+| `src/components/admin/AdminSettingsSection.tsx` | Complete - Democratic governance status card, pending approvals badge, member override badges |
 
 ---
 
-## New Types & Data Structures
+## Gaps Requiring Implementation
 
-### File: `src/types/communityDemocraticSettings.ts` (NEW)
+### Gap 1: Notification Banner Not Integrated into Community View
+The `SettingsChangeNotificationBanner` component exists but isn't integrated into the main community page to notify members of pending settings.
 
-```text
-Define comprehensive types for the democratic settings system:
+**Files to Modify:**
+- `src/pages/Community.tsx` or `src/pages/CommunityDetail.tsx`
 
-CommunitySettingCategory:
-  - privacy_settings
-  - general_settings
-  - election_settings
-  - finance_settings
-  - membership_settings
-  - posting_settings
-  - meeting_settings
+### Gap 2: Admin View Component Not Integrated
+The `CommunitySettingsAdminView` component exists but isn't used in the admin dashboard to show democratic governance status.
 
-DemocraticSettingStatus:
-  - pending_approval (admin proposed, awaiting 60%)
-  - active (approved by 60%+ members)
-  - disapproved (60%+ members disapproved)
-  - member_override (member recommendation with 60%+ replaced admin setting)
+**Files to Modify:**
+- `src/pages/CommunityAdminDashboard.tsx` (if exists) or relevant admin section
 
-AdminSettingProposal:
-  - proposalId
-  - settingKey
-  - settingCategory
-  - currentValue
-  - proposedValue
-  - proposedBy (admin info)
-  - proposedAt
-  - approvalCount
-  - disapprovalCount
-  - approvalPercentage
-  - disapprovalPercentage
-  - status
-  - effectiveDate
-  - expiresAt (if not approved within X days)
+### Gap 3: Dual Currency Display - Remaining Files
+The following files still use legacy `M{amount.toLocaleString()}` format without the dual currency display:
 
-MemberRecommendation:
-  - recommendationId
-  - settingKey
-  - recommendedValue
-  - recommendedBy (member info)
-  - recommendedAt
-  - supportCount
-  - supportPercentage
-  - isActive
-
-MemberSettingVote:
-  - voteId
-  - proposalId / recommendationId
-  - memberId
-  - voteType: 'approve' | 'disapprove'
-  - recommendedAlternative (optional)
-  - votedAt
-  - updatedAt
-```
-
-### File: `src/data/communityDemocraticSettingsData.ts` (NEW)
-
-```text
-Mock data for:
-- All community settings organized by category
-- Pending admin proposals awaiting approval
-- Member recommendations with support counts
-- Vote distribution for each setting
-- Notification queue for member prompts
-```
+| File | Lines to Update |
+|------|-----------------|
+| `src/components/community/DonationDialog.tsx` | Lines 74-77, 185 |
+| `src/components/community/CommunityQuizDialog.tsx` | Lines 49-52, 63-66, 119, 177, 181, 223-224, 274, 324, 342 |
+| `src/components/community/MobigateQuizDialog.tsx` | Lines 50-53, 64-67 |
+| `src/components/community/elections/CheckIndebtednessSheet.tsx` | Lines 31-34, 124 |
+| `src/components/community/meetings/MinutesDownloadDialog.tsx` | Line 247 |
+| `src/components/community/finance/WalletWithdrawDialog.tsx` | Lines 65-67, 95-97, 152, 172 |
+| `src/components/community/fundraiser/DonationSheet.tsx` | Lines 45-59 |
 
 ---
 
-## UI Components to Create
+## Implementation Plan
 
-### 1. Community Settings Sheet (Member-Facing)
-**File:** `src/components/community/settings/CommunitySettingsSheet.tsx`
+### Phase 1: Integrate Notification Banner (Priority: Medium)
 
-```text
-A full-height mobile sheet containing:
+**File: `src/pages/Community.tsx` or `src/pages/CommunityDetail.tsx`**
 
-HEADER:
-  - "Community Settings" title with Settings icon
-  - Badge showing pending approvals count
-
-SECTIONS (Accordion):
-  1. Pending Admin Changes (with notification badge)
-     - Cards for each pending admin proposal
-     - Approve/Disapprove buttons
-     - "Recommend Alternative" option
-     
-  2. Active Settings by Category
-     - Privacy Settings
-     - General Settings  
-     - Election Settings
-     - Finance Settings
-     - Membership Settings
-     - Posting Settings
-     - Meeting Settings
-     
-  3. Member Recommendations
-     - List of member-proposed alternatives
-     - Support/Unsupport buttons
-     - Progress toward 60% threshold
-
-FOOTER:
-  - Info card explaining 60% threshold rules
-  - "Members' votes determine all settings"
-```
-
-### 2. Admin Setting Proposal Card
-**File:** `src/components/community/settings/AdminSettingProposalCard.tsx`
-
-```text
-Mobile-optimized card for displaying pending admin proposals:
-
-LAYOUT:
-  - Setting name & category badge
-  - Current value vs Proposed value (visual comparison)
-  - Proposed by admin info + timestamp
-  - Approval progress bar (needs 60%)
-  - Disapproval count
-  
-ACTIONS:
-  - Approve button (green)
-  - Disapprove button (red)
-  - "Recommend Alternative" button (opens recommendation dialog)
-```
-
-### 3. Recommend Alternative Dialog
-**File:** `src/components/community/settings/RecommendAlternativeDialog.tsx`
-
-```text
-Dialog/Drawer for members to recommend alternative settings:
-
-CONTENT:
-  - Current setting value (read-only)
-  - Admin's proposed value (read-only)
-  - Input for member's recommended value
-  - Reason for recommendation (optional textarea)
-  
-ACTIONS:
-  - Submit Recommendation
-  - Cancel
-```
-
-### 4. Member Recommendations List
-**File:** `src/components/community/settings/MemberRecommendationsList.tsx`
-
-```text
-List of member-proposed alternatives:
-
-EACH ITEM:
-  - Setting name
-  - Recommended value
-  - Recommender info
-  - Support count + progress toward 60%
-  - Support/Unsupport toggle button
-  
-SPECIAL HANDLING:
-  - If recommendation reaches 60%, highlight with "Majority Reached" badge
-  - Show countdown if close to threshold
-```
-
-### 5. Settings Change Notification Banner
-**File:** `src/components/community/settings/SettingsChangeNotificationBanner.tsx`
-
-```text
-Sticky banner for pending approval prompts:
-
-DISPLAY:
-  - Alert icon + "X Settings Pending Your Approval"
-  - "Review Now" button
-  
-BEHAVIOR:
-  - Appears when user has unreviewed admin proposals
-  - Dismisses after user views Community Settings
-  - Re-appears for new proposals
-```
-
-### 6. Community Settings Admin View
-**File:** `src/components/admin/settings/CommunitySettingsAdminView.tsx`
-
-```text
-Enhanced admin settings panel showing:
-
-FOR EACH SETTING:
-  - Current value (with member approval status)
-  - Edit button (triggers multi-sig + member approval flow)
-  - Member approval percentage
-  - Active member recommendations
-  
-WARNING CARD:
-  - "Settings changes require 60% member approval to take effect"
-  - "Member recommendations with 60% support automatically override"
-```
-
----
-
-## Integration Points
-
-### 1. Add to Community Menu
-**File:** `src/components/community/CommunityMainMenu.tsx`
-
-```text
-ADD new AccordionItem "Community Settings" as LAST item:
-
-Position: After "Mobi-Merchant" section (line ~1007)
-
-Content:
-  - "View All Settings" button → opens CommunitySettingsSheet
-  - Badge showing pending approval count
-  - "How Settings Work" info text
-
-State:
-  - Add showCommunitySettings state
-  - Add CommunitySettingsSheet to dialog renders
-```
-
-### 2. Add Notification Banner to Community Page
-**File:** `src/pages/Community.tsx` or `src/pages/CommunityDetail.tsx`
-
-```text
-Add SettingsChangeNotificationBanner component:
-  - Shows when member has pending setting approvals
-  - Positioned below header or as floating banner
-```
-
-### 3. Update Admin Settings Section
-**File:** `src/components/admin/AdminSettingsSection.tsx`
-
-```text
-Modify to integrate democratic approval:
-  - Show approval status for each setting
-  - Add "Pending Approval" badges
-  - Show member override warnings
-  - Link to view member recommendations
-```
-
----
-
-## Logic & Calculation Utilities
-
-### File: `src/lib/democraticSettingsUtils.ts` (NEW)
-
+1. Import the notification banner component:
 ```typescript
-// Core calculation functions:
+import { SettingsChangeNotificationBanner } from "@/components/community/settings/SettingsChangeNotificationBanner";
+import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
+```
 
-/**
- * Calculate if setting has reached 60% approval
- */
-function hasReached60PercentApproval(
-  approvalCount: number, 
-  totalValidMembers: number
-): boolean
+2. Add state for showing community settings sheet:
+```typescript
+const [showCommunitySettings, setShowCommunitySettings] = useState(false);
+const pendingSettingsCount = getPendingProposalsCount();
+```
 
-/**
- * Calculate if setting has reached 60% disapproval
- */
-function hasReached60PercentDisapproval(
-  disapprovalCount: number, 
-  totalValidMembers: number
-): boolean
+3. Add banner below header:
+```tsx
+{pendingSettingsCount > 0 && (
+  <SettingsChangeNotificationBanner
+    pendingCount={pendingSettingsCount}
+    onReviewClick={() => setShowCommunitySettings(true)}
+  />
+)}
+```
 
-/**
- * Get winning recommendation (highest support among 60%+ recommendations)
- */
-function getWinningRecommendation(
-  recommendations: MemberRecommendation[], 
-  totalValidMembers: number
-): MemberRecommendation | null
+4. Add CommunitySettingsSheet at bottom of component render
 
-/**
- * Determine final setting value based on votes
- */
-function determineFinalSettingValue(
-  adminProposal: AdminSettingProposal,
-  recommendations: MemberRecommendation[],
-  totalValidMembers: number
-): { value: any; source: 'admin' | 'member_recommendation' | 'unchanged' }
+### Phase 2: Complete Dual Currency Integration (Priority: High)
 
-/**
- * Get all settings requiring member attention
- */
-function getPendingSettingsForMember(
-  memberId: string,
-  proposals: AdminSettingProposal[]
-): AdminSettingProposal[]
+For each file, apply this pattern:
+
+**Import Statement:**
+```typescript
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+```
+
+**Display Pattern (stacked - for cards):**
+```tsx
+<p className="font-bold">{formatMobiAmount(amount)}</p>
+<p className="text-xs text-muted-foreground">≈ {formatLocalAmount(amount, "NGN")}</p>
+```
+
+**Display Pattern (inline - for toasts/messages):**
+```tsx
+`${formatMobiAmount(amount)} (≈ ${formatLocalAmount(amount, "NGN")})`
 ```
 
 ---
 
-## Notification System
+### Phase 2a: Update DonationDialog.tsx
 
-### Member Prompt Behavior
+**File:** `src/components/community/DonationDialog.tsx`
 
-1. **When Admin Changes Setting:**
-   - System creates `AdminSettingProposal` with `pending_approval` status
-   - All valid members receive notification
-   - Setting does NOT take effect until 60% approve
-
-2. **Member Reviews Setting:**
-   - Can Approve (adds to approval count)
-   - Can Disapprove (adds to disapproval count)
-   - Can Recommend Alternative (creates `MemberRecommendation`)
-
-3. **60% Approval Reached:**
-   - Setting becomes `active`
-   - Applied to both Admin Panel and Member Panels
-   - Notification sent: "Setting X has been approved"
-
-4. **60% Disapproval Reached:**
-   - If recommendations exist, the one with highest 60%+ support wins
-   - Setting becomes `member_override`
-   - Admin setting is replaced
-   - Notification sent: "Members have overridden admin setting"
-
-5. **Disapproval Without Recommendation:**
-   - Setting remains unchanged (current value persists)
-   - Admin can propose new value
-
----
-
-## Settings Categories & Scope
-
-### Complete Settings Coverage
-
-| Category | Settings Included |
-|----------|-------------------|
-| **Privacy** | Community finances, member financial status, complaints, meeting recordings, general posts, member comments |
-| **General** | Handover time, account manager, download fees, access fees, complaint box fee, posting fee |
-| **Election** | Who can vote, view results, view accredited voters, download resources |
-| **Membership** | Who can add members, approve new members, remove/suspend/block |
-| **Posting** | Who can post, edit/pause/delete/approve content |
-| **Meeting** | Attendance register, meeting schedules, frequency |
-| **Promotion** | Community suggestion visibility, community visibility, guest access |
-
----
-
-## UI/UX Mobile-First Design
-
-### Community Settings Sheet Layout
-
-```text
-+--------------------------------+
-|  < Community Settings      X  |
-|  [3 Pending Approvals badge]  |
-+--------------------------------+
-|                                |
-|  [!] PENDING ADMIN CHANGES (3) |
-|  +----------------------------+|
-|  | Privacy Setting Change     ||
-|  | Current: Valid Members     ||
-|  | → Proposed: All Members    ||
-|  | [====60%====     ] 45%    ||
-|  | [Approve] [Disapprove]     ||
-|  +----------------------------+|
-|                                |
-|  v ACTIVE SETTINGS             |
-|    > Privacy Settings          |
-|    > General Settings          |
-|    > Election Settings         |
-|    > Finance Settings          |
-|    > Membership Settings       |
-|                                |
-|  v MEMBER RECOMMENDATIONS (2)  |
-|  +----------------------------+|
-|  | Meeting Download Fee: M0   ||
-|  | By: John Doe | 52% support ||
-|  | [Support] [Unsupport]      ||
-|  +----------------------------+|
-|                                |
-|  +----------------------------+|
-|  | ℹ How Settings Work        ||
-|  | • 60% approval required    ||
-|  | • Members can recommend    ||
-|  | • Majority wins            ||
-|  +----------------------------+|
-+--------------------------------+
+1. Add import:
+```typescript
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 ```
 
+2. Replace `formatMobiAmount` function (lines 74-77) with import from utility
+
+3. Update preset buttons (line 185):
+```tsx
+// Before
+<span className="text-xs sm:text-sm font-bold">M{preset.toLocaleString()}</span>
+
+// After
+<span className="text-xs sm:text-sm font-bold">{formatMobiAmount(preset)}</span>
+<span className="text-[10px] text-muted-foreground">≈ {formatLocalAmount(preset, "NGN")}</span>
+```
+
+### Phase 2b: Update CommunityQuizDialog.tsx
+
+**File:** `src/components/community/CommunityQuizDialog.tsx`
+
+1. Add import for `formatMobiAmount` and `formatLocalAmount`
+
+2. Update all instances:
+   - Line 51: Toast description
+   - Line 65-66: Toast description for win
+   - Lines 119, 177, 181, 223-224: Wallet balance and quiz amounts
+   - Lines 274, 324, 342: Player stats and contributions
+
+### Phase 2c: Update MobigateQuizDialog.tsx
+
+**File:** `src/components/community/MobigateQuizDialog.tsx`
+
+1. Add import for formatting utilities
+
+2. Update toast messages (lines 50-53, 64-67)
+
+### Phase 2d: Update CheckIndebtednessSheet.tsx
+
+**File:** `src/components/community/elections/CheckIndebtednessSheet.tsx`
+
+1. Add import for formatting utilities
+
+2. Update toast message (line 33) and display text (line 124)
+
+### Phase 2e: Update MinutesDownloadDialog.tsx
+
+**File:** `src/components/community/meetings/MinutesDownloadDialog.tsx`
+
+1. Add import for formatting utilities
+
+2. Update wallet balance display (line 247)
+
+### Phase 2f: Update WalletWithdrawDialog.tsx
+
+**File:** `src/components/community/finance/WalletWithdrawDialog.tsx`
+
+1. Add import for formatting utilities
+
+2. Update:
+   - Toast messages (lines 65-67, 95-97)
+   - Available balance display (line 152)
+   - Minimum withdrawal display (line 172)
+
+### Phase 2g: Update DonationSheet.tsx (Fundraiser)
+
+**File:** `src/components/community/fundraiser/DonationSheet.tsx`
+
+1. Add import for formatting utilities
+
+2. Update conversion display functions (lines 45-59)
+
 ---
 
-## Files to Create (Summary)
+## Verification Checklist
 
-| File | Purpose |
-|------|---------|
-| `src/types/communityDemocraticSettings.ts` | Type definitions for democratic governance |
-| `src/data/communityDemocraticSettingsData.ts` | Mock data for all settings and proposals |
-| `src/lib/democraticSettingsUtils.ts` | Calculation and utility functions |
-| `src/components/community/settings/CommunitySettingsSheet.tsx` | Main member-facing settings sheet |
-| `src/components/community/settings/AdminSettingProposalCard.tsx` | Card for pending admin proposals |
-| `src/components/community/settings/RecommendAlternativeDialog.tsx` | Dialog for member recommendations |
-| `src/components/community/settings/MemberRecommendationsList.tsx` | List of member recommendations |
-| `src/components/community/settings/SettingsChangeNotificationBanner.tsx` | Notification banner component |
-| `src/components/community/settings/ActiveSettingsList.tsx` | List of active settings by category |
-| `src/components/admin/settings/CommunitySettingsAdminView.tsx` | Enhanced admin settings view |
+After implementation, verify:
 
-## Files to Modify
+### Community Settings Democratic Governance
+- [x] Types and interfaces defined with 60% threshold config
+- [x] Utility functions for all threshold calculations
+- [x] Mock data includes proposals, recommendations, and active settings
+- [x] CommunitySettingsSheet accessible from Community Menu (last item)
+- [x] Pending count badge shown in menu
+- [x] Admin proposals show approve/disapprove buttons
+- [x] Progress bars show 60% threshold marker
+- [x] Member recommendations list with support toggle
+- [x] Recommend Alternative dialog works
+- [x] AdminSettingsSection shows democratic governance status
+- [ ] Notification banner integrated into community page (TO BE DONE)
 
-| File | Changes |
-|------|---------|
-| `src/components/community/CommunityMainMenu.tsx` | Add "Community Settings" accordion section |
-| `src/components/admin/AdminSettingsSection.tsx` | Add approval status indicators |
-| `src/types/communityPrivacyVoting.ts` | Extend to support 60% threshold |
+### Dual Currency Display
+- [x] MembersFinancialReportsDialog - Updated
+- [x] IncomeSourceDetailSheet - Updated
+- [x] AccountStatementsDialog - Updated
+- [x] FinancialStatusDialog - Updated
+- [x] FinancialObligationsDialog - Updated
+- [x] WalletTransferDialog - Updated
+- [x] TransactionAuthorizationPanel - Updated
+- [x] MobigateQuizPlayDialog - Updated
+- [x] AdminPrimaryManagementSheet - Updated
+- [ ] DonationDialog - TO BE UPDATED
+- [ ] CommunityQuizDialog - TO BE UPDATED
+- [ ] MobigateQuizDialog (toast messages) - TO BE UPDATED
+- [ ] CheckIndebtednessSheet - TO BE UPDATED
+- [ ] MinutesDownloadDialog - TO BE UPDATED
+- [ ] WalletWithdrawDialog - TO BE UPDATED
+- [ ] DonationSheet (fundraiser) - TO BE UPDATED
 
 ---
 
-## Implementation Order
+## Files Summary
 
-1. **Phase 1: Types & Data**
-   - Create type definitions
-   - Create mock data with sample proposals
-   - Create utility functions
+### Files to Modify (7 files)
+1. `src/components/community/DonationDialog.tsx`
+2. `src/components/community/CommunityQuizDialog.tsx`
+3. `src/components/community/MobigateQuizDialog.tsx`
+4. `src/components/community/elections/CheckIndebtednessSheet.tsx`
+5. `src/components/community/meetings/MinutesDownloadDialog.tsx`
+6. `src/components/community/finance/WalletWithdrawDialog.tsx`
+7. `src/components/community/fundraiser/DonationSheet.tsx`
 
-2. **Phase 2: Core Components**
-   - CommunitySettingsSheet (main container)
-   - AdminSettingProposalCard
-   - ActiveSettingsList
-   - MemberRecommendationsList
+### Optional Enhancement Files (2 files)
+1. Community page - Add SettingsChangeNotificationBanner
+2. Admin dashboard - Integrate CommunitySettingsAdminView
 
-3. **Phase 3: Interactive Components**
-   - RecommendAlternativeDialog
-   - Vote handling logic
-   - Progress calculations
+---
 
-4. **Phase 4: Integration**
-   - Add to CommunityMainMenu
-   - Update AdminSettingsSection
-   - Add notification banner
+## Technical Notes
 
-5. **Phase 5: Polish**
-   - Mobile optimization
-   - Animation/transitions
-   - Edge case handling
+- All new components follow mobile-first design with 92vh drawer height
+- Touch-friendly buttons use minimum h-10 height
+- Progress bars include visual 60% threshold markers
+- Toast messages provide user feedback for all actions
+- Democratic settings use consistent emerald color theme
+- The 60% threshold is configurable via `DEMOCRATIC_SETTINGS_CONFIG`
