@@ -361,17 +361,17 @@ export function getRequirementsDescription(
 
   switch (module) {
     case "members":
-      return "President + (Secretary OR PRO)";
+      return "President + (Secretary or PRO)";
     case "finances":
       return hasViceActing 
-        ? "4 signatories: President, Treasurer, (Secretary OR Fin.Sec), + Legal Adviser"
-        : "3 signatories: President + Treasurer + (Secretary OR Fin.Sec)";
+        ? "4 signatories: President, Treasurer, (Secretary or Fin.Sec), + Legal Adviser"
+        : "3 signatories: President + Treasurer + (Secretary or Fin.Sec)";
     case "elections":
-      return "President + Secretary + (PRO OR Dir. of Socials)";
+      return "President + Secretary + (PRO or Dir. of Socials)";
     case "content":
       return "Secretary + PRO, or President + one of them";
     case "leadership":
-      return "President + Secretary + (PRO OR Dir. of Socials)";
+      return "President + Secretary + (PRO or Dir. of Socials)";
     case "settings":
       return "President + Secretary + Legal Adviser";
     default:
