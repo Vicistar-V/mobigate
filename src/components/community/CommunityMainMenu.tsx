@@ -36,9 +36,11 @@ import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
 import { CommunityQuizDialog } from "./CommunityQuizDialog";
 import { MobigateQuizDialog } from "./MobigateQuizDialog";
+import { MemberPrivacyVotingSheet } from "./settings/MemberPrivacyVotingSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { Vote } from "lucide-react";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
@@ -82,6 +84,7 @@ export function CommunityMainMenu({
   const [showManageGallery, setShowManageGallery] = useState(false);
   const [showCommunityQuiz, setShowCommunityQuiz] = useState(false);
   const [showMobigateQuiz, setShowMobigateQuiz] = useState(false);
+  const [showPrivacyVoting, setShowPrivacyVoting] = useState(false);
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -959,6 +962,29 @@ export function CommunityMainMenu({
               </AccordionContent>
             </AccordionItem>
 
+            {/* Member Settings - Democratic Voting */}
+            <AccordionItem value="member-settings" className="border rounded-lg px-3 data-[state=open]:bg-muted/30 border-primary/20 bg-primary/5">
+              <AccordionTrigger className="text-base">
+                Member Settings
+              </AccordionTrigger>
+              <AccordionContent className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-primary/10 hover:bg-primary/20"
+                  onClick={() => {
+                    setShowPrivacyVoting(true);
+                    setOpen(false);
+                  }}
+                >
+                  <Vote className="h-4 w-4 mr-2 text-primary" />
+                  <span className="text-primary font-medium">Privacy Settings Voting</span>
+                </Button>
+                <p className="text-xs text-muted-foreground px-4 pb-2">
+                  Vote on community privacy settings. Majority decides.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
             {/* Mobi-Merchant */}
             <AccordionItem value="mobi-merchant" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
               <AccordionTrigger className="text-base">Mobi-Merchant</AccordionTrigger>
@@ -1087,6 +1113,12 @@ export function CommunityMainMenu({
       <MobigateQuizDialog 
         open={showMobigateQuiz} 
         onOpenChange={setShowMobigateQuiz}
+      />
+
+      {/* Member Privacy Voting Sheet */}
+      <MemberPrivacyVotingSheet
+        open={showPrivacyVoting}
+        onOpenChange={setShowPrivacyVoting}
       />
     </>
   );
