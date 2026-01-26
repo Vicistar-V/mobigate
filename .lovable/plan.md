@@ -1,123 +1,105 @@
 
-# Campaign Media Uploader Integration & Candidate Dashboard Enhancement
+# Simplified Campaign Royalty System for Admin Dashboard
 
-## Overview
+## Understanding the Requirement
 
-This plan addresses two key requirements:
-1. Add the **Campaign Media Uploader** to the Admin's "Create Campaign" form (it already exists in the Candidate's campaign creation flow but is missing from the Admin Panel)
-2. Ensure the **"Create Campaign" button is prominently visible** on the Candidate Dashboard after successful election declaration
+The Admin Dashboard currently shows too much analytics (views, clicks, feedback stats) that are not necessary for community admins. What's actually needed is a focused **Candidates' Campaign Royalty** section that shows:
 
----
-
-## Current State Analysis
-
-### What Already Exists
-
-| Component | Has Media Uploader | Has Create Campaign Button |
-|-----------|-------------------|---------------------------|
-| `CampaignSettingsDialog.tsx` (Candidate) | Yes - Line 255 | N/A (IS the creation dialog) |
-| `CampaignFormDialog.tsx` (Admin) | **NO - Missing** | N/A |
-| `CandidateDashboardSheet.tsx` | N/A | Yes - Lines 130-151, 237-245 |
-| `DeclarationOfInterestSheet.tsx` | N/A | Redirects to dashboard |
-
-### The Media Uploader Component
-
-The `CampaignMediaUploader.tsx` component already provides:
-- Campaign Banner upload (16:9 aspect ratio, required)
-- Profile Photo upload (circular/square format, required)
-- Promotional Artwork gallery (up to 4 optional images)
-- File validation (type + size limits)
-- Preview thumbnails with remove/set-primary actions
+1. The **community's share** of each candidate's campaign fees (the "royalty")
+2. Each candidate has different campaign parameters (audience reach, duration), so royalties vary
+3. Records tied to each candidate's campaign
 
 ---
 
-## Implementation Plan
+## Current Components Analysis
 
-### Task 1: Add Media Uploader to Admin Campaign Form
+| Component | Current Purpose | Keep/Simplify |
+|-----------|----------------|---------------|
+| `AdminCampaignsTab.tsx` | Campaign management with status stats + fee summary | Simplify - Remove aggregate fee summary card |
+| `CampaignRoyaltySection.tsx` | Aggregate totals + per-candidate list | Simplify - Focus only on Community Royalty |
+| `CampaignRoyaltyDetailSheet.tsx` | Full detail with analytics | Simplify - Remove Campaign Performance section |
+| `AdminElectionSection.tsx` | Uses CampaignRoyaltySection | Keep as-is (integration point) |
 
-**File:** `src/components/admin/election/CampaignFormDialog.tsx`
+---
 
-**Changes:**
+## Proposed Changes
 
-1. Import the media uploader component:
-```typescript
-import { CampaignMediaUploader } from "@/components/community/elections/CampaignMediaUploader";
-```
+### 1. Simplify CampaignRoyaltySection.tsx
 
-2. Add campaign images state to form data:
-```typescript
-const [formData, setFormData] = useState({
-  candidateName: "",
-  office: "",
-  slogan: "",
-  manifesto: "",
-  priorities: [""],
-  startDate: "",
-  endDate: "",
-  publishImmediately: false,
-  campaignImages: []  // NEW: Store uploaded images
-});
-```
+**Remove:**
+- Total Fees stat card (line 56-61)
+- Mobigate share stat card (line 70-77)
+- Distribution Ratio Card with "Configure" button (lines 80-104)
 
-3. Add Media Upload section after Campaign Slogan field (before Campaign Period):
+**Keep:**
+- Community Royalty Total (prominently displayed)
+- Per-candidate royalty list with clear breakdown
+
+**New Layout:**
 ```text
-{/* Campaign Media Upload Section */}
-<Separator className="my-4" />
+┌─────────────────────────────────────────┐
+│  📊 Community Campaign Royalties        │
+│  ─────────────────────────────────────  │
+│  Total Earned: M8,502 (≈ ₦8,502)       │
+│  From 4 paid campaigns                  │
+└─────────────────────────────────────────┘
 
-<div className="space-y-2">
-  <Label className="text-sm font-medium flex items-center gap-2">
-    <Image className="h-4 w-4" />
-    Campaign Media *
-  </Label>
-  <CampaignMediaUploader 
-    onImagesChange={(images) => 
-      setFormData(prev => ({ ...prev, campaignImages: images }))
-    }
-  />
-</div>
+┌─────────────────────────────────────────┐
+│ 👤 Chief Adebayo Okonkwo                │
+│    President • 21 days                  │
+│    Royalty: M2,550 (60% of M4,250)      │
+│    Audiences: Community, Members, Global│
+│                                    [>]  │
+└─────────────────────────────────────────┘
 
-<Separator className="my-4" />
+┌─────────────────────────────────────────┐
+│ 👤 Dr. Amina Bello                      │
+│    Vice President • 14 days             │
+│    Royalty: M1,404 (60% of M2,340)      │
+│    Audiences: Community, Marketplace    │
+│                                    [>]  │
+└─────────────────────────────────────────┘
 ```
-
-4. Add validation in handleSubmit to ensure at least a banner is uploaded
 
 ---
 
-### Task 2: Enhance Candidate Dashboard Campaign Button Visibility
+### 2. Simplify CampaignRoyaltyDetailSheet.tsx
 
-**File:** `src/components/community/elections/CandidateDashboardSheet.tsx`
+**Remove:**
+- Campaign Performance section (lines 204-227) with Views, Clicks, Feedback stats
+- These are analytics that belong to the candidate's dashboard, not admin
 
-The "Create New Campaign" button already exists but can be enhanced:
-
-**Current location (Lines 129-152):**
-- A prominent CTA card with Megaphone icon
-- Button styled with primary colors
-- Shows when `canCreateCampaign === true` and `campaignStatus === "not_created"`
-
-**Enhancements to make:**
-
-1. Add a pulsing animation to draw attention:
-```typescript
-className="w-full animate-pulse"
-```
-
-2. Add tooltip text explaining the action
-
-3. Add an info card below the button explaining what the campaign creation enables (reach voters, share manifesto, set audience & duration)
+**Keep:**
+- Candidate Info card
+- Campaign Parameters (duration, dates, audiences, tagline)
+- Fee Breakdown (base fee, audience premium, total)
+- Royalty Distribution (Community Share vs Mobigate Share)
+- Payment timestamp
+- Campaign ID
 
 ---
 
-### Task 3: Ensure Declaration Flow Leads to Campaign Creation
+### 3. Simplify AdminCampaignsTab.tsx
 
-**File:** `src/components/community/elections/DeclarationOfInterestSheet.tsx`
+**Remove:**
+- Fee Summary Card (lines 145-167) - duplicates CampaignRoyaltySection data
 
-This already works correctly:
-- After successful declaration, shows "Go to Campaign Dashboard" button
-- The `onDeclarationComplete` callback is used to:
-  1. Close the Declaration sheet
-  2. Open the `CandidateDashboardSheet`
-  
-The dashboard then shows the "Create Campaign" CTA.
+**Keep:**
+- Stats Row (Active/Draft/Paused/Ended counts) - useful for management
+- Campaign list with status management actions
+- Views/Endorsements stats in cards - these are for the candidate's benefit
+
+---
+
+### 4. Add Unique Parameters Display Per Candidate
+
+Each candidate card in the royalty list will clearly show:
+- Selected audience targets (Community Only, Members, Global, etc.)
+- Campaign duration (days)
+- Fee calculation: `Total Fee × 60% = Community Royalty`
+- Payment date
+
+This emphasizes that royalties vary based on candidate's choices.
 
 ---
 
@@ -125,73 +107,50 @@ The dashboard then shows the "Create Campaign" CTA.
 
 | File | Changes |
 |------|---------|
-| `src/components/admin/election/CampaignFormDialog.tsx` | Add CampaignMediaUploader import and integrate into form with state management |
-| `src/components/community/elections/CandidateDashboardSheet.tsx` | Enhance CTA visibility with animation and clearer messaging |
-
----
-
-## Technical Details
-
-### Form Data Flow (Admin Panel)
-
-```text
-CampaignFormDialog
-  └── Form State
-      ├── candidateName
-      ├── office
-      ├── slogan
-      ├── manifesto
-      ├── priorities[]
-      ├── startDate/endDate
-      ├── publishImmediately
-      └── campaignImages[] ← NEW
-          ├── banner (required)
-          ├── profile (required)
-          └── artwork[] (optional, up to 4)
-```
-
-### Candidate Dashboard Flow
-
-```text
-1. Member clicks "Declare for Election (EoI)" in Community Menu
-2. DeclarationOfInterestSheet opens
-3. Member selects office, pays fee
-4. On success: "Go to Campaign Dashboard" button shown
-5. Click redirects to CandidateDashboardSheet
-6. Dashboard shows prominent "Create New Campaign" CTA (when eligible)
-7. Click opens CampaignSettingsDialog (3-step process with media uploader)
-```
+| `src/components/admin/election/CampaignRoyaltySection.tsx` | Remove aggregate stats, simplify to Community Royalty focus |
+| `src/components/admin/election/CampaignRoyaltyDetailSheet.tsx` | Remove Campaign Performance analytics section |
+| `src/components/admin/election/AdminCampaignsTab.tsx` | Remove Fee Summary Card (already shown in Royalties section) |
 
 ---
 
 ## Mobile-First UI Considerations
 
-- Media uploader is already mobile-optimized with:
-  - Touch-friendly upload buttons (h-10+ touch targets)
-  - Responsive grid layout (cols-2 for artworks)
-  - Proper aspect ratios for mobile viewing
-  - File size validation prevents slow uploads
-
-- Admin form uses Drawer component (mobile-friendly bottom sheet)
+- All cards remain touch-friendly with h-10+ targets
+- Per-candidate royalty cards show stacked layout for clear reading
+- Audience badges wrap properly on small screens
+- Community royalty amount is prominently displayed in green
 
 ---
 
-## Validation Requirements
+## Technical Details
 
-### Admin Campaign Form Validation:
-1. Candidate Name - Required
-2. Office Position - Required
-3. Campaign Slogan - Optional but recommended
-4. **Campaign Banner** - Required (NEW)
-5. **Profile Photo** - Required (NEW)
-6. Campaign Period - Optional (defaults available)
+### Royalty Calculation (Already Implemented)
+```typescript
+// Each candidate's royalty is calculated based on their chosen parameters:
+communityShare = totalFeeInMobi * (communityPercentage / 100)
+// Default: 60% to Community, 40% to Mobigate
+
+// Example:
+// Candidate A: 21 days + 3 audiences = M4,250 total → M2,550 royalty
+// Candidate B: 7 days + 1 audience = M1,000 total → M600 royalty
+```
+
+### Data Flow (Unchanged)
+```text
+mockEnhancedCampaigns → CampaignRoyaltySection → CampaignRoyaltyDetailSheet
+                     ↓
+           Filter: paymentStatus === "paid"
+                     ↓
+           Display: communityShare per candidate
+```
 
 ---
 
 ## Summary
 
-This implementation:
-1. Adds the existing `CampaignMediaUploader` component to the Admin's campaign creation form
-2. Maintains consistency between Admin and Candidate campaign creation experiences
-3. Keeps the existing Candidate Dashboard flow intact (the "Create Campaign" button is already there and working)
-4. Enhances the CTA visibility with minor UI improvements
+This simplification:
+1. Removes redundant aggregate analytics from Admin view
+2. Focuses on **Community Campaign Royalties** - what admins actually need to see
+3. Keeps per-candidate detail showing how their unique parameters affected the royalty
+4. Removes campaign performance stats (Views/Clicks/Feedback) from admin detail view - those belong to candidates
+5. Maintains mobile-first responsive design throughout
