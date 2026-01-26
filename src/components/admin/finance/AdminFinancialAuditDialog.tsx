@@ -45,6 +45,7 @@ import { mockYearlyAudits, YearlyFinancialAudit } from "@/data/financialManageme
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { IncomeSourceDetailSheet } from "./IncomeSourceDetailSheet";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface AdminFinancialAuditDialogProps {
   open: boolean;
@@ -73,14 +74,23 @@ export const AdminFinancialAuditDialog = ({
     });
   };
 
-  const formatCurrency = (amount: number) => {
-    if (amount >= 1000000) {
-      return `M${(amount / 1000000).toFixed(2)}M`;
-    }
-    if (amount >= 1000) {
-      return `M${(amount / 1000).toFixed(0)}k`;
-    }
-    return `M${amount.toLocaleString()}`;
+  const formatCurrency = (amount: number, showLocal: boolean = true) => {
+    const mobi = amount >= 1000000
+      ? `M${(amount / 1000000).toFixed(2)}M`
+      : amount >= 1000
+        ? `M${(amount / 1000).toFixed(0)}k`
+        : `M${amount.toLocaleString()}`;
+    
+    if (!showLocal) return mobi;
+    
+    // Show local currency equivalent
+    const localAmount = amount >= 1000000
+      ? `₦${(amount / 1000000).toFixed(2)}M`
+      : amount >= 1000
+        ? `₦${(amount / 1000).toFixed(0)}k`
+        : `₦${amount.toLocaleString()}`;
+    
+    return `${mobi} (${localAmount})`;
   };
 
   const Content = () => {

@@ -45,6 +45,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { DualCurrencyDisplay } from "@/components/common/DualCurrencyDisplay";
 
 interface AccountStatementsDialogProps {
   open: boolean;
@@ -300,13 +301,14 @@ export const AccountStatementsDialog = ({
                     <p className="font-medium text-sm leading-tight line-clamp-2 flex-1 min-w-0">
                       {txn.description}
                     </p>
-                    <p
-                      className={`font-bold text-sm flex-shrink-0 ${
-                        txn.type === "credit" ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {txn.type === "credit" ? "+" : "-"}M{txn.amount.toLocaleString()}
-                    </p>
+                    <div className="flex-shrink-0 text-right">
+                      <DualCurrencyDisplay
+                        mobiAmount={txn.amount}
+                        transactionType={txn.type === "credit" ? "income" : "expense"}
+                        showSign="auto"
+                        size="sm"
+                      />
+                    </div>
                   </div>
                   
                   {/* Row 2: Category + Reference + Balance */}
@@ -314,7 +316,9 @@ export const AccountStatementsDialog = ({
                     <span className="truncate flex-1 min-w-0">
                       {getCategoryLabel(txn.category)} • {txn.reference}
                     </span>
-                    <span className="flex-shrink-0">Bal: M{txn.balance.toLocaleString()}</span>
+                    <span className="flex-shrink-0">
+                      Bal: M{txn.balance.toLocaleString()} (₦{txn.balance.toLocaleString()})
+                    </span>
                   </div>
 
                   {/* Row 3: Member/Auth + Date + Status - Stacked for mobile */}

@@ -19,6 +19,8 @@ import { LevyProgressCard } from "./finance/LevyProgressCard";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
+import { DualCurrencyDisplay, formatDualCurrency } from "@/components/common/DualCurrencyDisplay";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 const getTransactionIcon = (type: RecentTransaction['type']) => {
   switch (type) {
@@ -81,9 +83,12 @@ const TransactionItem = ({ transaction, onAuthorize }: TransactionItemProps) => 
         </p>
       </div>
       <div className="flex flex-col items-end gap-1 shrink-0">
-        <span className={`font-semibold text-sm ${colorClass}`}>
-          {transaction.type === 'expense' ? '-' : '+'}M{transaction.amount.toLocaleString()}
-        </span>
+        <DualCurrencyDisplay
+          mobiAmount={transaction.amount}
+          transactionType={transaction.type}
+          showSign="auto"
+          size="sm"
+        />
         {transaction.status === 'pending' && onAuthorize ? (
           <Button 
             variant="outline" 
@@ -117,9 +122,11 @@ const DefaultingMemberItem = ({ member }: DefaultingMemberItemProps) => (
       <p className="text-sm text-muted-foreground line-clamp-1">{member.obligation}</p>
     </div>
     <div className="flex flex-col items-end shrink-0">
-      <span className="font-semibold text-sm text-destructive">
-        M{member.amountOwed.toLocaleString()}
-      </span>
+      <DualCurrencyDisplay
+        mobiAmount={member.amountOwed}
+        transactionType="expense"
+        size="sm"
+      />
       <span className="text-xs text-muted-foreground whitespace-nowrap">
         Due {formatRelativeTime(member.dueDate)}
       </span>
@@ -248,7 +255,7 @@ export function AdminFinanceSection({
               <div className="text-left min-w-0">
                 <h3 className="font-semibold text-base">Finance</h3>
                 <p className="text-sm text-muted-foreground">
-                  M{stats.walletBalance.toLocaleString()}
+                  {formatDualCurrency(stats.walletBalance)}
                   {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} pending`}
                 </p>
               </div>

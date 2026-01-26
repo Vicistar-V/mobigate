@@ -9,6 +9,8 @@ import { mockWalletData, mockTransactions } from "@/data/financeData";
 import { WalletTopUpDialog } from "./WalletTopUpDialog";
 import { WalletTransferDialog } from "./WalletTransferDialog";
 import { WalletWithdrawDialog } from "./WalletWithdrawDialog";
+import { DualCurrencyDisplay, formatDualCurrency } from "@/components/common/DualCurrencyDisplay";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface FinancialOverviewDialogProps {
   open: boolean;
@@ -60,8 +62,11 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Total Balance</p>
                     <h2 className="text-3xl font-bold">
-                      {walletData.currency} {walletData.balance.toLocaleString()}
+                      M{walletData.balance.toLocaleString()}
                     </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      ≈ ₦{walletData.balance.toLocaleString()}
+                    </p>
                   </div>
                   <div className="bg-primary/10 p-3 rounded-full">
                     <Wallet className="h-6 w-6 text-primary" />
@@ -99,8 +104,11 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
                     </div>
                     <p className="text-xs text-muted-foreground">Income</p>
                   </div>
-                  <p className="text-xl font-bold">
-                    {walletData.currency} {walletData.monthlyIncome.toLocaleString()}
+                  <p className="text-xl font-bold text-green-600">
+                    +M{walletData.monthlyIncome.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    (₦{walletData.monthlyIncome.toLocaleString()})
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">This month</p>
                 </CardContent>
@@ -114,8 +122,11 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
                     </div>
                     <p className="text-xs text-muted-foreground">Expenses</p>
                   </div>
-                  <p className="text-xl font-bold">
-                    {walletData.currency} {walletData.monthlyExpenditure.toLocaleString()}
+                  <p className="text-xl font-bold text-red-600">
+                    -M{walletData.monthlyExpenditure.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    (₦{walletData.monthlyExpenditure.toLocaleString()})
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">This month</p>
                 </CardContent>
@@ -150,14 +161,12 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-semibold text-sm ${
-                        transaction.type === "credit" 
-                          ? "text-green-600" 
-                          : "text-red-600"
-                      }`}>
-                        {transaction.type === "credit" ? "+" : "-"}
-                        {transaction.currency} {transaction.amount.toLocaleString()}
-                      </p>
+                      <DualCurrencyDisplay
+                        mobiAmount={transaction.amount}
+                        transactionType={transaction.type}
+                        showSign="auto"
+                        size="sm"
+                      />
                       <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-xs mt-1">
                         {transaction.status}
                       </Badge>

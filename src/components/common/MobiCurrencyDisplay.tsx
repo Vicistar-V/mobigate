@@ -131,12 +131,14 @@ export function MobiCurrencyDisplay({
 }
 
 /**
- * Compact display for lists and cards
+ * Compact display for lists and cards - now with local currency equivalent
  */
 interface MobiCompactDisplayProps {
   amount: number;
   showSign?: boolean;
   type?: "income" | "expense" | "neutral";
+  showLocalEquivalent?: boolean;
+  localCurrency?: string;
   className?: string;
 }
 
@@ -144,6 +146,8 @@ export function MobiCompactDisplay({
   amount,
   showSign = false,
   type = "neutral",
+  showLocalEquivalent = true,
+  localCurrency = "NGN",
   className = "",
 }: MobiCompactDisplayProps) {
   const colorClasses = {
@@ -153,10 +157,16 @@ export function MobiCompactDisplay({
   };
 
   const sign = showSign ? (type === "expense" ? "-" : "+") : "";
+  const formatted = formatMobiWithLocal(amount, localCurrency);
 
   return (
     <span className={`font-semibold ${colorClasses[type]} ${className}`}>
       {sign}{formatMobiAmount(amount)}
+      {showLocalEquivalent && (
+        <span className="text-muted-foreground font-normal text-xs ml-1">
+          ({formatted.local})
+        </span>
+      )}
     </span>
   );
 }
