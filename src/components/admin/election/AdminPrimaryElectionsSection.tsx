@@ -11,7 +11,9 @@ import {
   Trophy,
   BarChart3,
   Settings,
-  Plus
+  Plus,
+  Info,
+  Star
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,10 +31,17 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { 
   mockPrimaryElections, 
-  getPrimaryStats 
+  getPrimaryStats,
+  mockElectionProcessSettings
 } from "@/data/electionProcessesData";
 import { PrimaryElection, PrimaryCandidate } from "@/types/electionProcesses";
 import { cn } from "@/lib/utils";
+import { 
+  calculateAdvancingCandidates, 
+  getAdvancementStatusText,
+  AdvancementReason,
+  DEFAULT_ADVANCEMENT_CONFIG
+} from "@/lib/primaryElectionUtils";
 
 const getStatusBadge = (status: PrimaryElection['status']) => {
   switch (status) {
@@ -166,45 +175,66 @@ export function AdminPrimaryElectionsSection() {
                 </div>
               )}
 
-              {/* Candidates Preview */}
-              {primary.candidates.length > 0 && (
-                <div className="space-y-1.5">
-                  {primary.candidates.slice(0, 2).map((candidate, idx) => (
-                    <div 
-                      key={candidate.id}
-                      className={cn(
-                        "flex items-center justify-between p-2 rounded-lg",
-                        candidate.advancedToMain ? "bg-emerald-50 dark:bg-emerald-950/20" : "bg-muted/30"
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-muted-foreground w-4">
-                          {idx + 1}.
-                        </span>
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={candidate.avatar} />
-                          <AvatarFallback className="text-[10px]">{candidate.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs font-medium truncate max-w-[120px]">
-                          {candidate.name}
-                        </span>
-                        {candidate.advancedToMain && (
-                          <Trophy className="h-3 w-3 text-amber-500" />
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold">{candidate.percentage}%</span>
-                        <p className="text-[10px] text-muted-foreground">{candidate.votes} votes</p>
-                      </div>
-                    </div>
-                  ))}
-                  {primary.candidates.length > 2 && (
-                    <p className="text-xs text-muted-foreground text-center">
-                      +{primary.candidates.length - 2} more candidates
-                    </p>
-                  )}
-                </div>
-              )}
+            {/* Candidates Preview */}
+              {primary.candidates.length > 0 && (() => {
+                const config = {
+                  autoQualifyThreshold: mockElectionProcessSettings.primaryAdvancementThreshold,
+                  minimumAdvancing: mockElectionProcessSettings.primaryAdvancementMinimum,
+                  maximumAdvancing: mockElectionProcessSettings.primaryAdvancementMaximum,
+                };
+                const advancementResult = calculateAdvancingCandidates(primary.candidates, config);
+                
+                return (
+                  <div className="space-y-1.5">
+                    {primary.candidates.slice(0, 2).map((candidate, idx) => {
+                      const reason = advancementResult.advancementReasons.get(candidate.id);
+                      const isAutoQualified = reason === 'auto_qualified';
+                      const isTopVotes = reason === 'top_votes';
+                      const advances = isAutoQualified || isTopVotes;
+                      
+                      return (
+                        <div 
+                          key={candidate.id}
+                          className={cn(
+                            "flex items-center justify-between p-2 rounded-lg",
+                            isAutoQualified ? "bg-emerald-50 dark:bg-emerald-950/20" : 
+                            isTopVotes ? "bg-amber-50 dark:bg-amber-950/20" : 
+                            "bg-muted/30"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-muted-foreground w-4">
+                              {idx + 1}.
+                            </span>
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={candidate.avatar} />
+                              <AvatarFallback className="text-[10px]">{candidate.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs font-medium truncate max-w-[120px]">
+                              {candidate.name}
+                            </span>
+                            {isAutoQualified && (
+                              <Star className="h-3 w-3 text-emerald-500 fill-emerald-500" />
+                            )}
+                            {isTopVotes && (
+                              <Trophy className="h-3 w-3 text-amber-500" />
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs font-bold">{candidate.percentage}%</span>
+                            <p className="text-[10px] text-muted-foreground">{candidate.votes} votes</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {primary.candidates.length > 2 && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        +{primary.candidates.length - 2} more candidates
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {primary.status === 'scheduled' && (
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground p-4 bg-muted/30 rounded-lg">
@@ -297,64 +327,140 @@ export function AdminPrimaryElectionsSection() {
                   </Card>
                 )}
 
-                {/* Candidates Results */}
+              {/* Advancement Rules Info */}
                 {selectedPrimary.candidates.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-2 pt-3 px-4">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        Candidates Results
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-4 pb-4">
-                      <div className="space-y-3">
-                        {selectedPrimary.candidates.map((candidate, idx) => (
-                          <div 
-                            key={candidate.id}
-                            className={cn(
-                              "p-3 rounded-lg border",
-                              candidate.advancedToMain 
-                                ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800" 
-                                : "bg-muted/30 border-transparent"
-                            )}
-                          >
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-sm font-bold text-muted-foreground w-5">
-                                {idx + 1}.
-                              </span>
-                              <Avatar className="h-9 w-9">
-                                <AvatarImage src={candidate.avatar} />
-                                <AvatarFallback>{candidate.name[0]}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-sm truncate">{candidate.name}</p>
-                                {candidate.advancedToMain && (
-                                  <Badge className="bg-emerald-500 text-white text-[10px] mt-0.5">
-                                    <Trophy className="h-2.5 w-2.5 mr-1" />
-                                    Advances to Main
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                            <div className="ml-8">
-                              <div className="flex justify-between text-xs mb-1">
-                                <span className="text-muted-foreground">{candidate.votes.toLocaleString()} votes</span>
-                                <span className="font-bold">{candidate.percentage}%</span>
-                              </div>
-                              <Progress 
-                                value={candidate.percentage} 
-                                className={cn(
-                                  "h-2",
-                                  candidate.advancedToMain && "[&>div]:bg-emerald-500"
-                                )}
-                              />
-                            </div>
-                          </div>
-                        ))}
+                  <Card className="bg-blue-500/5 border-blue-500/20">
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                        <div className="text-xs space-y-1">
+                          <p className="font-medium text-blue-700 dark:text-blue-400">Advancement Rules</p>
+                          <ul className="text-muted-foreground space-y-0.5">
+                            <li className="flex items-center gap-1.5">
+                              <Star className="h-3 w-3 text-emerald-500 fill-emerald-500" />
+                              <span>≥25% votes = Auto-qualifies</span>
+                            </li>
+                            <li className="flex items-center gap-1.5">
+                              <Trophy className="h-3 w-3 text-amber-500" />
+                              <span>Top votes fill remaining slots</span>
+                            </li>
+                            <li>• Maximum 4 candidates advance</li>
+                            <li>• Minimum 2 candidates required</li>
+                          </ul>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Candidates Results */}
+                {selectedPrimary.candidates.length > 0 && (() => {
+                  const config = {
+                    autoQualifyThreshold: mockElectionProcessSettings.primaryAdvancementThreshold,
+                    minimumAdvancing: mockElectionProcessSettings.primaryAdvancementMinimum,
+                    maximumAdvancing: mockElectionProcessSettings.primaryAdvancementMaximum,
+                  };
+                  const advancementResult = calculateAdvancingCandidates(selectedPrimary.candidates, config);
+                  
+                  return (
+                    <Card>
+                      <CardHeader className="pb-2 pt-3 px-4">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Users className="h-4 w-4 text-primary" />
+                            Candidates Results
+                          </CardTitle>
+                          <Badge variant="secondary" className="text-[10px]">
+                            {advancementResult.totalAdvancing} advancing
+                          </Badge>
+                        </div>
+                        {advancementResult.autoQualifiedCount > 0 && (
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {advancementResult.autoQualifiedCount} auto-qualified (≥25%)
+                            {advancementResult.topVoteFilledCount > 0 && 
+                              ` • ${advancementResult.topVoteFilledCount} by top votes`
+                            }
+                          </p>
+                        )}
+                      </CardHeader>
+                      <CardContent className="px-4 pb-4">
+                        <div className="space-y-3">
+                          {selectedPrimary.candidates.map((candidate, idx) => {
+                            const reason = advancementResult.advancementReasons.get(candidate.id);
+                            const isAutoQualified = reason === 'auto_qualified';
+                            const isTopVotes = reason === 'top_votes';
+                            const advances = isAutoQualified || isTopVotes;
+                            
+                            return (
+                              <div 
+                                key={candidate.id}
+                                className={cn(
+                                  "p-3 rounded-lg border",
+                                  isAutoQualified 
+                                    ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800" 
+                                    : isTopVotes
+                                    ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+                                    : "bg-muted/30 border-transparent"
+                                )}
+                              >
+                                <div className="flex items-center gap-3 mb-2">
+                                  <span className="text-sm font-bold text-muted-foreground w-5">
+                                    {idx + 1}.
+                                  </span>
+                                  <Avatar className="h-9 w-9">
+                                    <AvatarImage src={candidate.avatar} />
+                                    <AvatarFallback>{candidate.name[0]}</AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-sm truncate">{candidate.name}</p>
+                                    {isAutoQualified && (
+                                      <Badge className="bg-emerald-500 text-white text-[10px] mt-0.5">
+                                        <Star className="h-2.5 w-2.5 mr-1 fill-white" />
+                                        Auto-Qualified ({candidate.percentage}%)
+                                      </Badge>
+                                    )}
+                                    {isTopVotes && (
+                                      <Badge className="bg-amber-500 text-white text-[10px] mt-0.5">
+                                        <Trophy className="h-2.5 w-2.5 mr-1" />
+                                        Advances (Top Votes)
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="ml-8">
+                                  <div className="flex justify-between text-xs mb-1">
+                                    <span className="text-muted-foreground">{candidate.votes.toLocaleString()} votes</span>
+                                    <span className="font-bold">{candidate.percentage}%</span>
+                                  </div>
+                                  {/* Progress bar with 25% threshold marker */}
+                                  <div className="relative">
+                                    <Progress 
+                                      value={candidate.percentage} 
+                                      className={cn(
+                                        "h-2",
+                                        isAutoQualified && "[&>div]:bg-emerald-500",
+                                        isTopVotes && "[&>div]:bg-amber-500"
+                                      )}
+                                    />
+                                    {/* 25% threshold line */}
+                                    <div 
+                                      className="absolute top-0 bottom-0 w-0.5 bg-red-500/60"
+                                      style={{ left: '25%' }}
+                                    />
+                                  </div>
+                                  <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                                    <span></span>
+                                    <span className="text-red-500/80">25% threshold ↑</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
 
                 {/* Actions */}
                 {selectedPrimary.status === 'scheduled' && (
