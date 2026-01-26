@@ -276,8 +276,9 @@ export const AccountStatementsDialog = ({
 
         <div className="space-y-2">
           {filteredTransactions.map((txn) => (
-            <Card key={txn.id} className="p-3">
-              <div className="flex items-start gap-3">
+            <Card key={txn.id} className="p-3 overflow-hidden">
+              <div className="flex items-start gap-2">
+                {/* Icon */}
                 <div
                   className={`p-2 rounded-lg flex-shrink-0 ${
                     txn.type === "credit"
@@ -292,62 +293,59 @@ export const AccountStatementsDialog = ({
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
+                {/* Content - Fully stacked on mobile */}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  {/* Row 1: Title + Amount */}
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{txn.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {getCategoryLabel(txn.category)} • {txn.reference}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p
-                        className={`font-semibold text-sm ${
-                          txn.type === "credit" ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {txn.type === "credit" ? "+" : "-"}{formatMobiAmount(txn.amount)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        ≈ {formatLocalAmount(txn.amount, "NGN")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Bal: {formatMobiAmount(txn.balance)}
-                      </p>
-                    </div>
+                    <p className="font-medium text-sm leading-tight line-clamp-2 flex-1 min-w-0">
+                      {txn.description}
+                    </p>
+                    <p
+                      className={`font-bold text-sm flex-shrink-0 ${
+                        txn.type === "credit" ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
+                      {txn.type === "credit" ? "+" : "-"}M{txn.amount.toLocaleString()}
+                    </p>
+                  </div>
+                  
+                  {/* Row 2: Category + Reference + Balance */}
+                  <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span className="truncate flex-1 min-w-0">
+                      {getCategoryLabel(txn.category)} • {txn.reference}
+                    </span>
+                    <span className="flex-shrink-0">Bal: M{txn.balance.toLocaleString()}</span>
                   </div>
 
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-2">
-                      {txn.memberName && txn.memberAvatar && (
-                        <div className="flex items-center gap-1">
-                          <Avatar className="h-5 w-5">
-                            <AvatarImage src={txn.memberAvatar} />
-                            <AvatarFallback className="text-xs">
-                              {txn.memberName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs text-muted-foreground truncate max-w-20">
-                            {txn.memberName}
-                          </span>
-                        </div>
-                      )}
-                      {txn.authorizedBy && (
-                        <span className="text-xs text-muted-foreground">
-                          Auth: {txn.authorizedBy}
+                  {/* Row 3: Member/Auth + Date + Status - Stacked for mobile */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-border/50">
+                    {txn.memberName && txn.memberAvatar && (
+                      <div className="flex items-center gap-1">
+                        <Avatar className="h-4 w-4">
+                          <AvatarImage src={txn.memberAvatar} />
+                          <AvatarFallback className="text-[10px]">
+                            {txn.memberName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs text-muted-foreground truncate max-w-[80px]">
+                          {txn.memberName.split(' ')[0]}...
                         </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {format(txn.date, "MMM d, HH:mm")}
+                      </div>
+                    )}
+                    {txn.authorizedBy && (
+                      <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                        Auth: {txn.authorizedBy}
                       </span>
-                      {getStatusBadge(txn.status)}
-                    </div>
+                    )}
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {format(txn.date, "MMM d, HH:mm")}
+                    </span>
+                    {getStatusBadge(txn.status)}
                   </div>
 
+                  {/* Row 4: Notes */}
                   {txn.notes && (
-                    <p className="text-xs text-muted-foreground mt-1 italic">
+                    <p className="text-xs text-muted-foreground italic pt-1">
                       Note: {txn.notes}
                     </p>
                   )}
