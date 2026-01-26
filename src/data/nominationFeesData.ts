@@ -271,3 +271,41 @@ export function isPrimaryRequired(officeId: string): boolean {
   
   return feeStructure.requiresPrimary && count > (feeStructure.maxCandidates || 20);
 }
+
+/**
+ * Mobigate platform nomination configuration
+ * Only accessible to Mobigate Admin
+ */
+export const mobigateNominationConfig = {
+  serviceChargePercent: 20, // 15-30% range
+  minimumServiceChargePercent: 15,
+  maximumServiceChargePercent: 30,
+  lastUpdatedAt: new Date("2025-01-01"),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+/**
+ * Calculate total nomination cost including service charge
+ */
+export function calculateTotalNominationCost(officeId: string): {
+  nominationFee: number;
+  processingFee: number;
+  serviceCharge: number;
+  totalDebited: number;
+  communityReceives: number;
+  mobigateReceives: number;
+} | null {
+  const fee = getNominationFee(officeId);
+  if (!fee) return null;
+  
+  const serviceCharge = fee.feeInMobi * (mobigateNominationConfig.serviceChargePercent / 100);
+  
+  return {
+    nominationFee: fee.feeInMobi,
+    processingFee: fee.processingFee,
+    serviceCharge,
+    totalDebited: fee.feeInMobi + fee.processingFee + serviceCharge,
+    communityReceives: fee.feeInMobi + fee.processingFee,
+    mobigateReceives: serviceCharge,
+  };
+}

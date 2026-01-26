@@ -1,0 +1,387 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  LayoutDashboard,
+  Vote,
+  Building2,
+  Users,
+  Wallet,
+  Settings,
+  TrendingUp,
+  Activity,
+  Globe,
+  AlertCircle,
+  ChevronRight,
+  Coins,
+  Shield,
+} from "lucide-react";
+import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
+import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
+import { formatMobi } from "@/lib/mobiCurrencyTranslation";
+
+// Mock platform stats
+const platformStats = {
+  totalCommunities: 1247,
+  activeCommunities: 892,
+  totalUsers: 156789,
+  activeUsers: 45231,
+  totalTransactions: 89456,
+  platformRevenue: 12500000,
+  pendingApprovals: 23,
+  activeElections: 45,
+};
+
+// Mock revenue data
+const revenueBreakdown = [
+  { source: "Nomination Fees (Service Charges)", amount: 4500000, percentage: 36 },
+  { source: "Campaign Fees (Platform Share)", amount: 3200000, percentage: 25.6 },
+  { source: "Advertisement Revenue", amount: 2800000, percentage: 22.4 },
+  { source: "Premium Features", amount: 1500000, percentage: 12 },
+  { source: "Other Services", amount: 500000, percentage: 4 },
+];
+
+// Mock communities
+const topCommunities = [
+  { id: "1", name: "Umuahia Progressive Union", members: 1245, elections: 3, revenue: 450000 },
+  { id: "2", name: "Lagos Igbo Community", members: 2890, elections: 2, revenue: 380000 },
+  { id: "3", name: "Abuja Professional Network", members: 567, elections: 1, revenue: 220000 },
+  { id: "4", name: "Delta State Association", members: 1890, elections: 4, revenue: 510000 },
+];
+
+export default function MobigateAdminDashboard() {
+  const [activeTab, setActiveTab] = useState("overview");
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <MobigateAdminHeader 
+        title="Mobigate Admin"
+        subtitle="Platform Administration"
+        pendingActions={platformStats.pendingApprovals}
+      />
+
+      <div className="p-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-3 h-auto mb-4">
+            <TabsTrigger value="overview" className="text-xs py-2">
+              <LayoutDashboard className="h-4 w-4 mr-1" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="elections" className="text-xs py-2">
+              <Vote className="h-4 w-4 mr-1" />
+              Elections
+            </TabsTrigger>
+            <TabsTrigger value="revenue" className="text-xs py-2">
+              <Wallet className="h-4 w-4 mr-1" />
+              Revenue
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="mt-0">
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-4 pb-6">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Building2 className="h-4 w-4 text-primary" />
+                        <span className="text-xs text-muted-foreground">Communities</span>
+                      </div>
+                      <p className="text-2xl font-bold">{platformStats.totalCommunities.toLocaleString()}</p>
+                      <p className="text-xs text-emerald-600">
+                        {platformStats.activeCommunities.toLocaleString()} active
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="h-4 w-4 text-blue-500" />
+                        <span className="text-xs text-muted-foreground">Users</span>
+                      </div>
+                      <p className="text-2xl font-bold">{(platformStats.totalUsers / 1000).toFixed(0)}K</p>
+                      <p className="text-xs text-emerald-600">
+                        {(platformStats.activeUsers / 1000).toFixed(1)}K active
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Activity className="h-4 w-4 text-amber-500" />
+                        <span className="text-xs text-muted-foreground">Transactions</span>
+                      </div>
+                      <p className="text-2xl font-bold">{(platformStats.totalTransactions / 1000).toFixed(1)}K</p>
+                      <p className="text-xs text-muted-foreground">All time</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Wallet className="h-4 w-4 text-emerald-500" />
+                        <span className="text-xs text-muted-foreground">Revenue</span>
+                      </div>
+                      <p className="text-2xl font-bold">{formatMobi(platformStats.platformRevenue)}</p>
+                      <p className="text-xs text-emerald-600">+12.5% this month</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                      <Vote className="h-5 w-5" />
+                      <span className="text-xs">Elections</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                      <Building2 className="h-5 w-5" />
+                      <span className="text-xs">Communities</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                      <Users className="h-5 w-5" />
+                      <span className="text-xs">Users</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                      <Settings className="h-5 w-5" />
+                      <span className="text-xs">Settings</span>
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Pending Actions */}
+                {platformStats.pendingApprovals > 0 && (
+                  <Card className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-5 w-5 text-amber-500" />
+                          <div>
+                            <p className="font-medium text-sm">Pending Approvals</p>
+                            <p className="text-xs text-muted-foreground">
+                              {platformStats.pendingApprovals} items need review
+                            </p>
+                          </div>
+                        </div>
+                        <Button size="sm">Review</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Top Communities */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Top Communities</CardTitle>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs">
+                        View All
+                        <ChevronRight className="h-3 w-3 ml-1" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {topCommunities.map((community, index) => (
+                      <div
+                        key={community.id}
+                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-sm font-bold text-primary">
+                              {index + 1}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{community.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {community.members.toLocaleString()} members
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-sm text-primary">
+                            {formatMobi(community.revenue)}
+                          </p>
+                          <Badge variant="secondary" className="text-xs">
+                            {community.elections} elections
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Elections Tab - Nomination Fee Settings */}
+          <TabsContent value="elections" className="mt-0">
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-4 pb-6">
+                {/* Active Elections Stats */}
+                <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Active Elections</p>
+                        <p className="text-3xl font-bold">{platformStats.activeElections}</p>
+                      </div>
+                      <Vote className="h-10 w-10 text-primary/50" />
+                    </div>
+                    <div className="flex gap-4 mt-3 pt-3 border-t">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Nominations Open</p>
+                        <p className="font-bold">12</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">In Voting</p>
+                        <p className="font-bold">8</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Concluded</p>
+                        <p className="font-bold">25</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Mobigate-Only Notice */}
+                <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <Shield className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium">Mobigate Admin Only</p>
+                    <p className="text-xs text-muted-foreground">
+                      These settings are only accessible to platform administrators
+                    </p>
+                  </div>
+                </div>
+
+                {/* Nomination Fee Settings */}
+                <NominationFeeSettingsSection />
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Revenue Tab */}
+          <TabsContent value="revenue" className="mt-0">
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-4 pb-6">
+                {/* Revenue Overview */}
+                <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Total Platform Revenue</p>
+                        <p className="text-3xl font-bold text-emerald-600">
+                          {formatMobi(platformStats.platformRevenue)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 text-emerald-600">
+                        <TrendingUp className="h-5 w-5" />
+                        <span className="font-bold">+12.5%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Revenue Breakdown */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Revenue Breakdown</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {revenueBreakdown.map((item, index) => (
+                      <div key={index} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">{item.source}</span>
+                          <span className="font-medium">{formatMobi(item.amount)}</span>
+                        </div>
+                        <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="absolute left-0 top-0 h-full bg-primary rounded-full"
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-right text-muted-foreground">
+                          {item.percentage}%
+                        </p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Monthly Trend */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Monthly Performance</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      <div className="p-3 bg-muted/30 rounded-lg">
+                        <p className="text-xs text-muted-foreground">This Month</p>
+                        <p className="font-bold text-emerald-600">{formatMobi(2800000)}</p>
+                      </div>
+                      <div className="p-3 bg-muted/30 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Last Month</p>
+                        <p className="font-bold">{formatMobi(2490000)}</p>
+                      </div>
+                      <div className="p-3 bg-muted/30 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Growth</p>
+                        <p className="font-bold text-emerald-600">+12.5%</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Fee Collections */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Coins className="h-5 w-5 text-amber-500" />
+                      Fee Collections
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div>
+                        <p className="font-medium text-sm">Service Charges</p>
+                        <p className="text-xs text-muted-foreground">From nomination fees</p>
+                      </div>
+                      <p className="font-bold text-primary">{formatMobi(4500000)}</p>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div>
+                        <p className="font-medium text-sm">Campaign Royalties</p>
+                        <p className="text-xs text-muted-foreground">40% platform share</p>
+                      </div>
+                      <p className="font-bold text-primary">{formatMobi(3200000)}</p>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div>
+                        <p className="font-medium text-sm">Ad Revenue</p>
+                        <p className="text-xs text-muted-foreground">Banner & promoted content</p>
+                      </div>
+                      <p className="font-bold text-primary">{formatMobi(2800000)}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
