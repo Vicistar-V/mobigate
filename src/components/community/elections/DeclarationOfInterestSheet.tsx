@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MobiCurrencyDisplay } from "@/components/common/MobiCurrencyDisplay";
-import { nominationFeeStructures, getNominationFee, mockNominationPeriod } from "@/data/nominationFeesData";
+import { nominationFeeStructures, getNominationFee, mockNominationPeriod, calculateTotalNominationCost, mobigateNominationConfig } from "@/data/nominationFeesData";
 import { NominationFeeStructure } from "@/types/nominationProcess";
 import { formatMobiAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
@@ -84,8 +84,9 @@ export function DeclarationOfInterestSheet({
   const [transactionRef, setTransactionRef] = useState<string>("");
 
   const selectedFeeStructure = selectedOffice ? getNominationFee(selectedOffice) : null;
-  const hasInsufficientBalance = selectedFeeStructure 
-    ? walletBalance < selectedFeeStructure.totalFee 
+  const costBreakdown = selectedOffice ? calculateTotalNominationCost(selectedOffice) : null;
+  const hasInsufficientBalance = costBreakdown 
+    ? walletBalance < costBreakdown.totalDebited 
     : false;
 
   const handleSelectOffice = (officeId: string) => {
@@ -226,33 +227,49 @@ export function DeclarationOfInterestSheet({
       </div>
 
       {/* Selected Office Fee Breakdown */}
-      {selectedFeeStructure && (
+      {costBreakdown && selectedFeeStructure && (
         <Card className={hasInsufficientBalance ? "border-destructive" : "border-primary"}>
           <CardContent className="p-4 space-y-3">
             <h4 className="font-semibold text-sm">Fee Breakdown</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Nomination Fee</span>
-                <span>{formatMobiAmount(selectedFeeStructure.feeInMobi)}</span>
+                <span>{formatMobiAmount(costBreakdown.nominationFee)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Processing Fee</span>
-                <span>{formatMobiAmount(selectedFeeStructure.processingFee)}</span>
+                <span>{formatMobiAmount(costBreakdown.processingFee)}</span>
+              </div>
+              <div className="flex justify-between text-amber-600">
+                <span>Service Charge ({mobigateNominationConfig.serviceChargePercent}%)</span>
+                <span>{formatMobiAmount(costBreakdown.serviceCharge)}</span>
               </div>
               <Separator />
               <div className="flex justify-between font-bold">
-                <span>Total</span>
+                <span>Total Debited</span>
                 <span className="text-primary">
-                  {formatMobiAmount(selectedFeeStructure.totalFee)}
+                  {formatMobiAmount(costBreakdown.totalDebited)}
                 </span>
               </div>
+            </div>
+
+            {/* Fee Distribution Info */}
+            <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
+              <p className="flex justify-between">
+                <span>→ Community Account:</span>
+                <span className="font-medium">{formatMobiAmount(costBreakdown.communityReceives)}</span>
+              </p>
+              <p className="flex justify-between">
+                <span>→ Mobigate Platform:</span>
+                <span className="font-medium">{formatMobiAmount(costBreakdown.mobigateReceives)}</span>
+              </p>
             </div>
 
             {hasInsufficientBalance && (
               <div className="flex items-center gap-2 text-destructive text-sm">
                 <AlertCircle className="h-4 w-4" />
                 <span>
-                  Insufficient balance. Need {formatMobiAmount(selectedFeeStructure.totalFee - walletBalance)} more.
+                  Insufficient balance. Need {formatMobiAmount(costBreakdown.totalDebited - walletBalance)} more.
                 </span>
               </div>
             )}
@@ -269,7 +286,7 @@ export function DeclarationOfInterestSheet({
       </div>
       <h3 className="text-lg font-semibold">Processing Payment...</h3>
       <p className="text-sm text-muted-foreground text-center">
-        Debiting {formatMobiAmount(selectedFeeStructure?.totalFee || 0)} from your Mobi Wallet
+        Debiting {formatMobiAmount(costBreakdown?.totalDebited || 0)} from your Mobi Wallet
       </p>
     </div>
   );
@@ -298,13 +315,13 @@ export function DeclarationOfInterestSheet({
           <div className="flex justify-between">
             <span className="text-muted-foreground">Amount Debited</span>
             <span className="font-semibold text-primary">
-              {formatMobiAmount(selectedFeeStructure?.totalFee || 0)}
+              {formatMobiAmount(costBreakdown?.totalDebited || 0)}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">New Balance</span>
             <span>
-              {formatMobiAmount(walletBalance - (selectedFeeStructure?.totalFee || 0))}
+              {formatMobiAmount(walletBalance - (costBreakdown?.totalDebited || 0))}
             </span>
           </div>
         </CardContent>
@@ -376,8 +393,13 @@ export function DeclarationOfInterestSheet({
                 <strong>{selectedFeeStructure?.officeName}</strong>.
               </p>
               <p>
-                <strong>{formatMobiAmount(selectedFeeStructure?.totalFee || 0)}</strong> will be
+                <strong>{formatMobiAmount(costBreakdown?.totalDebited || 0)}</strong> will be
                 debited from your Mobi Wallet.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                • {formatMobiAmount(costBreakdown?.communityReceives || 0)} goes to Community Account
+                <br />
+                • {formatMobiAmount(costBreakdown?.mobigateReceives || 0)} Service Charge to Mobigate
               </p>
               <p className="text-amber-600">
                 This action cannot be reversed. Are you sure you want to proceed?

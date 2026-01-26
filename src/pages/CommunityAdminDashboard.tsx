@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, RefreshCw } from "lucide-react";
+import { MemberPrivacyVotingSheet } from "@/components/community/settings/MemberPrivacyVotingSheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
@@ -78,6 +79,7 @@ const CommunityAdminDashboard = () => {
   // showFinancialAudit removed - now handled by AdminFinanceSection's AdminFinancialAuditDialog
   const [showFinancialObligations, setShowFinancialObligations] = useState(false);
   const [showConstitution, setShowConstitution] = useState(false);
+  const [showDemocraticPrivacy, setShowDemocraticPrivacy] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -248,6 +250,7 @@ const CommunityAdminDashboard = () => {
               onPrivacySettings={() => showToast("Privacy", "Opening privacy settings...")}
               onNotificationSettings={() => showToast("Notifications", "Opening notification settings...")}
               onCommunityRules={() => showToast("Rules", "Opening community rules...")}
+              onDemocraticPrivacy={() => setShowDemocraticPrivacy(true)}
             />
           </div>
 
@@ -302,6 +305,11 @@ const CommunityAdminDashboard = () => {
       <ConstitutionViewer
         open={showConstitution}
         onOpenChange={setShowConstitution}
+      />
+
+      <MemberPrivacyVotingSheet
+        open={showDemocraticPrivacy}
+        onOpenChange={setShowDemocraticPrivacy}
       />
     </div>
   );
