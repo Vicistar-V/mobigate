@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,8 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { AdminCampaign } from "@/data/adminElectionData";
 import { useToast } from "@/hooks/use-toast";
+import { CampaignMediaUploader } from "@/components/community/elections/CampaignMediaUploader";
+
+interface CampaignImage {
+  id: string;
+  file?: File;
+  preview: string;
+  type: "banner" | "profile" | "artwork";
+  isPrimary?: boolean;
+}
 
 interface CampaignFormDialogProps {
   open: boolean;
@@ -39,7 +49,8 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
     priorities: [""],
     startDate: "",
     endDate: "",
-    publishImmediately: false
+    publishImmediately: false,
+    campaignImages: [] as CampaignImage[]
   });
 
   useEffect(() => {
@@ -52,7 +63,8 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
         priorities: campaign.priorities.length > 0 ? campaign.priorities : [""],
         startDate: campaign.startDate.toISOString().split('T')[0],
         endDate: campaign.endDate.toISOString().split('T')[0],
-        publishImmediately: campaign.status === 'active'
+        publishImmediately: campaign.status === 'active',
+        campaignImages: []
       });
     } else {
       setFormData({
@@ -63,7 +75,8 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
         priorities: [""],
         startDate: "",
         endDate: "",
-        publishImmediately: false
+        publishImmediately: false,
+        campaignImages: []
       });
     }
   }, [campaign, open]);
@@ -89,11 +102,28 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
     }));
   };
 
+  const handleImagesChange = (images: CampaignImage[]) => {
+    setFormData(prev => ({ ...prev, campaignImages: images }));
+  };
+
   const handleSubmit = () => {
     if (!formData.candidateName || !formData.office) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in candidate name and office position",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate required media uploads
+    const hasBanner = formData.campaignImages.some(img => img.type === "banner");
+    const hasProfile = formData.campaignImages.some(img => img.type === "profile");
+    
+    if (!hasBanner || !hasProfile) {
+      toast({
+        title: "Media Required",
+        description: "Please upload both a campaign banner and profile photo",
         variant: "destructive"
       });
       return;
@@ -163,6 +193,21 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 placeholder="Enter a catchy campaign slogan"
               />
             </div>
+
+            {/* Campaign Media Upload Section */}
+            <Separator className="my-2" />
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Image className="h-4 w-4 text-primary" />
+                Campaign Media *
+              </Label>
+              <CampaignMediaUploader 
+                onImagesChange={handleImagesChange}
+              />
+            </div>
+
+            <Separator className="my-2" />
 
             {/* Campaign Period */}
             <div className="grid grid-cols-2 gap-3">
