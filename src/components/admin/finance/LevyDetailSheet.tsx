@@ -17,7 +17,8 @@ import {
   Bell,
   Clock,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  Globe
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -25,6 +26,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { format, differenceInDays } from "date-fns";
 import { DuesAndLevies, getObligationStatusColor } from "@/data/financialManagementData";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { MobiExplainerTooltip } from "@/components/common/MobiExplainerTooltip";
 
 interface MemberPaymentRecord {
   id: string;
@@ -130,7 +133,10 @@ export function LevyDetailSheet({
             <p className={`text-sm font-bold ${
               payment.status === 'paid' ? 'text-green-600' : 'text-muted-foreground'
             }`}>
-              M{payment.amount.toLocaleString()}
+              {formatMobiAmount(payment.amount)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              ≈ {formatLocalAmount(payment.amount, "NGN")}
             </p>
             {payment.reference && (
               <p className="text-xs text-muted-foreground">{payment.reference}</p>
@@ -159,12 +165,21 @@ export function LevyDetailSheet({
           <div className="grid grid-cols-2 gap-3 text-sm mb-3">
             <div className="flex items-center gap-2">
               <Wallet className="h-4 w-4 text-muted-foreground" />
-              <span>M{levy.amount.toLocaleString()}/member</span>
+              <div>
+                <span className="font-medium">{formatMobiAmount(levy.amount)}</span>
+                <span className="text-xs text-muted-foreground">/member</span>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>{format(levy.dueDate, "MMM d, yyyy")}</span>
             </div>
+          </div>
+          
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+            <Globe className="h-3 w-3" />
+            <span>Local equivalent: {formatLocalAmount(levy.amount, "NGN")}/member</span>
+            <MobiExplainerTooltip size="sm" />
           </div>
 
           {daysUntilDue > 0 ? (
@@ -193,15 +208,21 @@ export function LevyDetailSheet({
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-2 bg-green-500/10 rounded-lg">
               <p className="text-lg font-bold text-green-600">
-                M{levy.totalCollected.toLocaleString()}
+                {formatMobiAmount(levy.totalCollected)}
               </p>
               <p className="text-xs text-muted-foreground">Collected</p>
+              <p className="text-xs text-green-600/70">
+                ≈ {formatLocalAmount(levy.totalCollected, "NGN")}
+              </p>
             </div>
             <div className="text-center p-2 bg-muted/50 rounded-lg">
               <p className="text-lg font-bold">
-                M{levy.totalExpected.toLocaleString()}
+                {formatMobiAmount(levy.totalExpected)}
               </p>
               <p className="text-xs text-muted-foreground">Target</p>
+              <p className="text-xs text-muted-foreground">
+                ≈ {formatLocalAmount(levy.totalExpected, "NGN")}
+              </p>
             </div>
           </div>
 

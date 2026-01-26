@@ -109,6 +109,39 @@ export function formatMobiWithLocal(
 }
 
 /**
+ * Format Mobi with inline local currency (compact version)
+ * For NGN (1:1 rate), only shows Mobi since values are identical
+ * For other currencies, shows both: "M50,000 (≈ $100)"
+ */
+export function formatMobiWithLocalInline(
+  mobiAmount: number, 
+  localCurrency: string = "NGN"
+): string {
+  const result = formatMobiWithLocal(mobiAmount, localCurrency);
+  
+  // For NGN (1:1 rate), only show Mobi since values are identical
+  if (localCurrency === "NGN") {
+    return result.mobi;
+  }
+  
+  return result.combined;
+}
+
+/**
+ * Get the local currency equivalent amount (number only)
+ */
+export function getLocalEquivalent(
+  mobiAmount: number,
+  localCurrency: string = "NGN"
+): number {
+  const conversion = convertFromMobi(mobiAmount, localCurrency);
+  return conversion.toAmount;
+}
+
+// Re-export SUPPORTED_CURRENCIES for convenience
+export { SUPPORTED_CURRENCIES } from "@/types/mobiFinancialProtocol";
+
+/**
  * Calculate platform profit from exchange rate margins
  * Mobigate profits from the spread between buy/sell rates
  */
