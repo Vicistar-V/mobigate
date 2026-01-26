@@ -1,213 +1,338 @@
 
+# Mobigate Admin Dashboard & Democratic Privacy Settings Implementation Plan
 
-# Mobigate Universal Financial Protocol - Verification Complete
+## Overview
 
-## Summary
-
-After conducting a comprehensive file-by-file inspection of both frontend components and supporting data/utility files, I can confirm that **the Mobigate Universal Financial Protocol and Election System has been FULLY IMPLEMENTED and INTEGRATED**.
-
----
-
-## Verification Details
-
-### 1. Mobigate Universal Financial Protocol ✅
-
-| Component | File | Status |
-|-----------|------|--------|
-| Type Definitions | `src/types/mobiFinancialProtocol.ts` | Complete |
-| Exchange Rates | 7 currencies (NGN, USD, GBP, CAD, EUR, ZAR, CFA) | Configured |
-| Currency Utilities | `src/lib/mobiCurrencyTranslation.ts` | Complete |
-| Display Component | `src/components/common/MobiCurrencyDisplay.tsx` | Complete |
-
-**Key Features Verified:**
-- `convertToMobi()` and `convertFromMobi()` functions working
-- `formatMobiWithLocal()` displays both Mobi and local equivalent
-- `calculatePlatformProfit()` for revenue calculations
-- Currency selector dropdown for international users
+This plan implements:
+1. **Democratic Privacy Settings** - Community settings determined by member voting with majority rule
+2. **Mobigate Admin Dashboard** - Platform-level administration (separate from Community Admin)
+3. **Nomination Fee Configuration** - Mobigate-only settings for election fees and service charges
+4. **Declare for Election Button** - Member access point for nomination process
 
 ---
 
-### 2. Election Declaration & Nomination Fees ✅
+## Part 1: Democratic Privacy Settings System
 
-| Component | File | Status |
-|-----------|------|--------|
-| Type Definitions | `src/types/nominationProcess.ts` | Complete |
-| Fee Structure Data | `src/data/nominationFeesData.ts` | 12 offices configured |
-| Declaration Sheet | `src/components/community/elections/DeclarationOfInterestSheet.tsx` | Complete |
-| Candidate Dashboard | `src/components/community/elections/CandidateDashboardSheet.tsx` | Complete |
+### 1.1 New Type Definitions
 
-**Fee Structure Verified:**
-- President General: M50,000 + M2,500 processing = M52,500
-- Vice President: M40,000 + M2,000 processing = M42,000
-- Secretary General: M30,000 + M1,500 processing = M31,500
-- All 12 office positions properly configured
+**File: `src/types/communityPrivacyVoting.ts`**
 
-**Flow Verified:**
+```typescript
+// Privacy voting options
+type VotersListPrivacy = 'nobody' | 'only_admins' | 'valid_members' | 'all_members';
+
+interface PrivacySetting {
+  settingId: string;
+  settingName: string;
+  settingDescription: string;
+  currentValue: VotersListPrivacy;
+  voteCounts: {
+    nobody: number;
+    only_admins: number;
+    valid_members: number;
+    all_members: number;
+  };
+  totalVotes: number;
+  memberVote?: VotersListPrivacy;
+  lastUpdated: Date;
+  effectiveDate: Date;
+}
+
+interface CommunitySettingsVote {
+  settingId: string;
+  memberId: string;
+  selectedOption: string;
+  votedAt: Date;
+}
+
+interface DemocraticSettingsConfig {
+  communityId: string;
+  settings: PrivacySetting[];
+  votingEnabled: boolean;
+  minimumVotesRequired: number;
+  lastRecalculatedAt: Date;
+}
+```
+
+### 1.2 Community Settings Privacy Section
+
+**File: `src/components/admin/settings/VotersListPrivacySettings.tsx`**
+
+Admin view showing:
+- Current setting with majority indicator
+- Vote distribution breakdown (pie chart or progress bars)
+- Member participation rate
+- Setting becomes permanent once majority is established
+
+### 1.3 Member Settings Privacy Section
+
+**File: `src/components/community/settings/MemberPrivacyVotingSheet.tsx`**
+
+Mobile-first sheet for members to:
+- View current community privacy settings
+- See their current vote (if any)
+- Cast or change their vote
+- View real-time vote distribution
+- Understand that majority rule applies
+
+**UI Flow:**
+1. Member opens Settings from their profile
+2. Sees "Community Privacy Settings" section
+3. For each setting (e.g., Voters' List), sees options:
+   - Nobody
+   - Only Admins
+   - Valid Members
+   - All Members
+4. Selects their preference
+5. Vote is recorded and totals update
+6. Majority option becomes the active setting
+
+---
+
+## Part 2: Mobigate Admin Dashboard
+
+### 2.1 New Page & Route
+
+**File: `src/pages/admin/MobigateAdminDashboard.tsx`**
+
+Platform-level administration page with:
+- Dashboard header with Mobigate branding
+- Stats cards (total communities, total users, total transactions)
+- Platform revenue overview
+- System health indicators
+
+### 2.2 Route Addition
+
+**File: `src/App.tsx`** - Add route:
+```typescript
+<Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
+```
+
+### 2.3 Mobigate Admin Dashboard Sections
+
+**Tabs/Sections:**
+1. **Overview** - Platform stats and revenue
+2. **Election Settings** - Nomination fees, service charges
+3. **Communities** - Manage all communities
+4. **Users** - Platform user management
+5. **Revenue** - Financial reports and royalty tracking
+6. **System** - Platform configuration
+
+---
+
+## Part 3: Nomination Fee & Service Charge Configuration
+
+### 3.1 Mobigate Election Fee Settings Component
+
+**File: `src/components/mobigate/NominationFeeSettingsSection.tsx`**
+
+Mobigate-only settings (NOT visible to Community Admins):
+
+**Fee Configuration:**
+- Office-specific nomination fees (already exists in `nominationFeesData.ts`)
+- Edit capability for each office fee
+- Bulk update option
+
+**Service Charge Configuration:**
+- Service Charge Percentage slider (15% - 30% range)
+- Current percentage display with large number
+- Fee breakdown preview showing:
+  - Example: If Nomination Fee = M50,000
+  - Service Charge (20%) = M10,000
+  - Total Debited = M60,000
+  - To Community Account = M50,000
+  - To Mobigate = M10,000 (service charge)
+
+**UI Components:**
+```
++--------------------------------------+
+| Service Charge Rate                  |
++--------------------------------------+
+|                                      |
+|              20%                     |
+|                                      |
+| [========|===========] 15% --- 30%   |
+|                                      |
+| Preview:                             |
+| Nomination Fee:    M50,000           |
+| Service Charge:    M10,000 (20%)     |
+| Total Debited:     M60,000           |
++--------------------------------------+
+| Community Receives: M50,000          |
+| Mobigate Receives:  M10,000          |
++--------------------------------------+
+| [Save Changes]                       |
++--------------------------------------+
+```
+
+### 3.2 Update Nomination Types
+
+**File: `src/types/nominationProcess.ts`** - Add:
+```typescript
+interface MobigateNominationConfig {
+  serviceChargePercent: number; // 15-30%
+  minimumServiceChargePercent: number; // 15
+  maximumServiceChargePercent: number; // 30
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+```
+
+### 3.3 Update Nomination Fee Data
+
+**File: `src/data/nominationFeesData.ts`** - Add:
+```typescript
+export const mobigateNominationConfig: MobigateNominationConfig = {
+  serviceChargePercent: 20,
+  minimumServiceChargePercent: 15,
+  maximumServiceChargePercent: 30,
+  lastUpdatedAt: new Date("2025-01-01"),
+  lastUpdatedBy: "Mobigate Admin"
+};
+
+// Update fee calculation to include service charge
+export function calculateTotalNominationCost(officeId: string) {
+  const fee = getNominationFee(officeId);
+  if (!fee) return null;
+  
+  const serviceCharge = fee.feeInMobi * (mobigateNominationConfig.serviceChargePercent / 100);
+  return {
+    nominationFee: fee.feeInMobi,
+    serviceCharge,
+    total: fee.feeInMobi + serviceCharge,
+    communityReceives: fee.feeInMobi,
+    mobigateReceives: serviceCharge
+  };
+}
+```
+
+---
+
+## Part 4: Declare for Election Button Integration
+
+### 4.1 Member Dashboard Integration
+
+**File: `src/components/community/CommunityElectionTab.tsx`**
+
+Add prominent "Declare for Election" button:
+- Position: Top of the navigation area OR as a floating action button
+- Style: Primary/accent color to stand out
+- Icon: Vote/Flag icon
+- Opens `DeclarationOfInterestSheet`
+
+### 4.2 Add to Member Profile Menu
+
+**File: (Member profile settings component)**
+
+Add "Declare for Election" option in the community actions section for easy access from the member's personal menu.
+
+---
+
+## Part 5: Remove Conflicting Tab
+
+### 5.1 Clean Up Election Settings Tab
+
+The current `ElectionManagementPage.tsx` has a Settings tab with Campaign Fee Distribution that appears to be accessible to Community Admins. Based on the requirement:
+
+**Action:** The Nomination Fee and Service Charge settings are Mobigate-only. The existing Campaign Fee Distribution can remain for Community Admins to view (but not edit Mobigate-controlled settings).
+
+**Clarification:**
+- **Community Admins CAN:** View campaign fee distribution (Community vs Mobigate split)
+- **Community Admins CANNOT:** Edit nomination fees, service charge percentages
+- **Mobigate Admins CAN:** Control all fee structures
+
+---
+
+## Part 6: Integration Summary
+
+### Files to Create (8 files):
+
+1. `src/types/communityPrivacyVoting.ts` - Democratic privacy types
+2. `src/data/communityPrivacyVotingData.ts` - Mock voting data
+3. `src/components/admin/settings/VotersListPrivacySettings.tsx` - Admin privacy view
+4. `src/components/community/settings/MemberPrivacyVotingSheet.tsx` - Member voting UI
+5. `src/pages/admin/MobigateAdminDashboard.tsx` - Platform admin page
+6. `src/components/mobigate/MobigateAdminHeader.tsx` - Platform admin header
+7. `src/components/mobigate/NominationFeeSettingsSection.tsx` - Fee configuration
+8. `src/components/mobigate/ServiceChargeConfigCard.tsx` - Service charge slider
+
+### Files to Modify (6 files):
+
+1. `src/App.tsx` - Add Mobigate admin route
+2. `src/types/nominationProcess.ts` - Add Mobigate config types
+3. `src/data/nominationFeesData.ts` - Add service charge calculation
+4. `src/components/community/CommunityElectionTab.tsx` - Add Declare button
+5. `src/components/admin/AdminSettingsSection.tsx` - Add privacy voting link
+6. `src/components/community/elections/DeclarationOfInterestSheet.tsx` - Update fee display with service charge
+
+---
+
+## Technical Details
+
+### Democratic Settings Logic
+
+```typescript
+// Calculate majority and apply setting
+function calculateMajoritySetting(setting: PrivacySetting): {
+  winner: VotersListPrivacy;
+  percentage: number;
+  isMajority: boolean;
+} {
+  const { voteCounts, totalVotes } = setting;
+  
+  const entries = Object.entries(voteCounts) as [VotersListPrivacy, number][];
+  const sorted = entries.sort((a, b) => b[1] - a[1]);
+  const [winner, winnerVotes] = sorted[0];
+  const percentage = totalVotes > 0 ? (winnerVotes / totalVotes) * 100 : 0;
+  
+  return {
+    winner,
+    percentage,
+    isMajority: percentage > 50
+  };
+}
+```
+
+### Service Charge Application
+
+The service charge is applied automatically when a member declares for election:
 1. Member selects office position
-2. Fee breakdown displayed with wallet balance check
-3. Payment confirmation dialog
-4. 2.5-second processing simulation
-5. Success state with "Go to Campaign Dashboard" CTA
+2. System calculates: Nomination Fee + Service Charge (%)
+3. Total is debited from member's Mobi wallet
+4. Nomination Fee goes to Community Account
+5. Service Charge goes to Mobigate
+
+### Mobile-First Design
+
+All new components follow:
+- Sheet/Drawer patterns for mobile modals
+- Touch-friendly inputs (min 44px height)
+- Large readable text for settings
+- Progress indicators for voting percentages
+- Clear visual hierarchy
 
 ---
 
-### 3. Primary Election System (>20 Candidates) ✅
+## Mock Data Initialization
 
-| Component | File | Status |
-|-----------|------|--------|
-| Extended Types | `src/types/electionProcesses.ts` | `PrimaryElectionConfig` added |
-| Admin Management | `src/components/admin/election/AdminPrimaryManagementSheet.tsx` | Complete |
+### Voters' List Privacy Default
 
-**Features Verified:**
-- Primary threshold: 20 candidates (configurable)
-- Advancement slots: Top 4 finalists
-- Offices requiring primary vs. direct to main election
-- Candidate selection with checkbox UI
-- Finalist confirmation flow
+```typescript
+const mockVotersListSetting: PrivacySetting = {
+  settingId: "voters-list-privacy",
+  settingName: "Voters' List Visibility",
+  settingDescription: "Who can see the list of voters and their voting records",
+  currentValue: "valid_members",
+  voteCounts: {
+    nobody: 5,
+    only_admins: 12,
+    valid_members: 28,
+    all_members: 8
+  },
+  totalVotes: 53,
+  lastUpdated: new Date("2025-01-15"),
+  effectiveDate: new Date("2025-01-16")
+};
+```
 
----
-
-### 4. Campaign Creation Suite ✅
-
-| Component | File | Status |
-|-----------|------|--------|
-| Campaign Types | `src/types/campaignSystem.ts` | Complete |
-| Media Uploader | `src/components/community/elections/CampaignMediaUploader.tsx` | Complete |
-| Settings Dialog | `src/components/community/elections/CampaignSettingsDialog.tsx` | Enhanced |
-| Fee Distribution | `src/lib/campaignFeeDistribution.ts` | Complete |
-
-**Mandatory Parameters Verified:**
-- Candidate name: Auto-populated
-- Office position: Auto-populated
-- Slogan: Required input (max 40 chars)
-- Media Uploader: Banner (required), Profile photo (required), Artwork (up to 4)
-
-**Variable Costs Verified:**
-- Duration options: 3, 7, 14, 21, 30, 60, 90 days
-- Audience targeting: 5 options with premium multipliers
-- Dynamic fee calculation with breakdown display
-
----
-
-### 5. Campaign Royalty & Revenue Distribution ✅
-
-| Component | File | Status |
-|-----------|------|--------|
-| Royalty Section | `src/components/admin/election/CampaignRoyaltySection.tsx` | Complete |
-| Detail Sheet | `src/components/admin/election/CampaignRoyaltyDetailSheet.tsx` | Complete |
-| Config Dialog | `src/components/admin/election/FeeDistributionConfigDialog.tsx` | Complete |
-
-**Features Verified:**
-- Default distribution: 60% Community / 40% Mobigate
-- Configurable slider (30%-80% range)
-- Change history log with timestamps
-- Multi-signature authorization notice
-- Per-campaign unique royalty breakdown
-
----
-
-### 6. Post-Election Certificate of Return ✅
-
-| Component | File | Status |
-|-----------|------|--------|
-| Type Definitions | `src/types/certificateOfReturn.ts` | Complete |
-| Generator | `src/components/admin/election/CertificateOfReturnGenerator.tsx` | Complete |
-| Display | `src/components/community/elections/CertificateOfReturnDisplay.tsx` | Complete |
-| Transparency Settings | `src/components/admin/election/AdminWinnersAnnouncementTab.tsx` | Integrated |
-
-**Certificate Features Verified:**
-- Certificate number format: `COR/{YEAR}/{SEQ}`
-- Winner name and office prominently displayed
-- Tenure dates (e.g., 2025-2029)
-- Verification code for authenticity
-- Digital signature by Mobigate
-- Download as TXT file
-
-**Transparency Settings Verified:**
-- Anonymous mode: Show accreditation numbers only
-- Identified mode: Show voter names
-- Anti-intimidation notice toggle
-
----
-
-### 7. Active Community Dues/Levy Management ✅
-
-| Component | File | Status |
-|-----------|------|--------|
-| Progress Card | `src/components/admin/finance/LevyProgressCard.tsx` | Complete |
-| Detail Sheet | `src/components/admin/finance/LevyDetailSheet.tsx` | Complete |
-| Integration | `src/components/admin/AdminFinanceSection.tsx` | Integrated |
-
-**Mock Data Verified (Annual Dues 2025):**
-- Unit Price: M15,000
-- Deadline: March 31, 2025
-- Paid Status: 30/50 members (60%)
-- Cash Flow: M450,000 collected of M750,000 target
-
-**Controls Verified:**
-- View Details button
-- Send Reminders button
-- Paid/Unpaid member tabs
-- CSV Export option
-
----
-
-### 8. Integration Points ✅
-
-| Integration | Location | Status |
-|-------------|----------|--------|
-| Declaration Access | `CommunityElectionTab.tsx` → "...More" menu | Integrated |
-| Candidate Dashboard | `CommunityElectionTab.tsx` → "...More" menu | Integrated |
-| Primaries Button | `AdminElectionSection.tsx` | Integrated |
-| Royalties Button | `AdminElectionSection.tsx` | Integrated |
-| Certificates Button | `AdminWinnersAnnouncementTab.tsx` | Integrated |
-| Levy Progress | `AdminFinanceSection.tsx` | Integrated |
-
----
-
-## Files Created/Modified Summary
-
-### New Files (17 total):
-1. `src/types/mobiFinancialProtocol.ts`
-2. `src/types/nominationProcess.ts`
-3. `src/types/certificateOfReturn.ts`
-4. `src/lib/mobiCurrencyTranslation.ts`
-5. `src/data/nominationFeesData.ts`
-6. `src/components/common/MobiCurrencyDisplay.tsx`
-7. `src/components/community/elections/DeclarationOfInterestSheet.tsx`
-8. `src/components/community/elections/CandidateDashboardSheet.tsx`
-9. `src/components/community/elections/CampaignMediaUploader.tsx`
-10. `src/components/community/elections/CertificateOfReturnDisplay.tsx`
-11. `src/components/admin/election/AdminPrimaryManagementSheet.tsx`
-12. `src/components/admin/election/CampaignRoyaltySection.tsx`
-13. `src/components/admin/election/CampaignRoyaltyDetailSheet.tsx`
-14. `src/components/admin/election/FeeDistributionConfigDialog.tsx`
-15. `src/components/admin/election/CertificateOfReturnGenerator.tsx`
-16. `src/components/admin/finance/LevyProgressCard.tsx`
-17. `src/components/admin/finance/LevyDetailSheet.tsx`
-
-### Modified Files (8 total):
-1. `src/types/electionProcesses.ts` - Added primary threshold fields
-2. `src/data/campaignSystemData.ts` - Variable cost calculations
-3. `src/components/community/elections/CampaignSettingsDialog.tsx` - Media uploader
-4. `src/components/admin/election/AdminWinnersAnnouncementTab.tsx` - Transparency toggles
-5. `src/components/community/CommunityElectionTab.tsx` - Navigation options
-6. `src/components/admin/AdminElectionSection.tsx` - New sections
-7. `src/components/admin/AdminFinanceSection.tsx` - Levy progress
-8. `src/data/electionProcessesData.ts` - Primary threshold settings
-
----
-
-## Conclusion
-
-**ALL FEATURES FROM THE ORIGINAL PLAN HAVE BEEN FULLY IMPLEMENTED AND INTEGRATED.**
-
-The implementation follows:
-- Mobile-first design principles with Drawer/Sheet patterns
-- Consistent Mobi (M) currency usage throughout
-- Proper TypeScript type definitions
-- Multi-signature authorization where appropriate
-- Realistic mock data for demo purposes
-
-No additional implementation is required. The system is complete and ready for testing.
-
+This implementation creates a complete democratic governance system where member preferences directly influence community settings, while maintaining clear separation between Community Admin and Mobigate Admin privileges.
