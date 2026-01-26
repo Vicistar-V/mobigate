@@ -1,251 +1,197 @@
 
-# Comprehensive Implementation Plan: Community Settings Democratic Governance & Dual Currency Integration Fixes
+# Campaign Media Uploader Integration & Candidate Dashboard Enhancement
 
-## Inspection Summary
+## Overview
 
-### Community Settings Democratic Governance System - FULLY IMPLEMENTED
-The democratic governance system has been successfully implemented with all required components:
-
-**Created Files (All Complete):**
-| File | Status |
-|------|--------|
-| `src/types/communityDemocraticSettings.ts` | Complete - All types, interfaces, and 60% threshold config |
-| `src/lib/democraticSettingsUtils.ts` | Complete - 12 utility functions for threshold calculations |
-| `src/data/communityDemocraticSettingsData.ts` | Complete - Mock data for proposals, recommendations, settings |
-| `src/components/community/settings/CommunitySettingsSheet.tsx` | Complete - Main member-facing sheet with all features |
-| `src/components/community/settings/AdminSettingProposalCard.tsx` | Complete - Voting cards with progress bars and 60% marker |
-| `src/components/community/settings/ActiveSettingsList.tsx` | Complete - Settings display with approval status |
-| `src/components/community/settings/MemberRecommendationsList.tsx` | Complete - Support/unsupport with majority tracking |
-| `src/components/community/settings/RecommendAlternativeDialog.tsx` | Complete - Member recommendation submission |
-| `src/components/community/settings/SettingsChangeNotificationBanner.tsx` | Complete - Notification component (available but not yet integrated into main view) |
-| `src/components/admin/settings/CommunitySettingsAdminView.tsx` | Complete - Admin dashboard view (available but not yet used in admin panel) |
-
-**Modified Files (Integration Complete):**
-| File | Status |
-|------|--------|
-| `src/components/community/CommunityMainMenu.tsx` | Complete - "Community Settings" section added as last item with emerald styling, pending count badge, and sheet trigger |
-| `src/components/admin/AdminSettingsSection.tsx` | Complete - Democratic governance status card, pending approvals badge, member override badges |
+This plan addresses two key requirements:
+1. Add the **Campaign Media Uploader** to the Admin's "Create Campaign" form (it already exists in the Candidate's campaign creation flow but is missing from the Admin Panel)
+2. Ensure the **"Create Campaign" button is prominently visible** on the Candidate Dashboard after successful election declaration
 
 ---
 
-## Gaps Requiring Implementation
+## Current State Analysis
 
-### Gap 1: Notification Banner Not Integrated into Community View
-The `SettingsChangeNotificationBanner` component exists but isn't integrated into the main community page to notify members of pending settings.
+### What Already Exists
 
-**Files to Modify:**
-- `src/pages/Community.tsx` or `src/pages/CommunityDetail.tsx`
+| Component | Has Media Uploader | Has Create Campaign Button |
+|-----------|-------------------|---------------------------|
+| `CampaignSettingsDialog.tsx` (Candidate) | Yes - Line 255 | N/A (IS the creation dialog) |
+| `CampaignFormDialog.tsx` (Admin) | **NO - Missing** | N/A |
+| `CandidateDashboardSheet.tsx` | N/A | Yes - Lines 130-151, 237-245 |
+| `DeclarationOfInterestSheet.tsx` | N/A | Redirects to dashboard |
 
-### Gap 2: Admin View Component Not Integrated
-The `CommunitySettingsAdminView` component exists but isn't used in the admin dashboard to show democratic governance status.
+### The Media Uploader Component
 
-**Files to Modify:**
-- `src/pages/CommunityAdminDashboard.tsx` (if exists) or relevant admin section
-
-### Gap 3: Dual Currency Display - Remaining Files
-The following files still use legacy `M{amount.toLocaleString()}` format without the dual currency display:
-
-| File | Lines to Update |
-|------|-----------------|
-| `src/components/community/DonationDialog.tsx` | Lines 74-77, 185 |
-| `src/components/community/CommunityQuizDialog.tsx` | Lines 49-52, 63-66, 119, 177, 181, 223-224, 274, 324, 342 |
-| `src/components/community/MobigateQuizDialog.tsx` | Lines 50-53, 64-67 |
-| `src/components/community/elections/CheckIndebtednessSheet.tsx` | Lines 31-34, 124 |
-| `src/components/community/meetings/MinutesDownloadDialog.tsx` | Line 247 |
-| `src/components/community/finance/WalletWithdrawDialog.tsx` | Lines 65-67, 95-97, 152, 172 |
-| `src/components/community/fundraiser/DonationSheet.tsx` | Lines 45-59 |
+The `CampaignMediaUploader.tsx` component already provides:
+- Campaign Banner upload (16:9 aspect ratio, required)
+- Profile Photo upload (circular/square format, required)
+- Promotional Artwork gallery (up to 4 optional images)
+- File validation (type + size limits)
+- Preview thumbnails with remove/set-primary actions
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Integrate Notification Banner (Priority: Medium)
+### Task 1: Add Media Uploader to Admin Campaign Form
 
-**File: `src/pages/Community.tsx` or `src/pages/CommunityDetail.tsx`**
+**File:** `src/components/admin/election/CampaignFormDialog.tsx`
 
-1. Import the notification banner component:
+**Changes:**
+
+1. Import the media uploader component:
 ```typescript
-import { SettingsChangeNotificationBanner } from "@/components/community/settings/SettingsChangeNotificationBanner";
-import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
+import { CampaignMediaUploader } from "@/components/community/elections/CampaignMediaUploader";
 ```
 
-2. Add state for showing community settings sheet:
+2. Add campaign images state to form data:
 ```typescript
-const [showCommunitySettings, setShowCommunitySettings] = useState(false);
-const pendingSettingsCount = getPendingProposalsCount();
+const [formData, setFormData] = useState({
+  candidateName: "",
+  office: "",
+  slogan: "",
+  manifesto: "",
+  priorities: [""],
+  startDate: "",
+  endDate: "",
+  publishImmediately: false,
+  campaignImages: []  // NEW: Store uploaded images
+});
 ```
 
-3. Add banner below header:
-```tsx
-{pendingSettingsCount > 0 && (
-  <SettingsChangeNotificationBanner
-    pendingCount={pendingSettingsCount}
-    onReviewClick={() => setShowCommunitySettings(true)}
+3. Add Media Upload section after Campaign Slogan field (before Campaign Period):
+```text
+{/* Campaign Media Upload Section */}
+<Separator className="my-4" />
+
+<div className="space-y-2">
+  <Label className="text-sm font-medium flex items-center gap-2">
+    <Image className="h-4 w-4" />
+    Campaign Media *
+  </Label>
+  <CampaignMediaUploader 
+    onImagesChange={(images) => 
+      setFormData(prev => ({ ...prev, campaignImages: images }))
+    }
   />
-)}
+</div>
+
+<Separator className="my-4" />
 ```
 
-4. Add CommunitySettingsSheet at bottom of component render
+4. Add validation in handleSubmit to ensure at least a banner is uploaded
 
-### Phase 2: Complete Dual Currency Integration (Priority: High)
+---
 
-For each file, apply this pattern:
+### Task 2: Enhance Candidate Dashboard Campaign Button Visibility
 
-**Import Statement:**
+**File:** `src/components/community/elections/CandidateDashboardSheet.tsx`
+
+The "Create New Campaign" button already exists but can be enhanced:
+
+**Current location (Lines 129-152):**
+- A prominent CTA card with Megaphone icon
+- Button styled with primary colors
+- Shows when `canCreateCampaign === true` and `campaignStatus === "not_created"`
+
+**Enhancements to make:**
+
+1. Add a pulsing animation to draw attention:
 ```typescript
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+className="w-full animate-pulse"
 ```
 
-**Display Pattern (stacked - for cards):**
-```tsx
-<p className="font-bold">{formatMobiAmount(amount)}</p>
-<p className="text-xs text-muted-foreground">≈ {formatLocalAmount(amount, "NGN")}</p>
+2. Add tooltip text explaining the action
+
+3. Add an info card below the button explaining what the campaign creation enables (reach voters, share manifesto, set audience & duration)
+
+---
+
+### Task 3: Ensure Declaration Flow Leads to Campaign Creation
+
+**File:** `src/components/community/elections/DeclarationOfInterestSheet.tsx`
+
+This already works correctly:
+- After successful declaration, shows "Go to Campaign Dashboard" button
+- The `onDeclarationComplete` callback is used to:
+  1. Close the Declaration sheet
+  2. Open the `CandidateDashboardSheet`
+  
+The dashboard then shows the "Create Campaign" CTA.
+
+---
+
+## Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/components/admin/election/CampaignFormDialog.tsx` | Add CampaignMediaUploader import and integrate into form with state management |
+| `src/components/community/elections/CandidateDashboardSheet.tsx` | Enhance CTA visibility with animation and clearer messaging |
+
+---
+
+## Technical Details
+
+### Form Data Flow (Admin Panel)
+
+```text
+CampaignFormDialog
+  └── Form State
+      ├── candidateName
+      ├── office
+      ├── slogan
+      ├── manifesto
+      ├── priorities[]
+      ├── startDate/endDate
+      ├── publishImmediately
+      └── campaignImages[] ← NEW
+          ├── banner (required)
+          ├── profile (required)
+          └── artwork[] (optional, up to 4)
 ```
 
-**Display Pattern (inline - for toasts/messages):**
-```tsx
-`${formatMobiAmount(amount)} (≈ ${formatLocalAmount(amount, "NGN")})`
+### Candidate Dashboard Flow
+
+```text
+1. Member clicks "Declare for Election (EoI)" in Community Menu
+2. DeclarationOfInterestSheet opens
+3. Member selects office, pays fee
+4. On success: "Go to Campaign Dashboard" button shown
+5. Click redirects to CandidateDashboardSheet
+6. Dashboard shows prominent "Create New Campaign" CTA (when eligible)
+7. Click opens CampaignSettingsDialog (3-step process with media uploader)
 ```
 
 ---
 
-### Phase 2a: Update DonationDialog.tsx
+## Mobile-First UI Considerations
 
-**File:** `src/components/community/DonationDialog.tsx`
+- Media uploader is already mobile-optimized with:
+  - Touch-friendly upload buttons (h-10+ touch targets)
+  - Responsive grid layout (cols-2 for artworks)
+  - Proper aspect ratios for mobile viewing
+  - File size validation prevents slow uploads
 
-1. Add import:
-```typescript
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
-```
-
-2. Replace `formatMobiAmount` function (lines 74-77) with import from utility
-
-3. Update preset buttons (line 185):
-```tsx
-// Before
-<span className="text-xs sm:text-sm font-bold">M{preset.toLocaleString()}</span>
-
-// After
-<span className="text-xs sm:text-sm font-bold">{formatMobiAmount(preset)}</span>
-<span className="text-[10px] text-muted-foreground">≈ {formatLocalAmount(preset, "NGN")}</span>
-```
-
-### Phase 2b: Update CommunityQuizDialog.tsx
-
-**File:** `src/components/community/CommunityQuizDialog.tsx`
-
-1. Add import for `formatMobiAmount` and `formatLocalAmount`
-
-2. Update all instances:
-   - Line 51: Toast description
-   - Line 65-66: Toast description for win
-   - Lines 119, 177, 181, 223-224: Wallet balance and quiz amounts
-   - Lines 274, 324, 342: Player stats and contributions
-
-### Phase 2c: Update MobigateQuizDialog.tsx
-
-**File:** `src/components/community/MobigateQuizDialog.tsx`
-
-1. Add import for formatting utilities
-
-2. Update toast messages (lines 50-53, 64-67)
-
-### Phase 2d: Update CheckIndebtednessSheet.tsx
-
-**File:** `src/components/community/elections/CheckIndebtednessSheet.tsx`
-
-1. Add import for formatting utilities
-
-2. Update toast message (line 33) and display text (line 124)
-
-### Phase 2e: Update MinutesDownloadDialog.tsx
-
-**File:** `src/components/community/meetings/MinutesDownloadDialog.tsx`
-
-1. Add import for formatting utilities
-
-2. Update wallet balance display (line 247)
-
-### Phase 2f: Update WalletWithdrawDialog.tsx
-
-**File:** `src/components/community/finance/WalletWithdrawDialog.tsx`
-
-1. Add import for formatting utilities
-
-2. Update:
-   - Toast messages (lines 65-67, 95-97)
-   - Available balance display (line 152)
-   - Minimum withdrawal display (line 172)
-
-### Phase 2g: Update DonationSheet.tsx (Fundraiser)
-
-**File:** `src/components/community/fundraiser/DonationSheet.tsx`
-
-1. Add import for formatting utilities
-
-2. Update conversion display functions (lines 45-59)
+- Admin form uses Drawer component (mobile-friendly bottom sheet)
 
 ---
 
-## Verification Checklist
+## Validation Requirements
 
-After implementation, verify:
-
-### Community Settings Democratic Governance
-- [x] Types and interfaces defined with 60% threshold config
-- [x] Utility functions for all threshold calculations
-- [x] Mock data includes proposals, recommendations, and active settings
-- [x] CommunitySettingsSheet accessible from Community Menu (last item)
-- [x] Pending count badge shown in menu
-- [x] Admin proposals show approve/disapprove buttons
-- [x] Progress bars show 60% threshold marker
-- [x] Member recommendations list with support toggle
-- [x] Recommend Alternative dialog works
-- [x] AdminSettingsSection shows democratic governance status
-- [ ] Notification banner integrated into community page (TO BE DONE)
-
-### Dual Currency Display
-- [x] MembersFinancialReportsDialog - Updated
-- [x] IncomeSourceDetailSheet - Updated
-- [x] AccountStatementsDialog - Updated
-- [x] FinancialStatusDialog - Updated
-- [x] FinancialObligationsDialog - Updated
-- [x] WalletTransferDialog - Updated
-- [x] TransactionAuthorizationPanel - Updated
-- [x] MobigateQuizPlayDialog - Updated
-- [x] AdminPrimaryManagementSheet - Updated
-- [ ] DonationDialog - TO BE UPDATED
-- [ ] CommunityQuizDialog - TO BE UPDATED
-- [ ] MobigateQuizDialog (toast messages) - TO BE UPDATED
-- [ ] CheckIndebtednessSheet - TO BE UPDATED
-- [ ] MinutesDownloadDialog - TO BE UPDATED
-- [ ] WalletWithdrawDialog - TO BE UPDATED
-- [ ] DonationSheet (fundraiser) - TO BE UPDATED
+### Admin Campaign Form Validation:
+1. Candidate Name - Required
+2. Office Position - Required
+3. Campaign Slogan - Optional but recommended
+4. **Campaign Banner** - Required (NEW)
+5. **Profile Photo** - Required (NEW)
+6. Campaign Period - Optional (defaults available)
 
 ---
 
-## Files Summary
+## Summary
 
-### Files to Modify (7 files)
-1. `src/components/community/DonationDialog.tsx`
-2. `src/components/community/CommunityQuizDialog.tsx`
-3. `src/components/community/MobigateQuizDialog.tsx`
-4. `src/components/community/elections/CheckIndebtednessSheet.tsx`
-5. `src/components/community/meetings/MinutesDownloadDialog.tsx`
-6. `src/components/community/finance/WalletWithdrawDialog.tsx`
-7. `src/components/community/fundraiser/DonationSheet.tsx`
-
-### Optional Enhancement Files (2 files)
-1. Community page - Add SettingsChangeNotificationBanner
-2. Admin dashboard - Integrate CommunitySettingsAdminView
-
----
-
-## Technical Notes
-
-- All new components follow mobile-first design with 92vh drawer height
-- Touch-friendly buttons use minimum h-10 height
-- Progress bars include visual 60% threshold markers
-- Toast messages provide user feedback for all actions
-- Democratic settings use consistent emerald color theme
-- The 60% threshold is configurable via `DEMOCRATIC_SETTINGS_CONFIG`
+This implementation:
+1. Adds the existing `CampaignMediaUploader` component to the Admin's campaign creation form
+2. Maintains consistency between Admin and Candidate campaign creation experiences
+3. Keeps the existing Candidate Dashboard flow intact (the "Create Campaign" button is already there and working)
+4. Enhances the CTA visibility with minor UI improvements
