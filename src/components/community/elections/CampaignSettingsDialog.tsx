@@ -23,7 +23,8 @@ import {
   AlertCircle,
   Loader2,
   Plus,
-  X
+  X,
+  Image as ImageIcon
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { 
@@ -42,6 +43,7 @@ import {
   processCampaignPayment,
   formatMobiAmount
 } from "@/lib/campaignFeeDistribution";
+import { CampaignMediaUploader } from "./CampaignMediaUploader";
 
 interface CampaignSettingsDialogProps {
   open: boolean;
@@ -73,6 +75,7 @@ export function CampaignSettingsDialog({
   
   // Form State
   const [tagline, setTagline] = useState("");
+  const [slogan, setSlogan] = useState("");
   const [manifesto, setManifesto] = useState("");
   const [priorities, setPriorities] = useState<CampaignPriority[]>([
     { id: "1", title: "", description: "" }
@@ -80,6 +83,8 @@ export function CampaignSettingsDialog({
   const [selectedAudiences, setSelectedAudiences] = useState<CampaignAudience[]>(["community_interface"]);
   const [selectedDuration, setSelectedDuration] = useState<CampaignDurationDays>(7);
   const [newPriority, setNewPriority] = useState("");
+  
+  // Media uploads handled by CampaignMediaUploader
 
   // Calculate fees
   const feeCalculation = calculateCampaignFee(selectedDuration, selectedAudiences);
@@ -114,6 +119,14 @@ export function CampaignSettingsDialog({
 
   const handleNext = () => {
     if (step === 1) {
+      if (!slogan.trim()) {
+        toast({
+          title: "Slogan Required",
+          description: "Please enter a campaign slogan",
+          variant: "destructive"
+        });
+        return;
+      }
       if (!tagline.trim()) {
         toast({
           title: "Tagline Required",
@@ -167,6 +180,7 @@ export function CampaignSettingsDialog({
       // Reset and close
       setStep(1);
       setTagline("");
+      setSlogan("");
       setManifesto("");
       setPriorities([{ id: "1", title: "", description: "" }]);
       setSelectedAudiences(["community_interface"]);
@@ -196,6 +210,17 @@ export function CampaignSettingsDialog({
       </div>
       
       <div className="space-y-2">
+        <Label className="text-sm font-medium">Campaign Slogan *</Label>
+        <Input 
+          value={slogan}
+          onChange={(e) => setSlogan(e.target.value)}
+          placeholder="e.g., 'Progress Through Unity'"
+          maxLength={40}
+        />
+        <p className="text-xs text-muted-foreground">{slogan.length}/40 characters</p>
+      </div>
+      
+      <div className="space-y-2">
         <Label className="text-sm font-medium">Campaign Tagline *</Label>
         <Input 
           value={tagline}
@@ -217,6 +242,20 @@ export function CampaignSettingsDialog({
         />
         <p className="text-xs text-muted-foreground">{manifesto.length}/1000 characters</p>
       </div>
+
+      {/* Media Upload Section */}
+      <Separator />
+      
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <ImageIcon className="h-4 w-4 text-muted-foreground" />
+          <Label className="text-sm font-medium">Campaign Media *</Label>
+        </div>
+        
+        <CampaignMediaUploader />
+      </div>
+
+      <Separator />
       
       <div className="space-y-2">
         <Label className="text-sm font-medium">Key Priorities</Label>

@@ -11,17 +11,26 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { CertificateOfReturn } from "@/types/certificateOfReturn";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-interface CertificateOfReturnDisplayProps {
+export interface CertificateOfReturnDisplayProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   certificate: CertificateOfReturn;
   onDownload?: () => void;
 }
 
 export function CertificateOfReturnDisplay({
+  open,
+  onOpenChange,
   certificate,
   onDownload,
 }: CertificateOfReturnDisplayProps) {
+  const isMobile = useIsMobile();
   const handleDownload = () => {
     // Generate text content for download
     const content = `
@@ -71,7 +80,7 @@ Powered by Mobigate
     onDownload?.();
   };
 
-  return (
+  const CertificateContent = () => (
     <Card className="border-2 border-primary/20 bg-gradient-to-b from-primary/5 to-transparent">
       <CardContent className="p-6 space-y-6">
         {/* Header */}
@@ -180,6 +189,46 @@ Powered by Mobigate
         </Button>
       </CardContent>
     </Card>
+  );
+
+  // If open/onOpenChange not provided, render inline
+  if (open === undefined) {
+    return <CertificateContent />;
+  }
+
+  // Otherwise render in a dialog/drawer
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92vh]">
+          <DrawerHeader className="border-b pb-3">
+            <DrawerTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-primary" />
+              Certificate of Return
+            </DrawerTitle>
+          </DrawerHeader>
+          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+            <CertificateContent />
+          </ScrollArea>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Award className="h-5 w-5 text-primary" />
+            Certificate of Return
+          </DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="flex-1 pr-4">
+          <CertificateContent />
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }
 

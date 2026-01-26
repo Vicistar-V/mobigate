@@ -291,10 +291,12 @@ export const mockElectionProcessSettings: ElectionProcessSettings = {
   nominationDurationDays: 30,
   primaryElectionEnabled: true,
   primaryAdvancementCount: 2,
+  primaryThreshold: 20,
   minimumNominations: 2,
   requireNomineeAcceptance: true,
   endorsementThreshold: 10,
   votingDurationHours: 8,
+  voterChangeTimeMinutes: 30,
 };
 
 // Helper functions
