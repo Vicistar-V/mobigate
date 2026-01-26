@@ -38,10 +38,12 @@ import { CommunityQuizDialog } from "./CommunityQuizDialog";
 import { MobigateQuizDialog } from "./MobigateQuizDialog";
 import { MemberPrivacyVotingSheet } from "./settings/MemberPrivacyVotingSheet";
 import { CommunitySettingsSheet } from "./settings/CommunitySettingsSheet";
+import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestSheet";
+import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { Vote, Settings2 } from "lucide-react";
+import { Vote, Settings2, Flag } from "lucide-react";
 import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
 
 interface CommunityMainMenuProps {
@@ -88,6 +90,8 @@ export function CommunityMainMenu({
   const [showMobigateQuiz, setShowMobigateQuiz] = useState(false);
   const [showPrivacyVoting, setShowPrivacyVoting] = useState(false);
   const [showCommunitySettings, setShowCommunitySettings] = useState(false);
+  const [showDeclarationOfInterest, setShowDeclarationOfInterest] = useState(false);
+  const [showCandidateDashboard, setShowCandidateDashboard] = useState(false);
 
   const pendingSettingsCount = getPendingProposalsCount();
 
@@ -617,6 +621,18 @@ export function CommunityMainMenu({
                 Election/Voting
               </AccordionTrigger>
               <AccordionContent className="space-y-1">
+                {/* Declare for Election - Highlighted Entry Point */}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-10 transition-colors duration-200 bg-primary/10 hover:bg-primary/20 text-primary font-medium"
+                  onClick={() => {
+                    setShowDeclarationOfInterest(true);
+                    setOpen(false);
+                  }}
+                >
+                  <Flag className="h-4 w-4 mr-2" />
+                  Declare for Election (EoI)
+                </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4 h-9 transition-colors duration-200"
@@ -1171,6 +1187,24 @@ export function CommunityMainMenu({
       <CommunitySettingsSheet
         open={showCommunitySettings}
         onOpenChange={setShowCommunitySettings}
+      />
+
+      {/* Election Declaration of Interest Sheet */}
+      <DeclarationOfInterestSheet
+        open={showDeclarationOfInterest}
+        onOpenChange={setShowDeclarationOfInterest}
+        memberName="John Doe"
+        walletBalance={75000}
+        onDeclarationComplete={(officeId, ref) => {
+          setShowDeclarationOfInterest(false);
+          setShowCandidateDashboard(true);
+        }}
+      />
+
+      {/* Candidate Dashboard Sheet */}
+      <CandidateDashboardSheet
+        open={showCandidateDashboard}
+        onOpenChange={setShowCandidateDashboard}
       />
     </>
   );
