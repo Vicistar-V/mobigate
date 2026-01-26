@@ -56,6 +56,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { DualCurrencyDisplay, formatDualCurrency } from "@/components/common/DualCurrencyDisplay";
 
 interface MembersFinancialReportsDialogProps {
   open: boolean;

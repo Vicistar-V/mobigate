@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUpRight, ArrowDownLeft, X } from "lucide-react";
 import { format } from "date-fns";
+import { DualCurrencyDisplay } from "@/components/common/DualCurrencyDisplay";
 
 interface Transaction {
   id: string;
@@ -132,16 +133,14 @@ export const RecentTransactionsDialog = ({
                     </div>
                   </div>
                   <div className="flex items-center justify-between sm:flex-col sm:items-end sm:text-right shrink-0 mt-2 sm:mt-0 pl-9 sm:pl-0">
-                    <p className={`text-base sm:text-lg font-semibold ${
-                      transaction.type === "received" 
-                        ? "text-emerald-600" 
-                        : "text-red-600"
-                    }`}>
-                      {transaction.type === "received" ? "+" : "-"}
-                      {currencySymbol}{transaction.amount.toLocaleString()}
-                    </p>
+                    <DualCurrencyDisplay
+                      mobiAmount={transaction.amount}
+                      transactionType={transaction.type === "received" ? "credit" : "debit"}
+                      showSign="auto"
+                      size="md"
+                    />
                     <Badge variant="outline" className="text-sm sm:text-base sm:mt-1">
-                      {transaction.currency}
+                      Mobi
                     </Badge>
                   </div>
                 </div>
