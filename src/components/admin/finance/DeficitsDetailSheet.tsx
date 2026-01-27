@@ -2,10 +2,8 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
 import {
   Drawer,
   DrawerContent,
@@ -22,184 +20,191 @@ import {
   Search,
   AlertTriangle,
   Calendar,
-  User,
+  Building2,
   Clock,
   ChevronRight,
   Mail,
   Phone,
-  Ban,
+  CreditCard,
+  FileText,
+  Receipt,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 
-import communityPerson1 from "@/assets/community-person-1.jpg";
-import communityPerson2 from "@/assets/community-person-2.jpg";
-import communityPerson3 from "@/assets/community-person-3.jpg";
-import communityPerson4 from "@/assets/community-person-4.jpg";
-import communityPerson5 from "@/assets/community-person-5.jpg";
-import communityPerson6 from "@/assets/community-person-6.jpg";
-
-interface DeficitRecord {
+interface CommunityDebtRecord {
   id: string;
-  memberName: string;
-  memberAvatar: string;
-  memberEmail: string;
-  memberPhone: string;
-  obligationType: string;
-  obligationName: string;
+  payeeName: string;
+  payeeType: "contractor" | "vendor" | "utility" | "service_provider" | "other";
+  payeeEmail: string;
+  payeePhone: string;
+  invoiceNumber: string;
+  description: string;
   amountOwed: number;
   dueDate: Date;
   daysPastDue: number;
-  status: "overdue" | "grace_period" | "defaulting" | "suspended";
-  lastReminder?: Date;
+  status: "overdue" | "due_soon" | "pending_approval" | "disputed";
+  priority: "high" | "medium" | "low";
   notes?: string;
 }
 
-// Mock data for deficits categories
-const mockDeficitRecords: Record<string, DeficitRecord[]> = {
-  unpaidDues: [
+// Mock data for community debts/payables
+const mockCommunityDebtRecords: Record<string, CommunityDebtRecord[]> = {
+  contractorPayables: [
     {
-      id: "ud1",
-      memberName: "Obiora Chukwuma",
-      memberAvatar: communityPerson1,
-      memberEmail: "obiora.c@email.com",
-      memberPhone: "+234 801 234 5678",
-      obligationType: "annual_dues",
-      obligationName: "Annual Dues 2025",
-      amountOwed: 15000,
+      id: "cp1",
+      payeeName: "Mega Builders Construction Ltd",
+      payeeType: "contractor",
+      payeeEmail: "accounts@megabuilders.com",
+      payeePhone: "+234 801 234 5678",
+      invoiceNumber: "INV-MB-2025-045",
+      description: "Community Hall Phase 2 - Roofing & Finishing",
+      amountOwed: 75000,
+      dueDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+      daysPastDue: 15,
+      status: "overdue",
+      priority: "high",
+      notes: "Contractor has sent 2 payment reminders"
+    },
+    {
+      id: "cp2",
+      payeeName: "PowerMax Electricals",
+      payeeType: "contractor",
+      payeeEmail: "billing@powermax.ng",
+      payeePhone: "+234 802 345 6789",
+      invoiceNumber: "INV-PME-2025-112",
+      description: "Electrical Installation - Final Phase",
+      amountOwed: 45000,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      daysPastDue: 0,
+      status: "due_soon",
+      priority: "medium",
+    },
+    {
+      id: "cp3",
+      payeeName: "AquaFlow Plumbing Services",
+      payeeType: "contractor",
+      payeeEmail: "info@aquaflow.com",
+      payeePhone: "+234 803 456 7890",
+      invoiceNumber: "INV-AFS-2025-089",
+      description: "Water System Installation & Testing",
+      amountOwed: 30000,
+      dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      daysPastDue: 5,
+      status: "overdue",
+      priority: "medium",
+    },
+  ],
+  vendorPayables: [
+    {
+      id: "vp1",
+      payeeName: "Dangote Building Materials",
+      payeeType: "vendor",
+      payeeEmail: "sales@dangotecement.com",
+      payeePhone: "+234 804 567 8901",
+      invoiceNumber: "INV-DBM-2025-234",
+      description: "Cement & Iron Rods - Credit Purchase",
+      amountOwed: 65000,
       dueDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       daysPastDue: 30,
       status: "overdue",
-      lastReminder: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      notes: "Promised to pay by month end"
+      priority: "high",
+      notes: "30-day credit term expired"
     },
     {
-      id: "ud2",
-      memberName: "Ngozi Okafor",
-      memberAvatar: communityPerson2,
-      memberEmail: "ngozi.o@email.com",
-      memberPhone: "+234 802 345 6789",
-      obligationType: "annual_dues",
-      obligationName: "Annual Dues 2025",
-      amountOwed: 15000,
-      dueDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
-      daysPastDue: 45,
-      status: "defaulting",
-      lastReminder: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    },
-    {
-      id: "ud3",
-      memberName: "Emeka Nwosu",
-      memberAvatar: communityPerson4,
-      memberEmail: "emeka.n@email.com",
-      memberPhone: "+234 803 456 7890",
-      obligationType: "annual_dues",
-      obligationName: "Annual Dues 2025",
-      amountOwed: 15000,
-      dueDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-      daysPastDue: 15,
-      status: "grace_period",
-    },
-    {
-      id: "ud4",
-      memberName: "Adaeze Nnamdi",
-      memberAvatar: communityPerson5,
-      memberEmail: "adaeze.n@email.com",
-      memberPhone: "+234 804 567 8901",
-      obligationType: "annual_dues",
-      obligationName: "Annual Dues 2024",
-      amountOwed: 12000,
-      dueDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-      daysPastDue: 365,
-      status: "suspended",
-      notes: "Membership suspended due to non-payment"
-    },
-  ],
-  unpaidLevies: [
-    {
-      id: "ul1",
-      memberName: "Chukwuemeka Okonkwo",
-      memberAvatar: communityPerson4,
-      memberEmail: "chukwuemeka.o@email.com",
-      memberPhone: "+234 805 678 9012",
-      obligationType: "development_levy",
-      obligationName: "Community Hall Development Levy",
-      amountOwed: 25000,
-      dueDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
-      daysPastDue: 20,
-      status: "overdue",
-      lastReminder: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    },
-    {
-      id: "ul2",
-      memberName: "Ifeanyi Ezekwesili",
-      memberAvatar: communityPerson6,
-      memberEmail: "ifeanyi.e@email.com",
-      memberPhone: "+234 806 789 0123",
-      obligationType: "development_levy",
-      obligationName: "Community Hall Development Levy",
-      amountOwed: 12500,
-      dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-      daysPastDue: 10,
-      status: "grace_period",
-      notes: "Partial payment received - M12,500 pending"
-    },
-    {
-      id: "ul3",
-      memberName: "Dr. Amaka Eze",
-      memberAvatar: communityPerson3,
-      memberEmail: "dr.amaka@email.com",
-      memberPhone: "+234 807 890 1234",
-      obligationType: "emergency_levy",
-      obligationName: "Emergency Health Fund",
-      amountOwed: 5000,
-      dueDate: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000),
-      daysPastDue: 35,
-      status: "defaulting",
-    },
-  ],
-  pendingObligations: [
-    {
-      id: "po1",
-      memberName: "Ngozi Okafor",
-      memberAvatar: communityPerson2,
-      memberEmail: "ngozi.o@email.com",
-      memberPhone: "+234 802 345 6789",
-      obligationType: "special_assessment",
-      obligationName: "Road Repair Assessment",
-      amountOwed: 10000,
+      id: "vp2",
+      payeeName: "Office Hub Nigeria Ltd",
+      payeeType: "vendor",
+      payeeEmail: "orders@officehub.ng",
+      payeePhone: "+234 805 678 9012",
+      invoiceNumber: "INV-OH-2025-567",
+      description: "Office Furniture & Equipment",
+      amountOwed: 35000,
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
       daysPastDue: 0,
-      status: "grace_period",
-      notes: "Due in 2 weeks"
+      status: "pending_approval",
+      priority: "low",
     },
     {
-      id: "po2",
-      memberName: "Obiora Chukwuma",
-      memberAvatar: communityPerson1,
-      memberEmail: "obiora.c@email.com",
-      memberPhone: "+234 801 234 5678",
-      obligationType: "project_levy",
-      obligationName: "School Building Project",
-      amountOwed: 30000,
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      id: "vp3",
+      payeeName: "Premier Printing Press",
+      payeeType: "vendor",
+      payeeEmail: "accounts@premierprint.com",
+      payeePhone: "+234 806 789 0123",
+      invoiceNumber: "INV-PPP-2025-321",
+      description: "Annual Report Printing & Binding",
+      amountOwed: 25000,
+      dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      daysPastDue: 10,
+      status: "disputed",
+      priority: "low",
+      notes: "Quality dispute pending resolution"
+    },
+  ],
+  pendingBills: [
+    {
+      id: "pb1",
+      payeeName: "EKEDC - Eko Electricity",
+      payeeType: "utility",
+      payeeEmail: "support@abornedc.com",
+      payeePhone: "0700-CALL-EKEDC",
+      invoiceNumber: "BILL-EKEDC-JAN-2025",
+      description: "Electricity Bill - Community Hall & Office",
+      amountOwed: 25000,
+      dueDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      daysPastDue: 7,
+      status: "overdue",
+      priority: "high",
+      notes: "Disconnection notice received"
+    },
+    {
+      id: "pb2",
+      payeeName: "Lagos State Water Corporation",
+      payeeType: "utility",
+      payeeEmail: "billing@lswc.gov.ng",
+      payeePhone: "+234 1 234 5678",
+      invoiceNumber: "BILL-LSWC-Q1-2025",
+      description: "Water Rates - Q1 2025",
+      amountOwed: 15000,
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       daysPastDue: 0,
-      status: "grace_period",
+      status: "due_soon",
+      priority: "medium",
+    },
+    {
+      id: "pb3",
+      payeeName: "Zenith Security Services",
+      payeeType: "service_provider",
+      payeeEmail: "accounts@zenithsecurity.ng",
+      payeePhone: "+234 807 890 1234",
+      invoiceNumber: "INV-ZSS-FEB-2025",
+      description: "Security Personnel - February Salary",
+      amountOwed: 10000,
+      dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      daysPastDue: 3,
+      status: "overdue",
+      priority: "high",
     },
   ],
 };
 
 const deficitLabels: Record<string, string> = {
-  unpaidDues: "Unpaid Dues",
-  unpaidLevies: "Unpaid Levies",
-  pendingObligations: "Pending Obligations",
+  contractorPayables: "Contractor Payables",
+  vendorPayables: "Vendor Payables",
+  pendingBills: "Pending Bills & Utilities",
+};
+
+const deficitDescriptions: Record<string, string> = {
+  contractorPayables: "Amounts owed to contractors for construction and project work",
+  vendorPayables: "Amounts owed to vendors for materials and supplies",
+  pendingBills: "Outstanding utility bills and service provider payments",
 };
 
 const deficitColors: Record<string, string> = {
-  unpaidDues: "bg-amber-50 border-amber-200",
-  unpaidLevies: "bg-orange-50 border-orange-200",
-  pendingObligations: "bg-yellow-50 border-yellow-200",
+  contractorPayables: "bg-amber-50 border-amber-200",
+  vendorPayables: "bg-orange-50 border-orange-200",
+  pendingBills: "bg-red-50 border-red-200",
 };
 
 interface DeficitsDetailSheetProps {
@@ -229,33 +234,61 @@ const formatLocalPrimary = (amount: number): { local: string; mobi: string } => 
   };
 };
 
-const getStatusConfig = (status: DeficitRecord["status"]) => {
+const getStatusConfig = (status: CommunityDebtRecord["status"]) => {
   switch (status) {
     case "overdue":
       return { 
         label: "Overdue", 
         className: "bg-red-500/10 text-red-600",
       };
-    case "grace_period":
+    case "due_soon":
       return { 
-        label: "Grace Period", 
+        label: "Due Soon", 
         className: "bg-amber-500/10 text-amber-600",
       };
-    case "defaulting":
+    case "pending_approval":
       return { 
-        label: "Defaulting", 
-        className: "bg-orange-500/10 text-orange-600",
+        label: "Pending Approval", 
+        className: "bg-blue-500/10 text-blue-600",
       };
-    case "suspended":
+    case "disputed":
       return { 
-        label: "Suspended", 
-        className: "bg-gray-500/10 text-gray-600",
+        label: "Disputed", 
+        className: "bg-purple-500/10 text-purple-600",
       };
     default:
       return { 
         label: status, 
         className: "bg-gray-500/10 text-gray-600",
       };
+  }
+};
+
+const getPriorityConfig = (priority: CommunityDebtRecord["priority"]) => {
+  switch (priority) {
+    case "high":
+      return { label: "High Priority", className: "bg-red-500/10 text-red-600" };
+    case "medium":
+      return { label: "Medium", className: "bg-amber-500/10 text-amber-600" };
+    case "low":
+      return { label: "Low", className: "bg-green-500/10 text-green-600" };
+    default:
+      return { label: priority, className: "bg-gray-500/10 text-gray-600" };
+  }
+};
+
+const getPayeeTypeIcon = (type: CommunityDebtRecord["payeeType"]) => {
+  switch (type) {
+    case "contractor":
+      return <Building2 className="h-4 w-4" />;
+    case "vendor":
+      return <Receipt className="h-4 w-4" />;
+    case "utility":
+      return <FileText className="h-4 w-4" />;
+    case "service_provider":
+      return <Building2 className="h-4 w-4" />;
+    default:
+      return <FileText className="h-4 w-4" />;
   }
 };
 
@@ -268,24 +301,28 @@ export const DeficitsDetailSheet = ({
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRecord, setSelectedRecord] = useState<DeficitRecord | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<CommunityDebtRecord | null>(null);
 
-  const records = mockDeficitRecords[sourceKey] || [];
+  const records = mockCommunityDebtRecords[sourceKey] || [];
   const sourceLabel = deficitLabels[sourceKey] || sourceKey;
+  const sourceDescription = deficitDescriptions[sourceKey] || "";
   const sourceColor = deficitColors[sourceKey] || "bg-amber-50 border-amber-200";
 
   const filteredRecords = records.filter((r) =>
-    r.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.obligationName.toLowerCase().includes(searchQuery.toLowerCase())
+    r.payeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalFormatted = formatLocalPrimary(totalAmount);
-  const overdueCount = records.filter(r => r.status === "overdue" || r.status === "defaulting").length;
+  const overdueCount = records.filter(r => r.status === "overdue").length;
+  const highPriorityCount = records.filter(r => r.priority === "high").length;
 
-  const handleSendReminder = (record: DeficitRecord) => {
+  const handlePayNow = (record: CommunityDebtRecord) => {
+    const formatted = formatLocalPrimary(record.amountOwed);
     toast({
-      title: "Reminder Sent",
-      description: `Payment reminder sent to ${record.memberName}.`,
+      title: "Payment Initiated",
+      description: `Payment of ${formatted.local} (${formatted.mobi}) to ${record.payeeName} has been queued for processing.`,
     });
   };
 
@@ -300,11 +337,11 @@ export const DeficitsDetailSheet = ({
           <div className="flex-1">
             <p className="text-xs text-muted-foreground">{sourceLabel}</p>
             <p className="text-xl font-bold text-amber-600">{totalFormatted.local}</p>
-            <p className="text-xs text-muted-foreground">({totalFormatted.mobi})</p>
+            <p className="text-xs text-muted-foreground">({totalFormatted.mobi}) owed</p>
           </div>
           <div className="text-right">
             <Badge variant="secondary" className="text-xs mb-1">
-              {records.length} members
+              {records.length} payables
             </Badge>
             {overdueCount > 0 && (
               <div>
@@ -315,13 +352,26 @@ export const DeficitsDetailSheet = ({
             )}
           </div>
         </div>
+        <p className="text-xs text-muted-foreground mt-3 border-t pt-2">
+          {sourceDescription}
+        </p>
       </Card>
+
+      {/* Priority Summary */}
+      {highPriorityCount > 0 && (
+        <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg border border-red-200">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <span className="text-sm text-red-700">
+            {highPriorityCount} high priority payment{highPriorityCount > 1 ? 's' : ''} require immediate attention
+          </span>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by member name or obligation..."
+          placeholder="Search by payee, description, or invoice..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -331,54 +381,64 @@ export const DeficitsDetailSheet = ({
       {/* Records List */}
       <div className="space-y-2">
         <h3 className="font-semibold text-sm flex items-center gap-2">
-          <User className="h-4 w-4" />
-          Outstanding Records ({filteredRecords.length})
+          <Receipt className="h-4 w-4" />
+          Outstanding Payments ({filteredRecords.length})
         </h3>
 
         <div className="space-y-2">
           {filteredRecords.map((record) => {
             const amountFormatted = formatLocalPrimary(record.amountOwed);
             const statusConfig = getStatusConfig(record.status);
+            const priorityConfig = getPriorityConfig(record.priority);
             
             return (
               <Card 
                 key={record.id} 
-                className="p-3 cursor-pointer hover:bg-muted/30 transition-colors active:scale-[0.99]"
+                className={`p-3 cursor-pointer hover:bg-muted/30 transition-colors active:scale-[0.99] ${
+                  record.priority === "high" ? "border-l-4 border-l-red-500" : ""
+                }`}
                 onClick={() => setSelectedRecord(record)}
               >
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={record.memberAvatar} />
-                    <AvatarFallback className="text-sm">
-                      {record.memberName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{record.memberName}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {record.obligationName}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <Badge className={`text-xs ${statusConfig.className}`}>
-                        {statusConfig.label}
-                      </Badge>
-                      {record.daysPastDue > 0 && (
-                        <span className="text-xs text-red-600">
-                          {record.daysPastDue} days overdue
-                        </span>
-                      )}
+                <div className="space-y-2">
+                  {/* Header Row */}
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-muted/50 flex-shrink-0">
+                      {getPayeeTypeIcon(record.payeeType)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{record.payeeName}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">
+                        {record.description}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-sm text-red-600">
+                        -{amountFormatted.local}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ({amountFormatted.mobi})
+                      </p>
                     </div>
                   </div>
 
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-sm text-amber-600">
-                      {amountFormatted.local}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      ({amountFormatted.mobi})
-                    </p>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground mt-1 ml-auto" />
+                  {/* Footer Row */}
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <FileText className="h-3 w-3" />
+                      <span className="truncate max-w-[100px]">{record.invoiceNumber}</span>
+                      <span className="text-muted-foreground/50">•</span>
+                      {record.daysPastDue > 0 ? (
+                        <span className="text-red-600">{record.daysPastDue} days overdue</span>
+                      ) : (
+                        <span>Due: {format(record.dueDate, "MMM d")}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Badge className={`text-[10px] ${statusConfig.className}`}>
+                        {statusConfig.label}
+                      </Badge>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -389,21 +449,21 @@ export const DeficitsDetailSheet = ({
 
       {filteredRecords.length === 0 && (
         <Card className="p-8 text-center">
-          <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="font-medium mb-2">No Records Found</h3>
+          <Receipt className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="font-medium mb-2">No Payables Found</h3>
           <p className="text-sm text-muted-foreground">
             Try adjusting your search query.
           </p>
         </Card>
       )}
 
-      {/* Member Detail Modal */}
+      {/* Debt Detail Modal */}
       {selectedRecord && (
-        <DeficitMemberDetailModal
+        <DebtDetailModal
           record={selectedRecord}
           open={!!selectedRecord}
           onOpenChange={(open) => !open && setSelectedRecord(null)}
-          onSendReminder={handleSendReminder}
+          onPayNow={handlePayNow}
         />
       )}
     </div>
@@ -414,7 +474,7 @@ export const DeficitsDetailSheet = ({
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[92vh]">
           <DrawerHeader className="border-b">
-            <DrawerTitle>{sourceLabel} Details</DrawerTitle>
+            <DrawerTitle>{sourceLabel}</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
             <Content />
@@ -428,7 +488,7 @@ export const DeficitsDetailSheet = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>{sourceLabel} Details</DialogTitle>
+          <DialogTitle>{sourceLabel}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
           <Content />
@@ -438,118 +498,112 @@ export const DeficitsDetailSheet = ({
   );
 };
 
-// Member Detail Modal Component
-interface DeficitMemberDetailModalProps {
-  record: DeficitRecord;
+// Debt Detail Modal Component
+interface DebtDetailModalProps {
+  record: CommunityDebtRecord;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSendReminder: (record: DeficitRecord) => void;
+  onPayNow: (record: CommunityDebtRecord) => void;
 }
 
-const DeficitMemberDetailModal = ({
+const DebtDetailModal = ({
   record,
   open,
   onOpenChange,
-  onSendReminder,
-}: DeficitMemberDetailModalProps) => {
+  onPayNow,
+}: DebtDetailModalProps) => {
   const isMobile = useIsMobile();
   const amountFormatted = formatLocalPrimary(record.amountOwed);
   const statusConfig = getStatusConfig(record.status);
+  const priorityConfig = getPriorityConfig(record.priority);
 
   const DetailContent = () => (
     <div className="space-y-4">
-      {/* Member Header */}
+      {/* Payee Header */}
       <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
-        <Avatar className="h-14 w-14">
-          <AvatarImage src={record.memberAvatar} />
-          <AvatarFallback>{record.memberName.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <p className="font-semibold">{record.memberName}</p>
-          <Badge className={`mt-1 ${statusConfig.className}`}>
-            {statusConfig.label}
-          </Badge>
+        <div className="p-3 rounded-lg bg-background">
+          {getPayeeTypeIcon(record.payeeType)}
         </div>
+        <div className="flex-1">
+          <p className="font-semibold">{record.payeeName}</p>
+          <p className="text-xs text-muted-foreground capitalize">
+            {record.payeeType.replace(/_/g, " ")}
+          </p>
+        </div>
+        <Badge className={priorityConfig.className}>
+          {priorityConfig.label}
+        </Badge>
       </div>
 
       {/* Amount Due */}
-      <div className="text-center py-4 bg-amber-50 rounded-lg border border-amber-200">
-        <p className="text-xs text-muted-foreground mb-1">Amount Owed</p>
-        <p className="text-3xl font-bold text-amber-600">{amountFormatted.local}</p>
+      <div className="text-center py-4 bg-red-50 rounded-lg border border-red-200">
+        <p className="text-xs text-muted-foreground mb-1">Amount Owed by Community</p>
+        <p className="text-3xl font-bold text-red-600">{amountFormatted.local}</p>
         <p className="text-sm text-muted-foreground">({amountFormatted.mobi})</p>
+        <Badge className={`mt-2 ${statusConfig.className}`}>
+          {statusConfig.label}
+        </Badge>
       </div>
 
       {/* Details Grid */}
       <div className="space-y-3">
         <Card className="p-3">
-          <p className="text-xs text-muted-foreground mb-1">Obligation</p>
-          <p className="font-medium text-sm">{record.obligationName}</p>
-          <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-            {record.obligationType.replace(/_/g, " ")}
-          </p>
+          <p className="text-xs text-muted-foreground mb-1">Description</p>
+          <p className="font-medium text-sm">{record.description}</p>
         </Card>
 
         <div className="grid grid-cols-2 gap-3">
           <Card className="p-3">
-            <p className="text-xs text-muted-foreground mb-1">Due Date</p>
-            <p className="font-medium text-sm">{format(record.dueDate, "MMM d, yyyy")}</p>
+            <p className="text-xs text-muted-foreground mb-1">Invoice Number</p>
+            <p className="font-medium text-sm">{record.invoiceNumber}</p>
           </Card>
           <Card className="p-3">
-            <p className="text-xs text-muted-foreground mb-1">Days Past Due</p>
-            <p className={`font-medium text-sm ${record.daysPastDue > 0 ? "text-red-600" : "text-green-600"}`}>
-              {record.daysPastDue > 0 ? `${record.daysPastDue} days` : "Not yet due"}
+            <p className="text-xs text-muted-foreground mb-1">Due Date</p>
+            <p className={`font-medium text-sm ${record.daysPastDue > 0 ? "text-red-600" : ""}`}>
+              {format(record.dueDate, "MMM d, yyyy")}
             </p>
           </Card>
         </div>
+
+        {record.daysPastDue > 0 && (
+          <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+            <Clock className="h-4 w-4 text-red-600" />
+            <span className="text-sm text-red-700 font-medium">
+              {record.daysPastDue} days past due
+            </span>
+          </div>
+        )}
 
         <Card className="p-3">
           <p className="text-xs text-muted-foreground mb-2">Contact Information</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <Mail className="h-4 w-4 text-muted-foreground" />
-              <span>{record.memberEmail}</span>
+              <span>{record.payeeEmail}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              <span>{record.memberPhone}</span>
+              <span>{record.payeePhone}</span>
             </div>
           </div>
         </Card>
 
-        {record.lastReminder && (
-          <Card className="p-3">
-            <p className="text-xs text-muted-foreground mb-1">Last Reminder Sent</p>
-            <p className="font-medium text-sm">{format(record.lastReminder, "MMM d, yyyy 'at' h:mm a")}</p>
-          </Card>
-        )}
-
         {record.notes && (
-          <Card className="p-3">
-            <p className="text-xs text-muted-foreground mb-1">Notes</p>
+          <Card className="p-3 bg-amber-50 border-amber-200">
+            <p className="text-xs text-muted-foreground mb-1">Notes / Remarks</p>
             <p className="text-sm">{record.notes}</p>
           </Card>
         )}
 
         {/* Actions */}
-        <div className="grid grid-cols-2 gap-2 pt-2">
+        <div className="pt-2">
           <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => onSendReminder(record)}
+            className="w-full bg-green-600 hover:bg-green-700"
+            onClick={() => onPayNow(record)}
           >
-            <Mail className="h-4 w-4 mr-2" />
-            Send Reminder
+            <CreditCard className="h-4 w-4 mr-2" />
+            Pay Now - {amountFormatted.local}
           </Button>
-          {record.status === "defaulting" && (
-            <Button 
-              variant="destructive" 
-              className="w-full"
-              onClick={() => {}}
-            >
-              <Ban className="h-4 w-4 mr-2" />
-              Suspend
-            </Button>
-          )}
         </div>
       </div>
     </div>
@@ -560,7 +614,7 @@ const DeficitMemberDetailModal = ({
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[85vh]">
           <DrawerHeader className="border-b">
-            <DrawerTitle>Member Deficit Details</DrawerTitle>
+            <DrawerTitle>Payable Details</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
             <DetailContent />
@@ -574,7 +628,7 @@ const DeficitMemberDetailModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Member Deficit Details</DialogTitle>
+          <DialogTitle>Payable Details</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
           <DetailContent />
