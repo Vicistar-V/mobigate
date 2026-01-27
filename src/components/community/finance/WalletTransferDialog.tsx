@@ -90,9 +90,10 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
   };
 
   const handleConfirmTransfer = () => {
+    const amountVal = parseFloat(amount);
     toast({
       title: "Transfer Successful!",
-      description: `M${parseFloat(amount).toLocaleString()} sent to ${selectedMember?.name}`,
+      description: `₦${amountVal.toLocaleString()} (M${amountVal.toLocaleString()}) sent to ${selectedMember?.name}`,
     });
     onOpenChange(false);
     // Reset
@@ -205,7 +206,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                Available balance: {formatMobiAmount(walletBalance)} (≈ {formatLocalAmount(walletBalance, "NGN")})
+                Available balance: {formatLocalAmount(walletBalance, "NGN")} ({formatMobiAmount(walletBalance)})
               </p>
             </div>
 
@@ -253,9 +254,9 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Amount</span>
                 <div className="text-right">
-                  <span className="font-bold text-lg">{formatMobiAmount(parseFloat(amount))}</span>
+                  <span className="font-bold text-lg">{formatLocalAmount(parseFloat(amount), "NGN")}</span>
                   <p className="text-xs text-muted-foreground">
-                    ≈ {formatLocalAmount(parseFloat(amount), "NGN")}
+                    ({formatMobiAmount(parseFloat(amount))})
                   </p>
                 </div>
               </div>

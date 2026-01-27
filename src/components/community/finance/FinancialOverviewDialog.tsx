@@ -9,8 +9,7 @@ import { mockWalletData, mockTransactions } from "@/data/financeData";
 import { WalletTopUpDialog } from "./WalletTopUpDialog";
 import { WalletTransferDialog } from "./WalletTransferDialog";
 import { WalletWithdrawDialog } from "./WalletWithdrawDialog";
-import { DualCurrencyDisplay, formatDualCurrency } from "@/components/common/DualCurrencyDisplay";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { DualCurrencyDisplay } from "@/components/common/DualCurrencyDisplay";
 
 interface FinancialOverviewDialogProps {
   open: boolean;
@@ -55,17 +54,17 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
 
         <ScrollArea className="h-[calc(90vh-80px)]">
           <div className="p-4 sm:p-6 space-y-4">
-            {/* Wallet Balance Card */}
+            {/* Wallet Balance Card - LOCAL CURRENCY PRIMARY */}
             <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Total Balance</p>
                     <h2 className="text-3xl font-bold">
-                      M{walletData.balance.toLocaleString()}
+                      ₦{walletData.balance.toLocaleString()}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                      ≈ ₦{walletData.balance.toLocaleString()}
+                      (M{walletData.balance.toLocaleString()})
                     </p>
                   </div>
                   <div className="bg-primary/10 p-3 rounded-full">
@@ -94,7 +93,7 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
               </Button>
             </div>
 
-            {/* Monthly Summary */}
+            {/* Monthly Summary - LOCAL CURRENCY PRIMARY */}
             <div className="grid grid-cols-2 gap-3">
               <Card>
                 <CardContent className="p-4">
@@ -105,10 +104,10 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
                     <p className="text-xs text-muted-foreground">Income</p>
                   </div>
                   <p className="text-xl font-bold text-green-600">
-                    +M{walletData.monthlyIncome.toLocaleString()}
+                    +₦{walletData.monthlyIncome.toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    (₦{walletData.monthlyIncome.toLocaleString()})
+                    (M{walletData.monthlyIncome.toLocaleString()})
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">This month</p>
                 </CardContent>
@@ -123,10 +122,10 @@ export function FinancialOverviewDialog({ open, onOpenChange }: FinancialOvervie
                     <p className="text-xs text-muted-foreground">Expenses</p>
                   </div>
                   <p className="text-xl font-bold text-red-600">
-                    -M{walletData.monthlyExpenditure.toLocaleString()}
+                    -₦{walletData.monthlyExpenditure.toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    (₦{walletData.monthlyExpenditure.toLocaleString()})
+                    (M{walletData.monthlyExpenditure.toLocaleString()})
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">This month</p>
                 </CardContent>

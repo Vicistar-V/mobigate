@@ -158,10 +158,10 @@ export const AccountStatementsDialog = ({
             <div>
               <p className="text-xs text-muted-foreground">Total Credits</p>
               <p className="text-lg font-bold text-green-600">
-                {formatMobiAmount(totals.totalCredits)}
+                {formatLocalAmount(totals.totalCredits, "NGN")}
               </p>
               <p className="text-xs text-muted-foreground">
-                ≈ {formatLocalAmount(totals.totalCredits, "NGN")}
+                ({formatMobiAmount(totals.totalCredits)})
               </p>
             </div>
           </div>
@@ -172,10 +172,10 @@ export const AccountStatementsDialog = ({
             <div>
               <p className="text-xs text-muted-foreground">Total Debits</p>
               <p className="text-lg font-bold text-red-600">
-                {formatMobiAmount(totals.totalDebits)}
+                {formatLocalAmount(totals.totalDebits, "NGN")}
               </p>
               <p className="text-xs text-muted-foreground">
-                ≈ {formatLocalAmount(totals.totalDebits, "NGN")}
+                ({formatMobiAmount(totals.totalDebits)})
               </p>
             </div>
           </div>
@@ -317,7 +317,7 @@ export const AccountStatementsDialog = ({
                       {getCategoryLabel(txn.category)} • {txn.reference}
                     </span>
                     <span className="flex-shrink-0">
-                      Bal: M{txn.balance.toLocaleString()} (₦{txn.balance.toLocaleString()})
+                      Bal: ₦{txn.balance.toLocaleString()} (M{txn.balance.toLocaleString()})
                     </span>
                   </div>
 

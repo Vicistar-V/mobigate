@@ -208,10 +208,10 @@ export const MembersFinancialReportsDialog = ({
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-sm text-green-600">
-                        +{formatMobiAmount(payment.amountPaid)}
+                        +{formatLocalAmount(payment.amountPaid, "NGN")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        ≈ {formatLocalAmount(payment.amountPaid, "NGN")}
+                        ({formatMobiAmount(payment.amountPaid)})
                       </p>
                       <Badge
                         className={
@@ -266,10 +266,10 @@ export const MembersFinancialReportsDialog = ({
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-sm text-red-600">
-                        -{formatMobiAmount(disbursement.amount)}
+                        -{formatLocalAmount(disbursement.amount, "NGN")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        ≈ {formatLocalAmount(disbursement.amount, "NGN")}
+                        ({formatMobiAmount(disbursement.amount)})
                       </p>
                       <Badge variant="outline" className="text-xs">
                         {getDisbursementTypeLabel(disbursement.disbursementType)}
@@ -342,9 +342,9 @@ export const MembersFinancialReportsDialog = ({
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <div>
-                          <span>{formatMobiAmount(obligation.amountPaid)} / {formatMobiAmount(obligation.amountDue)}</span>
+                          <span>{formatLocalAmount(obligation.amountPaid, "NGN")} / {formatLocalAmount(obligation.amountDue, "NGN")}</span>
                           <p className="text-muted-foreground">
-                            ≈ {formatLocalAmount(obligation.amountPaid, "NGN")} / {formatLocalAmount(obligation.amountDue, "NGN")}
+                            ({formatMobiAmount(obligation.amountPaid)} / {formatMobiAmount(obligation.amountDue)})
                           </p>
                         </div>
                         <span className="text-muted-foreground">{progressPercentage}%</span>

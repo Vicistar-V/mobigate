@@ -74,23 +74,24 @@ export const AdminFinancialAuditDialog = ({
     });
   };
 
+  // Helper: Local Currency PRIMARY, Mobi SECONDARY
   const formatCurrency = (amount: number, showLocal: boolean = true) => {
+    const local = amount >= 1000000
+      ? `₦${(amount / 1000000).toFixed(2)}M`
+      : amount >= 1000
+        ? `₦${(amount / 1000).toFixed(0)}k`
+        : `₦${amount.toLocaleString()}`;
+    
+    if (!showLocal) return local;
+    
+    // Show Mobi currency equivalent (secondary)
     const mobi = amount >= 1000000
       ? `M${(amount / 1000000).toFixed(2)}M`
       : amount >= 1000
         ? `M${(amount / 1000).toFixed(0)}k`
         : `M${amount.toLocaleString()}`;
     
-    if (!showLocal) return mobi;
-    
-    // Show local currency equivalent
-    const localAmount = amount >= 1000000
-      ? `₦${(amount / 1000000).toFixed(2)}M`
-      : amount >= 1000
-        ? `₦${(amount / 1000).toFixed(0)}k`
-        : `₦${amount.toLocaleString()}`;
-    
-    return `${mobi} (${localAmount})`;
+    return `${local} (${mobi})`;
   };
 
   const Content = () => {

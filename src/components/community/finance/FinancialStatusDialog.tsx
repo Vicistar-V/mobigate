@@ -18,12 +18,20 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { mockFinancialStatus } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface FinancialStatusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Helper: Local Currency PRIMARY, Mobi SECONDARY
+const formatLocalPrimary = (amount: number): { local: string; mobi: string } => {
+  return {
+    local: `₦${amount.toLocaleString()}`,
+    mobi: `M${amount.toLocaleString()}`,
+  };
+};
 
 export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDialogProps) {
   const { toast } = useToast();
@@ -40,9 +48,10 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
     
+    const formatted = formatLocalPrimary(status.outstandingBalance);
     toast({
       title: "Payment Successful!",
-      description: `Your payment of M${status.outstandingBalance.toLocaleString()} (₦${status.outstandingBalance.toLocaleString()}) has been debited from your Mobi Wallet.`,
+      description: `Your payment of ${formatted.local} (${formatted.mobi}) has been debited from your Mobi Wallet.`,
     });
     
     setIsProcessingPayment(false);
@@ -74,6 +83,10 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
         return null;
     }
   };
+
+  const outstandingFormatted = formatLocalPrimary(status.outstandingBalance);
+  const totalPaidFormatted = formatLocalPrimary(status.totalPaid);
+  const totalDueFormatted = formatLocalPrimary(status.totalDue);
 
   return (
     <>
@@ -128,7 +141,7 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                 </CardContent>
               </Card>
 
-              {/* Outstanding Balance */}
+              {/* Outstanding Balance - LOCAL CURRENCY PRIMARY */}
               {status.outstandingBalance > 0 && (
                 <Card>
                   <CardHeader>
@@ -140,10 +153,10 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                   <CardContent className="space-y-4">
                     <div className="text-center p-4 bg-yellow-500/10 rounded-lg">
                       <p className="text-3xl font-bold text-yellow-700">
-                        {formatMobiAmount(status.outstandingBalance)}
+                        {outstandingFormatted.local}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        ≈ {formatLocalAmount(status.outstandingBalance, "NGN")} Amount due
+                        ({outstandingFormatted.mobi}) Amount due
                       </p>
                     </div>
                     
@@ -154,7 +167,7 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                       size="lg"
                     >
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Pay Now - {formatMobiAmount(status.outstandingBalance)}
+                      Pay Now - {outstandingFormatted.local}
                     </Button>
                   </CardContent>
                 </Card>
@@ -188,19 +201,19 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Total Paid</p>
                       <p className="text-lg font-bold text-green-600">
-                        {formatMobiAmount(status.totalPaid)}
+                        {totalPaidFormatted.local}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        ≈ {formatLocalAmount(status.totalPaid, "NGN")}
+                        ({totalPaidFormatted.mobi})
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Total Due</p>
                       <p className="text-lg font-bold">
-                        {formatMobiAmount(status.totalDue)}
+                        {totalDueFormatted.local}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        ≈ {formatLocalAmount(status.totalDue, "NGN")}
+                        ({totalDueFormatted.mobi})
                       </p>
                     </div>
                   </div>
@@ -239,9 +252,9 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
           <AlertDialogDescription className="text-center">
               You are paying{" "}
               <span className="font-bold text-foreground">
-                {formatMobiAmount(status.outstandingBalance)}
+                {outstandingFormatted.local}
               </span>{" "}
-              (≈ {formatLocalAmount(status.outstandingBalance, "NGN")}) to clear your outstanding balance.
+              ({outstandingFormatted.mobi}) to clear your outstanding balance.
               This amount will be debited from your Mobi Wallet.
             </AlertDialogDescription>
           </AlertDialogHeader>

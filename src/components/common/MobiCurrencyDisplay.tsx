@@ -11,7 +11,8 @@ import {
   formatMobiAmount, 
   formatMobiWithLocal, 
   getSupportedCurrencies,
-  convertFromMobi 
+  convertFromMobi,
+  formatLocalAmount 
 } from "@/lib/mobiCurrencyTranslation";
 import { SUPPORTED_CURRENCIES } from "@/types/mobiFinancialProtocol";
 
@@ -25,6 +26,9 @@ interface MobiCurrencyDisplayProps {
   className?: string;
 }
 
+/**
+ * MobiCurrencyDisplay - Displays LOCAL CURRENCY as PRIMARY with Mobi as secondary
+ */
 export function MobiCurrencyDisplay({
   amount,
   showLocalEquivalent = true,
@@ -47,7 +51,7 @@ export function MobiCurrencyDisplay({
     lg: "text-lg",
   };
 
-  const mobiSizeClasses = {
+  const localSizeClasses = {
     sm: "text-base font-semibold",
     md: "text-lg font-bold",
     lg: "text-2xl font-bold",
@@ -56,7 +60,7 @@ export function MobiCurrencyDisplay({
   if (variant === "badge") {
     return (
       <Badge variant="secondary" className={`${className}`}>
-        {formatted.mobi}
+        {formatted.local}
       </Badge>
     );
   }
@@ -64,10 +68,10 @@ export function MobiCurrencyDisplay({
   if (variant === "inline") {
     return (
       <span className={`${sizeClasses[size]} ${className}`}>
-        <span className="font-semibold text-primary">{formatted.mobi}</span>
+        <span className="font-semibold text-primary">{formatted.local}</span>
         {showLocalEquivalent && (
           <span className="text-muted-foreground ml-1">
-            (≈ {formatted.local})
+            ({formatted.mobi})
           </span>
         )}
       </span>
@@ -76,10 +80,10 @@ export function MobiCurrencyDisplay({
 
   return (
     <div className={`flex flex-col ${className}`}>
-      {/* Main Mobi amount */}
+      {/* Main Local Currency amount (PRIMARY) */}
       <div className="flex items-center gap-2">
-        <span className={`${mobiSizeClasses[size]} text-primary`}>
-          {formatted.mobi}
+        <span className={`${localSizeClasses[size]} text-primary`}>
+          {formatted.local}
         </span>
         
         {allowCurrencyChange && (
@@ -120,10 +124,10 @@ export function MobiCurrencyDisplay({
         )}
       </div>
       
-      {/* Local currency equivalent */}
+      {/* Mobi equivalent (SECONDARY) */}
       {showLocalEquivalent && (
         <span className={`${sizeClasses[size]} text-muted-foreground`}>
-          ≈ {formatted.local}
+          ({formatted.mobi})
         </span>
       )}
     </div>
@@ -131,7 +135,8 @@ export function MobiCurrencyDisplay({
 }
 
 /**
- * Compact display for lists and cards - now with local currency equivalent
+ * Compact display for lists and cards
+ * Displays LOCAL CURRENCY as PRIMARY with Mobi as secondary
  */
 interface MobiCompactDisplayProps {
   amount: number;
@@ -157,14 +162,15 @@ export function MobiCompactDisplay({
   };
 
   const sign = showSign ? (type === "expense" ? "-" : "+") : "";
-  const formatted = formatMobiWithLocal(amount, localCurrency);
+  const localFormatted = formatLocalAmount(amount, localCurrency);
+  const mobiFormatted = formatMobiAmount(amount);
 
   return (
     <span className={`font-semibold ${colorClasses[type]} ${className}`}>
-      {sign}{formatMobiAmount(amount)}
+      {sign}{localFormatted}
       {showLocalEquivalent && (
         <span className="text-muted-foreground font-normal text-xs ml-1">
-          ({formatted.local})
+          ({mobiFormatted})
         </span>
       )}
     </span>
