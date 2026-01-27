@@ -46,6 +46,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { IncomeSourceDetailSheet } from "./IncomeSourceDetailSheet";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { ExpenseSourceDetailSheet } from "./ExpenseSourceDetailSheet";
 
 interface AdminFinancialAuditDialogProps {
   open: boolean;
@@ -61,6 +62,10 @@ export const AdminFinancialAuditDialog = ({
   const [selectedYear, setSelectedYear] = useState<string>("2025");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedIncomeSource, setSelectedIncomeSource] = useState<{
+    key: string;
+    amount: number;
+  } | null>(null);
+  const [selectedExpenseSource, setSelectedExpenseSource] = useState<{
     key: string;
     amount: number;
   } | null>(null);
@@ -359,22 +364,44 @@ export const AdminFinancialAuditDialog = ({
                 <TrendingDown className="h-4 w-4 text-red-600" />
                 Expense Categories
               </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                Tap on any category to view expense details
+              </p>
               <div className="space-y-3">
                 {Object.entries(currentAudit.breakdown.expenses).map(([key, value]) => {
                   const percentage = Math.round((value / currentAudit.totalFundsSpent) * 100);
                   const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
                   
+                  // Color mapping for expense sources
+                  const colorMap: Record<string, string> = {
+                    operationalExpenses: "bg-blue-50",
+                    projectExpenses: "bg-purple-50",
+                    welfarePayouts: "bg-pink-50",
+                    administrativeExpenses: "bg-amber-50",
+                    otherExpenses: "bg-gray-50",
+                  };
+                  const bgColor = colorMap[key] || "bg-gray-50";
+                  
                   return (
-                    <div key={key} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{label}</span>
-                        <span className="font-medium">{formatCurrency(value)}</span>
+                    <button
+                      key={key}
+                      className={`w-full text-left p-3 rounded-lg ${bgColor} hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer`}
+                      onClick={() => setSelectedExpenseSource({ key, amount: value })}
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground">{label}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-semibold text-sm text-red-600">{formatCurrency(value)}</span>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Progress value={percentage} className="h-1.5 flex-1" />
+                          <span className="text-xs text-muted-foreground w-8">{percentage}%</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Progress value={percentage} className="h-1.5 flex-1" />
-                        <span className="text-xs text-muted-foreground w-8">{percentage}%</span>
-                      </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -419,6 +446,15 @@ export const AdminFinancialAuditDialog = ({
             totalAmount={selectedIncomeSource.amount}
           />
         )}
+        
+        {selectedExpenseSource && (
+          <ExpenseSourceDetailSheet
+            open={!!selectedExpenseSource}
+            onOpenChange={(open) => !open && setSelectedExpenseSource(null)}
+            sourceKey={selectedExpenseSource.key}
+            totalAmount={selectedExpenseSource.amount}
+          />
+        )}
       </>
     );
   }
@@ -442,6 +478,15 @@ export const AdminFinancialAuditDialog = ({
           onOpenChange={(open) => !open && setSelectedIncomeSource(null)}
           sourceKey={selectedIncomeSource.key}
           totalAmount={selectedIncomeSource.amount}
+        />
+      )}
+      
+      {selectedExpenseSource && (
+        <ExpenseSourceDetailSheet
+          open={!!selectedExpenseSource}
+          onOpenChange={(open) => !open && setSelectedExpenseSource(null)}
+          sourceKey={selectedExpenseSource.key}
+          totalAmount={selectedExpenseSource.amount}
         />
       )}
     </>
