@@ -47,6 +47,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { IncomeSourceDetailSheet } from "./IncomeSourceDetailSheet";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { ExpenseSourceDetailSheet } from "./ExpenseSourceDetailSheet";
+import { DeficitsDetailSheet } from "./DeficitsDetailSheet";
+import { FloatingFundsDetailSheet } from "./FloatingFundsDetailSheet";
 
 interface AdminFinancialAuditDialogProps {
   open: boolean;
@@ -66,6 +68,14 @@ export const AdminFinancialAuditDialog = ({
     amount: number;
   } | null>(null);
   const [selectedExpenseSource, setSelectedExpenseSource] = useState<{
+    key: string;
+    amount: number;
+  } | null>(null);
+  const [selectedDeficitSource, setSelectedDeficitSource] = useState<{
+    key: string;
+    amount: number;
+  } | null>(null);
+  const [selectedFloatingSource, setSelectedFloatingSource] = useState<{
     key: string;
     amount: number;
   } | null>(null);
@@ -253,25 +263,29 @@ export const AdminFinancialAuditDialog = ({
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
                 Deficits Breakdown
               </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                Tap on any category to view member details
+              </p>
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Unpaid Dues</span>
-                  <span className="font-medium text-amber-600">
-                    {formatCurrency(currentAudit.breakdown.deficits.unpaidDues)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Unpaid Levies</span>
-                  <span className="font-medium text-amber-600">
-                    {formatCurrency(currentAudit.breakdown.deficits.unpaidLevies)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Pending Obligations</span>
-                  <span className="font-medium text-amber-600">
-                    {formatCurrency(currentAudit.breakdown.deficits.pendingObligations)}
-                  </span>
-                </div>
+                {[
+                  { key: "unpaidDues", label: "Unpaid Dues", amount: currentAudit.breakdown.deficits.unpaidDues },
+                  { key: "unpaidLevies", label: "Unpaid Levies", amount: currentAudit.breakdown.deficits.unpaidLevies },
+                  { key: "pendingObligations", label: "Pending Obligations", amount: currentAudit.breakdown.deficits.pendingObligations },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    className="w-full flex items-center justify-between text-sm p-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors active:scale-[0.99]"
+                    onClick={() => setSelectedDeficitSource({ key: item.key, amount: item.amount })}
+                  >
+                    <span className="text-muted-foreground">{item.label}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium text-amber-600">
+                        {formatCurrency(item.amount)}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </button>
+                ))}
               </div>
             </Card>
 
@@ -281,25 +295,29 @@ export const AdminFinancialAuditDialog = ({
                 <RefreshCw className="h-4 w-4 text-purple-600" />
                 Floating Funds (Recoverable)
               </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                Tap on any category to view recovery details
+              </p>
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Pending Loans</span>
-                  <span className="font-medium text-purple-600">
-                    {formatCurrency(currentAudit.breakdown.floating.pendingLoans)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Advances Given</span>
-                  <span className="font-medium text-purple-600">
-                    {formatCurrency(currentAudit.breakdown.floating.advancesGiven)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Recoverable Expenses</span>
-                  <span className="font-medium text-purple-600">
-                    {formatCurrency(currentAudit.breakdown.floating.recoverableExpenses)}
-                  </span>
-                </div>
+                {[
+                  { key: "pendingLoans", label: "Pending Loans", amount: currentAudit.breakdown.floating.pendingLoans },
+                  { key: "advancesGiven", label: "Advances Given", amount: currentAudit.breakdown.floating.advancesGiven },
+                  { key: "recoverableExpenses", label: "Recoverable Expenses", amount: currentAudit.breakdown.floating.recoverableExpenses },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    className="w-full flex items-center justify-between text-sm p-2.5 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors active:scale-[0.99]"
+                    onClick={() => setSelectedFloatingSource({ key: item.key, amount: item.amount })}
+                  >
+                    <span className="text-muted-foreground">{item.label}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium text-purple-600">
+                        {formatCurrency(item.amount)}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </button>
+                ))}
               </div>
             </Card>
           </TabsContent>
@@ -455,6 +473,24 @@ export const AdminFinancialAuditDialog = ({
             totalAmount={selectedExpenseSource.amount}
           />
         )}
+        
+        {selectedDeficitSource && (
+          <DeficitsDetailSheet
+            open={!!selectedDeficitSource}
+            onOpenChange={(open) => !open && setSelectedDeficitSource(null)}
+            sourceKey={selectedDeficitSource.key}
+            totalAmount={selectedDeficitSource.amount}
+          />
+        )}
+        
+        {selectedFloatingSource && (
+          <FloatingFundsDetailSheet
+            open={!!selectedFloatingSource}
+            onOpenChange={(open) => !open && setSelectedFloatingSource(null)}
+            sourceKey={selectedFloatingSource.key}
+            totalAmount={selectedFloatingSource.amount}
+          />
+        )}
       </>
     );
   }
@@ -487,6 +523,24 @@ export const AdminFinancialAuditDialog = ({
           onOpenChange={(open) => !open && setSelectedExpenseSource(null)}
           sourceKey={selectedExpenseSource.key}
           totalAmount={selectedExpenseSource.amount}
+        />
+      )}
+      
+      {selectedDeficitSource && (
+        <DeficitsDetailSheet
+          open={!!selectedDeficitSource}
+          onOpenChange={(open) => !open && setSelectedDeficitSource(null)}
+          sourceKey={selectedDeficitSource.key}
+          totalAmount={selectedDeficitSource.amount}
+        />
+      )}
+      
+      {selectedFloatingSource && (
+        <FloatingFundsDetailSheet
+          open={!!selectedFloatingSource}
+          onOpenChange={(open) => !open && setSelectedFloatingSource(null)}
+          sourceKey={selectedFloatingSource.key}
+          totalAmount={selectedFloatingSource.amount}
         />
       )}
     </>
