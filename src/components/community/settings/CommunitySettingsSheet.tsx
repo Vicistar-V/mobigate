@@ -17,13 +17,14 @@ import { AdminSettingProposalCard } from "./AdminSettingProposalCard";
 import { ActiveSettingsList } from "./ActiveSettingsList";
 import { MemberRecommendationsList } from "./MemberRecommendationsList";
 import { RecommendAlternativeDialog } from "./RecommendAlternativeDialog";
+import { RecommendNewSettingDialog } from "./RecommendNewSettingDialog";
 import {
   mockAdminProposals,
   mockMemberRecommendations,
   mockSettingsStats,
   getSettingsByCategory,
 } from "@/data/communityDemocraticSettingsData";
-import { SETTING_CATEGORY_LABELS, DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
+import { SETTING_CATEGORY_LABELS, DEMOCRATIC_SETTINGS_CONFIG, ActiveCommunitySetting } from "@/types/communityDemocraticSettings";
 
 interface CommunitySettingsSheetProps {
   open: boolean;
@@ -34,6 +35,8 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
   const isMobile = useIsMobile();
   const [recommendDialogOpen, setRecommendDialogOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<string | null>(null);
+  const [recommendNewDialogOpen, setRecommendNewDialogOpen] = useState(false);
+  const [selectedSetting, setSelectedSetting] = useState<ActiveCommunitySetting | null>(null);
 
   const pendingProposals = mockAdminProposals.filter(
     (p) => p.status === "pending_approval" && p.memberVote === null
@@ -44,6 +47,11 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
   const handleRecommendAlternative = (proposalId: string) => {
     setSelectedProposal(proposalId);
     setRecommendDialogOpen(true);
+  };
+
+  const handleRecommendNewSetting = (setting: ActiveCommunitySetting) => {
+    setSelectedSetting(setting);
+    setRecommendNewDialogOpen(true);
   };
 
   const handleVote = (proposalId: string, vote: "approve" | "disapprove") => {
@@ -138,7 +146,10 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="pb-2">
-                        <ActiveSettingsList settings={settings} />
+                        <ActiveSettingsList 
+                          settings={settings} 
+                          onRecommendSetting={handleRecommendNewSetting}
+                        />
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -231,11 +242,18 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
         </div>
       </ScrollArea>
 
-      {/* Recommend Alternative Dialog */}
+      {/* Recommend Alternative Dialog (for pending proposals) */}
       <RecommendAlternativeDialog
         open={recommendDialogOpen}
         onOpenChange={setRecommendDialogOpen}
         proposalId={selectedProposal}
+      />
+
+      {/* Recommend New Setting Dialog (for active settings) */}
+      <RecommendNewSettingDialog
+        open={recommendNewDialogOpen}
+        onOpenChange={setRecommendNewDialogOpen}
+        setting={selectedSetting}
       />
     </div>
   );
