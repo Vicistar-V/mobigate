@@ -1,15 +1,17 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Check, AlertCircle, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Check, AlertCircle, Users, Lightbulb } from "lucide-react";
 import { ActiveCommunitySetting, DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
 import { format } from "date-fns";
 
 interface ActiveSettingsListProps {
   settings: ActiveCommunitySetting[];
+  onRecommendSetting?: (setting: ActiveCommunitySetting) => void;
 }
 
-export function ActiveSettingsList({ settings }: ActiveSettingsListProps) {
+export function ActiveSettingsList({ settings, onRecommendSetting }: ActiveSettingsListProps) {
   const threshold = DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD;
 
   const getSourceBadge = (source: ActiveCommunitySetting["source"]) => {
@@ -57,10 +59,25 @@ export function ActiveSettingsList({ settings }: ActiveSettingsListProps) {
               {getSourceBadge(setting.source)}
             </div>
 
-            {/* Current Value */}
-            <div className="flex items-center justify-between p-1.5 rounded bg-muted/50">
-              <span className="text-[10px] text-muted-foreground">Current Value:</span>
-              <span className="text-xs font-medium">{setting.currentValue}</span>
+            {/* Current Value with Recommend Button */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between p-1.5 rounded bg-muted/50">
+                <span className="text-[10px] text-muted-foreground">Current Value:</span>
+                <span className="text-xs font-medium">{setting.currentValue}</span>
+              </div>
+              
+              {/* Recommend New Setting Button */}
+              {onRecommendSetting && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-7 text-[10px] border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/50"
+                  onClick={() => onRecommendSetting(setting)}
+                >
+                  <Lightbulb className="h-3 w-3 mr-1.5" />
+                  Recommend New Setting
+                </Button>
+              )}
             </div>
 
             {/* Approval Status */}
