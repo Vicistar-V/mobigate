@@ -24,7 +24,6 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 import communityPerson1 from "@/assets/community-person-1.jpg";
 import communityPerson2 from "@/assets/community-person-2.jpg";
@@ -119,6 +118,26 @@ interface IncomeSourceDetailSheetProps {
   totalAmount: number;
 }
 
+// Helper: Local Currency PRIMARY, Mobi SECONDARY
+const formatLocalPrimary = (amount: number): { local: string; mobi: string } => {
+  if (amount >= 1000000) {
+    return {
+      local: `₦${(amount / 1000000).toFixed(2)}M`,
+      mobi: `M${(amount / 1000000).toFixed(2)}M`,
+    };
+  }
+  if (amount >= 1000) {
+    return {
+      local: `₦${(amount / 1000).toFixed(0)}k`,
+      mobi: `M${(amount / 1000).toFixed(0)}k`,
+    };
+  }
+  return {
+    local: `₦${amount.toLocaleString()}`,
+    mobi: `M${amount.toLocaleString()}`,
+  };
+};
+
 export const IncomeSourceDetailSheet = ({
   open,
   onOpenChange,
@@ -137,19 +156,11 @@ export const IncomeSourceDetailSheet = ({
     p.reference.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const formatCurrency = (amount: number) => {
-    if (amount >= 1000000) {
-      return `M${(amount / 1000000).toFixed(2)}M`;
-    }
-    if (amount >= 1000) {
-      return `M${(amount / 1000).toFixed(0)}k`;
-    }
-    return `M${amount.toLocaleString()}`;
-  };
+  const totalFormatted = formatLocalPrimary(totalAmount);
 
   const Content = () => (
     <div className="space-y-4">
-      {/* Summary Header */}
+      {/* Summary Header - LOCAL CURRENCY PRIMARY */}
       <Card className={`p-4 ${sourceColor} border-0`}>
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-lg bg-white/60">
@@ -157,7 +168,8 @@ export const IncomeSourceDetailSheet = ({
           </div>
           <div className="flex-1">
             <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-            <p className="text-xl font-bold text-green-700">{formatCurrency(totalAmount)}</p>
+            <p className="text-xl font-bold text-green-700">{totalFormatted.local}</p>
+            <p className="text-xs text-muted-foreground">({totalFormatted.mobi})</p>
           </div>
           <Badge variant="secondary" className="text-xs">
             {payments.length} payments
@@ -184,46 +196,49 @@ export const IncomeSourceDetailSheet = ({
         </h3>
 
         <div className="space-y-2">
-          {filteredPayments.map((payment) => (
-            <Card key={payment.id} className="p-3">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 flex-shrink-0">
-                  <AvatarImage src={payment.memberAvatar} />
-                  <AvatarFallback className="text-sm">
-                    {payment.memberName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+          {filteredPayments.map((payment) => {
+            const paymentFormatted = formatLocalPrimary(payment.amount);
+            return (
+              <Card key={payment.id} className="p-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 flex-shrink-0">
+                    <AvatarImage src={payment.memberAvatar} />
+                    <AvatarFallback className="text-sm">
+                      {payment.memberName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{payment.memberName}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    <span>{format(payment.paymentDate, "MMM d, yyyy")}</span>
-                    <span className="text-muted-foreground/50">•</span>
-                    <span className="truncate">{payment.reference}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{payment.memberName}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      <span>{format(payment.paymentDate, "MMM d, yyyy")}</span>
+                      <span className="text-muted-foreground/50">•</span>
+                      <span className="truncate">{payment.reference}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-semibold text-sm text-green-600">
+                      +{paymentFormatted.local}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      ({paymentFormatted.mobi})
+                    </p>
+                    <Badge
+                      className={`text-xs ${
+                        payment.status === "completed" 
+                          ? "bg-green-500/10 text-green-600" 
+                          : "bg-amber-500/10 text-amber-600"
+                      }`}
+                    >
+                      {payment.status === "completed" ? "Paid" : "Pending"}
+                    </Badge>
                   </div>
                 </div>
-
-                <div className="text-right flex-shrink-0">
-                  <p className="font-semibold text-sm text-green-600">
-                    +{formatMobiAmount(payment.amount)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    ≈ {formatLocalAmount(payment.amount, "NGN")}
-                  </p>
-                  <Badge
-                    className={`text-xs ${
-                      payment.status === "completed" 
-                        ? "bg-green-500/10 text-green-600" 
-                        : "bg-amber-500/10 text-amber-600"
-                    }`}
-                  >
-                    {payment.status === "completed" ? "Paid" : "Pending"}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       </div>
 

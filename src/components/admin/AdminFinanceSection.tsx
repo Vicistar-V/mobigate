@@ -220,7 +220,7 @@ export function AdminFinanceSection({
       module: "finances",
       additionalInfo: {
         label: "Amount",
-        value: `M${authTransaction.amount.toLocaleString()}`,
+        value: `₦${authTransaction.amount.toLocaleString()} (M${authTransaction.amount.toLocaleString()})`,
       },
     });
   };
@@ -265,9 +265,9 @@ export function AdminFinanceSection({
             <div className="space-y-4">
               {/* Stats Row - 4 columns, compact */}
               <div className="grid grid-cols-4 gap-2">
-                <StatCard label="Balance" value={`M${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
-                <StatCard label="Income" value={`M${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
-                <StatCard label="Expense" value={`M${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
+                <StatCard label="Balance" value={`₦${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
+                <StatCard label="Income" value={`₦${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
+                <StatCard label="Expense" value={`₦${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
                 <StatCard label="Pending" value={String(stats.pendingPayments)} icon={Clock} />
               </div>
 

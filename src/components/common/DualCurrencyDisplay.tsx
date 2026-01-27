@@ -7,15 +7,15 @@ interface DualCurrencyDisplayProps {
   transactionType?: "income" | "expense" | "transfer" | "credit" | "debit";
   size?: "sm" | "md" | "lg";
   colorize?: boolean;
-  showLocalInline?: boolean;
+  showMobiInline?: boolean;
   className?: string;
 }
 
 /**
- * DualCurrencyDisplay - Displays Mobi amount with local currency equivalent
+ * DualCurrencyDisplay - Displays LOCAL CURRENCY as PRIMARY with Mobi as secondary
  * 
- * For NGN (1:1 rate), shows: M15,000 (₦15,000)
- * For other currencies, shows: M50,000 (≈ $100)
+ * Primary: ₦15,000 (large/main)
+ * Secondary: (M15,000) - smaller, bracketed
  */
 export function DualCurrencyDisplay({
   mobiAmount,
@@ -24,7 +24,7 @@ export function DualCurrencyDisplay({
   transactionType,
   size = "md",
   colorize = true,
-  showLocalInline = true,
+  showMobiInline = true,
   className = "",
 }: DualCurrencyDisplayProps) {
   // Determine sign based on transaction type or explicit sign
@@ -53,9 +53,12 @@ export function DualCurrencyDisplay({
     }
   }
 
-  // Get local currency equivalent
+  // Get local currency equivalent (PRIMARY display)
   const localAmount = convertFromMobi(Math.abs(mobiAmount), localCurrency);
   const localFormatted = formatLocalAmount(localAmount.toAmount, localCurrency);
+
+  // Mobi formatting (SECONDARY display)
+  const mobiFormatted = `M${Math.abs(mobiAmount).toLocaleString()}`;
 
   // Size classes
   const sizeClasses = {
@@ -64,14 +67,18 @@ export function DualCurrencyDisplay({
     lg: "text-lg",
   };
 
-  const mobiFormatted = `${sign}M${Math.abs(mobiAmount).toLocaleString()}`;
+  const mobiSizeClasses = {
+    sm: "text-[10px]",
+    md: "text-xs",
+    lg: "text-sm",
+  };
 
   return (
     <span className={`font-semibold ${sizeClasses[size]} ${colorClass} ${className}`}>
-      {mobiFormatted}
-      {showLocalInline && (
-        <span className="text-muted-foreground font-normal text-xs ml-1">
-          ({localFormatted})
+      {sign}{localFormatted}
+      {showMobiInline && (
+        <span className={`text-muted-foreground font-normal ${mobiSizeClasses[size]} ml-1`}>
+          ({mobiFormatted})
         </span>
       )}
     </span>
@@ -79,9 +86,33 @@ export function DualCurrencyDisplay({
 }
 
 /**
- * Formats a Mobi amount with local currency for simple text display
+ * Formats amount with LOCAL CURRENCY as primary and Mobi as secondary
+ * Output: "₦15,000 (M15,000)" or "+₦15,000 (M15,000)"
  */
 export function formatDualCurrency(
+  mobiAmount: number,
+  localCurrency: string = "NGN",
+  options?: {
+    showSign?: "+" | "-" | "none";
+  }
+): string {
+  const { showSign = "none" } = options || {};
+  
+  const sign = showSign === "+" ? "+" : showSign === "-" ? "-" : "";
+  const amount = Math.abs(mobiAmount);
+  
+  const localAmount = convertFromMobi(amount, localCurrency);
+  const localFormatted = formatLocalAmount(localAmount.toAmount, localCurrency);
+  const mobiFormatted = `M${amount.toLocaleString()}`;
+  
+  return `${sign}${localFormatted} (${mobiFormatted})`;
+}
+
+/**
+ * Formats with Mobi primary for backward compatibility where needed
+ * Output: "M15,000 (₦15,000)"
+ */
+export function formatMobiPrimary(
   mobiAmount: number,
   localCurrency: string = "NGN",
   options?: {
@@ -108,8 +139,12 @@ export function formatDualCurrency(
  */
 export function useDualCurrency(localCurrency: string = "NGN") {
   return {
+    // Primary format: Local currency first
     format: (mobiAmount: number, sign?: "+" | "-" | "none") =>
       formatDualCurrency(mobiAmount, localCurrency, { showSign: sign }),
+    // Mobi primary format (backward compat)
+    formatMobiFirst: (mobiAmount: number, sign?: "+" | "-" | "none") =>
+      formatMobiPrimary(mobiAmount, localCurrency, { showSign: sign }),
     formatMobi: (mobiAmount: number) => formatMobiAmount(mobiAmount),
     formatLocal: (mobiAmount: number) => {
       const localAmount = convertFromMobi(mobiAmount, localCurrency);
