@@ -207,7 +207,7 @@ export const AdminFinancialAuditDialog = ({
                 {formatCurrency(currentAudit.totalDeficits)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Unpaid obligations from members
+                Debts community owes
               </p>
             </div>
             <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
@@ -257,20 +257,20 @@ export const AdminFinancialAuditDialog = ({
               </div>
             </Card>
 
-            {/* Deficits Breakdown */}
+            {/* Deficits Breakdown - Community Payables */}
             <Card className="p-4">
               <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
-                Deficits Breakdown
+                Deficits Breakdown (Community Debts)
               </h4>
               <p className="text-xs text-muted-foreground mb-3">
-                Tap on any category to view member details
+                Tap on any category to view payment details
               </p>
               <div className="space-y-2">
                 {[
-                  { key: "unpaidDues", label: "Unpaid Dues", amount: currentAudit.breakdown.deficits.unpaidDues },
-                  { key: "unpaidLevies", label: "Unpaid Levies", amount: currentAudit.breakdown.deficits.unpaidLevies },
-                  { key: "pendingObligations", label: "Pending Obligations", amount: currentAudit.breakdown.deficits.pendingObligations },
+                  { key: "contractorPayables", label: "Contractor Payables", amount: currentAudit.breakdown.deficits.unpaidDues },
+                  { key: "vendorPayables", label: "Vendor Payables", amount: currentAudit.breakdown.deficits.unpaidLevies },
+                  { key: "pendingBills", label: "Pending Bills & Utilities", amount: currentAudit.breakdown.deficits.pendingObligations },
                 ].map((item) => (
                   <button
                     key={item.key}
@@ -433,8 +433,8 @@ export const AdminFinancialAuditDialog = ({
             <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <p>
               This audit report shows the financial summary for {selectedYear}. 
-              Deficits represent unpaid member obligations, while floating funds 
-              are amounts expected to be recovered.
+              Deficits represent debts the community owes (pending payments to vendors/contractors), 
+              while floating funds are amounts expected to be recovered.
             </p>
           </div>
         </Card>
