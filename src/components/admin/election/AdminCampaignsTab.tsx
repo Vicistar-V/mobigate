@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar as CalendarIcon, X, Globe, Users, UserCircle, Store, UsersRound, Wallet, MessageSquare, Receipt, Building2, Coins } from "lucide-react";
+import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar as CalendarIcon, X, Globe, Users, UserCircle, Store, UsersRound, Wallet, MessageSquare, Receipt, Building2, Coins, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import { CampaignAudience } from "@/types/campaignSystem";
 import { useToast } from "@/hooks/use-toast";
 import { CampaignFormDialog } from "./CampaignFormDialog";
 import { CampaignFeeDetailSheet } from "./CampaignFeeDetailSheet";
+import { AdminCampaignPreviewSheet } from "./AdminCampaignPreviewSheet";
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
@@ -69,10 +70,19 @@ export function AdminCampaignsTab() {
   // Fee Detail Sheet state
   const [feeDetailOpen, setFeeDetailOpen] = useState(false);
   const [feeDetailType, setFeeDetailType] = useState<"total" | "community" | "mobigate">("total");
+  
+  // Preview Sheet state
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewCampaign, setPreviewCampaign] = useState<AdminCampaign | null>(null);
 
   const openFeeDetail = (type: "total" | "community" | "mobigate") => {
     setFeeDetailType(type);
     setFeeDetailOpen(true);
+  };
+
+  const handlePreview = (campaign: AdminCampaign) => {
+    setPreviewCampaign(campaign);
+    setPreviewOpen(true);
   };
 
   const filteredCampaigns = campaigns.filter(campaign => {
@@ -404,6 +414,16 @@ export function AdminCampaignsTab() {
                     Edit
                   </Button>
                   
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-xs gap-1 text-primary"
+                    onClick={() => handlePreview(campaign)}
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    View
+                  </Button>
+                  
                   {campaign.status === 'active' && (
                     <Button
                       size="sm"
@@ -478,6 +498,12 @@ export function AdminCampaignsTab() {
         open={feeDetailOpen}
         onOpenChange={setFeeDetailOpen}
         viewType={feeDetailType}
+      />
+
+      <AdminCampaignPreviewSheet
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        campaign={previewCampaign}
       />
     </div>
   );
