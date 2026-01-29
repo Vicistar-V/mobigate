@@ -306,7 +306,7 @@ export function DeclarationOfInterestSheet({
       </div>
       <h3 className="text-lg font-semibold">Processing Payment...</h3>
       <p className="text-sm text-muted-foreground text-center">
-        Debiting {formatMobiAmount(costBreakdown?.totalDebited || 0)} from your Mobi Wallet
+        Debiting {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")} from your Wallet
       </p>
     </div>
   );
@@ -336,10 +336,10 @@ export function DeclarationOfInterestSheet({
             <span className="text-muted-foreground">Amount Debited</span>
             <div className="text-right">
               <span className="font-semibold text-primary">
-                {formatMobiAmount(costBreakdown?.totalDebited || 0)}
+                {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")}
               </span>
               <p className="text-xs text-muted-foreground">
-                ≈ {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")}
+                ≈ {formatMobiAmount(costBreakdown?.totalDebited || 0)}
               </p>
             </div>
           </div>
@@ -347,10 +347,10 @@ export function DeclarationOfInterestSheet({
             <span className="text-muted-foreground">New Balance</span>
             <div className="text-right">
               <span>
-                {formatMobiAmount(walletBalance - (costBreakdown?.totalDebited || 0))}
+                {formatLocalAmount(walletBalance - (costBreakdown?.totalDebited || 0), "NGN")}
               </span>
               <p className="text-xs text-muted-foreground">
-                ≈ {formatLocalAmount(walletBalance - (costBreakdown?.totalDebited || 0), "NGN")}
+                ≈ {formatMobiAmount(walletBalance - (costBreakdown?.totalDebited || 0))}
               </p>
             </div>
           </div>
