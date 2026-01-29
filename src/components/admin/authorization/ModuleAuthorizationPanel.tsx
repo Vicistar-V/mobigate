@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
+import {
   Shield, 
   CheckCircle2, 
   AlertCircle, 
@@ -175,28 +174,26 @@ export function ModuleAuthorizationPanel({
       />
 
       {/* Officer Authorization List - Single column for mobile optimization */}
-      <ScrollArea className="h-[380px] pr-1">
-        <div className="space-y-3">
-          {officers.map((officer) => {
-            const displayProps = getOfficerDisplayProps(officer);
-            return (
-              <ModuleOfficerCard
-                key={officer.role}
-                role={officer.role}
-                name={officer.name}
-                imageUrl={officer.imageUrl}
-                displayTitle={OFFICER_DISPLAY_TITLES[officer.role]}
-                isRequired={displayProps.isRequired}
-                isAlternative={displayProps.isAlternative}
-                isAuxiliary={displayProps.isAuxiliary}
-                status={officer.status}
-                onAuthorize={handleAuthorize}
-                disabled={isExpired}
-              />
-            );
-          })}
-        </div>
-      </ScrollArea>
+      <div className="space-y-3 max-h-[400px] overflow-y-auto touch-auto pr-1">
+        {officers.map((officer) => {
+          const displayProps = getOfficerDisplayProps(officer);
+          return (
+            <ModuleOfficerCard
+              key={officer.role}
+              role={officer.role}
+              name={officer.name}
+              imageUrl={officer.imageUrl}
+              displayTitle={OFFICER_DISPLAY_TITLES[officer.role]}
+              isRequired={displayProps.isRequired}
+              isAlternative={displayProps.isAlternative}
+              isAuxiliary={displayProps.isAuxiliary}
+              status={officer.status}
+              onAuthorize={handleAuthorize}
+              disabled={isExpired}
+            />
+          );
+        })}
+      </div>
 
       {/* Authorization Status */}
       <div

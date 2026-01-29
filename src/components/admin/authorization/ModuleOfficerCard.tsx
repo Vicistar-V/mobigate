@@ -77,21 +77,21 @@ export function ModuleOfficerCard({
   const getBadge = () => {
     if (isRequired) {
       return (
-        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-orange-300 text-orange-600 bg-orange-50 dark:bg-orange-950/30">
+        <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-orange-300 text-orange-600 bg-orange-50 dark:bg-orange-950/30 shrink-0">
           REQUIRED
         </Badge>
       );
     }
     if (isAlternative) {
       return (
-        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-950/30">
+        <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-950/30 shrink-0">
           PICK ONE
         </Badge>
       );
     }
     if (isAuxiliary) {
       return (
-        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-gray-300 text-gray-500">
+        <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-gray-300 text-gray-500 shrink-0">
           AUXILIARY
         </Badge>
       );
@@ -102,45 +102,49 @@ export function ModuleOfficerCard({
   return (
     <Card
       className={cn(
-        "p-3 transition-all duration-200",
+        "p-4 transition-all duration-200",
         isAuthorized && "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20",
         shake && "animate-shake"
       )}
     >
       <div className="space-y-3">
-        {/* Header */}
-        <div className="flex items-start gap-2">
-          <Avatar className="h-8 w-8">
+        {/* Header - Horizontal layout with avatar, info, and status */}
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12 shrink-0">
             <AvatarImage src={imageUrl} alt={name} />
-            <AvatarFallback className="text-xs">{name.charAt(0)}</AvatarFallback>
+            <AvatarFallback className="text-base">{name.charAt(0)}</AvatarFallback>
           </Avatar>
+          
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+            {/* Title Row with Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 {displayTitle}
               </p>
               {getBadge()}
             </div>
-            <p className="text-xs font-medium leading-tight">{name}</p>
+            {/* Name - Full display */}
+            <p className="text-base font-medium leading-tight mt-0.5">{name}</p>
           </div>
+          
           {/* Status Icon */}
           {isAuthorized ? (
-            <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+            <CheckCircle2 className="h-6 w-6 text-emerald-500 shrink-0" />
           ) : (
-            <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <Clock className="h-6 w-6 text-muted-foreground shrink-0" />
           )}
         </div>
 
         {/* Authorization Form or Status */}
         {isAuthorized ? (
-          <div className="flex items-center gap-2 px-2 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-md">
-            <UserCheck className="h-4 w-4 text-emerald-600" />
-            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+          <div className="flex items-center gap-2 px-3 py-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-md">
+            <UserCheck className="h-5 w-5 text-emerald-600" />
+            <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
               Authorized
             </span>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -148,7 +152,7 @@ export function ModuleOfficerCard({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={disabled || isLoading}
-                className="h-10 pr-10 text-sm"
+                className="h-11 pr-10 text-base"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleAuthorize();
                 }}
@@ -160,16 +164,16 @@ export function ModuleOfficerCard({
                 tabIndex={-1}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-5 w-5" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-5 w-5" />
                 )}
               </button>
             </div>
             <Button
               onClick={handleAuthorize}
               disabled={disabled || isLoading || !password.trim()}
-              className="w-full h-10 text-sm"
+              className="w-full h-11 text-sm"
               variant={isRequired ? "default" : "secondary"}
             >
               {isLoading ? (
