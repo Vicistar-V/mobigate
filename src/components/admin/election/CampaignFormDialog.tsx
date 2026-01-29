@@ -107,10 +107,28 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
   };
 
   const handleSubmit = () => {
-    if (!formData.candidateName || !formData.office) {
+    if (!formData.candidateName.trim()) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in candidate name and office position",
+        title: "Candidate Name Required",
+        description: "Please enter the candidate's full name",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.office) {
+      toast({
+        title: "Office Position Required",
+        description: "Please select an office position",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.slogan.trim()) {
+      toast({
+        title: "Campaign Slogan Required",
+        description: "Please enter a campaign slogan",
         variant: "destructive"
       });
       return;
@@ -161,7 +179,7 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 id="candidate"
                 value={formData.candidateName}
                 onChange={(e) => setFormData(prev => ({ ...prev, candidateName: e.target.value }))}
-                placeholder="Select or enter candidate name"
+                placeholder="Enter full name (e.g., John Chukwuma Okafor)"
               />
             </div>
 
@@ -173,7 +191,7 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 onValueChange={(value) => setFormData(prev => ({ ...prev, office: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select office" />
+                  <SelectValue placeholder="Select office position" />
                 </SelectTrigger>
                 <SelectContent>
                   {officeOptions.map(office => (
@@ -185,13 +203,15 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
 
             {/* Campaign Slogan */}
             <div className="space-y-2">
-              <Label htmlFor="slogan">Campaign Slogan</Label>
+              <Label htmlFor="slogan">Campaign Slogan *</Label>
               <Input
                 id="slogan"
                 value={formData.slogan}
                 onChange={(e) => setFormData(prev => ({ ...prev, slogan: e.target.value }))}
-                placeholder="Enter a catchy campaign slogan"
+                placeholder="e.g., Building a stronger community together"
+                maxLength={100}
               />
+              <p className="text-xs text-muted-foreground">A short, memorable phrase (max 100 characters)</p>
             </div>
 
             {/* Campaign Media Upload Section */}
@@ -238,9 +258,10 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 id="manifesto"
                 value={formData.manifesto}
                 onChange={(e) => setFormData(prev => ({ ...prev, manifesto: e.target.value }))}
-                placeholder="Enter the campaign manifesto..."
+                placeholder="Describe your vision, goals, and plans for the community. What will you achieve if elected?"
                 rows={5}
               />
+              <p className="text-xs text-muted-foreground">Detailed statement of candidate's plans and vision</p>
             </div>
 
             {/* Key Priorities */}
@@ -252,7 +273,7 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                     <Input
                       value={priority}
                       onChange={(e) => handlePriorityChange(index, e.target.value)}
-                      placeholder={`Priority ${index + 1}`}
+                      placeholder={index === 0 ? "e.g., Improve community infrastructure" : `Priority ${index + 1}`}
                     />
                     {formData.priorities.length > 1 && (
                       <Button
