@@ -506,8 +506,9 @@ function OfficeOptionCard({ office, isSelected, walletBalance }: OfficeOptionCar
         </div>
         <div className="text-right shrink-0">
           <span className={`font-semibold text-sm ${hasInsufficientBalance ? "text-destructive" : "text-primary"}`}>
-            {formatMobiAmount(office.totalFee)}
+            {formatLocalAmount(office.totalFee, "NGN")}
           </span>
+          <p className="text-[10px] text-muted-foreground">≈ {formatMobiAmount(office.totalFee)}</p>
         </div>
       </Label>
     </div>
