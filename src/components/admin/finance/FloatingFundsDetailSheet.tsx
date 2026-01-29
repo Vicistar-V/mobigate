@@ -301,24 +301,28 @@ export const FloatingFundsDetailSheet = ({
     <div className="space-y-4">
       {/* Summary Header */}
       <Card className={`p-4 ${sourceColor} border`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-white/80">
-            <RefreshCw className="h-5 w-5 text-purple-600" />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-lg bg-white/80 shrink-0">
+              <RefreshCw className="h-5 w-5 text-purple-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{sourceLabel}</p>
+              <p className="text-xl font-bold text-purple-600 break-words leading-tight">
+                {totalFormatted.local}
+              </p>
+              <p className="text-xs text-muted-foreground break-words">
+                ({totalFormatted.mobi}) pending
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-            <p className="text-xl font-bold text-purple-600 whitespace-normal break-words leading-tight">{totalFormatted.local}</p>
-            <p className="text-xs text-muted-foreground">({totalFormatted.mobi}) pending</p>
-          </div>
-          <div className="text-right">
-            <Badge variant="secondary" className="text-xs mb-1">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary" className="text-xs">
               {records.length} records
             </Badge>
-            <div>
-              <Badge className="text-[10px] bg-green-500/10 text-green-600">
-                {recoveryRate}% recovered
-              </Badge>
-            </div>
+            <Badge className="text-[10px] bg-green-500/10 text-green-600">
+              {recoveryRate}% recovered
+            </Badge>
           </div>
         </div>
       </Card>
@@ -327,7 +331,7 @@ export const FloatingFundsDetailSheet = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by name or description..."
+          placeholder="Search by name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -353,10 +357,11 @@ export const FloatingFundsDetailSheet = ({
                 className="p-3 cursor-pointer hover:bg-muted/30 transition-colors active:scale-[0.99]"
                 onClick={() => setSelectedRecord(record)}
               >
+                {/* Mobile-optimized stacked layout */}
                 <div className="space-y-2">
-                  {/* Header Row */}
+                  {/* Row 1: Avatar + Name */}
                   <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10 flex-shrink-0">
+                    <Avatar className="h-10 w-10 shrink-0">
                       <AvatarImage src={record.memberAvatar} />
                       <AvatarFallback className="text-sm">
                         {record.memberName.charAt(0)}
@@ -364,30 +369,37 @@ export const FloatingFundsDetailSheet = ({
                     </Avatar>
 
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{record.memberName}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
+                      <p className="font-medium text-sm break-words leading-tight">
+                        {record.memberName}
+                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 break-words">
                         {record.description}
                       </p>
                     </div>
+                  </div>
 
-                    <div className="text-right flex-shrink-0 max-w-[52%]">
-                      <p className="font-semibold text-sm text-purple-600 whitespace-normal break-words leading-tight">
+                  {/* Row 2: Amount */}
+                  <div className="flex items-center justify-between gap-2 pl-13">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-purple-600 break-words leading-tight">
                         {pendingFormatted.local}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         ({pendingFormatted.mobi})
                       </p>
                     </div>
-                  </div>
-
-                  {/* Progress & Status */}
-                  <div className="flex items-center gap-2">
-                    <Progress value={recoveryProgress} className="h-1.5 flex-1" />
-                    <span className="text-xs text-muted-foreground w-10">{recoveryProgress}%</span>
-                    <Badge className={`text-xs ${statusConfig.className}`}>
+                    <Badge className={`text-[10px] shrink-0 ${statusConfig.className}`}>
                       {statusConfig.label}
                     </Badge>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+
+                  {/* Row 3: Progress & chevron */}
+                  <div className="flex items-center gap-2 pl-13">
+                    <Progress value={recoveryProgress} className="h-1.5 flex-1" />
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {recoveryProgress}%
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                   </div>
                 </div>
               </Card>
