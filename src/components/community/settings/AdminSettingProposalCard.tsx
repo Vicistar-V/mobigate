@@ -58,56 +58,60 @@ export function AdminSettingProposalCard({
   return (
     <Card className="overflow-hidden border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
       <CardContent className="p-3 space-y-3">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-medium text-sm truncate">{proposal.settingName}</h4>
-              <Badge variant="outline" className="text-[10px] px-1.5 shrink-0">
-                {SETTING_CATEGORY_LABELS[proposal.settingCategory]}
-              </Badge>
+        {/* Header - Stacked for mobile */}
+        <div className="space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h4 className="font-semibold text-sm break-words leading-tight">{proposal.settingName}</h4>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-              {proposal.settingDescription}
-            </p>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{daysRemaining}d left</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-            <Clock className="h-3 w-3" />
-            <span>{daysRemaining}d left</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="text-xs px-2 py-0.5 shrink-0">
+              {SETTING_CATEGORY_LABELS[proposal.settingCategory]}
+            </Badge>
           </div>
+          <p className="text-sm text-muted-foreground break-words">
+            {proposal.settingDescription}
+          </p>
         </div>
 
-        {/* Value Comparison */}
-        <div className="flex items-center gap-2 p-2 rounded-lg bg-background">
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Current</p>
-            <p className="text-xs font-medium truncate">{proposal.currentValue}</p>
+        {/* Value Comparison - Stacked for mobile */}
+        <div className="space-y-2 p-3 rounded-lg bg-background">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground uppercase font-medium">Current</span>
+            <span className="text-sm font-semibold break-words">{proposal.currentValue}</span>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-          <div className="flex-1 min-w-0 text-right">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Proposed</p>
-            <p className="text-xs font-medium text-primary truncate">{proposal.proposedValue}</p>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <ArrowRight className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground uppercase font-medium">Proposed</span>
+            <span className="text-sm font-semibold text-primary break-words">{proposal.proposedValue}</span>
           </div>
         </div>
 
         {/* Proposed By */}
         <div className="flex items-center gap-2">
-          <Avatar className="h-5 w-5">
+          <Avatar className="h-6 w-6 shrink-0">
             <AvatarImage src={proposal.proposedBy.avatar} />
-            <AvatarFallback className="text-[8px]">
+            <AvatarFallback className="text-xs">
               {proposal.proposedBy.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-muted-foreground break-words">
             Proposed by <strong>{proposal.proposedBy.name}</strong> ({proposal.proposedBy.role})
           </span>
         </div>
 
-        {/* Progress Bar */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Approval Progress</span>
-            <span className="font-medium">
+        {/* Progress Bar - Stacked */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-sm text-muted-foreground">Approval Progress</span>
+            <span className="text-sm font-semibold">
               {proposal.approvalPercentage}% / {threshold}% needed
             </span>
           </div>
@@ -119,13 +123,13 @@ export function AdminSettingProposalCard({
               style={{ left: `${threshold}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Check className="h-3 w-3 text-green-500" />
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-green-500" />
               {proposal.approvalCount} approved
             </span>
-            <span className="flex items-center gap-1">
-              <X className="h-3 w-3 text-red-500" />
+            <span className="flex items-center gap-1.5">
+              <X className="h-3.5 w-3.5 text-red-500" />
               {proposal.disapprovalCount} disapproved
             </span>
           </div>
@@ -133,9 +137,9 @@ export function AdminSettingProposalCard({
 
         {/* Vote Actions */}
         {hasVoted ? (
-          <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-muted/50">
+          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50">
             <Check className="h-4 w-4 text-green-500" />
-            <span className="text-sm">
+            <span className="text-sm font-medium">
               You {localVote === "approve" ? "approved" : "disapproved"} this change
             </span>
           </div>
@@ -144,21 +148,21 @@ export function AdminSettingProposalCard({
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 h-9 text-green-600 border-green-200 hover:bg-green-50 dark:hover:bg-green-950/30"
+              className="flex-1 h-10 text-sm text-green-600 border-green-200 hover:bg-green-50 dark:hover:bg-green-950/30"
               onClick={() => handleVote("approve")}
               disabled={isVoting}
             >
-              <Check className="h-4 w-4 mr-1" />
+              <Check className="h-4 w-4 mr-2" />
               Approve
             </Button>
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 h-9 text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30"
+              className="flex-1 h-10 text-sm text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30"
               onClick={() => handleVote("disapprove")}
               disabled={isVoting}
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="h-4 w-4 mr-2" />
               Disapprove
             </Button>
           </div>
@@ -168,18 +172,18 @@ export function AdminSettingProposalCard({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+          className="w-full h-9 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
           onClick={() => onRecommend(proposal.proposalId)}
         >
-          <Lightbulb className="h-3 w-3 mr-1" />
+          <Lightbulb className="h-4 w-4 mr-2" />
           Recommend Alternative Setting
         </Button>
 
         {/* Votes Needed Info */}
         {votesNeeded > 0 && (
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-            <AlertTriangle className="h-3 w-3" />
-            <span>{votesNeeded} more approvals needed to reach {threshold}% threshold</span>
+          <div className="flex items-start gap-2 text-sm text-muted-foreground">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span className="break-words">{votesNeeded} more approvals needed to reach {threshold}% threshold</span>
           </div>
         )}
       </CardContent>
