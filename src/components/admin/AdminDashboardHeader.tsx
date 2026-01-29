@@ -2,8 +2,7 @@ import { Users, Clock, Vote, Wallet, TrendingUp, TrendingDown } from "lucide-rea
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AdminStats } from "@/data/adminDashboardData";
-import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
-
+import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 interface StatCardProps {
   icon: React.ElementType;
   value: string | number;
@@ -91,7 +90,7 @@ export function AdminDashboardHeader({
         />
         <StatCard
           icon={Wallet}
-          value={formatMobiAmount(stats.walletBalance)}
+          value={formatLocalAmount(stats.walletBalance, "NGN")}
           label="Balance"
           onClick={onBalanceClick}
         />
