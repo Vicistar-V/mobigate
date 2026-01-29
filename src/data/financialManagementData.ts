@@ -9,7 +9,7 @@ import communityPerson6 from "@/assets/community-person-6.jpg";
 
 // ============ DUES & LEVIES ============
 
-export type ObligationType = "annual_dues" | "development_levy" | "special_assessment" | "registration_fee" | "emergency_levy" | "project_levy";
+export type ObligationType = "annual_dues" | "development_levy" | "special_assessment" | "registration_fee" | "emergency_levy" | "project_levy" | "social_levy" | "condolence_levy" | "statutory_levy";
 
 export type ObligationStatus = "active" | "expired" | "upcoming" | "suspended";
 
@@ -667,6 +667,9 @@ export const getObligationTypeLabel = (type: ObligationType): string => {
     registration_fee: "Registration Fee",
     emergency_levy: "Emergency Levy",
     project_levy: "Project Levy",
+    social_levy: "Social Levy",
+    condolence_levy: "Condolence Levy",
+    statutory_levy: "Statutory Levy",
   };
   return labels[type];
 };
