@@ -32,6 +32,7 @@ import {
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
+import { formatNgnMobi } from "@/lib/financialDisplay";
 
 interface CommunityDebtRecord {
   id: string;
@@ -214,25 +215,8 @@ interface DeficitsDetailSheetProps {
   totalAmount: number;
 }
 
-// Helper: Local Currency PRIMARY, Mobi SECONDARY
-const formatLocalPrimary = (amount: number): { local: string; mobi: string } => {
-  if (amount >= 1000000) {
-    return {
-      local: `₦${(amount / 1000000).toFixed(2)}M`,
-      mobi: `M${(amount / 1000000).toFixed(2)}M`,
-    };
-  }
-  if (amount >= 1000) {
-    return {
-      local: `₦${(amount / 1000).toFixed(0)}k`,
-      mobi: `M${(amount / 1000).toFixed(0)}k`,
-    };
-  }
-  return {
-    local: `₦${amount.toLocaleString()}`,
-    mobi: `M${amount.toLocaleString()}`,
-  };
-};
+// Helper: Local Currency PRIMARY, Mobi SECONDARY (no abbreviations)
+const formatLocalPrimary = (amount: number) => formatNgnMobi(amount);
 
 const getStatusConfig = (status: CommunityDebtRecord["status"]) => {
   switch (status) {
@@ -336,7 +320,7 @@ export const DeficitsDetailSheet = ({
           </div>
           <div className="flex-1">
             <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-            <p className="text-xl font-bold text-amber-600">{totalFormatted.local}</p>
+            <p className="text-xl font-bold text-amber-600 whitespace-normal break-words leading-tight">{totalFormatted.local}</p>
             <p className="text-xs text-muted-foreground">({totalFormatted.mobi}) owed</p>
           </div>
           <div className="text-right">
@@ -411,8 +395,8 @@ export const DeficitsDetailSheet = ({
                         {record.description}
                       </p>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-semibold text-sm text-red-600">
+                    <div className="text-right flex-shrink-0 max-w-[52%]">
+                      <p className="font-semibold text-sm text-red-600 whitespace-normal break-words leading-tight">
                         -{amountFormatted.local}
                       </p>
                       <p className="text-xs text-muted-foreground">

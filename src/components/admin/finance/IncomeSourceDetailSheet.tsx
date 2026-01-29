@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatNgnMobi } from "@/lib/financialDisplay";
 
 import communityPerson1 from "@/assets/community-person-1.jpg";
 import communityPerson2 from "@/assets/community-person-2.jpg";
@@ -118,25 +119,8 @@ interface IncomeSourceDetailSheetProps {
   totalAmount: number;
 }
 
-// Helper: Local Currency PRIMARY, Mobi SECONDARY
-const formatLocalPrimary = (amount: number): { local: string; mobi: string } => {
-  if (amount >= 1000000) {
-    return {
-      local: `₦${(amount / 1000000).toFixed(2)}M`,
-      mobi: `M${(amount / 1000000).toFixed(2)}M`,
-    };
-  }
-  if (amount >= 1000) {
-    return {
-      local: `₦${(amount / 1000).toFixed(0)}k`,
-      mobi: `M${(amount / 1000).toFixed(0)}k`,
-    };
-  }
-  return {
-    local: `₦${amount.toLocaleString()}`,
-    mobi: `M${amount.toLocaleString()}`,
-  };
-};
+// Helper: Local Currency PRIMARY, Mobi SECONDARY (no abbreviations)
+const formatLocalPrimary = (amount: number) => formatNgnMobi(amount);
 
 export const IncomeSourceDetailSheet = ({
   open,
@@ -168,7 +152,7 @@ export const IncomeSourceDetailSheet = ({
           </div>
           <div className="flex-1">
             <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-            <p className="text-xl font-bold text-green-700">{totalFormatted.local}</p>
+            <p className="text-xl font-bold text-green-700 whitespace-normal break-words leading-tight">{totalFormatted.local}</p>
             <p className="text-xs text-muted-foreground">({totalFormatted.mobi})</p>
           </div>
           <Badge variant="secondary" className="text-xs">
@@ -219,7 +203,7 @@ export const IncomeSourceDetailSheet = ({
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-sm text-green-600">
+                    <p className="font-semibold text-sm text-green-600 whitespace-normal break-words leading-tight">
                       +{paymentFormatted.local}
                     </p>
                     <p className="text-xs text-muted-foreground">

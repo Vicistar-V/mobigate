@@ -45,7 +45,7 @@ import { mockYearlyAudits, YearlyFinancialAudit } from "@/data/financialManageme
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { IncomeSourceDetailSheet } from "./IncomeSourceDetailSheet";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatNgnMobi } from "@/lib/financialDisplay";
 import { ExpenseSourceDetailSheet } from "./ExpenseSourceDetailSheet";
 import { DeficitsDetailSheet } from "./DeficitsDetailSheet";
 import { FloatingFundsDetailSheet } from "./FloatingFundsDetailSheet";
@@ -89,24 +89,12 @@ export const AdminFinancialAuditDialog = ({
     });
   };
 
-  // Helper: Local Currency PRIMARY, Mobi SECONDARY
-  const formatCurrency = (amount: number, showLocal: boolean = true) => {
-    const local = amount >= 1000000
-      ? `₦${(amount / 1000000).toFixed(2)}M`
-      : amount >= 1000
-        ? `₦${(amount / 1000).toFixed(0)}k`
-        : `₦${amount.toLocaleString()}`;
-    
-    if (!showLocal) return local;
-    
-    // Show Mobi currency equivalent (secondary)
-    const mobi = amount >= 1000000
-      ? `M${(amount / 1000000).toFixed(2)}M`
-      : amount >= 1000
-        ? `M${(amount / 1000).toFixed(0)}k`
-        : `M${amount.toLocaleString()}`;
-    
-    return `${local} (${mobi})`;
+  // Helper: Local Currency PRIMARY, Mobi SECONDARY (no abbreviations)
+  const formatCurrency = (amount: number, prefix?: "+" | "-") => {
+    const display = formatNgnMobi(amount);
+    if (prefix === "+") return `+${display.combined}`;
+    if (prefix === "-") return `-${display.combined}`;
+    return display.combined;
   };
 
   const Content = () => {
@@ -154,7 +142,7 @@ export const AdminFinancialAuditDialog = ({
               <ArrowDownLeft className="h-4 w-4 text-green-600" />
               <span className="text-xs text-muted-foreground">Funds Received</span>
             </div>
-            <p className="text-lg font-bold text-green-600">
+            <p className="text-lg font-bold text-green-600 whitespace-normal break-words leading-tight">
               {formatCurrency(currentAudit.totalFundsReceived)}
             </p>
           </Card>
@@ -163,7 +151,7 @@ export const AdminFinancialAuditDialog = ({
               <ArrowUpRight className="h-4 w-4 text-red-600" />
               <span className="text-xs text-muted-foreground">Funds Spent</span>
             </div>
-            <p className="text-lg font-bold text-red-600">
+            <p className="text-lg font-bold text-red-600 whitespace-normal break-words leading-tight">
               {formatCurrency(currentAudit.totalFundsSpent)}
             </p>
           </Card>
@@ -172,7 +160,7 @@ export const AdminFinancialAuditDialog = ({
               <Wallet className="h-4 w-4 text-blue-600" />
               <span className="text-xs text-muted-foreground">Closing Balance</span>
             </div>
-            <p className="text-lg font-bold text-blue-600">
+            <p className="text-lg font-bold text-blue-600 whitespace-normal break-words leading-tight">
               {formatCurrency(currentAudit.closingBalance)}
             </p>
           </Card>
@@ -185,8 +173,8 @@ export const AdminFinancialAuditDialog = ({
               )}
               <span className="text-xs text-muted-foreground">Net Flow</span>
             </div>
-            <p className={`text-lg font-bold ${isPositive ? "text-emerald-600" : "text-orange-600"}`}>
-              {isPositive ? "+" : ""}{formatCurrency(netFlow)}
+            <p className={`text-lg font-bold ${isPositive ? "text-emerald-600" : "text-orange-600"} whitespace-normal break-words leading-tight`}>
+              {formatCurrency(netFlow, isPositive ? "+" : undefined)}
             </p>
           </Card>
         </div>
@@ -203,7 +191,7 @@ export const AdminFinancialAuditDialog = ({
                 <Minus className="h-4 w-4 text-amber-600" />
                 <span className="text-xs text-muted-foreground">Total Deficits</span>
               </div>
-              <p className="text-lg font-bold text-amber-600">
+              <p className="text-lg font-bold text-amber-600 whitespace-normal break-words leading-tight">
                 {formatCurrency(currentAudit.totalDeficits)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -215,7 +203,7 @@ export const AdminFinancialAuditDialog = ({
                 <Clock className="h-4 w-4 text-purple-600" />
                 <span className="text-xs text-muted-foreground">Floating Funds</span>
               </div>
-              <p className="text-lg font-bold text-purple-600">
+              <p className="text-lg font-bold text-purple-600 whitespace-normal break-words leading-tight">
                 {formatCurrency(currentAudit.floatingFunds)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -238,21 +226,29 @@ export const AdminFinancialAuditDialog = ({
             <Card className="p-4">
               <h4 className="font-medium text-sm mb-3">Balance Flow</h4>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <span className="text-sm text-muted-foreground">Opening Balance</span>
-                  <span className="font-medium">{formatCurrency(currentAudit.openingBalance)}</span>
+                  <span className="font-medium text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                    {formatCurrency(currentAudit.openingBalance)}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between text-green-600">
+                <div className="flex items-start justify-between gap-3 text-green-600">
                   <span className="text-sm">+ Funds Received</span>
-                  <span className="font-medium">+{formatCurrency(currentAudit.totalFundsReceived)}</span>
+                  <span className="font-medium text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                    {formatCurrency(currentAudit.totalFundsReceived, "+")}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between text-red-600">
+                <div className="flex items-start justify-between gap-3 text-red-600">
                   <span className="text-sm">- Funds Spent</span>
-                  <span className="font-medium">-{formatCurrency(currentAudit.totalFundsSpent)}</span>
+                  <span className="font-medium text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                    {formatCurrency(currentAudit.totalFundsSpent, "-")}
+                  </span>
                 </div>
-                <div className="border-t pt-2 flex items-center justify-between font-semibold">
+                <div className="border-t pt-2 flex items-start justify-between gap-3 font-semibold">
                   <span>Closing Balance</span>
-                  <span className="text-blue-600">{formatCurrency(currentAudit.closingBalance)}</span>
+                  <span className="text-blue-600 text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                    {formatCurrency(currentAudit.closingBalance)}
+                  </span>
                 </div>
               </div>
             </Card>
@@ -278,8 +274,8 @@ export const AdminFinancialAuditDialog = ({
                     onClick={() => setSelectedDeficitSource({ key: item.key, amount: item.amount })}
                   >
                     <span className="text-muted-foreground">{item.label}</span>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-amber-600">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <span className="font-medium text-amber-600 text-right whitespace-normal break-words leading-tight">
                         {formatCurrency(item.amount)}
                       </span>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -310,8 +306,8 @@ export const AdminFinancialAuditDialog = ({
                     onClick={() => setSelectedFloatingSource({ key: item.key, amount: item.amount })}
                   >
                     <span className="text-muted-foreground">{item.label}</span>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium text-purple-600">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <span className="font-medium text-purple-600 text-right whitespace-normal break-words leading-tight">
                         {formatCurrency(item.amount)}
                       </span>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -356,11 +352,13 @@ export const AdminFinancialAuditDialog = ({
                       onClick={() => setSelectedIncomeSource({ key, amount: value })}
                     >
                       <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <span className="text-sm font-medium text-foreground">{label}</span>
-                          <div className="flex items-center gap-1">
-                            <span className="font-semibold text-sm">{formatCurrency(value)}</span>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="font-semibold text-sm text-right whitespace-normal break-words leading-tight">
+                              {formatCurrency(value)}
+                            </span>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -407,11 +405,13 @@ export const AdminFinancialAuditDialog = ({
                       onClick={() => setSelectedExpenseSource({ key, amount: value })}
                     >
                       <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <span className="text-sm font-medium text-foreground">{label}</span>
-                          <div className="flex items-center gap-1">
-                            <span className="font-semibold text-sm text-red-600">{formatCurrency(value)}</span>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="font-semibold text-sm text-red-600 text-right whitespace-normal break-words leading-tight">
+                              {formatCurrency(value)}
+                            </span>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
