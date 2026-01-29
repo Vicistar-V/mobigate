@@ -140,6 +140,38 @@ export function AdminAccreditationTab() {
     });
   };
 
+  const handleExport = () => {
+    // Generate CSV content from voters
+    const headers = ["Name", "Membership ID", "Status", "Financial Status", "Amount Owing", "Date Accredited"];
+    const csvRows = [
+      headers.join(","),
+      ...filteredVoters.map(voter => [
+        `"${voter.name}"`,
+        voter.membershipId,
+        voter.accreditationStatus,
+        voter.financialStatus,
+        voter.amountOwing || 0,
+        voter.dateAccredited ? format(new Date(voter.dateAccredited), "yyyy-MM-dd") : "N/A"
+      ].join(","))
+    ];
+    
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `accreditation-list-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Export Successful",
+      description: `Exported ${filteredVoters.length} voter records to CSV`
+    });
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4 pb-20 overflow-hidden">
       {/* Stats Row */}
@@ -171,7 +203,12 @@ export function AdminAccreditationTab() {
           <UserX className="h-3.5 w-3.5" />
           Revoke
         </Button>
-        <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8">
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="gap-1.5 text-xs h-8"
+          onClick={handleExport}
+        >
           <Download className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Export</span>
         </Button>
