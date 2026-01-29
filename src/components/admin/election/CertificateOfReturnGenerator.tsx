@@ -267,17 +267,15 @@ export function CertificateOfReturnGenerator({
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[92vh] flex flex-col overflow-hidden">
-            <DrawerHeader className="border-b pb-3 flex-shrink-0">
+          <DrawerContent className="max-h-[92vh]">
+            <DrawerHeader className="border-b pb-3">
               <DrawerTitle className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-primary" />
                 Certificate Generator
               </DrawerTitle>
             </DrawerHeader>
-            <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-              <div className="p-4 pb-8">
-                <Content />
-              </div>
+            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+              <Content />
             </ScrollArea>
           </DrawerContent>
         </Drawer>
