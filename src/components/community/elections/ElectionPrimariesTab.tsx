@@ -1,11 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Menu, Users, TrendingUp, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Users, TrendingUp, ChevronRight } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
+import { useNavigate } from "react-router-dom";
 
 interface PrimaryResult {
   id: string;
@@ -94,14 +96,25 @@ const getCandidateColors = (index: number) => {
 };
 
 export const ElectionPrimariesTab = () => {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Menu className="w-5 h-5" />
-          <h1 className="text-2xl font-bold">Nomination Primaries</h1>
-        </div>
+      {/* Header with Back Button */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleBack}
+          className="h-10 w-10 shrink-0"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">Nomination Primaries</h1>
       </div>
 
       {/* Description */}
