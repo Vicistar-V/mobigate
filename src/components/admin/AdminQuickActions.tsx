@@ -119,9 +119,8 @@ export function AdminQuickActions({
       <div className="overflow-x-auto -mx-4 px-4">
         <div className="flex items-center gap-1 pt-1 w-max min-w-full justify-center">
           <Button
-            variant="ghost"
             size="sm"
-            className="h-8 px-3 text-xs font-medium text-primary hover:text-primary shrink-0"
+            className="h-8 px-3 text-xs font-medium shrink-0"
             onClick={handleQuizGames}
           >
             <Gamepad2 className="h-3.5 w-3.5 mr-1.5" />
