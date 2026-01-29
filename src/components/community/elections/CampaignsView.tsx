@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Users, Plus, Eye, MessageSquare, Globe, UserCircle, Store, UsersRound, Wallet } from "lucide-react";
+import { Calendar, Users, Plus, Eye, MessageSquare, Globe, UserCircle, Store, UsersRound, Wallet, Building2 } from "lucide-react";
 import { EnhancedCampaign, CampaignAudience } from "@/types/campaignSystem";
 import { mockEnhancedCampaigns } from "@/data/campaignSystemData";
 import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
@@ -92,6 +92,14 @@ export const CampaignsView = ({ onLaunchCampaign }: CampaignsViewProps) => {
                   </div>
                   <p className="text-sm text-muted-foreground">{campaign.office}</p>
                 </div>
+              </div>
+
+              {/* Community Name - prominently displayed */}
+              <div className="flex items-center gap-1.5 px-2 py-1.5 bg-muted/50 rounded-md">
+                <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="text-xs font-medium text-foreground/80 truncate">
+                  {campaign.communityName}
+                </span>
               </div>
 
               {/* Tagline */}
