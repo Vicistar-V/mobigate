@@ -100,17 +100,15 @@ export function CampaignRoyaltySection({ onViewFullReport }: CampaignRoyaltySect
                           {campaign.office} • {campaign.durationDays} days
                         </p>
                         
-                        {/* Royalty Amount - Prominently Displayed */}
+                        {/* Royalty Amount - Only show Community Share */}
                         <div className="mt-2 p-2 bg-green-500/10 rounded-lg">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">Royalty</span>
+                            <span className="text-xs text-muted-foreground">Your Royalty</span>
                             <span className="font-bold text-green-600">
                               {formatMobiAmount(campaign.communityShare)}
                             </span>
                           </div>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
-                            60% of {formatMobiAmount(campaign.totalFeeInMobi)} total fee
-                          </p>
+                          {/* Removed: "60% of X total fee" - Mobigate Admin info only */}
                         </div>
                         
                         {/* Audience Targets */}
