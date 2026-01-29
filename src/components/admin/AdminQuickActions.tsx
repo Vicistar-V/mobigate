@@ -1,5 +1,12 @@
-import { Users, Wallet, Vote, FileText, Crown, Settings } from "lucide-react";
+import { Users, Wallet, Vote, FileText, Crown, Settings, Gamepad2, Store, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuickActionButtonProps {
   icon: React.ElementType;
@@ -47,6 +54,29 @@ export function AdminQuickActions({
   pendingMembers,
   pendingContent,
 }: AdminQuickActionsProps) {
+  const { toast } = useToast();
+
+  const handleQuizGames = () => {
+    toast({
+      title: "Quiz Games",
+      description: "Opening Quiz Games management...",
+    });
+  };
+
+  const handleMobiStore = () => {
+    toast({
+      title: "Mobi-Store",
+      description: "Opening Mobi-Store management...",
+    });
+  };
+
+  const handleOthersOption = (option: string) => {
+    toast({
+      title: option,
+      description: `Opening ${option}...`,
+    });
+  };
+
   return (
     <div className="space-y-3">
       <h2 className="text-base font-semibold text-muted-foreground">Quick Actions</h2>
@@ -83,6 +113,53 @@ export function AdminQuickActions({
           label="Settings"
           onClick={onCommunitySettings}
         />
+      </div>
+
+      {/* Quick Links Row */}
+      <div className="flex items-center justify-center gap-1 pt-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-3 text-xs font-medium text-primary hover:text-primary"
+          onClick={handleQuizGames}
+        >
+          <Gamepad2 className="h-3.5 w-3.5 mr-1.5" />
+          Quiz Games
+        </Button>
+        <span className="text-muted-foreground/50">|</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-3 text-xs font-medium text-primary hover:text-primary"
+          onClick={handleMobiStore}
+        >
+          <Store className="h-3.5 w-3.5 mr-1.5" />
+          Mobi-Store
+        </Button>
+        <span className="text-muted-foreground/50">|</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-3 text-xs font-medium text-primary hover:text-primary"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5 mr-1.5" />
+              Others
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem onClick={() => handleOthersOption("Community Forum")}>
+              Community Forum
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleOthersOption("Help Center")}>
+              Help Center
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleOthersOption("FAQs")}>
+              FAQs
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
