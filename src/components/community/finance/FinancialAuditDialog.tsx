@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, FileText, Download, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { X, FileText, Download, TrendingUp, TrendingDown, ChevronRight, Wallet, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -8,12 +8,22 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { mockAuditReports } from "@/data/financeData";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { mockYearlyAudits } from "@/data/financialManagementData";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { IncomeSourceDetailSheet } from "@/components/admin/finance/IncomeSourceDetailSheet";
 
 interface FinancialAuditDialogProps {
   open: boolean;
@@ -23,173 +33,310 @@ interface FinancialAuditDialogProps {
 export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialogProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [reports] = useState(mockAuditReports);
+  const [selectedYear, setSelectedYear] = useState<string>("2025");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [selectedIncomeSource, setSelectedIncomeSource] = useState<{
+    key: string;
+    amount: number;
+  } | null>(null);
 
-  const handleDownloadReport = (reportId: string, period: string) => {
+  const currentAudit = mockYearlyAudits.find((a) => a.year === parseInt(selectedYear));
+
+  const handleDownloadReport = () => {
     toast({
       title: "Downloading Report",
-      description: `${period} audit report will be downloaded`,
+      description: `${selectedYear} audit report will be downloaded`,
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-500/10 text-green-700";
-      case "in-progress":
-        return "bg-blue-500/10 text-blue-700";
-      default:
-        return "bg-gray-500/10 text-gray-700";
-    }
+  // Helper: Local Currency PRIMARY, Mobi SECONDARY
+  const formatCurrency = (amount: number) => {
+    const local = amount >= 1000000
+      ? `₦${(amount / 1000000).toFixed(2)}M`
+      : amount >= 1000
+        ? `₦${(amount / 1000).toFixed(0)}k`
+        : `₦${amount.toLocaleString()}`;
+    
+    const mobi = amount >= 1000000
+      ? `M${(amount / 1000000).toFixed(2)}M`
+      : amount >= 1000
+        ? `M${(amount / 1000).toFixed(0)}k`
+        : `M${amount.toLocaleString()}`;
+    
+    return `${local} (${mobi})`;
   };
 
-  const Content = () => (
-    <div className="space-y-4">
-      {reports.map((report) => (
-        <Card key={report.id}>
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">{report.period}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {report.startDate.toLocaleDateString()} - {report.endDate.toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <Badge className={getStatusColor(report.status)}>
-                {report.status}
-              </Badge>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            {/* Financial Summary */}
-            {report.status === "completed" && (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-green-500/10 rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
-                      <p className="text-xs text-muted-foreground">Total Income</p>
-                    </div>
-                    <p className="text-lg font-bold text-green-700">
-                      {report.currency} {report.totalIncome.toLocaleString()}
-                    </p>
-                  </div>
-
-                  <div className="p-3 bg-red-500/10 rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <TrendingDown className="h-4 w-4 text-red-600" />
-                      <p className="text-xs text-muted-foreground">Total Expenses</p>
-                    </div>
-                    <p className="text-lg font-bold text-red-700">
-                      {report.currency} {report.totalExpenditure.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <p className="text-sm text-muted-foreground mb-1">Net Balance</p>
-                  <p className={`text-2xl font-bold ${
-                    report.balance >= 0 ? "text-green-700" : "text-red-700"
-                  }`}>
-                    {report.currency} {Math.abs(report.balance).toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {report.balance >= 0 ? "Surplus" : "Deficit"}
-                  </p>
-                </div>
-
-                {/* Discrepancies Alert */}
-                {report.discrepancies > 0 && (
-                  <div className="flex items-start gap-3 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-sm text-yellow-700">
-                        {report.discrepancies} Discrepanc{report.discrepancies > 1 ? "ies" : "y"} Found
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Minor accounting discrepancies detected. Review recommended.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
-                  <span>Generated: {report.generatedDate.toLocaleDateString()}</span>
-                  <Button
-                    onClick={() => handleDownloadReport(report.id, report.period)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Download className="h-3 w-3 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {report.status === "in-progress" && (
-              <div className="text-center py-6">
-                <p className="text-sm text-muted-foreground">
-                  Audit in progress. Report will be available soon.
-                </p>
-              </div>
-            )}
-
-            {report.status === "pending" && (
-              <div className="text-center py-6">
-                <p className="text-sm text-muted-foreground">
-                  Audit scheduled. Report will be generated after period end.
-                </p>
-              </div>
-            )}
-          </CardContent>
+  const Content = () => {
+    if (!currentAudit) {
+      return (
+        <Card className="p-8 text-center">
+          <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="font-medium mb-2">No Audit Data Available</h3>
+          <p className="text-sm text-muted-foreground">
+            No financial audit data found for {selectedYear}.
+          </p>
         </Card>
-      ))}
-    </div>
-  );
+      );
+    }
+
+    const netFlow = currentAudit.totalFundsReceived - currentAudit.totalFundsSpent;
+    const isPositive = netFlow >= 0;
+
+    return (
+      <div className="space-y-4">
+        {/* Year Selector */}
+        <div className="flex items-center justify-between gap-3">
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent className="bg-background z-50">
+              {mockYearlyAudits.map((audit) => (
+                <SelectItem key={audit.year} value={audit.year.toString()}>
+                  {audit.year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" onClick={handleDownloadReport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-3 bg-green-50 border-green-200">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-4 w-4 text-green-600" />
+              <span className="text-xs text-muted-foreground">Funds Received</span>
+            </div>
+            <p className="text-base font-bold text-green-600">
+              {formatCurrency(currentAudit.totalFundsReceived)}
+            </p>
+          </Card>
+          <Card className="p-3 bg-red-50 border-red-200">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingDown className="h-4 w-4 text-red-600" />
+              <span className="text-xs text-muted-foreground">Funds Spent</span>
+            </div>
+            <p className="text-base font-bold text-red-600">
+              {formatCurrency(currentAudit.totalFundsSpent)}
+            </p>
+          </Card>
+          <Card className="p-3 bg-blue-50 border-blue-200">
+            <div className="flex items-center gap-2 mb-1">
+              <Wallet className="h-4 w-4 text-blue-600" />
+              <span className="text-xs text-muted-foreground">Closing Balance</span>
+            </div>
+            <p className="text-base font-bold text-blue-600">
+              {formatCurrency(currentAudit.closingBalance)}
+            </p>
+          </Card>
+          <Card className={`p-3 ${isPositive ? "bg-emerald-50 border-emerald-200" : "bg-orange-50 border-orange-200"}`}>
+            <div className="flex items-center gap-2 mb-1">
+              {isPositive ? (
+                <TrendingUp className="h-4 w-4 text-emerald-600" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-orange-600" />
+              )}
+              <span className="text-xs text-muted-foreground">Net Flow</span>
+            </div>
+            <p className={`text-base font-bold ${isPositive ? "text-emerald-600" : "text-orange-600"}`}>
+              {isPositive ? "+" : ""}{formatCurrency(netFlow)}
+            </p>
+          </Card>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="income" className="text-sm">Income Sources</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-3 mt-0">
+            <Card className="p-4">
+              <h4 className="font-medium text-sm mb-3">Balance Flow</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Opening Balance</span>
+                  <span className="font-medium text-sm">{formatCurrency(currentAudit.openingBalance)}</span>
+                </div>
+                <div className="flex items-center justify-between text-green-600">
+                  <span className="text-sm">+ Funds Received</span>
+                  <span className="font-medium text-sm">+{formatCurrency(currentAudit.totalFundsReceived)}</span>
+                </div>
+                <div className="flex items-center justify-between text-red-600">
+                  <span className="text-sm">- Funds Spent</span>
+                  <span className="font-medium text-sm">-{formatCurrency(currentAudit.totalFundsSpent)}</span>
+                </div>
+                <div className="border-t pt-2 flex items-center justify-between font-semibold">
+                  <span className="text-sm">Closing Balance</span>
+                  <span className="text-blue-600 text-sm">{formatCurrency(currentAudit.closingBalance)}</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Quick Income Summary */}
+            <Card className="p-4">
+              <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                Top Income Sources
+              </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                Tap to view payment details
+              </p>
+              <div className="space-y-2">
+                {Object.entries(currentAudit.breakdown.income)
+                  .sort(([, a], [, b]) => b - a)
+                  .slice(0, 4)
+                  .map(([key, value]) => {
+                    const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+                    
+                    const colorMap: Record<string, string> = {
+                      duesCollected: "bg-blue-100",
+                      leviesCollected: "bg-cyan-100",
+                      donations: "bg-pink-100",
+                      fundraisers: "bg-purple-100",
+                      eventRevenue: "bg-yellow-100",
+                      minutesDownloadRevenue: "bg-green-100",
+                      otherIncome: "bg-gray-100",
+                    };
+                    const bgColor = colorMap[key] || "bg-gray-100";
+                    
+                    return (
+                      <button
+                        key={key}
+                        className={`w-full flex items-center justify-between text-sm p-2.5 rounded-lg ${bgColor} hover:opacity-90 transition-colors active:scale-[0.99]`}
+                        onClick={() => setSelectedIncomeSource({ key, amount: value })}
+                      >
+                        <span className="text-muted-foreground text-left">{label}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-green-600">
+                            {formatCurrency(value)}
+                          </span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </button>
+                    );
+                  })}
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Income Tab - Full list with progress bars */}
+          <TabsContent value="income" className="space-y-3 mt-0">
+            <Card className="p-4">
+              <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                All Income Sources
+              </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                Tap on any source to view detailed payment records
+              </p>
+              <div className="space-y-3">
+                {Object.entries(currentAudit.breakdown.income).map(([key, value]) => {
+                  const percentage = Math.round((value / currentAudit.totalFundsReceived) * 100);
+                  const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+                  
+                  const colorMap: Record<string, string> = {
+                    duesCollected: "bg-blue-100",
+                    leviesCollected: "bg-cyan-100",
+                    donations: "bg-pink-100",
+                    fundraisers: "bg-purple-100",
+                    eventRevenue: "bg-yellow-100",
+                    minutesDownloadRevenue: "bg-green-100",
+                    otherIncome: "bg-gray-100",
+                  };
+                  const bgColor = colorMap[key] || "bg-gray-100";
+                  
+                  return (
+                    <button
+                      key={key}
+                      className={`w-full text-left p-3 rounded-lg ${bgColor} hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer`}
+                      onClick={() => setSelectedIncomeSource({ key, amount: value })}
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground">{label}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-semibold text-sm">{formatCurrency(value)}</span>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Progress value={percentage} className="h-1.5 flex-1" />
+                          <span className="text-xs text-muted-foreground w-8">{percentage}%</span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  };
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh]">
-          <DrawerHeader className="border-b">
-            <DrawerTitle>Financial Audit Reports</DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
-          </ScrollArea>
-        </DrawerContent>
-      </Drawer>
+      <>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="max-h-[92vh]">
+            <DrawerHeader className="border-b">
+              <DrawerTitle>Community Financial Audit</DrawerTitle>
+            </DrawerHeader>
+            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+              <Content />
+            </ScrollArea>
+          </DrawerContent>
+        </Drawer>
+
+        {/* Income Source Detail Sheet */}
+        <IncomeSourceDetailSheet
+          open={!!selectedIncomeSource}
+          onOpenChange={(open) => !open && setSelectedIncomeSource(null)}
+          sourceKey={selectedIncomeSource?.key || ""}
+          totalAmount={selectedIncomeSource?.amount || 0}
+        />
+      </>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10 border-b pb-4">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold">Financial Audit Reports</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10 border-b pb-4">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-bold">Community Financial Audit</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
 
-        <ScrollArea className="flex-1 p-4 sm:p-6">
-          <Content />
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+          <ScrollArea className="flex-1 p-4 sm:p-6">
+            <Content />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Income Source Detail Sheet */}
+      <IncomeSourceDetailSheet
+        open={!!selectedIncomeSource}
+        onOpenChange={(open) => !open && setSelectedIncomeSource(null)}
+        sourceKey={selectedIncomeSource?.key || ""}
+        totalAmount={selectedIncomeSource?.amount || 0}
+      />
+    </>
   );
 }

@@ -300,13 +300,16 @@ export const ManageDuesLeviesDialog = ({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background z-50">
                 <SelectItem value="annual_dues">Annual Dues</SelectItem>
                 <SelectItem value="development_levy">Development Levy</SelectItem>
                 <SelectItem value="special_assessment">Special Assessment</SelectItem>
                 <SelectItem value="registration_fee">Registration Fee</SelectItem>
                 <SelectItem value="emergency_levy">Emergency Levy</SelectItem>
                 <SelectItem value="project_levy">Project Levy</SelectItem>
+                <SelectItem value="social_levy">Social Levy</SelectItem>
+                <SelectItem value="condolence_levy">Condolence Levy</SelectItem>
+                <SelectItem value="statutory_levy">Statutory Levy</SelectItem>
               </SelectContent>
             </Select>
           </div>

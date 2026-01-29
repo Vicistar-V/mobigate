@@ -78,6 +78,7 @@ export interface WinnerCandidate {
   votes: number;
   percentage: number;
   isWinner: boolean;
+  isRunnerUp?: boolean; // Second place becomes Deputy/Vice automatically
 }
 
 export interface ElectionInfo {
@@ -429,7 +430,7 @@ export const mockWinnerResults: ElectionWinnerResult[] = [
     officeName: "President General",
     candidates: [
       { id: "cand-1", name: "Paulson Chinedu Okonkwo", avatar: "/placeholder.svg", votes: 527, percentage: 61.5, isWinner: true },
-      { id: "cand-2", name: "Jerome Ifeanyi Adebayo", avatar: "/placeholder.svg", votes: 316, percentage: 36.9, isWinner: false },
+      { id: "cand-2", name: "Jerome Ifeanyi Adebayo", avatar: "/placeholder.svg", votes: 316, percentage: 36.9, isWinner: false, isRunnerUp: true },
       { id: "cand-3", name: "Jude Emeka Nwosu", avatar: "/placeholder.svg", votes: 13, percentage: 1.6, isWinner: false }
     ],
     announced: false
