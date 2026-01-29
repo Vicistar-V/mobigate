@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, FileText, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Badge } from "@/components/ui/badge";
 import { mockAdminNews, mockAdminEvents, mockAdminArticles, mockAdminVibes, getPendingApprovals, AdminContentItem, getContentAdminStats, ContentType } from "@/data/adminContentData";
 import { useToast } from "@/hooks/use-toast";
@@ -134,8 +134,8 @@ export default function ContentModerationPage() {
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
-        <div className="border-b px-4">
-          <ScrollArea className="w-full touch-auto" style={{ overflowX: 'auto' }}>
+        <div className="border-b px-4 overflow-x-auto">
+          <div className="w-max min-w-full">
             <TabsList className="h-11 bg-transparent w-max">
               <TabsTrigger value="pending" className="gap-1">
                 Pending <Badge variant="destructive" className="text-[10px] px-1">{stats.totalPending}</Badge>
@@ -145,7 +145,7 @@ export default function ContentModerationPage() {
               <TabsTrigger value="articles">Articles</TabsTrigger>
               <TabsTrigger value="vibes">Vibes</TabsTrigger>
             </TabsList>
-          </ScrollArea>
+          </div>
         </div>
 
         <div className="p-4">

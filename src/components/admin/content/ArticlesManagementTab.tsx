@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { AdminContentItem } from "@/data/adminContentData";
 import { format } from "date-fns";
 
@@ -117,8 +117,8 @@ export function ArticlesManagementTab({
 
       {/* Category Filter */}
       {categories.length > 0 && (
-        <ScrollArea className="w-full" style={{ overflowX: 'auto' }}>
-          <div className="flex gap-2 pb-2">
+        <div className="overflow-x-auto -mx-4 px-4">
+          <div className="flex gap-2 pb-2 w-max">
             <Badge
               variant={categoryFilter === "all" ? "default" : "outline"}
               className="cursor-pointer shrink-0"
@@ -137,7 +137,7 @@ export function ArticlesManagementTab({
               </Badge>
             ))}
           </div>
-        </ScrollArea>
+        </div>
       )}
 
       {/* Articles List */}
