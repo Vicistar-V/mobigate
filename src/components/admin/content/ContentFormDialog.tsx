@@ -56,6 +56,8 @@ export function ContentFormDialog({
   });
   const [newTag, setNewTag] = useState("");
   const [publishOption, setPublishOption] = useState<"draft" | "pending" | "published">("draft");
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
     if (editingItem) {
@@ -78,6 +80,8 @@ export function ContentFormDialog({
         tags: [],
       });
       setPublishOption("draft");
+      setShowCustomCategory(false);
+      setCustomCategory("");
     }
   }, [editingItem, contentType, open]);
 
@@ -117,14 +121,37 @@ export function ContentFormDialog({
           <>
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select value={formData.category || ""} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
+              <Select 
+                value={showCustomCategory ? "other" : (formData.category || "")} 
+                onValueChange={(v) => {
+                  if (v === "other") {
+                    setShowCustomCategory(true);
+                  } else {
+                    setShowCustomCategory(false);
+                    setCustomCategory("");
+                    setFormData(prev => ({ ...prev, category: v }));
+                  }
+                }}
+              >
                 <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>
                   {newsCategories.map(cat => (
                     <SelectItem key={cat} value={cat.toLowerCase()}>{cat}</SelectItem>
                   ))}
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {showCustomCategory && (
+                <Input
+                  placeholder="Enter custom category..."
+                  value={customCategory}
+                  onChange={(e) => {
+                    setCustomCategory(e.target.value);
+                    setFormData(prev => ({ ...prev, category: e.target.value.toLowerCase() }));
+                  }}
+                  className="mt-2"
+                />
+              )}
             </div>
             <div className="flex items-center justify-between">
               <Label>Featured News</Label>
@@ -138,14 +165,37 @@ export function ContentFormDialog({
           <>
             <div className="space-y-2">
               <Label>Event Type</Label>
-              <Select value={formData.category || ""} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
+              <Select 
+                value={showCustomCategory ? "other" : (formData.category || "")} 
+                onValueChange={(v) => {
+                  if (v === "other") {
+                    setShowCustomCategory(true);
+                  } else {
+                    setShowCustomCategory(false);
+                    setCustomCategory("");
+                    setFormData(prev => ({ ...prev, category: v }));
+                  }
+                }}
+              >
                 <SelectTrigger><SelectValue placeholder="Select event type" /></SelectTrigger>
                 <SelectContent>
                   {eventTypes.map(type => (
                     <SelectItem key={type} value={type.toLowerCase()}>{type}</SelectItem>
                   ))}
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {showCustomCategory && (
+                <Input
+                  placeholder="Enter custom event type..."
+                  value={customCategory}
+                  onChange={(e) => {
+                    setCustomCategory(e.target.value);
+                    setFormData(prev => ({ ...prev, category: e.target.value.toLowerCase() }));
+                  }}
+                  className="mt-2"
+                />
+              )}
             </div>
             <div className="space-y-2">
               <Label>Venue Name</Label>
@@ -199,14 +249,37 @@ export function ContentFormDialog({
           <>
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select value={formData.category || ""} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
+              <Select 
+                value={showCustomCategory ? "other" : (formData.category || "")} 
+                onValueChange={(v) => {
+                  if (v === "other") {
+                    setShowCustomCategory(true);
+                  } else {
+                    setShowCustomCategory(false);
+                    setCustomCategory("");
+                    setFormData(prev => ({ ...prev, category: v }));
+                  }
+                }}
+              >
                 <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>
                   {articleCategories.map(cat => (
                     <SelectItem key={cat} value={cat.toLowerCase()}>{cat}</SelectItem>
                   ))}
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {showCustomCategory && (
+                <Input
+                  placeholder="Enter custom category..."
+                  value={customCategory}
+                  onChange={(e) => {
+                    setCustomCategory(e.target.value);
+                    setFormData(prev => ({ ...prev, category: e.target.value.toLowerCase() }));
+                  }}
+                  className="mt-2"
+                />
+              )}
             </div>
             <div className="space-y-2">
               <Label>Excerpt</Label>

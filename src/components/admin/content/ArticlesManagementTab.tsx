@@ -52,12 +52,24 @@ export function ArticlesManagementTab({
     featured: articles.filter(a => a.featured).length,
   };
 
+  // Predefined categories for "Other" filter logic
+  const predefinedCategories = ["community news", "culture", "development", "education", "opinion"];
   const categories = [...new Set(articles.map(a => a.category).filter(Boolean))];
 
   const filtered = articles.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-    const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+    
+    let matchesCategory = false;
+    if (categoryFilter === "all") {
+      matchesCategory = true;
+    } else if (categoryFilter === "other") {
+      // Show articles with categories not in predefined list
+      matchesCategory = !predefinedCategories.includes(item.category?.toLowerCase() || "");
+    } else {
+      matchesCategory = item.category === categoryFilter;
+    }
+    
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
@@ -116,29 +128,34 @@ export function ArticlesManagementTab({
       </div>
 
       {/* Category Filter */}
-      {categories.length > 0 && (
-        <div className="overflow-x-auto -mx-4 px-4">
-          <div className="flex gap-2 pb-2 w-max">
+      <div className="overflow-x-auto -mx-4 px-4">
+        <div className="flex gap-2 pb-2 w-max">
+          <Badge
+            variant={categoryFilter === "all" ? "default" : "outline"}
+            className="cursor-pointer shrink-0"
+            onClick={() => setCategoryFilter("all")}
+          >
+            All
+          </Badge>
+          {categories.map(cat => (
             <Badge
-              variant={categoryFilter === "all" ? "default" : "outline"}
-              className="cursor-pointer shrink-0"
-              onClick={() => setCategoryFilter("all")}
+              key={cat}
+              variant={categoryFilter === cat ? "default" : "outline"}
+              className="cursor-pointer shrink-0 capitalize"
+              onClick={() => setCategoryFilter(cat!)}
             >
-              All
+              {cat}
             </Badge>
-            {categories.map(cat => (
-              <Badge
-                key={cat}
-                variant={categoryFilter === cat ? "default" : "outline"}
-                className="cursor-pointer shrink-0 capitalize"
-                onClick={() => setCategoryFilter(cat!)}
-              >
-                {cat}
-              </Badge>
-            ))}
-          </div>
+          ))}
+          <Badge
+            variant={categoryFilter === "other" ? "default" : "outline"}
+            className="cursor-pointer shrink-0"
+            onClick={() => setCategoryFilter("other")}
+          >
+            Other
+          </Badge>
         </div>
-      )}
+      </div>
 
       {/* Articles List */}
       <div className="space-y-3">
