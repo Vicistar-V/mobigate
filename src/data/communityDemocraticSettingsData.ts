@@ -64,6 +64,8 @@ export const mockAdminProposals: AdminSettingProposal[] = [
     settingCategory: 'privacy_settings',
     currentValue: 'Valid Members Only',
     proposedValue: 'All Members',
+    valueOptions: ['Nobody', 'Only Admins', 'Valid Members Only', 'All Members', 'Public (Visitors)'],
+    isNumericSetting: false,
     proposedBy: mockAdmins.president,
     proposedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
     approvalCount: 45,
@@ -85,6 +87,8 @@ export const mockAdminProposals: AdminSettingProposal[] = [
     settingCategory: 'meeting_settings',
     currentValue: 'M500',
     proposedValue: 'M1000',
+    valueOptions: ['Free (M0)', 'M100', 'M200', 'M500', 'M1000', 'M2000', 'M5000'],
+    isNumericSetting: true, // This is a financial amount
     proposedBy: mockAdmins.treasurer,
     proposedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
     approvalCount: 28,
@@ -106,6 +110,8 @@ export const mockAdminProposals: AdminSettingProposal[] = [
     settingCategory: 'membership_settings',
     currentValue: 'Admin Approval Required',
     proposedValue: 'Auto-Approve After Quiz',
+    valueOptions: ['Automatic', 'Admin Approval Required', 'Auto-Approve After Quiz', 'Committee Review'],
+    isNumericSetting: false,
     proposedBy: mockAdmins.secretary,
     proposedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
     approvalCount: 62,

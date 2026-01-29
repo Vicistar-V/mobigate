@@ -94,6 +94,8 @@ export interface AdminSettingProposal {
   settingCategory: CommunitySettingCategory;
   currentValue: string;
   proposedValue: string;
+  valueOptions?: string[]; // Available preset options for this setting
+  isNumericSetting?: boolean; // True if this is a numeric value (amounts, days, etc.)
   proposedBy: AdminInfo;
   proposedAt: Date;
   approvalCount: number;
