@@ -51,90 +51,99 @@ export function CandidateFeedbackSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl">
-        <SheetHeader className="pb-2">
-          <SheetTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-primary" />
-              Campaign Feedback
-            </div>
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="text-xs">
-                {unreadCount} unread
-              </Badge>
-            )}
-          </SheetTitle>
-        </SheetHeader>
-        
-        {/* Campaign Info */}
-        <div className="bg-muted/50 rounded-lg p-3 mb-4">
-          <p className="text-sm font-medium">{campaign.candidateName}</p>
-          <p className="text-xs text-muted-foreground">for {campaign.office}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {campaign.feedbackCount} total responses received
-          </p>
-        </div>
-        
-        {/* Search & Filter */}
-        <div className="flex gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search feedback..."
-              className="pl-9"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setFilterStatus("all")}>
-                All ({campaign.feedbacks.length})
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStatus("unread")}>
-                Unread ({unreadCount})
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStatus("read")}>
-                Read ({campaign.feedbacks.length - unreadCount})
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
-        <Separator className="mb-4" />
-        
-        {/* Feedback List */}
-        <ScrollArea className="h-[calc(100%-220px)]">
-          {filteredFeedbacks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <MessageSquare className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="font-semibold text-sm">No Feedback Yet</h3>
-              <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                {searchQuery 
-                  ? "No feedback matches your search"
-                  : "Feedback from your audience will appear here"
-                }
+      <SheetContent
+        side="bottom"
+        className="h-[85vh] max-h-[92vh] rounded-t-2xl p-0 overflow-hidden"
+      >
+        <div className="h-full flex flex-col">
+          {/* Sticky header zone */}
+          <div className="shrink-0 px-4 pt-4">
+            <SheetHeader className="pb-2">
+              <SheetTitle className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <MessageSquare className="h-5 w-5 text-primary shrink-0" />
+                  <span className="truncate">Campaign Feedback</span>
+                </div>
+                {unreadCount > 0 && (
+                  <Badge variant="destructive" className="text-xs shrink-0">
+                    {unreadCount} unread
+                  </Badge>
+                )}
+              </SheetTitle>
+            </SheetHeader>
+
+            {/* Campaign Info */}
+            <div className="bg-muted/50 rounded-lg p-3 mb-4">
+              <p className="text-sm font-medium break-words">{campaign.candidateName}</p>
+              <p className="text-xs text-muted-foreground break-words">for {campaign.office}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {campaign.feedbackCount} total responses received
               </p>
             </div>
-          ) : (
-            <div className="space-y-3 pr-2">
-              {filteredFeedbacks.map((feedback) => (
-                <FeedbackCard 
-                  key={feedback.id} 
-                  feedback={feedback} 
-                  onMarkAsRead={onMarkAsRead}
+
+            {/* Search & Filter */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="relative flex-1 min-w-[220px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search feedback..."
+                  className="pl-9 h-11 text-base"
                 />
-              ))}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-11 w-11 shrink-0">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setFilterStatus("all")}>
+                    All ({campaign.feedbacks.length})
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("unread")}>
+                    Unread ({unreadCount})
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus("read")}>
+                    Read ({campaign.feedbacks.length - unreadCount})
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          )}
-        </ScrollArea>
+
+            <Separator className="mb-4" />
+          </div>
+
+          {/* Scrollable list */}
+          <div className="flex-1 min-h-0 px-4 pb-4">
+            <ScrollArea className="h-full">
+              {filteredFeedbacks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center px-2">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <MessageSquare className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-sm">No Feedback Yet</h3>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+                    {searchQuery
+                      ? "No feedback matches your search"
+                      : "Feedback from your audience will appear here"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3 pr-2">
+                  {filteredFeedbacks.map((feedback) => (
+                    <FeedbackCard
+                      key={feedback.id}
+                      feedback={feedback}
+                      onMarkAsRead={onMarkAsRead}
+                    />
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        </div>
       </SheetContent>
     </Sheet>
   );
