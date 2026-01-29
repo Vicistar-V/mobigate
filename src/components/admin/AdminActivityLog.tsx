@@ -96,13 +96,16 @@ export function AdminActivityLog({ activities, maxHeight = "300px" }: AdminActiv
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <ScrollArea style={{ maxHeight }} className="touch-auto">
+        <div 
+          className="overflow-y-auto touch-auto overscroll-contain" 
+          style={{ maxHeight }}
+        >
           <div className="divide-y divide-border">
             {activities.map((activity) => (
               <ActivityItem key={activity.id} activity={activity} />
             ))}
           </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
