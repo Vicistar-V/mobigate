@@ -49,6 +49,8 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
   const [campaignImage, setCampaignImage] = useState<string | null>(null);
   const [campaignColor, setCampaignColor] = useState("green");
   const [showCampaignSettings, setShowCampaignSettings] = useState(false);
+  const [startDateOpen, setStartDateOpen] = useState(false);
+  const [endDateOpen, setEndDateOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,6 +162,16 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
     onOpenChange(false);
   };
 
+  const handleStartDateSelect = (date: Date | undefined) => {
+    setStartDate(date);
+    setStartDateOpen(false); // Auto-close on selection
+  };
+
+  const handleEndDateSelect = (date: Date | undefined) => {
+    setEndDate(date);
+    setEndDateOpen(false); // Auto-close on selection
+  };
+
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
@@ -233,7 +245,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
               <Label className="text-sm font-medium">Campaign Period *</Label>
               <div className="grid grid-cols-2 gap-3">
                 {/* Start Date */}
-                <Popover>
+                <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -250,16 +262,16 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                     <Calendar
                       mode="single"
                       selected={startDate}
-                      onSelect={setStartDate}
+                      onSelect={handleStartDateSelect}
                       disabled={(date) => date < new Date()}
                       initialFocus
-                      className="pointer-events-auto"
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
 
                 {/* End Date */}
-                <Popover>
+                <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -276,10 +288,10 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                     <Calendar
                       mode="single"
                       selected={endDate}
-                      onSelect={setEndDate}
+                      onSelect={handleEndDateSelect}
                       disabled={(date) => date < (startDate || new Date())}
                       initialFocus
-                      className="pointer-events-auto"
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
