@@ -423,20 +423,20 @@ export function DeclarationOfInterestSheet({
                 <strong>{selectedFeeStructure?.officeName}</strong>.
               </p>
               <p>
-                <strong>{formatMobiAmount(costBreakdown?.totalDebited || 0)}</strong>{" "}
+                <strong>{formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")}</strong>{" "}
                 <span className="text-muted-foreground">
-                  (≈ {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")})
+                  (≈ {formatMobiAmount(costBreakdown?.totalDebited || 0)})
                 </span>{" "}
-                will be debited from your Mobi Wallet.
+                will be debited from your Wallet.
               </p>
               <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                 <p className="flex justify-between">
                   <span>• Community Account:</span>
-                  <span>{formatMobiAmount(costBreakdown?.communityReceives || 0)} (≈ {formatLocalAmount(costBreakdown?.communityReceives || 0, "NGN")})</span>
+                  <span>{formatLocalAmount(costBreakdown?.communityReceives || 0, "NGN")} (≈ {formatMobiAmount(costBreakdown?.communityReceives || 0)})</span>
                 </p>
                 <p className="flex justify-between">
                   <span>• Mobigate Platform:</span>
-                  <span>{formatMobiAmount(costBreakdown?.mobigateReceives || 0)} (≈ {formatLocalAmount(costBreakdown?.mobigateReceives || 0, "NGN")})</span>
+                  <span>{formatLocalAmount(costBreakdown?.mobigateReceives || 0, "NGN")} (≈ {formatMobiAmount(costBreakdown?.mobigateReceives || 0)})</span>
                 </p>
               </div>
               <p className="text-amber-600">
