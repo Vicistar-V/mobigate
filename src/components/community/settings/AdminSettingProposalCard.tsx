@@ -9,7 +9,7 @@ import {
   X,
   Lightbulb,
   Clock,
-  ArrowRight,
+  ArrowDown,
   AlertTriangle,
 } from "lucide-react";
 import { AdminSettingProposal, SETTING_CATEGORY_LABELS, DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
@@ -57,80 +57,87 @@ export function AdminSettingProposalCard({
 
   return (
     <Card className="overflow-hidden border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
-      <CardContent className="p-4 space-y-4">
+      <CardContent className="p-3 sm:p-4 space-y-3">
         {/* Header - Full width stacked */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {/* Title row with time remaining */}
-          <div className="flex items-start justify-between gap-3">
-            <h4 className="font-bold text-base break-words leading-snug flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <h4 className="font-bold text-sm sm:text-base leading-snug flex-1 min-w-0 line-clamp-2">
               {proposal.settingName}
             </h4>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground shrink-0 whitespace-nowrap">
-              <Clock className="h-4 w-4" />
+            <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground shrink-0">
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>{daysRemaining}d left</span>
             </div>
           </div>
 
           {/* Category badge */}
-          <Badge variant="outline" className="text-xs px-2.5 py-1">
+          <Badge variant="outline" className="text-xs px-2 py-0.5">
             {SETTING_CATEGORY_LABELS[proposal.settingCategory]}
           </Badge>
 
           {/* Description */}
-          <p className="text-sm text-muted-foreground break-words leading-relaxed">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3">
             {proposal.settingDescription}
           </p>
         </div>
 
-        {/* Value Comparison - Fully stacked side by side */}
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-2 p-3 rounded-lg bg-background items-center">
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground uppercase font-medium mb-1">Current</p>
-            <p className="text-sm font-semibold break-words leading-tight">{proposal.currentValue}</p>
+        {/* Value Comparison - Fully stacked for mobile */}
+        <div className="space-y-2 p-3 rounded-lg bg-background">
+          {/* Current Value */}
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground uppercase font-medium">Current</p>
+            <p className="text-sm font-semibold break-words">{proposal.currentValue}</p>
           </div>
-          <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0" />
-          <div className="min-w-0 text-right">
-            <p className="text-xs text-muted-foreground uppercase font-medium mb-1">Proposed</p>
-            <p className="text-sm font-bold text-primary break-words leading-tight">{proposal.proposedValue}</p>
+          
+          {/* Arrow */}
+          <div className="flex justify-center py-1">
+            <ArrowDown className="h-4 w-4 text-muted-foreground" />
+          </div>
+          
+          {/* Proposed Value */}
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground uppercase font-medium">Proposed</p>
+            <p className="text-sm font-bold text-primary break-words">{proposal.proposedValue}</p>
           </div>
         </div>
 
         {/* Proposed By */}
-        <div className="flex items-center gap-2.5">
-          <Avatar className="h-7 w-7 shrink-0">
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6 shrink-0">
             <AvatarImage src={proposal.proposedBy.avatar} />
             <AvatarFallback className="text-xs">
               {proposal.proposedBy.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm text-muted-foreground break-words">
+          <span className="text-xs sm:text-sm text-muted-foreground">
             Proposed by <strong className="text-foreground">{proposal.proposedBy.name}</strong> ({proposal.proposedBy.role})
           </span>
         </div>
 
         {/* Progress Bar - Stacked with clear labels */}
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium">Approval Progress</span>
-            <span className="text-sm font-bold">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-1">
+            <span className="text-xs sm:text-sm font-medium">Approval Progress</span>
+            <span className="text-xs sm:text-sm font-bold whitespace-nowrap">
               {proposal.approvalPercentage}% / {threshold}% needed
             </span>
           </div>
           <div className="relative">
-            <Progress value={proposal.approvalPercentage} className="h-2.5" />
+            <Progress value={proposal.approvalPercentage} className="h-2" />
             {/* 60% threshold marker */}
             <div
-              className="absolute top-0 h-2.5 w-0.5 bg-primary"
+              className="absolute top-0 h-2 w-0.5 bg-primary"
               style={{ left: `${threshold}%` }}
             />
           </div>
-          <div className="flex items-center justify-between gap-2 text-sm">
-            <span className="flex items-center gap-1.5 text-green-600">
-              <Check className="h-4 w-4" />
+          <div className="flex items-center justify-between gap-2 text-xs sm:text-sm">
+            <span className="flex items-center gap-1 text-green-600">
+              <Check className="h-3.5 w-3.5" />
               {proposal.approvalCount} approved
             </span>
-            <span className="flex items-center gap-1.5 text-red-600">
-              <X className="h-4 w-4" />
+            <span className="flex items-center gap-1 text-red-600">
+              <X className="h-3.5 w-3.5" />
               {proposal.disapprovalCount} disapproved
             </span>
           </div>
@@ -139,29 +146,29 @@ export function AdminSettingProposalCard({
         {/* Vote Actions */}
         {hasVoted ? (
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50">
-            <Check className="h-5 w-5 text-green-500" />
-            <span className="text-sm font-medium">
+            <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+            <span className="text-xs sm:text-sm font-medium">
               You {localVote === "approve" ? "approved" : "disapproved"} this change
             </span>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <Button
               variant="outline"
-              className="h-11 text-base font-semibold text-green-600 border-green-300 hover:bg-green-50 dark:hover:bg-green-950/30"
+              className="h-10 text-sm font-semibold text-green-600 border-green-300 hover:bg-green-50 dark:hover:bg-green-950/30"
               onClick={() => handleVote("approve")}
               disabled={isVoting}
             >
-              <Check className="h-5 w-5 mr-2" />
+              <Check className="h-4 w-4 mr-1.5" />
               Approve
             </Button>
             <Button
               variant="outline"
-              className="h-11 text-base font-semibold text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
+              className="h-10 text-sm font-semibold text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
               onClick={() => handleVote("disapprove")}
               disabled={isVoting}
             >
-              <X className="h-5 w-5 mr-2" />
+              <X className="h-4 w-4 mr-1.5" />
               Disapprove
             </Button>
           </div>
@@ -170,18 +177,18 @@ export function AdminSettingProposalCard({
         {/* Recommend Alternative */}
         <Button
           variant="ghost"
-          className="w-full h-10 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+          className="w-full h-9 text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
           onClick={() => onRecommend(proposal.proposalId)}
         >
-          <Lightbulb className="h-4 w-4 mr-2" />
-          Recommend Alternative Setting
+          <Lightbulb className="h-3.5 w-3.5 mr-1.5" />
+          Recommend Alternative
         </Button>
 
         {/* Votes Needed Info */}
         {votesNeeded > 0 && (
-          <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-100/50 dark:bg-amber-900/20 text-sm text-amber-700 dark:text-amber-400">
-            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-            <span className="break-words">{votesNeeded} more approvals needed to reach {threshold}% threshold</span>
+          <div className="flex items-start gap-2 p-2 rounded-lg bg-amber-100/50 dark:bg-amber-900/20 text-xs sm:text-sm text-amber-700 dark:text-amber-400">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <span>{votesNeeded} more approvals needed to reach {threshold}%</span>
           </div>
         )}
       </CardContent>
