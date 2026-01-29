@@ -3,6 +3,7 @@ import { ArrowLeft, Vote, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { AdminNominationsTab } from "@/components/admin/election/AdminNominationsTab";
 import { AdminCampaignsTab } from "@/components/admin/election/AdminCampaignsTab";
 import { AdminElectionProcessesTab } from "@/components/admin/election/AdminElectionProcessesTab";
 import { AdminAccreditationTab } from "@/components/admin/election/AdminAccreditationTab";
@@ -35,10 +36,16 @@ export default function ElectionManagementPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="campaigns" className="w-full">
+      <Tabs defaultValue="nominations" className="w-full">
         <div className="border-b bg-background">
           <ScrollArea className="w-full">
             <TabsList className="h-10 sm:h-11 bg-muted/50 w-max min-w-full px-3 sm:px-4 justify-start gap-1">
+              <TabsTrigger 
+                value="nominations" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                Nominations
+              </TabsTrigger>
               <TabsTrigger 
                 value="campaigns" 
                 className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
@@ -82,6 +89,9 @@ export default function ElectionManagementPage() {
         </div>
 
         <div className="p-3 sm:p-4 overflow-hidden">
+          <TabsContent value="nominations" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <AdminNominationsTab />
+          </TabsContent>
           <TabsContent value="campaigns" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminCampaignsTab />
           </TabsContent>
