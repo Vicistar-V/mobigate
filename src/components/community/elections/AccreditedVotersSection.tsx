@@ -56,15 +56,17 @@ export const AccreditedVotersSection = () => {
             variant="ghost"
             className={`w-full justify-start py-3.5 px-4 rounded-none hover:bg-muted h-auto whitespace-normal text-left text-sm ${
               viewType === 'current' 
-                ? 'bg-green-50 dark:bg-green-950/30 border-l-4 border-l-green-600 font-semibold text-green-800 dark:text-green-300' 
+                ? 'bg-green-100 dark:bg-green-950/50 border-l-4 border-l-green-600 font-bold' 
                 : ''
             }`}
             onClick={() => handleViewChange('current')}
           >
-            <div className="flex items-center gap-2">
-              <CheckCircle className={`h-4 w-4 ${viewType === 'current' ? 'text-green-600' : 'text-muted-foreground'}`} />
-              <span>Currently Accredited [Valid Voters]</span>
-              <Badge variant="outline" className="ml-auto bg-green-100 text-green-700 border-green-300">
+            <div className="flex items-center gap-2 w-full">
+              <CheckCircle className={`h-5 w-5 shrink-0 ${viewType === 'current' ? 'text-green-700' : 'text-muted-foreground'}`} />
+              <span className={viewType === 'current' ? 'text-foreground font-semibold' : 'text-foreground'}>
+                Currently Accredited [Valid Voters]
+              </span>
+              <Badge variant="outline" className="ml-auto bg-green-100 text-green-700 border-green-300 shrink-0">
                 {validCount}
               </Badge>
             </div>
@@ -73,15 +75,17 @@ export const AccreditedVotersSection = () => {
             variant="ghost"
             className={`w-full justify-start py-3.5 px-4 rounded-none hover:bg-muted h-auto whitespace-normal text-left text-sm border-t ${
               viewType === 'previous' 
-                ? 'bg-red-50 dark:bg-red-950/30 border-l-4 border-l-red-600 font-semibold text-red-800 dark:text-red-300' 
+                ? 'bg-red-100 dark:bg-red-950/50 border-l-4 border-l-red-600 font-bold' 
                 : ''
             }`}
             onClick={() => handleViewChange('previous')}
           >
-            <div className="flex items-center gap-2">
-              <XCircle className={`h-4 w-4 ${viewType === 'previous' ? 'text-red-600' : 'text-muted-foreground'}`} />
-              <span>Previously Accredited [Invalid Voters]</span>
-              <Badge variant="outline" className="ml-auto bg-red-100 text-red-700 border-red-300">
+            <div className="flex items-center gap-2 w-full">
+              <XCircle className={`h-5 w-5 shrink-0 ${viewType === 'previous' ? 'text-red-700' : 'text-muted-foreground'}`} />
+              <span className={viewType === 'previous' ? 'text-foreground font-semibold' : 'text-foreground'}>
+                Previously Accredited [Invalid Voters]
+              </span>
+              <Badge variant="outline" className="ml-auto bg-red-100 text-red-700 border-red-300 shrink-0">
                 {invalidCount}
               </Badge>
             </div>
