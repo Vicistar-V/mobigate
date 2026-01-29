@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle, Users, Vote, TrendingUp } from "lucide-react";
+import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle, Users, Vote, TrendingUp, ListChecks } from "lucide-react";
 import { ElectionOffice, ElectionCandidate, defaultElectionSettings } from "@/data/electionData";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { VoteConfirmationDialog } from "./VoteConfirmationDialog";
 import { ChangeVoteDialog } from "./ChangeVoteDialog";
 import { AdminRemarkDrawer } from "./AdminRemarkDrawer";
 import { CandidateCommentsDrawer } from "./CandidateCommentsDrawer";
+import { CandidateVotersListSheet } from "./CandidateVotersListSheet";
 
 interface ElectionVotingCardProps {
   office: ElectionOffice;
@@ -61,6 +62,10 @@ export const ElectionVotingCard = ({
   // Manifesto state
   const [manifestoCandidate, setManifestoCandidate] = useState<ElectionCandidate | null>(null);
   const [showManifesto, setShowManifesto] = useState(false);
+  
+  // Voters List state
+  const [votersListCandidate, setVotersListCandidate] = useState<ElectionCandidate | null>(null);
+  const [showVotersList, setShowVotersList] = useState(false);
 
   const predefinedComments = [
     "Excellent choice!",
@@ -297,7 +302,7 @@ export const ElectionVotingCard = ({
 
               {/* Row 2: View Campaign Manifesto - Directly below name */}
               <button
-                className="w-full flex items-center justify-center gap-2 py-2 mb-3 text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors text-sm font-medium"
+                className="w-full flex items-center justify-center gap-2 py-2 mb-2 text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors text-sm font-medium"
                 onClick={() => {
                   setManifestoCandidate(candidate);
                   setShowManifesto(true);
@@ -305,6 +310,18 @@ export const ElectionVotingCard = ({
               >
                 <FileText className="w-4 h-4" />
                 View Campaign Manifesto
+              </button>
+
+              {/* Row 2.5: Voters List Button */}
+              <button
+                className="w-full flex items-center justify-center gap-2 py-2 mb-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors text-sm font-medium border border-border"
+                onClick={() => {
+                  setVotersListCandidate(candidate);
+                  setShowVotersList(true);
+                }}
+              >
+                <ListChecks className="w-4 h-4" />
+                Voters List ({candidate.votes})
               </button>
 
               {/* Row 3: Action Buttons - Colored and prominent */}
@@ -450,6 +467,16 @@ export const ElectionVotingCard = ({
         onOpenChange={setShowManifesto}
         candidate={manifestoCandidate}
         officeName={office.name}
+      />
+
+      {/* Candidate Voters List Sheet */}
+      <CandidateVotersListSheet
+        open={showVotersList}
+        onOpenChange={setShowVotersList}
+        candidateName={votersListCandidate?.name || ""}
+        candidateColor={votersListCandidate?.color || "blue"}
+        officeName={office.name}
+        totalVotes={votersListCandidate?.votes || 0}
       />
     </Card>
   );
