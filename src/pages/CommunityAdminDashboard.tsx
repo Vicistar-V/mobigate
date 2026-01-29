@@ -146,9 +146,9 @@ const CommunityAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content - Safe horizontal padding */}
-      <ScrollArea className="h-[calc(100vh-64px)] touch-auto">
-        <div className="px-4 py-4 space-y-4 pb-24">
+      {/* Main Content - Reduced horizontal padding for more content space */}
+      <ScrollArea className="h-[calc(100vh-64px)] touch-auto overscroll-contain">
+        <div className="px-3 py-3 space-y-3 pb-24">
           {/* Dashboard Header with Stats */}
           <AdminDashboardHeader
             communityName="Ndigbo Unity Association"
@@ -179,7 +179,7 @@ const CommunityAdminDashboard = () => {
           />
 
           {/* Admin Sections */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Membership Management */}
             <AdminMembershipSection
               stats={mockAdminStats}

@@ -1,11 +1,5 @@
-import { Users, Wallet, Vote, FileText, Crown, Settings, Gamepad2, Store, MoreHorizontal } from "lucide-react";
+import { Users, Wallet, Vote, FileText, Crown, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuickActionButtonProps {
@@ -18,18 +12,18 @@ interface QuickActionButtonProps {
 const QuickActionButton = ({ icon: Icon, label, onClick, badge }: QuickActionButtonProps) => (
   <Button
     variant="outline"
-    className="h-auto py-3 px-2 flex flex-col items-center gap-2 relative"
+    className="h-auto py-2.5 px-2 flex flex-col items-center gap-1.5 relative min-w-0"
     onClick={onClick}
   >
     <div className="relative">
-      <Icon className="h-6 w-6 text-primary" />
+      <Icon className="h-5 w-5 text-primary" />
       {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-1.5 -right-2.5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+        <span className="absolute -top-1 -right-2 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
           {badge > 9 ? '9+' : badge}
         </span>
       )}
     </div>
-    <span className="text-sm font-medium text-center leading-tight">{label}</span>
+    <span className="text-xs font-medium text-center leading-tight truncate w-full">{label}</span>
   </Button>
 );
 
@@ -56,31 +50,10 @@ export function AdminQuickActions({
 }: AdminQuickActionsProps) {
   const { toast } = useToast();
 
-  const handleQuizGames = () => {
-    toast({
-      title: "Quiz Games",
-      description: "Opening Quiz Games management...",
-    });
-  };
-
-  const handleMobiStore = () => {
-    toast({
-      title: "Mobi-Store",
-      description: "Opening Mobi-Store management...",
-    });
-  };
-
-  const handleOthersOption = (option: string) => {
-    toast({
-      title: option,
-      description: `Opening ${option}...`,
-    });
-  };
-
   return (
-    <div className="space-y-3">
-      <h2 className="text-base font-semibold text-muted-foreground">Quick Actions</h2>
-      <div className="grid grid-cols-2 gap-2">
+    <div className="space-y-2">
+      <h2 className="text-sm font-semibold text-muted-foreground">Quick Actions</h2>
+      <div className="grid grid-cols-3 gap-1.5">
         <QuickActionButton
           icon={Users}
           label="Members"
@@ -113,52 +86,6 @@ export function AdminQuickActions({
           label="Settings"
           onClick={onCommunitySettings}
         />
-      </div>
-
-      {/* Quick Links Row - Scrollable */}
-      <div className="overflow-x-auto -mx-4 px-4">
-        <div className="flex items-center gap-1 pt-1 w-max min-w-full justify-center">
-          <Button
-            size="sm"
-            className="h-8 px-3 text-xs font-medium shrink-0"
-            onClick={handleQuizGames}
-          >
-            <Gamepad2 className="h-3.5 w-3.5 mr-1.5" />
-            Quiz Games
-          </Button>
-          <span className="text-muted-foreground/50 shrink-0">|</span>
-          <Button
-            size="sm"
-            className="h-8 px-3 text-xs font-medium shrink-0"
-            onClick={handleMobiStore}
-          >
-            <Store className="h-3.5 w-3.5 mr-1.5" />
-            Mobi-Store
-          </Button>
-          <span className="text-muted-foreground/50 shrink-0">|</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="sm"
-                className="h-8 px-3 text-xs font-medium shrink-0"
-              >
-                <MoreHorizontal className="h-3.5 w-3.5 mr-1.5" />
-                Others
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem onClick={() => handleOthersOption("Community Forum")}>
-                Community Forum
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleOthersOption("Help Center")}>
-                Help Center
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleOthersOption("FAQs")}>
-                FAQs
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
     </div>
   );
