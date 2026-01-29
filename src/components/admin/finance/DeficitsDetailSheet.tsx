@@ -314,38 +314,42 @@ export const DeficitsDetailSheet = ({
     <div className="space-y-4">
       {/* Summary Header */}
       <Card className={`p-4 ${sourceColor} border`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-white/80">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-lg bg-white/80 shrink-0">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{sourceLabel}</p>
+              <p className="text-xl font-bold text-amber-600 break-words leading-tight">
+                {totalFormatted.local}
+              </p>
+              <p className="text-xs text-muted-foreground break-words">
+                ({totalFormatted.mobi}) owed
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-            <p className="text-xl font-bold text-amber-600 whitespace-normal break-words leading-tight">{totalFormatted.local}</p>
-            <p className="text-xs text-muted-foreground">({totalFormatted.mobi}) owed</p>
-          </div>
-          <div className="text-right">
-            <Badge variant="secondary" className="text-xs mb-1">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary" className="text-xs">
               {records.length} payables
             </Badge>
             {overdueCount > 0 && (
-              <div>
-                <Badge className="text-[10px] bg-red-500/10 text-red-600">
-                  {overdueCount} overdue
-                </Badge>
-              </div>
+              <Badge className="text-[10px] bg-red-500/10 text-red-600">
+                {overdueCount} overdue
+              </Badge>
             )}
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-3 border-t pt-2">
+        <p className="text-xs text-muted-foreground mt-3 border-t pt-2 break-words">
           {sourceDescription}
         </p>
       </Card>
 
       {/* Priority Summary */}
       {highPriorityCount > 0 && (
-        <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg border border-red-200">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <span className="text-sm text-red-700">
+        <div className="flex items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+          <AlertTriangle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+          <span className="text-sm text-red-700 break-words">
             {highPriorityCount} high priority payment{highPriorityCount > 1 ? 's' : ''} require immediate attention
           </span>
         </div>
@@ -355,7 +359,7 @@ export const DeficitsDetailSheet = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by payee, description, or invoice..."
+          placeholder="Search payee, invoice..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -373,7 +377,6 @@ export const DeficitsDetailSheet = ({
           {filteredRecords.map((record) => {
             const amountFormatted = formatLocalPrimary(record.amountOwed);
             const statusConfig = getStatusConfig(record.status);
-            const priorityConfig = getPriorityConfig(record.priority);
             
             return (
               <Card 
@@ -383,46 +386,51 @@ export const DeficitsDetailSheet = ({
                 }`}
                 onClick={() => setSelectedRecord(record)}
               >
+                {/* Mobile-optimized stacked layout */}
                 <div className="space-y-2">
-                  {/* Header Row */}
+                  {/* Row 1: Icon + Payee Name */}
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-muted/50 flex-shrink-0">
+                    <div className="p-2 rounded-lg bg-muted/50 shrink-0">
                       {getPayeeTypeIcon(record.payeeType)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{record.payeeName}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
+                      <p className="font-medium text-sm break-words leading-tight">
+                        {record.payeeName}
+                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 break-words">
                         {record.description}
                       </p>
                     </div>
-                    <div className="text-right flex-shrink-0 max-w-[52%]">
-                      <p className="font-semibold text-sm text-red-600 whitespace-normal break-words leading-tight">
+                  </div>
+
+                  {/* Row 2: Amount - full width */}
+                  <div className="flex items-center justify-between gap-2 pl-11">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-red-600 break-words leading-tight">
                         -{amountFormatted.local}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         ({amountFormatted.mobi})
                       </p>
                     </div>
+                    <Badge className={`text-[10px] shrink-0 ${statusConfig.className}`}>
+                      {statusConfig.label}
+                    </Badge>
                   </div>
 
-                  {/* Footer Row */}
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  {/* Row 3: Invoice & Due date */}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-11 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
                       <FileText className="h-3 w-3" />
-                      <span className="truncate max-w-[100px]">{record.invoiceNumber}</span>
-                      <span className="text-muted-foreground/50">•</span>
-                      {record.daysPastDue > 0 ? (
-                        <span className="text-red-600">{record.daysPastDue} days overdue</span>
-                      ) : (
-                        <span>Due: {format(record.dueDate, "MMM d")}</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Badge className={`text-[10px] ${statusConfig.className}`}>
-                        {statusConfig.label}
-                      </Badge>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                      <span className="break-all">{record.invoiceNumber}</span>
+                    </span>
+                    <span className="text-muted-foreground/50">•</span>
+                    {record.daysPastDue > 0 ? (
+                      <span className="text-red-600">{record.daysPastDue} days overdue</span>
+                    ) : (
+                      <span>Due: {format(record.dueDate, "MMM d")}</span>
+                    )}
+                    <ChevronRight className="h-4 w-4 ml-auto shrink-0" />
                   </div>
                 </div>
               </Card>

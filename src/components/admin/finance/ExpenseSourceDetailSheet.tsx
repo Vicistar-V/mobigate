@@ -485,29 +485,33 @@ export const ExpenseSourceDetailSheet = ({
     <div className="space-y-4">
       {/* Summary Header - LOCAL CURRENCY PRIMARY */}
       <Card className={`p-4 ${sourceColor} border`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-white/80">
-            {sourceIcon}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-lg bg-white/80 shrink-0">
+              {sourceIcon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{sourceLabel}</p>
+              <p className="text-xl font-bold text-red-600 break-words leading-tight">
+                -{totalFormatted.local}
+              </p>
+              <p className="text-xs text-muted-foreground break-words">
+                ({totalFormatted.mobi})
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-            <p className="text-xl font-bold text-red-600 whitespace-normal break-words leading-tight">-{totalFormatted.local}</p>
-            <p className="text-xs text-muted-foreground">({totalFormatted.mobi})</p>
-          </div>
-          <div className="text-right">
-            <Badge variant="secondary" className="text-xs mb-1">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary" className="text-xs">
               {expenses.length} records
             </Badge>
-            <div className="flex gap-1 justify-end">
-              <Badge className="text-[10px] bg-green-500/10 text-green-600">
-                {completedCount} paid
+            <Badge className="text-[10px] bg-green-500/10 text-green-600">
+              {completedCount} paid
+            </Badge>
+            {pendingCount > 0 && (
+              <Badge className="text-[10px] bg-amber-500/10 text-amber-600">
+                {pendingCount} pending
               </Badge>
-              {pendingCount > 0 && (
-                <Badge className="text-[10px] bg-amber-500/10 text-amber-600">
-                  {pendingCount} pending
-                </Badge>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </Card>
@@ -516,7 +520,7 @@ export const ExpenseSourceDetailSheet = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by description, vendor, or reference..."
+          placeholder="Search expense..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -541,40 +545,43 @@ export const ExpenseSourceDetailSheet = ({
                 className="p-3 cursor-pointer hover:bg-muted/30 transition-colors active:scale-[0.99]"
                 onClick={() => setSelectedExpense(expense)}
               >
+                {/* Mobile-optimized stacked layout */}
                 <div className="space-y-2">
-                  {/* Header Row */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm line-clamp-2">{expense.description}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        {expense.vendor}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0 max-w-[52%]">
-                      <p className="font-semibold text-sm text-red-600 whitespace-normal break-words leading-tight">
+                  {/* Row 1: Description & Vendor */}
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm break-words leading-tight line-clamp-2">
+                      {expense.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground break-words mt-0.5">
+                      {expense.vendor}
+                    </p>
+                  </div>
+
+                  {/* Row 2: Amount & Status */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-red-600 break-words leading-tight">
                         -{expenseFormatted.local}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         ({expenseFormatted.mobi})
                       </p>
                     </div>
+                    <Badge className={`text-[10px] shrink-0 ${statusConfig.className}`}>
+                      {statusConfig.icon}
+                      <span className="ml-1">{statusConfig.label}</span>
+                    </Badge>
                   </div>
 
-                  {/* Footer Row */}
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  {/* Row 3: Date & Reference */}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      <span>{format(expense.date, "MMM d, yyyy")}</span>
-                      <span className="text-muted-foreground/50">•</span>
-                      <span className="truncate max-w-[100px]">{expense.reference}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={`text-xs ${statusConfig.className}`}>
-                        {statusConfig.icon}
-                        <span className="ml-1">{statusConfig.label}</span>
-                      </Badge>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                      {format(expense.date, "MMM d, yyyy")}
+                    </span>
+                    <span className="text-muted-foreground/50">•</span>
+                    <span className="break-all">{expense.reference}</span>
+                    <ChevronRight className="h-4 w-4 ml-auto shrink-0" />
                   </div>
                 </div>
               </Card>

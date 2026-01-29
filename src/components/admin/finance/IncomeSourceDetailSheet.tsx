@@ -146,18 +146,24 @@ export const IncomeSourceDetailSheet = ({
     <div className="space-y-4">
       {/* Summary Header - LOCAL CURRENCY PRIMARY */}
       <Card className={`p-4 ${sourceColor} border-0`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-white/60">
-            <TrendingUp className="h-5 w-5 text-green-600" />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-lg bg-white/60 shrink-0">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{sourceLabel}</p>
+              <p className="text-xl font-bold text-green-700 break-words leading-tight">
+                {totalFormatted.local}
+              </p>
+              <p className="text-xs text-muted-foreground break-words">
+                ({totalFormatted.mobi})
+              </p>
+            </div>
+            <Badge variant="secondary" className="text-xs shrink-0">
+              {payments.length} payments
+            </Badge>
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-            <p className="text-xl font-bold text-green-700 whitespace-normal break-words leading-tight">{totalFormatted.local}</p>
-            <p className="text-xs text-muted-foreground">({totalFormatted.mobi})</p>
-          </div>
-          <Badge variant="secondary" className="text-xs">
-            {payments.length} payments
-          </Badge>
         </div>
       </Card>
 
@@ -184,33 +190,45 @@ export const IncomeSourceDetailSheet = ({
             const paymentFormatted = formatLocalPrimary(payment.amount);
             return (
               <Card key={payment.id} className="p-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={payment.memberAvatar} />
-                    <AvatarFallback className="text-sm">
-                      {payment.memberName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+                {/* Mobile-optimized stacked layout */}
+                <div className="space-y-2">
+                  {/* Row 1: Avatar + Name + Amount */}
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-10 w-10 shrink-0">
+                      <AvatarImage src={payment.memberAvatar} />
+                      <AvatarFallback className="text-sm">
+                        {payment.memberName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
 
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{payment.memberName}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      <span>{format(payment.paymentDate, "MMM d, yyyy")}</span>
-                      <span className="text-muted-foreground/50">•</span>
-                      <span className="truncate">{payment.reference}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm break-words leading-tight">
+                        {payment.memberName}
+                      </p>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-sm text-green-600 break-words leading-tight">
+                        +{paymentFormatted.local}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ({paymentFormatted.mobi})
+                      </p>
                     </div>
                   </div>
 
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-sm text-green-600 whitespace-normal break-words leading-tight">
-                      +{paymentFormatted.local}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      ({paymentFormatted.mobi})
-                    </p>
+                  {/* Row 2: Date, Reference, Status - stacked for mobile */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pl-13">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(payment.paymentDate, "MMM d, yyyy")}
+                      </span>
+                      <span className="text-muted-foreground/50">•</span>
+                      <span className="break-all">{payment.reference}</span>
+                    </div>
                     <Badge
-                      className={`text-xs ${
+                      className={`text-[10px] shrink-0 ${
                         payment.status === "completed" 
                           ? "bg-green-500/10 text-green-600" 
                           : "bg-amber-500/10 text-amber-600"
