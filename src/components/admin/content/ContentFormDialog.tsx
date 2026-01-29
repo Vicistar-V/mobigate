@@ -326,14 +326,14 @@ export function ContentFormDialog({
               />
             </div>
 
-            {/* Description - Common to most */}
+            {/* Full Content - Common to most */}
             {contentType !== "article" && (
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{contentType === "vibe" ? "Caption" : "Full Content"}</Label>
                 <Textarea 
                   value={formData.description || ""} 
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter description..."
+                  placeholder={contentType === "vibe" ? "Write a caption..." : "Enter full content..."}
                   rows={3}
                 />
               </div>
