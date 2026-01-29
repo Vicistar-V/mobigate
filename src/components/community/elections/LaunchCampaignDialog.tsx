@@ -184,17 +184,17 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader className="border-b">
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <DrawerHeader className="border-b px-4 shrink-0">
             <DrawerTitle className="text-xl font-bold">Launch Your Campaign</DrawerTitle>
           </DrawerHeader>
 
           {/* Scrollable form content using DrawerBody */}
-          <DrawerBody>
+          <DrawerBody className="flex-1 overflow-y-auto touch-auto px-4">
             <div className="py-4 space-y-5">
               {/* Candidate Name */}
               <div className="space-y-2">
-                <Label htmlFor="candidateName" className="text-sm font-medium">
+                <Label htmlFor="candidateName" className="text-sm font-semibold">
                   Candidate Name *
                 </Label>
                 <Input
@@ -202,15 +202,15 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                   placeholder="Enter your full name"
                   value={candidateName}
                   onChange={(e) => setCandidateName(e.target.value)}
-                  className="h-12"
+                  className="h-12 text-base"
                 />
               </div>
 
               {/* Office/Position */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Office/Position *</Label>
+                <Label className="text-sm font-semibold">Office/Position *</Label>
                 <Select value={office} onValueChange={setOffice}>
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger className="h-12 text-base">
                     <SelectValue placeholder="Select office to contest" />
                   </SelectTrigger>
                   <SelectContent>
@@ -225,7 +225,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
 
               {/* Campaign Description */}
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium">
+                <Label htmlFor="description" className="text-sm font-semibold">
                   Campaign Tagline *
                 </Label>
                 <Input
@@ -233,13 +233,13 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                   placeholder="A short, catchy campaign slogan"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="h-12"
+                  className="h-12 text-base"
                 />
               </div>
 
               {/* Manifesto */}
               <div className="space-y-2">
-                <Label htmlFor="manifesto" className="text-sm font-medium">
+                <Label htmlFor="manifesto" className="text-sm font-semibold">
                   Your Manifesto *
                 </Label>
                 <Textarea
@@ -247,13 +247,13 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                   placeholder="What will you do if elected? Share your vision and plans..."
                   value={manifesto}
                   onChange={(e) => setManifesto(e.target.value)}
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[120px] resize-none text-base"
                 />
               </div>
 
               {/* Campaign Period */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Campaign Period *</Label>
+                <Label className="text-sm font-semibold">Campaign Period *</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {/* Start Date */}
                   <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
@@ -261,12 +261,12 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                       <Button
                         variant="outline"
                         className={cn(
-                          "h-12 justify-start text-left font-normal",
+                          "h-12 justify-start text-left font-normal text-base",
                           !startDate && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {startDate ? format(startDate, "MMM dd") : "Start"}
+                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                        <span className="truncate">{startDate ? format(startDate, "MMM dd") : "Start"}</span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -287,12 +287,12 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                       <Button
                         variant="outline"
                         className={cn(
-                          "h-12 justify-start text-left font-normal",
+                          "h-12 justify-start text-left font-normal text-base",
                           !endDate && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {endDate ? format(endDate, "MMM dd") : "End"}
+                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                        <span className="truncate">{endDate ? format(endDate, "MMM dd") : "End"}</span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -311,7 +311,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
 
               {/* Campaign Color */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Campaign Color</Label>
+                <Label className="text-sm font-semibold">Campaign Color</Label>
                 <div className="flex gap-3 flex-wrap">
                   {colorOptions.map((color) => (
                     <button
@@ -319,7 +319,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                       type="button"
                       onClick={() => setCampaignColor(color.value)}
                       className={cn(
-                        "w-10 h-10 rounded-full transition-all",
+                        "w-12 h-12 rounded-full transition-all",
                         color.class,
                         campaignColor === color.value && "ring-2 ring-offset-2 ring-primary scale-110"
                       )}
@@ -331,7 +331,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
 
               {/* Campaign Photo (Optional) */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Campaign Photo (Optional)</Label>
+                <Label className="text-sm font-semibold">Campaign Photo (Optional)</Label>
                 {campaignImage ? (
                   <div className="space-y-2">
                     <div className="relative w-full h-40 rounded-lg overflow-hidden border border-border">
@@ -343,7 +343,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                     </div>
                     <div className="flex gap-2">
                       <label className="flex-1">
-                        <Button variant="outline" className="w-full" asChild>
+                        <Button variant="outline" className="w-full h-11" asChild>
                           <span>
                             <ImagePlus className="mr-2 h-4 w-4" />
                             Change Photo
@@ -361,9 +361,9 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                         variant="ghost" 
                         size="icon"
                         onClick={handleRemoveImage}
-                        className="text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive h-11 w-11"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-5 w-5" />
                       </Button>
                     </div>
                   </div>
@@ -371,9 +371,9 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                   <label className="block cursor-pointer">
                     <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 hover:border-primary/50 transition-colors">
                       <div className="flex flex-col items-center gap-2 text-center">
-                        <ImagePlus className="h-8 w-8 text-muted-foreground" />
-                        <p className="text-sm font-medium">Add Campaign Photo</p>
-                        <p className="text-xs text-muted-foreground">JPG, PNG up to 2MB</p>
+                        <ImagePlus className="h-10 w-10 text-muted-foreground" />
+                        <p className="text-base font-medium">Add Campaign Photo</p>
+                        <p className="text-sm text-muted-foreground">JPG, PNG up to 2MB</p>
                       </div>
                     </div>
                     <input 
@@ -393,7 +393,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
           </DrawerBody>
 
           {/* Fixed Action Buttons at Bottom using DrawerFooter */}
-          <DrawerFooter className="space-y-3 gap-0">
+          <DrawerFooter className="space-y-3 gap-0 px-4 shrink-0 border-t bg-background">
             {/* Preview Campaign Button */}
             <Button 
               onClick={handlePreviewCampaign}
@@ -410,7 +410,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
               className="w-full h-14 text-base font-semibold bg-primary hover:bg-primary/90"
             >
               <Settings className="mr-2 h-5 w-5" />
-              Configure Campaign (Audience & Fees)
+              <span className="break-words text-center">Configure Campaign (Audience & Fees)</span>
             </Button>
             
             <div className="relative py-1">
