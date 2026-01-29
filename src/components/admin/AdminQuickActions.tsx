@@ -128,9 +128,8 @@ export function AdminQuickActions({
           </Button>
           <span className="text-muted-foreground/50 shrink-0">|</span>
           <Button
-            variant="ghost"
             size="sm"
-            className="h-8 px-3 text-xs font-medium text-primary hover:text-primary shrink-0"
+            className="h-8 px-3 text-xs font-medium shrink-0"
             onClick={handleMobiStore}
           >
             <Store className="h-3.5 w-3.5 mr-1.5" />
@@ -140,9 +139,8 @@ export function AdminQuickActions({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
                 size="sm"
-                className="h-8 px-3 text-xs font-medium text-primary hover:text-primary shrink-0"
+                className="h-8 px-3 text-xs font-medium shrink-0"
               >
                 <MoreHorizontal className="h-3.5 w-3.5 mr-1.5" />
                 Others
