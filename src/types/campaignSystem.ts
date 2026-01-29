@@ -69,6 +69,8 @@ export interface EnhancedCampaign {
   candidateId: string;
   candidateName: string;
   candidatePhoto?: string;
+  communityName: string; // The community/organization the candidate is running in
+  communityLogo?: string;
   office: string;
   tagline: string;
   manifesto: string;

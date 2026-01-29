@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, ChevronRight, Vote } from "lucide-react";
+import { MessageSquare, ChevronRight, Vote, Building2 } from "lucide-react";
 import { EnhancedCampaign } from "@/types/campaignSystem";
 import { calculateDaysRemaining } from "@/lib/campaignFeeDistribution";
 
@@ -39,7 +39,9 @@ export function CampaignBannerCard({
             
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{campaign.candidateName}</p>
-              <p className="text-xs text-muted-foreground">for {campaign.office}</p>
+              <p className="text-xs text-primary font-medium">
+                for {campaign.office} • <span className="text-muted-foreground">{campaign.communityName}</span>
+              </p>
             </div>
             
             <div className="flex flex-col items-end gap-1">
@@ -95,6 +97,14 @@ export function CampaignBannerCard({
               {daysRemaining}d left
             </Badge>
           )}
+        </div>
+        
+        {/* Community Name - prominently displayed for external audiences */}
+        <div className="flex items-center gap-1.5 mt-2 px-2 py-1.5 bg-muted/50 rounded-md">
+          <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="text-xs font-medium text-foreground/80 truncate">
+            {campaign.communityName}
+          </span>
         </div>
         
         {/* Tagline */}
