@@ -65,15 +65,17 @@ export const urgencyLevels = [
   'Other'
 ];
 
-// Audience options from wireframe
+// Audience options with extra charge percentages for campaigns
 export const audienceOptions = [
-  { id: 'friends', label: 'FRIENDS' },
-  { id: 'friends-of-friends', label: 'FRIENDS & FRIENDS OF FRIENDS' },
-  { id: 'communities', label: 'MY COMMUNITIES' },
-  { id: 'circles', label: 'MY CIRCLES' },
-  { id: 'life-mates', label: 'MY LIFE MATES' },
-  { id: 'public', label: 'PUBLIC' }
+  { id: 'friends', label: 'FRIENDS', chargePercent: 10 },
+  { id: 'friends-of-friends', label: 'FRIENDS & FRIENDS OF FRIENDS', chargePercent: 15 },
+  { id: 'this-community', label: 'THIS COMMUNITY', chargePercent: 0 },
+  { id: 'other-communities', label: 'OTHER COMMUNITIES', chargePercent: 10 },
+  { id: 'circles', label: 'MY CIRCLES', chargePercent: 10 },
+  { id: 'life-mates', label: 'MY LIFE MATES', chargePercent: 10 },
+  { id: 'public', label: 'ALL PUBLIC', chargePercent: 20 }
 ];
+
 
 // Mock campaigns data
 export const mockCampaigns: FundRaiserCampaign[] = [
