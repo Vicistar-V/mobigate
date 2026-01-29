@@ -55,13 +55,17 @@ export const CampaignsView = ({ onLaunchCampaign }: CampaignsViewProps) => {
   };
 
   return (
-    <div className="space-y-4 px-1">
-      {/* Header - stacked on mobile for better spacing */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-bold">Active Campaigns</h2>
-        <Button onClick={onLaunchCampaign} size="sm" className="h-10">
+    <div className="space-y-4 px-4 sm:px-0">
+      {/* Header - fully stacked on mobile to prevent clipping */}
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-bold leading-tight">Active Campaigns</h2>
+        <Button
+          onClick={onLaunchCampaign}
+          size="sm"
+          className="h-11 w-full sm:w-auto"
+        >
           <Plus className="w-4 h-4 mr-2" />
-          Launch Campaign
+          <span className="truncate">Launch Campaign</span>
         </Button>
       </div>
 
