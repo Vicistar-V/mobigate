@@ -85,17 +85,17 @@ export function OfficerAuthorizationCard({
             <AvatarFallback className="text-xs">{name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1 flex-wrap">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                 {displayTitle}
               </p>
               {isRequired && (
-                <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-orange-300 text-orange-600">
+                <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-orange-300 text-orange-600">
                   REQUIRED
                 </Badge>
               )}
             </div>
-            <p className="text-sm font-medium truncate">{name}</p>
+            <p className="text-xs font-medium leading-tight">{name}</p>
           </div>
           {/* Status Icon */}
           {isAuthorized ? (

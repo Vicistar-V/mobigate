@@ -116,12 +116,12 @@ export function ModuleOfficerCard({
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                 {displayTitle}
               </p>
               {getBadge()}
             </div>
-            <p className="text-sm font-medium">{name}</p>
+            <p className="text-xs font-medium leading-tight">{name}</p>
           </div>
           {/* Status Icon */}
           {isAuthorized ? (
