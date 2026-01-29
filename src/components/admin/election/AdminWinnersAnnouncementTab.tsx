@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trophy, Crown, Megaphone, Calendar, Users, CheckCircle, Clock, FileText, Shield, Eye, EyeOff, Award } from "lucide-react";
+import { Trophy, Crown, Megaphone, Calendar, Users, CheckCircle, Clock, FileText, Shield, Eye, EyeOff, Award, FileCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +8,13 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { mockCurrentElection, mockWinnerResults, ElectionWinnerResult } from "@/data/adminElectionData";
+import { mockCurrentElection, mockWinnerResults, ElectionWinnerResult, WinnerCandidate } from "@/data/adminElectionData";
 import { useToast } from "@/hooks/use-toast";
 import { WinnerAnnouncementDialog } from "./WinnerAnnouncementDialog";
 import { CertificateOfReturnGenerator } from "./CertificateOfReturnGenerator";
-import { format } from "date-fns";
-
+import { CertificateOfReturnPreview } from "./CertificateOfReturnPreview";
+import { format, addYears } from "date-fns";
+import { CertificateOfReturn } from "@/types/certificateOfReturn";
 interface StatCardProps {
   value: string | number;
   label: string;
@@ -35,6 +36,12 @@ export function AdminWinnersAnnouncementTab() {
   const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
   const [showCertificateGenerator, setShowCertificateGenerator] = useState(false);
   
+  // Certificate state
+  const [issuedCertificates, setIssuedCertificates] = useState<Record<string, CertificateOfReturn>>({});
+  const [showCertificatePreview, setShowCertificatePreview] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<CertificateOfReturn | null>(null);
+  const [issuingCertificate, setIssuingCertificate] = useState<string | null>(null);
+  
   // Voter transparency settings
   const [voterTransparency, setVoterTransparency] = useState<'anonymous' | 'identified'>('anonymous');
   const [showAntiIntimidationNotice, setShowAntiIntimidationNotice] = useState(true);
@@ -42,6 +49,76 @@ export function AdminWinnersAnnouncementTab() {
   const election = mockCurrentElection;
   const announcedCount = results.filter(r => r.announced).length;
   const pendingCount = results.filter(r => !r.announced).length;
+  const communityName = "Ndigbo Progressive Union";
+
+  // Generate certificate for a winner
+  const generateCertificate = (result: ElectionWinnerResult, winner: WinnerCandidate): CertificateOfReturn => {
+    const now = new Date();
+    const tenureYears = 4;
+    
+    return {
+      id: `cert-${result.id}-${Date.now()}`,
+      certificateNumber: `COR/${now.getFullYear()}/${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+      communityName,
+      communityId: "comm-001",
+      communityLocation: "Nigeria",
+      winnerName: winner.name,
+      winnerId: winner.id,
+      winnerAvatar: winner.avatar,
+      officePosition: result.officeName,
+      officeCategory: 'executive',
+      electionId: election.id,
+      electionName: election.name,
+      electionDate: election.date,
+      totalVotesReceived: winner.votes,
+      totalVotesCast: result.candidates.reduce((sum, c) => sum + c.votes, 0),
+      votePercentage: winner.percentage,
+      tenureStart: now,
+      tenureEnd: addYears(now, tenureYears),
+      tenureDurationYears: tenureYears,
+      issuedDate: now,
+      issuedBy: "Mobigate Electoral Commission",
+      digitalSignature: "MOBIGATE-SIG-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
+      verificationCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
+      status: 'issued'
+    };
+  };
+
+  // Handle issuing certificate
+  const handleIssueCertificate = async (result: ElectionWinnerResult) => {
+    const winner = result.candidates.find(c => c.isWinner);
+    if (!winner) return;
+
+    setIssuingCertificate(result.id);
+    
+    // Simulate processing
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const certificate = generateCertificate(result, winner);
+    
+    setIssuedCertificates(prev => ({
+      ...prev,
+      [result.id]: certificate
+    }));
+    
+    setSelectedCertificate(certificate);
+    setShowCertificatePreview(true);
+    setIssuingCertificate(null);
+    
+    toast({
+      title: "Certificate Issued!",
+      description: `Certificate of Return for ${winner.name} has been issued successfully.`
+    });
+  };
+
+  // View existing certificate
+  const handleViewCertificate = (resultId: string) => {
+    const certificate = issuedCertificates[resultId];
+    if (certificate) {
+      setSelectedCertificate(certificate);
+      setShowCertificatePreview(true);
+    }
+  };
 
   const handleAnnounce = (result: ElectionWinnerResult) => {
     setSelectedResult(result);
@@ -262,21 +339,48 @@ export function AdminWinnersAnnouncementTab() {
                 </div>
 
                 {/* Announcement Info or Actions */}
-                <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t">
+                <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t space-y-2">
                   {result.announced ? (
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                        {result.announcedAt && format(result.announcedAt, "MMM d, h:mm a")}
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 sm:h-7 text-[10px] sm:text-xs text-red-600 shrink-0"
-                        onClick={() => handleRevokeAnnouncement(result.id)}
-                      >
-                        Revoke
-                      </Button>
-                    </div>
+                    <>
+                      {/* Announced status and revoke */}
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                          {result.announcedAt && format(result.announcedAt, "MMM d, h:mm a")}
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 sm:h-7 text-[10px] sm:text-xs text-red-600 shrink-0"
+                          onClick={() => handleRevokeAnnouncement(result.id)}
+                        >
+                          Revoke
+                        </Button>
+                      </div>
+                      
+                      {/* Issue Certificate of Return Button - Only visible for announced winners */}
+                      {issuedCertificates[result.id] ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full gap-1.5 h-8 text-xs border-primary/30 text-primary hover:bg-primary/10"
+                          onClick={() => handleViewCertificate(result.id)}
+                        >
+                          <FileCheck className="h-3.5 w-3.5" />
+                          View Certificate of Return
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full gap-1.5 h-8 text-xs border-primary/30 text-primary hover:bg-primary/10"
+                          onClick={() => handleIssueCertificate(result)}
+                          disabled={issuingCertificate === result.id}
+                        >
+                          <Award className="h-3.5 w-3.5" />
+                          {issuingCertificate === result.id ? 'Issuing Certificate...' : 'Issue Certificate of Return'}
+                        </Button>
+                      )}
+                    </>
                   ) : (
                     <Button
                       size="sm"
@@ -305,6 +409,15 @@ export function AdminWinnersAnnouncementTab() {
         open={showCertificateGenerator}
         onOpenChange={setShowCertificateGenerator}
       />
+
+      {/* Certificate Preview */}
+      {selectedCertificate && (
+        <CertificateOfReturnPreview
+          open={showCertificatePreview}
+          onOpenChange={setShowCertificatePreview}
+          certificate={selectedCertificate}
+        />
+      )}
     </div>
   );
 }
