@@ -36,35 +36,55 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        // NOTE: `touch-none` blocks native scrolling on mobile/trackpads.
-        // Keep drawers scroll-friendly by default; individual drawers can still override.
-        "fixed inset-x-0 bottom-0 z-[70] mt-24 flex h-auto flex-col rounded-t-[10px] border bg-card touch-auto select-none",
+        // Mobile-optimized with proper scrolling support
+        "fixed inset-x-0 bottom-0 z-[70] mt-24 flex h-auto max-h-[92vh] flex-col rounded-t-xl border bg-card touch-auto select-none overflow-hidden",
         className,
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+      {/* Drag handle indicator */}
+      <div className="shrink-0 mx-auto mt-3 mb-1 h-1.5 w-12 rounded-full bg-muted" />
+      
       {showClose && (
-        <DrawerPrimitive.Close className="absolute right-4 top-4 rounded-full p-2 opacity-70 bg-muted/50 hover:opacity-100 hover:bg-muted transition-all focus:outline-none focus:ring-2 focus:ring-ring">
+        <DrawerPrimitive.Close className="absolute right-4 top-4 z-20 rounded-full p-2 opacity-70 bg-muted/50 hover:opacity-100 hover:bg-muted transition-all focus:outline-none focus:ring-2 focus:ring-ring">
           <X className="h-5 w-5" />
           <span className="sr-only">Close</span>
         </DrawerPrimitive.Close>
       )}
-      {children}
+      
+      {/* Content wrapper for proper flex layout */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {children}
+      </div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));
 DrawerContent.displayName = "DrawerContent";
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)} {...props} />
+  <div className={cn("shrink-0 grid gap-1.5 px-4 pb-2 text-center sm:text-left", className)} {...props} />
 );
 DrawerHeader.displayName = "DrawerHeader";
 
 const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("mt-auto flex flex-col gap-2 p-4", className)} {...props} />
+  <div className={cn("shrink-0 mt-auto flex flex-col gap-2 px-4 py-3 border-t bg-background", className)} {...props} />
 );
 DrawerFooter.displayName = "DrawerFooter";
+
+/** 
+ * Scrollable body section for Drawer content.
+ * Use this to wrap main content that should scroll while header/footer stay fixed.
+ */
+const DrawerBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div 
+    className={cn(
+      "flex-1 overflow-y-auto touch-auto overscroll-contain px-4",
+      className
+    )} 
+    {...props} 
+  />
+);
+DrawerBody.displayName = "DrawerBody";
 
 const DrawerTitle = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Title>,
@@ -88,13 +108,14 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
-  DrawerPortal,
-  DrawerOverlay,
-  DrawerTrigger,
+  DrawerBody,
   DrawerClose,
   DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
   DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
 };
