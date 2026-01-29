@@ -115,51 +115,53 @@ export function AdminQuickActions({
         />
       </div>
 
-      {/* Quick Links Row */}
-      <div className="flex items-center justify-center gap-1 pt-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 px-3 text-xs font-medium text-primary hover:text-primary"
-          onClick={handleQuizGames}
-        >
-          <Gamepad2 className="h-3.5 w-3.5 mr-1.5" />
-          Quiz Games
-        </Button>
-        <span className="text-muted-foreground/50">|</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 px-3 text-xs font-medium text-primary hover:text-primary"
-          onClick={handleMobiStore}
-        >
-          <Store className="h-3.5 w-3.5 mr-1.5" />
-          Mobi-Store
-        </Button>
-        <span className="text-muted-foreground/50">|</span>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-3 text-xs font-medium text-primary hover:text-primary"
-            >
-              <MoreHorizontal className="h-3.5 w-3.5 mr-1.5" />
-              Others
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem onClick={() => handleOthersOption("Community Forum")}>
-              Community Forum
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleOthersOption("Help Center")}>
-              Help Center
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleOthersOption("FAQs")}>
-              FAQs
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Quick Links Row - Scrollable */}
+      <div className="overflow-x-auto -mx-4 px-4">
+        <div className="flex items-center gap-1 pt-1 w-max min-w-full justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-3 text-xs font-medium text-primary hover:text-primary shrink-0"
+            onClick={handleQuizGames}
+          >
+            <Gamepad2 className="h-3.5 w-3.5 mr-1.5" />
+            Quiz Games
+          </Button>
+          <span className="text-muted-foreground/50 shrink-0">|</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-3 text-xs font-medium text-primary hover:text-primary shrink-0"
+            onClick={handleMobiStore}
+          >
+            <Store className="h-3.5 w-3.5 mr-1.5" />
+            Mobi-Store
+          </Button>
+          <span className="text-muted-foreground/50 shrink-0">|</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-xs font-medium text-primary hover:text-primary shrink-0"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                Others
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={() => handleOthersOption("Community Forum")}>
+                Community Forum
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleOthersOption("Help Center")}>
+                Help Center
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleOthersOption("FAQs")}>
+                FAQs
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );
