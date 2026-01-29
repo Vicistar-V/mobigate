@@ -157,13 +157,23 @@ export function LeadershipMemberActionsMenu({
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu modal={true}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-10 w-10 shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
             <MoreVertical className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent 
+          align="end" 
+          className="w-56 z-[100]"
+          sideOffset={5}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           {/* View Profile */}
           <DropdownMenuItem onClick={handleViewProfile} className="py-3">
             <User className="h-4 w-4 mr-3" />
@@ -217,7 +227,7 @@ export function LeadershipMemberActionsMenu({
               <MessageCircle className="h-4 w-4 mr-3" />
               Comment
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-48">
+            <DropdownMenuSubContent className="w-48 z-[110]">
               <DropdownMenuItem onClick={handleAddComment} className="py-2.5">
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Add Comment
@@ -235,7 +245,7 @@ export function LeadershipMemberActionsMenu({
               <Flag className="h-4 w-4 mr-3" />
               Report
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-52">
+            <DropdownMenuSubContent className="w-52 z-[110]">
               <DropdownMenuItem onClick={handleNewReport} className="py-2.5 text-destructive focus:text-destructive">
                 <AlertTriangle className="h-4 w-4 mr-2" />
                 Report Member
