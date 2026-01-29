@@ -48,10 +48,10 @@ interface StatCardProps {
 }
 
 const StatCard = ({ value, label, icon: Icon, color }: StatCardProps) => (
-  <div className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg ${color} min-w-0`}>
-    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mb-0.5" />
-    <span className="text-lg sm:text-xl font-bold">{value}</span>
-    <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{label}</span>
+  <div className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-lg ${color} min-w-0`}>
+    <Icon className="h-4 w-4 mb-0.5" />
+    <span className="text-xl font-bold">{value}</span>
+    <span className="text-xs text-muted-foreground">{label}</span>
   </div>
 );
 
@@ -188,9 +188,9 @@ export function AdminAccreditationTab() {
           size="sm"
           onClick={handleBulkAccredit}
           disabled={selectedVoters.length === 0}
-          className="gap-1.5 bg-green-600 hover:bg-green-700 text-xs h-8"
+          className="gap-1.5 bg-green-600 hover:bg-green-700 text-xs h-9"
         >
-          <UserCheck className="h-3.5 w-3.5" />
+          <UserCheck className="h-4 w-4" />
           Accredit ({selectedVoters.length})
         </Button>
         <Button
@@ -198,41 +198,41 @@ export function AdminAccreditationTab() {
           variant="outline"
           onClick={handleBulkRevoke}
           disabled={selectedVoters.length === 0}
-          className="gap-1.5 text-red-600 text-xs h-8"
+          className="gap-1.5 text-red-600 text-xs h-9"
         >
-          <UserX className="h-3.5 w-3.5" />
+          <UserX className="h-4 w-4" />
           Revoke
         </Button>
         <Button 
           size="sm" 
           variant="outline" 
-          className="gap-1.5 text-xs h-8"
+          className="gap-1.5 text-xs h-9"
           onClick={handleExport}
         >
-          <Download className="h-3.5 w-3.5" />
+          <Download className="h-4 w-4" />
           <span className="hidden sm:inline">Export</span>
         </Button>
         <Button 
           size="sm" 
           variant="outline" 
-          className="gap-1.5 ml-auto text-xs h-8"
+          className="gap-1.5 ml-auto text-xs h-9"
           onClick={() => setShowSettings(!showSettings)}
         >
-          <Settings className="h-3.5 w-3.5" />
+          <Settings className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Settings Panel */}
       {showSettings && (
         <Card>
-          <CardHeader className="py-2.5 px-3">
-            <CardTitle className="text-sm">Auto-Accreditation Settings</CardTitle>
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-base">Auto-Accreditation Settings</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 pt-0 space-y-3">
+          <CardContent className="p-4 pt-0 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium">Auto-accredit clear members</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-1">Automatically accredit members with no dues</p>
+                <p className="text-sm font-medium">Auto-accredit clear members</p>
+                <p className="text-xs text-muted-foreground">Automatically accredit members with no dues</p>
               </div>
               <Switch
                 checked={settings.autoAccredit}
@@ -241,22 +241,22 @@ export function AdminAccreditationTab() {
             </div>
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium">Require Financial Clearance</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-1">Only accredit members without obligations</p>
+                <p className="text-sm font-medium">Require Financial Clearance</p>
+                <p className="text-xs text-muted-foreground">Only accredit members without obligations</p>
               </div>
               <Switch
                 checked={settings.requireFinancialClearance}
                 onCheckedChange={(checked) => setSettings(prev => ({ ...prev, requireFinancialClearance: checked }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t">
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t">
               <div>
-                <p className="text-muted-foreground text-[10px]">Accreditation Period</p>
-                <p className="font-medium text-[11px]">{format(settings.accreditationStartDate, "MMM d")} - {format(settings.accreditationEndDate, "MMM d")}</p>
+                <p className="text-xs text-muted-foreground">Accreditation Period</p>
+                <p className="font-medium text-sm">{format(settings.accreditationStartDate, "MMM d")} - {format(settings.accreditationEndDate, "MMM d")}</p>
               </div>
               <div>
-                <p className="text-muted-foreground text-[10px]">Min. Membership</p>
-                <p className="font-medium text-[11px]">{settings.minimumMembershipDays} days</p>
+                <p className="text-xs text-muted-foreground">Min. Membership</p>
+                <p className="font-medium text-sm">{settings.minimumMembershipDays} days</p>
               </div>
             </div>
           </CardContent>
@@ -271,12 +271,12 @@ export function AdminAccreditationTab() {
             placeholder="Search by name or ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-9 text-sm"
+            className="pl-9 h-10 text-sm"
           />
         </div>
         <div className="flex gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="flex-1 h-8 text-xs">
+            <SelectTrigger className="flex-1 h-9 text-sm">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -288,7 +288,7 @@ export function AdminAccreditationTab() {
             </SelectContent>
           </Select>
           <Select value={financialFilter} onValueChange={setFinancialFilter}>
-            <SelectTrigger className="flex-1 h-8 text-xs">
+            <SelectTrigger className="flex-1 h-9 text-sm">
               <SelectValue placeholder="Financial" />
             </SelectTrigger>
             <SelectContent>
@@ -307,7 +307,7 @@ export function AdminAccreditationTab() {
           checked={selectedVoters.length === filteredVoters.length && filteredVoters.length > 0}
           onCheckedChange={handleSelectAll}
         />
-        <span className="text-xs text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           Select all ({filteredVoters.length})
         </span>
       </div>
@@ -316,42 +316,42 @@ export function AdminAccreditationTab() {
       <div className="space-y-2">
         {filteredVoters.map((voter) => (
           <Card key={voter.id} className="overflow-hidden">
-            <CardContent className="p-2.5 sm:p-3">
-              <div className="flex items-center gap-2.5">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-3">
                 <Checkbox
                   checked={selectedVoters.includes(voter.id)}
                   onCheckedChange={(checked) => handleSelectVoter(voter.id, checked as boolean)}
                 />
                 
-                <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
+                <Avatar className="h-10 w-10 sm:h-11 sm:w-11 shrink-0">
                   <AvatarImage src={voter.avatar} alt={voter.name} />
-                  <AvatarFallback className="text-xs">{voter.name[0]}</AvatarFallback>
+                  <AvatarFallback className="text-sm">{voter.name[0]}</AvatarFallback>
                 </Avatar>
                 
                 <div className="flex-1 min-w-0 overflow-hidden">
                   {/* Name + Badge Row */}
                   <div className="flex items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate leading-tight">{voter.name}</h4>
-                      <p className="text-[10px] text-muted-foreground truncate">{voter.membershipId}</p>
+                      <h4 className="font-medium text-base truncate leading-tight">{voter.name}</h4>
+                      <p className="text-xs text-muted-foreground">{voter.membershipId}</p>
                     </div>
-                    <Badge className={`text-[9px] shrink-0 capitalize ${getStatusColor(voter.accreditationStatus)}`}>
+                    <Badge className={`text-xs shrink-0 capitalize ${getStatusColor(voter.accreditationStatus)}`}>
                       {voter.accreditationStatus}
                     </Badge>
                   </div>
                   
                   {/* Financial + Actions Row */}
-                  <div className="flex items-center justify-between mt-1.5 gap-2">
-                    <span className={`text-[10px] ${getFinancialColor(voter.financialStatus)}`}>
+                  <div className="flex items-center justify-between mt-2 gap-2">
+                    <span className={`text-sm font-medium ${getFinancialColor(voter.financialStatus)}`}>
                       {voter.financialStatus === 'owing' ? `Owing: M${voter.amountOwing?.toLocaleString()}` : voter.financialStatus}
                     </span>
                     
-                    <div className="flex gap-1 shrink-0">
+                    <div className="flex gap-1.5 shrink-0">
                       {voter.accreditationStatus !== 'valid' && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 px-2 text-[10px] text-green-600"
+                          className="h-7 px-2.5 text-xs text-green-600"
                           onClick={() => handleAccredit(voter.id)}
                         >
                           Accredit
@@ -361,7 +361,7 @@ export function AdminAccreditationTab() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 px-2 text-[10px] text-red-600"
+                          className="h-7 px-2.5 text-xs text-red-600"
                           onClick={() => handleRevoke(voter.id)}
                         >
                           Revoke
