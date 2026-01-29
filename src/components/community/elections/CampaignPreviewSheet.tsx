@@ -1,5 +1,4 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,180 +87,178 @@ export function CampaignPreviewSheet({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[92vh] flex flex-col">
+      <DrawerContent showClose={false}>
         <DrawerHeader className="sr-only">
           <DrawerTitle>Campaign Preview</DrawerTitle>
         </DrawerHeader>
         
-        <div className="flex flex-col h-full max-h-[92vh]">
-          {/* Preview Mode Banner - Fixed at top */}
-          <div className="shrink-0 bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 -ml-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <MonitorSmartphone className="h-4 w-4 text-amber-600" />
-            <span className="text-xs font-medium text-amber-700">Live Preview - How voters will see your campaign</span>
-          </div>
-          
-          {/* Scrollable Content */}
-          <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-            {/* Header with Campaign Image */}
-            <div className="relative">
-              {campaignImage ? (
-                <div className="h-40 overflow-hidden">
-                  <img 
-                    src={campaignImage}
-                    alt={`${candidateName || "Candidate"} campaign`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-                </div>
-              ) : (
-                <div className={cn(
-                  "h-32 bg-gradient-to-b",
-                  colorClasses[campaignColor] || colorClasses.green
-                )} />
-              )}
-              
-              {/* Candidate Avatar - Overlapping */}
-              <div className={`absolute ${campaignImage ? '-bottom-8' : '-bottom-8'} left-4`}>
-                <Avatar className="h-16 w-16 ring-4 ring-background shadow-lg">
-                  <AvatarFallback className={cn(
-                    "text-lg font-bold",
-                    colorBadgeClasses[campaignColor] || colorBadgeClasses.green
-                  )}>
-                    {candidateName 
-                      ? candidateName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() 
-                      : "??"
-                    }
-                  </AvatarFallback>
-                </Avatar>
+        {/* Preview Mode Banner - Fixed at top */}
+        <div className="shrink-0 bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 -ml-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <MonitorSmartphone className="h-4 w-4 text-amber-600" />
+          <span className="text-xs font-medium text-amber-700">Live Preview - How voters will see your campaign</span>
+        </div>
+        
+        {/* Scrollable Content using DrawerBody */}
+        <DrawerBody className="px-0">
+          {/* Header with Campaign Image */}
+          <div className="relative">
+            {campaignImage ? (
+              <div className="h-40 overflow-hidden">
+                <img 
+                  src={campaignImage}
+                  alt={`${candidateName || "Candidate"} campaign`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
               </div>
-              
-              {/* Campaign Badge */}
-              <Badge className={cn(
-                "absolute top-3 right-3",
-                colorBadgeClasses[campaignColor] || colorBadgeClasses.green
-              )}>
-                <Vote className="h-3 w-3 mr-1" />
-                Election Campaign
-              </Badge>
+            ) : (
+              <div className={cn(
+                "h-32 bg-gradient-to-b",
+                colorClasses[campaignColor] || colorClasses.green
+              )} />
+            )}
+            
+            {/* Candidate Avatar - Overlapping */}
+            <div className={`absolute ${campaignImage ? '-bottom-8' : '-bottom-8'} left-4`}>
+              <Avatar className="h-16 w-16 ring-4 ring-background shadow-lg">
+                <AvatarFallback className={cn(
+                  "text-lg font-bold",
+                  colorBadgeClasses[campaignColor] || colorBadgeClasses.green
+                )}>
+                  {candidateName 
+                    ? candidateName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() 
+                    : "??"
+                  }
+                </AvatarFallback>
+              </Avatar>
             </div>
             
-            <div className="px-4 pt-10 pb-2">
-              <h2 className="text-lg font-bold">
-                {candidateName || <span className="text-muted-foreground italic">Your Name</span>}
-              </h2>
-              <p className={cn(
-                "text-sm font-medium",
-                office ? "text-primary" : "text-muted-foreground italic"
-              )}>
-                {office ? `Candidate for ${office}` : "Select an office"}
+            {/* Campaign Badge */}
+            <Badge className={cn(
+              "absolute top-3 right-3",
+              colorBadgeClasses[campaignColor] || colorBadgeClasses.green
+            )}>
+              <Vote className="h-3 w-3 mr-1" />
+              Election Campaign
+            </Badge>
+          </div>
+          
+          <div className="px-4 pt-10 pb-2">
+            <h2 className="text-lg font-bold">
+              {candidateName || <span className="text-muted-foreground italic">Your Name</span>}
+            </h2>
+            <p className={cn(
+              "text-sm font-medium",
+              office ? "text-primary" : "text-muted-foreground italic"
+            )}>
+              {office ? `Candidate for ${office}` : "Select an office"}
+            </p>
+          </div>
+          
+          <div className="px-4 pb-6">
+            {/* Tagline */}
+            <div className={cn(
+              "rounded-lg p-3 my-4 border",
+              colorBgClasses[campaignColor] || colorBgClasses.green,
+              colorBorderClasses[campaignColor] || colorBorderClasses.green
+            )}>
+              <p className="text-sm font-medium italic">
+                "{tagline || <span className="text-muted-foreground">Your campaign tagline will appear here...</span>}"
               </p>
             </div>
             
-            <div className="px-4 pb-6">
-              {/* Tagline */}
-              <div className={cn(
-                "rounded-lg p-3 my-4 border",
-                colorBgClasses[campaignColor] || colorBgClasses.green,
-                colorBorderClasses[campaignColor] || colorBorderClasses.green
-              )}>
-                <p className="text-sm font-medium italic">
-                  "{tagline || <span className="text-muted-foreground">Your campaign tagline will appear here...</span>}"
-                </p>
-              </div>
-              
-              {/* Campaign Stats (Preview with mock data) */}
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <Eye className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-                    <p className="text-lg font-bold text-muted-foreground">0</p>
-                    <p className="text-[10px] text-muted-foreground">Views</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <MessageSquare className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-                    <p className="text-lg font-bold text-muted-foreground">0</p>
-                    <p className="text-[10px] text-muted-foreground">Responses</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <Clock className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-                    <p className="text-lg font-bold">{daysRemaining}</p>
-                    <p className="text-[10px] text-muted-foreground">Days Left</p>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Campaign Duration */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 flex-wrap">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>
-                  {startDate && endDate 
-                    ? `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")}`
-                    : <span className="italic">Select campaign dates</span>
-                  }
-                </span>
-                {campaignDuration > 0 && (
-                  <Badge variant="outline" className="text-[10px] ml-auto">
-                    {campaignDuration} days
-                  </Badge>
+            {/* Campaign Stats (Preview with mock data) */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <Eye className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-lg font-bold text-muted-foreground">0</p>
+                  <p className="text-[10px] text-muted-foreground">Views</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <MessageSquare className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-lg font-bold text-muted-foreground">0</p>
+                  <p className="text-[10px] text-muted-foreground">Responses</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <Clock className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-lg font-bold">{daysRemaining}</p>
+                  <p className="text-[10px] text-muted-foreground">Days Left</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Campaign Duration */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 flex-wrap">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>
+                {startDate && endDate 
+                  ? `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")}`
+                  : <span className="italic">Select campaign dates</span>
+                }
+              </span>
+              {campaignDuration > 0 && (
+                <Badge variant="outline" className="text-[10px] ml-auto">
+                  {campaignDuration} days
+                </Badge>
+              )}
+            </div>
+            
+            <Separator className="my-4" />
+            
+            {/* Manifesto */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-sm mb-2">Campaign Manifesto</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {manifesto || (
+                  <span className="italic">
+                    Your manifesto will appear here. Share your vision and plans for the office...
+                  </span>
                 )}
-              </div>
-              
-              <Separator className="my-4" />
-              
-              {/* Manifesto */}
-              <div className="mb-4">
-                <h4 className="font-semibold text-sm mb-2">Campaign Manifesto</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {manifesto || (
-                    <span className="italic">
-                      Your manifesto will appear here. Share your vision and plans for the office...
-                    </span>
-                  )}
-                </p>
-              </div>
-              
-              {/* Placeholder for priorities */}
-              <div className="mb-4">
-                <h4 className="font-semibold text-sm mb-2">Key Priorities</h4>
-                <p className="text-xs text-muted-foreground italic">
-                  Your priorities will be displayed here after campaign setup.
-                </p>
-              </div>
-              
-              {/* Extra padding for bottom buttons */}
-              <div className="h-24" />
+              </p>
             </div>
-          </ScrollArea>
-          
-          {/* Action Buttons - Fixed at bottom */}
-          <div className="shrink-0 p-4 border-t bg-background">
-            <p className="text-[10px] text-center text-muted-foreground mb-2">
-              These buttons are shown for preview only
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" disabled>
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-              <Button className="flex-1" disabled>
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Write Feedback
-              </Button>
+            
+            {/* Placeholder for priorities */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-sm mb-2">Key Priorities</h4>
+              <p className="text-xs text-muted-foreground italic">
+                Your priorities will be displayed here after campaign setup.
+              </p>
             </div>
+            
+            {/* Extra padding for bottom buttons */}
+            <div className="h-4" />
           </div>
-        </div>
+        </DrawerBody>
+        
+        {/* Action Buttons - Fixed at bottom using DrawerFooter */}
+        <DrawerFooter>
+          <p className="text-[10px] text-center text-muted-foreground mb-2">
+            These buttons are shown for preview only
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" disabled>
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button className="flex-1" disabled>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Write Feedback
+            </Button>
+          </div>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
