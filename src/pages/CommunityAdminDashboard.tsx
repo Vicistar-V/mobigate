@@ -18,6 +18,7 @@ import { AdminElectionSection } from "@/components/admin/AdminElectionSection";
 import { AdminMeetingSection } from "@/components/admin/AdminMeetingSection";
 import { AdminLeadershipSection } from "@/components/admin/AdminLeadershipSection";
 import { AdminSettingsSection } from "@/components/admin/AdminSettingsSection";
+import { AdminSettingsTab } from "@/components/admin/settings/AdminSettingsTab";
 
 // Existing Community Dialogs
 import { ManageMembershipRequestsDialog } from "@/components/community/ManageMembershipRequestsDialog";
@@ -80,6 +81,7 @@ const CommunityAdminDashboard = () => {
   const [showFinancialObligations, setShowFinancialObligations] = useState(false);
   const [showConstitution, setShowConstitution] = useState(false);
   const [showDemocraticPrivacy, setShowDemocraticPrivacy] = useState(false);
+  const [showSettingsTab, setShowSettingsTab] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -165,7 +167,7 @@ const CommunityAdminDashboard = () => {
             onManageElections={() => navigate(`/community/${communityId}/admin/elections`)}
             onManageContent={() => navigate(`/community/${communityId}/admin/content`)}
             onManageLeadership={() => setShowLeadershipDialog(true)}
-            onCommunitySettings={() => showToast("Settings", "Opening community settings...")}
+            onCommunitySettings={() => setShowSettingsTab(true)}
             pendingMembers={mockAdminStats.pendingRequests}
             pendingContent={mockAdminStats.pendingContent}
           />
@@ -310,6 +312,11 @@ const CommunityAdminDashboard = () => {
       <MemberPrivacyVotingSheet
         open={showDemocraticPrivacy}
         onOpenChange={setShowDemocraticPrivacy}
+      />
+
+      <AdminSettingsTab
+        open={showSettingsTab}
+        onOpenChange={setShowSettingsTab}
       />
     </div>
   );
