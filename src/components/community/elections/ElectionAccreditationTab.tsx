@@ -30,7 +30,7 @@ const activitiesData = {
 };
 
 export const ElectionAccreditationTab = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities'>('financial');
+  const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities' | 'accredited'>('financial');
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
   const [showActivitiesSheet, setShowActivitiesSheet] = useState(false);
   const [showFinancialStatusDialog, setShowFinancialStatusDialog] = useState(false);
@@ -83,19 +83,25 @@ export const ElectionAccreditationTab = () => {
         </Button>
       </div>
       
-      {/* Financial / Activities toggle */}
-      <div className="flex items-center gap-2">
+      {/* Financial / Activities / Accredited Voters toggle */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <Button 
-          className={`${activeSubTab === 'financial' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+          className={`shrink-0 ${activeSubTab === 'financial' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
           onClick={() => setActiveSubTab('financial')}
         >
           Financial
         </Button>
         <Button 
-          className={`${activeSubTab === 'activities' ? 'bg-yellow-400 text-black hover:bg-yellow-500' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+          className={`shrink-0 ${activeSubTab === 'activities' ? 'bg-yellow-400 text-black hover:bg-yellow-500' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
           onClick={() => setActiveSubTab('activities')}
         >
           Activities
+        </Button>
+        <Button 
+          className={`shrink-0 ${activeSubTab === 'accredited' ? 'bg-teal-500 hover:bg-teal-600 text-white' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+          onClick={() => setActiveSubTab('accredited')}
+        >
+          Accredited Voters
         </Button>
       </div>
       
@@ -241,6 +247,11 @@ export const ElectionAccreditationTab = () => {
             </div>
           </Card>
         </>
+      )}
+
+      {/* Accredited Voters Tab Content */}
+      {activeSubTab === 'accredited' && (
+        <AccreditedVotersSection />
       )}
       
       {/* Get Accreditation Now button */}
