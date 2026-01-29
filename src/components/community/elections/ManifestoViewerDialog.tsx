@@ -37,104 +37,105 @@ export const ManifestoViewerDialog = ({
     return colorMap[color as keyof typeof colorMap] || 'bg-gray-500';
   };
 
-  const content = (
-    <div className="flex flex-col h-full">
-      {/* Candidate Header */}
-      <div className="flex items-center gap-4 p-4 border-b">
-        <Avatar className={`h-16 w-16 ${getCandidateColorClass(candidate.color)}`}>
-          <AvatarFallback className="text-white text-xl font-bold">
-            {candidate.name.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <h3 className="text-xl font-bold">{candidate.name}</h3>
-          <p className="text-sm text-muted-foreground">{officeName}</p>
+  const ManifestoContent = () => (
+    <div className="space-y-6 pb-4">
+      {/* Main Manifesto */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <FileText className="w-5 h-5 text-primary shrink-0" />
+          <h4 className="font-semibold text-lg">Campaign Manifesto</h4>
         </div>
+        <p className="text-muted-foreground leading-relaxed whitespace-pre-line break-words">
+          {candidate.manifesto || "No manifesto available for this candidate."}
+        </p>
       </div>
 
-      {/* Campaign Slogan */}
-      {candidate.campaignSlogan && (
-        <div className="p-4 bg-muted/50 border-b">
-          <div className="flex items-start gap-2">
-            <Quote className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-            <p className="text-base italic font-medium text-foreground">
-              "{candidate.campaignSlogan}"
-            </p>
+      {/* Key Priorities - Parsed from manifesto */}
+      {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Target className="w-5 h-5 text-primary shrink-0" />
+            <h4 className="font-semibold text-lg">Key Priorities</h4>
           </div>
+          <ul className="space-y-2">
+            {candidate.keyPriorities.map((priority, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-1 shrink-0" />
+                <span className="text-muted-foreground break-words">{priority}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
-
-      {/* Manifesto Content */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-6">
-          {/* Main Manifesto */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-5 h-5 text-primary" />
-              <h4 className="font-semibold text-lg">Campaign Manifesto</h4>
-            </div>
-            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-              {candidate.manifesto || "No manifesto available for this candidate."}
-            </p>
-          </div>
-
-          {/* Key Priorities - Parsed from manifesto */}
-          {candidate.keyPriorities && candidate.keyPriorities.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Target className="w-5 h-5 text-primary" />
-                <h4 className="font-semibold text-lg">Key Priorities</h4>
-              </div>
-              <ul className="space-y-2">
-                {candidate.keyPriorities.map((priority, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-500 mt-1 flex-shrink-0" />
-                    <span className="text-muted-foreground">{priority}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </ScrollArea>
-
-      {/* Action Buttons */}
-      <div className="p-4 border-t flex gap-2">
-        {onWriteFeedback && (
-          <Button 
-            className="flex-1" 
-            variant="default"
-            onClick={() => {
-              onOpenChange(false);
-              onWriteFeedback();
-            }}
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Write Feedback
-          </Button>
-        )}
-        <Button 
-          className={onWriteFeedback ? "" : "w-full"} 
-          variant="outline"
-          onClick={() => onOpenChange(false)}
-        >
-          Close
-        </Button>
-      </div>
     </div>
   );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh]">
-          <DrawerHeader className="border-b pb-4">
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <DrawerHeader className="border-b pb-4 shrink-0">
             <DrawerTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
               Campaign Manifesto
             </DrawerTitle>
           </DrawerHeader>
-          {content}
+
+          {/* Candidate Header - Fixed */}
+          <div className="flex items-center gap-4 p-4 border-b shrink-0">
+            <Avatar className={`h-16 w-16 ${getCandidateColorClass(candidate.color)}`}>
+              <AvatarFallback className="text-white text-xl font-bold">
+                {candidate.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-bold break-words">{candidate.name}</h3>
+              <p className="text-sm text-muted-foreground">{officeName}</p>
+            </div>
+          </div>
+
+          {/* Campaign Slogan - Fixed */}
+          {candidate.campaignSlogan && (
+            <div className="p-4 bg-muted/50 border-b shrink-0">
+              <div className="flex items-start gap-2">
+                <Quote className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                <p className="text-base italic font-medium text-foreground break-words">
+                  "{candidate.campaignSlogan}"
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Scrollable Manifesto Content */}
+          <ScrollArea className="flex-1 overflow-y-auto touch-auto">
+            <div className="p-4">
+              <ManifestoContent />
+            </div>
+          </ScrollArea>
+
+          {/* Action Buttons - Fixed Footer */}
+          <div className="p-4 border-t flex gap-2 shrink-0 bg-background">
+            {onWriteFeedback && (
+              <Button 
+                className="flex-1 h-11" 
+                variant="default"
+                onClick={() => {
+                  onOpenChange(false);
+                  onWriteFeedback();
+                }}
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Write Feedback
+              </Button>
+            )}
+            <Button 
+              className={`h-11 ${onWriteFeedback ? "" : "w-full"}`} 
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Close
+            </Button>
+          </div>
         </DrawerContent>
       </Drawer>
     );
@@ -142,14 +143,69 @@ export const ManifestoViewerDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] p-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b">
+      <DialogContent className="max-w-lg max-h-[85vh] p-0 overflow-hidden flex flex-col">
+        <DialogHeader className="p-4 border-b shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
             Campaign Manifesto
           </DialogTitle>
         </DialogHeader>
-        {content}
+
+        {/* Candidate Header */}
+        <div className="flex items-center gap-4 p-4 border-b shrink-0">
+          <Avatar className={`h-16 w-16 ${getCandidateColorClass(candidate.color)}`}>
+            <AvatarFallback className="text-white text-xl font-bold">
+              {candidate.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold break-words">{candidate.name}</h3>
+            <p className="text-sm text-muted-foreground">{officeName}</p>
+          </div>
+        </div>
+
+        {/* Campaign Slogan */}
+        {candidate.campaignSlogan && (
+          <div className="p-4 bg-muted/50 border-b shrink-0">
+            <div className="flex items-start gap-2">
+              <Quote className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <p className="text-base italic font-medium text-foreground break-words">
+                "{candidate.campaignSlogan}"
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Scrollable Manifesto Content */}
+        <ScrollArea className="flex-1">
+          <div className="p-4">
+            <ManifestoContent />
+          </div>
+        </ScrollArea>
+
+        {/* Action Buttons */}
+        <div className="p-4 border-t flex gap-2 shrink-0">
+          {onWriteFeedback && (
+            <Button 
+              className="flex-1" 
+              variant="default"
+              onClick={() => {
+                onOpenChange(false);
+                onWriteFeedback();
+              }}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Write Feedback
+            </Button>
+          )}
+          <Button 
+            className={onWriteFeedback ? "" : "w-full"} 
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
