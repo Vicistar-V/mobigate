@@ -55,96 +55,97 @@ export const CampaignsView = ({ onLaunchCampaign }: CampaignsViewProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 px-1">
+      {/* Header - stacked on mobile for better spacing */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-bold">Active Campaigns</h2>
-        <Button onClick={onLaunchCampaign} size="sm">
+        <Button onClick={onLaunchCampaign} size="sm" className="h-10">
           <Plus className="w-4 h-4 mr-2" />
           Launch Campaign
         </Button>
       </div>
 
+      {/* Campaign cards - single column on mobile */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {campaigns.map((campaign) => (
-          <Card key={campaign.id} className="p-4 hover:shadow-lg transition-shadow">
+          <Card key={campaign.id} className="p-4 hover:shadow-lg transition-shadow overflow-hidden">
             <div className="space-y-3">
-              {/* Header with Avatar and Status */}
+              {/* Header - restructured for mobile */}
               <div className="flex items-start gap-3">
-                <Avatar className="h-12 w-12">
+                <Avatar className="h-14 w-14 shrink-0">
                   <AvatarImage src={campaign.candidatePhoto} alt={campaign.candidateName} />
-                  <AvatarFallback>{campaign.candidateName.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="text-lg">{campaign.candidateName.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-base truncate">{campaign.candidateName}</h3>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-base leading-tight break-words pr-1">{campaign.candidateName}</h3>
+                    <Badge 
+                      variant={campaign.status === "active" ? "default" : "secondary"} 
+                      className="text-[10px] shrink-0 px-2 py-0.5"
+                    >
+                      {campaign.status}
+                    </Badge>
+                  </div>
                   <p className="text-sm text-muted-foreground">{campaign.office}</p>
                 </div>
-                <Badge variant={campaign.status === "active" ? "default" : "secondary"} className="text-xs">
-                  {campaign.status}
-                </Badge>
               </div>
 
               {/* Tagline */}
-              <p className="text-sm font-medium italic">"{campaign.tagline}"</p>
+              <p className="text-sm font-medium italic leading-snug">"{campaign.tagline}"</p>
 
-              {/* Audience Badges */}
-              <div className="flex flex-wrap gap-1">
+              {/* Audience Badges - wrapped properly */}
+              <div className="flex flex-wrap gap-1.5">
                 {campaign.audienceTargets.map((audience) => (
-                  <Badge key={audience} variant="outline" className="text-[10px] gap-1 px-1.5 py-0.5">
+                  <Badge 
+                    key={audience} 
+                    variant="outline" 
+                    className="text-[11px] gap-1 px-2 py-1 whitespace-nowrap"
+                  >
                     {audienceIcons[audience]}
                     {audienceLabels[audience]}
                   </Badge>
                 ))}
               </div>
 
-              {/* Stats Row */}
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              {/* Stats Row - flex-wrap for small screens */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <Eye className="w-3 h-3" />
-                  {campaign.views}
+                  <Eye className="w-3.5 h-3.5 shrink-0" />
+                  {campaign.views.toLocaleString()}
                 </span>
                 <span className="flex items-center gap-1">
-                  <MessageSquare className="w-3 h-3" />
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0" />
                   {campaign.feedbackCount}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Wallet className="w-3 h-3" />
+                  <Wallet className="w-3.5 h-3.5 shrink-0" />
                   {formatMobiAmount(campaign.totalFeeInMobi)}
                 </span>
               </div>
 
               {/* Date Range */}
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Calendar className="w-3 h-3" />
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
                 <span>{format(campaign.startDate, "MMM dd")} - {format(campaign.endDate, "MMM dd, yyyy")}</span>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  className="flex-1" 
-                  size="sm"
-                  onClick={() => handleViewCampaign(campaign)}
-                >
-                  View Campaign
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => handleWriteFeedback(campaign)}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                </Button>
-              </div>
+              {/* Action Button - full width on mobile */}
+              <Button 
+                variant="outline" 
+                className="w-full h-11 text-base" 
+                onClick={() => handleViewCampaign(campaign)}
+              >
+                View Campaign
+              </Button>
             </div>
           </Card>
         ))}
 
         {campaigns.length === 0 && (
-          <div className="col-span-full text-center py-12">
+          <div className="col-span-full text-center py-12 px-4">
             <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground">No active campaigns at the moment.</p>
-            <Button variant="outline" className="mt-4" onClick={onLaunchCampaign}>
+            <Button variant="outline" className="mt-4 h-11" onClick={onLaunchCampaign}>
               Launch Your Campaign
             </Button>
           </div>
