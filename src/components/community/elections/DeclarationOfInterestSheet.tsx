@@ -240,22 +240,22 @@ export function DeclarationOfInterestSheet({
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Nomination Fee</span>
                 <div className="text-right">
-                  <span>{formatMobiAmount(costBreakdown.nominationFee)}</span>
-                  <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(costBreakdown.nominationFee, "NGN")}</p>
+                  <span>{formatLocalAmount(costBreakdown.nominationFee, "NGN")}</span>
+                  <p className="text-xs text-muted-foreground">≈ {formatMobiAmount(costBreakdown.nominationFee)}</p>
                 </div>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Processing Fee</span>
                 <div className="text-right">
-                  <span>{formatMobiAmount(costBreakdown.processingFee)}</span>
-                  <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(costBreakdown.processingFee, "NGN")}</p>
+                  <span>{formatLocalAmount(costBreakdown.processingFee, "NGN")}</span>
+                  <p className="text-xs text-muted-foreground">≈ {formatMobiAmount(costBreakdown.processingFee)}</p>
                 </div>
               </div>
               <div className="flex justify-between text-amber-600">
                 <span>Service Charge ({mobigateNominationConfig.serviceChargePercent}%)</span>
                 <div className="text-right">
-                  <span>{formatMobiAmount(costBreakdown.serviceCharge)}</span>
-                  <p className="text-xs text-amber-600/70">≈ {formatLocalAmount(costBreakdown.serviceCharge, "NGN")}</p>
+                  <span>{formatLocalAmount(costBreakdown.serviceCharge, "NGN")}</span>
+                  <p className="text-xs text-amber-600/70">≈ {formatMobiAmount(costBreakdown.serviceCharge)}</p>
                 </div>
               </div>
               <Separator />
@@ -263,9 +263,9 @@ export function DeclarationOfInterestSheet({
                 <span>Total Debited</span>
                 <div className="text-right">
                   <span className="text-primary">
-                    {formatMobiAmount(costBreakdown.totalDebited)}
+                    {formatLocalAmount(costBreakdown.totalDebited, "NGN")}
                   </span>
-                  <p className="text-xs font-normal text-muted-foreground">≈ {formatLocalAmount(costBreakdown.totalDebited, "NGN")}</p>
+                  <p className="text-xs font-normal text-muted-foreground">≈ {formatMobiAmount(costBreakdown.totalDebited)}</p>
                 </div>
               </div>
             </div>
@@ -274,11 +274,11 @@ export function DeclarationOfInterestSheet({
             <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
               <p className="flex justify-between">
                 <span>→ Community Account:</span>
-                <span className="font-medium">{formatMobiAmount(costBreakdown.communityReceives)} (≈ {formatLocalAmount(costBreakdown.communityReceives, "NGN")})</span>
+                <span className="font-medium">{formatLocalAmount(costBreakdown.communityReceives, "NGN")} (≈ {formatMobiAmount(costBreakdown.communityReceives)})</span>
               </p>
               <p className="flex justify-between">
                 <span>→ Mobigate Platform:</span>
-                <span className="font-medium">{formatMobiAmount(costBreakdown.mobigateReceives)} (≈ {formatLocalAmount(costBreakdown.mobigateReceives, "NGN")})</span>
+                <span className="font-medium">{formatLocalAmount(costBreakdown.mobigateReceives, "NGN")} (≈ {formatMobiAmount(costBreakdown.mobigateReceives)})</span>
               </p>
             </div>
 
@@ -286,7 +286,7 @@ export function DeclarationOfInterestSheet({
               <div className="flex items-center gap-2 text-destructive text-sm">
                 <AlertCircle className="h-4 w-4" />
                 <span>
-                  Insufficient balance. Need {formatMobiAmount(costBreakdown.totalDebited - walletBalance)} more.
+                  Insufficient balance. Need {formatLocalAmount(costBreakdown.totalDebited - walletBalance, "NGN")} more.
                 </span>
               </div>
             )}
@@ -306,7 +306,7 @@ export function DeclarationOfInterestSheet({
       </div>
       <h3 className="text-lg font-semibold">Processing Payment...</h3>
       <p className="text-sm text-muted-foreground text-center">
-        Debiting {formatMobiAmount(costBreakdown?.totalDebited || 0)} from your Mobi Wallet
+        Debiting {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")} from your Wallet
       </p>
     </div>
   );
@@ -336,10 +336,10 @@ export function DeclarationOfInterestSheet({
             <span className="text-muted-foreground">Amount Debited</span>
             <div className="text-right">
               <span className="font-semibold text-primary">
-                {formatMobiAmount(costBreakdown?.totalDebited || 0)}
+                {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")}
               </span>
               <p className="text-xs text-muted-foreground">
-                ≈ {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")}
+                ≈ {formatMobiAmount(costBreakdown?.totalDebited || 0)}
               </p>
             </div>
           </div>
@@ -347,10 +347,10 @@ export function DeclarationOfInterestSheet({
             <span className="text-muted-foreground">New Balance</span>
             <div className="text-right">
               <span>
-                {formatMobiAmount(walletBalance - (costBreakdown?.totalDebited || 0))}
+                {formatLocalAmount(walletBalance - (costBreakdown?.totalDebited || 0), "NGN")}
               </span>
               <p className="text-xs text-muted-foreground">
-                ≈ {formatLocalAmount(walletBalance - (costBreakdown?.totalDebited || 0), "NGN")}
+                ≈ {formatMobiAmount(walletBalance - (costBreakdown?.totalDebited || 0))}
               </p>
             </div>
           </div>
@@ -423,20 +423,20 @@ export function DeclarationOfInterestSheet({
                 <strong>{selectedFeeStructure?.officeName}</strong>.
               </p>
               <p>
-                <strong>{formatMobiAmount(costBreakdown?.totalDebited || 0)}</strong>{" "}
+                <strong>{formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")}</strong>{" "}
                 <span className="text-muted-foreground">
-                  (≈ {formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")})
+                  (≈ {formatMobiAmount(costBreakdown?.totalDebited || 0)})
                 </span>{" "}
-                will be debited from your Mobi Wallet.
+                will be debited from your Wallet.
               </p>
               <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                 <p className="flex justify-between">
                   <span>• Community Account:</span>
-                  <span>{formatMobiAmount(costBreakdown?.communityReceives || 0)} (≈ {formatLocalAmount(costBreakdown?.communityReceives || 0, "NGN")})</span>
+                  <span>{formatLocalAmount(costBreakdown?.communityReceives || 0, "NGN")} (≈ {formatMobiAmount(costBreakdown?.communityReceives || 0)})</span>
                 </p>
                 <p className="flex justify-between">
                   <span>• Mobigate Platform:</span>
-                  <span>{formatMobiAmount(costBreakdown?.mobigateReceives || 0)} (≈ {formatLocalAmount(costBreakdown?.mobigateReceives || 0, "NGN")})</span>
+                  <span>{formatLocalAmount(costBreakdown?.mobigateReceives || 0, "NGN")} (≈ {formatMobiAmount(costBreakdown?.mobigateReceives || 0)})</span>
                 </p>
               </div>
               <p className="text-amber-600">
@@ -506,8 +506,9 @@ function OfficeOptionCard({ office, isSelected, walletBalance }: OfficeOptionCar
         </div>
         <div className="text-right shrink-0">
           <span className={`font-semibold text-sm ${hasInsufficientBalance ? "text-destructive" : "text-primary"}`}>
-            {formatMobiAmount(office.totalFee)}
+            {formatLocalAmount(office.totalFee, "NGN")}
           </span>
+          <p className="text-[10px] text-muted-foreground">≈ {formatMobiAmount(office.totalFee)}</p>
         </div>
       </Label>
     </div>

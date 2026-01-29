@@ -33,12 +33,11 @@ export function MobiExplainerTooltip({ size = "sm", className }: MobiExplainerTo
           <div className="space-y-2">
             <p className="text-xs font-medium flex items-center gap-1">
               <Globe className="h-3 w-3" />
-              Mobi (M) Currency
+              Local-First Currency
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              <strong>Mobi (M)</strong> is Mobigate's universal platform currency. 
-              All transactions are processed in Mobi and automatically converted 
-              to your local currency at current exchange rates.
+              All community transactions are conducted in your <strong>local currency</strong> and 
+              automatically converted to <strong>Mobi (M)</strong>, Mobigate's universal platform currency.
             </p>
             <p className="text-xs text-muted-foreground">
               Current rate: <strong>₦1 = M1</strong>
@@ -62,7 +61,8 @@ interface MobiCurrencyInfoBannerProps {
 }
 
 /**
- * An informational banner explaining Mobi currency and conversion
+ * An informational banner explaining local currency and Mobi conversion
+ * Follows the Local-First Dual Currency Protocol
  */
 export function MobiCurrencyInfoBanner({ 
   currencyCode = "NGN",
@@ -87,14 +87,26 @@ export function MobiCurrencyInfoBanner({
         return "₦1 = M1";
     }
   };
+
+  const getCurrencySymbol = () => {
+    switch (currencyCode) {
+      case "NGN": return "₦";
+      case "USD": return "$";
+      case "GBP": return "£";
+      case "EUR": return "€";
+      case "ZAR": return "R";
+      case "CAD": return "CAD$";
+      default: return "₦";
+    }
+  };
   
   return (
     <div className={`flex items-start gap-2 p-3 bg-primary/5 rounded-lg ${className}`}>
       <Globe className="h-4 w-4 text-primary shrink-0 mt-0.5" />
       <div className="text-xs text-muted-foreground">
         <p>
-          All fees are charged in <strong>Mobi (M)</strong>, Mobigate's universal currency, 
-          and automatically converted to your community's local currency.
+          All community transactions are in <strong>{getCurrencySymbol()} ({currencyCode})</strong>, 
+          your local currency, and automatically converted to <strong>Mobi (M)</strong> equivalents.
         </p>
         <p className="mt-1 font-medium">
           Current rate: {getRateDisplay()}
