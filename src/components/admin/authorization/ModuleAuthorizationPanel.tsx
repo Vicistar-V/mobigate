@@ -174,9 +174,9 @@ export function ModuleAuthorizationPanel({
         isValid={validation.isValid}
       />
 
-      {/* Officer Authorization Grid */}
-      <ScrollArea className="h-[320px] pr-1">
-        <div className="grid grid-cols-2 gap-3">
+      {/* Officer Authorization List - Single column for mobile optimization */}
+      <ScrollArea className="h-[380px] pr-1">
+        <div className="space-y-3">
           {officers.map((officer) => {
             const displayProps = getOfficerDisplayProps(officer);
             return (
