@@ -114,15 +114,15 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange }: Fina
         <div className="text-xs text-gray-500 text-right mt-2 mr-2">
           More scrolling out →
         </div>
-        
-        {/* Side note */}
-        <div className="text-xs text-red-600 text-right mt-2 mr-2">
-          All other Previous Years Summaries following here!
-        </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 justify-end pt-4 border-t mt-4 flex-wrap">
+      {/* Side note - Outside scrollable area */}
+      <div className="text-xs text-red-600 text-center mt-3 px-4">
+        All other Previous Years Summaries following here!
+      </div>
+
+      {/* Action Buttons - Outside scrollable area */}
+      <div className="flex gap-2 justify-end pt-4 border-t mt-4 flex-wrap px-0">
         <Button variant="outline" size="sm">
           DOWNLOAD SUMMARIES
         </Button>
