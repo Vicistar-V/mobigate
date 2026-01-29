@@ -64,22 +64,22 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
 
   const SheetContentComponent = () => (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
+      {/* Header - Stacked for mobile clarity */}
       <div className="px-4 py-4 border-b flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="p-2.5 rounded-lg bg-primary/10 shrink-0">
               <Settings className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h2 className="text-lg font-semibold">Community Settings</h2>
-              <p className="text-xs text-muted-foreground">
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold break-words">Community Settings</h2>
+              <p className="text-sm text-muted-foreground">
                 Vote on all community settings
               </p>
             </div>
           </div>
           {pendingProposals.length > 0 && (
-            <Badge variant="destructive" className="px-2 py-1">
+            <Badge variant="destructive" className="px-2.5 py-1 text-sm shrink-0">
               {pendingProposals.length} Pending
             </Badge>
           )}
@@ -224,19 +224,19 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
 
           {/* Bottom Stats */}
           <div className="grid grid-cols-3 gap-2 pt-2">
-            <div className="text-center p-2 rounded-lg bg-muted/50">
-              <p className="text-lg font-bold">{mockSettingsStats.totalSettings}</p>
-              <p className="text-[10px] text-muted-foreground">Total Settings</p>
+            <div className="text-center p-3 rounded-lg bg-muted/50">
+              <p className="text-xl font-bold">{mockSettingsStats.totalSettings}</p>
+              <p className="text-xs text-muted-foreground">Total Settings</p>
             </div>
-            <div className="text-center p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30">
-              <p className="text-lg font-bold text-amber-600">{mockSettingsStats.pendingApprovals}</p>
-              <p className="text-[10px] text-muted-foreground">Pending</p>
+            <div className="text-center p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30">
+              <p className="text-xl font-bold text-amber-600">{mockSettingsStats.pendingApprovals}</p>
+              <p className="text-xs text-muted-foreground">Pending</p>
             </div>
-            <div className="text-center p-2 rounded-lg bg-blue-50 dark:bg-blue-950/30">
-              <p className="text-lg font-bold text-blue-600">
+            <div className="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+              <p className="text-xl font-bold text-blue-600">
                 {mockSettingsStats.memberRecommendations}
               </p>
-              <p className="text-[10px] text-muted-foreground">Recommendations</p>
+              <p className="text-xs text-muted-foreground whitespace-nowrap">Recommend</p>
             </div>
           </div>
         </div>
