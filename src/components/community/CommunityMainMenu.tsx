@@ -1029,13 +1029,15 @@ export function CommunityMainMenu({
 
             {/* Community Settings - Democratic Governance */}
             <AccordionItem value="community-settings" className="border rounded-lg px-3 data-[state=open]:bg-muted/30 border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Settings2 className="h-4 w-4 text-emerald-600" />
-                  Community Settings
+              <AccordionTrigger className="text-base font-semibold py-3">
+                <div className="flex items-center justify-between w-full pr-2">
+                  <div className="flex items-center gap-2">
+                    <Settings2 className="h-4 w-4 text-emerald-600" />
+                    <span>Community Settings</span>
+                  </div>
                   {pendingSettingsCount > 0 && (
-                    <Badge variant="destructive" className="ml-auto mr-2 text-[10px] px-1.5">
-                      {pendingSettingsCount} Pending
+                    <Badge variant="destructive" className="text-xs px-2 py-0.5">
+                      {pendingSettingsCount}
                     </Badge>
                   )}
                 </div>
@@ -1052,16 +1054,16 @@ export function CommunityMainMenu({
                   <Settings2 className="h-4 w-4 mr-2 text-emerald-600" />
                   <span className="text-emerald-700 dark:text-emerald-300 font-medium">View All Settings</span>
                   {pendingSettingsCount > 0 && (
-                    <Badge className="ml-auto bg-amber-500 text-white text-[10px]">
-                      {pendingSettingsCount}
+                    <Badge className="ml-auto bg-amber-500 text-white text-xs">
+                      {pendingSettingsCount} pending
                     </Badge>
                   )}
                 </Button>
                 <div className="px-4 py-2 rounded-lg bg-muted/30 space-y-1">
-                  <p className="text-xs text-muted-foreground">
-                    <strong>60% approval</strong> required for all setting changes
+                  <p className="text-sm text-muted-foreground">
+                    <strong>60% approval</strong> required for all changes
                   </p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Members can approve, disapprove & recommend alternatives
                   </p>
                 </div>
