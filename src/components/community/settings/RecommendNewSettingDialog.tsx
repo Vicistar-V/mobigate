@@ -65,8 +65,8 @@ export function RecommendNewSettingDialog({
   };
 
   const Content = () => (
-    <ScrollArea className="max-h-[70vh] overflow-y-auto touch-auto">
-      <div className="space-y-4 p-4">
+    <ScrollArea className="max-h-[70vh] overflow-y-auto touch-auto overscroll-contain">
+      <div className="space-y-4 p-4" onClick={(e) => e.stopPropagation()}>
         {/* Current Setting Context */}
         {setting && (
           <Card className="bg-muted/50">
@@ -145,7 +145,10 @@ export function RecommendNewSettingDialog({
                   placeholder="Enter custom value"
                   value={recommendedValue}
                   onChange={(e) => setRecommendedValue(e.target.value)}
-                  className="h-11 text-base"
+                  className="h-11 text-base touch-manipulation"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
                 />
               </div>
             ) : (
@@ -154,7 +157,10 @@ export function RecommendNewSettingDialog({
                 placeholder="Enter your recommended setting value"
                 value={recommendedValue}
                 onChange={(e) => setRecommendedValue(e.target.value)}
-                className="h-11 text-base"
+                className="h-11 text-base touch-manipulation"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
               />
             )}
             <p className="text-sm text-muted-foreground">
@@ -171,7 +177,10 @@ export function RecommendNewSettingDialog({
               placeholder="Explain why you recommend this change..."
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="min-h-[100px] resize-none text-base"
+              className="min-h-[100px] resize-none text-base touch-manipulation"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
             />
           </div>
         </div>
