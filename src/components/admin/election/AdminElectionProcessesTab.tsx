@@ -166,7 +166,7 @@ export function AdminElectionProcessesTab() {
       <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
         <CardContent className="p-4">
           <h4 className="font-semibold text-sm mb-3 text-green-800 dark:text-green-200">
-            Election Progress Summary
+            Election Process Summary
           </h4>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
