@@ -29,13 +29,13 @@ const getStatusColor = (status: AdminClearanceRequest['status']) => {
 const getDocStatusIcon = (status: ClearanceDocument['status']) => {
   switch (status) {
     case 'verified':
-      return <CheckCircle className="h-3 w-3 text-green-600 shrink-0" />;
+      return <CheckCircle className="h-3.5 w-3.5 text-green-600 shrink-0" />;
     case 'submitted':
-      return <Clock className="h-3 w-3 text-amber-600 shrink-0" />;
+      return <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />;
     case 'rejected':
-      return <XCircle className="h-3 w-3 text-red-600 shrink-0" />;
+      return <XCircle className="h-3.5 w-3.5 text-red-600 shrink-0" />;
     case 'missing':
-      return <AlertCircle className="h-3 w-3 text-gray-400 shrink-0" />;
+      return <AlertCircle className="h-3.5 w-3.5 text-gray-400 shrink-0" />;
     default:
       return null;
   }
@@ -49,10 +49,10 @@ interface StatCardProps {
 }
 
 const StatCard = ({ value, label, icon: Icon, color }: StatCardProps) => (
-  <div className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg ${color} min-w-0`}>
-    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mb-0.5" />
-    <span className="text-lg sm:text-xl font-bold">{value}</span>
-    <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{label}</span>
+  <div className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-lg ${color} min-w-0`}>
+    <Icon className="h-4 w-4 mb-0.5" />
+    <span className="text-xl font-bold">{value}</span>
+    <span className="text-xs text-muted-foreground">{label}</span>
   </div>
 );
 
@@ -122,11 +122,11 @@ export function AdminClearancesTab() {
             placeholder="Search candidates..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-9 text-sm"
+            className="pl-8 h-10 text-sm"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[100px] sm:w-[140px] h-9 text-xs">
+          <SelectTrigger className="w-[100px] sm:w-[140px] h-10 text-sm">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -152,8 +152,8 @@ export function AdminClearancesTab() {
             <Card key={request.id} className="overflow-hidden">
               <CardContent className="p-3 sm:p-4">
                 {/* Header Row */}
-                <div className="flex items-start gap-2.5 sm:gap-3">
-                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 shrink-0">
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-11 w-11 sm:h-12 sm:w-12 shrink-0">
                     <AvatarImage src={request.candidateAvatar} alt={request.candidateName} />
                     <AvatarFallback className="text-sm">{request.candidateName[0]}</AvatarFallback>
                   </Avatar>
@@ -162,20 +162,20 @@ export function AdminClearancesTab() {
                     {/* Name + Badge Row */}
                     <div className="flex items-start gap-2">
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-sm truncate leading-tight">{request.candidateName}</h4>
-                        <p className="text-xs text-muted-foreground truncate">{request.office}</p>
+                        <h4 className="font-semibold text-base truncate leading-tight">{request.candidateName}</h4>
+                        <p className="text-sm text-primary">{request.office}</p>
                       </div>
-                      <Badge className={`text-[9px] shrink-0 capitalize whitespace-nowrap ${getStatusColor(request.status)}`}>
+                      <Badge className={`text-xs shrink-0 capitalize whitespace-nowrap ${getStatusColor(request.status)}`}>
                         {request.status.replace('_', ' ')}
                       </Badge>
                     </div>
 
                     {/* Documents Checklist */}
-                    <div className="mt-2.5 space-y-1">
-                      <p className="text-[10px] font-medium text-muted-foreground">Documents:</p>
-                      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                    <div className="mt-3 space-y-1.5">
+                      <p className="text-xs font-medium text-muted-foreground">Documents:</p>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
                         {request.documents.map((doc, index) => (
-                          <div key={index} className="flex items-center gap-1 text-[10px] min-w-0">
+                          <div key={index} className="flex items-center gap-1.5 text-sm min-w-0">
                             {getDocStatusIcon(doc.status)}
                             <span className={`truncate ${doc.status === 'missing' ? 'text-muted-foreground' : ''}`}>
                               {doc.name}
@@ -187,32 +187,32 @@ export function AdminClearancesTab() {
 
                     {/* Notes if any */}
                     {request.notes && (
-                      <p className="mt-2 text-[10px] text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-1.5 rounded line-clamp-2">
+                      <p className="mt-2.5 text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded line-clamp-2">
                         📝 {request.notes}
                       </p>
                     )}
 
                     {/* Rejection Reason */}
                     {request.rejectionReason && (
-                      <p className="mt-2 text-[10px] text-red-600 bg-red-50 dark:bg-red-950/30 p-1.5 rounded line-clamp-2">
+                      <p className="mt-2.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-2 rounded line-clamp-2">
                         ❌ {request.rejectionReason}
                       </p>
                     )}
 
                     {/* Footer Row */}
-                    <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-border/50 gap-2">
-                      <span className="text-[10px] text-muted-foreground truncate">
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50 gap-2">
+                      <span className="text-xs text-muted-foreground">
                         {format(request.submittedAt, "MMM d, yyyy")}
                       </span>
                       
-                      <div className="flex gap-1 shrink-0">
+                      <div className="flex gap-1.5 shrink-0">
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 px-2 text-[10px] gap-1"
+                          className="h-7 px-2.5 text-xs gap-1"
                           onClick={() => handleReview(request)}
                         >
-                          <Eye className="h-3 w-3" />
+                          <Eye className="h-3.5 w-3.5" />
                           Review
                         </Button>
                         
@@ -221,7 +221,7 @@ export function AdminClearancesTab() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-[10px] text-green-600"
+                              className="h-7 px-2.5 text-xs text-green-600"
                               onClick={() => handleQuickApprove(request.id)}
                             >
                               Approve
@@ -229,7 +229,7 @@ export function AdminClearancesTab() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-6 px-2 text-[10px] text-red-600"
+                              className="h-7 px-2.5 text-xs text-red-600"
                               onClick={() => handleQuickReject(request.id)}
                             >
                               Reject
