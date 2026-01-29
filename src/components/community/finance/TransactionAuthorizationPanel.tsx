@@ -235,9 +235,9 @@ export function TransactionAuthorizationPanel({
         </div>
       </div>
 
-      {/* Officer Authorization Grid */}
-      <ScrollArea className="h-[280px] pr-1">
-        <div className="grid grid-cols-2 gap-3">
+      {/* Officer Authorization List - Single column for mobile optimization */}
+      <ScrollArea className="h-[340px] pr-1">
+        <div className="space-y-3">
           {AUTHORIZATION_OFFICERS.map((officer) => {
             const officerState = officers.find((o) => o.role === officer.role);
             return (
