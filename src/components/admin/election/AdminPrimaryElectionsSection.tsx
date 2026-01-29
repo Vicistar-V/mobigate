@@ -13,7 +13,8 @@ import {
   Settings,
   Plus,
   Info,
-  Star
+  Star,
+  ListChecks
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import {
 } from "@/data/electionProcessesData";
 import { PrimaryElection, PrimaryCandidate } from "@/types/electionProcesses";
 import { cn } from "@/lib/utils";
+import { CandidateVotersListSheet } from "./CandidateVotersListSheet";
 import { 
   calculateAdvancingCandidates, 
   getAdvancementStatusText,
@@ -79,6 +81,24 @@ export function AdminPrimaryElectionsSection() {
   const { toast } = useToast();
   const [selectedPrimary, setSelectedPrimary] = useState<PrimaryElection | null>(null);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
+  
+  // Voters List Sheet state
+  const [votersListOpen, setVotersListOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<{
+    id: string;
+    name: string;
+    avatar: string;
+    votes: number;
+    isWinner: boolean;
+    officeName: string;
+  } | null>(null);
+
+  const openVotersList = (candidate: typeof selectedCandidate, officeName: string) => {
+    if (candidate) {
+      setSelectedCandidate({ ...candidate, officeName });
+      setVotersListOpen(true);
+    }
+  };
 
   const stats = getPrimaryStats();
 
@@ -452,6 +472,24 @@ export function AdminPrimaryElectionsSection() {
                                     <span></span>
                                     <span className="text-red-500/80">25% threshold ↑</span>
                                   </div>
+                                  
+                                  {/* Voters List Button */}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full mt-2 h-7 text-xs gap-1.5"
+                                    onClick={() => openVotersList({
+                                      id: candidate.id,
+                                      name: candidate.name,
+                                      avatar: candidate.avatar,
+                                      votes: candidate.votes,
+                                      isWinner: advances,
+                                      officeName: selectedPrimary.officeName
+                                    }, selectedPrimary.officeName)}
+                                  >
+                                    <ListChecks className="h-3.5 w-3.5" />
+                                    Voters List
+                                  </Button>
                                 </div>
                               </div>
                             );
@@ -498,6 +536,20 @@ export function AdminPrimaryElectionsSection() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Candidate Voters List Sheet */}
+      {selectedCandidate && (
+        <CandidateVotersListSheet
+          open={votersListOpen}
+          onOpenChange={setVotersListOpen}
+          candidateId={selectedCandidate.id}
+          candidateName={selectedCandidate.name}
+          candidateAvatar={selectedCandidate.avatar}
+          voteCount={selectedCandidate.votes}
+          officeName={selectedCandidate.officeName}
+          isWinner={selectedCandidate.isWinner}
+        />
+      )}
     </div>
   );
 }
