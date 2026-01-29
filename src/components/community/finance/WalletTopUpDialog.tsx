@@ -17,12 +17,25 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Wallet, CreditCard, Smartphone, Building2, CheckCircle2, ChevronRight, ChevronLeft, Globe, MapPin, ArrowRight, Store, Info } from "lucide-react";
+import { 
+  Wallet, 
+  CreditCard, 
+  Smartphone, 
+  Building2, 
+  CheckCircle2, 
+  ChevronRight, 
+  ChevronLeft, 
+  Store,
+  BadgePercent,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { VoucherDenominationSelector } from "./VoucherDenominationSelector";
+import { MerchantSelectionStep } from "./MerchantSelectionStep";
 import { SelectedVoucher, calculateVoucherTotals } from "@/data/rechargeVouchersData";
+import { MerchantCountry, MobiMerchant, calculateDiscountedAmount } from "@/data/mobiMerchantsData";
 
 interface WalletTopUpDialogProps {
   open: boolean;
@@ -31,39 +44,21 @@ interface WalletTopUpDialogProps {
 
 type Step = "vouchers" | "merchants" | "payment" | "confirm";
 
-interface MerchantOption {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  flag?: string;
-}
-
-const merchantOptions: MerchantOption[] = [
-  {
-    id: "nigeria",
-    name: "Nigeria",
-    description: "Merchants in Local Country",
-    icon: <MapPin className="h-5 w-5" />,
-    flag: "🇳🇬",
-  },
-  {
-    id: "international",
-    name: "Select Another Country",
-    description: "International Payment Options",
-    icon: <Globe className="h-5 w-5" />,
-  },
-];
-
 export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps) {
   const [selectedVouchers, setSelectedVouchers] = useState<SelectedVoucher[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("card");
-  const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<MerchantCountry | null>(null);
+  const [selectedMerchant, setSelectedMerchant] = useState<MobiMerchant | null>(null);
   const [step, setStep] = useState<Step>("vouchers");
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const totals = calculateVoucherTotals(selectedVouchers);
+  
+  // Calculate discounted amount if merchant selected
+  const discountInfo = selectedMerchant 
+    ? calculateDiscountedAmount(totals.totalNgn, selectedMerchant.discountPercent)
+    : { discounted: totals.totalNgn, savings: 0 };
 
   const handleContinueToMerchants = () => {
     if (selectedVouchers.length === 0) {
@@ -77,8 +72,9 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
     setStep("merchants");
   };
 
-  const handleSelectMerchant = (merchantId: string) => {
-    setSelectedMerchant(merchantId);
+  const handleSelectMerchant = (country: MerchantCountry, merchant: MobiMerchant) => {
+    setSelectedCountry(country);
+    setSelectedMerchant(merchant);
     setStep("payment");
   };
 
@@ -95,6 +91,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
     setTimeout(() => {
       setSelectedVouchers([]);
       setPaymentMethod("card");
+      setSelectedCountry(null);
       setSelectedMerchant(null);
       setStep("vouchers");
     }, 300);
@@ -105,6 +102,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
     setTimeout(() => {
       setSelectedVouchers([]);
       setPaymentMethod("card");
+      setSelectedCountry(null);
       setSelectedMerchant(null);
       setStep("vouchers");
     }, 300);
@@ -134,8 +132,8 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   };
 
   const getMerchantLabel = () => {
-    const merchant = merchantOptions.find((m) => m.id === selectedMerchant);
-    return merchant ? `${merchant.flag || ""} ${merchant.name}`.trim() : "";
+    if (!selectedMerchant || !selectedCountry) return "";
+    return `${selectedCountry.flag} ${selectedMerchant.name}`;
   };
 
   const renderVouchersStep = () => (
@@ -158,7 +156,8 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
         <div className="h-4" />
       </ScrollArea>
 
-      <div className="shrink-0 px-4 py-3 border-t bg-background">
+      {/* Sticky Footer with Button */}
+      <div className="shrink-0 px-4 py-3 border-t bg-background sticky bottom-0">
         <Button
           onClick={handleContinueToMerchants}
           className="w-full"
@@ -172,64 +171,11 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   );
 
   const renderMerchantsStep = () => (
-    <>
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-4 pb-4">
-          <Card className="p-3 bg-muted/50">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Total Amount</span>
-              <div className="text-right">
-                <span className="font-bold">₦{totals.totalNgn.toLocaleString()}</span>
-                <span className="text-xs text-muted-foreground ml-1">(US${totals.totalUsd})</span>
-              </div>
-            </div>
-          </Card>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Choose Mobi-Merchant</Label>
-            <p className="text-xs text-muted-foreground mb-3">
-              Select an accredited merchant to purchase your vouchers
-            </p>
-
-            <div className="space-y-2">
-              {merchantOptions.map((merchant) => (
-                <Card
-                  key={merchant.id}
-                  className="p-4 cursor-pointer transition-all duration-200 hover:border-primary hover:bg-primary/5 active:scale-[0.98]"
-                  onClick={() => handleSelectMerchant(merchant.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                      {merchant.flag ? (
-                        <span className="text-xl">{merchant.flag}</span>
-                      ) : (
-                        merchant.icon
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{merchant.name}</p>
-                      <p className="text-xs text-muted-foreground">{merchant.description}</p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </ScrollArea>
-
-      <div className="shrink-0 px-4 py-3 border-t bg-background">
-        <Button
-          variant="outline"
-          onClick={handleBack}
-          className="w-full"
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back to Vouchers
-        </Button>
-      </div>
-    </>
+    <MerchantSelectionStep
+      totalAmount={totals.totalNgn}
+      onSelectMerchant={handleSelectMerchant}
+      onBack={handleBack}
+    />
   );
 
   const renderPaymentStep = () => (
@@ -246,11 +192,37 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
                 <span className="text-muted-foreground">Merchant</span>
                 <span className="font-medium">{getMerchantLabel()}</span>
               </div>
+              
+              {/* Discount Info */}
+              {selectedMerchant && selectedMerchant.discountPercent > 0 && (
+                <>
+                  <div className="flex justify-between text-sm pt-2 border-t">
+                    <span className="text-muted-foreground">Original Amount</span>
+                    <span className="line-through text-muted-foreground">
+                      ₦{totals.totalNgn.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <BadgePercent className="h-3.5 w-3.5 text-green-600" />
+                      Discount ({selectedMerchant.discountPercent}%)
+                    </span>
+                    <span className="text-green-600 font-medium">
+                      -₦{discountInfo.savings.toLocaleString()}
+                    </span>
+                  </div>
+                </>
+              )}
+              
               <div className="flex justify-between pt-2 border-t">
                 <span className="text-muted-foreground">Amount to Pay</span>
                 <div className="text-right">
-                  <p className="text-xl font-bold">₦{totals.totalNgn.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground">(US${totals.totalUsd})</p>
+                  <p className="text-xl font-bold">₦{discountInfo.discounted.toLocaleString()}</p>
+                  {discountInfo.savings > 0 && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 text-[10px]">
+                      You save ₦{discountInfo.savings.toLocaleString()}
+                    </Badge>
+                  )}
                 </div>
               </div>
               <div className="flex justify-between pt-2 border-t text-sm">
@@ -306,7 +278,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
         </div>
       </ScrollArea>
 
-      <div className="shrink-0 px-4 py-3 border-t bg-background flex gap-2">
+      <div className="shrink-0 px-4 py-3 border-t bg-background sticky bottom-0 flex gap-2">
         <Button variant="outline" onClick={handleBack} className="flex-1">
           <ChevronLeft className="h-4 w-4 mr-1" />
           Back
@@ -345,9 +317,15 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
                 </div>
               ))}
               <div className="border-t pt-2 mt-2">
+                {selectedMerchant && discountInfo.savings > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Merchant Discount ({selectedMerchant.discountPercent}%)</span>
+                    <span>-₦{discountInfo.savings.toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Amount</span>
-                  <span className="font-bold">₦{totals.totalNgn.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Total Paid</span>
+                  <span className="font-bold">₦{discountInfo.discounted.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Mobi Credit</span>
@@ -375,7 +353,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
         </div>
       </ScrollArea>
 
-      <div className="shrink-0 px-4 py-3 border-t bg-background">
+      <div className="shrink-0 px-4 py-3 border-t bg-background sticky bottom-0">
         <Button onClick={handleConfirm} className="w-full">
           Done
         </Button>
@@ -386,7 +364,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const getStepTitle = () => {
     switch (step) {
       case "vouchers":
-        return "Buy Mobi Vouchers";
+        return "Top Up Wallet";
       case "merchants":
         return "Choose Merchant";
       case "payment":
@@ -394,7 +372,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
       case "confirm":
         return "Processing";
       default:
-        return "Buy Mobi Vouchers";
+        return "Top Up Wallet";
     }
   };
 
@@ -425,7 +403,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent className="max-h-[85vh] flex flex-col">
+        <DrawerContent className="max-h-[92vh] flex flex-col">
           <DrawerHeader className="pb-2 border-b shrink-0">
             <DrawerTitle className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
