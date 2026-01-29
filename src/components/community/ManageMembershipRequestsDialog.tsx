@@ -761,7 +761,7 @@ export function ManageMembershipRequestsDialog({
             <TabsContent value="managers" className="mt-0 space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-semibold text-base">Membership Managers</h3>
+                  <h3 className="font-semibold text-base">Admins</h3>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     Users who can approve or reject applications
                   </p>
@@ -804,7 +804,7 @@ export function ManageMembershipRequestsDialog({
 
               {!isOwner && (
                 <p className="text-sm text-center text-muted-foreground italic pt-4">
-                  Only the Community Owner can assign or remove Membership Managers
+                  Only the Community Owner can assign or remove Admins
                 </p>
               )}
             </TabsContent>
