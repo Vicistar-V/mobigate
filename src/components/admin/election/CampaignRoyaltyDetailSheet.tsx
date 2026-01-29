@@ -108,89 +108,44 @@ export function CampaignRoyaltyDetailSheet({
         </CardContent>
       </Card>
 
-      {/* Fee Breakdown */}
-      <Card>
+      {/* Fee Breakdown - Community Admin View */}
+      {/* Note: Total Collected and detailed fee breakdown are Mobigate Admin concerns only */}
+      {/* Community Admins only see their royalty share */}
+
+      {/* Community Royalty - Only show Community's share */}
+      <Card className="bg-green-500/5 border-green-500/20">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-primary" />
-            <h4 className="font-semibold text-sm">Fee Breakdown</h4>
+            <Wallet className="h-4 w-4 text-green-600" />
+            <h4 className="font-semibold text-sm text-green-700">Community Royalty Earned</h4>
             <MobiExplainerTooltip size="sm" />
           </div>
           
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Base Fee ({campaign.durationDays} days)</span>
-              <div className="text-right">
-                <span>{formatMobiAmount(campaign.baseFee)}</span>
-                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.baseFee, "NGN")}</p>
-              </div>
+          {/* Only Community Share - Mobigate Share hidden for Community Admins */}
+          <div className="flex justify-between items-center p-3 bg-background rounded-lg">
+            <div>
+              <span className="text-sm text-muted-foreground">Your Community Earnings</span>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Based on {campaign.durationDays}-day campaign
+              </p>
             </div>
-            {campaign.audiencePremium > 0 && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Audience Premium</span>
-                <div className="text-right">
-                  <span>+{formatMobiAmount(campaign.audiencePremium)}</span>
-                  <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.audiencePremium, "NGN")}</p>
-                </div>
-              </div>
-            )}
-            <Separator />
-            <div className="flex justify-between font-bold">
-              <span>Total Fee Paid</span>
-              <div className="text-right">
-                <span className="text-primary">{formatMobiAmount(campaign.totalFeeInMobi)}</span>
-                <p className="text-xs font-normal text-muted-foreground">≈ {formatLocalAmount(campaign.totalFeeInMobi, "NGN")}</p>
-              </div>
+            <div className="text-right">
+              <span className="text-xl font-bold text-green-600">
+                {formatMobiAmount(campaign.communityShare)}
+              </span>
+              <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.communityShare, "NGN")}</p>
             </div>
           </div>
 
           {campaign.paidAt && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg">
               <Receipt className="h-3 w-3" />
-              <span>Paid on {format(campaign.paidAt, "MMM d, yyyy 'at' h:mm a")}</span>
+              <span>Received on {format(campaign.paidAt, "MMM d, yyyy")}</span>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Royalty Distribution */}
-      <Card className="bg-green-500/5 border-green-500/20">
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <PieChart className="h-4 w-4 text-green-600" />
-            <h4 className="font-semibold text-sm text-green-700">Royalty Distribution</h4>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between items-center p-2 bg-background rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-                <span className="text-sm">Community Wallet (60%)</span>
-              </div>
-              <div className="text-right">
-                <span className="font-bold text-green-600">
-                  {formatMobiAmount(campaign.communityShare)}
-                </span>
-                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.communityShare, "NGN")}</p>
-              </div>
-            </div>
-            
-            <div className="flex justify-between items-center p-2 bg-background rounded-lg">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span className="text-sm">Mobigate Account (40%)</span>
-              </div>
-              <div className="text-right">
-                <span className="font-bold text-blue-600">
-                  {formatMobiAmount(campaign.mobigateShare)}
-                </span>
-                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(campaign.mobigateShare, "NGN")}</p>
-              </div>
-            </div>
-          </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            Unique royalty based on candidate's selected parameters
+            Royalty based on candidate's selected campaign parameters
           </p>
         </CardContent>
       </Card>
