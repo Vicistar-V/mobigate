@@ -80,7 +80,7 @@ export function AdminQuickActions({
   return (
     <div className="space-y-3">
       <h2 className="text-base font-semibold text-muted-foreground">Quick Actions</h2>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <QuickActionButton
           icon={Users}
           label="Members"
