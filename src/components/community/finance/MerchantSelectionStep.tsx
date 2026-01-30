@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   ArrowRight, 
   ChevronLeft, 
@@ -17,7 +16,6 @@ import {
 import { 
   MerchantCountry, 
   MobiMerchant, 
-  merchantCountries,
   getLocalCountry,
   getOtherCountries,
   calculateDiscountedAmount,
@@ -62,7 +60,8 @@ export function MerchantSelectionStep({
   if (subStep === "countries") {
     return (
       <>
-        <ScrollArea className="flex-1 px-4">
+        {/* Scrollable content using native scrolling */}
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
           <div className="space-y-4 pb-4">
             {/* Total Amount Card */}
             <Card className="p-3 bg-muted/50">
@@ -142,7 +141,7 @@ export function MerchantSelectionStep({
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="shrink-0 px-4 py-3 border-t bg-background">
           <Button
@@ -161,7 +160,8 @@ export function MerchantSelectionStep({
   // Render merchant list for selected country
   return (
     <>
-      <ScrollArea className="flex-1 px-4">
+      {/* Scrollable content using native scrolling */}
+      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
         <div className="space-y-4 pb-4">
           {/* Country Header */}
           <Card className="p-3 bg-muted/50">
@@ -236,7 +236,7 @@ export function MerchantSelectionStep({
               })}
           </div>
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="shrink-0 px-4 py-3 border-t bg-background">
         <Button
