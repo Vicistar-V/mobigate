@@ -111,17 +111,26 @@ export function PendingApprovalsTab({
       {/* Type Filters */}
       <ScrollArea className="w-full" style={{ overflowX: 'auto' }}>
         <div className="flex gap-2 pb-2">
-          {(['all', 'news', 'event', 'article', 'vibe'] as const).map(type => (
-            <Badge
-              key={type}
-              variant={typeFilter === type ? "default" : "outline"}
-              className="cursor-pointer shrink-0 gap-1 capitalize"
-              onClick={() => setTypeFilter(type)}
-            >
-              {type === 'all' ? 'All' : type}
-              <span className="ml-1 text-[10px] opacity-70">({typeCounts[type]})</span>
-            </Badge>
-          ))}
+          {(['all', 'news', 'event', 'article', 'vibe'] as const).map(type => {
+            const displayLabel = {
+              all: 'All',
+              news: 'News',
+              event: 'Events',
+              article: 'Articles',
+              vibe: 'Vibes'
+            }[type];
+            return (
+              <Badge
+                key={type}
+                variant={typeFilter === type ? "default" : "outline"}
+                className="cursor-pointer shrink-0 gap-1"
+                onClick={() => setTypeFilter(type)}
+              >
+                {displayLabel}
+                <span className="ml-1 text-[10px] opacity-70">({typeCounts[type]})</span>
+              </Badge>
+            );
+          })}
         </div>
       </ScrollArea>
 
