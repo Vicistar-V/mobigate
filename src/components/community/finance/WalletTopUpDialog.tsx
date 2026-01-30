@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +51,18 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const [step, setStep] = useState<Step>("vouchers");
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Mobile: prevent "jump to top" on state updates when selecting vouchers.
+  const vouchersScrollRef = useRef<HTMLDivElement | null>(null);
+  const vouchersScrollTopRef = useRef(0);
+
+  useLayoutEffect(() => {
+    if (step !== "vouchers") return;
+    const el = vouchersScrollRef.current;
+    if (!el) return;
+    // Restore immediately after React commits the updated DOM.
+    el.scrollTop = vouchersScrollTopRef.current;
+  }, [selectedVouchers, step]);
 
   const totals = calculateVoucherTotals(selectedVouchers);
   
@@ -137,27 +149,48 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
 
   const renderVouchersStep = () => (
     <>
-      {/* Info Banner */}
-      <div className="mx-4 mt-2 mb-3 p-3 bg-primary/5 rounded-lg shrink-0">
-        <div className="flex items-start gap-2">
-          <Store className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-          <p className="text-xs text-muted-foreground">
-            Purchase <strong>Mobi Vouchers</strong> with your local currency from accredited <strong>Mobi-Merchants</strong> to fund your Community Wallet.
-          </p>
-        </div>
-      </div>
+      {/* Single scroll container for mobile stability */}
+      <div
+        ref={vouchersScrollRef}
+        className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain"
+        onScroll={(e) => {
+          vouchersScrollTopRef.current = (e.currentTarget as HTMLDivElement).scrollTop;
+        }}
+      >
+        <div className="px-4 pt-3 pb-4 space-y-3">
+          {/* Info Banner */}
+          <div className="p-3 bg-primary/5 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Store className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground">
+                Purchase <strong>Mobi Vouchers</strong> with your local currency from accredited{" "}
+                <strong>Mobi-Merchants</strong> to fund your Community Wallet.
+              </p>
+            </div>
+          </div>
 
-      {/* Scrollable voucher list using native scrolling */}
-      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
-        <VoucherDenominationSelector
-          selectedVouchers={selectedVouchers}
-          onSelectionChange={setSelectedVouchers}
-        />
-        <div className="h-4" />
+          <VoucherDenominationSelector
+            selectedVouchers={selectedVouchers}
+            onSelectionChange={setSelectedVouchers}
+          />
+        </div>
       </div>
 
       {/* Sticky Footer with Button */}
       <div className="shrink-0 px-4 py-3 border-t bg-background">
+        {/* Always-visible running total (before choosing a merchant) */}
+        {selectedVouchers.length > 0 && (
+          <div className="mb-3 rounded-lg border bg-card p-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Total Amount</span>
+              <span className="font-semibold">₦{totals.totalNgn.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs mt-1">
+              <span className="text-muted-foreground">Mobi Credit</span>
+              <span className="text-primary font-medium">{totals.totalMobi.toLocaleString()} Mobi</span>
+            </div>
+          </div>
+        )}
         <Button
           onClick={handleContinueToMerchants}
           className="w-full"
@@ -405,7 +438,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent className="max-h-[92vh] flex flex-col">
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden touch-auto">
           <DrawerHeader className="pb-2 border-b shrink-0">
             <DrawerTitle className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
