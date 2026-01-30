@@ -20,7 +20,7 @@ import {
 import { MobigateQuizPlayDialog } from "./MobigateQuizPlayDialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 
 interface MobigateQuizDialogProps {
   open: boolean;
@@ -50,7 +50,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
     if (playerWalletBalance < quiz.stakeAmount) {
       toast({
         title: "Insufficient Balance",
-        description: `You need at least ${formatMobiAmount(quiz.stakeAmount)} (≈ ${formatLocalAmount(quiz.stakeAmount, "NGN")}) to play.`,
+        description: `You need at least ${formatLocalFirst(quiz.stakeAmount, "NGN")} to play.`,
         variant: "destructive"
       });
       return;
@@ -64,7 +64,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
     toast({
       title: result.amountWon > 0 ? "🔥 Amazing Win!" : "Game Over",
       description: result.amountWon > 0 
-        ? `You won ${formatMobiAmount(result.amountWon)} (≈ ${formatLocalAmount(result.amountWon, "NGN")}) on Mobigate!` 
+        ? `You won ${formatLocalFirst(result.amountWon, "NGN")} on Mobigate!` 
         : "Better luck next time!",
     });
     setShowGamePlay(false);
@@ -113,7 +113,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
               <div className="p-4">
                 {/* Quizzes Tab */}
                 <TabsContent value="quizzes" className="mt-0 space-y-4">
-                  {/* Wallet & Stats Card */}
+                  {/* Wallet & Stats Card - LOCAL CURRENCY FIRST */}
                   <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between">
@@ -122,8 +122,8 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                           <span className="text-sm text-amber-700 dark:text-amber-300">Your Wallet</span>
                         </div>
                         <div className="text-right">
-                          <span className="font-bold text-amber-700 dark:text-amber-300">{formatMobiAmount(playerWalletBalance)}</span>
-                          <p className="text-[10px] text-amber-500">≈ {formatLocalAmount(playerWalletBalance, "NGN")}</p>
+                          <span className="font-bold text-amber-700 dark:text-amber-300">{formatLocalAmount(playerWalletBalance, "NGN")}</span>
+                          <p className="text-[10px] text-amber-500">({formatMobiAmount(playerWalletBalance)})</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-2 mt-3 pt-2 border-t border-amber-200 dark:border-amber-700">
@@ -139,7 +139,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                         </div>
                         <div className="text-center">
                           <p className="text-[10px] text-amber-600">Net Profit</p>
-                          <p className="font-bold text-sm text-green-600">+{formatMobiAmount(mobigatePlayerStats.netProfit)}</p>
+                          <p className="font-bold text-sm text-green-600">+{formatLocalAmount(mobigatePlayerStats.netProfit, "NGN")}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -183,20 +183,21 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                               {quiz.prizePool && (
                                 <div className="p-2 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg text-center border border-amber-200">
                                   <p className="text-[10px] text-amber-600">🏆 Prize Pool</p>
-                                  <p className="font-bold text-lg text-amber-700">{formatMobiAmount(quiz.prizePool)}</p>
+                                  <p className="font-bold text-lg text-amber-700">{formatLocalAmount(quiz.prizePool, "NGN")}</p>
+                                  <p className="text-[9px] text-amber-500">({formatMobiAmount(quiz.prizePool)})</p>
                                 </div>
                               )}
 
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-white dark:bg-background rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">{formatMobiAmount(quiz.stakeAmount)}</p>
-                                  <p className="text-[9px] text-red-400">≈ {formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                                  <p className="font-bold text-sm text-red-600">{formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                                  <p className="text-[9px] text-red-400">({formatMobiAmount(quiz.stakeAmount)})</p>
                                 </div>
                                 <div className="p-2 bg-white dark:bg-background rounded-lg text-center border border-green-200 dark:border-green-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-green-600">{formatMobiAmount(quiz.winningAmount)}</p>
-                                  <p className="text-[9px] text-green-400">≈ {formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                                  <p className="font-bold text-sm text-green-600">{formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                                  <p className="text-[9px] text-green-400">({formatMobiAmount(quiz.winningAmount)})</p>
                                 </div>
                               </div>
 
@@ -264,13 +265,13 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">{formatMobiAmount(quiz.stakeAmount)}</p>
-                                  <p className="text-[9px] text-red-400">≈ {formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                                  <p className="font-bold text-sm text-red-600">{formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                                  <p className="text-[9px] text-red-400">({formatMobiAmount(quiz.stakeAmount)})</p>
                                 </div>
                                 <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded-lg text-center border border-green-200 dark:border-green-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-green-600">{formatMobiAmount(quiz.winningAmount)}</p>
-                                  <p className="text-[9px] text-green-400">≈ {formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                                  <p className="font-bold text-sm text-green-600">{formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                                  <p className="text-[9px] text-green-400">({formatMobiAmount(quiz.winningAmount)})</p>
                                 </div>
                               </div>
 

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { MobigateQuiz, MOBIGATE_ANSWER_LABELS, calculateMobigateWinnings } from "@/data/mobigateQuizData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 
 interface MobigateQuizPlayDialogProps {
   open: boolean;
@@ -93,7 +93,7 @@ export function MobigateQuizPlayDialog({ open, onOpenChange, quiz, playerWalletB
   const startGame = () => {
     if (!quiz) return;
     if (playerWalletBalance < quiz.stakeAmount) { toast({ title: "Insufficient Balance", variant: "destructive" }); return; }
-    toast({ title: "🔥 Game Started!", description: `M${quiz.stakeAmount.toLocaleString()} deducted. Let's go!` });
+    toast({ title: "🔥 Game Started!", description: `${formatLocalFirst(quiz.stakeAmount, "NGN")} deducted. Let's go!` });
     setGameState("playing");
     setTimeRemaining(quiz.timeLimitPerQuestion);
   };
@@ -166,13 +166,13 @@ export function MobigateQuizPlayDialog({ open, onOpenChange, quiz, playerWalletB
 
           {gameState === "game_over" && finalResult && (
             <div className="space-y-4">
-              <Card className={cn("border-2", finalResult.status === "won" && "border-green-500 bg-gradient-to-br from-green-50 to-emerald-50", finalResult.status === "partial_win" && "border-yellow-500 bg-gradient-to-br from-yellow-50 to-amber-50", finalResult.status === "lost" && "border-red-500 bg-red-50")}><CardContent className="p-6 text-center space-y-4"><div className={cn("inline-flex items-center justify-center w-16 h-16 rounded-full", finalResult.status === "won" && "bg-green-100", finalResult.status === "partial_win" && "bg-yellow-100", finalResult.status === "lost" && "bg-red-100")}>{finalResult.status === "won" && <Trophy className="h-8 w-8 text-green-500" />}{finalResult.status === "partial_win" && <Trophy className="h-8 w-8 text-yellow-500" />}{finalResult.status === "lost" && <XCircle className="h-8 w-8 text-red-500" />}</div><div><h2 className="text-xl font-bold">{finalResult.status === "won" ? "🔥 Amazing Win!" : finalResult.status === "partial_win" ? "Good Job!" : "Better Luck!"}</h2><p className="text-muted-foreground mt-1">{answers.filter(a => a.isCorrect).length}/10 correct</p></div>{finalResult.amount > 0 && (<div className="pt-2"><p className="text-sm text-muted-foreground">You won</p><p className="text-3xl font-bold text-amber-600">{formatMobiAmount(finalResult.amount)}</p><p className="text-xs text-muted-foreground">≈ {formatLocalAmount(finalResult.amount, "NGN")}</p></div>)}</CardContent></Card>
+              <Card className={cn("border-2", finalResult.status === "won" && "border-green-500 bg-gradient-to-br from-green-50 to-emerald-50", finalResult.status === "partial_win" && "border-yellow-500 bg-gradient-to-br from-yellow-50 to-amber-50", finalResult.status === "lost" && "border-red-500 bg-red-50")}><CardContent className="p-6 text-center space-y-4"><div className={cn("inline-flex items-center justify-center w-16 h-16 rounded-full", finalResult.status === "won" && "bg-green-100", finalResult.status === "partial_win" && "bg-yellow-100", finalResult.status === "lost" && "bg-red-100")}>{finalResult.status === "won" && <Trophy className="h-8 w-8 text-green-500" />}{finalResult.status === "partial_win" && <Trophy className="h-8 w-8 text-yellow-500" />}{finalResult.status === "lost" && <XCircle className="h-8 w-8 text-red-500" />}</div><div><h2 className="text-xl font-bold">{finalResult.status === "won" ? "🔥 Amazing Win!" : finalResult.status === "partial_win" ? "Good Job!" : "Better Luck!"}</h2><p className="text-muted-foreground mt-1">{answers.filter(a => a.isCorrect).length}/10 correct</p></div>{finalResult.amount > 0 && (<div className="pt-2"><p className="text-sm text-muted-foreground">You won</p><p className="text-3xl font-bold text-amber-600">{formatLocalAmount(finalResult.amount, "NGN")}</p><p className="text-xs text-muted-foreground">({formatMobiAmount(finalResult.amount)})</p></div>)}</CardContent></Card>
             </div>
           )}
         </div>
 
         <div className="sticky bottom-0 z-10 bg-background border-t p-4">
-          {gameState === "pre_game" && <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" size="lg" onClick={startGame} disabled={playerWalletBalance < quiz.stakeAmount}><Zap className="h-4 w-4 mr-2" />{playerWalletBalance >= quiz.stakeAmount ? `Start - Pay ${formatMobiAmount(quiz.stakeAmount)}` : "Insufficient Balance"}</Button>}
+          {gameState === "pre_game" && <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" size="lg" onClick={startGame} disabled={playerWalletBalance < quiz.stakeAmount}><Zap className="h-4 w-4 mr-2" />{playerWalletBalance >= quiz.stakeAmount ? `Start - Pay ${formatLocalFirst(quiz.stakeAmount, "NGN")}` : "Insufficient Balance"}</Button>}
           {gameState === "playing" && <Button className="w-full bg-amber-500 hover:bg-amber-600" size="lg" onClick={handleConfirmAnswer} disabled={selectedAnswer === null}>{selectedAnswer === null ? "Select Answer" : `Confirm ${MOBIGATE_ANSWER_LABELS[selectedAnswer]}`}</Button>}
           {gameState === "question_result" && <Button className="w-full" size="lg" disabled>Loading next...</Button>}
           {gameState === "game_over" && <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500" size="lg" onClick={handleGameCompleteClick}>Complete & Exit</Button>}

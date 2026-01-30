@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CommunityQuiz, COMMUNITY_ANSWER_LABELS, calculateCommunityWinnings } from "@/data/communityQuizData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 
 interface CommunityQuizPlayDialogProps {
   open: boolean;
@@ -93,7 +93,7 @@ export function CommunityQuizPlayDialog({ open, onOpenChange, quiz, playerWallet
   const startGame = () => {
     if (!quiz) return;
     if (playerWalletBalance < quiz.stakeAmount) { toast({ title: "Insufficient Balance", variant: "destructive" }); return; }
-    toast({ title: "Stake Deducted", description: `${formatMobiAmount(quiz.stakeAmount)} (≈ ${formatLocalAmount(quiz.stakeAmount, "NGN")}) deducted. Good luck!` });
+    toast({ title: "Stake Deducted", description: `${formatLocalFirst(quiz.stakeAmount, "NGN")} deducted. Good luck!` });
     setGameState("playing");
     setTimeRemaining(quiz.timeLimitPerQuestion);
   };
@@ -138,21 +138,21 @@ export function CommunityQuizPlayDialog({ open, onOpenChange, quiz, playerWallet
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-center p-3 bg-white dark:bg-background rounded-lg border border-red-200">
                     <p className="text-xs text-muted-foreground">Stake</p>
-                    <p className="font-bold text-lg text-red-600">{formatMobiAmount(quiz.stakeAmount)}</p>
-                    <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                    <p className="font-bold text-lg text-red-600">{formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                    <p className="text-xs text-muted-foreground">({formatMobiAmount(quiz.stakeAmount)})</p>
                   </div>
                   <div className="text-center p-3 bg-white dark:bg-background rounded-lg border border-blue-200">
                     <p className="text-xs text-muted-foreground">Win Amount</p>
-                    <p className="font-bold text-lg text-blue-600">{formatMobiAmount(quiz.winningAmount)}</p>
-                    <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                    <p className="font-bold text-lg text-blue-600">{formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                    <p className="text-xs text-muted-foreground">({formatMobiAmount(quiz.winningAmount)})</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center text-sm"><div className="p-2 bg-white dark:bg-background rounded-lg"><p className="text-xs text-muted-foreground">Questions</p><p className="font-semibold">10</p></div><div className="p-2 bg-white dark:bg-background rounded-lg"><p className="text-xs text-muted-foreground">Time/Q</p><p className="font-semibold">{quiz.timeLimitPerQuestion}s</p></div><div className="p-2 bg-white dark:bg-background rounded-lg"><p className="text-xs text-muted-foreground">Options</p><p className="font-semibold">A-H</p></div></div>
               </CardContent></Card>
               <Card><CardContent className="p-4 space-y-3"><h3 className="font-semibold text-sm text-blue-700">Winning Structure</h3><div className="space-y-2 text-sm"><div className="flex items-center justify-between p-2 bg-green-50 rounded-lg"><span className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />10/10</span><span className="font-semibold text-green-600">100% Win</span></div><div className="flex items-center justify-between p-2 bg-yellow-50 rounded-lg"><span className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-yellow-500" />8-9/10</span><span className="font-semibold text-yellow-600">50% Win</span></div><div className="flex items-center justify-between p-2 bg-red-50 rounded-lg"><span className="flex items-center gap-2"><XCircle className="h-4 w-4 text-red-500" />&lt;8/10</span><span className="font-semibold text-red-600">No Prize</span></div></div></CardContent></Card>
-              <Card className={cn("border-2", playerWalletBalance >= quiz.stakeAmount ? "border-green-300 bg-green-50" : "border-red-300 bg-red-50")}><CardContent className="p-4"><div className="flex items-center gap-3"><Wallet className={cn("h-5 w-5", playerWalletBalance >= quiz.stakeAmount ? "text-green-500" : "text-red-500")} /><div className="flex-1"><p className="text-sm font-medium">Your Wallet</p><p className="text-lg font-bold">{formatMobiAmount(playerWalletBalance)}</p><p className="text-xs text-muted-foreground">≈ {formatLocalAmount(playerWalletBalance, "NGN")}</p></div><Badge variant={playerWalletBalance >= quiz.stakeAmount ? "outline" : "destructive"} className={playerWalletBalance >= quiz.stakeAmount ? "bg-green-100 text-green-600" : ""}>{playerWalletBalance >= quiz.stakeAmount ? "Sufficient" : "Insufficient"}</Badge></div></CardContent></Card>
+              <Card className={cn("border-2", playerWalletBalance >= quiz.stakeAmount ? "border-green-300 bg-green-50" : "border-red-300 bg-red-50")}><CardContent className="p-4"><div className="flex items-center gap-3"><Wallet className={cn("h-5 w-5", playerWalletBalance >= quiz.stakeAmount ? "text-green-500" : "text-red-500")} /><div className="flex-1"><p className="text-sm font-medium">Your Wallet</p><p className="text-lg font-bold">{formatLocalAmount(playerWalletBalance, "NGN")}</p><p className="text-xs text-muted-foreground">({formatMobiAmount(playerWalletBalance)})</p></div><Badge variant={playerWalletBalance >= quiz.stakeAmount ? "outline" : "destructive"} className={playerWalletBalance >= quiz.stakeAmount ? "bg-green-100 text-green-600" : ""}>{playerWalletBalance >= quiz.stakeAmount ? "Sufficient" : "Insufficient"}</Badge></div></CardContent></Card>
               <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm"><AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" /><p className="text-muted-foreground">Once started, stake is deducted immediately. Answer carefully!</p></div>
-              <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg text-xs text-muted-foreground"><Globe className="h-4 w-4 text-primary mt-0.5 shrink-0" /><p>All amounts are in <strong>Mobi (M)</strong>, Mobigate's universal currency, and shown with local currency equivalents.</p></div>
+              <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg text-xs text-muted-foreground"><Globe className="h-4 w-4 text-primary mt-0.5 shrink-0" /><p>All amounts displayed in local currency (₦) with Mobi (M) equivalent.</p></div>
             </div>
           )}
 
@@ -177,13 +177,13 @@ export function CommunityQuizPlayDialog({ open, onOpenChange, quiz, playerWallet
 
           {gameState === "game_over" && finalResult && (
             <div className="space-y-4">
-              <Card className={cn("border-2", finalResult.status === "won" && "border-green-500 bg-green-50", finalResult.status === "partial_win" && "border-yellow-500 bg-yellow-50", finalResult.status === "lost" && "border-red-500 bg-red-50")}><CardContent className="p-6 text-center space-y-4"><div className={cn("inline-flex items-center justify-center w-16 h-16 rounded-full", finalResult.status === "won" && "bg-green-100", finalResult.status === "partial_win" && "bg-yellow-100", finalResult.status === "lost" && "bg-red-100")}>{finalResult.status === "won" && <Trophy className="h-8 w-8 text-green-500" />}{finalResult.status === "partial_win" && <Trophy className="h-8 w-8 text-yellow-500" />}{finalResult.status === "lost" && <XCircle className="h-8 w-8 text-red-500" />}</div><div><h2 className="text-xl font-bold">{finalResult.status === "won" ? "Congratulations!" : finalResult.status === "partial_win" ? "Good Job!" : "Better Luck Next Time!"}</h2><p className="text-muted-foreground mt-1">{answers.filter(a => a.isCorrect).length}/10 correct</p></div>{finalResult.amount > 0 && (<div className="pt-2"><p className="text-sm text-muted-foreground">You won</p><p className="text-3xl font-bold text-blue-600">{formatMobiAmount(finalResult.amount)}</p><p className="text-sm text-muted-foreground">≈ {formatLocalAmount(finalResult.amount, "NGN")}</p></div>)}</CardContent></Card>
+              <Card className={cn("border-2", finalResult.status === "won" && "border-green-500 bg-green-50", finalResult.status === "partial_win" && "border-yellow-500 bg-yellow-50", finalResult.status === "lost" && "border-red-500 bg-red-50")}><CardContent className="p-6 text-center space-y-4"><div className={cn("inline-flex items-center justify-center w-16 h-16 rounded-full", finalResult.status === "won" && "bg-green-100", finalResult.status === "partial_win" && "bg-yellow-100", finalResult.status === "lost" && "bg-red-100")}>{finalResult.status === "won" && <Trophy className="h-8 w-8 text-green-500" />}{finalResult.status === "partial_win" && <Trophy className="h-8 w-8 text-yellow-500" />}{finalResult.status === "lost" && <XCircle className="h-8 w-8 text-red-500" />}</div><div><h2 className="text-xl font-bold">{finalResult.status === "won" ? "Congratulations!" : finalResult.status === "partial_win" ? "Good Job!" : "Better Luck Next Time!"}</h2><p className="text-muted-foreground mt-1">{answers.filter(a => a.isCorrect).length}/10 correct</p></div>{finalResult.amount > 0 && (<div className="pt-2"><p className="text-sm text-muted-foreground">You won</p><p className="text-3xl font-bold text-blue-600">{formatLocalAmount(finalResult.amount, "NGN")}</p><p className="text-sm text-muted-foreground">({formatMobiAmount(finalResult.amount)})</p></div>)}</CardContent></Card>
             </div>
           )}
         </div>
 
         <div className="sticky bottom-0 z-10 bg-background border-t p-4">
-          {gameState === "pre_game" && <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg" onClick={startGame} disabled={playerWalletBalance < quiz.stakeAmount}>{playerWalletBalance >= quiz.stakeAmount ? `Start - Pay ${formatMobiAmount(quiz.stakeAmount)}` : "Insufficient Balance"}</Button>}
+          {gameState === "pre_game" && <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg" onClick={startGame} disabled={playerWalletBalance < quiz.stakeAmount}>{playerWalletBalance >= quiz.stakeAmount ? `Start - Pay ${formatLocalFirst(quiz.stakeAmount, "NGN")}` : "Insufficient Balance"}</Button>}
           {gameState === "playing" && <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg" onClick={handleConfirmAnswer} disabled={selectedAnswer === null}>{selectedAnswer === null ? "Select Answer" : `Confirm ${COMMUNITY_ANSWER_LABELS[selectedAnswer]}`}</Button>}
           {gameState === "question_result" && <Button className="w-full" size="lg" disabled>Loading next...</Button>}
           {gameState === "game_over" && <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg" onClick={handleGameCompleteClick}>Complete & Exit</Button>}

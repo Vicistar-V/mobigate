@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 
 interface DonationDialogProps {
   open: boolean;
@@ -70,11 +70,11 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
     setAmount("");
   };
 
-  // Format dual currency display using utility
+  // Format dual currency display using utility - LOCAL CURRENCY FIRST
   const formatDualAmount = (mobiValue: number | string) => {
     const numValue = typeof mobiValue === 'string' ? parseInt(mobiValue) : mobiValue;
     if (isNaN(numValue)) return "";
-    return `${formatMobiAmount(numValue)} (${formatLocalAmount(numValue, "NGN")})`;
+    return formatLocalFirst(numValue, "NGN");
   };
 
   const handleDonate = () => {
@@ -168,10 +168,10 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
                       className="h-auto py-2 px-1.5 flex flex-col items-center gap-0.5"
                     >
                       <span className="text-xs sm:text-sm font-bold">
-                        {formatMobiAmount(preset)}
+                        {formatLocalAmount(preset, "NGN")}
                       </span>
                       <span className="text-[10px] sm:text-xs text-muted-foreground">
-                        ≈ {formatLocalAmount(preset, "NGN")}
+                        ({formatMobiAmount(preset)})
                       </span>
                     </Button>
                   ))}
@@ -179,16 +179,16 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
               </div>
             </div>
 
-            {/* Custom Amount in Mobi */}
+            {/* Custom Amount - LOCAL CURRENCY PRIMARY */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Or Enter Custom Amount (Mobi)</label>
+              <label className="text-sm font-medium mb-2 block">Or Enter Custom Amount ({COMMUNITY_LOCAL_CURRENCY.symbol})</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">
-                  M
+                  {COMMUNITY_LOCAL_CURRENCY.symbol}
                 </span>
                 <Input
                   type="number"
-                  placeholder="Enter amount in Mobi..."
+                  placeholder="Enter amount..."
                   value={customAmount}
                   onChange={(e) => handleCustomAmount(e.target.value)}
                   className="pl-8"
@@ -197,11 +197,11 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
               </div>
               {customAmount && parseInt(customAmount) > 0 && (
                 <p className="text-sm text-primary font-medium mt-1">
-                  ≈ {formatLocalAmount(parseInt(customAmount), "NGN")} ({COMMUNITY_LOCAL_CURRENCY.name})
+                  = {formatMobiAmount(parseInt(customAmount))}
                 </p>
               )}
               <p className="text-xs text-muted-foreground mt-1">
-                Minimum donation: {formatMobiAmount(1000)} ({COMMUNITY_LOCAL_CURRENCY.symbol}1,000)
+                Minimum donation: {COMMUNITY_LOCAL_CURRENCY.symbol}1,000 ({formatMobiAmount(1000)})
               </p>
             </div>
 
@@ -267,19 +267,19 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
               </RadioGroup>
             </div>
 
-            {/* Summary with Dual Currency */}
+            {/* Summary with Dual Currency - LOCAL FIRST */}
             {currentAmount && parseInt(currentAmount) > 0 && (
               <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-muted-foreground">Donation Amount:</span>
                     <span className="text-xl font-bold">
-                      {formatMobiAmount(parseInt(currentAmount))}
+                      {formatLocalAmount(parseInt(currentAmount), "NGN")}
                     </span>
                   </div>
                   <div className="text-right mb-2">
                     <span className="text-sm text-muted-foreground">
-                      (≈ {formatLocalAmount(parseInt(currentAmount), "NGN")} {COMMUNITY_LOCAL_CURRENCY.code})
+                      ({formatMobiAmount(parseInt(currentAmount))})
                     </span>
                   </div>
                   {!isAnonymous && (
@@ -293,14 +293,14 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
           </div>
         </ScrollArea>
 
-        {/* Footer Actions with Dual Currency */}
+        {/* Footer Actions with Dual Currency - LOCAL FIRST */}
         <div className="p-4 border-t bg-background sticky bottom-0">
           <Button onClick={handleDonate} className="w-full" size="lg">
             <Heart className="h-4 w-4 mr-2" />
             {currentAmount && parseInt(currentAmount) > 0 ? (
               <span>
-                Donate {formatMobiAmount(parseInt(currentAmount))}{" "}
-                <span className="opacity-80">(≈ {formatLocalAmount(parseInt(currentAmount), "NGN")})</span>
+                Donate {formatLocalAmount(parseInt(currentAmount), "NGN")}{" "}
+                <span className="opacity-80">({formatMobiAmount(parseInt(currentAmount))})</span>
               </span>
             ) : (
               "Donate"
@@ -321,7 +321,7 @@ export function DonationDialog({ open, onOpenChange }: DonationDialogProps) {
             <AlertDialogTitle className="text-center">Confirm Donation</AlertDialogTitle>
             <AlertDialogDescription className="text-center">
               You are sending a monetary Donation of{" "}
-              <span className="font-bold text-foreground">{formatMobiAmount(parseInt(currentAmount) || 0)}</span> to this Community. 
+              <span className="font-bold text-foreground">{formatLocalFirst(parseInt(currentAmount) || 0, "NGN")}</span> to this Community. 
               This action cannot be reversed.
             </AlertDialogDescription>
           </AlertDialogHeader>
