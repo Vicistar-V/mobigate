@@ -287,7 +287,7 @@ export function AdminFinanceSection({
                 <div className="grid grid-cols-2 gap-2">
                   <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowMemberReports(true)}>
                     <Users className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Member Reports</span>
+                    <span className="truncate">Members' Reports</span>
                   </Button>
                   <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowAudit(true)}>
                     <BarChart3 className="h-4 w-4 mr-2 shrink-0" />
