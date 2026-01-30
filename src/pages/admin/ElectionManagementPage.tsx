@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Vote, Settings } from "lucide-react";
+import { ArrowLeft, Vote, Settings, Plus, Gavel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -9,11 +10,14 @@ import { AdminElectionProcessesTab } from "@/components/admin/election/AdminElec
 import { AdminAccreditationTab } from "@/components/admin/election/AdminAccreditationTab";
 import { AdminClearancesTab } from "@/components/admin/election/AdminClearancesTab";
 import { AdminWinnersAnnouncementTab } from "@/components/admin/election/AdminWinnersAnnouncementTab";
+import { AdminImpeachmentTab } from "@/components/admin/election/AdminImpeachmentTab";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
+import { DeclareElectionDrawer } from "@/components/admin/election/DeclareElectionDrawer";
 
 export default function ElectionManagementPage() {
   const { communityId } = useParams();
   const navigate = useNavigate();
+  const [showDeclareElection, setShowDeclareElection] = useState(false);
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -28,24 +32,28 @@ export default function ElectionManagementPage() {
           >
             <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <Vote className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 shrink-0" />
             <h1 className="font-bold text-base sm:text-lg truncate">Election Management</h1>
           </div>
+          {/* New Election Button */}
+          <Button 
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white font-medium shrink-0"
+            onClick={() => setShowDeclareElection(true)}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">New Election</span>
+            <span className="sm:hidden">New</span>
+          </Button>
         </div>
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="nominations" className="w-full">
+      <Tabs defaultValue="campaigns" className="w-full">
         <div className="border-b bg-background">
           <ScrollArea className="w-full">
             <TabsList className="h-10 sm:h-11 bg-muted/50 w-max min-w-full px-3 sm:px-4 justify-start gap-1">
-              <TabsTrigger 
-                value="nominations" 
-                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
-              >
-                Nominations
-              </TabsTrigger>
               <TabsTrigger 
                 value="campaigns" 
                 className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
@@ -77,6 +85,13 @@ export default function ElectionManagementPage() {
                 Winners
               </TabsTrigger>
               <TabsTrigger 
+                value="impeachment" 
+                className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+              >
+                <Gavel className="h-3.5 w-3.5 mr-1" />
+                Impeachment
+              </TabsTrigger>
+              <TabsTrigger 
                 value="settings" 
                 className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
               >
@@ -89,9 +104,6 @@ export default function ElectionManagementPage() {
         </div>
 
         <div className="p-3 sm:p-4 overflow-hidden">
-          <TabsContent value="nominations" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <AdminNominationsTab />
-          </TabsContent>
           <TabsContent value="campaigns" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminCampaignsTab />
           </TabsContent>
@@ -107,6 +119,9 @@ export default function ElectionManagementPage() {
           <TabsContent value="winners" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminWinnersAnnouncementTab />
           </TabsContent>
+          <TabsContent value="impeachment" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <AdminImpeachmentTab />
+          </TabsContent>
           <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <div className="space-y-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -118,6 +133,12 @@ export default function ElectionManagementPage() {
           </TabsContent>
         </div>
       </Tabs>
+
+      {/* Declare Election Drawer */}
+      <DeclareElectionDrawer
+        open={showDeclareElection}
+        onOpenChange={setShowDeclareElection}
+      />
     </div>
   );
 }
