@@ -55,6 +55,15 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   // Mobile: prevent "jump to top" on state updates when selecting vouchers.
   const vouchersScrollRef = useRef<HTMLDivElement | null>(null);
   const vouchersScrollTopRef = useRef(0);
+  const vouchersScrollLockRef = useRef(false);
+
+  const captureVouchersScroll = () => {
+    const el = vouchersScrollRef.current;
+    if (!el) return;
+    // Capture BEFORE any focus/scroll side-effects happen.
+    vouchersScrollTopRef.current = el.scrollTop;
+    vouchersScrollLockRef.current = true;
+  };
 
   useLayoutEffect(() => {
     if (step !== "vouchers") return;
@@ -62,6 +71,14 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
     if (!el) return;
     // Restore immediately after React commits the updated DOM.
     el.scrollTop = vouchersScrollTopRef.current;
+
+    // Release the lock after the browser has had a chance to finish any
+    // post-click focus/scroll adjustments.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        vouchersScrollLockRef.current = false;
+      });
+    });
   }, [selectedVouchers, step]);
 
   const totals = calculateVoucherTotals(selectedVouchers);
@@ -154,6 +171,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
         ref={vouchersScrollRef}
         className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain"
         onScroll={(e) => {
+          if (vouchersScrollLockRef.current) return;
           vouchersScrollTopRef.current = (e.currentTarget as HTMLDivElement).scrollTop;
         }}
       >
@@ -172,6 +190,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
           <VoucherDenominationSelector
             selectedVouchers={selectedVouchers}
             onSelectionChange={setSelectedVouchers}
+            onPreInteract={captureVouchersScroll}
           />
         </div>
       </div>
@@ -214,7 +233,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const renderPaymentStep = () => (
     <>
       {/* Scrollable content using native scrolling */}
-      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
+      <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain px-4">
         <div className="space-y-4 pb-4">
           <Card className="p-4 bg-muted">
             <div className="space-y-2">
@@ -327,7 +346,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const renderConfirmStep = () => (
     <>
       {/* Scrollable content using native scrolling */}
-      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
+      <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain px-4">
         <div className="space-y-4 pb-4">
           <div className="flex justify-center pt-4">
             <div className="h-20 w-20 rounded-full bg-green-100 dark:bg-green-950 flex items-center justify-center">
