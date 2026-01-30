@@ -6,9 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { AdminContentItem } from "@/data/adminContentData";
-
 interface ContentPreviewSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -63,9 +61,10 @@ export function ContentPreviewSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-xl">
-        <SheetHeader className="pb-4">
-          <div className="flex items-center justify-between">
+      <SheetContent side="bottom" className="h-[92vh]">
+        {/* Fixed Header */}
+        <SheetHeader className="shrink-0 pb-3">
+          <div className="flex items-center justify-between pr-8">
             <SheetTitle className="flex items-center gap-2">
               <TypeIcon className="h-5 w-5 text-purple-600" />
               Content Preview
@@ -76,7 +75,8 @@ export function ContentPreviewSheet({
           </div>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(85vh-180px)] pr-4 touch-auto">
+        {/* Scrollable Body - Native scrolling for mobile */}
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-4">
           <div className="space-y-4">
             {/* Thumbnail/Media */}
             <div className="aspect-video rounded-lg bg-muted flex items-center justify-center overflow-hidden">
@@ -100,11 +100,11 @@ export function ContentPreviewSheet({
 
             {/* Author Info */}
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
+              <Avatar className="h-10 w-10 shrink-0">
                 <AvatarImage src={content.authorAvatar} />
                 <AvatarFallback>{content.authorName[0]}</AvatarFallback>
               </Avatar>
-              <div>
+              <div className="min-w-0">
                 <p className="font-medium text-sm">{content.authorName}</p>
                 <p className="text-xs text-muted-foreground">
                   {content.publishedAt 
@@ -134,23 +134,25 @@ export function ContentPreviewSheet({
                 <div className="space-y-3">
                   <h4 className="font-semibold text-sm">Event Details</h4>
                   {content.eventDate && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{format(content.eventDate, "EEEE, MMMM d, yyyy 'at' h:mm a")}</span>
+                    <div className="flex items-start gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <span className="break-words">{format(content.eventDate, "EEEE, MMMM d, yyyy 'at' h:mm a")}</span>
                     </div>
                   )}
                   {content.venue && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span>{content.venue}</span>
-                      {content.venueType && (
-                        <Badge variant="secondary" className="text-[10px] capitalize">{content.venueType}</Badge>
-                      )}
+                    <div className="flex items-start gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                        <span className="break-words">{content.venue}</span>
+                        {content.venueType && (
+                          <Badge variant="secondary" className="text-xs capitalize shrink-0">{content.venueType}</Badge>
+                        )}
+                      </div>
                     </div>
                   )}
                   {content.capacity && (
                     <div className="flex items-center gap-2 text-sm">
-                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <Users className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span>{content.rsvpCount || 0} / {content.capacity} attending</span>
                     </div>
                   )}
@@ -163,23 +165,23 @@ export function ContentPreviewSheet({
               <>
                 <Separator />
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
                     <h4 className="font-semibold text-sm">Full Content</h4>
                     {content.readTime && (
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="text-xs">
                         <Clock className="h-3 w-3 mr-1" />
                         {content.readTime} read
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
                     {content.content}
                   </p>
                 </div>
                 {content.tags && content.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1.5">
                     {content.tags.map(tag => (
-                      <Badge key={tag} variant="outline" className="text-[10px]">{tag}</Badge>
+                      <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
                     ))}
                   </div>
                 )}
@@ -192,14 +194,14 @@ export function ContentPreviewSheet({
                 <Separator />
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm">Media Info</h4>
-                  <div className="flex items-center gap-2">
-                    {MediaIcon && <MediaIcon className="h-4 w-4 text-muted-foreground" />}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {MediaIcon && <MediaIcon className="h-4 w-4 text-muted-foreground shrink-0" />}
                     <span className="text-sm capitalize">{content.mediaType}</span>
                     {content.duration && (
-                      <Badge variant="secondary" className="text-[10px]">{content.duration}</Badge>
+                      <Badge variant="secondary" className="text-xs">{content.duration}</Badge>
                     )}
                     {content.spotlight && (
-                      <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">Spotlight</Badge>
+                      <Badge className="bg-amber-500/10 text-amber-600 text-xs">Spotlight</Badge>
                     )}
                   </div>
                 </div>
@@ -210,29 +212,29 @@ export function ContentPreviewSheet({
             <Separator />
             <div>
               <h4 className="font-semibold text-sm mb-2">Engagement</h4>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <Eye className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-                  <p className="font-bold">{content.views.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground">Views</p>
+                  <p className="font-bold text-sm">{content.views.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Views</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <Heart className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-                  <p className="font-bold">{content.likes.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground">Likes</p>
+                  <p className="font-bold text-sm">{content.likes.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Likes</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <MessageSquare className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-                  <p className="font-bold">{content.comments.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground">Comments</p>
+                  <p className="font-bold text-sm">{content.comments.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Comments</p>
                 </div>
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-4 border-t mt-4">
+        {/* Fixed Footer Actions */}
+        <div className="shrink-0 flex gap-2 px-4 py-3 border-t bg-background">
           {content.status === "pending" && onApprove && onReject && (
             <>
               <Button 
