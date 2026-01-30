@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Gavel,
   AlertTriangle,
@@ -91,6 +91,7 @@ interface Officer {
 interface MemberImpeachmentDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialView?: "list" | "start";
 }
 
 // Mock data
@@ -178,10 +179,10 @@ const getVoteStatusLabel = (vote: MemberVoteStatus) => {
   }
 };
 
-export function MemberImpeachmentDrawer({ open, onOpenChange }: MemberImpeachmentDrawerProps) {
+export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "list" }: MemberImpeachmentDrawerProps) {
   const { toast } = useToast();
   
-  const [view, setView] = useState<"list" | "start" | "details">("list");
+  const [view, setView] = useState<"list" | "start" | "details">(initialView);
   const [step, setStep] = useState<"select" | "reason">("select");
   const [selectedOfficer, setSelectedOfficer] = useState<Officer | null>(null);
   const [impeachmentReason, setImpeachmentReason] = useState("");
@@ -189,6 +190,13 @@ export function MemberImpeachmentDrawer({ open, onOpenChange }: MemberImpeachmen
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingVote, setPendingVote] = useState<MemberVoteStatus | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Sync view with initialView when drawer opens
+  useEffect(() => {
+    if (open) {
+      setView(initialView);
+    }
+  }, [open, initialView]);
 
   // Active impeachments for members to vote on
   const activeImpeachments = mockActiveImpeachments.filter(
