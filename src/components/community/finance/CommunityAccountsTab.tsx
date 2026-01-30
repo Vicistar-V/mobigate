@@ -94,32 +94,32 @@ export const CommunityAccountsTab = () => {
       <div className="grid grid-cols-3 gap-2">
         <Button 
           variant={activeFilter === 'credit' ? 'default' : 'outline'}
-          className={`border-2 ${activeFilter === 'credit' ? 'bg-green-600 border-green-700' : 'border-green-600 text-green-700 bg-white'}`}
+          className={`border-2 h-auto py-3 ${activeFilter === 'credit' ? 'bg-green-600 border-green-700' : 'border-green-600 text-green-700 bg-white'}`}
           onClick={() => setActiveFilter('credit')}
         >
-          <div className="text-center">
-            <div className="font-bold text-xs sm:text-sm">All Credit</div>
-            <div className="text-[10px] sm:text-xs">All Income</div>
+          <div className="text-center space-y-0.5">
+            <div className="font-bold text-xs sm:text-sm leading-tight">All Credit</div>
+            <div className="text-xs opacity-80 leading-tight">All Income</div>
           </div>
         </Button>
         <Button 
           variant={activeFilter === 'debit' ? 'default' : 'outline'}
-          className={`border-2 ${activeFilter === 'debit' ? 'bg-red-600 border-red-700' : 'bg-red-50 border-red-600 text-red-700'}`}
+          className={`border-2 h-auto py-3 ${activeFilter === 'debit' ? 'bg-red-600 border-red-700' : 'bg-red-50 border-red-600 text-red-700'}`}
           onClick={() => setActiveFilter('debit')}
         >
-          <div className="text-center">
-            <div className="font-bold text-xs sm:text-sm">All Debit</div>
-            <div className="text-[10px] sm:text-xs">All Withdrawals</div>
+          <div className="text-center space-y-0.5">
+            <div className="font-bold text-xs sm:text-sm leading-tight">All Debit</div>
+            <div className="text-xs opacity-80 leading-tight">All Withdrawals</div>
           </div>
         </Button>
         <Button 
           variant={activeFilter === 'balance' ? 'default' : 'outline'}
-          className={`border-2 ${activeFilter === 'balance' ? 'bg-green-600 border-green-700' : 'border-green-600 text-green-700 bg-white'}`}
+          className={`border-2 h-auto py-3 ${activeFilter === 'balance' ? 'bg-green-600 border-green-700' : 'border-green-600 text-green-700 bg-white'}`}
           onClick={() => setActiveFilter('balance')}
         >
-          <div className="text-center">
-            <div className="font-bold text-xs sm:text-sm">Balance</div>
-            <div className="text-[10px] sm:text-xs">Available Balance</div>
+          <div className="text-center space-y-0.5">
+            <div className="font-bold text-xs sm:text-sm leading-tight">Balance</div>
+            <div className="text-xs opacity-80 leading-tight">Available Balance</div>
           </div>
         </Button>
       </div>
