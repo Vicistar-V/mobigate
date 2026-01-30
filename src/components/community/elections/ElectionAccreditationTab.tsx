@@ -14,6 +14,7 @@ import { UpcomingElectionsSection } from "./UpcomingElectionsSection";
 import { PreviousResultsSection } from "./PreviousResultsSection";
 import { UpcomingSchedulesSection } from "./UpcomingSchedulesSection";
 import { FinancialStatusDialog } from "@/components/community/finance/FinancialStatusDialog";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 import { toast } from "sonner";
 
 // Mock activities data
@@ -36,6 +37,7 @@ export const ElectionAccreditationTab = () => {
   const [showFinancialStatusDialog, setShowFinancialStatusDialog] = useState(false);
   const [debtsChecked, setDebtsChecked] = useState(false);
   const [receiptsChecked, setReceiptsChecked] = useState(false);
+  const [showReceiptsFormatSheet, setShowReceiptsFormatSheet] = useState(false);
   const [isAccredited, setIsAccredited] = useState(false);
   const [isAccreditationLoading, setIsAccreditationLoading] = useState(false);
   const [accreditationNumber, setAccreditationNumber] = useState<string | null>(null);
@@ -67,10 +69,15 @@ export const ElectionAccreditationTab = () => {
 
   const handleDownloadReceipts = () => {
     if (receiptsChecked) {
-      toast.success("Downloading receipts...");
+      setShowReceiptsFormatSheet(true);
     } else {
       toast.error("Please check the box to confirm receipt download.");
     }
+  };
+
+  const handleReceiptsFormatDownload = (selectedFormat: DownloadFormat) => {
+    toast.success(`Receipts downloaded as ${selectedFormat.toUpperCase()}`);
+    setShowReceiptsFormatSheet(false);
   };
 
   return (
@@ -328,6 +335,14 @@ export const ElectionAccreditationTab = () => {
       <FinancialStatusDialog
         open={showFinancialStatusDialog}
         onOpenChange={setShowFinancialStatusDialog}
+      />
+      <DownloadFormatSheet
+        open={showReceiptsFormatSheet}
+        onOpenChange={setShowReceiptsFormatSheet}
+        onDownload={handleReceiptsFormatDownload}
+        title="Download Receipts"
+        documentName="Financial Receipts"
+        availableFormats={["pdf", "jpeg", "png", "txt"]}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { format as formatDate } from "date-fns";
 import { 
   Award, 
   Calendar, 
@@ -20,6 +20,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 
 export interface CertificateOfReturnDisplayProps {
   open?: boolean;
@@ -37,8 +38,9 @@ export function CertificateOfReturnDisplay({
   const isMobile = useIsMobile();
   const certificateRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showFormatSheet, setShowFormatSheet] = useState(false);
 
-  const handleDownload = async () => {
+  const handleFormatDownload = async (selectedFormat: DownloadFormat) => {
     if (!certificateRef.current) return;
     
     setIsDownloading(true);
@@ -46,7 +48,7 @@ export function CertificateOfReturnDisplay({
     try {
       // Capture the certificate as an image
       const canvas = await html2canvas(certificateRef.current, {
-        scale: 3, // High resolution
+        scale: 3,
         backgroundColor: "#ffffff",
         useCORS: true,
         logging: false,
@@ -54,49 +56,46 @@ export function CertificateOfReturnDisplay({
         windowHeight: certificateRef.current.scrollHeight,
       });
       
-      // Create PDF
-      const imgData = canvas.toDataURL("image/png", 1.0);
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
+      const fileName = `Certificate-${certificate.certificateNumber.replace(/\//g, "_")}`;
       
-      // Calculate dimensions to fit A4
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
+      if (selectedFormat === "pdf") {
+        const imgData = canvas.toDataURL("image/png", 1.0);
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const padding = 15;
+        const availableWidth = pageWidth - (padding * 2);
+        const ratio = availableWidth / canvas.width;
+        const scaledHeight = canvas.height * ratio;
+        const yPosition = scaledHeight < (pageHeight - padding * 2) ? (pageHeight - scaledHeight) / 2 : padding;
+        pdf.addImage(imgData, "PNG", padding, yPosition, availableWidth, scaledHeight);
+        pdf.save(`${fileName}.pdf`);
+      } else if (selectedFormat === "jpeg") {
+        const link = document.createElement("a");
+        link.download = `${fileName}.jpg`;
+        link.href = canvas.toDataURL("image/jpeg", 0.95);
+        link.click();
+      } else if (selectedFormat === "png") {
+        const link = document.createElement("a");
+        link.download = `${fileName}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } else if (selectedFormat === "txt") {
+        const textContent = `CERTIFICATE OF RETURN\n${certificate.certificateNumber}\n\nThis is to certify that ${certificate.winnerName} has been duly elected to the office of ${certificate.officePosition} of ${certificate.communityName}.\n\nElection Date: ${formatDate(certificate.electionDate, "MMMM d, yyyy")}\nVotes Received: ${certificate.totalVotesReceived} (${certificate.votePercentage.toFixed(1)}%)\nTenure: ${formatDate(certificate.tenureStart, "yyyy")} - ${formatDate(certificate.tenureEnd, "yyyy")}\n\nVerification Code: ${certificate.verificationCode}\nIssued by: ${certificate.issuedBy}\nDate: ${formatDate(certificate.issuedDate, "MMMM d, yyyy")}`;
+        const blob = new Blob([textContent], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.download = `${fileName}.txt`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
       
-      // Scale to fit width with padding
-      const padding = 15;
-      const availableWidth = pageWidth - (padding * 2);
-      const ratio = availableWidth / imgWidth;
-      const scaledHeight = imgHeight * ratio;
-      
-      // Center vertically if smaller than page
-      const yPosition = scaledHeight < (pageHeight - padding * 2) 
-        ? (pageHeight - scaledHeight) / 2 
-        : padding;
-      
-      pdf.addImage(imgData, "PNG", padding, yPosition, availableWidth, scaledHeight);
-      
-      // Download PDF
-      pdf.save(`Certificate-${certificate.certificateNumber.replace(/\//g, "_")}.pdf`);
-      
-      toast({
-        title: "Certificate Downloaded",
-        description: "Your certificate has been saved as a PDF file.",
-      });
-      
+      toast({ title: "Certificate Downloaded", description: `Saved as ${selectedFormat.toUpperCase()} file.` });
+      setShowFormatSheet(false);
       onDownload?.();
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast({
-        title: "Download Failed",
-        description: "Unable to generate PDF. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Error generating download:", error);
+      toast({ title: "Download Failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setIsDownloading(false);
     }
@@ -150,7 +149,7 @@ export function CertificateOfReturnDisplay({
                 <Calendar className="h-4 w-4 text-blue-600" />
                 <div>
                   <p className="text-xs text-gray-500">Election Date</p>
-                  <p className="font-medium text-gray-900">{format(certificate.electionDate, "MMM d, yyyy")}</p>
+                  <p className="font-medium text-gray-900">{formatDate(certificate.electionDate, "MMM d, yyyy")}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -170,9 +169,9 @@ export function CertificateOfReturnDisplay({
                 Tenure of Office
               </p>
               <div className="flex justify-center items-center gap-2 text-sm font-medium text-gray-900">
-                <span>{format(certificate.tenureStart, "yyyy")}</span>
+                <span>{formatDate(certificate.tenureStart, "yyyy")}</span>
                 <span>—</span>
-                <span>{format(certificate.tenureEnd, "yyyy")}</span>
+                <span>{formatDate(certificate.tenureEnd, "yyyy")}</span>
                 <span className="ml-2 text-xs bg-white border border-blue-600/30 text-blue-600 px-2 py-0.5 rounded">
                   {certificate.tenureDurationYears} Years
                 </span>
@@ -198,7 +197,7 @@ export function CertificateOfReturnDisplay({
                 Issued by: {certificate.issuedBy}
               </p>
               <p className="text-xs text-gray-500">
-                Date: {format(certificate.issuedDate, "MMMM d, yyyy")}
+                Date: {formatDate(certificate.issuedDate, "MMMM d, yyyy")}
               </p>
               <p className="text-[10px] text-gray-400 italic">
                 This certificate serves as verified evidence of leadership for 
@@ -212,21 +211,32 @@ export function CertificateOfReturnDisplay({
       {/* Download Button - Outside printable area */}
       <Button 
         className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
-        onClick={handleDownload}
+        onClick={() => setShowFormatSheet(true)}
         disabled={isDownloading}
       >
         {isDownloading ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Generating PDF...
+            Downloading...
           </>
         ) : (
           <>
             <Download className="h-4 w-4 mr-2" />
-            Download Certificate (PDF)
+            Download Certificate
           </>
         )}
       </Button>
+
+      {/* Format Selection Sheet */}
+      <DownloadFormatSheet
+        open={showFormatSheet}
+        onOpenChange={setShowFormatSheet}
+        onDownload={handleFormatDownload}
+        title="Download Certificate"
+        documentName={`Certificate of Return - ${certificate.winnerName}`}
+        availableFormats={["pdf", "jpeg", "png", "txt"]}
+        isDownloading={isDownloading}
+      />
     </div>
   );
 

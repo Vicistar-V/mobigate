@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { CertificateOfReturn } from "@/types/certificateOfReturn";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 
 interface CertificateOfReturnPreviewProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function CertificateOfReturnPreview({
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const certificateRef = useRef<HTMLDivElement>(null);
+  const [showFormatSheet, setShowFormatSheet] = useState(false);
 
   const handleDownload = () => {
     // Generate professional text content for download
@@ -331,23 +333,45 @@ and all official documentation purposes.
   );
 
   const ActionButtons = () => (
-    <div className="flex gap-2 mt-4">
-      <Button 
-        className="flex-1 gap-2" 
-        onClick={handleDownload}
-      >
-        <Download className="h-4 w-4" />
-        Download
-      </Button>
-      <Button 
-        variant="outline" 
-        className="flex-1 gap-2"
-        onClick={handlePrint}
-      >
-        <Printer className="h-4 w-4" />
-        Print
-      </Button>
-    </div>
+    <>
+      <div className="flex gap-2 mt-4">
+        <Button 
+          className="flex-1 gap-2" 
+          onClick={() => setShowFormatSheet(true)}
+        >
+          <Download className="h-4 w-4" />
+          Download
+        </Button>
+        <Button 
+          variant="outline" 
+          className="flex-1 gap-2"
+          onClick={handlePrint}
+        >
+          <Printer className="h-4 w-4" />
+          Print
+        </Button>
+      </div>
+      
+      <DownloadFormatSheet
+        open={showFormatSheet}
+        onOpenChange={setShowFormatSheet}
+        onDownload={(selectedFormat) => {
+          // For now, use the existing handleDownload for txt, toast for others
+          if (selectedFormat === "txt") {
+            handleDownload();
+          } else {
+            toast({
+              title: "Download Started",
+              description: `Certificate saved as ${selectedFormat.toUpperCase()}`,
+            });
+          }
+          setShowFormatSheet(false);
+        }}
+        title="Download Certificate"
+        documentName={`Certificate of Return - ${certificate.winnerName}`}
+        availableFormats={["pdf", "jpeg", "png", "txt"]}
+      />
+    </>
   );
 
   if (isMobile) {
