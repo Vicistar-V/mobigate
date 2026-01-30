@@ -1,3 +1,4 @@
+import type React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,11 +9,14 @@ import { rechargeVouchers, RechargeVoucher, SelectedVoucher, calculateVoucherTot
 interface VoucherDenominationSelectorProps {
   selectedVouchers: SelectedVoucher[];
   onSelectionChange: (vouchers: SelectedVoucher[]) => void;
+  /** Used by the parent drawer to capture scrollTop before any click/focus side-effects happen. */
+  onPreInteract?: () => void;
 }
 
 export function VoucherDenominationSelector({
   selectedVouchers,
   onSelectionChange,
+  onPreInteract,
 }: VoucherDenominationSelectorProps) {
   const activeVouchers = rechargeVouchers.filter((v) => v.isActive);
 
@@ -25,21 +29,17 @@ export function VoucherDenominationSelector({
     return found?.quantity || 0;
   };
 
-  // NOTE: keep these handlers resilient on mobile: stop propagation so the parent
-  // scroll container doesn't "helpfully" jump/focus to the top.
-  const handleToggleVoucher = (voucher: RechargeVoucher, checked: boolean, event: React.SyntheticEvent) => {
-    // Prevent scroll jump by stopping propagation
-    event.stopPropagation();
-    
-    if (checked) {
-      onSelectionChange([...selectedVouchers, { voucher, quantity: 1 }]);
-    } else {
+  const toggleVoucher = (voucher: RechargeVoucher) => {
+    if (isVoucherSelected(voucher.id)) {
       onSelectionChange(selectedVouchers.filter((sv) => sv.voucher.id !== voucher.id));
+      return;
     }
+    onSelectionChange([...selectedVouchers, { voucher, quantity: 1 }]);
   };
 
   const handleQuantityChange = (voucherId: string, delta: number, event: React.SyntheticEvent) => {
     event.stopPropagation();
+    onPreInteract?.();
     // Prevent browser from shifting scroll when buttons receive focus
     // (common in mobile drawers).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,36 +96,45 @@ export function VoucherDenominationSelector({
                   ? "border-primary bg-primary/5 shadow-sm"
                   : "hover:border-muted-foreground/30"
               }`}
+              role="button"
+              tabIndex={0}
+              onPointerDown={() => onPreInteract?.()}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleVoucher(voucher);
+              }}
             >
               <div className="flex items-center gap-3">
                 <Checkbox
                   id={voucher.id}
                   checked={isSelected}
                   onCheckedChange={(checked) => {
-                    // Direct handler without event
+                    onPreInteract?.();
                     if (checked) {
                       onSelectionChange([...selectedVouchers, { voucher, quantity: 1 }]);
-                    } else {
-                      onSelectionChange(selectedVouchers.filter((sv) => sv.voucher.id !== voucher.id));
+                      return;
                     }
+                    onSelectionChange(selectedVouchers.filter((sv) => sv.voucher.id !== voucher.id));
                   }}
                   onPointerDown={(e) => {
                     // Prevent focus/scroll adjustments within the parent scroll container
                     e.stopPropagation();
-                    e.preventDefault();
+                    onPreInteract?.();
                   }}
                   onClick={(e) => e.stopPropagation()}
                   className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
 
-                <label
-                  htmlFor={voucher.id}
+                <div
                   className="flex-1 cursor-pointer"
                   onPointerDown={(e) => {
                     e.stopPropagation();
-                    e.preventDefault();
+                    onPreInteract?.();
                   }}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    // Card onClick handles the toggle.
+                    e.stopPropagation();
+                  }}
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm">
@@ -144,7 +153,7 @@ export function VoucherDenominationSelector({
                   <p className="text-xs text-muted-foreground mt-0.5">
                     ₦{voucher.ngnPrice.toLocaleString()} / (US${voucher.usdPrice})
                   </p>
-                </label>
+                </div>
 
                 {isSelected && (
                   <div className="flex items-center gap-1 animate-fade-in">
