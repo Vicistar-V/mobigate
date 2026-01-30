@@ -85,7 +85,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const handleConfirm = () => {
     toast({
       title: "Top Up Successful!",
-      description: `${totals.totalMobi.toLocaleString()} Mobi has been added to your wallet`,
+      description: `₦${totals.totalNgn.toLocaleString()} (M${totals.totalMobi.toLocaleString()}) has been added to your wallet`,
     });
     onOpenChange(false);
     setTimeout(() => {

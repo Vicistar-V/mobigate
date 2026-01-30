@@ -94,18 +94,36 @@ export function formatLocalAmount(amount: number, currencyCode: string): string 
 
 /**
  * Format both Mobi and local equivalent for display
+ * LOCAL CURRENCY PRIMARY - follows the Local-First Dual Currency Protocol
  */
 export function formatMobiWithLocal(
   mobiAmount: number, 
   localCurrency: string = "NGN"
-): { mobi: string; local: string; combined: string } {
+): { mobi: string; local: string; combined: string; localFirst: string } {
   const localAmount = convertFromMobi(mobiAmount, localCurrency);
   
   return {
     mobi: formatMobiAmount(mobiAmount),
     local: formatLocalAmount(localAmount.toAmount, localCurrency),
+    // Legacy Mobi-first format (deprecated)
     combined: `${formatMobiAmount(mobiAmount)} (≈ ${formatLocalAmount(localAmount.toAmount, localCurrency)})`,
+    // NEW: Local currency first format (recommended)
+    localFirst: `${formatLocalAmount(localAmount.toAmount, localCurrency)} (${formatMobiAmount(mobiAmount)})`,
   };
+}
+
+/**
+ * Format with LOCAL CURRENCY as PRIMARY, Mobi as secondary
+ * This is the recommended format per the Local-First Dual Currency Protocol
+ * Output: "₦15,000 (M15,000)"
+ */
+export function formatLocalFirst(
+  amount: number, 
+  localCurrency: string = "NGN"
+): string {
+  const localFormatted = formatLocalAmount(amount, localCurrency);
+  const mobiFormatted = formatMobiAmount(amount);
+  return `${localFormatted} (${mobiFormatted})`;
 }
 
 /**

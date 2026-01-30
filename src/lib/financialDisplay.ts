@@ -24,6 +24,7 @@ export function formatNumberFull(
 /**
  * Local-first dual currency display for NGN (₦) and Mobi (M).
  * Note: In this UI template NGN:Mobi is treated as 1:1 for display.
+ * PRIMARY: Local Currency (₦), SECONDARY: Mobi (M)
  */
 export function formatNgnMobi(amount: number, fractionDigits: number = 2): DualCurrencyDisplay {
   const abs = Math.abs(amount);

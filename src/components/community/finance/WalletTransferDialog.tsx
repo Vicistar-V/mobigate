@@ -193,7 +193,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               <Label htmlFor="amount">Transfer Amount</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  M
+                  ₦
                 </span>
                 <Input
                   id="amount"
