@@ -158,48 +158,54 @@ export const CommunityMeetingsTab = () => {
         <CardContent className="p-4">
           <h2 className="text-xl font-bold mb-4">Community Meetings & Activities</h2>
           
-          {/* Meeting Type Toggles */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Executive Meetings */}
-            <div className="space-y-2">
-              <Button
-                variant={selectedMeetingType === "executive" ? "default" : "outline"}
-                className="w-full justify-between"
-                onClick={() => setSelectedMeetingType("executive")}
+          {/* Meeting Type Toggles - Tab Style */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <Button
+              variant={selectedMeetingType === "executive" ? "default" : "outline"}
+              size="sm"
+              className="rounded-full px-4 text-sm"
+              onClick={() => setSelectedMeetingType("executive")}
+            >
+              Executive Meeting
+            </Button>
+            <Button
+              variant={selectedMeetingType === "general" ? "default" : "outline"}
+              size="sm"
+              className="rounded-full px-4 text-sm"
+              onClick={() => setSelectedMeetingType("general")}
+            >
+              General Meeting
+            </Button>
+          </div>
+
+          {/* Status Indicators Row */}
+          <div className="flex items-center gap-6">
+            {/* Executive Status */}
+            <div className="flex items-center gap-1.5">
+              <Badge 
+                variant="default" 
+                className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1"
               >
-                <span>Executive Meetings</span>
-                <MoreVertical className="w-4 h-4" />
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                Online
+              </Badge>
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <MoreVertical className="w-3.5 h-3.5" />
               </Button>
-              <div className="flex gap-2">
-                <Badge variant="default" className="bg-green-600">
-                  <span className="w-2 h-2 bg-white rounded-full mr-1" />
-                  Online
-                </Badge>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <MoreVertical className="w-3 h-3" />
-                </Button>
-              </div>
             </div>
 
-            {/* General Meetings */}
-            <div className="space-y-2">
-              <Button
-                variant={selectedMeetingType === "general" ? "default" : "outline"}
-                className="w-full justify-between"
-                onClick={() => setSelectedMeetingType("general")}
+            {/* General Status */}
+            <div className="flex items-center gap-1.5">
+              <Badge 
+                variant="secondary" 
+                className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full flex items-center gap-1"
               >
-                <span>General Meetings</span>
-                <MoreVertical className="w-4 h-4" />
+                <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full" />
+                Offline
+              </Badge>
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <MoreVertical className="w-3.5 h-3.5" />
               </Button>
-              <div className="flex gap-2">
-                <Badge variant="secondary" className="bg-muted">
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full mr-1" />
-                  Offline
-                </Badge>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <MoreVertical className="w-3 h-3" />
-                </Button>
-              </div>
             </div>
           </div>
         </CardContent>
