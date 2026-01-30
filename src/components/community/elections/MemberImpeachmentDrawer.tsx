@@ -17,9 +17,12 @@ import {
   ThumbsDown,
   Minus,
   Eye,
+  EyeOff,
   Calendar,
   Vote,
   Shield,
+  Settings,
+  Lock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,6 +51,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format, differenceInDays, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ImpeachmentPrivacySettings } from "./ImpeachmentPrivacySettings";
+import { 
+  mockImpeachmentPrivacySettings, 
+  ImpeachmentPrivacySetting,
+  getEffectivePrivacyValue 
+} from "@/types/impeachmentPrivacySettings";
 
 // Constants
 const IMPEACHMENT_VALIDITY_DAYS = 30;
@@ -191,6 +200,19 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
   const [pendingVote, setPendingVote] = useState<MemberVoteStatus | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showVotersList, setShowVotersList] = useState(false);
+  const [showPrivacySettings, setShowPrivacySettings] = useState(false);
+  const [privacySettings] = useState<ImpeachmentPrivacySetting[]>(mockImpeachmentPrivacySettings);
+
+  // Get effective privacy values
+  const getPrivacyValue = (key: string): 'visible' | 'hidden' => {
+    const setting = privacySettings.find(s => s.settingKey === key);
+    return setting ? getEffectivePrivacyValue(setting) : 'visible';
+  };
+
+  const isInitiatorVisible = getPrivacyValue('initiator_visibility') === 'visible';
+  const isVotersVisible = getPrivacyValue('voters_visibility') === 'visible';
+  const isDatesVisible = getPrivacyValue('dates_visibility') === 'visible';
+  const isStatusVisible = getPrivacyValue('status_visibility') === 'visible';
 
   // Sync view with initialView when drawer opens
   useEffect(() => {
@@ -257,14 +279,58 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
   // List View - Shows active impeachments + Start button
   const renderListView = () => (
     <div className="space-y-4">
-      {/* Start Impeachment Button */}
-      <Button
-        onClick={() => setView("start")}
-        className="w-full h-12 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold"
-      >
-        <Gavel className="h-5 w-5 mr-2" />
-        Start Impeachment Process
-      </Button>
+      {/* Action Buttons Row */}
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          onClick={() => setView("start")}
+          className="h-12 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold"
+        >
+          <Gavel className="h-4 w-4 mr-2" />
+          Start Process
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setShowPrivacySettings(true)}
+          className="h-12"
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          Privacy Settings
+        </Button>
+      </div>
+
+      {/* Privacy Settings Summary */}
+      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-blue-600" />
+              <span className="text-xs font-medium text-blue-800 dark:text-blue-300">Privacy Status</span>
+            </div>
+            <Badge variant="outline" className="text-xs">
+              {privacySettings.filter(s => s.memberVote === null).length} pending votes
+            </Badge>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {privacySettings.map((setting) => {
+              const isVisible = getEffectivePrivacyValue(setting) === 'visible';
+              return (
+                <div 
+                  key={setting.settingId}
+                  className={cn(
+                    "text-center p-1.5 rounded text-[10px]",
+                    isVisible 
+                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
+                      : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {isVisible ? <Eye className="h-3 w-3 mx-auto mb-0.5" /> : <EyeOff className="h-3 w-3 mx-auto mb-0.5" />}
+                  <p className="truncate">{setting.settingName.split('/')[0].split(' ')[0]}</p>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Info Banner */}
       <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
@@ -535,18 +601,32 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
                 <p className="font-semibold text-sm">{selectedImpeachment.officerName}</p>
                 <p className="text-sm text-muted-foreground">{selectedImpeachment.officerPosition}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge className="bg-blue-500 text-white text-xs">
-                    {getStatusLabel(selectedImpeachment.status)}
-                  </Badge>
-                  <div className={cn(
-                    "flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full",
-                    daysRemaining <= 3 ? "bg-red-100 text-red-700" :
-                    daysRemaining <= 7 ? "bg-amber-100 text-amber-700" :
-                    "bg-blue-100 text-blue-700"
-                  )}>
-                    <Timer className="h-3 w-3" />
-                    {daysRemaining}d left
-                  </div>
+                  {isStatusVisible ? (
+                    <Badge className="bg-blue-500 text-white text-xs">
+                      {getStatusLabel(selectedImpeachment.status)}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                      <Lock className="h-3 w-3 mr-1" />
+                      Status Hidden
+                    </Badge>
+                  )}
+                  {isDatesVisible ? (
+                    <div className={cn(
+                      "flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full",
+                      daysRemaining <= 3 ? "bg-red-100 text-red-700" :
+                      daysRemaining <= 7 ? "bg-amber-100 text-amber-700" :
+                      "bg-blue-100 text-blue-700"
+                    )}>
+                      <Timer className="h-3 w-3" />
+                      {daysRemaining}d left
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      <EyeOff className="h-3 w-3" />
+                      Timeline Hidden
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -608,26 +688,80 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
               {selectedImpeachment.reason}
             </p>
             <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              {/* Initiated by - respects privacy */}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5" />
                   Initiated by:
                 </span>
-                <span className="font-semibold">{selectedImpeachment.initiatorName}</span>
+                {isInitiatorVisible ? (
+                  <span className="font-semibold">{selectedImpeachment.initiatorName}</span>
+                ) : (
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    Hidden
+                  </span>
+                )}
               </div>
-              <div 
-                className="flex items-center justify-between text-sm cursor-pointer hover:bg-muted/50 -mx-3 px-3 py-1.5 rounded-lg transition-colors"
-                onClick={() => setShowVotersList(true)}
-              >
-                <span className="text-muted-foreground flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5" />
-                  Supported by:
-                </span>
-                <span className="font-semibold text-primary flex items-center gap-1">
-                  {selectedImpeachment.supportersCount}/{selectedImpeachment.totalEligibleVoters} Members
-                  <ChevronRight className="h-4 w-4" />
-                </span>
-              </div>
+              
+              {/* Supported by - respects privacy */}
+              {isVotersVisible ? (
+                <div 
+                  className="flex items-center justify-between text-sm cursor-pointer hover:bg-muted/50 -mx-3 px-3 py-1.5 rounded-lg transition-colors"
+                  onClick={() => setShowVotersList(true)}
+                >
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    Supported by:
+                  </span>
+                  <span className="font-semibold text-primary flex items-center gap-1">
+                    {selectedImpeachment.supportersCount}/{selectedImpeachment.totalEligibleVoters} Members
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    Voters:
+                  </span>
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    Protected by Privacy Settings
+                  </span>
+                </div>
+              )}
+
+              {/* Dates - respects privacy */}
+              {isDatesVisible ? (
+                <>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Initiated:
+                    </span>
+                    <span className="font-medium">{format(selectedImpeachment.initiatedAt, "MMM d, yyyy")}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <Timer className="h-3.5 w-3.5" />
+                      Expires:
+                    </span>
+                    <span className="font-medium">{format(selectedImpeachment.expiresAt, "MMM d, yyyy")}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" />
+                    Timeline:
+                  </span>
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    Hidden
+                  </span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -882,6 +1016,12 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Privacy Settings Drawer */}
+      <ImpeachmentPrivacySettings
+        open={showPrivacySettings}
+        onOpenChange={setShowPrivacySettings}
+      />
     </>
   );
 }
