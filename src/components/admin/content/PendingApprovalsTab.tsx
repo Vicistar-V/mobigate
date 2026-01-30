@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import { Search, Eye, Check, X, Newspaper, Calendar, BookOpen, MessageSquare, FileText, CheckSquare, Square, AlertCircle } from "lucide-react";
+import { Search, Eye, Check, X, Newspaper, Calendar, BookOpen, MessageSquare, FileText, AlertCircle, ChevronDown, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { AdminContentItem, ContentType } from "@/data/adminContentData";
 import { format } from "date-fns";
 
@@ -108,9 +113,24 @@ export function PendingApprovalsTab({
         </CardContent>
       </Card>
 
-      {/* Type Filters */}
-      <ScrollArea className="w-full" style={{ overflowX: 'auto' }}>
-        <div className="flex gap-2 pb-2">
+      {/* Type Filter Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            {typeFilter === "all" ? "All" : {
+              news: "News",
+              event: "Events", 
+              article: "Articles",
+              vibe: "Vibes"
+            }[typeFilter]}
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 ml-1">
+              {typeCounts[typeFilter]}
+            </Badge>
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="bg-card z-50 w-40">
           {(['all', 'news', 'event', 'article', 'vibe'] as const).map(type => {
             const displayLabel = {
               all: 'All',
@@ -119,20 +139,25 @@ export function PendingApprovalsTab({
               article: 'Articles',
               vibe: 'Vibes'
             }[type];
+            const TypeIcon = type === 'all' ? null : getTypeIcon(type);
+            const isActive = typeFilter === type;
+            
             return (
-              <Badge
+              <DropdownMenuItem
                 key={type}
-                variant={typeFilter === type ? "default" : "outline"}
-                className="cursor-pointer shrink-0 gap-1"
                 onClick={() => setTypeFilter(type)}
+                className={`flex items-center justify-between cursor-pointer ${isActive ? 'bg-primary text-primary-foreground' : ''}`}
               >
-                {displayLabel}
-                <span className="ml-1 text-[10px] opacity-70">({typeCounts[type]})</span>
-              </Badge>
+                <span className="flex items-center gap-2">
+                  {TypeIcon && <TypeIcon className="h-4 w-4" />}
+                  {displayLabel}
+                </span>
+                <span className="text-[10px] opacity-70">({typeCounts[type]})</span>
+              </DropdownMenuItem>
             );
           })}
-        </div>
-      </ScrollArea>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Search */}
       <div className="relative">
