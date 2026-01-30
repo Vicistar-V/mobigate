@@ -97,7 +97,7 @@ export const mockEventsData: EventItem[] = [
     title: "Virtual Town Hall Meeting",
     description: "Monthly community discussion addressing local issues, development projects, and member concerns. Join from anywhere!",
     eventType: "meetup",
-    venue: "Zoom Platform",
+    venue: "Mobi Meeting",
     venueType: "virtual",
     audience: "members-only",
     sponsorship: "free",

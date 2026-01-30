@@ -200,7 +200,7 @@ export const mockAdminEvents: AdminContentItem[] = [
     submittedAt: new Date("2025-01-17"),
     eventDate: new Date("2025-02-08T19:00:00"),
     eventEndDate: new Date("2025-02-08T21:00:00"),
-    venue: "Zoom Platform",
+    venue: "Mobi Meeting",
     venueType: "virtual",
     rsvpCount: 0,
     capacity: 500,
