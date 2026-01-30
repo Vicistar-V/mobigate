@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
+import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
@@ -278,6 +279,9 @@ export default function MobigateAdminDashboard() {
 
                 {/* Nomination Fee Settings */}
                 <NominationFeeSettingsSection />
+
+                {/* Campaign Fee Distribution Settings */}
+                <CampaignFeeDistributionSettings />
               </div>
             </ScrollArea>
           </TabsContent>

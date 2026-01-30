@@ -11,7 +11,7 @@ import { AdminAccreditationTab } from "@/components/admin/election/AdminAccredit
 import { AdminClearancesTab } from "@/components/admin/election/AdminClearancesTab";
 import { AdminWinnersAnnouncementTab } from "@/components/admin/election/AdminWinnersAnnouncementTab";
 import { AdminImpeachmentTab } from "@/components/admin/election/AdminImpeachmentTab";
-import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
+import { ElectionSettingsSection } from "@/components/admin/election/ElectionSettingsSection";
 import { DeclareElectionDrawer } from "@/components/admin/election/DeclareElectionDrawer";
 
 export default function ElectionManagementPage() {
@@ -123,13 +123,7 @@ export default function ElectionManagementPage() {
             <AdminImpeachmentTab />
           </TabsContent>
           <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Campaign Settings
-              </h2>
-              <CampaignFeeDistributionSettings />
-            </div>
+            <ElectionSettingsSection />
           </TabsContent>
         </div>
       </Tabs>
