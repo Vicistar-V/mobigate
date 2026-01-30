@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar as CalendarIcon, X, Globe, Users, UserCircle, Store, UsersRound, Wallet, MessageSquare, Receipt, Building2, Coins, ExternalLink } from "lucide-react";
+import { Plus, Eye, Pause, Play, StopCircle, Edit, Trash2, Search, Calendar as CalendarIcon, X, Globe, Users, UserCircle, Store, UsersRound, MessageSquare, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,11 +10,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { mockAdminCampaigns, AdminCampaign } from "@/data/adminElectionData";
 import { mockEnhancedCampaigns, getCampaignStats } from "@/data/campaignSystemData";
-import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
 import { CampaignAudience } from "@/types/campaignSystem";
 import { useToast } from "@/hooks/use-toast";
 import { CampaignFormDialog } from "./CampaignFormDialog";
-import { CampaignFeeDetailSheet } from "./CampaignFeeDetailSheet";
+
 import { AdminCampaignPreviewSheet } from "./AdminCampaignPreviewSheet";
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -67,18 +66,9 @@ export function AdminCampaignsTab() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
-  // Fee Detail Sheet state
-  const [feeDetailOpen, setFeeDetailOpen] = useState(false);
-  const [feeDetailType, setFeeDetailType] = useState<"total" | "community" | "mobigate">("total");
-  
   // Preview Sheet state
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewCampaign, setPreviewCampaign] = useState<AdminCampaign | null>(null);
-
-  const openFeeDetail = (type: "total" | "community" | "mobigate") => {
-    setFeeDetailType(type);
-    setFeeDetailOpen(true);
-  };
 
   const handlePreview = (campaign: AdminCampaign) => {
     setPreviewCampaign(campaign);
@@ -161,50 +151,6 @@ export function AdminCampaignsTab() {
         <StatCard value={stats.paused} label="Paused" color="bg-amber-500/10" />
         <StatCard value={stats.ended} label="Ended" color="bg-red-500/10" />
       </div>
-
-      {/* Campaign Fee Summary - Clickable Cards */}
-      <Card className="bg-muted/30 border">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Receipt className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm">Campaign Fee Summary</h3>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {/* Total Collected */}
-            <button
-              onClick={() => openFeeDetail("total")}
-              className="flex flex-col items-center p-3 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 transition-colors cursor-pointer text-center"
-            >
-              <span className="text-[10px] text-muted-foreground mb-1">Total Collected</span>
-              <span className="text-base sm:text-lg font-bold text-orange-500">
-                {formatMobiAmount(campaignStats.totalFees)}
-              </span>
-            </button>
-            
-            {/* Community Share */}
-            <button
-              onClick={() => openFeeDetail("community")}
-              className="flex flex-col items-center p-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 transition-colors cursor-pointer text-center"
-            >
-              <span className="text-[10px] text-muted-foreground mb-1">Community Share</span>
-              <span className="text-base sm:text-lg font-bold text-green-600">
-                {formatMobiAmount(campaignStats.totalCommunityShare)}
-              </span>
-            </button>
-            
-            {/* Mobigate Share */}
-            <button
-              onClick={() => openFeeDetail("mobigate")}
-              className="flex flex-col items-center p-3 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 transition-colors cursor-pointer text-center"
-            >
-              <span className="text-[10px] text-muted-foreground mb-1">Mobigate Share</span>
-              <span className="text-base sm:text-lg font-bold text-blue-500">
-                {formatMobiAmount(campaignStats.totalMobigateShare)}
-              </span>
-            </button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Action Bar */}
       <div className="flex gap-2">
@@ -494,11 +440,6 @@ export function AdminCampaignsTab() {
         campaign={editingCampaign}
       />
 
-      <CampaignFeeDetailSheet
-        open={feeDetailOpen}
-        onOpenChange={setFeeDetailOpen}
-        viewType={feeDetailType}
-      />
 
       <AdminCampaignPreviewSheet
         open={previewOpen}
