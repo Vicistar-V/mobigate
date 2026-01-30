@@ -94,6 +94,7 @@ export function CommunityMainMenu({
   const [showDeclarationOfInterest, setShowDeclarationOfInterest] = useState(false);
   const [showCandidateDashboard, setShowCandidateDashboard] = useState(false);
   const [showImpeachment, setShowImpeachment] = useState(false);
+  const [impeachmentMode, setImpeachmentMode] = useState<"start" | "view">("view");
 
   const pendingSettingsCount = getPendingProposalsCount();
 
@@ -698,17 +699,69 @@ export function CommunityMainMenu({
                 >
                   Accredited Voters
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-4 h-9 transition-colors duration-200 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => {
-                    setShowImpeachment(true);
-                    setOpen(false);
-                  }}
-                >
-                  <Gavel className="h-4 w-4 mr-2" />
-                  Impeachment
-                </Button>
+                {/* Impeachment Sub-Accordion */}
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="impeachment" className="border-none">
+                    <AccordionTrigger className="py-2 pl-4 pr-2 text-sm text-red-600 hover:text-red-700 hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <Gavel className="h-4 w-4" />
+                        Impeachment
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pl-6 space-y-1 pb-2">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start h-9 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => {
+                          setImpeachmentMode("start");
+                          setShowImpeachment(true);
+                          setOpen(false);
+                        }}
+                      >
+                        <Gavel className="h-4 w-4 mr-2" />
+                        Start Impeachment Process
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start h-9 text-sm"
+                        onClick={() => {
+                          setImpeachmentMode("view");
+                          setShowImpeachment(true);
+                          setOpen(false);
+                        }}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className="flex items-center">
+                            <Gavel className="h-4 w-4 mr-2 text-muted-foreground" />
+                            View Impeachment Processes
+                          </span>
+                          <Badge variant="secondary" className="text-xs ml-2">
+                            4
+                          </Badge>
+                        </div>
+                      </Button>
+                      {/* Stats Preview */}
+                      <div className="grid grid-cols-4 gap-1 mt-2 px-1">
+                        <div className="text-center p-1.5 bg-blue-50 rounded">
+                          <p className="text-xs font-bold text-blue-600">4</p>
+                          <p className="text-[10px] text-muted-foreground">Total</p>
+                        </div>
+                        <div className="text-center p-1.5 bg-amber-50 rounded">
+                          <p className="text-xs font-bold text-amber-600">2</p>
+                          <p className="text-[10px] text-muted-foreground">Active</p>
+                        </div>
+                        <div className="text-center p-1.5 bg-red-50 rounded">
+                          <p className="text-xs font-bold text-red-600">1</p>
+                          <p className="text-[10px] text-muted-foreground">Impeached</p>
+                        </div>
+                        <div className="text-center p-1.5 bg-orange-50 rounded">
+                          <p className="text-xs font-bold text-orange-600">1</p>
+                          <p className="text-[10px] text-muted-foreground">Expired</p>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
                 {(isAdmin || isOwner) && (
                   <Button
                     variant="ghost"
@@ -1226,6 +1279,7 @@ export function CommunityMainMenu({
       <MemberImpeachmentDrawer
         open={showImpeachment}
         onOpenChange={setShowImpeachment}
+        initialView={impeachmentMode === "start" ? "start" : "list"}
       />
     </>
   );
