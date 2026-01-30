@@ -61,23 +61,23 @@ export function ContentPreviewSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[92vh]">
+      <SheetContent side="bottom" className="h-[92vh] flex flex-col p-0">
         {/* Fixed Header */}
-        <SheetHeader className="shrink-0 pb-3">
-          <div className="flex items-center justify-between pr-8">
-            <SheetTitle className="flex items-center gap-2">
+        <div className="shrink-0 px-4 pt-4 pb-3 border-b">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <TypeIcon className="h-5 w-5 text-purple-600" />
-              Content Preview
-            </SheetTitle>
+              <span className="font-semibold text-lg">Content Preview</span>
+            </div>
             <Badge className={`${getStatusColor(content.status)}`}>
               {content.status}
             </Badge>
           </div>
-        </SheetHeader>
+        </div>
 
         {/* Scrollable Body - Native scrolling for mobile */}
-        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-4">
-          <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+          <div className="px-4 py-4 space-y-4">
             {/* Thumbnail/Media */}
             <div className="aspect-video rounded-lg bg-muted flex items-center justify-center overflow-hidden">
               {content.thumbnail ? (
@@ -92,7 +92,7 @@ export function ContentPreviewSheet({
 
             {/* Title & Category */}
             <div>
-              <h2 className="text-xl font-bold">{content.title}</h2>
+              <h2 className="text-xl font-bold break-words">{content.title}</h2>
               {content.category && (
                 <Badge variant="outline" className="mt-2 capitalize">{content.category}</Badge>
               )}
@@ -104,8 +104,8 @@ export function ContentPreviewSheet({
                 <AvatarImage src={content.authorAvatar} />
                 <AvatarFallback>{content.authorName[0]}</AvatarFallback>
               </Avatar>
-              <div className="min-w-0">
-                <p className="font-medium text-sm">{content.authorName}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm truncate">{content.authorName}</p>
                 <p className="text-xs text-muted-foreground">
                   {content.publishedAt 
                     ? `Published ${format(content.publishedAt, "MMM d, yyyy")}`
@@ -122,7 +122,7 @@ export function ContentPreviewSheet({
             {/* Description */}
             <div>
               <h4 className="font-semibold text-sm mb-2">Description</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
                 {content.description || "No description provided."}
               </p>
             </div>
@@ -136,16 +136,16 @@ export function ContentPreviewSheet({
                   {content.eventDate && (
                     <div className="flex items-start gap-2 text-sm">
                       <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <span className="break-words">{format(content.eventDate, "EEEE, MMMM d, yyyy 'at' h:mm a")}</span>
+                      <span className="break-words flex-1">{format(content.eventDate, "EEEE, MMMM d, yyyy 'at' h:mm a")}</span>
                     </div>
                   )}
                   {content.venue && (
                     <div className="flex items-start gap-2 text-sm">
                       <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                        <span className="break-words">{content.venue}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="break-words block">{content.venue}</span>
                         {content.venueType && (
-                          <Badge variant="secondary" className="text-xs capitalize shrink-0">{content.venueType}</Badge>
+                          <Badge variant="secondary" className="text-xs capitalize mt-1">{content.venueType}</Badge>
                         )}
                       </div>
                     </div>
@@ -210,7 +210,7 @@ export function ContentPreviewSheet({
 
             {/* Engagement Stats */}
             <Separator />
-            <div>
+            <div className="pb-4">
               <h4 className="font-semibold text-sm mb-2">Engagement</h4>
               <div className="grid grid-cols-3 gap-2">
                 <div className="text-center p-3 rounded-lg bg-muted/50">
