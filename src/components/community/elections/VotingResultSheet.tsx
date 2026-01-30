@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +10,9 @@ import {
 } from "@/components/ui/select";
 import { Download, X } from "lucide-react";
 import { ElectionOffice, VoteRecord } from "@/data/electionData";
-import { useState } from "react";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
+import { useToast } from "@/hooks/use-toast";
 
 interface VotingResultSheetProps {
   office: ElectionOffice;
@@ -25,7 +27,47 @@ export const VotingResultSheet = ({
   onClose,
   onDownload,
 }: VotingResultSheetProps) => {
+  const { toast } = useToast();
   const [sortFilter, setSortFilter] = useState("all");
+  const [showFormatSheet, setShowFormatSheet] = useState(false);
+
+  const handleFormatDownload = (selectedFormat: DownloadFormat) => {
+    // Generate content based on format
+    const fileName = `VotingResults-${office.shortCode}`;
+    
+    if (selectedFormat === "csv") {
+      const headers = ["Voter Name", "Registration", ...office.candidates.map(c => c.name)];
+      const rows = voteRecords.map(record => [
+        record.voterName,
+        record.voterRegistration,
+        ...office.candidates.map(c => {
+          const vote = record.votes.find(v => v.candidateId === c.id);
+          return vote?.vote || 0;
+        })
+      ]);
+      const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.download = `${fileName}.csv`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } else if (selectedFormat === "txt") {
+      const textContent = `Voting Results for ${office.name}\n${"=".repeat(40)}\nTotal Accredited Voters: ${office.totalAccreditedVoters}\n\nCandidates:\n${office.candidates.map(c => `- ${c.name}: ${c.votes} votes`).join("\n")}`;
+      const blob = new Blob([textContent], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.download = `${fileName}.txt`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } else {
+      toast({ title: "Download Started", description: `Results will be saved as ${selectedFormat.toUpperCase()}` });
+    }
+    
+    toast({ title: "Download Complete", description: `Saved as ${selectedFormat.toUpperCase()} file.` });
+    setShowFormatSheet(false);
+    onDownload?.();
+  };
 
   const getCandidateColors = (index: number) => {
     const colors = [
@@ -167,7 +209,7 @@ export const VotingResultSheet = ({
 
         {/* Action Buttons */}
         <div className="flex gap-2 justify-end pt-4 border-t">
-          <Button variant="outline" size="sm" onClick={onDownload}>
+          <Button variant="outline" size="sm" onClick={() => setShowFormatSheet(true)}>
             <Download className="w-4 h-4 mr-2" />
             Download Results
           </Button>
@@ -176,6 +218,16 @@ export const VotingResultSheet = ({
             Close
           </Button>
         </div>
+
+        {/* Format Selection Sheet */}
+        <DownloadFormatSheet
+          open={showFormatSheet}
+          onOpenChange={setShowFormatSheet}
+          onDownload={handleFormatDownload}
+          title="Download Results"
+          documentName={`Voting Results - ${office.name}`}
+          availableFormats={["pdf", "csv", "txt"]}
+        />
       </div>
     </Card>
   );

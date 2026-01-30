@@ -49,6 +49,7 @@ import { format, formatDistanceToNow, differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 
 interface MinutesDownloadDialogProps {
   open: boolean;
@@ -65,6 +66,8 @@ export const MinutesDownloadDialog = ({
   const isMobile = useIsMobile();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showFormatSheet, setShowFormatSheet] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<DownloadFormat | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadComplete, setDownloadComplete] = useState(false);
 
@@ -291,7 +294,7 @@ export const MinutesDownloadDialog = ({
             walletBalance < minutes.downloadFee ||
             isDownloading
           }
-          onClick={() => setShowConfirmation(true)}
+          onClick={() => setShowFormatSheet(true)}
         >
           <Download className="h-4 w-4" />
           {userDownload ? "Download Again" : `Download Minutes (${formatMobiAmount(minutes.downloadFee)})`}
@@ -326,6 +329,20 @@ export const MinutesDownloadDialog = ({
           </DrawerContent>
         </Drawer>
 
+        {/* Format Selection Sheet */}
+        <DownloadFormatSheet
+          open={showFormatSheet}
+          onOpenChange={setShowFormatSheet}
+          onDownload={(format) => {
+            setSelectedFormat(format);
+            setShowFormatSheet(false);
+            setShowConfirmation(true);
+          }}
+          title="Select Download Format"
+          documentName={minutes.meetingName}
+          availableFormats={["pdf", "txt", "docx"]}
+        />
+
         <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -333,6 +350,7 @@ export const MinutesDownloadDialog = ({
               <AlertDialogDescription>
                 {formatMobiAmount(minutes.downloadFee)} (≈ {formatLocalAmount(minutes.downloadFee, "NGN")}) will be deducted from your wallet.
                 {canMarkAttendance && " Your attendance will be marked for this meeting."}
+                {selectedFormat && <span className="block mt-2 font-medium">Format: {selectedFormat.toUpperCase()}</span>}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -360,6 +378,20 @@ export const MinutesDownloadDialog = ({
         </DialogContent>
       </Dialog>
 
+      {/* Format Selection Sheet */}
+      <DownloadFormatSheet
+        open={showFormatSheet}
+        onOpenChange={setShowFormatSheet}
+        onDownload={(format) => {
+          setSelectedFormat(format);
+          setShowFormatSheet(false);
+          setShowConfirmation(true);
+        }}
+        title="Select Download Format"
+        documentName={minutes.meetingName}
+        availableFormats={["pdf", "txt", "docx"]}
+      />
+
       <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -367,6 +399,7 @@ export const MinutesDownloadDialog = ({
             <AlertDialogDescription>
               {formatMobiAmount(minutes.downloadFee)} (≈ {formatLocalAmount(minutes.downloadFee, "NGN")}) will be deducted from your wallet.
               {canMarkAttendance && " Your attendance will be marked for this meeting."}
+              {selectedFormat && <span className="block mt-2 font-medium">Format: {selectedFormat.toUpperCase()}</span>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

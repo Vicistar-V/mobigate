@@ -22,6 +22,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { CheckIndebtednessSheet } from "../elections/CheckIndebtednessSheet";
 import { mockTransactions, mockAccountBalance, mockMemberFinancialRecord } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 import { toast } from "sonner";
 
 export const CommunityAccountsTab = () => {
@@ -29,6 +30,7 @@ export const CommunityAccountsTab = () => {
   const [isTableCollapsed, setIsTableCollapsed] = useState(false);
   const [sortBy, setSortBy] = useState('all');
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
+  const [showReceiptsFormatSheet, setShowReceiptsFormatSheet] = useState(false);
   const [debtsChecked, setDebtsChecked] = useState(false);
   const [receiptsChecked, setReceiptsChecked] = useState(false);
 
@@ -48,10 +50,15 @@ export const CommunityAccountsTab = () => {
 
   const handleDownloadReceipts = () => {
     if (receiptsChecked) {
-      toast.success("Downloading receipts...");
+      setShowReceiptsFormatSheet(true);
     } else {
       toast.error("Please check the box to confirm receipt download.");
     }
+  };
+
+  const handleReceiptsFormatDownload = (selectedFormat: DownloadFormat) => {
+    toast.success(`Receipts downloaded as ${selectedFormat.toUpperCase()}`);
+    setShowReceiptsFormatSheet(false);
   };
 
   const getBalanceInfo = () => {
@@ -240,6 +247,16 @@ export const CommunityAccountsTab = () => {
       <CheckIndebtednessSheet 
         open={showIndebtednessSheet} 
         onOpenChange={setShowIndebtednessSheet} 
+      />
+      
+      {/* Download Format Sheet */}
+      <DownloadFormatSheet
+        open={showReceiptsFormatSheet}
+        onOpenChange={setShowReceiptsFormatSheet}
+        onDownload={handleReceiptsFormatDownload}
+        title="Download Receipts"
+        documentName="Financial Receipts"
+        availableFormats={["pdf", "jpeg", "png", "txt"]}
       />
     </div>
   );

@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { mockAuditReports } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 
 interface FinancialAuditDialogProps {
   open: boolean;
@@ -24,12 +25,23 @@ export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialo
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [reports] = useState(mockAuditReports);
+  const [showFormatSheet, setShowFormatSheet] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<{ id: string; period: string } | null>(null);
 
-  const handleDownloadReport = (reportId: string, period: string) => {
+  const handleDownloadClick = (reportId: string, period: string) => {
+    setSelectedReport({ id: reportId, period });
+    setShowFormatSheet(true);
+  };
+
+  const handleFormatDownload = (selectedFormat: DownloadFormat) => {
+    if (!selectedReport) return;
+    
     toast({
       title: "Downloading Report",
-      description: `${period} audit report will be downloaded`,
+      description: `${selectedReport.period} audit report saved as ${selectedFormat.toUpperCase()}`,
     });
+    setShowFormatSheet(false);
+    setSelectedReport(null);
   };
 
   const getStatusColor = (status: string) => {
@@ -122,7 +134,7 @@ export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialo
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
                   <span>Generated: {report.generatedDate.toLocaleDateString()}</span>
                   <Button
-                    onClick={() => handleDownloadReport(report.id, report.period)}
+                    onClick={() => handleDownloadClick(report.id, report.period)}
                     size="sm"
                     variant="outline"
                   >
@@ -156,40 +168,62 @@ export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialo
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh]">
-          <DrawerHeader className="border-b">
-            <DrawerTitle>Financial Audit Reports</DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
-          </ScrollArea>
-        </DrawerContent>
-      </Drawer>
+      <>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="max-h-[92vh]">
+            <DrawerHeader className="border-b">
+              <DrawerTitle>Financial Audit Reports</DrawerTitle>
+            </DrawerHeader>
+            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+              <Content />
+            </ScrollArea>
+          </DrawerContent>
+        </Drawer>
+
+        <DownloadFormatSheet
+          open={showFormatSheet}
+          onOpenChange={setShowFormatSheet}
+          onDownload={handleFormatDownload}
+          title="Download Report"
+          documentName={selectedReport ? `${selectedReport.period} Audit Report` : undefined}
+          availableFormats={["pdf", "csv", "txt", "docx"]}
+        />
+      </>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10 border-b pb-4">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold">Financial Audit Reports</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="p-4 sm:p-6 pb-0 sticky top-0 bg-background z-10 border-b pb-4">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-bold">Financial Audit Reports</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
 
-        <ScrollArea className="flex-1 p-4 sm:p-6">
-          <Content />
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+          <ScrollArea className="flex-1 p-4 sm:p-6">
+            <Content />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      <DownloadFormatSheet
+        open={showFormatSheet}
+        onOpenChange={setShowFormatSheet}
+        onDownload={handleFormatDownload}
+        title="Download Report"
+        documentName={selectedReport ? `${selectedReport.period} Audit Report` : undefined}
+        availableFormats={["pdf", "csv", "txt", "docx"]}
+      />
+    </>
   );
 }
