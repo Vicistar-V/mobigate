@@ -61,7 +61,7 @@ export function MerchantSelectionStep({
     return (
       <>
         {/* Scrollable content using native scrolling */}
-        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
+        <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain px-4">
           <div className="space-y-4 pb-4">
             {/* Total Amount Card */}
             <Card className="p-3 bg-muted/50">
@@ -161,7 +161,7 @@ export function MerchantSelectionStep({
   return (
     <>
       {/* Scrollable content using native scrolling */}
-      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
+      <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain px-4">
         <div className="space-y-4 pb-4">
           {/* Country Header */}
           <Card className="p-3 bg-muted/50">

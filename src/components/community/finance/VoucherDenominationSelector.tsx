@@ -25,7 +25,9 @@ export function VoucherDenominationSelector({
     return found?.quantity || 0;
   };
 
-  const handleToggleVoucher = (voucher: RechargeVoucher, checked: boolean, event: React.MouseEvent) => {
+  // NOTE: keep these handlers resilient on mobile: stop propagation so the parent
+  // scroll container doesn't "helpfully" jump/focus to the top.
+  const handleToggleVoucher = (voucher: RechargeVoucher, checked: boolean, event: React.SyntheticEvent) => {
     // Prevent scroll jump by stopping propagation
     event.stopPropagation();
     
@@ -36,9 +38,12 @@ export function VoucherDenominationSelector({
     }
   };
 
-  const handleQuantityChange = (voucherId: string, delta: number, event: React.MouseEvent) => {
+  const handleQuantityChange = (voucherId: string, delta: number, event: React.SyntheticEvent) => {
     event.stopPropagation();
-    event.preventDefault();
+    // Prevent browser from shifting scroll when buttons receive focus
+    // (common in mobile drawers).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (event as any).preventDefault?.();
     
     onSelectionChange(
       selectedVouchers.map((sv) => {
@@ -104,6 +109,11 @@ export function VoucherDenominationSelector({
                       onSelectionChange(selectedVouchers.filter((sv) => sv.voucher.id !== voucher.id));
                     }
                   }}
+                  onPointerDown={(e) => {
+                    // Prevent focus/scroll adjustments within the parent scroll container
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
                   onClick={(e) => e.stopPropagation()}
                   className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
@@ -111,6 +121,10 @@ export function VoucherDenominationSelector({
                 <label
                   htmlFor={voucher.id}
                   className="flex-1 cursor-pointer"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center gap-2">
@@ -137,7 +151,7 @@ export function VoucherDenominationSelector({
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-7 w-7 touch-manipulation"
                       onClick={(e) => handleQuantityChange(voucher.id, -1, e)}
                       disabled={quantity <= 1}
                     >
@@ -149,7 +163,7 @@ export function VoucherDenominationSelector({
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-7 w-7 touch-manipulation"
                       onClick={(e) => handleQuantityChange(voucher.id, 1, e)}
                     >
                       <Plus className="h-3 w-3" />
