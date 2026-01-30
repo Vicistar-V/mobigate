@@ -10,7 +10,7 @@ import {
   Bell,
   TrendingUp 
 } from "lucide-react";
-import { MobiCompactDisplay } from "@/components/common/MobiCurrencyDisplay";
+import { formatLocalAmount, formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 import { format, differenceInDays } from "date-fns";
 
 interface LevyProgressCardProps {
@@ -79,7 +79,12 @@ export function LevyProgressCard({
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">Unit Price</p>
-            <MobiCompactDisplay amount={unitPrice} className="text-primary" />
+            <div className="text-primary font-semibold">
+              {formatLocalAmount(unitPrice, "NGN")}
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              ≈ {formatMobiAmount(unitPrice)}
+            </p>
           </div>
         </div>
 
@@ -120,11 +125,12 @@ export function LevyProgressCard({
               <Users className="h-4 w-4 text-muted-foreground" />
               <span>{paidCount}/{totalMembers} members paid</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              <MobiCompactDisplay amount={amountCollected} /> 
+            <div className="flex items-center gap-2 text-sm flex-wrap">
+              <TrendingUp className="h-4 w-4 text-green-600 shrink-0" />
+              <span className="font-semibold">{formatLocalAmount(amountCollected, "NGN")}</span>
+              <span className="text-muted-foreground text-xs">({formatMobiAmount(amountCollected)})</span>
               <span className="text-muted-foreground">of</span>
-              <MobiCompactDisplay amount={targetAmount} />
+              <span className="font-semibold">{formatLocalAmount(targetAmount, "NGN")}</span>
             </div>
             <div className={`flex items-center gap-2 text-sm ${getDeadlineColor()}`}>
               <Calendar className="h-4 w-4" />

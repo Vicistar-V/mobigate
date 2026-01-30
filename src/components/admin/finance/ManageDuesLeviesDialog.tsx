@@ -63,8 +63,9 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip } from "@/components/common/MobiExplainerTooltip";
+import { DualCurrencyDisplay, formatDualCurrency } from "@/components/common/DualCurrencyDisplay";
 
 interface ManageDuesLeviesDialogProps {
   open: boolean;
@@ -197,10 +198,10 @@ export const ManageDuesLeviesDialog = ({
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {getObligationTypeLabel(obligation.type)} • {formatMobiAmount(obligation.amount)}
+                      {getObligationTypeLabel(obligation.type)} • {formatLocalAmount(obligation.amount, "NGN")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ≈ {formatLocalAmount(obligation.amount, "NGN")}
+                      ≈ {formatMobiAmount(obligation.amount)}
                     </p>
                   </div>
                   <Wallet className="h-6 w-6 text-muted-foreground flex-shrink-0" />
@@ -229,12 +230,12 @@ export const ManageDuesLeviesDialog = ({
                     </span>
                     <div className="text-right">
                       <span className="font-medium">
-                        {formatMobiAmount(obligation.totalCollected)} / {formatMobiAmount(obligation.totalExpected)}
+                        {formatLocalAmount(obligation.totalCollected, "NGN")} / {formatLocalAmount(obligation.totalExpected, "NGN")}
                       </span>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground text-right">
-                    ≈ {formatLocalAmount(obligation.totalCollected, "NGN")} / {formatLocalAmount(obligation.totalExpected, "NGN")}
+                    ≈ {formatMobiAmount(obligation.totalCollected)} / {formatMobiAmount(obligation.totalExpected)}
                   </p>
                   <Progress value={progressPercentage} className="h-2" />
                   <p className="text-xs text-muted-foreground text-right">{progressPercentage}% collected</p>
@@ -316,7 +317,7 @@ export const ManageDuesLeviesDialog = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Amount (M)</Label>
+              <Label>Amount (₦)</Label>
               <Input
                 type="number"
                 placeholder="15000"
@@ -375,7 +376,7 @@ export const ManageDuesLeviesDialog = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="percentage">%</SelectItem>
-                    <SelectItem value="fixed">M</SelectItem>
+                    <SelectItem value="fixed">₦</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
