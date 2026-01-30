@@ -78,7 +78,7 @@ export function LevyProgressCard({
             <p className="text-sm text-muted-foreground">{year}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">Unit Price</p>
+            <p className="text-xs text-muted-foreground">Unit Amount</p>
             <div className="text-primary font-semibold">
               {formatLocalAmount(unitPrice, "NGN")}
             </div>
