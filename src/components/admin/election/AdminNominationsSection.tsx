@@ -43,6 +43,7 @@ import {
 } from "@/data/electionProcessesData";
 import { Nomination, NominationPeriod } from "@/types/electionProcesses";
 import { cn } from "@/lib/utils";
+import { NominateCandidateDrawer } from "./NominateCandidateDrawer";
 
 const getStatusBadge = (status: Nomination['status']) => {
   switch (status) {
@@ -99,6 +100,7 @@ export function AdminNominationsSection() {
   const [officeFilter, setOfficeFilter] = useState<string>("all");
   const [selectedNomination, setSelectedNomination] = useState<Nomination | null>(null);
   const [showNominationSheet, setShowNominationSheet] = useState(false);
+  const [showNominateCandidateDrawer, setShowNominateCandidateDrawer] = useState(false);
 
   const stats = getNominationStats();
 
@@ -266,6 +268,15 @@ export function AdminNominationsSection() {
 
   return (
     <div className="space-y-4 pb-20">
+      {/* Nominate Candidate Button */}
+      <Button
+        onClick={() => setShowNominateCandidateDrawer(true)}
+        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+      >
+        <UserPlus className="h-5 w-5 mr-2" />
+        Nominate Candidate
+      </Button>
+
       {/* Stats Row */}
       <div className="grid grid-cols-4 gap-1.5">
         <StatCard 
@@ -455,6 +466,12 @@ export function AdminNominationsSection() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Nominate Candidate Drawer */}
+      <NominateCandidateDrawer
+        open={showNominateCandidateDrawer}
+        onOpenChange={setShowNominateCandidateDrawer}
+      />
     </div>
   );
 }
