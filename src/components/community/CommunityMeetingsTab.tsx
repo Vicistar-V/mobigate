@@ -227,17 +227,19 @@ export const CommunityMeetingsTab = () => {
             onClick={handleJoinMeeting}
             size="lg"
             disabled={!canStartNewMeeting}
-            className={`w-full gap-2 h-14 text-lg ${
+            className={`w-full gap-2 h-auto min-h-14 py-3 text-sm sm:text-lg whitespace-normal text-center ${
               canStartNewMeeting
                 ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             }`}
           >
-            <Video className="w-6 h-6" />
-            {canStartNewMeeting 
-              ? `Join ${selectedMeetingType === "executive" ? "Executive" : "General"} Meeting Now`
-              : "Meeting Locked - Adopt Previous Minutes"
-            }
+            <Video className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+            <span className="leading-tight">
+              {canStartNewMeeting 
+                ? `Join ${selectedMeetingType === "executive" ? "Executive" : "General"} Meeting Now`
+                : "Meeting Locked - Adopt Previous Minutes"
+              }
+            </span>
           </Button>
 
           {/* Premium Ad */}

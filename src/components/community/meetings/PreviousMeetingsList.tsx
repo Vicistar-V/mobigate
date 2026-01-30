@@ -28,10 +28,16 @@ export const PreviousMeetingsList = ({
 
       {/* Tabs */}
       <Tabs defaultValue="messages" className="w-full">
-        <TabsList className="w-full justify-start px-4">
-          <TabsTrigger value="messages">Chat Messages</TabsTrigger>
-          <TabsTrigger value="download">Download Meeting Chat</TabsTrigger>
-        </TabsList>
+        <div className="px-4">
+          <TabsList className="w-full h-auto flex-wrap gap-1 p-1">
+            <TabsTrigger value="messages" className="flex-1 min-w-fit text-xs sm:text-sm py-2">
+              Chat Messages
+            </TabsTrigger>
+            <TabsTrigger value="download" className="flex-1 min-w-fit text-xs sm:text-sm py-2">
+              Download Chat
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="messages" className="px-4 mt-4">
           <div className="space-y-3">
