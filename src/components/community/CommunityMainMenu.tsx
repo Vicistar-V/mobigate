@@ -40,10 +40,11 @@ import { MemberPrivacyVotingSheet } from "./settings/MemberPrivacyVotingSheet";
 import { CommunitySettingsSheet } from "./settings/CommunitySettingsSheet";
 import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestSheet";
 import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
+import { MemberImpeachmentDrawer } from "./elections/MemberImpeachmentDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { Vote, Settings2, Flag } from "lucide-react";
+import { Vote, Settings2, Flag, Gavel } from "lucide-react";
 import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
 
 interface CommunityMainMenuProps {
@@ -92,6 +93,7 @@ export function CommunityMainMenu({
   const [showCommunitySettings, setShowCommunitySettings] = useState(false);
   const [showDeclarationOfInterest, setShowDeclarationOfInterest] = useState(false);
   const [showCandidateDashboard, setShowCandidateDashboard] = useState(false);
+  const [showImpeachment, setShowImpeachment] = useState(false);
 
   const pendingSettingsCount = getPendingProposalsCount();
 
@@ -696,6 +698,17 @@ export function CommunityMainMenu({
                 >
                   Accredited Voters
                 </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => {
+                    setShowImpeachment(true);
+                    setOpen(false);
+                  }}
+                >
+                  <Gavel className="h-4 w-4 mr-2" />
+                  Impeachment
+                </Button>
                 {(isAdmin || isOwner) && (
                   <Button
                     variant="ghost"
@@ -1207,6 +1220,12 @@ export function CommunityMainMenu({
       <CandidateDashboardSheet
         open={showCandidateDashboard}
         onOpenChange={setShowCandidateDashboard}
+      />
+
+      {/* Member Impeachment Drawer */}
+      <MemberImpeachmentDrawer
+        open={showImpeachment}
+        onOpenChange={setShowImpeachment}
       />
     </>
   );

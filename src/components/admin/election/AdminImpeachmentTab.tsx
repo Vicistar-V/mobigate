@@ -926,14 +926,20 @@ export function AdminImpeachmentTab() {
 
   return (
     <div className="space-y-4 pb-20">
-      {/* Initiate Button */}
-      <Button
-        onClick={() => setShowInitiateDrawer(true)}
-        className="w-full h-12 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold"
-      >
-        <Gavel className="h-5 w-5 mr-2" />
-        Start Impeachment Process
-      </Button>
+      {/* Admin Notice */}
+      <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+        <CardContent className="p-3">
+          <div className="flex items-start gap-2">
+            <Shield className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <div className="text-xs text-blue-700 dark:text-blue-400">
+              <p className="font-semibold">Admin Monitoring Dashboard</p>
+              <p className="mt-0.5">
+                View and monitor all impeachment processes. Members can initiate and vote on impeachment from their dashboards via the Election/Voting menu.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Info Banner */}
       <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
@@ -1042,20 +1048,6 @@ export function AdminImpeachmentTab() {
         )}
       </div>
 
-      {/* Initiate Drawer */}
-      {isMobile ? (
-        <Drawer open={showInitiateDrawer} onOpenChange={setShowInitiateDrawer}>
-          <DrawerContent className="max-h-[92vh] flex flex-col">
-            <InitiateDrawerContent />
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={showInitiateDrawer} onOpenChange={setShowInitiateDrawer}>
-          <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0">
-            <InitiateDrawerContent />
-          </DialogContent>
-        </Dialog>
-      )}
 
       {/* Details Sheet */}
       {isMobile ? (
@@ -1071,41 +1063,6 @@ export function AdminImpeachmentTab() {
           </DialogContent>
         </Dialog>
       )}
-
-      {/* Confirmation Dialog */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-              <Gavel className="h-5 w-5" />
-              Confirm Impeachment Petition
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-left space-y-2">
-              <p>
-                You are about to initiate impeachment proceedings against <strong>{selectedOfficer?.name}</strong> ({selectedOfficer?.position}).
-              </p>
-              <p className="text-xs">
-                • This action will be visible to all community members
-                <br />
-                • Requires 85% approval to succeed
-                <br />
-                • Valid for <strong>30 days</strong> only
-                <br />
-                • Notifications begin at 25% votes
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
-              onClick={handleInitiateImpeachment}
-            >
-              Submit Petition
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
