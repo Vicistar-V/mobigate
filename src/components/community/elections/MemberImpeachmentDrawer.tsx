@@ -190,6 +190,7 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingVote, setPendingVote] = useState<MemberVoteStatus | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showVotersList, setShowVotersList] = useState(false);
 
   // Sync view with initialView when drawer opens
   useEffect(() => {
@@ -614,13 +615,17 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
                 </span>
                 <span className="font-semibold">{selectedImpeachment.initiatorName}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              <div 
+                className="flex items-center justify-between text-sm cursor-pointer hover:bg-muted/50 -mx-3 px-3 py-1.5 rounded-lg transition-colors"
+                onClick={() => setShowVotersList(true)}
+              >
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <Users className="h-3.5 w-3.5" />
                   Supported by:
                 </span>
-                <span className="font-semibold text-primary">
-                  {selectedImpeachment.supportersCount} Members
+                <span className="font-semibold text-primary flex items-center gap-1">
+                  {selectedImpeachment.supportersCount}/{selectedImpeachment.totalEligibleVoters} Members
+                  <ChevronRight className="h-4 w-4" />
                 </span>
               </div>
             </div>
@@ -786,6 +791,97 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Voters List Drawer */}
+      <Drawer open={showVotersList} onOpenChange={setShowVotersList}>
+        <DrawerContent className="max-h-[85vh] flex flex-col">
+          <DrawerHeader className="shrink-0 border-b px-4">
+            <DrawerTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              All Voters
+            </DrawerTitle>
+          </DrawerHeader>
+          
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain p-4 min-h-0">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="text-center p-2.5 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                <p className="text-lg font-bold text-green-600">{selectedImpeachment?.votesFor || 0}</p>
+                <p className="text-xs text-muted-foreground">Support</p>
+              </div>
+              <div className="text-center p-2.5 bg-red-50 dark:bg-red-950/30 rounded-lg">
+                <p className="text-lg font-bold text-red-600">{selectedImpeachment?.votesAgainst || 0}</p>
+                <p className="text-xs text-muted-foreground">Reject</p>
+              </div>
+              <div className="text-center p-2.5 bg-muted rounded-lg">
+                <p className="text-lg font-bold">{(selectedImpeachment?.totalEligibleVoters || 0) - (selectedImpeachment?.votesFor || 0) - (selectedImpeachment?.votesAgainst || 0)}</p>
+                <p className="text-xs text-muted-foreground">Neutral</p>
+              </div>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex gap-2 mb-4 overflow-x-auto -mx-4 px-4 touch-pan-x">
+              <Badge variant="default" className="shrink-0 cursor-pointer h-8 px-4">All ({selectedImpeachment?.supportersCount || 0})</Badge>
+              <Badge variant="outline" className="shrink-0 cursor-pointer h-8 px-4">Support ({selectedImpeachment?.votesFor || 0})</Badge>
+              <Badge variant="outline" className="shrink-0 cursor-pointer h-8 px-4">Reject ({selectedImpeachment?.votesAgainst || 0})</Badge>
+              <Badge variant="outline" className="shrink-0 cursor-pointer h-8 px-4">Neutral</Badge>
+            </div>
+
+            {/* Voters List */}
+            <div className="space-y-2">
+              {/* Mock voters data */}
+              {[
+                { id: 1, name: "Mr. John Obi", accreditation: "ACC-2025-0042", vote: "support", votedAt: "Jan 16, 2025" },
+                { id: 2, name: "Mrs. Ada Nwosu", accreditation: "ACC-2025-0089", vote: "support", votedAt: "Jan 17, 2025" },
+                { id: 3, name: "Chief Emeka Okonkwo", accreditation: "ACC-2025-0023", vote: "support", votedAt: "Jan 17, 2025" },
+                { id: 4, name: "Dr. Chidi Eze", accreditation: "ACC-2025-0101", vote: "reject", votedAt: "Jan 18, 2025" },
+                { id: 5, name: "Mrs. Ngozi Udeh", accreditation: "ACC-2025-0056", vote: "support", votedAt: "Jan 18, 2025" },
+                { id: 6, name: "Mr. Obinna Nnamdi", accreditation: "ACC-2025-0078", vote: "neutral", votedAt: null },
+                { id: 7, name: "Barr. Chukwuma Ike", accreditation: "ACC-2025-0034", vote: "support", votedAt: "Jan 19, 2025" },
+                { id: 8, name: "Mrs. Adaeze Okoro", accreditation: "ACC-2025-0112", vote: "support", votedAt: "Jan 20, 2025" },
+              ].map((voter) => (
+                <Card key={voter.id} className="overflow-hidden">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarFallback className="text-xs">
+                          {voter.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{voter.name}</p>
+                        <p className="text-xs text-muted-foreground">{voter.accreditation}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "text-xs",
+                            voter.vote === "support" && "bg-green-50 text-green-600 border-green-200",
+                            voter.vote === "reject" && "bg-red-50 text-red-600 border-red-200",
+                            voter.vote === "neutral" && "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {voter.vote === "support" ? "Support" : voter.vote === "reject" ? "Reject" : "Neutral"}
+                        </Badge>
+                        {voter.votedAt && (
+                          <p className="text-xs text-muted-foreground mt-1">{voter.votedAt}</p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div className="shrink-0 px-4 py-4 border-t bg-background">
+            <Button variant="outline" className="w-full h-11" onClick={() => setShowVotersList(false)}>
+              Close
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
