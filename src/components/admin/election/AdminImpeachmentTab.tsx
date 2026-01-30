@@ -72,6 +72,8 @@ interface ImpeachmentProcess {
   officerPosition: string;
   officerAvatar?: string;
   initiatedBy: string;
+  initiatorName: string; // Full name of the initiator
+  supportersCount: number; // Number of members who signed the petition
   initiatedAt: Date;
   reason: string;
   status: ImpeachmentStatus;
@@ -122,6 +124,8 @@ const mockImpeachments: ImpeachmentProcess[] = [
     officerPosition: "Treasurer",
     officerAvatar: "/placeholder.svg",
     initiatedBy: "Community Members",
+    initiatorName: "Mr. John Obi",
+    supportersCount: 128,
     initiatedAt: new Date("2025-01-15"),
     reason: "Misappropriation of community funds and failure to present financial reports for 6 consecutive months.",
     status: "voting",
@@ -140,6 +144,8 @@ const mockImpeachments: ImpeachmentProcess[] = [
     officerPosition: "PRO",
     officerAvatar: "/placeholder.svg",
     initiatedBy: "Executive Committee",
+    initiatorName: "Dr. Chukwudi Eze",
+    supportersCount: 95,
     initiatedAt: new Date("2024-11-10"),
     reason: "Gross misconduct and unauthorized statements to the press damaging community reputation.",
     status: "expired",
@@ -158,6 +164,8 @@ const mockImpeachments: ImpeachmentProcess[] = [
     officerPosition: "Assistant Secretary",
     officerAvatar: "/placeholder.svg",
     initiatedBy: "Members Petition",
+    initiatorName: "Chief Adaeze Nwachukwu",
+    supportersCount: 185,
     initiatedAt: new Date("2024-08-15"),
     reason: "Dereliction of duties and absence from official meetings for over 3 months.",
     status: "successful",
@@ -176,6 +184,8 @@ const mockImpeachments: ImpeachmentProcess[] = [
     officerPosition: "Secretary General",
     officerAvatar: "/placeholder.svg",
     initiatedBy: "Anonymous Petition",
+    initiatorName: "Mr. Samuel Okoro",
+    supportersCount: 42,
     initiatedAt: new Date("2025-01-25"),
     reason: "Alleged conflict of interest in community legal matters and unauthorized legal representation.",
     status: "voting",
@@ -227,19 +237,30 @@ const getStatusLabel = (status: ImpeachmentStatus) => {
   }
 };
 
-// Stats Card Component
+// Stats Card Component - Now interactive/clickable
 const StatCard = ({
   icon,
   value,
   label,
   color,
+  isActive,
+  onClick,
 }: {
   icon: React.ReactNode;
   value: number;
   label: string;
   color: string;
+  isActive?: boolean;
+  onClick?: () => void;
 }) => (
-  <Card className={cn("border-0", color)}>
+  <Card 
+    className={cn(
+      "border-0 cursor-pointer transition-all active:scale-95",
+      color,
+      isActive && "ring-2 ring-primary ring-offset-1"
+    )}
+    onClick={onClick}
+  >
     <CardContent className="p-2.5 text-center">
       <div className="flex flex-col items-center gap-0.5">
         {icon}
@@ -290,7 +311,7 @@ export function AdminImpeachmentTab() {
   const { toast } = useToast();
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statsFilter, setStatsFilter] = useState<"all" | "active" | "impeached" | "expired">("all");
   const [showInitiateDrawer, setShowInitiateDrawer] = useState(false);
   const [selectedOfficer, setSelectedOfficer] = useState<Officer | null>(null);
   const [impeachmentReason, setImpeachmentReason] = useState("");
@@ -307,12 +328,27 @@ export function AdminImpeachmentTab() {
     expired: mockImpeachments.filter((i) => i.status === "expired" || i.status === "failed").length,
   };
 
-  // Filtered impeachments
+  // Filtered impeachments based on stats filter
   const filteredImpeachments = mockImpeachments.filter((imp) => {
     const matchesSearch = imp.officerName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || imp.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // Apply stats filter
+    let matchesStatsFilter = true;
+    if (statsFilter === "active") {
+      matchesStatsFilter = imp.status === "voting" || imp.status === "petition";
+    } else if (statsFilter === "impeached") {
+      matchesStatsFilter = imp.status === "successful";
+    } else if (statsFilter === "expired") {
+      matchesStatsFilter = imp.status === "expired" || imp.status === "failed";
+    }
+    
+    return matchesSearch && matchesStatsFilter;
   });
+
+  // Handle stats filter toggle
+  const handleStatsFilterClick = (filter: "all" | "active" | "impeached" | "expired") => {
+    setStatsFilter(prev => prev === filter ? "all" : filter);
+  };
 
   const handleSelectOfficer = (officer: Officer) => {
     setSelectedOfficer(officer);
@@ -727,7 +763,7 @@ export function AdminImpeachmentTab() {
                 </div>
                 <div className="p-2.5 bg-muted rounded-lg">
                   <p className="text-xl font-bold">{selectedImpeachment.totalEligibleVoters - selectedImpeachment.votesFor - selectedImpeachment.votesAgainst}</p>
-                  <p className="text-xs text-muted-foreground">Pending</p>
+                  <p className="text-xs text-muted-foreground">Neutral</p>
                 </div>
               </div>
 
@@ -758,10 +794,32 @@ export function AdminImpeachmentTab() {
                 Grounds for Impeachment
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-3 pb-3">
+            <CardContent className="px-3 pb-3 space-y-3">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {selectedImpeachment.reason}
               </p>
+              
+              {/* Initiator & Supporters Info */}
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5" />
+                    Initiated by:
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    {selectedImpeachment.initiatorName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    Supported by:
+                  </span>
+                  <span className="font-semibold text-primary">
+                    {selectedImpeachment.supportersCount}/{selectedImpeachment.totalEligibleVoters} Members
+                  </span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -903,33 +961,58 @@ export function AdminImpeachmentTab() {
         </CardContent>
       </Card>
 
-      {/* Stats Row */}
+      {/* Stats Row - Interactive Filters */}
       <div className="grid grid-cols-4 gap-1.5">
         <StatCard
           icon={<Users className="h-3.5 w-3.5 text-blue-600" />}
           value={stats.total}
           label="Total"
           color="bg-blue-500/10"
+          isActive={statsFilter === "all"}
+          onClick={() => handleStatsFilterClick("all")}
         />
         <StatCard
           icon={<Clock className="h-3.5 w-3.5 text-amber-600" />}
           value={stats.active}
           label="Active"
           color="bg-amber-500/10"
+          isActive={statsFilter === "active"}
+          onClick={() => handleStatsFilterClick("active")}
         />
         <StatCard
           icon={<CheckCircle2 className="h-3.5 w-3.5 text-red-600" />}
           value={stats.successful}
           label="Impeached"
           color="bg-red-500/10"
+          isActive={statsFilter === "impeached"}
+          onClick={() => handleStatsFilterClick("impeached")}
         />
         <StatCard
           icon={<XCircle className="h-3.5 w-3.5 text-orange-600" />}
           value={stats.expired}
           label="Expired"
           color="bg-orange-500/10"
+          isActive={statsFilter === "expired"}
+          onClick={() => handleStatsFilterClick("expired")}
         />
       </div>
+
+      {/* Active Filter Indicator */}
+      {statsFilter !== "all" && (
+        <div className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-2">
+          <span className="text-xs text-muted-foreground">
+            Showing: <span className="font-medium text-foreground capitalize">{statsFilter}</span> ({filteredImpeachments.length})
+          </span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 text-xs px-2"
+            onClick={() => setStatsFilter("all")}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">
