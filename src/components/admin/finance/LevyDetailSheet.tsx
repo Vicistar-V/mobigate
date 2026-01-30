@@ -133,10 +133,10 @@ export function LevyDetailSheet({
             <p className={`text-sm font-bold ${
               payment.status === 'paid' ? 'text-green-600' : 'text-muted-foreground'
             }`}>
-              {formatMobiAmount(payment.amount)}
+              {formatLocalAmount(payment.amount, "NGN")}
             </p>
             <p className="text-xs text-muted-foreground">
-              ≈ {formatLocalAmount(payment.amount, "NGN")}
+              ({formatMobiAmount(payment.amount)})
             </p>
             {payment.reference && (
               <p className="text-xs text-muted-foreground">{payment.reference}</p>
@@ -166,7 +166,7 @@ export function LevyDetailSheet({
             <div className="flex items-center gap-2">
               <Wallet className="h-4 w-4 text-muted-foreground" />
               <div>
-                <span className="font-medium">{formatMobiAmount(levy.amount)}</span>
+                <span className="font-medium">{formatLocalAmount(levy.amount, "NGN")}</span>
                 <span className="text-xs text-muted-foreground">/member</span>
               </div>
             </div>
@@ -178,7 +178,7 @@ export function LevyDetailSheet({
           
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
             <Globe className="h-3 w-3" />
-            <span>Local equivalent: {formatLocalAmount(levy.amount, "NGN")}/member</span>
+            <span>Mobi equivalent: {formatMobiAmount(levy.amount)}/member</span>
             <MobiExplainerTooltip size="sm" />
           </div>
 
@@ -208,20 +208,20 @@ export function LevyDetailSheet({
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-2 bg-green-500/10 rounded-lg">
               <p className="text-lg font-bold text-green-600">
-                {formatMobiAmount(levy.totalCollected)}
+                {formatLocalAmount(levy.totalCollected, "NGN")}
               </p>
               <p className="text-xs text-muted-foreground">Collected</p>
               <p className="text-xs text-green-600/70">
-                ≈ {formatLocalAmount(levy.totalCollected, "NGN")}
+                ({formatMobiAmount(levy.totalCollected)})
               </p>
             </div>
             <div className="text-center p-2 bg-muted/50 rounded-lg">
               <p className="text-lg font-bold">
-                {formatMobiAmount(levy.totalExpected)}
+                {formatLocalAmount(levy.totalExpected, "NGN")}
               </p>
               <p className="text-xs text-muted-foreground">Target</p>
               <p className="text-xs text-muted-foreground">
-                ≈ {formatLocalAmount(levy.totalExpected, "NGN")}
+                ({formatMobiAmount(levy.totalExpected)})
               </p>
             </div>
           </div>
