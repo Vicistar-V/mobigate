@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { Plus, Search, Eye, Edit, Trash2, Check, X, Star, Newspaper, Filter } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, Check, X, Star, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { AdminContentItem } from "@/data/adminContentData";
 import { format } from "date-fns";
 
@@ -67,19 +66,19 @@ export function NewsManagementTab({
       <div className="grid grid-cols-4 gap-2">
         <div className="text-center p-3 rounded-lg bg-muted/50">
           <p className="text-lg font-bold">{stats.total}</p>
-          <p className="text-[10px] text-muted-foreground">Total</p>
+          <p className="text-xs text-muted-foreground">Total</p>
         </div>
         <div className="text-center p-3 rounded-lg bg-green-500/10">
           <p className="text-lg font-bold text-green-600">{stats.published}</p>
-          <p className="text-[10px] text-muted-foreground">Published</p>
+          <p className="text-xs text-muted-foreground">Published</p>
         </div>
         <div className="text-center p-3 rounded-lg bg-amber-500/10">
           <p className="text-lg font-bold text-amber-600">{stats.pending}</p>
-          <p className="text-[10px] text-muted-foreground">Pending</p>
+          <p className="text-xs text-muted-foreground">Pending</p>
         </div>
         <div className="text-center p-3 rounded-lg bg-gray-500/10">
           <p className="text-lg font-bold text-gray-600">{stats.draft}</p>
-          <p className="text-[10px] text-muted-foreground">Draft</p>
+          <p className="text-xs text-muted-foreground">Draft</p>
         </div>
       </div>
 
@@ -115,13 +114,13 @@ export function NewsManagementTab({
         </Select>
       </div>
 
-      {/* Category Filter */}
+      {/* Category Filter - Horizontally Scrollable */}
       {categories.length > 0 && (
-        <ScrollArea className="w-full" style={{ overflowX: 'auto' }}>
-          <div className="flex gap-2 pb-2">
+        <div className="overflow-x-auto -mx-4 px-4 touch-pan-x">
+          <div className="flex gap-2 pb-2 w-max">
             <Badge
               variant={categoryFilter === "all" ? "default" : "outline"}
-              className="cursor-pointer shrink-0"
+              className="cursor-pointer shrink-0 h-8 px-4 text-sm"
               onClick={() => setCategoryFilter("all")}
             >
               All
@@ -130,14 +129,14 @@ export function NewsManagementTab({
               <Badge
                 key={cat}
                 variant={categoryFilter === cat ? "default" : "outline"}
-                className="cursor-pointer shrink-0 capitalize"
+                className="cursor-pointer shrink-0 h-8 px-4 text-sm capitalize whitespace-nowrap"
                 onClick={() => setCategoryFilter(cat!)}
               >
                 {cat}
               </Badge>
             ))}
           </div>
-        </ScrollArea>
+        </div>
       )}
 
       {/* News List */}
