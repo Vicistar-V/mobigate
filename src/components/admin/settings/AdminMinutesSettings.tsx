@@ -153,7 +153,7 @@ export const AdminMinutesSettings = ({
         </div>
         <Alert className="mt-4 border-amber-200 bg-amber-50">
           <AlertDescription className="text-amber-800 text-xs">
-            New meetings cannot proceed until previous minutes reach this adoption threshold.
+            New meetings cannot commence until Minutes of the last previous meeting have been duly adopted by the recommended percentage threshold.
           </AlertDescription>
         </Alert>
       </Card>
