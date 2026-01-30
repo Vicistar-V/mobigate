@@ -3,7 +3,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -380,26 +379,26 @@ export function DeclarationOfInterestSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent side="bottom" className="h-[92vh] rounded-t-2xl">
-          <SheetHeader className="pb-2">
+        <SheetContent side="bottom" className="h-[92vh] rounded-t-2xl p-0 flex flex-col">
+          <SheetHeader className="shrink-0 px-4 pt-4 pb-3 border-b">
             <SheetTitle className="flex items-center gap-2">
               <Vote className="h-5 w-5 text-primary" />
               {step === "success" ? "Declaration Complete" : "Declaration of Interest"}
             </SheetTitle>
           </SheetHeader>
 
-          <ScrollArea className="h-[calc(100%-120px)] mt-4">
-            <div className="pr-2 pb-4">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain min-h-0">
+            <div className="px-4 py-4">
               {step === "select" && renderSelectStep()}
               {step === "processing" && renderProcessingStep()}
               {step === "success" && renderSuccessStep()}
             </div>
-          </ScrollArea>
+          </div>
 
           {step === "select" && (
-            <div className="pt-4 border-t">
+            <div className="shrink-0 px-4 py-4 border-t bg-background">
               <Button
-                className="w-full"
+                className="w-full h-12"
                 size="lg"
                 disabled={!selectedOffice || hasInsufficientBalance}
                 onClick={handleProceedToConfirm}
@@ -494,7 +493,7 @@ function OfficeOptionCard({ office, isSelected, walletBalance }: OfficeOptionCar
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm">{office.officeName}</span>
             {office.requiresPrimary && (
-              <Badge variant="outline" className="text-[10px] px-1.5">
+              <Badge variant="outline" className="text-xs px-1.5 py-0">
                 <Users className="h-3 w-3 mr-0.5" />
                 Primary
               </Badge>
@@ -508,7 +507,7 @@ function OfficeOptionCard({ office, isSelected, walletBalance }: OfficeOptionCar
           <span className={`font-semibold text-sm ${hasInsufficientBalance ? "text-destructive" : "text-primary"}`}>
             {formatMobiAmount(office.totalFee)}
           </span>
-          <p className="text-[10px] text-muted-foreground">({formatLocalAmount(office.totalFee, "NGN")})</p>
+          <p className="text-xs text-muted-foreground">({formatLocalAmount(office.totalFee, "NGN")})</p>
         </div>
       </Label>
     </div>
