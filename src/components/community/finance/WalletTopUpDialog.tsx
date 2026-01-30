@@ -18,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Wallet, 
   CreditCard, 
@@ -139,7 +138,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const renderVouchersStep = () => (
     <>
       {/* Info Banner */}
-      <div className="mx-4 mt-2 mb-3 p-3 bg-primary/5 rounded-lg">
+      <div className="mx-4 mt-2 mb-3 p-3 bg-primary/5 rounded-lg shrink-0">
         <div className="flex items-start gap-2">
           <Store className="h-4 w-4 text-primary shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground">
@@ -148,16 +147,17 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-4">
+      {/* Scrollable voucher list using native scrolling */}
+      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
         <VoucherDenominationSelector
           selectedVouchers={selectedVouchers}
           onSelectionChange={setSelectedVouchers}
         />
         <div className="h-4" />
-      </ScrollArea>
+      </div>
 
       {/* Sticky Footer with Button */}
-      <div className="shrink-0 px-4 py-3 border-t bg-background sticky bottom-0">
+      <div className="shrink-0 px-4 py-3 border-t bg-background">
         <Button
           onClick={handleContinueToMerchants}
           className="w-full"
@@ -180,7 +180,8 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
 
   const renderPaymentStep = () => (
     <>
-      <ScrollArea className="flex-1 px-4">
+      {/* Scrollable content using native scrolling */}
+      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
         <div className="space-y-4 pb-4">
           <Card className="p-4 bg-muted">
             <div className="space-y-2">
@@ -276,9 +277,9 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
             </RadioGroup>
           </div>
         </div>
-      </ScrollArea>
+      </div>
 
-      <div className="shrink-0 px-4 py-3 border-t bg-background sticky bottom-0 flex gap-2">
+      <div className="shrink-0 px-4 py-3 border-t bg-background flex gap-2">
         <Button variant="outline" onClick={handleBack} className="flex-1">
           <ChevronLeft className="h-4 w-4 mr-1" />
           Back
@@ -292,7 +293,8 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
 
   const renderConfirmStep = () => (
     <>
-      <ScrollArea className="flex-1 px-4">
+      {/* Scrollable content using native scrolling */}
+      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
         <div className="space-y-4 pb-4">
           <div className="flex justify-center pt-4">
             <div className="h-20 w-20 rounded-full bg-green-100 dark:bg-green-950 flex items-center justify-center">
@@ -351,9 +353,9 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
             You'll receive a confirmation once the transaction is complete
           </p>
         </div>
-      </ScrollArea>
+      </div>
 
-      <div className="shrink-0 px-4 py-3 border-t bg-background sticky bottom-0">
+      <div className="shrink-0 px-4 py-3 border-t bg-background">
         <Button onClick={handleConfirm} className="w-full">
           Done
         </Button>
@@ -413,7 +415,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
               {getStepDescription()}
             </DrawerDescription>
           </DrawerHeader>
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0">
             <Content />
           </div>
         </DrawerContent>
@@ -433,7 +435,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
             {getStepDescription()}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0">
           <Content />
         </div>
       </DialogContent>
