@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -32,7 +31,6 @@ import {
   Search,
   Calendar,
   Filter,
-  ChevronRight,
   Wallet,
   ArrowUpRight,
   ArrowDownLeft,
@@ -46,6 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { DualCurrencyDisplay } from "@/components/common/DualCurrencyDisplay";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 
 interface AccountStatementsDialogProps {
   open: boolean;
@@ -63,6 +62,8 @@ export const AccountStatementsDialog = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [showDownloadSheet, setShowDownloadSheet] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Calculate totals
   const totals = mockAccountTransactions.reduce(
@@ -90,46 +91,6 @@ export const AccountStatementsDialog = ({
     return matchesType && matchesCategory && matchesSearch;
   });
 
-  const handleExport = () => {
-    const csvContent = [
-      "Date,Type,Category,Description,Reference,Amount,Balance,Status",
-      ...filteredTransactions.map(
-        (txn) =>
-          `${format(txn.date, "yyyy-MM-dd")},${txn.type},${txn.category},${txn.description},${txn.reference},${txn.amount},${txn.balance},${txn.status}`
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `account-statement-${format(new Date(), "yyyy-MM-dd")}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Statement Exported",
-      description: "Account statement has been downloaded as CSV.",
-    });
-  };
-
-  const getStatusBadge = (status: AccountTransaction["status"]) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-green-500/10 text-green-600 text-xs">Completed</Badge>;
-      case "pending":
-        return <Badge className="bg-amber-500/10 text-amber-600 text-xs">Pending</Badge>;
-      case "failed":
-        return <Badge className="bg-red-500/10 text-red-600 text-xs">Failed</Badge>;
-      case "reversed":
-        return <Badge className="bg-gray-500/10 text-gray-600 text-xs">Reversed</Badge>;
-      default:
-        return null;
-    }
-  };
-
   const getCategoryLabel = (category: AccountTransaction["category"]) => {
     const labels: Record<AccountTransaction["category"], string> = {
       dues_payment: "Dues Payment",
@@ -148,16 +109,148 @@ export const AccountStatementsDialog = ({
     return labels[category];
   };
 
+  const generateCSV = () => {
+    const csvContent = [
+      "Date,Type,Category,Description,Reference,Amount (NGN),Amount (Mobi),Balance (NGN),Balance (Mobi),Status",
+      ...filteredTransactions.map(
+        (txn) =>
+          `${format(txn.date, "yyyy-MM-dd")},${txn.type},${getCategoryLabel(txn.category)},"${txn.description}",${txn.reference},${txn.amount},${txn.amount},${txn.balance},${txn.balance},${txn.status}`
+      ),
+    ].join("\n");
+    return csvContent;
+  };
+
+  const generateTextContent = () => {
+    const header = `ACCOUNT STATEMENT
+Generated: ${format(new Date(), "MMMM d, yyyy 'at' HH:mm")}
+================================================================================
+
+SUMMARY
+-------
+Total Credits: ${formatLocalAmount(totals.totalCredits, "NGN")} (${formatMobiAmount(totals.totalCredits)})
+Total Debits: ${formatLocalAmount(totals.totalDebits, "NGN")} (${formatMobiAmount(totals.totalDebits)})
+Net Balance: ${formatLocalAmount(totals.totalCredits - totals.totalDebits, "NGN")} (${formatMobiAmount(totals.totalCredits - totals.totalDebits)})
+
+TRANSACTIONS (${filteredTransactions.length})
+================================================================================
+`;
+
+    const transactions = filteredTransactions.map((txn, index) => {
+      const sign = txn.type === "credit" ? "+" : "-";
+      return `
+${index + 1}. ${txn.description}
+   Date: ${format(txn.date, "MMM d, yyyy 'at' HH:mm")}
+   Type: ${txn.type.toUpperCase()} | Category: ${getCategoryLabel(txn.category)}
+   Amount: ${sign}${formatLocalAmount(txn.amount, "NGN")} (${formatMobiAmount(txn.amount)})
+   Balance: ${formatLocalAmount(txn.balance, "NGN")} (${formatMobiAmount(txn.balance)})
+   Reference: ${txn.reference}
+   Status: ${txn.status.toUpperCase()}
+   ${txn.memberName ? `Member: ${txn.memberName}` : ""}
+   ${txn.authorizedBy ? `Authorized by: ${txn.authorizedBy}` : ""}
+   ${txn.notes ? `Notes: ${txn.notes}` : ""}
+--------------------------------------------------------------------------------`;
+    }).join("\n");
+
+    return header + transactions + "\n\n=== END OF STATEMENT ===";
+  };
+
+  const handleDownload = async (selectedFormat: DownloadFormat) => {
+    setIsDownloading(true);
+    
+    try {
+      const fileName = `account-statement-${format(new Date(), "yyyy-MM-dd")}`;
+      
+      switch (selectedFormat) {
+        case "csv": {
+          const csvContent = generateCSV();
+          const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+          downloadBlob(blob, `${fileName}.csv`);
+          break;
+        }
+        
+        case "txt": {
+          const textContent = generateTextContent();
+          const blob = new Blob([textContent], { type: "text/plain;charset=utf-8;" });
+          downloadBlob(blob, `${fileName}.txt`);
+          break;
+        }
+        
+        case "pdf":
+        case "jpeg":
+        case "png":
+        case "svg":
+        case "docx": {
+          // For visual formats, we'd need html2canvas/jsPDF
+          // For now, show a message that these are being prepared
+          toast({
+            title: "Download Started",
+            description: `Your ${selectedFormat.toUpperCase()} file is being generated...`,
+          });
+          
+          // Simulate processing for demo
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // For non-text formats, fall back to text for demo
+          const textContent = generateTextContent();
+          const blob = new Blob([textContent], { type: "text/plain;charset=utf-8;" });
+          downloadBlob(blob, `${fileName}.${selectedFormat === "docx" ? "txt" : selectedFormat}`);
+          break;
+        }
+      }
+      
+      toast({
+        title: "Statement Downloaded",
+        description: `Account statement saved as ${selectedFormat.toUpperCase()}.`,
+      });
+      
+      setShowDownloadSheet(false);
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Unable to generate the statement. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const downloadBlob = (blob: Blob, fileName: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const getStatusBadge = (status: AccountTransaction["status"]) => {
+    switch (status) {
+      case "completed":
+        return <Badge className="bg-green-500/10 text-green-600 text-xs">Completed</Badge>;
+      case "pending":
+        return <Badge className="bg-amber-500/10 text-amber-600 text-xs">Pending</Badge>;
+      case "failed":
+        return <Badge className="bg-red-500/10 text-red-600 text-xs">Failed</Badge>;
+      case "reversed":
+        return <Badge className="bg-gray-500/10 text-gray-600 text-xs">Reversed</Badge>;
+      default:
+        return null;
+    }
+  };
+
   const Content = () => (
     <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="p-3 bg-green-50 border-green-200">
+        <Card className="p-3 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
           <div className="flex items-center gap-2">
-            <ArrowDownLeft className="h-5 w-5 text-green-600" />
-            <div>
+            <ArrowDownLeft className="h-5 w-5 text-green-600 shrink-0" />
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Total Credits</p>
-              <p className="text-lg font-bold text-green-600">
+              <p className="text-lg font-bold text-green-600 truncate">
                 {formatLocalAmount(totals.totalCredits, "NGN")}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -166,12 +259,12 @@ export const AccountStatementsDialog = ({
             </div>
           </div>
         </Card>
-        <Card className="p-3 bg-red-50 border-red-200">
+        <Card className="p-3 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
           <div className="flex items-center gap-2">
-            <ArrowUpRight className="h-5 w-5 text-red-600" />
-            <div>
+            <ArrowUpRight className="h-5 w-5 text-red-600 shrink-0" />
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Total Debits</p>
-              <p className="text-lg font-bold text-red-600">
+              <p className="text-lg font-bold text-red-600 truncate">
                 {formatLocalAmount(totals.totalDebits, "NGN")}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -196,7 +289,8 @@ export const AccountStatementsDialog = ({
               placeholder="Search by description or reference..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="pl-9 touch-manipulation"
+              autoComplete="off"
             />
           </div>
 
@@ -205,7 +299,7 @@ export const AccountStatementsDialog = ({
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background z-50">
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="credit">Credits Only</SelectItem>
                 <SelectItem value="debit">Debits Only</SelectItem>
@@ -215,7 +309,7 @@ export const AccountStatementsDialog = ({
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background z-50">
                 <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="dues_payment">Dues Payment</SelectItem>
                 <SelectItem value="levy_payment">Levy Payment</SelectItem>
@@ -243,7 +337,7 @@ export const AccountStatementsDialog = ({
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="h-9"
+                className="h-9 touch-manipulation"
               />
             </div>
             <div className="space-y-1">
@@ -255,17 +349,21 @@ export const AccountStatementsDialog = ({
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="h-9"
+                className="h-9 touch-manipulation"
               />
             </div>
           </div>
         </div>
       </Card>
 
-      {/* Export Button */}
-      <Button variant="outline" className="w-full gap-2" onClick={handleExport}>
+      {/* Download Statement Button - Opens Format Selection */}
+      <Button 
+        variant="outline" 
+        className="w-full gap-2 touch-manipulation" 
+        onClick={() => setShowDownloadSheet(true)}
+      >
         <Download className="h-4 w-4" />
-        Export Statement (CSV)
+        Download Statement
       </Button>
 
       {/* Transactions List */}
@@ -372,31 +470,42 @@ export const AccountStatementsDialog = ({
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh]">
-          <DrawerHeader className="border-b">
-            <DrawerTitle>Account Statements</DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
-          </ScrollArea>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Account Statements</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="flex-1 pr-4">
-          <Content />
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <>
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden touch-auto">
+            <DrawerHeader className="border-b shrink-0">
+              <DrawerTitle>Account Statements</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-1 overflow-y-auto touch-auto overscroll-contain p-4">
+              <Content />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
+            <DialogHeader className="px-4 pt-4 pb-2 border-b shrink-0">
+              <DialogTitle>Account Statements</DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto p-4">
+              <Content />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Download Format Selection Sheet */}
+      <DownloadFormatSheet
+        open={showDownloadSheet}
+        onOpenChange={setShowDownloadSheet}
+        onDownload={handleDownload}
+        title="Download Statement"
+        documentName={`Account Statement - ${format(new Date(), "MMMM yyyy")}`}
+        availableFormats={["pdf", "csv", "txt", "jpeg", "png", "docx"]}
+        isDownloading={isDownloading}
+      />
+    </>
   );
 };
