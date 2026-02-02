@@ -97,8 +97,11 @@ export function VoucherDenominationSelector({
                   : "hover:border-muted-foreground/30"
               }`}
               role="button"
-              tabIndex={0}
-              onPointerDown={() => onPreInteract?.()}
+              tabIndex={-1}
+              onPointerDown={(e) => {
+                e.preventDefault(); // Block native focus to prevent scroll jump
+                onPreInteract?.();
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 toggleVoucher(voucher);
@@ -117,7 +120,7 @@ export function VoucherDenominationSelector({
                     onSelectionChange(selectedVouchers.filter((sv) => sv.voucher.id !== voucher.id));
                   }}
                   onPointerDown={(e) => {
-                    // Prevent focus/scroll adjustments within the parent scroll container
+                    e.preventDefault(); // Prevent focus-triggered scroll
                     e.stopPropagation();
                     onPreInteract?.();
                   }}
@@ -161,6 +164,8 @@ export function VoucherDenominationSelector({
                       variant="outline"
                       size="icon"
                       className="h-7 w-7 touch-manipulation"
+                      tabIndex={-1}
+                      onPointerDown={(e) => e.preventDefault()}
                       onClick={(e) => handleQuantityChange(voucher.id, -1, e)}
                       disabled={quantity <= 1}
                     >
@@ -173,6 +178,8 @@ export function VoucherDenominationSelector({
                       variant="outline"
                       size="icon"
                       className="h-7 w-7 touch-manipulation"
+                      tabIndex={-1}
+                      onPointerDown={(e) => e.preventDefault()}
                       onClick={(e) => handleQuantityChange(voucher.id, 1, e)}
                     >
                       <Plus className="h-3 w-3" />

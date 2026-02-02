@@ -67,15 +67,21 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
 
   useLayoutEffect(() => {
     if (step !== "vouchers") return;
+    if (!vouchersScrollLockRef.current) return;
+    
     const el = vouchersScrollRef.current;
     if (!el) return;
+    
+    const scrollPos = vouchersScrollTopRef.current;
+    
     // Restore immediately after React commits the updated DOM.
-    el.scrollTop = vouchersScrollTopRef.current;
+    el.scrollTop = scrollPos;
 
-    // Release the lock after the browser has had a chance to finish any
-    // post-click focus/scroll adjustments.
+    // Also restore after micro-delays to catch late focus-triggered scrolls
     requestAnimationFrame(() => {
+      el.scrollTop = scrollPos;
       requestAnimationFrame(() => {
+        el.scrollTop = scrollPos;
         vouchersScrollLockRef.current = false;
       });
     });
@@ -170,6 +176,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
       <div
         ref={vouchersScrollRef}
         className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain"
+        style={{ scrollBehavior: 'auto' }}
         onScroll={(e) => {
           if (vouchersScrollLockRef.current) return;
           vouchersScrollTopRef.current = (e.currentTarget as HTMLDivElement).scrollTop;
