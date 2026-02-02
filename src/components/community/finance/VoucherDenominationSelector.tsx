@@ -1,49 +1,47 @@
 import type React from "react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Sparkles, Coins, X } from "lucide-react";
+import { Minus, Plus, Sparkles, Coins, X, Check } from "lucide-react";
 import { rechargeVouchers, RechargeVoucher, SelectedVoucher, calculateVoucherTotals } from "@/data/rechargeVouchersData";
 
 interface VoucherDenominationSelectorProps {
   selectedVouchers: SelectedVoucher[];
   onSelectionChange: (vouchers: SelectedVoucher[]) => void;
-  /** Used by the parent drawer to capture scrollTop before any click/focus side-effects happen. */
-  onPreInteract?: () => void;
 }
 
 export function VoucherDenominationSelector({
   selectedVouchers,
   onSelectionChange,
-  onPreInteract,
 }: VoucherDenominationSelectorProps) {
   const activeVouchers = rechargeVouchers.filter((v) => v.isActive);
 
-  const isVoucherSelected = (voucherId: string) => {
+  const isVoucherSelected = useCallback((voucherId: string) => {
     return selectedVouchers.some((sv) => sv.voucher.id === voucherId);
-  };
+  }, [selectedVouchers]);
 
-  const getVoucherQuantity = (voucherId: string) => {
+  const getVoucherQuantity = useCallback((voucherId: string) => {
     const found = selectedVouchers.find((sv) => sv.voucher.id === voucherId);
     return found?.quantity || 0;
-  };
+  }, [selectedVouchers]);
 
-  const toggleVoucher = (voucher: RechargeVoucher) => {
+  const toggleVoucher = useCallback((voucher: RechargeVoucher, e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent any default behavior and stop propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isVoucherSelected(voucher.id)) {
       onSelectionChange(selectedVouchers.filter((sv) => sv.voucher.id !== voucher.id));
-      return;
+    } else {
+      onSelectionChange([...selectedVouchers, { voucher, quantity: 1 }]);
     }
-    onSelectionChange([...selectedVouchers, { voucher, quantity: 1 }]);
-  };
+  }, [selectedVouchers, onSelectionChange, isVoucherSelected]);
 
-  const handleQuantityChange = (voucherId: string, delta: number, event: React.SyntheticEvent) => {
-    event.stopPropagation();
-    onPreInteract?.();
-    // Prevent browser from shifting scroll when buttons receive focus
-    // (common in mobile drawers).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event as any).preventDefault?.();
+  const handleQuantityChange = useCallback((voucherId: string, delta: number, e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent any default behavior and stop propagation
+    e.preventDefault();
+    e.stopPropagation();
     
     onSelectionChange(
       selectedVouchers.map((sv) => {
@@ -54,12 +52,13 @@ export function VoucherDenominationSelector({
         return sv;
       })
     );
-  };
+  }, [selectedVouchers, onSelectionChange]);
 
-  const handleClearAll = (event: React.MouseEvent) => {
-    event.stopPropagation();
+  const handleClearAll = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     onSelectionChange([]);
-  };
+  }, [onSelectionChange]);
 
   const totals = calculateVoucherTotals(selectedVouchers);
 
@@ -73,8 +72,10 @@ export function VoucherDenominationSelector({
           <Button
             variant="ghost"
             size="sm"
+            onTouchEnd={handleClearAll}
             onClick={handleClearAll}
-            className="h-7 text-xs text-muted-foreground hover:text-destructive"
+            className="h-7 text-xs text-muted-foreground hover:text-destructive touch-manipulation"
+            tabIndex={-1}
           >
             <X className="h-3 w-3 mr-1" />
             Clear All
@@ -82,7 +83,7 @@ export function VoucherDenominationSelector({
         )}
       </div>
 
-      {/* Voucher list - no nested ScrollArea */}
+      {/* Voucher list - simple native rendering */}
       <div className="space-y-2">
         {activeVouchers.map((voucher) => {
           const isSelected = isVoucherSelected(voucher.id);
@@ -91,55 +92,28 @@ export function VoucherDenominationSelector({
           return (
             <Card
               key={voucher.id}
-              className={`p-3 transition-all duration-200 ${
+              className={`p-3 transition-colors touch-manipulation select-none ${
                 isSelected
                   ? "border-primary bg-primary/5 shadow-sm"
-                  : "hover:border-muted-foreground/30"
+                  : "active:bg-muted/50"
               }`}
-              role="button"
-              tabIndex={-1}
-              onPointerDown={(e) => {
-                e.preventDefault(); // Block native focus to prevent scroll jump
-                onPreInteract?.();
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleVoucher(voucher);
-              }}
+              onTouchEnd={(e) => toggleVoucher(voucher, e)}
+              onClick={(e) => toggleVoucher(voucher, e)}
             >
               <div className="flex items-center gap-3">
-                <Checkbox
-                  id={voucher.id}
-                  checked={isSelected}
-                  onCheckedChange={(checked) => {
-                    onPreInteract?.();
-                    if (checked) {
-                      onSelectionChange([...selectedVouchers, { voucher, quantity: 1 }]);
-                      return;
-                    }
-                    onSelectionChange(selectedVouchers.filter((sv) => sv.voucher.id !== voucher.id));
-                  }}
-                  onPointerDown={(e) => {
-                    e.preventDefault(); // Prevent focus-triggered scroll
-                    e.stopPropagation();
-                    onPreInteract?.();
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-
+                {/* Custom checkbox - no Radix, no focus issues */}
                 <div
-                  className="flex-1 cursor-pointer"
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    onPreInteract?.();
-                  }}
-                  onClick={(e) => {
-                    // Card onClick handles the toggle.
-                    e.stopPropagation();
-                  }}
+                  className={`h-5 w-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                    isSelected
+                      ? "bg-primary border-primary"
+                      : "border-muted-foreground/40 bg-background"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
+                  {isSelected && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm">
                       {voucher.mobiValue.toLocaleString()} Mobi
                     </span>
@@ -159,27 +133,31 @@ export function VoucherDenominationSelector({
                 </div>
 
                 {isSelected && (
-                  <div className="flex items-center gap-1 animate-fade-in">
+                  <div 
+                    className="flex items-center gap-1"
+                    onTouchEnd={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-7 w-7 touch-manipulation"
+                      className="h-8 w-8 touch-manipulation"
                       tabIndex={-1}
-                      onPointerDown={(e) => e.preventDefault()}
+                      onTouchEnd={(e) => handleQuantityChange(voucher.id, -1, e)}
                       onClick={(e) => handleQuantityChange(voucher.id, -1, e)}
                       disabled={quantity <= 1}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
-                    <span className="w-6 text-center text-sm font-medium">
+                    <span className="w-8 text-center text-sm font-medium tabular-nums">
                       {quantity}
                     </span>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-7 w-7 touch-manipulation"
+                      className="h-8 w-8 touch-manipulation"
                       tabIndex={-1}
-                      onPointerDown={(e) => e.preventDefault()}
+                      onTouchEnd={(e) => handleQuantityChange(voucher.id, 1, e)}
                       onClick={(e) => handleQuantityChange(voucher.id, 1, e)}
                     >
                       <Plus className="h-3 w-3" />
@@ -194,7 +172,7 @@ export function VoucherDenominationSelector({
 
       {/* Running Totals */}
       {selectedVouchers.length > 0 && (
-        <Card className="p-3 bg-muted/50 border-dashed animate-fade-in">
+        <Card className="p-3 bg-muted/50 border-dashed">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-1.5">
