@@ -24,10 +24,10 @@ interface MemberRequestItemProps {
 }
 
 const MemberRequestItem = ({ request, onApprove, onReject, onView }: MemberRequestItemProps) => (
-  <div className="py-2.5 space-y-2">
-    {/* Top row: Avatar + Name + Time */}
-    <div className="flex items-center gap-2.5">
-      <Avatar className="h-10 w-10 shrink-0">
+  <div className="py-3 space-y-1.5">
+    {/* Row 1: Avatar + Name + Time */}
+    <div className="flex items-center gap-3">
+      <Avatar className="h-9 w-9 shrink-0">
         <AvatarImage src={request.avatar} alt={request.name} />
         <AvatarFallback className="text-xs">{request.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
       </Avatar>
@@ -38,35 +38,28 @@ const MemberRequestItem = ({ request, onApprove, onReject, onView }: MemberReque
         </p>
       </div>
     </div>
-    {/* Bottom row: Action buttons full width */}
-    <div className="flex items-center gap-1.5 pl-12">
-      <Button
-        size="sm"
-        variant="ghost"
-        className="h-8 flex-1 text-xs"
+    {/* Row 2: Action buttons inline */}
+    <div className="flex items-center gap-3 pl-12 text-xs">
+      <button
+        className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
         onClick={() => onView(request.id)}
       >
-        <Eye className="h-3.5 w-3.5 mr-1.5" />
+        <Eye className="h-3.5 w-3.5" />
         View
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        className="h-8 flex-1 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+      </button>
+      <button
+        className="flex items-center gap-1 text-green-600 hover:text-green-700"
         onClick={() => onApprove(request.id)}
       >
-        <Check className="h-3.5 w-3.5 mr-1.5" />
+        <Check className="h-3.5 w-3.5" />
         Approve
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        className="h-8 flex-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+      </button>
+      <button
+        className="flex items-center gap-1 text-red-500 hover:text-red-600"
         onClick={() => onReject(request.id)}
       >
-        <X className="h-3.5 w-3.5 mr-1.5" />
-        Reject
-      </Button>
+        <X className="h-3.5 w-3.5" />
+      </button>
     </div>
   </div>
 );
@@ -77,9 +70,9 @@ interface StatBadgeProps {
 }
 
 const StatBadge = ({ value, label }: StatBadgeProps) => (
-  <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-muted/40 min-h-[60px]">
-    <span className="text-lg font-bold leading-none">{value.toLocaleString()}</span>
-    <span className="text-xs text-muted-foreground mt-1">{label}</span>
+  <div className="flex flex-col items-center justify-center py-2">
+    <span className="text-base font-bold leading-none">{value.toLocaleString()}</span>
+    <span className="text-[10px] text-muted-foreground mt-0.5">{label}</span>
   </div>
 );
 
@@ -200,44 +193,38 @@ export function AdminMembershipSection({
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-2.5 pb-2.5">
-            <div className="space-y-2.5">
-              {/* Stats - Single 2x2 grid */}
-              <div className="grid grid-cols-4 gap-1">
+          <AccordionContent className="px-3 pb-3">
+            <div className="space-y-3">
+              {/* Stats - 3 column inline */}
+              <div className="flex items-center justify-start gap-6 py-1">
                 <StatBadge value={stats.totalMembers} label="Total" />
                 <StatBadge value={stats.activeMembers} label="Active" />
                 <StatBadge value={stats.pendingRequests} label="Pending" />
-                <StatBadge value={stats.blockedUsers} label="Blocked" />
               </div>
 
-              {/* Action Buttons - Stacked full width */}
-              <div className="flex flex-col gap-1.5">
-                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewAllMembers}>
-                  <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+              {/* Action Buttons - Stacked full width with icons */}
+              <div className="flex flex-col gap-0 divide-y divide-border">
+                <button 
+                  className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded"
+                  onClick={onViewAllMembers}
+                >
+                  <Users className="h-4 w-4 text-muted-foreground" />
                   View All Members
-                </Button>
-                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onManageRequests}>
-                  <span className="flex items-center">
-                    <UserPlus className="h-3.5 w-3.5 mr-2 shrink-0" />
-                    Membership Requests
-                  </span>
-                  {stats.pendingRequests > 0 && (
-                    <Badge variant="destructive" className="text-[10px] px-1.5 h-4 ml-2">
-                      {stats.pendingRequests}
-                    </Badge>
-                  )}
-                </Button>
-                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onViewBlocked}>
-                  <span className="flex items-center">
-                    <UserX className="h-3.5 w-3.5 mr-2 shrink-0" />
-                    Blocked Users
-                  </span>
-                  {stats.blockedUsers > 0 && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 h-4 ml-2">
-                      {stats.blockedUsers}
-                    </Badge>
-                  )}
-                </Button>
+                </button>
+                <button 
+                  className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded"
+                  onClick={onManageRequests}
+                >
+                  <UserPlus className="h-4 w-4 text-muted-foreground" />
+                  Membership Requests
+                </button>
+                <button 
+                  className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded"
+                  onClick={onViewBlocked}
+                >
+                  <UserX className="h-4 w-4 text-muted-foreground" />
+                  Blocked Users
+                </button>
               </div>
 
               {/* Search */}
@@ -253,34 +240,24 @@ export function AdminMembershipSection({
 
               {/* Recent Requests */}
               {recentRequests.length > 0 && (
-                <Card className="border-0 shadow-none bg-muted/30">
-                  <CardHeader className="p-2.5 pb-1">
-                    <CardTitle className="text-xs flex items-center justify-between">
-                      <span>Recent Requests</span>
-                      <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1" onClick={onManageRequests}>
-                        View All
-                        <ChevronRight className="h-3 w-3 ml-0.5" />
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-2.5 pt-0">
-                    <div className="divide-y divide-border/50">
-                      {recentRequests.slice(0, 3).map((request) => (
-                        <MemberRequestItem
-                          key={request.id}
-                          request={request}
-                          onApprove={handleApprove}
-                          onReject={handleReject}
-                          onView={handleView}
-                        />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Recent Requests</p>
+                  <div className="divide-y divide-border/50">
+                    {recentRequests.slice(0, 3).map((request) => (
+                      <MemberRequestItem
+                        key={request.id}
+                        request={request}
+                        onApprove={handleApprove}
+                        onReject={handleReject}
+                        onView={handleView}
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Authorization Info */}
-              <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+              <div className="flex items-start gap-2 pt-2 border-t border-border/50">
                 <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
                 <span className="text-xs text-muted-foreground leading-snug">
                   Member actions require President + (Secretary or PRO) authorization
