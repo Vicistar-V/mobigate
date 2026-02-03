@@ -202,7 +202,11 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                   placeholder="Enter your full name"
                   value={candidateName}
                   onChange={(e) => setCandidateName(e.target.value)}
-                  className="h-12 text-base"
+                  className="h-12 text-base touch-manipulation"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
 
@@ -233,7 +237,11 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                   placeholder="A short, catchy campaign slogan"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="h-12 text-base"
+                  className="h-12 text-base touch-manipulation"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
 
@@ -247,7 +255,11 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                   placeholder="What will you do if elected? Share your vision and plans..."
                   value={manifesto}
                   onChange={(e) => setManifesto(e.target.value)}
-                  className="min-h-[120px] resize-none text-base"
+                  className="min-h-[120px] resize-none text-base touch-manipulation"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
 
