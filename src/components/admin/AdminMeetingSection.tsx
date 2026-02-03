@@ -19,20 +19,29 @@ interface MeetingItemProps {
 }
 
 const MeetingItem = ({ meeting, onView }: MeetingItemProps) => (
-  <div className="flex items-center gap-3 py-3">
-    <div className="p-2 rounded-lg bg-teal-500/10 shrink-0">
-      <Video className="h-4 w-4 text-teal-600" />
+  <div className="py-3 space-y-1.5">
+    {/* Row 1: Icon + Title + Date */}
+    <div className="flex items-start gap-2.5">
+      <div className="p-1.5 rounded-md bg-teal-500/10 shrink-0 mt-0.5">
+        <Video className="h-3.5 w-3.5 text-teal-600" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm leading-snug line-clamp-1">{meeting.title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {formatFutureTime(meeting.date)}
+        </p>
+      </div>
     </div>
-    <div className="flex-1 min-w-0">
-      <p className="font-medium text-sm truncate">{meeting.title}</p>
-      <p className="text-sm text-muted-foreground">
-        {formatFutureTime(meeting.date)}
-      </p>
+    {/* Row 2: Action link */}
+    <div className="flex items-center gap-3 pl-8 text-xs">
+      <button 
+        className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => onView(meeting.id)}
+      >
+        View
+        <ChevronRight className="h-3.5 w-3.5" />
+      </button>
     </div>
-    <Button variant="ghost" size="sm" className="h-8 text-sm px-2 shrink-0" onClick={() => onView(meeting.id)}>
-      View
-      <ChevronRight className="h-4 w-4 ml-1" />
-    </Button>
   </div>
 );
 
