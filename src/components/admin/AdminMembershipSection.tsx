@@ -178,53 +178,55 @@ export function AdminMembershipSection({
         onAuthorized={handleAuthorizationComplete}
       />
 
-      <Accordion type="single" collapsible className="w-full max-w-full">
+      <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="membership" className="border rounded-lg overflow-hidden">
-          <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-lg bg-blue-500/10 shrink-0">
-                <Users className="h-5 w-5 text-blue-600" />
+          <AccordionTrigger className="px-3 hover:no-underline">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-blue-500/10 shrink-0">
+                <Users className="h-4 w-4 text-blue-600" />
               </div>
-              <div className="text-left min-w-0">
-                <h3 className="font-semibold text-base truncate">Membership</h3>
-                <p className="text-sm text-muted-foreground truncate">
+              <div className="text-left min-w-0 flex-1">
+                <h3 className="font-semibold text-sm">Membership</h3>
+                <p className="text-xs text-muted-foreground">
                   {stats.totalMembers.toLocaleString()} members • {stats.pendingRequests} pending
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-3 pb-3">
-            <div className="space-y-3 w-full max-w-full overflow-hidden">
-              {/* Stats Row - 2 columns for mobile */}
-              <div className="grid grid-cols-2 gap-1.5 w-full">
+          <AccordionContent className="px-2.5 pb-2.5">
+            <div className="space-y-2.5">
+              {/* Stats Row - 2x2 grid */}
+              <div className="grid grid-cols-2 gap-1.5">
                 <StatBadge value={stats.totalMembers} label="Total" />
                 <StatBadge value={stats.activeMembers} label="Active" />
                 <StatBadge value={stats.pendingRequests} label="Pending" />
                 <StatBadge value={stats.blockedUsers} label="Blocked" />
               </div>
 
-              {/* Action Buttons - Full width stacked */}
-              <div className="space-y-1.5">
-                <div className="grid grid-cols-2 gap-1.5">
-                  <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onViewAllMembers}>
-                    <Users className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                    View All
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onManageRequests}>
-                    <UserPlus className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                    Requests
-                    {stats.pendingRequests > 0 && (
-                      <Badge variant="destructive" className="ml-1.5 text-[10px] px-1 h-4">
-                        {stats.pendingRequests}
-                      </Badge>
-                    )}
-                  </Button>
-                </div>
-                <Button variant="outline" size="sm" className="w-full h-9 text-xs" onClick={onViewBlocked}>
-                  <UserX className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                  Blocked Users
+              {/* Action Buttons - Stacked full width */}
+              <div className="flex flex-col gap-1.5">
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewAllMembers}>
+                  <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  View All Members
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onManageRequests}>
+                  <span className="flex items-center">
+                    <UserPlus className="h-3.5 w-3.5 mr-2 shrink-0" />
+                    Membership Requests
+                  </span>
+                  {stats.pendingRequests > 0 && (
+                    <Badge variant="destructive" className="text-[10px] px-1.5 h-4 ml-2">
+                      {stats.pendingRequests}
+                    </Badge>
+                  )}
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onViewBlocked}>
+                  <span className="flex items-center">
+                    <UserX className="h-3.5 w-3.5 mr-2 shrink-0" />
+                    Blocked Users
+                  </span>
                   {stats.blockedUsers > 0 && (
-                    <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 h-4">
+                    <Badge variant="secondary" className="text-[10px] px-1.5 h-4 ml-2">
                       {stats.blockedUsers}
                     </Badge>
                   )}
@@ -244,18 +246,18 @@ export function AdminMembershipSection({
 
               {/* Recent Requests */}
               {recentRequests.length > 0 && (
-                <Card className="overflow-hidden">
-                  <CardHeader className="pb-1 pt-2.5 px-3">
+                <Card className="border-0 shadow-none bg-muted/30">
+                  <CardHeader className="p-2.5 pb-1">
                     <CardTitle className="text-xs flex items-center justify-between">
-                      Recent Requests
-                      <Button variant="ghost" size="sm" className="h-7 text-xs px-1.5" onClick={onManageRequests}>
+                      <span>Recent Requests</span>
+                      <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1" onClick={onManageRequests}>
                         View All
-                        <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+                        <ChevronRight className="h-3 w-3 ml-0.5" />
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="px-3 pb-3 pt-0">
-                    <div className="divide-y divide-border">
+                  <CardContent className="p-2.5 pt-0">
+                    <div className="divide-y divide-border/50">
                       {recentRequests.slice(0, 3).map((request) => (
                         <MemberRequestItem
                           key={request.id}
@@ -271,9 +273,9 @@ export function AdminMembershipSection({
               )}
 
               {/* Authorization Info */}
-              <div className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg">
-                <Shield className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-                <span className="text-xs text-muted-foreground leading-relaxed">
+              <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+                <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-snug">
                   Member actions require President + (Secretary or PRO) authorization
                 </span>
               </div>
