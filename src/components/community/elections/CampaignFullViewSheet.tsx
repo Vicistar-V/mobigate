@@ -12,7 +12,8 @@ import {
   Clock, 
   CheckCircle2,
   Share2,
-  Vote
+  Vote,
+  Building2
 } from "lucide-react";
 import { EnhancedCampaign } from "@/types/campaignSystem";
 import { calculateDaysRemaining, getAudienceLabel } from "@/lib/campaignFeeDistribution";
@@ -74,6 +75,13 @@ export function CampaignFullViewSheet({
           <div>
             <SheetTitle className="text-lg">{campaign.candidateName}</SheetTitle>
             <p className="text-sm text-primary font-medium">Candidate for {campaign.office}</p>
+            {/* Community Name */}
+            <div className="flex items-center gap-1.5 mt-2 px-2 py-1.5 bg-muted/50 rounded-md w-fit">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="text-xs font-medium text-foreground/80">
+                {campaign.communityName}
+              </span>
+            </div>
           </div>
         </SheetHeader>
         

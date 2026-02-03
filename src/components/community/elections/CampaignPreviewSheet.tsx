@@ -12,7 +12,8 @@ import {
   Share2,
   Vote,
   MonitorSmartphone,
-  ArrowLeft
+  ArrowLeft,
+  Building2
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ interface CampaignPreviewData {
   endDate?: Date;
   campaignImage?: string | null;
   campaignColor: string;
+  communityName?: string;
 }
 
 interface CampaignPreviewSheetProps {
@@ -79,7 +81,8 @@ export function CampaignPreviewSheet({
     startDate, 
     endDate, 
     campaignImage,
-    campaignColor 
+    campaignColor,
+    communityName
   } = data;
 
   const daysRemaining = endDate ? Math.max(0, differenceInDays(endDate, new Date())) : 0;
@@ -161,6 +164,13 @@ export function CampaignPreviewSheet({
             )}>
               {office ? `Candidate for ${office}` : "Select an office"}
             </p>
+            {/* Community Name */}
+            <div className="flex items-center gap-1.5 mt-2 px-2 py-1.5 bg-muted/50 rounded-md w-fit">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <span className="text-xs font-medium text-foreground/80">
+                {communityName || "Your Community Name"}
+              </span>
+            </div>
           </div>
           
           <div className="px-4 pb-6">

@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   Share2,
   Vote,
-  MonitorSmartphone
+  MonitorSmartphone,
+  Building2
 } from "lucide-react";
 import { AdminCampaign } from "@/data/adminElectionData";
 import { format, differenceInDays } from "date-fns";
@@ -69,6 +70,13 @@ export function AdminCampaignPreviewSheet({
       <div className="px-4 pt-10 pb-2">
         <h2 className="text-lg font-bold">{campaign.candidateName}</h2>
         <p className="text-sm text-primary font-medium">Candidate for {campaign.office}</p>
+        {/* Community Name */}
+        <div className="flex items-center gap-1.5 mt-2 px-2 py-1.5 bg-muted/50 rounded-md w-fit">
+          <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="text-xs font-medium text-foreground/80">
+            Ndigbo Progressive Union
+          </span>
+        </div>
       </div>
       
       <ScrollArea className="flex-1 px-4">
