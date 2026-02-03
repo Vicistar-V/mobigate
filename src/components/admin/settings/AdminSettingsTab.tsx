@@ -334,17 +334,17 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
 
       {/* Authorization Info */}
       <Card className="bg-muted/30">
-        <CardContent className="p-3 space-y-2">
+        <CardContent className="p-3 space-y-2.5">
           <div className="flex items-start gap-2">
             <Lock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               <strong>Multi-Signature Required:</strong> Most settings require authorization from 
               President + Secretary + Legal Adviser before being submitted for member approval.
             </p>
           </div>
           <div className="flex items-start gap-2">
             <Lightbulb className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               <strong>Member Recommendations:</strong> Members can recommend alternative values. 
               If a recommendation reaches 60% support, it overrides admin settings.
             </p>
@@ -357,7 +357,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
         <CardContent className="p-3">
           <div className="flex items-start gap-2">
             <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-blue-600 dark:text-blue-400">
+            <p className="text-sm text-blue-600 dark:text-blue-400">
               Tap any setting to view details, propose changes, or see current approval status. 
               Proposals expire after {DEMOCRATIC_SETTINGS_CONFIG.PROPOSAL_EXPIRY_DAYS} days without decision.
             </p>

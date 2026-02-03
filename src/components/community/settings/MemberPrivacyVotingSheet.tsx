@@ -141,7 +141,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
               <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Each setting is decided by member votes. The option with the most votes 
                     (&gt;50% for majority) becomes the community default.
                   </p>
@@ -174,16 +174,16 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1">
+                          <p className="text-sm text-muted-foreground line-clamp-2">
                             {setting.settingDescription}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs text-muted-foreground">Current:</span>
+                            <span className="text-sm text-muted-foreground">Current:</span>
                             <Badge variant="secondary" className="text-xs">
                               {getOptionIcon(setting.currentValue)}
                               <span className="ml-1">{PRIVACY_OPTION_LABELS[setting.currentValue]}</span>
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm text-muted-foreground">
                               ({result.percentage.toFixed(0)}%)
                             </span>
                           </div>
@@ -201,7 +201,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                           <div className="pt-4 space-y-4">
                             {/* Vote Distribution */}
                             <div className="space-y-2">
-                              <p className="text-xs font-medium text-muted-foreground">
+                              <p className="text-sm font-medium text-muted-foreground">
                                 Current Vote Distribution ({setting.totalVotes} votes)
                               </p>
                               {(Object.entries(setting.voteCounts) as [PrivacyVisibilityOption, number][]).map(
@@ -211,16 +211,16 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                                     : 0;
                                   const isWinner = option === result.winner;
 
-                                  return (
-                                    <div key={option} className="space-y-1">
-                                      <div className="flex items-center justify-between text-xs">
-                                        <span className={isWinner ? 'font-medium' : 'text-muted-foreground'}>
-                                          {PRIVACY_OPTION_LABELS[option]}
-                                        </span>
-                                        <span className="text-muted-foreground">
-                                          {votes} ({percentage.toFixed(0)}%)
-                                        </span>
-                                      </div>
+                                    return (
+                                      <div key={option} className="space-y-1">
+                                        <div className="flex items-center justify-between text-sm">
+                                          <span className={isWinner ? 'font-medium' : 'text-muted-foreground'}>
+                                            {PRIVACY_OPTION_LABELS[option]}
+                                          </span>
+                                          <span className="text-muted-foreground">
+                                            {votes} ({percentage.toFixed(0)}%)
+                                          </span>
+                                        </div>
                                       <Progress 
                                         value={percentage} 
                                         className={`h-1.5 ${isWinner ? '' : 'opacity-50'}`}
@@ -233,7 +233,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
 
                             {/* Voting Options */}
                             <div className="space-y-2">
-                              <p className="text-xs font-medium text-muted-foreground">
+                              <p className="text-sm font-medium text-muted-foreground">
                                 Cast Your Vote
                               </p>
                               <RadioGroup
@@ -266,7 +266,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                                             {PRIVACY_OPTION_LABELS[option]}
                                           </span>
                                         </div>
-                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                        <p className="text-sm text-muted-foreground mt-0.5">
                                           {PRIVACY_OPTION_DESCRIPTIONS[option]}
                                         </p>
                                       </div>
@@ -294,7 +294,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                             )}
 
                             {setting.memberVote && !hasChanges && (
-                              <p className="text-xs text-center text-muted-foreground">
+                              <p className="text-sm text-center text-muted-foreground">
                                 You voted for "{PRIVACY_OPTION_LABELS[setting.memberVote]}"
                               </p>
                             )}
@@ -317,7 +317,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-medium text-sm text-red-800">Impeachment Privacy Settings</h4>
-                        <p className="text-xs text-red-600/80 line-clamp-1">
+                        <p className="text-sm text-red-600/80 line-clamp-2">
                           Vote on what impeachment data to show or hide (70% threshold)
                         </p>
                       </div>
@@ -331,7 +331,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
               <Card className="bg-muted/30">
                 <CardContent className="p-4">
                   <h4 className="font-medium text-sm mb-2">How Voting Works</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
+                  <ul className="text-sm text-muted-foreground space-y-1.5">
                     <li>• Each member gets one vote per setting</li>
                     <li>• You can change your vote at any time</li>
                     <li>• The option with &gt;50% votes becomes permanent</li>
