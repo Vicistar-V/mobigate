@@ -243,10 +243,10 @@ export function AdminSettingsSection({
                   <Shield className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                   <span className="truncate">Privacy</span>
                 </Button>
-                <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onNotificationSettings}>
-                  <Bell className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                  <span className="truncate">Notif.</span>
-                </Button>
+            <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onNotificationSettings}>
+              <Bell className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+              <span className="truncate">Notifications</span>
+            </Button>
               </div>
 
               {/* Democratic Governance Status */}
