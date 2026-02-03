@@ -419,10 +419,13 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
 
             <Button 
               onClick={handleProceedToSettings} 
-              className="w-full h-14 text-base font-semibold bg-primary hover:bg-primary/90"
+              className="w-full h-auto min-h-14 py-3 text-base font-semibold bg-primary hover:bg-primary/90 flex flex-col items-center gap-1"
             >
-              <Settings className="mr-2 h-5 w-5" />
-              <span className="break-words text-center">Configure Campaign (Audience & Fees)</span>
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 shrink-0" />
+                <span>Configure Campaign</span>
+              </div>
+              <span className="text-xs font-normal opacity-90">(Audience & Fees)</span>
             </Button>
             
             <div className="relative py-1">
