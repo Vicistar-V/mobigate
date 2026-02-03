@@ -167,10 +167,10 @@ export function AdminLeadershipSection({
               </div>
 
               {/* Current Executive Carousel */}
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-medium text-muted-foreground mb-2">Current Executive</p>
-                <div className="overflow-x-auto touch-pan-x -mx-3 px-3">
-                  <div className="flex gap-2.5 pb-2">
+                <div className="overflow-x-auto touch-pan-x scrollbar-none">
+                  <div className="flex gap-2.5 pb-2 w-max">
                     {executives.slice(0, 6).map((member) => (
                       <ExecutiveCard
                         key={member.id}
