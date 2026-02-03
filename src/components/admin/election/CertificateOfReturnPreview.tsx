@@ -42,7 +42,7 @@ export function CertificateOfReturnPreview({
                      CERTIFICATE OF RETURN
 ══════════════════════════════════════════════════════════════════
 
-                    MOBIGATE ELECTORAL COMMISSION
+                    MOBIGATE ELECTORAL SYSTEM
                       Official Document
 
 Certificate No: ${certificate.certificateNumber}
@@ -92,7 +92,7 @@ Date of Issue:     ${format(certificate.issuedDate, "MMMM d, yyyy")}
 
                     ___________________________
                         MOBIGATE SIGNATURE
-                    Electoral Commission Seal
+                    Electoral System Seal
 
 
 This Certificate of Return serves as official and verified evidence
@@ -143,7 +143,7 @@ and all official documentation purposes.
               Certificate of Return
             </h1>
             <p className="text-primary-foreground/80 text-[10px] sm:text-xs mt-1 tracking-wide">
-              Mobigate Electoral Commission
+              Mobigate Electoral System
             </p>
           </div>
 
@@ -294,7 +294,7 @@ and all official documentation purposes.
                 </div>
                 
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                  Electoral Commission
+                  Electoral System
                 </p>
               </div>
 
