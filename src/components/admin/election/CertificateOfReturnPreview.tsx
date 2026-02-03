@@ -42,7 +42,7 @@ export function CertificateOfReturnPreview({
                      CERTIFICATE OF RETURN
 ══════════════════════════════════════════════════════════════════
 
-                    MOBIGATE ELECTORAL SYSTEM
+                    MOBIGATE INDEPENDENT ELECTORAL SYSTEM
                       Official Document
 
 Certificate No: ${certificate.certificateNumber}
@@ -143,7 +143,7 @@ and all official documentation purposes.
               Certificate of Return
             </h1>
             <p className="text-primary-foreground/80 text-[10px] sm:text-xs mt-1 tracking-wide">
-              Mobigate Electoral System
+              Mobigate Independent Electoral System
             </p>
           </div>
 

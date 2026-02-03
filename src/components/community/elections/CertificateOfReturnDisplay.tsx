@@ -303,7 +303,7 @@ export const mockCertificate: CertificateOfReturn = {
   tenureEnd: new Date("2030-02-28"),
   tenureDurationYears: 4,
   issuedDate: new Date("2026-01-27"),
-  issuedBy: "Mobigate Electoral System",
+  issuedBy: "Mobigate Independent Electoral System",
   digitalSignature: "MG-SIG-2026-A7B3C9D2",
   verificationCode: "KMN3G0GI",
   status: "issued",

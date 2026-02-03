@@ -77,7 +77,7 @@ export function AdminWinnersAnnouncementTab() {
       tenureEnd: addYears(now, tenureYears),
       tenureDurationYears: tenureYears,
       issuedDate: now,
-      issuedBy: "Mobigate Electoral System",
+      issuedBy: "Mobigate Independent Electoral System",
       digitalSignature: "MOBIGATE-SIG-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
       verificationCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
       status: 'issued'
