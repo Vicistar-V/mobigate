@@ -41,6 +41,8 @@ export const ElectionAccreditationTab = () => {
   const [isAccredited, setIsAccredited] = useState(false);
   const [isAccreditationLoading, setIsAccreditationLoading] = useState(false);
   const [accreditationNumber, setAccreditationNumber] = useState<string | null>(null);
+  const [isActivityDebtCleared, setIsActivityDebtCleared] = useState(false);
+  const [isActivityDebtClearing, setIsActivityDebtClearing] = useState(false);
 
   const handleGetAccreditation = async () => {
     if (isAccredited) return;
@@ -57,6 +59,20 @@ export const ElectionAccreditationTab = () => {
     setIsAccreditationLoading(false);
     
     toast.success("Accreditation successful! Check your email for your accreditation number.");
+  };
+
+  const handleActivityDebtClearing = async () => {
+    if (isActivityDebtCleared) return;
+    
+    setIsActivityDebtClearing(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setIsActivityDebtCleared(true);
+    setIsActivityDebtClearing(false);
+    
+    toast.success(`₦${activitiesData.totalPenalty.toLocaleString()} (M${activitiesData.totalPenalty.toLocaleString()}) debited from your Mobi Wallet. Activity debts cleared!`);
   };
 
   const handleDebtsClearing = () => {
@@ -261,6 +277,42 @@ export const ElectionAccreditationTab = () => {
         <AccreditedVotersSection />
       )}
       
+      {/* Clear Activity Debts Now Button - Shows only on Activities tab when debts exist */}
+      {activeSubTab === 'activities' && activitiesData.totalPenalty > 0 && (
+        <div className="space-y-2">
+          {!isActivityDebtCleared ? (
+            <Button 
+              className="w-full bg-orange-600 hover:bg-orange-700 text-lg font-bold py-6"
+              onClick={handleActivityDebtClearing}
+              disabled={isActivityDebtClearing}
+            >
+              {isActivityDebtClearing ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Processing Debit...</span>
+                </div>
+              ) : (
+                <span>Clear Debts Now</span>
+              )}
+            </Button>
+          ) : (
+            <Button 
+              className="w-full bg-green-600 hover:bg-green-600 text-lg font-bold py-6"
+              disabled
+            >
+              <CheckCircle2 className="h-5 w-5 mr-2" />
+              Activity Debts Cleared
+            </Button>
+          )}
+          
+          {!isActivityDebtCleared && (
+            <p className="text-xs text-muted-foreground text-center leading-relaxed">
+              This will debit <strong>M{activitiesData.totalPenalty.toLocaleString()}</strong> (≈ ₦{activitiesData.totalPenalty.toLocaleString()}) from your Mobi Wallet.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Get Accreditation Now button */}
       <Button 
         className={`w-full text-xl font-bold py-8 transition-all duration-300 ${
@@ -268,10 +320,12 @@ export const ElectionAccreditationTab = () => {
             ? "bg-green-700 hover:bg-green-700 cursor-default" 
             : isAccreditationLoading 
             ? "bg-green-500 hover:bg-green-500 cursor-wait" 
+            : activeSubTab === 'activities' && !isActivityDebtCleared
+            ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
             : "bg-green-600 hover:bg-green-700"
         }`}
         onClick={handleGetAccreditation}
-        disabled={isAccreditationLoading || isAccredited}
+        disabled={isAccreditationLoading || isAccredited || (activeSubTab === 'activities' && !isActivityDebtCleared)}
       >
         {isAccreditationLoading ? (
           <div className="flex items-center justify-center gap-3">
