@@ -202,10 +202,12 @@ export function AdminMembershipSection({
           </AccordionTrigger>
           <AccordionContent className="px-2.5 pb-2.5">
             <div className="space-y-2.5">
-              {/* Stats Row - 2x2 grid */}
+              {/* Stats Row - 2 columns */}
               <div className="grid grid-cols-2 gap-1.5">
                 <StatBadge value={stats.totalMembers} label="Total" />
                 <StatBadge value={stats.activeMembers} label="Active" />
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
                 <StatBadge value={stats.pendingRequests} label="Pending" />
                 <StatBadge value={stats.blockedUsers} label="Blocked" />
               </div>
