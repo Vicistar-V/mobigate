@@ -137,37 +137,37 @@ export function AdminLeadershipSection({
         onAuthorized={handleAuthorizationComplete}
       />
 
-      <Accordion type="single" collapsible className="w-full max-w-full">
+      <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="leadership" className="border rounded-lg overflow-hidden">
-          <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-lg bg-indigo-500/10 shrink-0">
-                <Crown className="h-5 w-5 text-indigo-600" />
+          <AccordionTrigger className="px-3 hover:no-underline">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-indigo-500/10 shrink-0">
+                <Crown className="h-4 w-4 text-indigo-600" />
               </div>
-              <div className="text-left min-w-0">
-                <h3 className="font-semibold text-base truncate">Leadership</h3>
-                <p className="text-sm text-muted-foreground truncate">
+              <div className="text-left min-w-0 flex-1">
+                <h3 className="font-semibold text-sm">Leadership</h3>
+                <p className="text-xs text-muted-foreground">
                   {executives.length} executives • 3 ad-hoc
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <div className="space-y-4 w-full max-w-full overflow-hidden">
+          <AccordionContent className="px-2.5 pb-2.5">
+            <div className="space-y-2.5">
               {/* Current Executive Carousel */}
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-2 pt-3 px-4">
-                  <CardTitle className="text-sm flex items-center justify-between">
-                    Current Executive
-                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onManageLeadership}>
+              <Card className="border-0 shadow-none bg-muted/30">
+                <CardHeader className="p-2.5 pb-1">
+                  <CardTitle className="text-xs flex items-center justify-between">
+                    <span>Current Executive</span>
+                    <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1" onClick={onManageLeadership}>
                       View All
-                      <ChevronRight className="h-4 w-4 ml-1" />
+                      <ChevronRight className="h-3 w-3 ml-0.5" />
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
+                <CardContent className="p-2.5 pt-0">
                   <ScrollArea className="w-full touch-auto">
-                    <div className="flex gap-3 pb-2">
+                    <div className="flex gap-2 pb-2">
                       {executives.slice(0, 6).map((member) => (
                         <ExecutiveCard
                           key={member.id}
@@ -181,47 +181,42 @@ export function AdminLeadershipSection({
                 </CardContent>
               </Card>
 
-              {/* Action Buttons - Full width stacked */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onManageLeadership}>
-                  <Crown className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                  Manage
+              {/* Action Buttons - Stacked full width */}
+              <div className="flex flex-col gap-1.5">
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageLeadership}>
+                  <Crown className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Leadership
                 </Button>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  className="h-9 text-xs px-2" 
-                  onClick={handleApplyResultsWithAuth}
-                >
-                  <Trophy className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                  Apply
+                <Button variant="default" size="sm" className="w-full h-9 text-xs justify-start" onClick={handleApplyResultsWithAuth}>
+                  <Trophy className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Apply Election Results
                 </Button>
-                <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onViewChangeHistory}>
-                  <History className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                  History
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewChangeHistory}>
+                  <History className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  View Change History
                 </Button>
-                <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={handleAssignAdhocWithAuth}>
-                  <Users className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                  Ad-hoc
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={handleAssignAdhocWithAuth}>
+                  <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Ad-hoc Committees
                 </Button>
               </div>
 
-              {/* Quick Stats - 2 columns for mobile */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+              {/* Quick Stats - 2 columns */}
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                   <span className="text-xs text-muted-foreground">Executives</span>
                   <span className="text-sm font-bold">{executives.length}</span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                   <span className="text-xs text-muted-foreground">Committees</span>
                   <span className="text-sm font-bold">3</span>
                 </div>
               </div>
 
               {/* Authorization Info */}
-              <div className="flex items-start gap-2 p-2.5 bg-muted/50 rounded-lg">
-                <Shield className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                <span className="text-xs text-muted-foreground leading-relaxed">
+              <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+                <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-snug">
                   Leadership changes require President + Secretary + (PRO or Dir. Socials)
                 </span>
               </div>

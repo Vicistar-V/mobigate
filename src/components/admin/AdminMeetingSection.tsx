@@ -79,96 +79,88 @@ export function AdminMeetingSection({
         open={showMinutesSettings}
         onOpenChange={setShowMinutesSettings}
       />
-    <Accordion type="single" collapsible className="w-full max-w-full">
+    <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="meeting" className="border rounded-lg overflow-hidden">
-        <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 rounded-lg bg-teal-500/10 shrink-0">
-              <Calendar className="h-5 w-5 text-teal-600" />
+        <AccordionTrigger className="px-3 hover:no-underline">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="p-1.5 rounded-lg bg-teal-500/10 shrink-0">
+              <Calendar className="h-4 w-4 text-teal-600" />
             </div>
-            <div className="text-left min-w-0">
-              <h3 className="font-semibold text-base truncate">Meetings</h3>
-              <p className="text-sm text-muted-foreground truncate">
+            <div className="text-left min-w-0 flex-1">
+              <h3 className="font-semibold text-sm">Meetings</h3>
+              <p className="text-xs text-muted-foreground">
                 {stats.scheduledMeetings} scheduled • {stats.avgAttendanceRate}% attendance
               </p>
             </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4">
-          <div className="space-y-4 w-full max-w-full overflow-hidden">
-            {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-1.5 w-full">
+        <AccordionContent className="px-2.5 pb-2.5">
+          <div className="space-y-2.5">
+            {/* Stats Row - 3 columns */}
+            <div className="grid grid-cols-3 gap-1.5">
               <StatBadge value={stats.scheduledMeetings} label="Scheduled" icon={Clock} />
               <StatBadge value={stats.completedMeetings} label="Completed" icon={CheckCircle} />
               <StatBadge value={`${stats.avgAttendanceRate}%`} label="Attendance" icon={Users} />
             </div>
 
             {/* Attendance Progress */}
-            <div className="p-3 rounded-lg bg-muted/50">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Avg Attendance</span>
-                <span className="text-sm font-bold text-teal-600">{stats.avgAttendanceRate}%</span>
+            <div className="p-2.5 rounded-lg bg-muted/30">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-medium">Avg Attendance</span>
+                <span className="text-xs font-bold text-teal-600">{stats.avgAttendanceRate}%</span>
               </div>
-              <Progress value={stats.avgAttendanceRate} className="h-2" />
+              <Progress value={stats.avgAttendanceRate} className="h-1.5" />
             </div>
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewUpcoming}>
-                <Clock className="h-4 w-4 mr-2" />
-                Upcoming
+            {/* Action Buttons - Stacked full width */}
+            <div className="flex flex-col gap-1.5">
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewUpcoming}>
+                <Clock className="h-3.5 w-3.5 mr-2 shrink-0" />
+                Upcoming Meetings
               </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewPast}>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Past
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewPast}>
+                <CheckCircle className="h-3.5 w-3.5 mr-2 shrink-0" />
+                Past Meetings
               </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewAttendance}>
-                <Users className="h-4 w-4 mr-2" />
-                Attendance
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewAttendance}>
+                <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+                Attendance Records
               </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewResolutions}>
-                <FileText className="h-4 w-4 mr-2" />
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewResolutions}>
+                <FileText className="h-3.5 w-3.5 mr-2 shrink-0" />
                 Resolutions
               </Button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewConflicts}>
-                <Scale className="h-4 w-4 mr-2" />
-                Conflicts
-                <Badge variant="secondary" className="ml-1 text-xs px-1.5">2</Badge>
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onViewConflicts}>
+                <span className="flex items-center">
+                  <Scale className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Conflicts & Disputes
+                </span>
+                <Badge variant="secondary" className="text-[10px] px-1.5 h-4 ml-2">2</Badge>
               </Button>
-              <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageRollCall}>
-                <Users className="h-4 w-4 mr-2" />
-                Roll-Call
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageRollCall}>
+                <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+                Roll-Call Management
+              </Button>
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowMinutesSettings(true)}>
+                <Settings className="h-3.5 w-3.5 mr-2 shrink-0" />
+                Minutes Settings
               </Button>
             </div>
-
-            {/* Minutes Settings Button */}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-10 text-sm w-full" 
-              onClick={() => setShowMinutesSettings(true)}
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Minutes Settings
-            </Button>
 
             {/* Upcoming Meetings */}
             {upcomingMeetings.length > 0 && (
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-2 pt-3 px-4">
-                  <CardTitle className="text-sm flex items-center justify-between">
-                    Upcoming
-                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onViewUpcoming}>
+              <Card className="border-0 shadow-none bg-muted/30">
+                <CardHeader className="p-2.5 pb-1">
+                  <CardTitle className="text-xs flex items-center justify-between">
+                    <span>Upcoming</span>
+                    <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1" onClick={onViewUpcoming}>
                       View All
-                      <ChevronRight className="h-4 w-4 ml-1" />
+                      <ChevronRight className="h-3 w-3 ml-0.5" />
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
-                  <div className="divide-y divide-border">
+                <CardContent className="p-2.5 pt-0">
+                  <div className="divide-y divide-border/50">
                     {upcomingMeetings.slice(0, 3).map((meeting) => (
                       <MeetingItem 
                         key={meeting.id} 

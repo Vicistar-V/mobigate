@@ -132,100 +132,83 @@ export function AdminSettingsSection({
 
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="settings" className="border rounded-lg overflow-hidden">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-lg bg-gray-500/10 shrink-0">
-                <Settings className="h-5 w-5 text-gray-600" />
+          <AccordionTrigger className="px-3 hover:no-underline">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-gray-500/10 shrink-0">
+                <Settings className="h-4 w-4 text-gray-600" />
               </div>
-              <div className="text-left min-w-0">
-                <h3 className="font-semibold text-base truncate">Settings</h3>
-                <p className="text-sm text-muted-foreground truncate">
+              <div className="text-left min-w-0 flex-1">
+                <h3 className="font-semibold text-sm">Settings</h3>
+                <p className="text-xs text-muted-foreground">
                   Profile, privacy & config
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <div className="space-y-3">
+          <AccordionContent className="px-2.5 pb-2.5">
+            <div className="space-y-2.5">
               {/* Profile Settings */}
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2 px-3">
-                  <CardTitle className="text-xs">Profile</CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 pb-3 pt-0">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onEditProfile}>
-                      <User className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Edit Profile</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onEditPhotos}>
-                      <Image className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Edit Photos</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col gap-1.5">
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onEditProfile}>
+                  <User className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Edit Profile
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onEditPhotos}>
+                  <Image className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Edit Photos
+                </Button>
+              </div>
 
               {/* Documents & Resources - With Authorization */}
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2 px-3">
+              <Card className="border-0 shadow-none bg-muted/30">
+                <CardHeader className="p-2.5 pb-1">
                   <CardTitle className="text-xs flex items-center gap-1.5">
                     Documents
                     <Lock className="h-2.5 w-2.5 text-muted-foreground" />
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 pb-3 pt-0">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-9 text-xs justify-start" 
-                      onClick={handleConstitutionWithAuth}
-                    >
-                      <FileText className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Constitution</span>
+                <CardContent className="p-2.5 pt-0">
+                  <div className="flex flex-col gap-1.5">
+                    <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={handleConstitutionWithAuth}>
+                      <FileText className="h-3.5 w-3.5 mr-2 shrink-0" />
+                      Constitution
                     </Button>
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onManageResources}>
-                      <FolderOpen className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Resources</span>
+                    <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageResources}>
+                      <FolderOpen className="h-3.5 w-3.5 mr-2 shrink-0" />
+                      Resources
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={handleRulesWithAuth}>
+                      <BookOpen className="h-3.5 w-3.5 mr-2 shrink-0" />
+                      Rules & Guidelines
                     </Button>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-9 text-xs justify-start w-full mt-1.5" 
-                    onClick={handleRulesWithAuth}
-                  >
-                    <BookOpen className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                    <span className="truncate">Rules & Guidelines</span>
-                  </Button>
                 </CardContent>
               </Card>
 
               {/* Quick Toggles */}
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2 px-3">
+              <Card className="border-0 shadow-none bg-muted/30">
+                <CardHeader className="p-2.5 pb-1">
                   <CardTitle className="text-xs">Quick Settings</CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 pb-3 pt-0 space-y-2">
+                <CardContent className="p-2.5 pt-0 space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Shield className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      <Label htmlFor="private-community" className="text-xs truncate">Private Community</Label>
+                      <Label htmlFor="private-community" className="text-xs">Private Community</Label>
                     </div>
                     <Switch id="private-community" defaultChecked className="shrink-0" />
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Bell className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      <Label htmlFor="member-notifications" className="text-xs truncate">Notifications</Label>
+                      <Label htmlFor="member-notifications" className="text-xs">Notifications</Label>
                     </div>
                     <Switch id="member-notifications" defaultChecked className="shrink-0" />
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      <Label htmlFor="auto-approve" className="text-xs truncate">Auto-approve Members</Label>
+                      <Label htmlFor="auto-approve" className="text-xs">Auto-approve Members</Label>
                     </div>
                     <Switch id="auto-approve" className="shrink-0" />
                   </div>
@@ -233,39 +216,29 @@ export function AdminSettingsSection({
               </Card>
 
               {/* Advanced Settings */}
-              <div className="grid grid-cols-2 gap-1.5">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-9 text-xs justify-start" 
-                  onClick={handlePrivacyWithAuth}
-                >
-                  <Shield className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                  <span className="truncate">Privacy</span>
+              <div className="flex flex-col gap-1.5">
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={handlePrivacyWithAuth}>
+                  <Shield className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Privacy Settings
                 </Button>
-            <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onNotificationSettings}>
-              <Bell className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-              <span className="truncate">Notifications</span>
-            </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onNotificationSettings}>
+                  <Bell className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Notification Settings
+                </Button>
               </div>
 
               {/* Democratic Governance Status */}
-              <Card className="overflow-hidden border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
+              <Card className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
                 <CardContent className="p-2.5 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Vote className="h-4 w-4 text-emerald-600 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium truncate">Democratic Governance</p>
+                        <p className="text-xs font-medium">Democratic Governance</p>
                         <p className="text-[10px] text-muted-foreground">60% member approval required</p>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-7 text-[10px] px-2 shrink-0"
-                      onClick={onDemocraticPrivacy}
-                    >
+                    <Button variant="outline" size="sm" className="h-7 text-[10px] px-2 shrink-0" onClick={onDemocraticPrivacy}>
                       View
                     </Button>
                   </div>
@@ -295,15 +268,15 @@ export function AdminSettingsSection({
 
               {/* Authorization Info */}
               <div className="space-y-1.5">
-                <div className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg">
-                  <Lock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                  <span className="text-[10px] text-muted-foreground leading-tight">
+                <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+                  <Lock className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+                  <span className="text-xs text-muted-foreground leading-snug">
                     Settings require President + Secretary + Legal Adviser
                   </span>
                 </div>
-                <div className="flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
-                  <span className="text-[10px] text-amber-700 dark:text-amber-300 leading-tight">
+                <div className="flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-950/30 rounded-md">
+                  <AlertTriangle className="h-3 w-3 text-amber-600 mt-0.5 shrink-0" />
+                  <span className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
                     All changes must receive 60% member approval
                   </span>
                 </div>
