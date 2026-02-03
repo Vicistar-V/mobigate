@@ -95,7 +95,7 @@ export function CertificateOfReturnGenerator({
       tenureEnd: addYears(now, tenureYearsNum),
       tenureDurationYears: tenureYearsNum,
       issuedDate: now,
-      issuedBy: "Mobigate Electoral Commission",
+      issuedBy: "Mobigate Electoral System",
       digitalSignature: "MOBIGATE-SIG-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
       verificationCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
       status: 'issued'
