@@ -30,7 +30,8 @@ const contentTypeLabels: Record<ContentType, string> = {
 
 const newsCategories = ["Announcements", "Events", "Updates", "General", "Affairs"];
 const eventTypes = ["Conference", "Workshop", "Meetup", "Celebration", "Fundraiser", "Social"];
-const venueTypes = ["indoor", "outdoor", "virtual", "hybrid"] as const;
+const meetingModes = ["indoor", "outdoor", "virtual", "hybrid"] as const;
+const platformVenueOptions = ["mobi-meeting", "zoom-meeting", "other"] as const;
 const audienceTypes = ["Members Only", "Public", "VIP", "Families", "Youth", "Seniors"];
 const articleCategories = ["Community News", "Culture", "Development", "Education", "Opinion"];
 const mediaTypes = ["video", "photo", "audio", "gallery"] as const;
@@ -42,7 +43,7 @@ export function ContentFormDialog({
   editingItem,
   onSubmit
 }: ContentFormDialogProps) {
-  const [formData, setFormData] = useState<Partial<AdminContentItem>>({
+  const [formData, setFormData] = useState<Partial<AdminContentItem> & { platformVenue?: string; customPlatformVenue?: string; venueAddress?: string }>({
     type: contentType,
     title: "",
     description: "",
@@ -52,6 +53,9 @@ export function ContentFormDialog({
     spotlight: false,
     mediaType: "photo",
     venueType: "indoor",
+    platformVenue: "mobi-meeting",
+    customPlatformVenue: "",
+    venueAddress: "",
     tags: [],
   });
   const [newTag, setNewTag] = useState("");
@@ -77,6 +81,9 @@ export function ContentFormDialog({
         spotlight: false,
         mediaType: "photo",
         venueType: "indoor",
+        platformVenue: "mobi-meeting",
+        customPlatformVenue: "",
+        venueAddress: "",
         tags: [],
       });
       setPublishOption("draft");
@@ -198,24 +205,58 @@ export function ContentFormDialog({
               )}
             </div>
             <div className="space-y-2">
-              <Label>Venue Name</Label>
-              <Input 
-                value={formData.venue || ""} 
-                onChange={(e) => setFormData(prev => ({ ...prev, venue: e.target.value }))}
-                placeholder="Enter venue name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Venue Type</Label>
-              <Select value={formData.venueType || "indoor"} onValueChange={(v) => setFormData(prev => ({ ...prev, venueType: v as typeof venueTypes[number] }))}>
+              <Label>Meeting Mode</Label>
+              <Select value={formData.venueType || "indoor"} onValueChange={(v) => setFormData(prev => ({ ...prev, venueType: v as typeof meetingModes[number] }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {venueTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>
-                  ))}
+                  <SelectItem value="outdoor">Outdoor</SelectItem>
+                  <SelectItem value="indoor">Indoor</SelectItem>
+                  <SelectItem value="virtual">Virtual</SelectItem>
+                  <SelectItem value="hybrid">Hybrid</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label>Platform/Venue</Label>
+              <Select 
+                value={formData.platformVenue || "mobi-meeting"} 
+                onValueChange={(v) => setFormData(prev => ({ 
+                  ...prev, 
+                  platformVenue: v,
+                  venue: v === "mobi-meeting" ? "Mobi-Meeting" : v === "zoom-meeting" ? "Zoom Meeting" : prev.customPlatformVenue || ""
+                }))}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mobi-meeting">Mobi-Meeting</SelectItem>
+                  <SelectItem value="zoom-meeting">Zoom Meeting</SelectItem>
+                  <SelectItem value="other">Other - Specify</SelectItem>
+                </SelectContent>
+              </Select>
+              {formData.platformVenue === "other" && (
+                <Input 
+                  value={formData.customPlatformVenue || ""} 
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    customPlatformVenue: e.target.value,
+                    venue: e.target.value
+                  }))}
+                  placeholder="Enter platform or venue name..."
+                  className="mt-2"
+                />
+              )}
+            </div>
+            {/* Conditional Address Field - Only for Indoor or Outdoor */}
+            {(formData.venueType === "indoor" || formData.venueType === "outdoor") && (
+              <div className="space-y-2">
+                <Label>Venue Address</Label>
+                <Input 
+                  value={formData.venueAddress || ""} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, venueAddress: e.target.value }))}
+                  placeholder="Enter venue address..."
+                />
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Start Date & Time</Label>
