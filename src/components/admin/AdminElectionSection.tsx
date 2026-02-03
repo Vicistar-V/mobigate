@@ -184,20 +184,20 @@ export function AdminElectionSection({
 
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="election" className="border rounded-lg overflow-hidden">
-          <AccordionTrigger className="px-3 hover:no-underline">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="p-1.5 rounded-lg bg-green-500/10 shrink-0">
-                <Vote className="h-4 w-4 text-green-600" />
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
+                <Vote className="h-5 w-5 text-green-600" />
               </div>
-              <div className="text-left min-w-0 flex-1">
-                <h3 className="font-semibold text-sm">Elections</h3>
-                <p className="text-xs text-muted-foreground truncate">
+              <div className="text-left min-w-0">
+                <h3 className="font-semibold text-base truncate">Elections</h3>
+                <p className="text-sm text-muted-foreground truncate">
                   {stats.activeElections} active • {stats.accreditedVoters} accredited
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-3 pb-3">
+          <AccordionContent className="px-4 pb-4">
             <div className="space-y-3">
               {/* Stats Row */}
               <div className="grid grid-cols-4 gap-1">

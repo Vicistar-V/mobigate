@@ -132,20 +132,20 @@ export function AdminSettingsSection({
 
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="settings" className="border rounded-lg overflow-hidden">
-          <AccordionTrigger className="px-3 hover:no-underline">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="p-1.5 rounded-lg bg-gray-500/10 shrink-0">
-                <Settings className="h-4 w-4 text-gray-600" />
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-lg bg-gray-500/10 shrink-0">
+                <Settings className="h-5 w-5 text-gray-600" />
               </div>
-              <div className="text-left min-w-0 flex-1">
-                <h3 className="font-semibold text-sm">Settings</h3>
-                <p className="text-xs text-muted-foreground truncate">
+              <div className="text-left min-w-0">
+                <h3 className="font-semibold text-base truncate">Settings</h3>
+                <p className="text-sm text-muted-foreground truncate">
                   Profile, privacy & config
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-3 pb-3">
+          <AccordionContent className="px-4 pb-4">
             <div className="space-y-3">
               {/* Profile Settings */}
               <Card className="overflow-hidden">
