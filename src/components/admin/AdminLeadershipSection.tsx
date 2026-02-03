@@ -29,16 +29,16 @@ interface ExecutiveCardProps {
 const ExecutiveCard = ({ member, onClick }: ExecutiveCardProps) => (
   <button
     onClick={() => onClick(member.id)}
-    className="flex flex-col items-center p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors w-20 shrink-0"
+    className="flex flex-col items-center p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors w-[72px] shrink-0"
   >
-    <Avatar className="h-12 w-12 mb-2">
+    <Avatar className="h-10 w-10 mb-1.5">
       <AvatarImage src={member.avatar} alt={member.name} />
-      <AvatarFallback className="text-sm">
+      <AvatarFallback className="text-xs">
         {member.name.split(' ').map(n => n[0]).join('')}
       </AvatarFallback>
     </Avatar>
-    <p className="font-medium text-sm text-center truncate w-full">{member.name.split(' ')[0]}</p>
-    <p className="text-xs text-muted-foreground text-center truncate w-full">{member.position}</p>
+    <p className="font-medium text-xs text-center truncate w-full leading-tight">{member.name.split(' ')[0]}</p>
+    <p className="text-[11px] text-muted-foreground text-center truncate w-full leading-tight">{member.position.split(' ')[0]}...</p>
   </button>
 );
 
@@ -181,51 +181,47 @@ export function AdminLeadershipSection({
                 </CardContent>
               </Card>
 
-              {/* Action Buttons */}
+              {/* Action Buttons - Full width stacked */}
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageLeadership}>
-                  <Crown className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onManageLeadership}>
+                  <Crown className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                   Manage
                 </Button>
                 <Button 
                   variant="default" 
                   size="sm" 
-                  className="h-10 text-sm" 
+                  className="h-9 text-xs px-2" 
                   onClick={handleApplyResultsWithAuth}
                 >
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Apply Results
+                  <Trophy className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                  Apply
                 </Button>
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewChangeHistory}>
-                  <History className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onViewChangeHistory}>
+                  <History className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                   History
                 </Button>
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={handleAssignAdhocWithAuth}>
-                  <Users className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={handleAssignAdhocWithAuth}>
+                  <Users className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                   Ad-hoc
                 </Button>
               </div>
 
-              {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-1.5">
-                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
-                  <span className="text-base font-bold">{executives.length}</span>
-                  <span className="text-xs text-muted-foreground truncate w-full text-center">Executives</span>
+              {/* Quick Stats - 2 columns for mobile */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+                  <span className="text-xs text-muted-foreground">Executives</span>
+                  <span className="text-sm font-bold">{executives.length}</span>
                 </div>
-                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
-                  <span className="text-base font-bold">3</span>
-                  <span className="text-xs text-muted-foreground truncate w-full text-center">Committees</span>
-                </div>
-                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 overflow-hidden">
-                  <span className="text-base font-bold">12</span>
-                  <span className="text-xs text-muted-foreground truncate w-full text-center">Staff</span>
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+                  <span className="text-xs text-muted-foreground">Committees</span>
+                  <span className="text-sm font-bold">3</span>
                 </div>
               </div>
 
               {/* Authorization Info */}
-              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-start gap-2 p-2.5 bg-muted/50 rounded-lg">
+                <Shield className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-relaxed">
                   Leadership changes require President + Secretary + (PRO or Dir. Socials)
                 </span>
               </div>

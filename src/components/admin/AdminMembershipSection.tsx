@@ -70,9 +70,9 @@ interface StatBadgeProps {
 }
 
 const StatBadge = ({ value, label }: StatBadgeProps) => (
-  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
-    <span className="text-base font-bold">{value.toLocaleString()}</span>
-    <span className="text-xs text-muted-foreground truncate w-full text-center">{label}</span>
+  <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+    <span className="text-xs text-muted-foreground">{label}</span>
+    <span className="text-sm font-bold">{value.toLocaleString()}</span>
   </div>
 );
 
@@ -195,8 +195,8 @@ export function AdminMembershipSection({
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <div className="space-y-4 w-full max-w-full overflow-hidden">
-              {/* Stats Row */}
-              <div className="grid grid-cols-4 gap-1.5 w-full">
+              {/* Stats Row - 2 columns for mobile */}
+              <div className="grid grid-cols-2 gap-2 w-full">
                 <StatBadge value={stats.totalMembers} label="Total" />
                 <StatBadge value={stats.activeMembers} label="Active" />
                 <StatBadge value={stats.pendingRequests} label="Pending" />
