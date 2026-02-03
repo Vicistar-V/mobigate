@@ -19,30 +19,21 @@ interface MeetingItemProps {
 }
 
 const MeetingItem = ({ meeting, onView }: MeetingItemProps) => (
-  <div className="py-3 space-y-1.5">
-    {/* Row 1: Icon + Title + Date */}
-    <div className="flex items-start gap-2.5">
-      <div className="p-1.5 rounded-md bg-teal-500/10 shrink-0 mt-0.5">
-        <Video className="h-3.5 w-3.5 text-teal-600" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm leading-snug line-clamp-1">{meeting.title}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {formatFutureTime(meeting.date)}
-        </p>
-      </div>
+  <button 
+    className="w-full py-3 flex items-center gap-2.5 text-left hover:bg-muted/50 -mx-1 px-1 rounded transition-colors"
+    onClick={() => onView(meeting.id)}
+  >
+    <div className="p-1.5 rounded-md bg-teal-500/10 shrink-0">
+      <Video className="h-3.5 w-3.5 text-teal-600" />
     </div>
-    {/* Row 2: Action link */}
-    <div className="flex items-center gap-3 pl-8 text-xs">
-      <button 
-        className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-        onClick={() => onView(meeting.id)}
-      >
-        View
-        <ChevronRight className="h-3.5 w-3.5" />
-      </button>
+    <div className="flex-1 min-w-0">
+      <p className="font-medium text-sm leading-snug line-clamp-1">{meeting.title}</p>
+      <p className="text-xs text-muted-foreground mt-0.5">
+        {formatFutureTime(meeting.date)}
+      </p>
     </div>
-  </div>
+    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+  </button>
 );
 
 interface StatBadgeProps {
