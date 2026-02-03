@@ -1,176 +1,234 @@
 
-# Implementation Plan: Add "Declare Election" Tab & Verify Impeachment Tab Position
+# Implementation Plan: Add Member-Facing "Nominate Candidate" Button & Enhanced Office Display
 
 ## Overview
-The user wants to restructure the Election Management page tab layout:
-1. **Add a "Declare Election" (or "New Election") tab as the FIRST tab** before "Campaigns"
-2. **Verify Impeachment tab is correctly positioned** between "Winners" and "Settings" (already correct)
-
-Currently, the "New Election" functionality is a button in the header. The user wants it moved to become the first tab in the tab row for easier discoverability.
+This plan adds a prominent **"Nominate Candidate"** button directly in the Community Main Menu's Election/Voting section, making it easily accessible to all members. Additionally, the nomination sheet will be enhanced to display **all community offices** - both available (selectable) and unavailable (grayed out with Lock icon and tenure dates).
 
 ---
 
-## Current Structure
+## Current State Analysis
 
-### Tab Order (Current):
-```
-Campaigns → Election Processes → Accreditation → Clearances → Winners → Impeachment → Settings
-```
+### What Exists:
+- `NominateCandidateSheet.tsx` - A member-facing nomination component that allows self-nomination or nominating other members
+- The sheet is currently only accessible via:
+  - "Nomination Primaries" menu item
+  - "More" dropdown in CommunityElectionTab (desktop only for the Nominate button)
+  - Inside the NominationsListView
 
-### Desired Tab Order:
-```
-+ Declare Election → Campaigns → Election Processes → Accreditation → Clearances → Winners → Impeachment → Settings
-```
+### What's Missing:
+1. A **direct, prominent button** in the Community Main Menu for "Nominate Candidate"
+2. Display of **inactive/unavailable offices** with Lock icons and tenure end dates
 
 ---
 
 ## Implementation Details
 
-### File: `src/pages/admin/ElectionManagementPage.tsx`
+### File 1: `src/components/community/CommunityMainMenu.tsx`
 
-**Change 1: Remove the "New Election" button from header**
+**Add "Nominate Candidate" button after "Declare for Election (EoI)"**
 
-The header currently has a button that opens `DeclareElectionDrawer`. This will be replaced by a new tab.
+Location: Lines 638-639 (after the Declare for Election button)
 
-**Lines to modify:** 39-48 (remove the New Election Button from header)
+```
++++ Add new state variable for nomination sheet
+const [showNominateCandidate, setShowNominateCandidate] = useState(false);
 
-Before:
-```tsx
-{/* New Election Button */}
-<Button 
-  size="sm"
-  className="bg-green-600 hover:bg-green-700 text-white font-medium shrink-0"
-  onClick={() => setShowDeclareElection(true)}
++++ Add highlighted Nominate button in Election/Voting accordion
+<Button
+  variant="ghost"
+  className="w-full justify-start pl-4 h-10 transition-colors duration-200 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-medium"
+  onClick={() => {
+    setShowNominateCandidate(true);
+    setOpen(false);
+  }}
 >
-  <Plus className="h-4 w-4 mr-1" />
-  <span className="hidden sm:inline">New Election</span>
-  <span className="sm:hidden">New</span>
+  <UserPlus className="h-4 w-4 mr-2" />
+  Nominate Candidate
 </Button>
+
++++ Add NominateCandidateSheet component at bottom
+<NominateCandidateSheet
+  open={showNominateCandidate}
+  onOpenChange={setShowNominateCandidate}
+  onNominationComplete={() => setShowNominateCandidate(false)}
+/>
 ```
 
-After: Remove this entire block
+**Visual Hierarchy:**
+- "Declare for Election (EoI)" - Primary/blue highlight (self-declaration, paid)
+- "Nominate Candidate" - Emerald/green highlight (community nomination)
+- Other buttons - Standard ghost styling
 
 ---
 
-**Change 2: Add "Declare Election" tab as FIRST tab trigger**
+### File 2: `src/components/community/elections/NominateCandidateSheet.tsx`
 
-Add a new TabsTrigger before "Campaigns" at line 57:
+**Enhance to display ALL offices with active/inactive states**
 
-```tsx
-<TabsTrigger 
-  value="declare" 
-  className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
->
-  <Plus className="h-3.5 w-3.5 mr-1" />
-  + Declare
-</TabsTrigger>
-```
-
----
-
-**Change 3: Add TabsContent for "Declare Election"**
-
-After line 106, before the Campaigns TabsContent:
-
-```tsx
-<TabsContent value="declare" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-  <AdminDeclareElectionTab onDeclareElection={() => setShowDeclareElection(true)} />
-</TabsContent>
-```
-
----
-
-### File: NEW - `src/components/admin/election/AdminDeclareElectionTab.tsx`
-
-Create a new tab content component that displays:
-1. **Summary stats** for existing declared elections (Active, Pending Authorization, Completed, Cancelled)
-2. **"+ Declare New Election" button** - prominent button that opens the existing `DeclareElectionDrawer`
-3. **List of declared elections** with their status, authorization progress, and details
-
-```tsx
-// Core structure:
-export function AdminDeclareElectionTab({ 
-  onDeclareElection 
-}: { 
-  onDeclareElection: () => void 
-}) {
-  // Stats grid showing: Active Elections, Pending Auth, Completed, Cancelled
-  // Prominent "+ Declare New Election" button
-  // List of declared elections with:
-  //   - Election type badge (General/Supplementary)
-  //   - Election name
-  //   - Selected offices count
-  //   - Authorization status (X/3 signatures)
-  //   - Nomination start & election dates
-  //   - Status badge (Pending Auth, Active, Completed)
-}
-```
-
-**Mobile-first design considerations:**
-- Touch-friendly button sizes (minimum 44px tap targets)
-- Stacked card layouts for election entries
-- ScrollArea for long lists with `touch-auto` and `overscroll-contain`
-- Stats grid using `grid-cols-4` with compact text
-
----
-
-## Mock Data Structure
+**Change 1: Update mock data import to include unavailable offices**
 
 ```typescript
-interface DeclaredElection {
-  id: string;
-  name: string;
-  type: 'general' | 'supplementary';
-  selectedOffices: string[];
-  nominationStartDate: Date;
-  electionDate: Date;
-  status: 'pending_authorization' | 'active' | 'nominations_open' | 'completed' | 'cancelled';
-  authorizationProgress: {
-    required: number;
-    completed: number;
-    signatories: string[];
-  };
-  vacancyReasons?: Record<string, VacancyReason>; // For supplementary elections
-  createdAt: Date;
-  createdBy: string;
-}
+// Add unavailable offices with tenure information
+const unavailableOffices = [
+  {
+    id: "office-unavail-1",
+    officeName: "President General",
+    currentHolder: "Chief Emmanuel Nwosu",
+    tenureEnd: new Date("2025-12-31"),
+    status: "active_tenure" as const,
+  },
+  {
+    id: "office-unavail-2",
+    officeName: "Secretary General",
+    currentHolder: "Mrs. Ngozi Eze",
+    tenureEnd: new Date("2025-12-31"),
+    status: "active_tenure" as const,
+  },
+  {
+    id: "office-unavail-3",
+    officeName: "Publicity Secretary",
+    currentHolder: "Dr. Patricia Okafor",
+    tenureEnd: new Date("2025-12-31"),
+    status: "active_tenure" as const,
+  },
+];
+```
+
+**Change 2: Update Office Selection UI (lines 289-316)**
+
+Replace simple dropdown with card-based selection showing:
+- **Available Offices** (green border, selectable)
+  - Office name
+  - Current nomination count
+  - "Open" badge
+- **Unavailable Offices** (grayed out, Lock icon)
+  - Office name
+  - Current holder name
+  - Tenure end date
+  - "Inactive" badge with Lock icon
+
+```tsx
+{/* Office Selection - Card-based with Active/Inactive states */}
+<div className="space-y-4">
+  {/* Available Offices */}
+  {openNominationPeriods.length > 0 && (
+    <div className="space-y-2">
+      <Label className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+        <Check className="h-3.5 w-3.5" />
+        Available Positions ({openNominationPeriods.length})
+      </Label>
+      <div className="space-y-2">
+        {openNominationPeriods.map((period) => (
+          <Card
+            key={period.officeId}
+            className={cn(
+              "cursor-pointer transition-all",
+              selectedOffice === period.officeId
+                ? "border-primary bg-primary/5 shadow-sm"
+                : "border-emerald-200 hover:border-emerald-400 hover:shadow-sm"
+            )}
+            onClick={() => setSelectedOffice(period.officeId)}
+          >
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{period.officeName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {period.nominationsCount}/{period.maxNominations || "No limit"} nominations
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-emerald-500 text-white text-[10px]">Open</Badge>
+                  {selectedOffice === period.officeId && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {/* Unavailable Offices */}
+  {unavailableOffices.length > 0 && (
+    <div className="space-y-2 mt-4">
+      <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+        <Lock className="h-3.5 w-3.5" />
+        Unavailable Positions ({unavailableOffices.length})
+      </Label>
+      <div className="space-y-2">
+        {unavailableOffices.map((office) => (
+          <Card
+            key={office.id}
+            className="opacity-60 border-muted cursor-not-allowed"
+          >
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-muted-foreground">{office.officeName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Current: {office.currentHolder}
+                  </p>
+                  <p className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
+                    <Calendar className="h-3 w-3" />
+                    Tenure ends: {format(office.tenureEnd, "MMM d, yyyy")}
+                  </p>
+                </div>
+                <Badge variant="secondary" className="text-[10px]">
+                  <Lock className="h-2.5 w-2.5 mr-1" />
+                  Inactive
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
 ```
 
 ---
 
-## Authorization Flow (Already Implemented)
+## Technical Summary
 
-The existing `DeclareElectionDrawer` component already handles:
-- Election type selection (General vs Supplementary)
-- Office selection with vacancy reasons for supplementary elections
-- Multi-step wizard flow
-- Integration with `ModuleAuthorizationDrawer` for multi-signature authorization
-- Authorization requirement: **President + Secretary + (PRO or Dir. of Socials)**, OR **Secretary + PRO + Legal Adviser + (Dir. of Socials or another Admin)** if President is unavailable
-
-No changes needed to the authorization logic.
+| File | Action | Description |
+|------|--------|-------------|
+| `CommunityMainMenu.tsx` | Modify | Add "Nominate Candidate" button + state + sheet integration |
+| `NominateCandidateSheet.tsx` | Modify | Add unavailable offices display with Lock icons and tenure dates |
 
 ---
 
-## Impeachment Tab Verification
+## Mobile-First Design Considerations
 
-**Current Position:** Between "Winners" and "Settings" (lines 87-93)
-**Required Position:** Between "Winners" and "Settings"
-**Status:** Already correctly positioned - no changes needed
-
----
-
-## Summary of Files to Modify/Create
-
-| File | Action |
-|------|--------|
-| `src/pages/admin/ElectionManagementPage.tsx` | Modify - Remove header button, add "Declare" tab |
-| `src/components/admin/election/AdminDeclareElectionTab.tsx` | Create - New tab content component |
+1. **Touch-friendly cards** - Min 48px touch targets for office selection
+2. **Stacked layout** - Available offices first, then unavailable offices
+3. **Clear visual hierarchy** - Green for available, gray/muted for unavailable
+4. **ScrollArea** with touch-auto for long office lists
+5. **Consistent with admin pattern** - Matches the active/inactive display in `NominateCandidateDrawer.tsx`
 
 ---
 
-## Technical Notes
+## User Flow
 
-1. **Import Updates**: Add `Plus` icon import if not already present in the page
-2. **State Management**: The `showDeclareElection` state already exists and will be passed to the new tab component
-3. **Default Tab**: Keep `defaultValue="campaigns"` so existing users aren't disrupted - or optionally change to `"declare"` if the admin wants to start there
-4. **Mobile Focus**: All UI elements will follow mobile-first patterns with touch-manipulation, proper sizing, and stacked layouts
+```
+Community Main Menu
+    |
+    +-- Election/Voting (Accordion)
+           |
+           +-- [Declare for Election (EoI)] (Blue highlight - paid self-declaration)
+           |
+           +-- [Nominate Candidate] (Green highlight - NEW)
+           |        |
+           |        +-> Opens NominateCandidateSheet
+           |               |
+           |               +-> Choose: Self / Other Member
+           |               +-> Select Office (shows Active + Inactive)
+           |               +-> Submit Nomination
+           |
+           +-- Campaigns
+           +-- Start Voting
+           +-- ... other options
+```
