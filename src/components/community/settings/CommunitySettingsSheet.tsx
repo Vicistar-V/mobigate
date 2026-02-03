@@ -187,30 +187,30 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
 
           {/* How Settings Work Info Card */}
           <Card className="bg-muted/50 border-dashed">
-            <CardContent className="p-2.5 sm:p-3">
+            <CardContent className="p-3">
               <div className="flex items-start gap-2">
                 <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div className="space-y-1.5 min-w-0">
-                  <p className="text-xs font-medium">How Democratic Settings Work</p>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li className="flex items-start gap-1">
-                      <ChevronRight className="h-3 w-3 shrink-0 mt-0.5" />
+                  <p className="text-sm font-medium">How Democratic Settings Work</p>
+                  <ul className="text-sm text-muted-foreground space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>
                         <strong>{DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}%</strong> member approval required for changes
                       </span>
                     </li>
-                    <li className="flex items-start gap-1">
-                      <ChevronRight className="h-3 w-3 shrink-0 mt-0.5" />
+                    <li className="flex items-start gap-1.5">
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>Members can disapprove & recommend alternatives</span>
                     </li>
-                    <li className="flex items-start gap-1">
-                      <ChevronRight className="h-3 w-3 shrink-0 mt-0.5" />
+                    <li className="flex items-start gap-1.5">
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>
                         Recommendations with <strong>{DEMOCRATIC_SETTINGS_CONFIG.RECOMMENDATION_THRESHOLD}%</strong> support override admin settings
                       </span>
                     </li>
-                    <li className="flex items-start gap-1">
-                      <ChevronRight className="h-3 w-3 shrink-0 mt-0.5" />
+                    <li className="flex items-start gap-1.5">
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>Admins cannot change settings without member approval</span>
                     </li>
                   </ul>

@@ -118,13 +118,13 @@ export function SettingsDetailSheet({
           <div className="p-2 rounded-lg bg-background">
             <p className="font-medium text-sm">{currentOption?.label || setting.currentValue}</p>
             {currentOption?.description && (
-              <p className="text-xs text-muted-foreground mt-0.5">{currentOption.description}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{currentOption.description}</p>
             )}
           </div>
 
           <Progress value={setting.approvalPercentage} className="h-1.5" />
           
-          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Last updated: {format(setting.lastUpdated, "MMM d, yyyy")}</span>
             {setting.updatedBy && <span>by {setting.updatedBy}</span>}
           </div>
@@ -138,10 +138,10 @@ export function SettingsDetailSheet({
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
                   Pending Change Awaiting Approval
                 </p>
-                <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
                   A proposed change to this setting is currently awaiting 60% member approval.
                 </p>
               </div>
@@ -155,7 +155,7 @@ export function SettingsDetailSheet({
       {/* Setting Description */}
       <div className="space-y-1">
         <p className="text-sm font-medium">{setting.name}</p>
-        <p className="text-xs text-muted-foreground">{setting.description}</p>
+        <p className="text-sm text-muted-foreground">{setting.description}</p>
       </div>
 
       {/* Options Selection */}
@@ -186,11 +186,11 @@ export function SettingsDetailSheet({
                       {option.label}
                     </Label>
                     {isCurrent && (
-                      <Badge variant="outline" className="text-[9px] px-1.5">Current</Badge>
+                      <Badge variant="outline" className="text-xs px-1.5">Current</Badge>
                     )}
                   </div>
                   {option.description && (
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {option.description}
                     </p>
                   )}
@@ -222,8 +222,8 @@ export function SettingsDetailSheet({
             <div className="flex items-start gap-2">
               <Lock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-medium">Multi-Signature Required</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">
+                <p className="text-sm font-medium">Multi-Signature Required</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   This setting requires President + Secretary + Legal Adviser authorization.
                 </p>
               </div>
@@ -238,10 +238,10 @@ export function SettingsDetailSheet({
           <div className="flex items-start gap-2">
             <Users className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
                 Democratic Approval Required
               </p>
-              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
                 Changes require 60% member approval. Members can also submit alternative recommendations.
               </p>
             </div>
@@ -287,7 +287,7 @@ export function SettingsDetailSheet({
                 Member Recommendation
               </p>
             </div>
-            <p className="text-[11px] text-blue-600 dark:text-blue-400">
+            <p className="text-sm text-blue-600 dark:text-blue-400">
               Recommend an alternative value that other members can support. 
               If it reaches 60% support, it will override admin settings.
             </p>
@@ -320,9 +320,9 @@ export function SettingsDetailSheet({
       )}
 
       {/* Info Footer */}
-      <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-lg">
+      <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg">
         <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Your proposal will be sent to all community members for voting. 
           The change will only take effect if at least 60% approve it within 14 days.
         </p>
