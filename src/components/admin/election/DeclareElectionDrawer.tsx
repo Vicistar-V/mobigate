@@ -353,32 +353,37 @@ export function DeclareElectionDrawer({
                 )}
               >
                 <CardContent className="p-3">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       id={office.id}
                       checked={selectedOffices.includes(office.id)}
                       onCheckedChange={(checked) =>
                         handleSelectOffice(office.id, checked as boolean)
                       }
-                      className="mt-0.5"
+                      className="shrink-0"
                     />
-                    <div className="flex-1 min-w-0">
-                      <Label htmlFor={office.id} className="font-medium text-sm cursor-pointer">
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      {/* Office Name Row */}
+                      <Label htmlFor={office.id} className="font-medium text-sm cursor-pointer block">
                         {office.name}
                       </Label>
+                      {/* Current Holder - for non-vacant */}
                       {office.currentHolder && !office.isVacant && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground truncate">
                           Current: {office.currentHolder}
                         </p>
                       )}
+                      {/* Vacancy Badge - stacked below name */}
                       {office.isVacant && (
-                        <Badge variant="destructive" className="text-xs mt-1">
-                          Vacant - {VACANCY_REASONS[office.vacancyReason || "other"].label}
-                        </Badge>
+                        <div className="flex">
+                          <Badge variant="destructive" className="text-[10px] px-2 py-0.5">
+                            Vacant - {VACANCY_REASONS[office.vacancyReason || "other"].label}
+                          </Badge>
+                        </div>
                       )}
                     </div>
                     {selectedOffices.includes(office.id) && (
-                      <Check className="h-4 w-4 text-primary shrink-0" />
+                      <Check className="h-5 w-5 text-primary shrink-0" />
                     )}
                   </div>
                 </CardContent>
