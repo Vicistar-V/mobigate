@@ -246,71 +246,62 @@ export function AdminFinanceSection({
       />
       
       <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="finance" className="border rounded-lg">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-lg bg-amber-500/10 shrink-0">
-                <Wallet className="h-5 w-5 text-amber-600" />
+        <AccordionItem value="finance" className="border rounded-lg overflow-hidden">
+          <AccordionTrigger className="px-3 hover:no-underline">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-amber-500/10 shrink-0">
+                <Wallet className="h-4 w-4 text-amber-600" />
               </div>
-              <div className="text-left min-w-0">
-                <h3 className="font-semibold text-base">Finance</h3>
-                <p className="text-sm text-muted-foreground">
+              <div className="text-left min-w-0 flex-1">
+                <h3 className="font-semibold text-sm">Finance</h3>
+                <p className="text-xs text-muted-foreground">
                   {formatDualCurrency(stats.walletBalance)}
                   {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} pending`}
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <div className="space-y-4">
-              {/* Stats Row - 4 columns, compact */}
-              <div className="grid grid-cols-4 gap-2">
+          <AccordionContent className="px-2.5 pb-2.5">
+            <div className="space-y-2.5">
+              {/* Stats Row - 2x2 grid */}
+              <div className="grid grid-cols-2 gap-1.5">
                 <StatCard label="Balance" value={`₦${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
                 <StatCard label="Income" value={`₦${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
                 <StatCard label="Expense" value={`₦${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
                 <StatCard label="Pending" value={String(stats.pendingPayments)} icon={Clock} />
               </div>
 
-              {/* Action Buttons - Stacked vertically for mobile safety */}
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowDuesLevies(true)}>
-                    <Settings className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Dues & Levies</span>
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowStatements(true)}>
-                    <Receipt className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Statements</span>
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowMemberReports(true)}>
-                    <Users className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Members' Reports</span>
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={() => setShowAudit(true)}>
-                    <BarChart3 className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Financial Audit</span>
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={onViewOverview}>
-                    <Wallet className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Overview</span>
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-10 text-sm justify-start" onClick={onViewObligations}>
-                    <AlertTriangle className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="truncate">Obligations</span>
-                    {stats.pendingPayments > 0 && (
-                      <Badge variant="destructive" className="ml-1 text-xs px-1.5 shrink-0">
-                        {stats.pendingPayments}
-                      </Badge>
-                    )}
-                  </Button>
-                </div>
+              {/* Action Buttons - Stacked full width */}
+              <div className="flex flex-col gap-1.5">
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowDuesLevies(true)}>
+                  <Settings className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Dues & Levies
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowStatements(true)}>
+                  <Receipt className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Account Statements
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowMemberReports(true)}>
+                  <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Members' Financial Reports
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowAudit(true)}>
+                  <BarChart3 className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Financial Audit
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onViewObligations}>
+                  <span className="flex items-center">
+                    <AlertTriangle className="h-3.5 w-3.5 mr-2 shrink-0" />
+                    View Obligations
+                  </span>
+                  {stats.pendingPayments > 0 && (
+                    <Badge variant="destructive" className="text-[10px] px-1.5 h-4 ml-2">
+                      {stats.pendingPayments}
+                    </Badge>
+                  )}
+                </Button>
               </div>
+
               {/* Active Levy Progress */}
               <LevyProgressCard
                 id="levy-2025-001"
@@ -327,19 +318,19 @@ export function AdminFinanceSection({
               />
 
               {/* Recent Transactions */}
-              <Card>
-                <CardHeader className="pb-2 pt-3 px-4">
-                  <CardTitle className="text-sm flex items-center justify-between">
+              <Card className="border-0 shadow-none bg-muted/30">
+                <CardHeader className="p-2.5 pb-1">
+                  <CardTitle className="text-xs flex items-center justify-between">
                     <span>Recent Transactions</span>
-                    <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onViewOverview}>
+                    <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1" onClick={onViewOverview}>
                       View All
-                      <ChevronRight className="h-4 w-4 ml-1" />
+                      <ChevronRight className="h-3 w-3 ml-0.5" />
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
-                  <div className="divide-y divide-border">
-                    {recentTransactions.slice(0, 4).map((transaction) => (
+                <CardContent className="p-2.5 pt-0">
+                  <div className="divide-y divide-border/50">
+                    {recentTransactions.slice(0, 3).map((transaction) => (
                       <TransactionItem 
                         key={transaction.id} 
                         transaction={transaction}
@@ -353,17 +344,17 @@ export function AdminFinanceSection({
               {/* Defaulting Members */}
               {defaultingMembers.length > 0 && (
                 <Card className="border-red-200 bg-red-50/30 dark:bg-red-950/10">
-                  <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-sm flex items-center gap-2 text-destructive">
-                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <CardHeader className="p-2.5 pb-1">
+                    <CardTitle className="text-xs flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                       <span>Defaulting</span>
-                      <Badge variant="destructive" className="ml-auto text-xs px-1.5">
+                      <Badge variant="destructive" className="ml-auto text-[10px] px-1.5 h-4">
                         {defaultingMembers.length}
                       </Badge>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 pt-0">
-                    <div className="divide-y divide-border">
+                  <CardContent className="p-2.5 pt-0">
+                    <div className="divide-y divide-border/50">
                       {defaultingMembers.slice(0, 3).map((member) => (
                         <DefaultingMemberItem key={member.id} member={member} />
                       ))}
@@ -373,9 +364,9 @@ export function AdminFinanceSection({
               )}
 
               {/* Authorization Info */}
-              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+                <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-snug">
                   Finance: 3 signatories if President initiates, 4 otherwise
                 </span>
               </div>

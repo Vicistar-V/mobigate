@@ -184,114 +184,81 @@ export function AdminElectionSection({
 
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="election" className="border rounded-lg overflow-hidden">
-          <AccordionTrigger className="px-4 hover:no-underline">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
-                <Vote className="h-5 w-5 text-green-600" />
+          <AccordionTrigger className="px-3 hover:no-underline">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-green-500/10 shrink-0">
+                <Vote className="h-4 w-4 text-green-600" />
               </div>
-              <div className="text-left min-w-0">
-                <h3 className="font-semibold text-base truncate">Elections</h3>
-                <p className="text-sm text-muted-foreground truncate">
+              <div className="text-left min-w-0 flex-1">
+                <h3 className="font-semibold text-sm">Elections</h3>
+                <p className="text-xs text-muted-foreground">
                   {stats.activeElections} active • {stats.accreditedVoters} accredited
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <div className="space-y-3">
-              {/* Stats Row */}
-              <div className="grid grid-cols-4 gap-1">
+          <AccordionContent className="px-2.5 pb-2.5">
+            <div className="space-y-2.5">
+              {/* Stats Row - 2x2 grid */}
+              <div className="grid grid-cols-2 gap-1.5">
                 <StatBadge value={stats.activeElections} label="Active" icon={Vote} />
-                <StatBadge value={stats.accreditedVoters} label="Accred." icon={Users} />
+                <StatBadge value={stats.accreditedVoters} label="Accredited" icon={Users} />
                 <StatBadge value={stats.clearedCandidates} label="Cleared" icon={CheckCircle} />
                 <StatBadge value={3} label="Pending" icon={Clock} />
               </div>
 
-              {/* Current Election Management */}
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2 px-3">
-                  <CardTitle className="text-xs">Manage Election</CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 pb-3 pt-0">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onViewCampaigns}>
-                      <FileText className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Campaigns</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onViewResults}>
-                      <Trophy className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Results</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onManageAccreditation}>
-                      <Users className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Accredit.</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onProcessClearances}>
-                      <CheckCircle className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Clear.</span>
-                      <Badge variant="destructive" className="ml-auto text-[10px] px-1 shrink-0">3</Badge>
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-9 text-xs justify-start" 
-                      onClick={() => setShowPrimaryManagement(true)}
-                    >
-                      <UserCheck className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Primaries</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-9 text-xs justify-start" 
-                      onClick={() => setShowRoyaltySection(true)}
-                    >
-                      <Coins className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Royalties</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Election Settings */}
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2 px-3">
-                  <CardTitle className="text-xs">Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 pb-3 pt-0">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <Button variant="outline" size="sm" className="h-9 text-xs justify-start" onClick={onConfigureVoting}>
-                      <Settings className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Voting</span>
-                    </Button>
-                    <Button 
-                      variant="default" 
-                      size="sm" 
-                      className="h-9 text-xs justify-start" 
-                      onClick={handleAnnounceWithAuth}
-                    >
-                      <Trophy className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                      <span className="truncate">Announce</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Action Buttons - Stacked full width */}
+              <div className="flex flex-col gap-1.5">
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewCampaigns}>
+                  <FileText className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  View Campaigns
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewResults}>
+                  <Trophy className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  View Results
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageAccreditation}>
+                  <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Accreditation
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onProcessClearances}>
+                  <span className="flex items-center">
+                    <CheckCircle className="h-3.5 w-3.5 mr-2 shrink-0" />
+                    Process Clearances
+                  </span>
+                  <Badge variant="destructive" className="text-[10px] px-1.5 h-4 ml-2">3</Badge>
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowPrimaryManagement(true)}>
+                  <UserCheck className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Primaries
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowRoyaltySection(true)}>
+                  <Coins className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Campaign Royalties
+                </Button>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onConfigureVoting}>
+                  <Settings className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Voting Settings
+                </Button>
+                <Button variant="default" size="sm" className="w-full h-9 text-xs justify-start" onClick={handleAnnounceWithAuth}>
+                  <Trophy className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Announce Winners
+                </Button>
+              </div>
 
               {/* Recent Election Activity */}
-              <Card className="overflow-hidden">
-                <CardHeader className="pb-1.5 pt-2 px-3">
+              <Card className="border-0 shadow-none bg-muted/30">
+                <CardHeader className="p-2.5 pb-1">
                   <CardTitle className="text-xs flex items-center justify-between">
                     <span>Recent Activity</span>
-                    <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5">
+                    <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1">
                       All
                       <ChevronRight className="h-3 w-3 ml-0.5" />
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 pb-3 pt-0">
-                  <div className="divide-y divide-border">
+                <CardContent className="p-2.5 pt-0">
+                  <div className="divide-y divide-border/50">
                     {electionActivities.slice(0, 3).map((activity) => (
                       <ElectionActivityItem key={activity.id} activity={activity} />
                     ))}
@@ -300,9 +267,9 @@ export function AdminElectionSection({
               </Card>
 
               {/* Authorization Info */}
-              <div className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg">
-                <Shield className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                <span className="text-[10px] text-muted-foreground leading-tight">
+              <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+                <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-snug">
                   Elections require President + Secretary + (PRO or Dir. Socials)
                 </span>
               </div>

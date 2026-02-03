@@ -211,61 +211,61 @@ export function AdminContentSection({
         onAuthorized={handleAuthorizationComplete}
       />
 
-      <Accordion type="single" collapsible className="w-full max-w-full">
+      <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="content" className="border rounded-lg overflow-hidden">
-          <AccordionTrigger className="px-4 hover:no-underline max-w-full">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-lg bg-purple-500/10 shrink-0">
-                <FileText className="h-5 w-5 text-purple-600" />
+          <AccordionTrigger className="px-3 hover:no-underline">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-purple-500/10 shrink-0">
+                <FileText className="h-4 w-4 text-purple-600" />
               </div>
-              <div className="text-left min-w-0">
-                <h3 className="font-semibold text-base truncate">Content</h3>
-                <p className="text-sm text-muted-foreground truncate">
+              <div className="text-left min-w-0 flex-1">
+                <h3 className="font-semibold text-sm">Content</h3>
+                <p className="text-xs text-muted-foreground">
                   {stats.totalNews + stats.totalEvents + stats.totalArticles + stats.totalVibes} posts
                   {stats.pendingContent > 0 && ` • ${stats.pendingContent} pending`}
                 </p>
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <div className="space-y-4 w-full max-w-full overflow-hidden">
-              {/* Stats Row */}
-              <div className="grid grid-cols-4 gap-1.5 w-full">
+          <AccordionContent className="px-2.5 pb-2.5">
+            <div className="space-y-2.5">
+              {/* Stats Row - 2x2 grid */}
+              <div className="grid grid-cols-2 gap-1.5">
                 <StatBadge value={stats.totalNews} label="News" icon={Newspaper} />
                 <StatBadge value={stats.totalEvents} label="Events" icon={Calendar} />
                 <StatBadge value={stats.totalArticles} label="Articles" icon={BookOpen} />
                 <StatBadge value={stats.totalVibes} label="Vibes" icon={MessageSquare} />
               </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageNews}>
-                  <Newspaper className="h-4 w-4 mr-2" />
-                  News
+              {/* Action Buttons - Stacked full width */}
+              <div className="flex flex-col gap-1.5">
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageNews}>
+                  <Newspaper className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage News
                 </Button>
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageEvents}>
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Events
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageEvents}>
+                  <Calendar className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Events
                 </Button>
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageGallery}>
-                  <Image className="h-4 w-4 mr-2" />
-                  Gallery
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageGallery}>
+                  <Image className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Gallery
                 </Button>
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageResources}>
-                  <FolderOpen className="h-4 w-4 mr-2" />
-                  Resources
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageResources}>
+                  <FolderOpen className="h-3.5 w-3.5 mr-2 shrink-0" />
+                  Manage Resources
                 </Button>
               </div>
 
               {/* Content Filters */}
               <ScrollArea className="w-full touch-auto">
                 <Tabs value={filter} onValueChange={setFilter}>
-                  <TabsList className="flex w-max h-9 bg-muted/50">
-                    <TabsTrigger value="all" className="text-sm px-3 h-7">All</TabsTrigger>
-                    <TabsTrigger value="news" className="text-sm px-3 h-7">News</TabsTrigger>
-                    <TabsTrigger value="event" className="text-sm px-3 h-7">Events</TabsTrigger>
-                    <TabsTrigger value="article" className="text-sm px-3 h-7">Articles</TabsTrigger>
-                    <TabsTrigger value="vibe" className="text-sm px-3 h-7">Vibes</TabsTrigger>
+                  <TabsList className="flex w-max h-8 bg-muted/50 p-0.5">
+                    <TabsTrigger value="all" className="text-xs px-2.5 h-7">All</TabsTrigger>
+                    <TabsTrigger value="news" className="text-xs px-2.5 h-7">News</TabsTrigger>
+                    <TabsTrigger value="event" className="text-xs px-2.5 h-7">Events</TabsTrigger>
+                    <TabsTrigger value="article" className="text-xs px-2.5 h-7">Articles</TabsTrigger>
+                    <TabsTrigger value="vibe" className="text-xs px-2.5 h-7">Vibes</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 <ScrollBar orientation="horizontal" />
@@ -273,18 +273,18 @@ export function AdminContentSection({
 
               {/* Recent Content */}
               {filteredContent.length > 0 && (
-                <Card className="overflow-hidden">
-                  <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-sm flex items-center justify-between">
-                      Recent Content
-                      <Button variant="ghost" size="sm" className="h-8 text-sm px-2">
+                <Card className="border-0 shadow-none bg-muted/30">
+                  <CardHeader className="p-2.5 pb-1">
+                    <CardTitle className="text-xs flex items-center justify-between">
+                      <span>Recent Content</span>
+                      <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1">
                         View All
-                        <ChevronRight className="h-4 w-4 ml-1" />
+                        <ChevronRight className="h-3 w-3 ml-0.5" />
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 pt-0">
-                    <div className="divide-y divide-border">
+                  <CardContent className="p-2.5 pt-0">
+                    <div className="divide-y divide-border/50">
                       {filteredContent.slice(0, 3).map((content) => (
                         <ContentItem
                           key={content.id}
@@ -299,10 +299,10 @@ export function AdminContentSection({
               )}
 
               {/* Authorization Info */}
-              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  Content actions require Secretary + PRO (no single person can publish alone)
+              <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+                <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-snug">
+                  Content actions require Secretary + PRO authorization
                 </span>
               </div>
             </div>
