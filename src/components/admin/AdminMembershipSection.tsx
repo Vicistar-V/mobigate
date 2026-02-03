@@ -24,41 +24,48 @@ interface MemberRequestItemProps {
 }
 
 const MemberRequestItem = ({ request, onApprove, onReject, onView }: MemberRequestItemProps) => (
-  <div className="flex items-center gap-2.5 py-2.5">
-    <Avatar className="h-9 w-9 shrink-0">
-      <AvatarImage src={request.avatar} alt={request.name} />
-      <AvatarFallback className="text-xs">{request.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-    </Avatar>
-    <div className="flex-1 min-w-0">
-      <p className="font-medium text-sm truncate">{request.name}</p>
-      <p className="text-xs text-muted-foreground">
-        {formatRelativeTime(request.requestDate)}
-      </p>
+  <div className="py-2.5 space-y-2">
+    {/* Top row: Avatar + Name + Time */}
+    <div className="flex items-center gap-2.5">
+      <Avatar className="h-10 w-10 shrink-0">
+        <AvatarImage src={request.avatar} alt={request.name} />
+        <AvatarFallback className="text-xs">{request.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm">{request.name}</p>
+        <p className="text-xs text-muted-foreground">
+          {formatRelativeTime(request.requestDate)}
+        </p>
+      </div>
     </div>
-    <div className="flex items-center gap-0.5 shrink-0">
+    {/* Bottom row: Action buttons full width */}
+    <div className="flex items-center gap-1.5 pl-12">
       <Button
-        size="icon"
+        size="sm"
         variant="ghost"
-        className="h-8 w-8"
+        className="h-8 flex-1 text-xs"
         onClick={() => onView(request.id)}
       >
-        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+        <Eye className="h-3.5 w-3.5 mr-1.5" />
+        View
       </Button>
       <Button
-        size="icon"
+        size="sm"
         variant="ghost"
-        className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+        className="h-8 flex-1 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
         onClick={() => onApprove(request.id)}
       >
-        <Check className="h-3.5 w-3.5" />
+        <Check className="h-3.5 w-3.5 mr-1.5" />
+        Approve
       </Button>
       <Button
-        size="icon"
+        size="sm"
         variant="ghost"
-        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+        className="h-8 flex-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
         onClick={() => onReject(request.id)}
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-3.5 w-3.5 mr-1.5" />
+        Reject
       </Button>
     </div>
   </div>
