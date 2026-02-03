@@ -81,7 +81,7 @@ export const privacySettings: AdminSetting[] = [
   {
     id: "privacy-4",
     key: "member_contact_sharing",
-    name: "Member Contact Sharing",
+    name: "Members' Contact Sharing",
     description: "Allow members to see other members' contact information",
     category: "privacy_settings",
     currentValue: "opt_in",

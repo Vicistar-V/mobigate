@@ -260,7 +260,7 @@ export function SettingsDetailSheet({
         ) : hasChanged ? (
           <>
             <Send className="h-4 w-4 mr-2" />
-            Submit for Member Approval
+            Submit for Members' Approval
           </>
         ) : (
           "Select a different value to propose"
