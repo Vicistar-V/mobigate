@@ -273,10 +273,10 @@ export function AdminPrimaryElectionsSection() {
         ))}
       </div>
 
-      {/* Primary Election Detail Sheet */}
+      {/* Primary Election Detail Sheet - Mobile optimized */}
       <Sheet open={showDetailSheet} onOpenChange={setShowDetailSheet}>
-        <SheetContent side="bottom" className="h-[90vh] rounded-t-2xl">
-          <SheetHeader className="pb-4">
+        <SheetContent side="bottom" className="h-[92vh] rounded-t-2xl p-0 flex flex-col">
+          <SheetHeader className="px-4 pt-4 pb-3 border-b shrink-0">
             <SheetTitle className="flex items-center gap-2">
               <Vote className="h-5 w-5 text-primary" />
               Primary Election Details
@@ -284,96 +284,88 @@ export function AdminPrimaryElectionsSection() {
           </SheetHeader>
 
           {selectedPrimary && (
-            <ScrollArea className="h-[calc(90vh-120px)]">
-              <div className="space-y-4 px-1">
-                {/* Election Info */}
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-bold text-base">{selectedPrimary.officeName}</h3>
-                        <p className="text-sm text-muted-foreground">Primary Election</p>
+            <ScrollArea className="flex-1 overflow-y-auto touch-auto">
+              <div className="space-y-3 px-4 py-4">
+                {/* Election Info - Compact card */}
+                <div className="p-3 rounded-lg border bg-card space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-sm leading-tight">{selectedPrimary.officeName}</h3>
+                      <p className="text-xs text-muted-foreground">Primary Election</p>
+                    </div>
+                    {getStatusBadge(selectedPrimary.status)}
+                  </div>
+                  
+                  {/* Date & Time - Side by side */}
+                  <div className="flex gap-2">
+                    <div className="flex items-center gap-2 flex-1 p-2 bg-muted/50 rounded-lg">
+                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-tight">Date</p>
+                        <p className="font-medium text-xs">{format(selectedPrimary.scheduledDate, "MMM d, yyyy")}</p>
                       </div>
-                      {getStatusBadge(selectedPrimary.status)}
+                    </div>
+                    <div className="flex items-center gap-2 flex-1 p-2 bg-muted/50 rounded-lg">
+                      <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-tight">Time</p>
+                        <p className="font-medium text-xs">{selectedPrimary.startTime} - {selectedPrimary.endTime}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Turnout Stats - Compact */}
+                {selectedPrimary.status !== 'scheduled' && (
+                  <div className="p-3 rounded-lg border bg-card space-y-2">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4 text-primary shrink-0" />
+                      <span className="text-sm font-semibold">Voter Turnout</span>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-[10px] text-muted-foreground">Date</p>
-                          <p className="font-medium text-xs">{format(selectedPrimary.scheduledDate, "MMM d, yyyy")}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-[10px] text-muted-foreground">Time</p>
-                          <p className="font-medium text-xs">{selectedPrimary.startTime} - {selectedPrimary.endTime}</p>
-                        </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Total Votes Cast</span>
+                      <span className="font-bold">{selectedPrimary.totalVotesCast.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Eligible Voters</span>
+                      <span className="font-medium">{selectedPrimary.totalEligibleVoters.toLocaleString()}</span>
+                    </div>
+                    <Progress 
+                      value={(selectedPrimary.totalVotesCast / selectedPrimary.totalEligibleVoters) * 100} 
+                      className="h-2"
+                    />
+                    <p className="text-center text-sm font-bold text-primary">
+                      {Math.round((selectedPrimary.totalVotesCast / selectedPrimary.totalEligibleVoters) * 100)}% Turnout
+                    </p>
+                  </div>
+                )}
+
+              {/* Advancement Rules Info - Compact list */}
+                {selectedPrimary.candidates.length > 0 && (
+                  <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                    <div className="flex items-start gap-2.5">
+                      <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                      <div className="text-xs space-y-1 min-w-0">
+                        <p className="font-semibold text-blue-700 dark:text-blue-400">Advancement Rules</p>
+                        <ul className="text-muted-foreground space-y-0.5">
+                          <li className="flex items-center gap-1.5">
+                            <Star className="h-3 w-3 text-emerald-500 fill-emerald-500 shrink-0" />
+                            <span>≥25% votes = Auto-qualifies</span>
+                          </li>
+                          <li className="flex items-center gap-1.5">
+                            <Trophy className="h-3 w-3 text-amber-500 shrink-0" />
+                            <span>Top votes fill remaining slots</span>
+                          </li>
+                          <li>• Maximum 4 candidates advance</li>
+                          <li>• Minimum 2 candidates required</li>
+                        </ul>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Turnout Stats */}
-                {selectedPrimary.status !== 'scheduled' && (
-                  <Card>
-                    <CardHeader className="pb-2 pt-3 px-4">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-primary" />
-                        Voter Turnout
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-4 pb-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Total Votes Cast</span>
-                          <span className="font-bold">{selectedPrimary.totalVotesCast.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Eligible Voters</span>
-                          <span className="font-medium">{selectedPrimary.totalEligibleVoters.toLocaleString()}</span>
-                        </div>
-                        <Progress 
-                          value={(selectedPrimary.totalVotesCast / selectedPrimary.totalEligibleVoters) * 100} 
-                          className="h-2"
-                        />
-                        <p className="text-center text-sm font-bold text-primary">
-                          {Math.round((selectedPrimary.totalVotesCast / selectedPrimary.totalEligibleVoters) * 100)}% Turnout
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  </div>
                 )}
 
-              {/* Advancement Rules Info */}
-                {selectedPrimary.candidates.length > 0 && (
-                  <Card className="bg-blue-500/5 border-blue-500/20">
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-2">
-                        <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-                        <div className="text-xs space-y-1">
-                          <p className="font-medium text-blue-700 dark:text-blue-400">Advancement Rules</p>
-                          <ul className="text-muted-foreground space-y-0.5">
-                            <li className="flex items-center gap-1.5">
-                              <Star className="h-3 w-3 text-emerald-500 fill-emerald-500" />
-                              <span>≥25% votes = Auto-qualifies</span>
-                            </li>
-                            <li className="flex items-center gap-1.5">
-                              <Trophy className="h-3 w-3 text-amber-500" />
-                              <span>Top votes fill remaining slots</span>
-                            </li>
-                            <li>• Maximum 4 candidates advance</li>
-                            <li>• Minimum 2 candidates required</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Candidates Results */}
+                {/* Candidates Results - Clean list */}
                 {selectedPrimary.candidates.length > 0 && (() => {
                   const config = {
                     autoQualifyThreshold: mockElectionProcessSettings.primaryAdvancementThreshold,
@@ -383,33 +375,32 @@ export function AdminPrimaryElectionsSection() {
                   const advancementResult = calculateAdvancingCandidates(selectedPrimary.candidates, config);
                   
                   return (
-                    <Card>
-                      <CardHeader className="pb-2 pt-3 px-4">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Users className="h-4 w-4 text-primary" />
-                            Candidates Results
-                          </CardTitle>
-                          <Badge variant="secondary" className="text-[10px]">
-                            {advancementResult.totalAdvancing} advancing
-                          </Badge>
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between px-1">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-primary shrink-0" />
+                          <span className="text-sm font-semibold">Candidates Results</span>
                         </div>
-                        {advancementResult.autoQualifiedCount > 0 && (
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            {advancementResult.autoQualifiedCount} auto-qualified (≥25%)
-                            {advancementResult.topVoteFilledCount > 0 && 
-                              ` • ${advancementResult.topVoteFilledCount} by top votes`
-                            }
-                          </p>
-                        )}
-                      </CardHeader>
-                      <CardContent className="px-4 pb-4">
-                        <div className="space-y-3">
-                          {selectedPrimary.candidates.map((candidate, idx) => {
-                            const reason = advancementResult.advancementReasons.get(candidate.id);
-                            const isAutoQualified = reason === 'auto_qualified';
-                            const isTopVotes = reason === 'top_votes';
-                            const advances = isAutoQualified || isTopVotes;
+                        <Badge variant="secondary" className="text-[10px]">
+                          {advancementResult.totalAdvancing} advancing
+                        </Badge>
+                      </div>
+                      
+                      {advancementResult.autoQualifiedCount > 0 && (
+                        <p className="text-[10px] text-muted-foreground px-1">
+                          {advancementResult.autoQualifiedCount} auto-qualified (≥25%)
+                          {advancementResult.topVoteFilledCount > 0 && 
+                            ` • ${advancementResult.topVoteFilledCount} by top votes`
+                          }
+                        </p>
+                      )}
+                      
+                      <div className="space-y-2">
+                        {selectedPrimary.candidates.map((candidate, idx) => {
+                          const reason = advancementResult.advancementReasons.get(candidate.id);
+                          const isAutoQualified = reason === 'auto_qualified';
+                          const isTopVotes = reason === 'top_votes';
+                          const advances = isAutoQualified || isTopVotes;
                             
                             return (
                               <div 
@@ -495,8 +486,7 @@ export function AdminPrimaryElectionsSection() {
                             );
                           })}
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
                   );
                 })()}
 

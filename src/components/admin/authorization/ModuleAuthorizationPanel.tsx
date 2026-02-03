@@ -6,7 +6,8 @@ import {
   CheckCircle2, 
   AlertCircle, 
   ArrowLeft,
-  Lock
+  Lock,
+  Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -114,7 +115,7 @@ export function ModuleAuthorizationPanel({
 
   // Get module icon based on type
   const getModuleIcon = () => {
-    return <Shield className="h-8 w-8 text-primary" />;
+    return <Shield className="h-7 w-7 text-primary" />;
   };
 
   // Determine which officers should be shown as required/optional
@@ -138,32 +139,32 @@ export function ModuleAuthorizationPanel({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Header - Compact for mobile */}
       <div className="text-center space-y-2">
         <div className="flex justify-center">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
             {getModuleIcon()}
           </div>
         </div>
-        <h3 className="text-lg font-bold">{actionTitle}</h3>
-        <p className="text-xs text-muted-foreground">
+        <h3 className="text-base font-bold leading-tight">{actionTitle}</h3>
+        <p className="text-xs text-muted-foreground leading-snug px-2">
           {actionDescription}
         </p>
       </div>
 
-      {/* Timer */}
+      {/* Timer - Full width badge style */}
       <div className="flex justify-center">
         <AuthorizationTimer expiresAt={expiresAt} onExpire={handleExpire} />
       </div>
 
-      {/* Action Details (if provided) */}
+      {/* Action Details Card - Full bleed mobile style */}
       {actionDetails && (
-        <Card className="p-3 bg-muted/50">
+        <Card className="p-3 bg-muted/30 border-muted">
           {actionDetails}
         </Card>
       )}
 
-      {/* Authorization Requirements Info */}
+      {/* Authorization Requirements Info - Compact */}
       <AuthorizationRulesInfo
         module={module}
         initiatorRole={initiatorRole}
@@ -173,8 +174,8 @@ export function ModuleAuthorizationPanel({
         isValid={validation.isValid}
       />
 
-      {/* Officer Authorization List - Single column for mobile optimization */}
-      <div className="space-y-3 max-h-[400px] overflow-y-auto touch-auto pr-1">
+      {/* Officer Authorization List - Full width vertical stack */}
+      <div className="space-y-2.5">
         {officers.map((officer) => {
           const displayProps = getOfficerDisplayProps(officer);
           return (
@@ -195,38 +196,43 @@ export function ModuleAuthorizationPanel({
         })}
       </div>
 
-      {/* Authorization Status */}
+      {/* Authorization Status - Prominent mobile status bar */}
       <div
         className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg border",
+          "flex items-center gap-2.5 px-4 py-3 rounded-xl",
           validation.isValid
-            ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
-            : "bg-muted border-border"
+            ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800"
+            : "bg-muted/50 border border-border"
         )}
       >
         {validation.isValid ? (
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
         ) : (
-          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          <Clock className="h-5 w-5 text-muted-foreground shrink-0" />
         )}
-        <span
-          className={cn(
-            "text-sm font-medium",
-            validation.isValid
-              ? "text-emerald-700 dark:text-emerald-400"
-              : "text-muted-foreground"
-          )}
-        >
-          {validation.authorizedCount}/{requiredCount} Authorized • {validation.message}
-        </span>
+        <div className="flex-1 min-w-0">
+          <span
+            className={cn(
+              "text-sm font-semibold",
+              validation.isValid
+                ? "text-emerald-700 dark:text-emerald-400"
+                : "text-muted-foreground"
+            )}
+          >
+            {validation.authorizedCount}/{requiredCount} Authorized
+          </span>
+          <p className="text-xs text-muted-foreground line-clamp-1">
+            {validation.message}
+          </p>
+        </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="space-y-2 pt-2">
+      {/* Action Buttons - Large touch targets */}
+      <div className="space-y-2.5 pt-2">
         <Button
           onClick={onConfirm}
           disabled={!validation.isValid || isExpired}
-          className="w-full h-12"
+          className="w-full h-12 text-base font-semibold"
         >
           <Lock className="h-5 w-5 mr-2" />
           Confirm Authorization
