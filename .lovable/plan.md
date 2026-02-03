@@ -1,135 +1,176 @@
 
-# Fix: Wallet Top Up Voucher List - Scroll Jump Prevention
+# Implementation Plan: Add "Declare Election" Tab & Verify Impeachment Tab Position
 
-## Problem Summary
-When selecting multiple voucher denominations in the "Top Up Wallet" drawer (especially items further down the list), the list jumps back to the top after each selection. This makes it extremely frustrating to select multiple vouchers on mobile.
+## Overview
+The user wants to restructure the Election Management page tab layout:
+1. **Add a "Declare Election" (or "New Election") tab as the FIRST tab** before "Campaigns"
+2. **Verify Impeachment tab is correctly positioned** between "Winners" and "Settings" (already correct)
 
-## Root Cause Analysis
-The current implementation uses a `useLayoutEffect` hook to restore scroll position after React re-renders. However, this approach has several weaknesses:
-
-1. **Browser Focus Behavior**: When a `Checkbox` or `Button` receives focus on mobile, the browser automatically scrolls to ensure the focused element is visible. This happens *after* the `useLayoutEffect` restore.
-
-2. **Timing Race Condition**: The `onPreInteract` callback captures scroll position on `pointerDown`, but by the time the state updates and `useLayoutEffect` runs, the browser may have already triggered a focus-scroll.
-
-3. **Radix Checkbox Internals**: The Radix `Checkbox` component internally manages focus, which can trigger scroll adjustments that the current prevention logic doesn't catch.
-
-## Solution Architecture
-
-### Strategy: Eliminate Focus-Triggered Scrolling
-
-Instead of fighting the browser's scroll behavior with capture/restore, we'll prevent the focus from causing scroll in the first place:
-
-1. **Disable focusable on quantity buttons** - Use `tabIndex={-1}` to prevent focus ring and associated scroll
-2. **Use `preventScroll` option** - When programmatically focusing elements
-3. **Block focus on checkbox clicks** - Add `preventScroll: true` to focus calls
-4. **Apply `touch-manipulation`** - Already present, ensure it's working with other fixes
-
-### Implementation Plan
+Currently, the "New Election" functionality is a button in the header. The user wants it moved to become the first tab in the tab row for easier discoverability.
 
 ---
 
-### File 1: `src/components/community/finance/VoucherDenominationSelector.tsx`
+## Current Structure
 
-**Changes:**
+### Tab Order (Current):
+```
+Campaigns → Election Processes → Accreditation → Clearances → Winners → Impeachment → Settings
+```
 
-1. **Add `tabIndex={-1}` to +/− buttons** to prevent them from receiving focus (and triggering scroll):
-   ```tsx
-   <Button
-     variant="outline"
-     size="icon"
-     className="h-7 w-7 touch-manipulation"
-     tabIndex={-1}  // Add this
-     onClick={(e) => handleQuantityChange(voucher.id, -1, e)}
-     disabled={quantity <= 1}
-   >
-   ```
-
-2. **Prevent focus on the Checkbox via `onPointerDown`** by calling `e.preventDefault()` which stops the browser from shifting focus:
-   ```tsx
-   <Checkbox
-     id={voucher.id}
-     checked={isSelected}
-     onPointerDown={(e) => {
-       e.preventDefault();  // Prevents focus scroll
-       e.stopPropagation();
-       onPreInteract?.();
-     }}
-     ...
-   />
-   ```
-
-3. **Prevent focus on Card click** - Apply same pattern to the card's `onPointerDown`:
-   ```tsx
-   <Card
-     ...
-     onPointerDown={(e) => {
-       e.preventDefault(); // Block native focus
-       onPreInteract?.();
-     }}
-     ...
-   >
-   ```
-
-4. **Remove `tabIndex={0}` from Card** - Cards don't need keyboard focus for this UI pattern on mobile
+### Desired Tab Order:
+```
++ Declare Election → Campaigns → Election Processes → Accreditation → Clearances → Winners → Impeachment → Settings
+```
 
 ---
 
-### File 2: `src/components/community/finance/WalletTopUpDialog.tsx`
+## Implementation Details
 
-**Changes:**
+### File: `src/pages/admin/ElectionManagementPage.tsx`
 
-1. **Strengthen scroll restoration with `requestAnimationFrame` delay** - Add a small delay before and after restoring to handle edge cases:
-   ```tsx
-   useLayoutEffect(() => {
-     if (step !== "vouchers") return;
-     if (!vouchersScrollLockRef.current) return;
-     
-     const el = vouchersScrollRef.current;
-     if (!el) return;
-     
-     // Restore immediately
-     el.scrollTop = vouchersScrollTopRef.current;
-     
-     // Also restore after a micro-delay to catch late focus scrolls
-     const scrollPos = vouchersScrollTopRef.current;
-     requestAnimationFrame(() => {
-       el.scrollTop = scrollPos;
-       requestAnimationFrame(() => {
-         el.scrollTop = scrollPos;
-         vouchersScrollLockRef.current = false;
-       });
-     });
-   }, [selectedVouchers, step]);
-   ```
+**Change 1: Remove the "New Election" button from header**
 
-2. **Add `scroll-behavior: auto` style** to prevent smooth scrolling from interfering with the restore:
-   ```tsx
-   <div
-     ref={vouchersScrollRef}
-     className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain"
-     style={{ scrollBehavior: 'auto' }}
-     ...
-   >
-   ```
+The header currently has a button that opens `DeclareElectionDrawer`. This will be replaced by a new tab.
+
+**Lines to modify:** 39-48 (remove the New Election Button from header)
+
+Before:
+```tsx
+{/* New Election Button */}
+<Button 
+  size="sm"
+  className="bg-green-600 hover:bg-green-700 text-white font-medium shrink-0"
+  onClick={() => setShowDeclareElection(true)}
+>
+  <Plus className="h-4 w-4 mr-1" />
+  <span className="hidden sm:inline">New Election</span>
+  <span className="sm:hidden">New</span>
+</Button>
+```
+
+After: Remove this entire block
 
 ---
 
-## Technical Details
+**Change 2: Add "Declare Election" tab as FIRST tab trigger**
 
-### Why `tabIndex={-1}` Works
-When an element has `tabIndex={-1}`, clicking it won't shift browser focus to that element, which means the browser won't trigger its "scroll focused element into view" behavior.
+Add a new TabsTrigger before "Campaigns" at line 57:
 
-### Why `e.preventDefault()` on `onPointerDown` Works
-Calling `preventDefault()` on the `pointerdown` event prevents the subsequent `focus` event from firing, which is what triggers the browser's scroll-to-element behavior.
-
-### Why Multiple `requestAnimationFrame` Calls
-Mobile browsers sometimes queue scroll adjustments that happen across multiple animation frames. By restoring in multiple frames, we catch any delayed scroll adjustments.
+```tsx
+<TabsTrigger 
+  value="declare" 
+  className="text-xs sm:text-sm px-3 sm:px-4 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm rounded-md font-medium whitespace-nowrap"
+>
+  <Plus className="h-3.5 w-3.5 mr-1" />
+  + Declare
+</TabsTrigger>
+```
 
 ---
 
-## Files to Modify
-1. `src/components/community/finance/VoucherDenominationSelector.tsx`
-2. `src/components/community/finance/WalletTopUpDialog.tsx`
+**Change 3: Add TabsContent for "Declare Election"**
 
-## Expected Outcome
-After these changes, selecting vouchers (including those at the bottom of the list) will no longer cause the list to jump to the top. The user's scroll position will be maintained throughout the selection process.
+After line 106, before the Campaigns TabsContent:
+
+```tsx
+<TabsContent value="declare" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+  <AdminDeclareElectionTab onDeclareElection={() => setShowDeclareElection(true)} />
+</TabsContent>
+```
+
+---
+
+### File: NEW - `src/components/admin/election/AdminDeclareElectionTab.tsx`
+
+Create a new tab content component that displays:
+1. **Summary stats** for existing declared elections (Active, Pending Authorization, Completed, Cancelled)
+2. **"+ Declare New Election" button** - prominent button that opens the existing `DeclareElectionDrawer`
+3. **List of declared elections** with their status, authorization progress, and details
+
+```tsx
+// Core structure:
+export function AdminDeclareElectionTab({ 
+  onDeclareElection 
+}: { 
+  onDeclareElection: () => void 
+}) {
+  // Stats grid showing: Active Elections, Pending Auth, Completed, Cancelled
+  // Prominent "+ Declare New Election" button
+  // List of declared elections with:
+  //   - Election type badge (General/Supplementary)
+  //   - Election name
+  //   - Selected offices count
+  //   - Authorization status (X/3 signatures)
+  //   - Nomination start & election dates
+  //   - Status badge (Pending Auth, Active, Completed)
+}
+```
+
+**Mobile-first design considerations:**
+- Touch-friendly button sizes (minimum 44px tap targets)
+- Stacked card layouts for election entries
+- ScrollArea for long lists with `touch-auto` and `overscroll-contain`
+- Stats grid using `grid-cols-4` with compact text
+
+---
+
+## Mock Data Structure
+
+```typescript
+interface DeclaredElection {
+  id: string;
+  name: string;
+  type: 'general' | 'supplementary';
+  selectedOffices: string[];
+  nominationStartDate: Date;
+  electionDate: Date;
+  status: 'pending_authorization' | 'active' | 'nominations_open' | 'completed' | 'cancelled';
+  authorizationProgress: {
+    required: number;
+    completed: number;
+    signatories: string[];
+  };
+  vacancyReasons?: Record<string, VacancyReason>; // For supplementary elections
+  createdAt: Date;
+  createdBy: string;
+}
+```
+
+---
+
+## Authorization Flow (Already Implemented)
+
+The existing `DeclareElectionDrawer` component already handles:
+- Election type selection (General vs Supplementary)
+- Office selection with vacancy reasons for supplementary elections
+- Multi-step wizard flow
+- Integration with `ModuleAuthorizationDrawer` for multi-signature authorization
+- Authorization requirement: **President + Secretary + (PRO or Dir. of Socials)**, OR **Secretary + PRO + Legal Adviser + (Dir. of Socials or another Admin)** if President is unavailable
+
+No changes needed to the authorization logic.
+
+---
+
+## Impeachment Tab Verification
+
+**Current Position:** Between "Winners" and "Settings" (lines 87-93)
+**Required Position:** Between "Winners" and "Settings"
+**Status:** Already correctly positioned - no changes needed
+
+---
+
+## Summary of Files to Modify/Create
+
+| File | Action |
+|------|--------|
+| `src/pages/admin/ElectionManagementPage.tsx` | Modify - Remove header button, add "Declare" tab |
+| `src/components/admin/election/AdminDeclareElectionTab.tsx` | Create - New tab content component |
+
+---
+
+## Technical Notes
+
+1. **Import Updates**: Add `Plus` icon import if not already present in the page
+2. **State Management**: The `showDeclareElection` state already exists and will be passed to the new tab component
+3. **Default Tab**: Keep `defaultValue="campaigns"` so existing users aren't disrupted - or optionally change to `"declare"` if the admin wants to start there
+4. **Mobile Focus**: All UI elements will follow mobile-first patterns with touch-manipulation, proper sizing, and stacked layouts
