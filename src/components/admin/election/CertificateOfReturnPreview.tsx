@@ -294,7 +294,7 @@ and all official documentation purposes.
                 </div>
                 
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                  Electoral System
+                  Independent Electoral System
                 </p>
               </div>
 
