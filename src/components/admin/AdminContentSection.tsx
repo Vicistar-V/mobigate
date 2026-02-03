@@ -55,42 +55,44 @@ const ContentItem = ({ content, onEdit, onRemove }: ContentItemProps) => {
   const Icon = getContentTypeIcon(content.type);
   
   return (
-    <div className="flex items-start gap-3 py-3">
-      <div className="p-2 rounded-lg bg-muted shrink-0">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{content.title}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <Avatar className="h-5 w-5">
-            <AvatarImage src={content.authorAvatar} alt={content.author} />
-            <AvatarFallback className="text-xs">{content.author[0]}</AvatarFallback>
-          </Avatar>
-          <span className="text-sm text-muted-foreground truncate">{content.author}</span>
-          <span className="text-sm text-muted-foreground">•</span>
-          <span className="text-sm text-muted-foreground">{formatRelativeTime(content.createdAt)}</span>
+    <div className="py-3 space-y-1.5">
+      {/* Row 1: Icon + Title + Status */}
+      <div className="flex items-start gap-2.5">
+        <div className="p-1.5 rounded-md bg-muted/50 shrink-0 mt-0.5">
+          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
-      </div>
-      <div className="flex items-center gap-1 shrink-0">
-        <Badge className={`text-xs px-1.5 ${getStatusColor(content.status)}`}>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-sm leading-snug line-clamp-1">{content.title}</p>
+          <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+            <Avatar className="h-4 w-4">
+              <AvatarImage src={content.authorAvatar} alt={content.author} />
+              <AvatarFallback className="text-[10px]">{content.author[0]}</AvatarFallback>
+            </Avatar>
+            <span className="truncate max-w-[100px]">{content.author}</span>
+            <span>•</span>
+            <span>{formatRelativeTime(content.createdAt)}</span>
+          </div>
+        </div>
+        <Badge className={`text-xs px-1.5 shrink-0 ${getStatusColor(content.status)}`}>
           {content.status}
         </Badge>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8"
+      </div>
+      {/* Row 2: Action links */}
+      <div className="flex items-center gap-3 pl-8 text-xs">
+        <button 
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => onEdit(content.id)}
         >
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 text-destructive"
+          <Edit className="h-3.5 w-3.5" />
+          Edit
+        </button>
+        <button 
+          className="flex items-center gap-1 text-destructive/70 hover:text-destructive transition-colors"
           onClick={() => onRemove(content.id)}
         >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+          <Trash2 className="h-3.5 w-3.5" />
+          Remove
+        </button>
       </div>
     </div>
   );
