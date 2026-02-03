@@ -72,7 +72,7 @@ interface StatBadgeProps {
 const StatBadge = ({ value, label }: StatBadgeProps) => (
   <div className="flex flex-col items-center justify-center py-2">
     <span className="text-base font-bold leading-none">{value.toLocaleString()}</span>
-    <span className="text-[10px] text-muted-foreground mt-0.5">{label}</span>
+    <span className="text-xs text-muted-foreground mt-0.5">{label}</span>
   </div>
 );
 

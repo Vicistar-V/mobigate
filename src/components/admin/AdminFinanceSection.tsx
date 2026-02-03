@@ -146,7 +146,7 @@ const StatCard = ({ label, value, icon: Icon, trend }: StatCardProps) => (
     <span className={`text-base font-bold leading-none ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : ''}`}>
       {value}
     </span>
-    <span className="text-[10px] text-muted-foreground mt-0.5">{label}</span>
+    <span className="text-xs text-muted-foreground mt-0.5">{label}</span>
   </div>
 );
 
