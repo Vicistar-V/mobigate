@@ -462,6 +462,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
           endDate,
           campaignImage,
           campaignColor,
+          communityName: "Ndigbo Progressive Union", // From current community context
         }}
       />
 
