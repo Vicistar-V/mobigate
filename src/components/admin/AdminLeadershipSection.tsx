@@ -29,19 +29,16 @@ interface ExecutiveCardProps {
 const ExecutiveCard = ({ member, onClick }: ExecutiveCardProps) => (
   <button
     onClick={() => onClick(member.id)}
-    className="w-full flex items-center gap-3 py-2.5 hover:bg-muted/50 -mx-1 px-1 rounded transition-colors text-left"
+    className="flex flex-col items-center p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors w-20 shrink-0"
   >
-    <Avatar className="h-9 w-9 shrink-0">
+    <Avatar className="h-11 w-11 mb-2">
       <AvatarImage src={member.avatar} alt={member.name} />
       <AvatarFallback className="text-xs">
         {member.name.split(' ').map(n => n[0]).join('')}
       </AvatarFallback>
     </Avatar>
-    <div className="flex-1 min-w-0">
-      <p className="font-medium text-sm leading-snug truncate">{member.name}</p>
-      <p className="text-xs text-muted-foreground truncate">{member.position}</p>
-    </div>
-    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+    <p className="font-medium text-xs text-center truncate w-full">{member.name.split(' ')[0]}</p>
+    <p className="text-xs text-muted-foreground text-center truncate w-full">{member.position.split(' ')[0]}</p>
   </button>
 );
 
@@ -169,11 +166,11 @@ export function AdminLeadershipSection({
                 </div>
               </div>
 
-              {/* Current Executive List */}
+              {/* Current Executive Carousel */}
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">Current Executive</p>
-                <ScrollArea className="max-h-[180px] overflow-y-auto touch-auto">
-                  <div className="flex flex-col divide-y divide-border/50">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Current Executive</p>
+                <div className="overflow-x-auto touch-pan-x -mx-3 px-3">
+                  <div className="flex gap-2.5 pb-2">
                     {executives.slice(0, 6).map((member) => (
                       <ExecutiveCard
                         key={member.id}
@@ -182,7 +179,7 @@ export function AdminLeadershipSection({
                       />
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
               </div>
 
               {/* Action Buttons - list style with dividers */}
