@@ -170,25 +170,25 @@ export function LeadershipMemberActionsMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="w-56 z-[100]"
-          sideOffset={5}
+          className="w-48 z-[100]"
+          sideOffset={4}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           {/* View Profile */}
-          <DropdownMenuItem onClick={handleViewProfile} className="py-3">
-            <User className="h-4 w-4 mr-3" />
+          <DropdownMenuItem onClick={handleViewProfile} className="py-2.5 text-sm">
+            <User className="h-4 w-4 mr-2" />
             View Profile
           </DropdownMenuItem>
 
           {/* Contributions */}
-          <DropdownMenuItem onClick={handleViewContributions} className="py-3">
-            <Coins className="h-4 w-4 mr-3" />
+          <DropdownMenuItem onClick={handleViewContributions} className="py-2.5 text-sm">
+            <Coins className="h-4 w-4 mr-2" />
             Contributions
           </DropdownMenuItem>
 
           {/* Manifesto */}
-          <DropdownMenuItem onClick={handleViewManifesto} className="py-3">
-            <FileText className="h-4 w-4 mr-3" />
+          <DropdownMenuItem onClick={handleViewManifesto} className="py-2.5 text-sm">
+            <FileText className="h-4 w-4 mr-2" />
             Manifesto
           </DropdownMenuItem>
 
@@ -196,72 +196,72 @@ export function LeadershipMemberActionsMenu({
 
           {/* Add Friend / Unfriend */}
           {isFriend ? (
-            <DropdownMenuItem onClick={handleUnfriend} className="py-3">
-              <UserMinus className="h-4 w-4 mr-3" />
+            <DropdownMenuItem onClick={handleUnfriend} className="py-2.5 text-sm">
+              <UserMinus className="h-4 w-4 mr-2" />
               Unfriend
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={handleAddFriend} className="py-3">
-              <UserPlus className="h-4 w-4 mr-3" />
+            <DropdownMenuItem onClick={handleAddFriend} className="py-2.5 text-sm">
+              <UserPlus className="h-4 w-4 mr-2" />
               Add Friend
             </DropdownMenuItem>
           )}
 
           {/* Add to Circle */}
-          <DropdownMenuItem onClick={handleAddToCircle} className="py-3">
-            <Users className="h-4 w-4 mr-3" />
+          <DropdownMenuItem onClick={handleAddToCircle} className="py-2.5 text-sm">
+            <Users className="h-4 w-4 mr-2" />
             Add to Circle
           </DropdownMenuItem>
 
           {/* Send Message/Chat */}
-          <DropdownMenuItem onClick={handleSendMessage} className="py-3">
-            <MessageSquare className="h-4 w-4 mr-3" />
-            Send Message
+          <DropdownMenuItem onClick={handleSendMessage} className="py-2.5 text-sm">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Message
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
 
           {/* Comment Sub-menu */}
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="py-3">
-              <MessageCircle className="h-4 w-4 mr-3" />
+            <DropdownMenuSubTrigger className="py-2.5 text-sm">
+              <MessageCircle className="h-4 w-4 mr-2" />
               Comment
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-48 z-[110]">
-              <DropdownMenuItem onClick={handleAddComment} className="py-2.5">
+            <DropdownMenuSubContent className="w-40 z-[110]">
+              <DropdownMenuItem onClick={handleAddComment} className="py-2 text-sm">
                 <MessageCircle className="h-4 w-4 mr-2" />
-                Add Comment
+                Add
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleViewComments} className="py-2.5">
+              <DropdownMenuItem onClick={handleViewComments} className="py-2 text-sm">
                 <Eye className="h-4 w-4 mr-2" />
-                View Comments
+                View All
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 
           {/* Report Sub-menu */}
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="py-3">
-              <Flag className="h-4 w-4 mr-3" />
+            <DropdownMenuSubTrigger className="py-2.5 text-sm">
+              <Flag className="h-4 w-4 mr-2" />
               Report
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-52 z-[110]">
-              <DropdownMenuItem onClick={handleNewReport} className="py-2.5 text-destructive focus:text-destructive">
+            <DropdownMenuSubContent className="w-40 z-[110]">
+              <DropdownMenuItem onClick={handleNewReport} className="py-2 text-sm text-destructive focus:text-destructive">
                 <AlertTriangle className="h-4 w-4 mr-2" />
-                Report Member
+                New Report
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleViewPendingReports} className="py-2.5">
+              <DropdownMenuItem onClick={handleViewPendingReports} className="py-2 text-sm">
                 <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-                <span>View Pending</span>
+                Pending
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleViewResolvedReports} className="py-2.5">
+              <DropdownMenuItem onClick={handleViewResolvedReports} className="py-2 text-sm">
                 <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                <span>View Resolved</span>
+                Resolved
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleViewAbsolvedReports} className="py-2.5">
+              <DropdownMenuItem onClick={handleViewAbsolvedReports} className="py-2 text-sm">
                 <ShieldCheck className="h-4 w-4 mr-2 text-blue-500" />
-                <span>View Absolved</span>
+                Absolved
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
@@ -270,13 +270,13 @@ export function LeadershipMemberActionsMenu({
 
           {/* Block / Unblock */}
           {isBlocked ? (
-            <DropdownMenuItem onClick={handleUnblock} className="py-3">
-              <ShieldCheck className="h-4 w-4 mr-3 text-green-500" />
+            <DropdownMenuItem onClick={handleUnblock} className="py-2.5 text-sm">
+              <ShieldCheck className="h-4 w-4 mr-2 text-green-500" />
               Unblock
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={handleBlock} className="py-3 text-destructive focus:text-destructive">
-              <Ban className="h-4 w-4 mr-3" />
+            <DropdownMenuItem onClick={handleBlock} className="py-2.5 text-sm text-destructive focus:text-destructive">
+              <Ban className="h-4 w-4 mr-2" />
               Block
             </DropdownMenuItem>
           )}
@@ -286,17 +286,17 @@ export function LeadershipMemberActionsMenu({
             <>
               <DropdownMenuSeparator />
               {onEdit && (
-                <DropdownMenuItem onClick={() => onEdit(member)} className="py-3">
+                <DropdownMenuItem onClick={() => onEdit(member)} className="py-2.5 text-sm">
                   Edit Member
                 </DropdownMenuItem>
               )}
               {onTransfer && (
-                <DropdownMenuItem onClick={() => onTransfer(member)} className="py-3">
+                <DropdownMenuItem onClick={() => onTransfer(member)} className="py-2.5 text-sm">
                   Transfer
                 </DropdownMenuItem>
               )}
               {onRemove && (
-                <DropdownMenuItem onClick={() => onRemove(member)} className="py-3 text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={() => onRemove(member)} className="py-2.5 text-sm text-destructive focus:text-destructive">
                   Remove
                 </DropdownMenuItem>
               )}
