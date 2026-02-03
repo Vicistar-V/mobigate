@@ -78,6 +78,7 @@ import { ExitCommunityDialog } from "@/components/community/ExitCommunityDialog"
 import { CreatePostTypeSelector, PostType } from "@/components/community/CreatePostTypeSelector";
 import { CreateVibeDialog } from "@/components/community/CreateVibeDialog";
 import { CreateCommunityContentDialog } from "@/components/community/CreateCommunityContentDialog";
+import { RotatingCtaButton } from "@/components/community/RotatingCtaButton";
 import { CreateSpecialEventDialog } from "@/components/community/CreateSpecialEventDialog";
 import { ArticleEditorDialog } from "@/components/community/ArticleEditorDialog";
 import { MediaUploadDialog } from "@/components/community/MediaUploadDialog";
@@ -435,6 +436,28 @@ const CommunityProfile = () => {
     setShowDonationDialog(true);
   };
 
+  const handleFundRaiser = () => {
+    handleTabChange("fund-raiser");
+    toast({
+      title: "FundRaiser",
+      description: "Opening community fundraiser campaigns...",
+    });
+  };
+
+  const handleQuizGame = () => {
+    toast({
+      title: "Mobi-Quiz Game",
+      description: "Opening community quiz game...",
+    });
+  };
+
+  const handleMobiCircle = () => {
+    toast({
+      title: "Create Mobi-Circle",
+      description: "Opening Mobi-Circle creation...",
+    });
+  };
+
   const handlePostTypeSelect = (type: PostType) => {
     switch (type) {
       case "gallery":
@@ -501,17 +524,16 @@ const CommunityProfile = () => {
                 </p>
               </div>
 
-              {/* Donate Button and Notifications */}
-              <div className="flex items-center gap-2 self-start sm:self-end">
-                {community.donationEnabled && (
-                  <Button
-                    onClick={handleDonate}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Donate To Community
-                  </Button>
-                )}
+              {/* Rotating CTA Button and Notifications */}
+              <div className="flex items-start gap-2 self-start sm:self-end">
+                <RotatingCtaButton
+                  onDonate={handleDonate}
+                  onFundRaiser={handleFundRaiser}
+                  onQuizGame={handleQuizGame}
+                  onMobiCircle={handleMobiCircle}
+                  donationEnabled={community.donationEnabled}
+                  interval={15000}
+                />
                 
                 {/* Notification Bell */}
                 <Button
