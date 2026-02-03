@@ -1,13 +1,15 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, TrendingUp, ChevronRight } from "lucide-react";
+import { ArrowLeft, Users, TrendingUp, ChevronRight, UserPlus } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 import { useNavigate } from "react-router-dom";
+import { NominateCandidateSheet } from "./NominateCandidateSheet";
 
 interface PrimaryResult {
   id: string;
@@ -97,6 +99,7 @@ const getCandidateColors = (index: number) => {
 
 export const ElectionPrimariesTab = () => {
   const navigate = useNavigate();
+  const [showNominateSheet, setShowNominateSheet] = useState(false);
 
   const handleBack = () => {
     navigate(-1);
@@ -124,6 +127,16 @@ export const ElectionPrimariesTab = () => {
           Only qualified nominees proceed to the main ballot.
         </p>
       </Card>
+
+      {/* Nominate Candidate Button - Prominent Entry Point */}
+      <Button
+        onClick={() => setShowNominateSheet(true)}
+        className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold shadow-md"
+        size="lg"
+      >
+        <UserPlus className="h-5 w-5 mr-2" />
+        Nominate Candidate
+      </Button>
 
       {/* Primaries Tables */}
       <div className="space-y-6">
@@ -222,6 +235,13 @@ export const ElectionPrimariesTab = () => {
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
+
+      {/* Nominate Candidate Sheet */}
+      <NominateCandidateSheet
+        open={showNominateSheet}
+        onOpenChange={setShowNominateSheet}
+        onNominationComplete={() => setShowNominateSheet(false)}
+      />
     </div>
   );
 };
