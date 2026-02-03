@@ -158,11 +158,11 @@ export function AdminLeadershipSection({
               <div className="flex items-center justify-start gap-6 py-1">
                 <div className="flex flex-col items-center justify-center py-2">
                   <span className="text-base font-bold leading-none">{executives.length}</span>
-                  <span className="text-[10px] text-muted-foreground mt-0.5">Executives</span>
+                  <span className="text-xs text-muted-foreground mt-0.5">Executives</span>
                 </div>
                 <div className="flex flex-col items-center justify-center py-2">
                   <span className="text-base font-bold leading-none">3</span>
-                  <span className="text-[10px] text-muted-foreground mt-0.5">Committees</span>
+                  <span className="text-xs text-muted-foreground mt-0.5">Committees</span>
                 </div>
               </div>
 
