@@ -55,21 +55,21 @@ const ActivityItem = ({ activity }: ActivityItemProps) => {
   const colorClass = getColorForType(activity.type);
   
   return (
-    <div className="flex items-start gap-3 py-3">
+    <div className="flex items-start gap-2.5 py-3">
       <Avatar className="h-8 w-8 shrink-0">
         <AvatarImage src={activity.adminAvatar} alt={activity.adminName} />
         <AvatarFallback className="text-xs">
           {activity.adminName.split(' ').map(n => n[0]).join('')}
         </AvatarFallback>
       </Avatar>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm">
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <p className="text-sm leading-relaxed">
           <span className="font-medium">{activity.adminName}</span>
           <span className="text-muted-foreground"> {activity.action} </span>
-          <span className="font-medium">{activity.target}</span>
+          <span className="font-medium break-words">{activity.target}</span>
         </p>
-        <div className="flex items-center gap-2 mt-1">
-          <div className={`p-1 rounded ${colorClass}`}>
+        <div className="flex items-center gap-1.5 mt-1">
+          <div className={`p-1 rounded shrink-0 ${colorClass}`}>
             <Icon className="h-3 w-3" />
           </div>
           <span className="text-xs text-muted-foreground">
