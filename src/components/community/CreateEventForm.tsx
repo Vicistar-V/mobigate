@@ -34,6 +34,9 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
   const [eventType, setEventType] = useState<EventItem["eventType"]>("social");
   const [venue, setVenue] = useState("");
   const [venueType, setVenueType] = useState<EventItem["venueType"]>("indoor");
+  const [platformVenue, setPlatformVenue] = useState<"mobi-meeting" | "zoom-meeting" | "other">("mobi-meeting");
+  const [customPlatformVenue, setCustomPlatformVenue] = useState("");
+  const [venueAddress, setVenueAddress] = useState("");
   const [audience, setAudience] = useState<EventItem["audience"]>("public");
   const [sponsorship, setSponsorship] = useState<EventItem["sponsorship"]>("free");
   const [spotlight, setSpotlight] = useState(false);
@@ -89,6 +92,9 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
     setEventType("social");
     setVenue("");
     setVenueType("indoor");
+    setPlatformVenue("mobi-meeting");
+    setCustomPlatformVenue("");
+    setVenueAddress("");
     setAudience("public");
     setSponsorship("free");
     setSpotlight(false);
@@ -220,37 +226,80 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
                     </Select>
                   </div>
 
-                  {/* Venue Name */}
+                  {/* Meeting Mode */}
                   <div className="space-y-2">
-                    <Label htmlFor="event-venue" className="text-sm font-semibold">
-                      Venue Name <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="event-venue"
-                      value={venue}
-                      onChange={(e) => setVenue(e.target.value)}
-                      placeholder="Enter venue name..."
-                      className="text-base"
-                    />
-                  </div>
-
-                  {/* Venue Type */}
-                  <div className="space-y-2">
-                    <Label htmlFor="venue-type" className="text-sm font-semibold">
-                      Venue Type
+                    <Label htmlFor="meeting-mode" className="text-sm font-semibold">
+                      Meeting Mode
                     </Label>
                     <Select value={venueType} onValueChange={(val) => setVenueType(val as EventItem["venueType"])}>
-                      <SelectTrigger id="venue-type" className="text-base">
+                      <SelectTrigger id="meeting-mode" className="text-base">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="indoor">Indoor</SelectItem>
                         <SelectItem value="outdoor">Outdoor</SelectItem>
+                        <SelectItem value="indoor">Indoor</SelectItem>
                         <SelectItem value="virtual">Virtual</SelectItem>
                         <SelectItem value="hybrid">Hybrid</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Platform/Venue */}
+                  <div className="space-y-2">
+                    <Label htmlFor="platform-venue" className="text-sm font-semibold">
+                      Platform/Venue <span className="text-destructive">*</span>
+                    </Label>
+                    <Select 
+                      value={platformVenue} 
+                      onValueChange={(val) => {
+                        const v = val as "mobi-meeting" | "zoom-meeting" | "other";
+                        setPlatformVenue(v);
+                        if (v === "mobi-meeting") {
+                          setVenue("Mobi-Meeting");
+                        } else if (v === "zoom-meeting") {
+                          setVenue("Zoom Meeting");
+                        } else {
+                          setVenue(customPlatformVenue);
+                        }
+                      }}
+                    >
+                      <SelectTrigger id="platform-venue" className="text-base">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mobi-meeting">Mobi-Meeting</SelectItem>
+                        <SelectItem value="zoom-meeting">Zoom Meeting</SelectItem>
+                        <SelectItem value="other">Other - Specify</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {platformVenue === "other" && (
+                      <Input
+                        value={customPlatformVenue}
+                        onChange={(e) => {
+                          setCustomPlatformVenue(e.target.value);
+                          setVenue(e.target.value);
+                        }}
+                        placeholder="Enter platform or venue name..."
+                        className="text-base mt-2"
+                      />
+                    )}
+                  </div>
+
+                  {/* Conditional Venue Address - Only for Indoor or Outdoor */}
+                  {(venueType === "indoor" || venueType === "outdoor") && (
+                    <div className="space-y-2">
+                      <Label htmlFor="venue-address" className="text-sm font-semibold">
+                        Venue Address
+                      </Label>
+                      <Input
+                        id="venue-address"
+                        value={venueAddress}
+                        onChange={(e) => setVenueAddress(e.target.value)}
+                        placeholder="Enter venue address..."
+                        className="text-base"
+                      />
+                    </div>
+                  )}
 
                   {/* Audience */}
                   <div className="space-y-2">
