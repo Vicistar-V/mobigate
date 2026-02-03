@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { AdminCampaign } from "@/data/adminElectionData";
 import { useToast } from "@/hooks/use-toast";
 import { CampaignMediaUploader } from "@/components/community/elections/CampaignMediaUploader";
+import { CampaignAudienceSelector } from "./CampaignAudienceSelector";
+import { CampaignAudience, CampaignDurationDays } from "@/types/campaignSystem";
 
 interface CampaignImage {
   id: string;
@@ -50,7 +52,9 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
     startDate: "",
     endDate: "",
     publishImmediately: false,
-    campaignImages: [] as CampaignImage[]
+    campaignImages: [] as CampaignImage[],
+    audienceTargets: ["community_interface"] as CampaignAudience[],
+    durationDays: 7 as CampaignDurationDays
   });
 
   useEffect(() => {
@@ -64,7 +68,9 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
         startDate: campaign.startDate.toISOString().split('T')[0],
         endDate: campaign.endDate.toISOString().split('T')[0],
         publishImmediately: campaign.status === 'active',
-        campaignImages: []
+        campaignImages: [],
+        audienceTargets: ["community_interface"],
+        durationDays: 7
       });
     } else {
       setFormData({
@@ -76,7 +82,9 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
         startDate: "",
         endDate: "",
         publishImmediately: false,
-        campaignImages: []
+        campaignImages: [],
+        audienceTargets: ["community_interface"],
+        durationDays: 7
       });
     }
   }, [campaign, open]);
@@ -104,6 +112,14 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
 
   const handleImagesChange = (images: CampaignImage[]) => {
     setFormData(prev => ({ ...prev, campaignImages: images }));
+  };
+
+  const handleAudiencesChange = (audiences: CampaignAudience[]) => {
+    setFormData(prev => ({ ...prev, audienceTargets: audiences }));
+  };
+
+  const handleDurationChange = (duration: CampaignDurationDays) => {
+    setFormData(prev => ({ ...prev, durationDays: duration }));
   };
 
   const handleSubmit = () => {
@@ -147,6 +163,16 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
       return;
     }
 
+    // Validate audience selection
+    if (formData.audienceTargets.length === 0) {
+      toast({
+        title: "Audience Required",
+        description: "Please select at least one target audience",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: isEditing ? "Campaign Updated" : "Campaign Created",
       description: isEditing 
@@ -160,8 +186,8 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
-        <DrawerHeader className="border-b">
+      <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+        <DrawerHeader className="border-b shrink-0">
           <div className="flex items-center justify-between">
             <DrawerTitle>{isEditing ? "Edit Campaign" : "Create New Campaign"}</DrawerTitle>
             <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
@@ -170,8 +196,8 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
           </div>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 p-4 overflow-auto touch-auto" style={{ maxHeight: 'calc(90vh - 140px)' }}>
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 overflow-auto touch-auto">
+          <div className="p-4 space-y-4">
             {/* Candidate Selection */}
             <div className="space-y-2">
               <Label htmlFor="candidate">Candidate Name *</Label>
@@ -239,27 +265,16 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
 
             <Separator className="my-2" />
 
-            {/* Campaign Period */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                />
-              </div>
-            </div>
+            {/* Target Audience & Duration Section */}
+            <CampaignAudienceSelector
+              selectedAudiences={formData.audienceTargets}
+              onAudiencesChange={handleAudiencesChange}
+              selectedDuration={formData.durationDays}
+              onDurationChange={handleDurationChange}
+              showFeeBreakdown={true}
+            />
+
+            <Separator className="my-2" />
 
             {/* Manifesto */}
             <div className="space-y-2">
@@ -331,10 +346,13 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 onCheckedChange={(checked) => setFormData(prev => ({ ...prev, publishImmediately: checked }))}
               />
             </div>
+
+            {/* Extra bottom padding for mobile */}
+            <div className="h-4" />
           </div>
         </ScrollArea>
 
-        <DrawerFooter className="border-t gap-2">
+        <DrawerFooter className="border-t gap-2 shrink-0 bg-background">
           <Button onClick={handleSubmit} className="bg-green-600 hover:bg-green-700">
             {isEditing ? "Save Changes" : formData.publishImmediately ? "Publish Campaign" : "Save as Draft"}
           </Button>
