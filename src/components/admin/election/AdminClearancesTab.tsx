@@ -151,15 +151,14 @@ export function AdminClearancesTab() {
           filteredRequests.map((request) => (
             <Card key={request.id} className="overflow-hidden">
               <CardContent className="p-3 sm:p-4">
-                {/* Header Row */}
+                {/* Header Row - Avatar + Name + Badge */}
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-11 w-11 sm:h-12 sm:w-12 shrink-0">
+                  <Avatar className="h-11 w-11 shrink-0">
                     <AvatarImage src={request.candidateAvatar} alt={request.candidateName} />
                     <AvatarFallback className="text-sm">{request.candidateName[0]}</AvatarFallback>
                   </Avatar>
                   
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    {/* Name + Badge Row */}
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-2">
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-base truncate leading-tight">{request.candidateName}</h4>
@@ -169,75 +168,75 @@ export function AdminClearancesTab() {
                         {request.status.replace('_', ' ')}
                       </Badge>
                     </div>
+                  </div>
+                </div>
 
-                    {/* Documents Checklist */}
-                    <div className="mt-3 space-y-1.5">
-                      <p className="text-xs font-medium text-muted-foreground">Documents:</p>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                        {request.documents.map((doc, index) => (
-                          <div key={index} className="flex items-center gap-1.5 text-sm min-w-0">
-                            {getDocStatusIcon(doc.status)}
-                            <span className={`truncate ${doc.status === 'missing' ? 'text-muted-foreground' : ''}`}>
-                              {doc.name}
-                            </span>
-                          </div>
-                        ))}
+                {/* Documents Checklist - Full Width for Mobile */}
+                <div className="mt-3 space-y-1.5">
+                  <p className="text-xs font-medium text-muted-foreground">Documents:</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                    {request.documents.map((doc, index) => (
+                      <div key={index} className="flex items-center gap-1.5 text-sm min-w-0">
+                        {getDocStatusIcon(doc.status)}
+                        <span className={`${doc.status === 'missing' ? 'text-muted-foreground' : ''}`}>
+                          {doc.name}
+                        </span>
                       </div>
-                    </div>
+                    ))}
+                  </div>
+                </div>
 
-                    {/* Notes if any */}
-                    {request.notes && (
-                      <p className="mt-2.5 text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded line-clamp-2">
-                        📝 {request.notes}
-                      </p>
-                    )}
+                {/* Notes if any */}
+                {request.notes && (
+                  <p className="mt-2.5 text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded line-clamp-2">
+                    📝 {request.notes}
+                  </p>
+                )}
 
-                    {/* Rejection Reason */}
-                    {request.rejectionReason && (
-                      <p className="mt-2.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-2 rounded line-clamp-2">
-                        ❌ {request.rejectionReason}
-                      </p>
-                    )}
+                {/* Rejection Reason */}
+                {request.rejectionReason && (
+                  <p className="mt-2.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-2 rounded line-clamp-2">
+                    ❌ {request.rejectionReason}
+                  </p>
+                )}
 
-                    {/* Footer Row */}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50 gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {format(request.submittedAt, "MMM d, yyyy")}
-                      </span>
-                      
-                      <div className="flex gap-1.5 shrink-0">
+                {/* Footer Row */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50 gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {format(request.submittedAt, "MMM d, yyyy")}
+                  </span>
+                  
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2.5 text-xs gap-1"
+                      onClick={() => handleReview(request)}
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      Review
+                    </Button>
+                    
+                    {request.status === 'pending' && (
+                      <>
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 px-2.5 text-xs gap-1"
-                          onClick={() => handleReview(request)}
+                          className="h-7 px-2.5 text-xs text-green-600"
+                          onClick={() => handleQuickApprove(request.id)}
                         >
-                          <Eye className="h-3.5 w-3.5" />
-                          Review
+                          Approve
                         </Button>
-                        
-                        {request.status === 'pending' && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2.5 text-xs text-green-600"
-                              onClick={() => handleQuickApprove(request.id)}
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2.5 text-xs text-red-600"
-                              onClick={() => handleQuickReject(request.id)}
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2.5 text-xs text-red-600"
+                          onClick={() => handleQuickReject(request.id)}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>
