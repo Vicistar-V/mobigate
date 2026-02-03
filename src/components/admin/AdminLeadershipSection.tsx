@@ -29,16 +29,19 @@ interface ExecutiveCardProps {
 const ExecutiveCard = ({ member, onClick }: ExecutiveCardProps) => (
   <button
     onClick={() => onClick(member.id)}
-    className="flex flex-col items-center p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors w-[72px] shrink-0"
+    className="w-full flex items-center gap-3 py-2.5 hover:bg-muted/50 -mx-1 px-1 rounded transition-colors text-left"
   >
-    <Avatar className="h-10 w-10 mb-1.5">
+    <Avatar className="h-9 w-9 shrink-0">
       <AvatarImage src={member.avatar} alt={member.name} />
       <AvatarFallback className="text-xs">
         {member.name.split(' ').map(n => n[0]).join('')}
       </AvatarFallback>
     </Avatar>
-    <p className="font-medium text-xs text-center truncate w-full leading-tight">{member.name.split(' ')[0]}</p>
-    <p className="text-[11px] text-muted-foreground text-center truncate w-full leading-tight">{member.position.split(' ')[0]}...</p>
+    <div className="flex-1 min-w-0">
+      <p className="font-medium text-sm leading-snug truncate">{member.name}</p>
+      <p className="text-xs text-muted-foreground truncate">{member.position}</p>
+    </div>
+    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
   </button>
 );
 
@@ -166,11 +169,11 @@ export function AdminLeadershipSection({
                 </div>
               </div>
 
-              {/* Current Executive Carousel */}
+              {/* Current Executive List */}
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">Current Executive</p>
-                <ScrollArea className="w-full touch-auto">
-                  <div className="flex gap-2 pb-2">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Current Executive</p>
+                <ScrollArea className="max-h-[180px] overflow-y-auto touch-auto">
+                  <div className="flex flex-col divide-y divide-border/50">
                     {executives.slice(0, 6).map((member) => (
                       <ExecutiveCard
                         key={member.id}
@@ -179,7 +182,6 @@ export function AdminLeadershipSection({
                       />
                     ))}
                   </div>
-                  <ScrollBar orientation="horizontal" />
                 </ScrollArea>
               </div>
 
