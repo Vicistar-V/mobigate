@@ -9,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MoreVertical, Settings, Play, LayoutDashboard } from "lucide-react";
+import { MoreVertical, Settings, Play, LayoutDashboard, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import { GuestLoginDialog } from "./GuestLoginDialog";
@@ -41,6 +41,7 @@ import { CommunitySettingsSheet } from "./settings/CommunitySettingsSheet";
 import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestSheet";
 import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
 import { MemberImpeachmentDrawer } from "./elections/MemberImpeachmentDrawer";
+import { NominateCandidateSheet } from "./elections/NominateCandidateSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -95,6 +96,7 @@ export function CommunityMainMenu({
   const [showCandidateDashboard, setShowCandidateDashboard] = useState(false);
   const [showImpeachment, setShowImpeachment] = useState(false);
   const [impeachmentMode, setImpeachmentMode] = useState<"start" | "view">("view");
+  const [showNominateCandidate, setShowNominateCandidate] = useState(false);
 
   const pendingSettingsCount = getPendingProposalsCount();
 
@@ -635,6 +637,18 @@ export function CommunityMainMenu({
                 >
                   <Flag className="h-4 w-4 mr-2" />
                   Declare for Election (EoI)
+                </Button>
+                {/* Nominate Candidate - Highlighted Entry Point */}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-10 transition-colors duration-200 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 font-medium"
+                  onClick={() => {
+                    setShowNominateCandidate(true);
+                    setOpen(false);
+                  }}
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Nominate Candidate
                 </Button>
                 <Button
                   variant="ghost"
@@ -1280,6 +1294,13 @@ export function CommunityMainMenu({
         open={showImpeachment}
         onOpenChange={setShowImpeachment}
         initialView={impeachmentMode === "start" ? "start" : "list"}
+      />
+
+      {/* Nominate Candidate Sheet */}
+      <NominateCandidateSheet
+        open={showNominateCandidate}
+        onOpenChange={setShowNominateCandidate}
+        onNominationComplete={() => setShowNominateCandidate(false)}
       />
     </>
   );

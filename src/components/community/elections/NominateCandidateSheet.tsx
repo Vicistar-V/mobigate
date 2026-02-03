@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { format } from "date-fns";
 import {
   UserPlus,
   Search,
@@ -8,6 +9,8 @@ import {
   Users,
   Vote,
   AlertCircle,
+  Lock,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +19,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Drawer,
@@ -51,6 +47,32 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { mockNominationPeriods } from "@/data/electionProcessesData";
+import { cn } from "@/lib/utils";
+
+// Unavailable offices with active tenure
+const unavailableOffices = [
+  {
+    id: "office-unavail-1",
+    officeName: "President General",
+    currentHolder: "Chief Emmanuel Nwosu",
+    tenureEnd: new Date("2025-12-31"),
+    status: "active_tenure" as const,
+  },
+  {
+    id: "office-unavail-2",
+    officeName: "Secretary General",
+    currentHolder: "Mrs. Ngozi Eze",
+    tenureEnd: new Date("2025-12-31"),
+    status: "active_tenure" as const,
+  },
+  {
+    id: "office-unavail-3",
+    officeName: "Publicity Secretary",
+    currentHolder: "Dr. Patricia Okafor",
+    tenureEnd: new Date("2025-12-31"),
+    status: "active_tenure" as const,
+  },
+];
 
 interface Member {
   id: string;
@@ -286,34 +308,93 @@ export function NominateCandidateSheet({
             </Card>
           )}
 
-          {/* Office Selection */}
-          <Card>
-            <CardContent className="p-4 space-y-3">
-              <Label className="text-sm font-semibold">Select Office</Label>
-              {openNominationPeriods.length > 0 ? (
-                <Select value={selectedOffice} onValueChange={setSelectedOffice}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="Choose an office..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
-                    {openNominationPeriods.map((period) => (
-                      <SelectItem key={period.officeId} value={period.officeId}>
-                        <div className="flex items-center gap-2">
-                          <Vote className="h-4 w-4 text-primary" />
-                          {period.officeName}
+          {/* Office Selection - Card-based with Active/Inactive states */}
+          <div className="space-y-4">
+            {/* Available Offices */}
+            {openNominationPeriods.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                  <Check className="h-3.5 w-3.5" />
+                  Available Positions ({openNominationPeriods.length})
+                </Label>
+                <div className="space-y-2">
+                  {openNominationPeriods.map((period) => (
+                    <Card
+                      key={period.officeId}
+                      className={cn(
+                        "cursor-pointer transition-all",
+                        selectedOffice === period.officeId
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 hover:shadow-sm"
+                      )}
+                      onClick={() => setSelectedOffice(period.officeId)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{period.officeName}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {period.nominationsCount}/{period.maxNominations || "No limit"} nominations
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-emerald-500 text-white text-[10px]">Open</Badge>
+                            {selectedOffice === period.officeId && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-amber-700 dark:text-amber-400">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <p className="text-sm">No nomination periods are currently open</p>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+            )}
+
+            {openNominationPeriods.length === 0 && (
+              <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-amber-700 dark:text-amber-400">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <p className="text-sm">No nomination periods are currently open</p>
+              </div>
+            )}
+
+            {/* Unavailable Offices */}
+            {unavailableOffices.length > 0 && (
+              <div className="space-y-2 mt-4">
+                <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5" />
+                  Unavailable Positions ({unavailableOffices.length})
+                </Label>
+                <div className="space-y-2">
+                  {unavailableOffices.map((office) => (
+                    <Card
+                      key={office.id}
+                      className="opacity-60 border-muted cursor-not-allowed"
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-muted-foreground">{office.officeName}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Current: {office.currentHolder}
+                            </p>
+                            <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
+                              <Calendar className="h-3 w-3" />
+                              Tenure ends: {format(office.tenureEnd, "MMM d, yyyy")}
+                            </p>
+                          </div>
+                          <Badge variant="secondary" className="text-[10px]">
+                            <Lock className="h-2.5 w-2.5 mr-1" />
+                            Inactive
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Submit Button */}
           <Button
