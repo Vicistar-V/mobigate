@@ -180,6 +180,11 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 value={formData.candidateName}
                 onChange={(e) => setFormData(prev => ({ ...prev, candidateName: e.target.value }))}
                 placeholder="Enter full name (e.g., John Chukwuma Okafor)"
+                className="touch-manipulation"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
 
@@ -210,6 +215,11 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 onChange={(e) => setFormData(prev => ({ ...prev, slogan: e.target.value }))}
                 placeholder="e.g., Building a stronger community together"
                 maxLength={100}
+                className="touch-manipulation"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                onClick={(e) => e.stopPropagation()}
               />
               <p className="text-xs text-muted-foreground">A short, memorable phrase (max 100 characters)</p>
             </div>
@@ -260,6 +270,11 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                 onChange={(e) => setFormData(prev => ({ ...prev, manifesto: e.target.value }))}
                 placeholder="Describe your vision, goals, and plans for the community. What will you achieve if elected?"
                 rows={5}
+                className="touch-manipulation"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                onClick={(e) => e.stopPropagation()}
               />
               <p className="text-xs text-muted-foreground">Detailed statement of candidate's plans and vision</p>
             </div>
@@ -274,6 +289,11 @@ export function CampaignFormDialog({ open, onOpenChange, campaign }: CampaignFor
                       value={priority}
                       onChange={(e) => handlePriorityChange(index, e.target.value)}
                       placeholder={index === 0 ? "e.g., Improve community infrastructure" : `Priority ${index + 1}`}
+                      className="touch-manipulation"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      onClick={(e) => e.stopPropagation()}
                     />
                     {formData.priorities.length > 1 && (
                       <Button
