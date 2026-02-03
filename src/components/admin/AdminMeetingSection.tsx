@@ -43,10 +43,9 @@ interface StatBadgeProps {
 }
 
 const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
-  <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
-    <Icon className="h-3.5 w-3.5 text-muted-foreground mb-0.5" />
-    <span className="text-base font-bold">{value}</span>
-    <span className="text-xs text-muted-foreground truncate w-full text-center">{label}</span>
+  <div className="flex flex-col items-center justify-center py-2">
+    <span className="text-base font-bold leading-none">{value}</span>
+    <span className="text-[10px] text-muted-foreground mt-0.5">{label}</span>
   </div>
 );
 
@@ -94,10 +93,10 @@ export function AdminMeetingSection({
             </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="px-2.5 pb-2.5">
-          <div className="space-y-2.5">
-            {/* Stats Row - 3 columns */}
-            <div className="grid grid-cols-3 gap-1.5">
+        <AccordionContent className="px-3 pb-3">
+          <div className="space-y-3">
+            {/* Stats - inline row */}
+            <div className="flex items-center justify-start gap-6 py-1">
               <StatBadge value={stats.scheduledMeetings} label="Scheduled" icon={Clock} />
               <StatBadge value={stats.completedMeetings} label="Completed" icon={CheckCircle} />
               <StatBadge value={`${stats.avgAttendanceRate}%`} label="Attendance" icon={Users} />
@@ -112,65 +111,52 @@ export function AdminMeetingSection({
               <Progress value={stats.avgAttendanceRate} className="h-1.5" />
             </div>
 
-            {/* Action Buttons - Stacked full width */}
-            <div className="flex flex-col gap-1.5">
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewUpcoming}>
-                <Clock className="h-3.5 w-3.5 mr-2 shrink-0" />
+            {/* Action Buttons - list style with dividers */}
+            <div className="flex flex-col gap-0 divide-y divide-border">
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewUpcoming}>
+                <Clock className="h-4 w-4 text-muted-foreground" />
                 Upcoming Meetings
-              </Button>
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewPast}>
-                <CheckCircle className="h-3.5 w-3.5 mr-2 shrink-0" />
+              </button>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewPast}>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 Past Meetings
-              </Button>
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewAttendance}>
-                <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+              </button>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewAttendance}>
+                <Users className="h-4 w-4 text-muted-foreground" />
                 Attendance Records
-              </Button>
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewResolutions}>
-                <FileText className="h-3.5 w-3.5 mr-2 shrink-0" />
+              </button>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewResolutions}>
+                <FileText className="h-4 w-4 text-muted-foreground" />
                 Resolutions
-              </Button>
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-between" onClick={onViewConflicts}>
-                <span className="flex items-center">
-                  <Scale className="h-3.5 w-3.5 mr-2 shrink-0" />
-                  Conflicts & Disputes
-                </span>
-                <Badge variant="secondary" className="text-[10px] px-1.5 h-4 ml-2">2</Badge>
-              </Button>
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageRollCall}>
-                <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
+              </button>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewConflicts}>
+                <Scale className="h-4 w-4 text-muted-foreground" />
+                Conflicts & Disputes
+              </button>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onManageRollCall}>
+                <Users className="h-4 w-4 text-muted-foreground" />
                 Roll-Call Management
-              </Button>
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={() => setShowMinutesSettings(true)}>
-                <Settings className="h-3.5 w-3.5 mr-2 shrink-0" />
+              </button>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={() => setShowMinutesSettings(true)}>
+                <Settings className="h-4 w-4 text-muted-foreground" />
                 Minutes Settings
-              </Button>
+              </button>
             </div>
 
             {/* Upcoming Meetings */}
             {upcomingMeetings.length > 0 && (
-              <Card className="border-0 shadow-none bg-muted/30">
-                <CardHeader className="p-2.5 pb-1">
-                  <CardTitle className="text-xs flex items-center justify-between">
-                    <span>Upcoming</span>
-                    <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1" onClick={onViewUpcoming}>
-                      View All
-                      <ChevronRight className="h-3 w-3 ml-0.5" />
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2.5 pt-0">
-                  <div className="divide-y divide-border/50">
-                    {upcomingMeetings.slice(0, 3).map((meeting) => (
-                      <MeetingItem 
-                        key={meeting.id} 
-                        meeting={meeting} 
-                        onView={(id) => {}} 
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">Upcoming</p>
+                <div className="divide-y divide-border/50">
+                  {upcomingMeetings.slice(0, 3).map((meeting) => (
+                    <MeetingItem 
+                      key={meeting.id} 
+                      meeting={meeting} 
+                      onView={(id) => {}} 
+                    />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </AccordionContent>

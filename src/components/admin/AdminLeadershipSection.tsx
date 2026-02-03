@@ -152,69 +152,59 @@ export function AdminLeadershipSection({
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-2.5 pb-2.5">
-            <div className="space-y-2.5">
-              {/* Current Executive Carousel */}
-              <Card className="border-0 shadow-none bg-muted/30">
-                <CardHeader className="p-2.5 pb-1">
-                  <CardTitle className="text-xs flex items-center justify-between">
-                    <span>Current Executive</span>
-                    <Button variant="ghost" size="sm" className="h-6 text-xs px-1.5 -mr-1" onClick={onManageLeadership}>
-                      View All
-                      <ChevronRight className="h-3 w-3 ml-0.5" />
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2.5 pt-0">
-                  <ScrollArea className="w-full touch-auto">
-                    <div className="flex gap-2 pb-2">
-                      {executives.slice(0, 6).map((member) => (
-                        <ExecutiveCard
-                          key={member.id}
-                          member={member}
-                          onClick={onViewExecutive}
-                        />
-                      ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Action Buttons - Stacked full width */}
-              <div className="flex flex-col gap-1.5">
-                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onManageLeadership}>
-                  <Crown className="h-3.5 w-3.5 mr-2 shrink-0" />
-                  Manage Leadership
-                </Button>
-                <Button variant="default" size="sm" className="w-full h-9 text-xs justify-start" onClick={handleApplyResultsWithAuth}>
-                  <Trophy className="h-3.5 w-3.5 mr-2 shrink-0" />
-                  Apply Election Results
-                </Button>
-                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={onViewChangeHistory}>
-                  <History className="h-3.5 w-3.5 mr-2 shrink-0" />
-                  View Change History
-                </Button>
-                <Button variant="outline" size="sm" className="w-full h-9 text-xs justify-start" onClick={handleAssignAdhocWithAuth}>
-                  <Users className="h-3.5 w-3.5 mr-2 shrink-0" />
-                  Manage Ad-hoc Committees
-                </Button>
+          <AccordionContent className="px-3 pb-3">
+            <div className="space-y-3">
+              {/* Stats - inline row */}
+              <div className="flex items-center justify-start gap-6 py-1">
+                <div className="flex flex-col items-center justify-center py-2">
+                  <span className="text-base font-bold leading-none">{executives.length}</span>
+                  <span className="text-[10px] text-muted-foreground mt-0.5">Executives</span>
+                </div>
+                <div className="flex flex-col items-center justify-center py-2">
+                  <span className="text-base font-bold leading-none">3</span>
+                  <span className="text-[10px] text-muted-foreground mt-0.5">Committees</span>
+                </div>
               </div>
 
-              {/* Quick Stats - 2 columns */}
-              <div className="grid grid-cols-2 gap-1.5">
-                <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                  <span className="text-xs text-muted-foreground">Executives</span>
-                  <span className="text-sm font-bold">{executives.length}</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                  <span className="text-xs text-muted-foreground">Committees</span>
-                  <span className="text-sm font-bold">3</span>
-                </div>
+              {/* Current Executive Carousel */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">Current Executive</p>
+                <ScrollArea className="w-full touch-auto">
+                  <div className="flex gap-2 pb-2">
+                    {executives.slice(0, 6).map((member) => (
+                      <ExecutiveCard
+                        key={member.id}
+                        member={member}
+                        onClick={onViewExecutive}
+                      />
+                    ))}
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </div>
+
+              {/* Action Buttons - list style with dividers */}
+              <div className="flex flex-col gap-0 divide-y divide-border">
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onManageLeadership}>
+                  <Crown className="h-4 w-4 text-muted-foreground" />
+                  Manage Leadership
+                </button>
+                <button className="flex items-center gap-3 py-2.5 text-sm font-medium text-primary hover:bg-muted/50 -mx-1 px-1 rounded" onClick={handleApplyResultsWithAuth}>
+                  <Trophy className="h-4 w-4 text-primary" />
+                  Apply Election Results
+                </button>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewChangeHistory}>
+                  <History className="h-4 w-4 text-muted-foreground" />
+                  View Change History
+                </button>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={handleAssignAdhocWithAuth}>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  Manage Ad-hoc Committees
+                </button>
               </div>
 
               {/* Authorization Info */}
-              <div className="flex items-start gap-2 p-2 bg-muted/30 rounded-md">
+              <div className="flex items-start gap-2 pt-2 border-t border-border/50">
                 <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
                 <span className="text-xs text-muted-foreground leading-snug">
                   Leadership changes require President + Secretary + (PRO or Dir. Socials)
