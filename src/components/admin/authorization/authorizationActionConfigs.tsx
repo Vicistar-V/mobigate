@@ -140,6 +140,20 @@ export const MODULE_ACTION_CONFIGS: Record<AuthorizationModule, Record<string, A
       iconComponent: Vote,
       iconColorClass: "text-amber-600",
     },
+    accredit_voters: {
+      title: "Accredit Voters",
+      description: "Multi-signature authorization to grant voting accreditation",
+      icon: <Vote className="h-5 w-5 text-green-600" />,
+      iconComponent: Vote,
+      iconColorClass: "text-green-600",
+    },
+    revoke_accreditation: {
+      title: "Revoke Accreditation",
+      description: "Multi-signature authorization to revoke voting accreditation",
+      icon: <Vote className="h-5 w-5 text-red-600" />,
+      iconComponent: Vote,
+      iconColorClass: "text-red-600",
+    },
   },
   content: {
     publish_news: {

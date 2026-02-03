@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, CheckCircle, XCircle, Clock, Search, Download, Settings, UserCheck, UserX } from "lucide-react";
+import { Users, CheckCircle, XCircle, Clock, Search, Download, Settings, UserCheck, UserX, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { mockAccreditationVoters, mockAccreditationSettings, AdminAccreditationVoter, AdminAccreditationSettings } from "@/data/adminElectionData";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { ModuleAuthorizationDrawer } from "@/components/admin/authorization/ModuleAuthorizationDrawer";
 
 const getStatusColor = (status: AdminAccreditationVoter['accreditationStatus']) => {
   switch (status) {
@@ -64,6 +65,14 @@ export function AdminAccreditationTab() {
   const [financialFilter, setFinancialFilter] = useState<string>("all");
   const [selectedVoters, setSelectedVoters] = useState<string[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+  
+  // Multi-signature authorization state
+  const [showAuthDrawer, setShowAuthDrawer] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: "accredit" | "revoke";
+    voterIds: string[];
+    voterNames: string[];
+  } | null>(null);
 
   const filteredVoters = voters.filter(voter => {
     const matchesSearch = voter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,48 +105,130 @@ export function AdminAccreditationTab() {
     }
   };
 
+  // Open authorization drawer for bulk accredit
   const handleBulkAccredit = () => {
-    setVoters(prev => prev.map(v => 
-      selectedVoters.includes(v.id) ? { ...v, accreditationStatus: 'valid' as const, dateAccredited: new Date() } : v
-    ));
-    toast({
-      title: "Voters Accredited",
-      description: `${selectedVoters.length} voters have been accredited`
+    const selectedVoterData = voters.filter(v => selectedVoters.includes(v.id));
+    setPendingAction({
+      type: "accredit",
+      voterIds: selectedVoters,
+      voterNames: selectedVoterData.map(v => v.name),
     });
-    setSelectedVoters([]);
+    setShowAuthDrawer(true);
   };
 
+  // Open authorization drawer for bulk revoke
   const handleBulkRevoke = () => {
-    setVoters(prev => prev.map(v => 
-      selectedVoters.includes(v.id) ? { ...v, accreditationStatus: 'revoked' as const } : v
-    ));
-    toast({
-      title: "Accreditation Revoked",
-      description: `${selectedVoters.length} voters have had their accreditation revoked`,
-      variant: "destructive"
+    const selectedVoterData = voters.filter(v => selectedVoters.includes(v.id));
+    setPendingAction({
+      type: "revoke",
+      voterIds: selectedVoters,
+      voterNames: selectedVoterData.map(v => v.name),
     });
-    setSelectedVoters([]);
+    setShowAuthDrawer(true);
   };
 
+  // Open authorization drawer for single accredit
   const handleAccredit = (voterId: string) => {
-    setVoters(prev => prev.map(v => 
-      v.id === voterId ? { ...v, accreditationStatus: 'valid' as const, dateAccredited: new Date() } : v
-    ));
-    toast({
-      title: "Voter Accredited",
-      description: "The voter has been accredited successfully"
+    const voter = voters.find(v => v.id === voterId);
+    if (!voter) return;
+    
+    setPendingAction({
+      type: "accredit",
+      voterIds: [voterId],
+      voterNames: [voter.name],
     });
+    setShowAuthDrawer(true);
   };
 
+  // Open authorization drawer for single revoke
   const handleRevoke = (voterId: string) => {
-    setVoters(prev => prev.map(v => 
-      v.id === voterId ? { ...v, accreditationStatus: 'revoked' as const } : v
-    ));
-    toast({
-      title: "Accreditation Revoked",
-      description: "The voter's accreditation has been revoked",
-      variant: "destructive"
+    const voter = voters.find(v => v.id === voterId);
+    if (!voter) return;
+    
+    setPendingAction({
+      type: "revoke",
+      voterIds: [voterId],
+      voterNames: [voter.name],
     });
+    setShowAuthDrawer(true);
+  };
+
+  // Execute action after multi-signature authorization
+  const handleAuthorizationComplete = () => {
+    if (!pendingAction) return;
+    
+    if (pendingAction.type === "accredit") {
+      setVoters(prev => prev.map(v => 
+        pendingAction.voterIds.includes(v.id) 
+          ? { ...v, accreditationStatus: 'valid' as const, dateAccredited: new Date() } 
+          : v
+      ));
+      toast({
+        title: "Voters Accredited",
+        description: `${pendingAction.voterIds.length} voter(s) have been accredited with multi-signature authorization`
+      });
+    } else {
+      setVoters(prev => prev.map(v => 
+        pendingAction.voterIds.includes(v.id) 
+          ? { ...v, accreditationStatus: 'revoked' as const } 
+          : v
+      ));
+      toast({
+        title: "Accreditation Revoked",
+        description: `${pendingAction.voterIds.length} voter(s) have had their accreditation revoked`,
+        variant: "destructive"
+      });
+    }
+    
+    setSelectedVoters([]);
+    setPendingAction(null);
+  };
+
+  // Render action details for authorization drawer
+  const getAuthActionDetails = () => {
+    if (!pendingAction) return null;
+    
+    const isAccredit = pendingAction.type === "accredit";
+    const count = pendingAction.voterIds.length;
+    
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${isAccredit ? "bg-green-500/10" : "bg-red-500/10"}`}>
+            {isAccredit ? (
+              <UserCheck className="h-5 w-5 text-green-600" />
+            ) : (
+              <UserX className="h-5 w-5 text-red-600" />
+            )}
+          </div>
+          <div>
+            <p className="font-medium text-sm">
+              {isAccredit ? "Accredit" : "Revoke"} {count} Voter{count !== 1 ? "s" : ""}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isAccredit ? "Grant voting rights" : "Remove voting rights"}
+            </p>
+          </div>
+        </div>
+        
+        {/* Voter names list */}
+        <div className="bg-muted/50 rounded-lg p-2 max-h-24 overflow-y-auto touch-auto">
+          {pendingAction.voterNames.slice(0, 5).map((name, idx) => (
+            <p key={idx} className="text-xs truncate">{name}</p>
+          ))}
+          {pendingAction.voterNames.length > 5 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              +{pendingAction.voterNames.length - 5} more
+            </p>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Shield className="h-3.5 w-3.5" />
+          <span>Requires 3 admin signatures</span>
+        </div>
+      </div>
+    );
   };
 
   const handleExport = () => {
@@ -375,6 +466,25 @@ export function AdminAccreditationTab() {
           </Card>
         ))}
       </div>
+
+      {/* Multi-Signature Authorization Drawer */}
+      <ModuleAuthorizationDrawer
+        open={showAuthDrawer}
+        onOpenChange={(open) => {
+          setShowAuthDrawer(open);
+          if (!open) setPendingAction(null);
+        }}
+        module="elections"
+        actionTitle={pendingAction?.type === "accredit" ? "Accredit Voters" : "Revoke Accreditation"}
+        actionDescription={
+          pendingAction?.type === "accredit"
+            ? "Multi-signature authorization required to grant voting accreditation"
+            : "Multi-signature authorization required to revoke voting accreditation"
+        }
+        actionDetails={getAuthActionDetails()}
+        initiatorRole="secretary"
+        onAuthorized={handleAuthorizationComplete}
+      />
     </div>
   );
 }

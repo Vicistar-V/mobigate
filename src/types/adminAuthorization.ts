@@ -150,15 +150,15 @@ export const MODULE_AUTHORIZATION_RULES: Record<AuthorizationModule, ModuleAutho
     requiresLegalAdviserIfActing: true,
   },
 
-  // ELECTIONS: President + Secretary + (PRO OR Director of Socials)
+  // ELECTIONS: President + Secretary + (PRO, Fin. Sec, OR Legal Adviser)
   elections: {
     module: "elections",
     displayName: "Elections",
     description: "Election management and result announcements",
     requiredSignatories: 3,
     requiredRoles: ["president", "secretary"],
-    alternativeRoles: [["publicity_secretary", "director_of_socials"]],
-    auxiliaryRoles: ["legal_adviser"],
+    alternativeRoles: [["publicity_secretary", "financial_secretary", "legal_adviser"]],
+    auxiliaryRoles: ["vice_president", "assistant_secretary"],
     canProceedWithoutPresident: false,
     requiresLegalAdviserIfActing: true,
   },
@@ -367,7 +367,7 @@ export function getRequirementsDescription(
         ? "4 signatories: President, Treasurer, (Secretary or Fin.Sec), + Legal Adviser"
         : "3 signatories: President + Treasurer + (Secretary or Fin.Sec)";
     case "elections":
-      return "President + Secretary + (PRO or Dir. of Socials)";
+      return "President + Secretary + (PRO, Fin. Sec, or Legal Adviser)";
     case "content":
       return "Secretary + PRO, or President + one of them";
     case "leadership":
