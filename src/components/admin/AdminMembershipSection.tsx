@@ -24,41 +24,41 @@ interface MemberRequestItemProps {
 }
 
 const MemberRequestItem = ({ request, onApprove, onReject, onView }: MemberRequestItemProps) => (
-  <div className="flex items-center gap-3 py-3">
-    <Avatar className="h-10 w-10 shrink-0">
+  <div className="flex items-center gap-2.5 py-2.5">
+    <Avatar className="h-9 w-9 shrink-0">
       <AvatarImage src={request.avatar} alt={request.name} />
-      <AvatarFallback className="text-sm">{request.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+      <AvatarFallback className="text-xs">{request.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
     </Avatar>
     <div className="flex-1 min-w-0">
       <p className="font-medium text-sm truncate">{request.name}</p>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         {formatRelativeTime(request.requestDate)}
       </p>
     </div>
-    <div className="flex items-center gap-1 shrink-0">
+    <div className="flex items-center gap-0.5 shrink-0">
       <Button
         size="icon"
         variant="ghost"
-        className="h-9 w-9"
+        className="h-8 w-8"
         onClick={() => onView(request.id)}
       >
-        <Eye className="h-4 w-4 text-muted-foreground" />
+        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
       </Button>
       <Button
         size="icon"
         variant="ghost"
-        className="h-9 w-9 text-green-600 hover:text-green-700 hover:bg-green-50"
+        className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
         onClick={() => onApprove(request.id)}
       >
-        <Check className="h-4 w-4" />
+        <Check className="h-3.5 w-3.5" />
       </Button>
       <Button
         size="icon"
         variant="ghost"
-        className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
         onClick={() => onReject(request.id)}
       >
-        <X className="h-4 w-4" />
+        <X className="h-3.5 w-3.5" />
       </Button>
     </div>
   </div>
@@ -193,67 +193,68 @@ export function AdminMembershipSection({
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4">
-            <div className="space-y-4 w-full max-w-full overflow-hidden">
+          <AccordionContent className="px-3 pb-3">
+            <div className="space-y-3 w-full max-w-full overflow-hidden">
               {/* Stats Row - 2 columns for mobile */}
-              <div className="grid grid-cols-2 gap-2 w-full">
+              <div className="grid grid-cols-2 gap-1.5 w-full">
                 <StatBadge value={stats.totalMembers} label="Total" />
                 <StatBadge value={stats.activeMembers} label="Active" />
                 <StatBadge value={stats.pendingRequests} label="Pending" />
                 <StatBadge value={stats.blockedUsers} label="Blocked" />
               </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onViewAllMembers}>
-                  <Users className="h-4 w-4 mr-2" />
-                  View All
-                </Button>
-                <Button variant="outline" size="sm" className="h-10 text-sm" onClick={onManageRequests}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Requests
-                  {stats.pendingRequests > 0 && (
-                    <Badge variant="destructive" className="ml-2 text-xs px-1.5">
-                      {stats.pendingRequests}
+              {/* Action Buttons - Full width stacked */}
+              <div className="space-y-1.5">
+                <div className="grid grid-cols-2 gap-1.5">
+                  <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onViewAllMembers}>
+                    <Users className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                    View All
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-9 text-xs px-2" onClick={onManageRequests}>
+                    <UserPlus className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                    Requests
+                    {stats.pendingRequests > 0 && (
+                      <Badge variant="destructive" className="ml-1.5 text-[10px] px-1 h-4">
+                        {stats.pendingRequests}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
+                <Button variant="outline" size="sm" className="w-full h-9 text-xs" onClick={onViewBlocked}>
+                  <UserX className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                  Blocked Users
+                  {stats.blockedUsers > 0 && (
+                    <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 h-4">
+                      {stats.blockedUsers}
                     </Badge>
                   )}
                 </Button>
               </div>
 
-              <Button variant="outline" size="sm" className="w-full h-10 text-sm" onClick={onViewBlocked}>
-                <UserX className="h-4 w-4 mr-2" />
-                Blocked Users
-                {stats.blockedUsers > 0 && (
-                  <Badge variant="secondary" className="ml-2 text-xs px-1.5">
-                    {stats.blockedUsers}
-                  </Badge>
-                )}
-              </Button>
-
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
                   placeholder="Search members..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-10"
+                  className="pl-8 h-9 text-sm"
                 />
               </div>
 
               {/* Recent Requests */}
               {recentRequests.length > 0 && (
                 <Card className="overflow-hidden">
-                  <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-sm flex items-center justify-between">
+                  <CardHeader className="pb-1 pt-2.5 px-3">
+                    <CardTitle className="text-xs flex items-center justify-between">
                       Recent Requests
-                      <Button variant="ghost" size="sm" className="h-8 text-sm px-2" onClick={onManageRequests}>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs px-1.5" onClick={onManageRequests}>
                         View All
-                        <ChevronRight className="h-4 w-4 ml-1" />
+                        <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4 pt-0">
+                  <CardContent className="px-3 pb-3 pt-0">
                     <div className="divide-y divide-border">
                       {recentRequests.slice(0, 3).map((request) => (
                         <MemberRequestItem
@@ -270,10 +271,10 @@ export function AdminMembershipSection({
               )}
 
               {/* Authorization Info */}
-              <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  Member actions require President + (Secretary OR PRO) authorization
+              <div className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg">
+                <Shield className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-relaxed">
+                  Member actions require President + (Secretary or PRO) authorization
                 </span>
               </div>
             </div>
