@@ -35,6 +35,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { OfficialLetterDisplay, LetterData } from "@/components/community/resources/OfficialLetterDisplay";
+import { DigitalIDCardDisplay, IDCardData } from "@/components/community/resources/DigitalIDCardDisplay";
 
 interface ManageCommunityResourcesDialogProps {
   open: boolean;
@@ -54,6 +56,12 @@ export function ManageCommunityResourcesDialog({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   
+  // Letter & ID Card preview state
+  const [showLetterPreview, setShowLetterPreview] = useState(false);
+  const [selectedLetterData, setSelectedLetterData] = useState<LetterData | null>(null);
+  const [showIDCardPreview, setShowIDCardPreview] = useState(false);
+  const [selectedIDCardData, setSelectedIDCardData] = useState<IDCardData | null>(null);
+
   // Publication upload form state
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [pubTitle, setPubTitle] = useState("");
@@ -98,11 +106,38 @@ export function ManageCommunityResourcesDialog({
     });
   };
 
-  const handleIssueIDCard = (requestId: string) => {
+  const handleIssueIDCard = (request: typeof mockIDCardRequests[0]) => {
+    const cardData: IDCardData = {
+      memberName: request.memberName,
+      memberId: request.memberId,
+      memberPhoto: request.memberPhoto,
+      cardNumber: `CMT-001-${request.memberId.split('-').pop()}`,
+      issueDate: new Date(),
+      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
+      communityName: "Ndigbo Progressive Union",
+      verificationCode: `VRF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+    };
+    setSelectedIDCardData(cardData);
+    setShowIDCardPreview(true);
     toast({
-      title: "ID Card Issued",
-      description: "The digital ID card has been generated and sent to the member",
+      title: "ID Card Generated",
+      description: "The digital ID card has been generated and is ready for download",
     });
+  };
+
+  const handleViewIDCard = (request: typeof mockIDCardRequests[0]) => {
+    const cardData: IDCardData = {
+      memberName: request.memberName,
+      memberId: request.memberId,
+      memberPhoto: request.memberPhoto,
+      cardNumber: `CMT-001-${request.memberId.split('-').pop()}`,
+      issueDate: request.processedDate || new Date(),
+      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
+      communityName: "Ndigbo Progressive Union",
+      verificationCode: `VRF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+    };
+    setSelectedIDCardData(cardData);
+    setShowIDCardPreview(true);
   };
 
   const handleApproveLetter = (requestId: string) => {
@@ -120,11 +155,40 @@ export function ManageCommunityResourcesDialog({
     });
   };
 
-  const handleIssueLetter = (requestId: string) => {
+  const handleIssueLetter = (request: typeof mockLetterRequests[0]) => {
+    const template = letterTemplates.find(t => t.id === request.templateId);
+    const letterData: LetterData = {
+      templateTitle: template?.title || "Official Letter",
+      letterNumber: request.letterNumber || `CMT/LTR/${new Date().getFullYear()}/${String(Math.floor(Math.random() * 999)).padStart(3, '0')}`,
+      requestedBy: request.requestedBy,
+      purpose: request.purpose,
+      issuedDate: new Date(),
+      communityName: "Ndigbo Progressive Union",
+      signedBy: "Community Secretary",
+      verificationCode: `LTR-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+    };
+    setSelectedLetterData(letterData);
+    setShowLetterPreview(true);
     toast({
-      title: "Letter Issued",
-      description: "The official letter has been generated with a unique reference number",
+      title: "Letter Generated",
+      description: "The official letter has been generated and is ready for download",
     });
+  };
+
+  const handleViewLetter = (request: typeof mockLetterRequests[0]) => {
+    const template = letterTemplates.find(t => t.id === request.templateId);
+    const letterData: LetterData = {
+      templateTitle: template?.title || "Official Letter",
+      letterNumber: request.letterNumber || "CMT/LTR/2024/000",
+      requestedBy: request.requestedBy,
+      purpose: request.purpose,
+      issuedDate: request.approvalDate || new Date(),
+      communityName: "Ndigbo Progressive Union",
+      signedBy: "Community Secretary",
+      verificationCode: `LTR-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+    };
+    setSelectedLetterData(letterData);
+    setShowLetterPreview(true);
   };
 
   const handleUploadPublication = () => {
@@ -360,14 +424,16 @@ export function ManageCommunityResourcesDialog({
                                     size="sm"
                                     variant="default"
                                     className="h-8 text-xs"
-                                    onClick={() => handleIssueIDCard(request.id)}
+                                    onClick={() => handleIssueIDCard(request)}
                                   >
                                     <Send className="h-3 w-3 mr-1" />
                                     Issue Card
                                   </Button>
                                 )}
                                 {request.status === "issued" && (
-                                  <Button size="sm" variant="outline" className="h-8 text-xs">
+                                  <Button size="sm" variant="outline" className="h-8 text-xs"
+                                    onClick={() => handleViewIDCard(request)}
+                                  >
                                     <Eye className="h-3 w-3 mr-1" />
                                     View Card
                                   </Button>
@@ -456,14 +522,16 @@ export function ManageCommunityResourcesDialog({
                                   size="sm"
                                   variant="default"
                                   className="h-8 text-xs"
-                                  onClick={() => handleIssueLetter(request.id)}
+                                  onClick={() => handleIssueLetter(request)}
                                 >
                                   <Send className="h-3 w-3 mr-1" />
                                   Issue Letter
                                 </Button>
                               )}
                               {request.status === "issued" && (
-                                <Button size="sm" variant="outline" className="h-8 text-xs">
+                                <Button size="sm" variant="outline" className="h-8 text-xs"
+                                  onClick={() => handleViewLetter(request)}
+                                >
                                   <Eye className="h-3 w-3 mr-1" />
                                   Preview
                                 </Button>
@@ -639,11 +707,11 @@ export function ManageCommunityResourcesDialog({
                                 {pub.edition} • {pub.pages} pages • {pub.fileSize}
                               </p>
 
-                              <div className="flex flex-wrap gap-2 mt-3">
+                              <div className="flex gap-2 mt-3 overflow-x-auto pb-1 -mb-1">
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="h-8 text-xs"
+                                  className="h-8 text-xs shrink-0"
                                   onClick={() => handleToggleFeatured(pub.id, pub.featured)}
                                 >
                                   {pub.featured ? (
@@ -658,14 +726,14 @@ export function ManageCommunityResourcesDialog({
                                     </>
                                   )}
                                 </Button>
-                                <Button size="sm" variant="outline" className="h-8 text-xs">
+                                <Button size="sm" variant="outline" className="h-8 text-xs shrink-0">
                                   <Edit className="h-3 w-3 mr-1" />
                                   Edit
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="h-8 text-xs text-destructive"
+                                  className="h-8 text-xs text-destructive shrink-0"
                                   onClick={() => {
                                     setItemToDelete(pub.id);
                                     setShowDeleteConfirm(true);
@@ -845,6 +913,30 @@ export function ManageCommunityResourcesDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Official Letter Preview */}
+      {selectedLetterData && (
+        <OfficialLetterDisplay
+          open={showLetterPreview}
+          onOpenChange={(open) => {
+            setShowLetterPreview(open);
+            if (!open) setSelectedLetterData(null);
+          }}
+          letterData={selectedLetterData}
+        />
+      )}
+
+      {/* Digital ID Card Preview */}
+      {selectedIDCardData && (
+        <DigitalIDCardDisplay
+          open={showIDCardPreview}
+          onOpenChange={(open) => {
+            setShowIDCardPreview(open);
+            if (!open) setSelectedIDCardData(null);
+          }}
+          cardData={selectedIDCardData}
+        />
+      )}
     </>
   );
 }
