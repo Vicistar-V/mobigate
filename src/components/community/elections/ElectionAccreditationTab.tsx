@@ -30,8 +30,14 @@ const activitiesData = {
   totalPenalty: 4500
 };
 
-export const ElectionAccreditationTab = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities' | 'accredited'>('financial');
+interface ElectionAccreditationTabProps {
+  initialSubTab?: 'financial' | 'activities' | 'accredited';
+}
+
+export const ElectionAccreditationTab = ({ 
+  initialSubTab = 'financial' 
+}: ElectionAccreditationTabProps) => {
+  const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities' | 'accredited'>(initialSubTab);
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
   const [showActivitiesSheet, setShowActivitiesSheet] = useState(false);
   const [showFinancialStatusDialog, setShowFinancialStatusDialog] = useState(false);
