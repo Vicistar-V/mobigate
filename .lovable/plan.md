@@ -1,98 +1,110 @@
 
-## Wire Up Inactive Buttons in "Other Members' Financial Summaries"
+## Wire Up All Inactive Buttons in Financial Clearances Tab
 
-### Problem
+### Problem Identified
 
-In the "Other Members' Financial Summaries" section, all four interactive elements are completely static:
-- **"View Now" button** -- does nothing
-- **"Friends" link** -- does nothing
-- **"Profile" link** -- does nothing  
-- **"View Report" link** -- does nothing
+The screenshot shows the **Financial Clearances** tab (`FinancialClearancesTab.tsx`), NOT the Community Accounts tab (which was fixed previously). This tab has its own set of **4 completely static buttons** with zero onClick handlers:
+
+- **Financial Status Report** (yellow) -- no onClick
+- **Check Total Indebtedness** (red) -- no onClick
+- **Debts Clearance Now** (green) -- no onClick
+- **Download Receipts** (blue) -- no onClick
+
+Additionally, two related components also have inactive elements:
+
+- **TransactionTable.tsx** -- Header says "Click for Details" but rows have no onClick
+- **FinancialSummaryTable.tsx** -- "DOWNLOAD SUMMARIES" and "Close" buttons have no onClick
 
 ### Solution
 
-Wire each button/link to its appropriate existing component or navigation target. All changes are confined to a single file.
+Wire all inactive elements to their existing functional components.
 
 ---
 
-### File: `src/components/community/finance/OtherMembersFinancialSection.tsx`
+### File 1: `src/components/community/finance/FinancialClearancesTab.tsx`
 
-#### Add State and Imports
+This is the PRIMARY fix. Currently lines 72-89 are 4 completely static buttons.
 
+**Changes:**
 - Import `useState` from React
-- Import `useNavigate` from `react-router-dom`
-- Import `useToast` from `@/hooks/use-toast`
-- Import `MemberPreviewDialog` from `@/components/community/MemberPreviewDialog`
 - Import `FinancialStatusDialog` from `./FinancialStatusDialog`
+- Import `CheckIndebtednessSheet` from `../elections/CheckIndebtednessSheet`
+- Import `DownloadFormatSheet` from `@/components/common/DownloadFormatSheet`
+- Import `toast` from `sonner`
 
-Add state variables:
-- `selectedMember` -- tracks which member was tapped (for Profile preview)
-- `showMemberPreview` -- controls the MemberPreviewDialog drawer
-- `showFinancialReport` -- controls the FinancialStatusDialog
-- `friendRequests` -- tracks which members have pending friend requests (local Set)
+**Add state variables:**
+- `showStatusDialog` -- controls FinancialStatusDialog
+- `showIndebtednessSheet` -- controls CheckIndebtednessSheet
+- `showReceiptsSheet` -- controls DownloadFormatSheet
 
-#### Wire "Friends" Button
+**Wire buttons:**
+| Button | Handler |
+|--------|---------|
+| Financial Status Report | `onClick={() => setShowStatusDialog(true)}` |
+| Check Total Indebtedness | `onClick={() => setShowIndebtednessSheet(true)}` |
+| Debts Clearance Now | `onClick={() => setShowIndebtednessSheet(true)}` |
+| Download Receipts | `onClick={() => setShowReceiptsSheet(true)}` |
 
-When tapped, send a friend request to that member (toast confirmation + update local state to show "Request Sent"). If already sent, show disabled state. This mirrors the pattern used in `MemberPreviewDialog.handleAddFriend`.
-
-```
-onClick -> if already sent: disabled state
-         -> else: add to friendRequests set, show toast "Friend request sent to {name}"
-```
-
-#### Wire "Profile" Button
-
-When tapped, open the `MemberPreviewDialog` drawer showing the member's preview (avatar, name, position, mutual friends, action buttons). The member data is mapped from `otherMembersFinancialData` to the `ExecutiveMember` format expected by `MemberPreviewDialog`.
-
-```
-onClick -> set selectedMember to mapped member data
-        -> set showMemberPreview = true
-```
-
-#### Wire "View Report" Button
-
-When tapped, open the `FinancialStatusDialog` which shows the member's financial standing, compliance rate, outstanding balance, and payment history. Since this is a UI template, it will show the mock financial status data.
-
-```
-onClick -> set showFinancialReport = true
-```
-
-#### Wire "View Now" Button
-
-When tapped, scroll down to the member list (or expand the section if collapsed). Since the members are already visible, this button will open a toast indicating "Viewing all member summaries" and could scroll to the first member card for visual feedback.
-
-Alternatively, since members are already visible, wire it to navigate to a hypothetical full members list view -- but since this is a UI template, show a toast: "Viewing all financial summaries" to provide tactile feedback.
+**Render dialogs** at the bottom of the component alongside existing content.
 
 ---
 
-### Technical Details
+### File 2: `src/components/community/finance/TransactionTable.tsx`
 
-**Member data mapping** (otherMembersFinancialData to ExecutiveMember format):
+The header says "Click for Details" but rows are not clickable.
 
-```typescript
-const mappedMember = {
-  id: member.id,
-  name: member.name,
-  imageUrl: member.avatar,
-  position: "Community Member",
-  isFriend: friendRequests.has(member.id),
-};
-```
+**Changes:**
+- Import `useState` from React
+- Import `Drawer, DrawerContent` from `@/components/ui/drawer`
+- Add `selectedTransaction` state
+- Add `onClick` handler to each `<tr>` with `cursor-pointer active:bg-muted/50 touch-manipulation` classes
+- When a row is tapped, open a mobile Drawer showing full transaction details:
+  - Transaction description (full, not truncated)
+  - Date
+  - Credit/Debit amounts (with dual currency)
+  - Approval code
+  - Status badge
+  - Close button
 
-**Button behavior summary:**
+---
 
-| Button | Action | Component/Navigation |
-|--------|--------|---------------------|
-| View Now | Toast feedback | Toast notification |
-| Friends | Send friend request | Local state + toast |
-| Profile | Open member preview | MemberPreviewDialog (Drawer) |
-| View Report | Open financial report | FinancialStatusDialog |
+### File 3: `src/components/community/finance/FinancialSummaryTable.tsx`
 
-### Mobile Optimization
+"DOWNLOAD SUMMARIES" and "Close" buttons (lines 126-131) have no onClick.
 
-- All triggered components (MemberPreviewDialog, FinancialStatusDialog) are already mobile-optimized with Drawer patterns
-- Button touch targets maintained with existing `h-auto p-0` sizing
-- No desktop breakpoints added -- purely mobile-focused
+**Changes:**
+- Add optional `onDownload` and `onClose` callback props to `FinancialSummaryTableProps`
+- Wire "DOWNLOAD SUMMARIES" button: `onClick={() => onDownload?.()}`
+- Wire "Close" button: `onClick={() => onClose?.()}`
+- Add `touch-manipulation active:scale-[0.97]` to both buttons for mobile feedback
+
+---
+
+### File 4: `src/components/community/finance/CommunityAccountsTab.tsx`
+
+Wire the FinancialSummaryTable callbacks.
+
+**Changes:**
+- Add `showSummaryDownload` state
+- Add `summarySort` state (replace the empty `onSortChange={() => {}}`)
+- Pass `onDownload={() => setShowSummaryDownload(true)}` to FinancialSummaryTable
+- Pass `onClose={() => setIsTableCollapsed(true)}` to FinancialSummaryTable (or scroll back up)
+- Pass `onSortChange={setSummarySort}` with proper state
+- Add another `DownloadFormatSheet` instance for summary downloads
+
+---
+
+### Summary of All Changes
+
+| File | What Gets Fixed |
+|------|----------------|
+| `FinancialClearancesTab.tsx` | All 4 action buttons wired to dialogs/sheets |
+| `TransactionTable.tsx` | Row clicks open detail drawer |
+| `FinancialSummaryTable.tsx` | DOWNLOAD SUMMARIES and Close buttons get callbacks |
+| `CommunityAccountsTab.tsx` | Wire summary table callbacks + sort state |
 
 ### Files Modified
-1. `src/components/community/finance/OtherMembersFinancialSection.tsx`
+1. `src/components/community/finance/FinancialClearancesTab.tsx`
+2. `src/components/community/finance/TransactionTable.tsx`
+3. `src/components/community/finance/FinancialSummaryTable.tsx`
+4. `src/components/community/finance/CommunityAccountsTab.tsx`
