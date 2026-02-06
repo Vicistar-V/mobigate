@@ -1,95 +1,143 @@
 
-## Fix Inactive Edit Button in Publications Management
+## Fix Community ID Card: Add Community Name and Activate Download Button
 
-### Problem
+### Problems Identified
 
-The "Edit" button on publication cards in the "Manage Resources > Pubs" tab has no `onClick` handler, making it completely non-functional on mobile (or anywhere).
+1. **Missing Community Name**: The inline ID card preview in the member's "Community Resources" dialog shows member details but lacks the community name header. The `DigitalIDCardDisplay` component already shows it with a blue gradient banner, but the inline preview card doesn't.
 
-### Solution
+2. **Inactive "Download Digital" button**: The button on line 162 has no `onClick` handler -- tapping it does nothing. It should open the `DigitalIDCardDisplay` component which provides the full high-fidelity card view with multi-format download.
 
-Wire the Edit button to open the existing upload form pre-filled with the selected publication's data, allowing the admin to modify and save changes.
+3. **Inactive Letter "Download" button**: The letter history download button (line 258) also has no `onClick` handler.
 
-### File: `src/components/community/ManageCommunityResourcesDialog.tsx`
+---
 
-**1. Add editing state (after line 68)**
+### File: `src/components/community/CommunityResourcesDialog.tsx`
 
-Add a state variable to track which publication is being edited:
+**Change 1: Add imports for DigitalIDCardDisplay and OfficialLetterDisplay**
+
+Add imports at the top:
 ```tsx
-const [editingPubId, setEditingPubId] = useState<string | null>(null);
+import { DigitalIDCardDisplay, IDCardData } from "@/components/community/resources/DigitalIDCardDisplay";
+import { OfficialLetterDisplay, LetterData } from "@/components/community/resources/OfficialLetterDisplay";
+import { Shield } from "lucide-react";
 ```
 
-**2. Add `handleEditPublication` handler (after `handleDeletePublication` around line 274)**
+**Change 2: Add state for ID card and letter preview dialogs**
 
-Create a function that pre-fills the upload form fields with the selected publication's data:
+After the existing state declarations (around line 25), add:
 ```tsx
-const handleEditPublication = (pub: typeof publications[0]) => {
-  setEditingPubId(pub.id);
-  setPubTitle(pub.title);
-  setPubDescription(pub.description);
-  setPubType(pub.type);
-  setPubEdition(pub.edition);
-  setPubPages(String(pub.pages));
-  setPubFeatured(pub.featured);
-  setCoverImageFile(pub.coverImage ? { name: "Current cover", preview: pub.coverImage } : null);
-  setPdfFile({ name: "Current PDF file" });
-  setShowUploadForm(true);
-};
+const [showIDCardPreview, setShowIDCardPreview] = useState(false);
+const [showLetterPreview, setShowLetterPreview] = useState(false);
+const [selectedLetterData, setSelectedLetterData] = useState<LetterData | null>(null);
 ```
 
-**3. Update `handleUploadPublication` (lines 206-231)**
+**Change 3: Add Community Name header to inline ID card preview (line 119)**
 
-Modify the existing upload handler to support both create and update flows:
-- If `editingPubId` is set, show "Publication Updated" toast
-- If not, show the current "Publication Uploaded" toast
-- Reset `editingPubId` to null in both cases
+Before the member photo/name section, add a professional branded header inside the card area showing "Ndigbo Progressive Union" with a shield icon. This matches the branding used in the `DigitalIDCardDisplay`:
 
-**4. Update form title and button text**
-
-Change the upload form header (line 617) and submit button (line 781) to reflect whether we're creating or editing:
-- Header: `editingPubId ? "Edit Publication" : "Upload Publication"`
-- Button: `editingPubId ? "Save Changes" : "Upload Publication"`
-
-**5. Update form close handler**
-
-When closing the upload form (line 620), also reset `editingPubId`:
 ```tsx
-onClick={() => { setShowUploadForm(false); setEditingPubId(null); }}
+<div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary/20 rounded-xl overflow-hidden">
+  {/* Community Name Header */}
+  <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3">
+    <div className="flex items-center gap-2">
+      <Shield className="h-4 w-4" />
+      <div>
+        <h4 className="text-xs font-bold uppercase tracking-wider">Ndigbo Progressive Union</h4>
+        <p className="text-[9px] opacity-80">Official Community ID Card</p>
+      </div>
+    </div>
+  </div>
+  {/* ...existing member details with p-4 padding... */}
+</div>
 ```
 
-**6. Wire the Edit button (line 852)**
+**Change 4: Wire "Download Digital" button (line 162)**
 
-Add the `onClick` handler to the Edit button:
+Add an `onClick` handler to open the `DigitalIDCardDisplay`:
+
 ```tsx
-<Button
+<Button 
+  variant="outline" 
   size="sm"
-  variant="outline"
-  className="h-8 text-xs shrink-0"
-  onClick={() => handleEditPublication(pub)}
+  onClick={() => setShowIDCardPreview(true)}
 >
-  <Edit className="h-3 w-3 mr-1" />
-  Edit
+  <Download className="h-4 w-4 mr-2" />
+  Download Digital
 </Button>
 ```
 
-**7. Update "Upload New Publication" button behavior**
+**Change 5: Add the DigitalIDCardDisplay component at the bottom of the return**
 
-When clicking "Upload New Publication" (line 607), ensure editing state is cleared:
+Render the component with card data mapped from `mockIDCard`:
+
 ```tsx
-onClick={() => { setEditingPubId(null); setShowUploadForm(true); }}
+<DigitalIDCardDisplay
+  open={showIDCardPreview}
+  onOpenChange={setShowIDCardPreview}
+  cardData={{
+    memberName: mockIDCard.memberName,
+    memberId: mockIDCard.memberId,
+    memberPhoto: mockIDCard.memberPhoto,
+    cardNumber: mockIDCard.cardNumber,
+    issueDate: mockIDCard.issueDate,
+    expiryDate: mockIDCard.expiryDate,
+    communityName: "Ndigbo Progressive Union",
+    verificationCode: mockIDCard.qrCode,
+  }}
+/>
+```
+
+**Change 6: Wire letter "Download" button (line 258)**
+
+Add an `onClick` handler that constructs `LetterData` from the request and opens the letter preview:
+
+```tsx
+<Button 
+  size="sm" 
+  variant="outline"
+  onClick={() => {
+    setSelectedLetterData({
+      templateTitle: template?.title || "",
+      letterNumber: request.letterNumber!,
+      requestedBy: request.requestedBy,
+      purpose: request.purpose,
+      issuedDate: request.approvalDate || request.requestDate,
+      communityName: "Ndigbo Progressive Union",
+      signedBy: request.approvedBy || "Community Secretary",
+      verificationCode: `VER-${request.letterNumber?.replace(/\//g, "-")}`,
+    });
+    setShowLetterPreview(true);
+  }}
+>
+  <Download className="h-3 w-3 mr-1" />
+  Download
+</Button>
+```
+
+**Change 7: Add the OfficialLetterDisplay component at the bottom of the return**
+
+```tsx
+{selectedLetterData && (
+  <OfficialLetterDisplay
+    open={showLetterPreview}
+    onOpenChange={setShowLetterPreview}
+    letterData={selectedLetterData}
+  />
+)}
 ```
 
 ---
 
 ### Summary
 
-| Change | Location | Purpose |
-|--------|----------|---------|
-| Add `editingPubId` state | After line 68 | Track which publication is being edited |
-| Add `handleEditPublication` | After line 274 | Pre-fill form fields from publication data |
-| Update `handleUploadPublication` | Lines 206-231 | Support update toast alongside create toast, reset editing state |
-| Update form header/button | Lines 617, 781 | Show "Edit Publication" / "Save Changes" when editing |
-| Update form close | Line 620 | Reset editing state on close |
-| Wire Edit button `onClick` | Line 852 | Call `handleEditPublication(pub)` |
-| Clear editing on new upload | Line 607 | Reset `editingPubId` when creating new |
+| Change | Purpose |
+|--------|---------|
+| Add community name banner to inline ID card | Shows "Ndigbo Progressive Union" with Shield icon in a blue gradient header, matching the official card design |
+| Wire "Download Digital" button | Opens `DigitalIDCardDisplay` drawer (mobile) with full card preview and multi-format download (PDF, JPEG, PNG) |
+| Wire letter "Download" button | Opens `OfficialLetterDisplay` drawer with full letter preview and multi-format download |
+| Add state variables | Track open/close state for both preview components |
+| Add imports | `DigitalIDCardDisplay`, `OfficialLetterDisplay`, `Shield` icon |
 
-All changes are in a single file. The form scrolls to the top on mobile when opened for editing, giving users a clear view of the pre-filled fields. The existing mobile optimizations (touch-action, text-base inputs, stopPropagation) remain intact.
+### Single File Modified
+
+`src/components/community/CommunityResourcesDialog.tsx`
