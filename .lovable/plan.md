@@ -1,134 +1,107 @@
 
 
-## Fix Inactive Publication Download Buttons - Mobile First
+## Add Constitution Tab and "More" Resources - Mobile First
 
-### Problem
+### What's Changing
 
-The "Download" and "Get" buttons on the Publications tab in Community Resources only show a toast notification saying "Downloading Publication" but don't actually do anything meaningful. They need to open the `DownloadFormatSheet` drawer so users can pick a format (PDF, JPEG, PNG, etc.) and trigger a proper download flow -- just like ID Cards and Letters already do.
+The Community Resources dialog currently has 3 tabs: **ID Cards**, **Letters**, **Publications**. Based on the screenshot annotation, the user wants **Constitution** added as a tab, with a **More** option for additional resources.
 
-### Solution
+### Approach
 
-Integrate the existing `DownloadFormatSheet` component into the Publications tab. When a user taps "Download" or "Get", the parent dialog closes (to avoid z-index conflicts on mobile), the format picker opens, and after downloading, the parent dialog re-opens.
+Instead of cramming 5+ tabs into a narrow mobile TabsList, the layout will use **4 tabs**: "ID Cards", "Letters", "Constitution", and "More" (with a horizontal dots icon). The "More" tab consolidates Publications and Other Resources into one place, keeping the mobile tab bar clean.
 
-### File: `src/components/community/CommunityResourcesDialog.tsx`
+### File 1: `src/components/community/CommunityResourcesDialog.tsx`
 
-**Change 1: Import DownloadFormatSheet**
+**Tab restructure (line 161)**
+- Change `grid-cols-3` to `grid-cols-4`
+- Keep "ID Cards" and "Letters" tabs
+- Add new "Constitution" tab (replacing Publications from the top-level)
+- Add "More" tab with a `MoreHorizontal` icon that contains:
+  - Publications section (moved here from its own tab)
+  - Other Resources section with placeholder cards (Community Forum link, Help Center, FAQs, etc.)
 
-Add the import for the existing download format picker component:
-```tsx
-import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
+**New state: `showConstitutionViewer`**
+- When user taps the "View Full Document" button inside the Constitution tab, close the parent dialog and open `ConstitutionViewer` (same z-index pattern as ID Card and Letter downloads)
+
+**Constitution tab content**
+- A summary card showing:
+  - Constitution title: "Constitution of Ndigbo Progressive Union"
+  - Version, adopted date, last amended date, effective date
+  - A list of article titles (compact, scrollable)
+  - "View Full Document" button that opens the existing `ConstitutionViewer`
+  - "Download PDF" button
+
+**More tab content**
+- **Publications** subsection (the existing publications UI moved here unchanged)
+- **Other Resources** subsection with cards for:
+  - Community Forum
+  - Help Center
+  - FAQs
+  - Each card has a title, description, and action button
+
+**Import additions**
+- `ConstitutionViewer` from `@/components/community/ConstitutionViewer`
+- `constitutionSections, constitutionMetadata` from `@/data/constitutionData`
+- `MoreHorizontal`, `Scale`, `HelpCircle`, `MessageCircle` icons from lucide-react
+
+### File 2: `src/data/constitutionData.ts`
+
+**Update constitution metadata title (line 243)**
+- Change `"Constitution of [Community Name]"` to `"Constitution of Ndigbo Progressive Union"`
+
+### Implementation Details
+
+**Constitution Tab UI (mobile-optimized)**
+```
++----------------------------------+
+| [Scale icon] Constitution        |
+| of Ndigbo Progressive Union     |
+| Version 2.1 | Effective 7/1/24  |
++----------------------------------+
+| Adopted: Jan 15, 2024           |
+| Last Amended: Jun 20, 2024      |
++----------------------------------+
+| Articles:                        |
+| [I] Name and Identity        >  |
+| [II] Objectives and Purpose  >  |
+| [III] Membership              >  |
+| [IV] Governance               >  |
+| ... (scrollable list)           |
++----------------------------------+
+| [View Full Document]  [PDF]     |
++----------------------------------+
 ```
 
-**Change 2: Add state variables for publication download flow**
-
-After the existing state declarations (around line 30), add:
-```tsx
-const [showPubDownload, setShowPubDownload] = useState(false);
-const [selectedPubForDownload, setSelectedPubForDownload] = useState<{ title: string; fileSize: string } | null>(null);
-const [isDownloading, setIsDownloading] = useState(false);
+**More Tab UI (mobile-optimized)**
+```
++----------------------------------+
+| Publications                     |
+| [Search bar]                     |
+| [Featured pub cards...]         |
+| [All publications list...]      |
++----------------------------------+
+| Other Resources                  |
+| [Community Forum card]          |
+| [Help Center card]              |
+| [FAQs card]                     |
++----------------------------------+
 ```
 
-**Change 3: Replace `handleDownloadPublication` with proper flow**
-
-Replace the current toast-only handler (lines 89-94) with a handler that closes the parent dialog and opens the format sheet:
-
-```tsx
-const handleDownloadPublication = (pub: { title: string; fileSize: string }) => {
-  setSelectedPubForDownload(pub);
-  onOpenChange(false);
-  setTimeout(() => setShowPubDownload(true), 150);
-};
-
-const handlePubDownloadConfirm = (format: DownloadFormat) => {
-  setIsDownloading(true);
-  setTimeout(() => {
-    setIsDownloading(false);
-    setShowPubDownload(false);
-    toast({
-      title: "Download Complete",
-      description: `${selectedPubForDownload?.title} downloaded as ${format.toUpperCase()}`,
-    });
-    setTimeout(() => onOpenChange(true), 150);
-  }, 1500);
-};
-
-const handleClosePubDownload = (open: boolean) => {
-  setShowPubDownload(open);
-  if (!open) {
-    setTimeout(() => onOpenChange(true), 150);
-  }
-};
-```
-
-**Change 4: Update Featured Publication "Download" buttons (line 390)**
-
-Update the onClick to pass the full publication object instead of just the title:
-```tsx
-<Button
-  onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
-  size="sm"
-  className="shrink-0"
->
-  <Download className="h-3 w-3 mr-1" />
-  Download
-</Button>
-```
-
-**Change 5: Update All Publications "Get" buttons (line 422-429)**
-
-Same pattern for the non-featured publications:
-```tsx
-<Button
-  onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
-  size="sm"
-  variant="ghost"
->
-  <Download className="h-3 w-3 mr-1" />
-  Get
-</Button>
-```
-
-**Change 6: Render `DownloadFormatSheet` at the bottom of the component (before the closing Fragment tag, after the OfficialLetterDisplay)**
-
-```tsx
-{selectedPubForDownload && (
-  <DownloadFormatSheet
-    open={showPubDownload}
-    onOpenChange={handleClosePubDownload}
-    onDownload={handlePubDownloadConfirm}
-    title="Download Publication"
-    documentName={selectedPubForDownload.title}
-    availableFormats={["pdf", "jpeg", "png"]}
-    isDownloading={isDownloading}
-  />
-)}
-```
-
----
-
-### How It Works on Mobile
-
-1. User taps "Download" or "Get" on any publication card
-2. The parent Community Resources dialog closes smoothly (150ms)
-3. The `DownloadFormatSheet` drawer slides up from the bottom, showing the publication name and format options (PDF recommended, plus JPEG, PNG)
-4. User selects a format and taps "Download as .PDF"
-5. A 1.5s spinner animation plays, then a success toast appears
-6. The format sheet closes and the Community Resources dialog re-opens automatically
-
-This follows the exact same pattern already used for ID Card and Letter downloads, ensuring consistency across the entire Resources feature.
+**Dialog close/reopen pattern for Constitution Viewer**
+Same as ID Card and Letter downloads:
+1. Close parent dialog
+2. Wait 150ms
+3. Open ConstitutionViewer
+4. When ConstitutionViewer closes, reopen parent dialog after 150ms
 
 ### Summary
 
-| Change | Purpose |
-|--------|---------|
-| Import `DownloadFormatSheet` | Reuse existing multi-format download component |
-| Add download state variables | Track selected publication and downloading status |
-| Replace toast-only handler | Open format picker instead of just showing toast |
-| Add download confirm handler | Simulate download with loading state and success toast |
-| Add close handler with re-open | Close parent dialog before opening drawer to fix z-index on mobile |
-| Update both Download and Get button onClick | Pass publication data to the new handler |
-| Render DownloadFormatSheet | Add the drawer component outside the Dialog |
-
-### Single File Modified
-`src/components/community/CommunityResourcesDialog.tsx`
+| Change | File | Purpose |
+|--------|------|---------|
+| Update tab grid to 4 columns | CommunityResourcesDialog.tsx | Fit Constitution and More tabs |
+| Add Constitution tab content | CommunityResourcesDialog.tsx | Article summary, metadata, and full viewer link |
+| Move Publications into More tab | CommunityResourcesDialog.tsx | Free up tab space for Constitution |
+| Add Other Resources section | CommunityResourcesDialog.tsx | Community Forum, Help Center, FAQs cards |
+| Wire ConstitutionViewer with z-index pattern | CommunityResourcesDialog.tsx | Open viewer without overlay conflicts |
+| Update constitution title | constitutionData.ts | Replace placeholder with "Ndigbo Progressive Union" |
 
