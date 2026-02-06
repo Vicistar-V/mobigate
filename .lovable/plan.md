@@ -1,116 +1,76 @@
 
 
-## Standardize Pagination Display at 50 Items
+## Clean Up Remaining "X of Y" Text Pattern
 
-### Problem
+### Context
 
-The badge and info text always show "X of Y" format (e.g., "19 of 527", "5 of 20", "50 of 316") regardless of whether there are actually more items to load. This creates confusing variations:
+The badge was already fixed in the last edit to show "19 voters" instead of "19 of 527" when all filtered results fit on one page. However, the info text below the badge still shows "Found 19 of 527 voters" when a search/filter is active, which uses the same "X of Y" pattern the user finds confusing.
 
-- When search narrows 527 voters to 19, it shows "19 of 19" -- redundant
-- When a candidate only has 20 votes, it shows "20 of 20" -- no pagination needed but looks like it
-- When there are 527 voters, it shows "50 of 527" -- this is the only case where the "X of Y" format makes sense
+### Change
 
-### Rule
+Simplify the info text to completely eliminate any "X of Y" pattern when all items are already visible on screen. The "X of Y" format should ONLY appear when there is a Load More button (i.e., more than 50 items to show).
 
-- **50 or fewer items**: Display all items, no "Load More" button, no "X of Y" text. Badge simply shows the total count (e.g., "19 voters" or "20 voters").
-- **More than 50 items**: Display first 50, show "Load More" button, badge shows "50 of 527", info text says "Showing 50 of 527 voters".
+### File: `src/components/admin/election/CandidateVotersListSheet.tsx`
 
----
+**Update the info text block (lines 255-263)**
 
-### Technical Details
-
-#### File: `src/components/admin/election/CandidateVotersListSheet.tsx`
-
-**1. Simplify the count badge logic (lines 246-248)**
-
-Replace the always-showing "X of Y" badge with conditional display:
-
-- When all filtered voters are displayed (`displayedVoters.length === filteredVoters.length`): Show just the count, e.g., `"19 voters"`
-- When there are more to load (`hasMore` is true): Show the "X of Y" format, e.g., `"50 of 527"`
-
-```tsx
-<Badge variant="secondary" className="text-xs">
-  {hasMore
-    ? `${displayedVoters.length} of ${filteredVoters.length}`
-    : `${filteredVoters.length} voters`
-  }
-</Badge>
-```
-
-**2. Simplify the info text (lines 252-255)**
-
-Replace the always-showing "Showing X of Y voters" line with conditional display:
-
-- When there are more to load: Show `"Showing 50 of 527 voters"`
-- When a search/filter narrowed results from a larger set: Show `"Found 19 voters"` (so the user knows their filter is active)
-- When all items are shown and no filter: Show nothing (remove the text entirely to save space)
-
+Current:
 ```tsx
 {hasMore ? (
   <p className="text-xs text-muted-foreground">
     Showing {displayedVoters.length} of {filteredVoters.length} voters
   </p>
-) : searchQuery || filterMode !== "all" ? (
+) : (searchQuery || filterMode !== "all") ? (
   <p className="text-xs text-muted-foreground">
     Found {filteredVoters.length} of {voteCount} voters
   </p>
 ) : null}
 ```
 
-**3. No changes needed to the Load More button logic**
-
-The existing `hasMore` check already handles this correctly -- the button only appears when `filteredVoters.length > displayCount`. Since `displayCount` starts at 50, lists with 50 or fewer items never show the button.
-
----
-
-### Expected Results
-
-**Candidate with 20 votes (no search):**
-```
-Badge: "20 voters"
-Info text: (none)
-Load More: (hidden)
+New:
+```tsx
+{hasMore ? (
+  <p className="text-xs text-muted-foreground">
+    Showing {displayedVoters.length} of {filteredVoters.length} voters
+  </p>
+) : (searchQuery || filterMode !== "all") ? (
+  <p className="text-xs text-muted-foreground">
+    {filteredVoters.length} matching voters found
+  </p>
+) : null}
 ```
 
-**Candidate with 527 votes (no search):**
-```
-Badge: "50 of 527"
-Info text: "Showing 50 of 527 voters"
-Load More: [Load More (477 remaining)]
-```
+### Expected Results After Fix
 
-**Candidate with 527 votes (search "j" returns 19):**
-```
-Badge: "19 voters"
-Info text: "Found 19 of 527 voters"
-Load More: (hidden)
-```
+**13 votes, search "j" returns 5:**
+- Badge: `5 voters`
+- Info text: `5 matching voters found`
+- Load More: hidden
 
-**Candidate with 527 votes (search "j" returns 65):**
-```
-Badge: "50 of 65"
-Info text: "Showing 50 of 65 voters"
-Load More: [Load More (15 remaining)]
-```
+**527 votes, no search:**
+- Badge: `50 of 527`
+- Info text: `Showing 50 of 527 voters`
+- Load More: visible
 
-**After tapping "Load More" on 527 voters:**
-```
-Badge: "100 of 527"  ->  tap again -> "150 of 527"  -> ... -> "527 voters"
-Info text: updates accordingly -> disappears when all shown
-Load More: disappears when all shown
-```
+**527 votes, search "j" returns 19:**
+- Badge: `19 voters`
+- Info text: `19 matching voters found`
+- Load More: hidden
 
----
+**316 votes, search "j" returns 20:**
+- Badge: `20 voters`
+- Info text: `20 matching voters found`
+- Load More: hidden
 
-### Files to Modify
+**527 votes, search returns 65:**
+- Badge: `50 of 65`
+- Info text: `Showing 50 of 65 voters`
+- Load More: visible
+
+### Summary
+
+Only one line changes in one file. The "X of Y" pattern is now exclusively reserved for when there are actually more items to load (Load More button visible). All other cases use simple, clean counts.
 
 | File | Change |
 |------|--------|
-| `src/components/admin/election/CandidateVotersListSheet.tsx` | Update badge and info text to use conditional display logic |
-
-### Mobile UX Impact
-
-- Cleaner display for small lists (no redundant "5 of 5" or "20 of 20")
-- Clear pagination indicator only when there are actually more items to load
-- Search results clearly indicate they are filtered from a larger set
-- Less visual noise on mobile screens
+| `src/components/admin/election/CandidateVotersListSheet.tsx` | Change "Found X of Y voters" to "X matching voters found" |
