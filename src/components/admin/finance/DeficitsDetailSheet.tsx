@@ -362,7 +362,11 @@ export const DeficitsDetailSheet = ({
           placeholder="Search payee, invoice..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
+          className="pl-9 touch-manipulation"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          onClick={(e) => e.stopPropagation()}
         />
       </div>
 
