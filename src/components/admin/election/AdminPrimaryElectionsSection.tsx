@@ -38,6 +38,7 @@ import {
 import { PrimaryElection, PrimaryCandidate } from "@/types/electionProcesses";
 import { cn } from "@/lib/utils";
 import { CandidateVotersListSheet } from "./CandidateVotersListSheet";
+import { SchedulePrimaryDrawer } from "./SchedulePrimaryDrawer";
 import { 
   calculateAdvancingCandidates, 
   getAdvancementStatusText,
@@ -81,6 +82,7 @@ export function AdminPrimaryElectionsSection() {
   const { toast } = useToast();
   const [selectedPrimary, setSelectedPrimary] = useState<PrimaryElection | null>(null);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
+  const [showScheduleDrawer, setShowScheduleDrawer] = useState(false);
   
   // Voters List Sheet state
   const [votersListOpen, setVotersListOpen] = useState(false);
@@ -146,7 +148,10 @@ export function AdminPrimaryElectionsSection() {
       </div>
 
       {/* Action Button */}
-      <Button className="w-full bg-green-600 hover:bg-green-700 gap-2">
+      <Button 
+        className="w-full bg-green-600 hover:bg-green-700 gap-2"
+        onClick={() => setShowScheduleDrawer(true)}
+      >
         <Plus className="h-4 w-4" />
         Schedule New Primary
       </Button>
@@ -540,6 +545,19 @@ export function AdminPrimaryElectionsSection() {
           isWinner={selectedCandidate.isWinner}
         />
       )}
+
+      {/* Schedule Primary Drawer */}
+      <SchedulePrimaryDrawer
+        open={showScheduleDrawer}
+        onOpenChange={setShowScheduleDrawer}
+        onScheduled={() => {
+          toast({
+            title: "Primary Scheduled",
+            description: "The primary election has been scheduled successfully"
+          });
+          setShowScheduleDrawer(false);
+        }}
+      />
     </div>
   );
 }
