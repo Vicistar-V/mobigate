@@ -1,145 +1,95 @@
 
+## Fix Inactive Edit Button in Publications Management
 
-## Integrate Multi-Signature Authorization into Election Settings
+### Problem
 
-### What Changes
+The "Edit" button on publication cards in the "Manage Resources > Pubs" tab has no `onClick` handler, making it completely non-functional on mobile (or anywhere).
 
-Currently, when an admin changes an Election Setting (e.g., "Candidate Eligibility Period" from 2 Years to 3 Years) and taps "Submit Change," a simple confirmation dialog appears. This bypasses the established multi-signature authorization system.
+### Solution
 
-The fix: Replace the simple `AlertDialog` with the `ModuleAuthorizationDrawer`, which enforces the **Elections** module rules: **President + Secretary + (PRO, Fin. Sec, or Legal Adviser)** -- 3 signatories required.
+Wire the Edit button to open the existing upload form pre-filled with the selected publication's data, allowing the admin to modify and save changes.
 
-### What the User Will See
+### File: `src/components/community/ManageCommunityResourcesDialog.tsx`
 
-1. Admin changes a setting value (e.g., selects "3 Years" for Candidate Eligibility)
-2. Taps "Submit Change"
-3. The **ModuleAuthorizationDrawer** slides up (92vh on mobile)
-4. Shows the setting being changed with old and new values
-5. Each required officer enters their password to authorize
-6. Once all 3+ signatures are collected, the change is applied
-7. Toast confirms: "Change Submitted for Approval"
+**1. Add editing state (after line 68)**
 
----
-
-### File: `src/components/admin/election/ElectionSettingsSection.tsx`
-
-**1. Add imports for the authorization system (lines 1-43)**
-
-Add these imports:
-- `ModuleAuthorizationDrawer` from `@/components/admin/authorization/ModuleAuthorizationDrawer`
-- `Settings` icon from lucide (already imported)
-- `renderActionDetails` and `getActionConfig` from `@/components/admin/authorization/authorizationActionConfigs`
-
-**2. Add new action config for election settings (in authorizationActionConfigs.tsx)**
-
-Add a new config entry under `elections` module:
-```
-update_election_setting: {
-  title: "Update Election Setting",
-  description: "Multi-signature authorization to modify election rules",
-  icon: <Settings className="h-5 w-5 text-green-600" />,
-  iconComponent: Settings,
-  iconColorClass: "text-green-600",
-}
-```
-
-**3. Replace state and handlers (lines 179-228)**
-
-Replace:
-- `showConfirmDialog` state with `showAuthDrawer` state
-- `handleSave` to open the auth drawer instead of the dialog
-- `confirmSave` becomes `handleAuthComplete` (called after successful multi-sig)
-
-New state:
+Add a state variable to track which publication is being edited:
 ```tsx
-const [showAuthDrawer, setShowAuthDrawer] = useState(false);
-const [selectedSetting, setSelectedSetting] = useState<ElectionSetting | null>(null);
+const [editingPubId, setEditingPubId] = useState<string | null>(null);
 ```
 
-New handler flow:
+**2. Add `handleEditPublication` handler (after `handleDeletePublication` around line 274)**
+
+Create a function that pre-fills the upload form fields with the selected publication's data:
 ```tsx
-const handleSave = (setting: ElectionSetting) => {
-  setSelectedSetting(setting);
-  setShowAuthDrawer(true);
-};
-
-const handleAuthComplete = () => {
-  // Apply the change after successful multi-sig authorization
-  if (!selectedSetting) return;
-  const newValue = pendingChanges[selectedSetting.id];
-  if (!newValue) return;
-
-  setSettings(prev => prev.map(s =>
-    s.id === selectedSetting.id
-      ? { ...s, currentValue: newValue, hasPendingChange: true, lastUpdated: new Date() }
-      : s
-  ));
-  setPendingChanges(prev => {
-    const { [selectedSetting.id]: _, ...rest } = prev;
-    return rest;
-  });
-  toast({ title: "Setting Updated", description: "..." });
-  setSelectedSetting(null);
+const handleEditPublication = (pub: typeof publications[0]) => {
+  setEditingPubId(pub.id);
+  setPubTitle(pub.title);
+  setPubDescription(pub.description);
+  setPubType(pub.type);
+  setPubEdition(pub.edition);
+  setPubPages(String(pub.pages));
+  setPubFeatured(pub.featured);
+  setCoverImageFile(pub.coverImage ? { name: "Current cover", preview: pub.coverImage } : null);
+  setPdfFile({ name: "Current PDF file" });
+  setShowUploadForm(true);
 };
 ```
 
-**4. Replace AlertDialog with ModuleAuthorizationDrawer (lines 336-359)**
+**3. Update `handleUploadPublication` (lines 206-231)**
 
-Remove the entire `AlertDialog` block and replace with:
+Modify the existing upload handler to support both create and update flows:
+- If `editingPubId` is set, show "Publication Updated" toast
+- If not, show the current "Publication Uploaded" toast
+- Reset `editingPubId` to null in both cases
 
+**4. Update form title and button text**
+
+Change the upload form header (line 617) and submit button (line 781) to reflect whether we're creating or editing:
+- Header: `editingPubId ? "Edit Publication" : "Upload Publication"`
+- Button: `editingPubId ? "Save Changes" : "Upload Publication"`
+
+**5. Update form close handler**
+
+When closing the upload form (line 620), also reset `editingPubId`:
 ```tsx
-<ModuleAuthorizationDrawer
-  open={showAuthDrawer}
-  onOpenChange={setShowAuthDrawer}
-  module="elections"
-  actionTitle="Update Election Setting"
-  actionDescription={
-    selectedSetting
-      ? `Change "${selectedSetting.name}" requires multi-signature authorization`
-      : ""
-  }
-  actionDetails={
-    selectedSetting ? (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-green-500/10">
-            <selectedSetting.icon className="h-5 w-5 text-green-600" />
-          </div>
-          <div>
-            <p className="font-medium text-sm">{selectedSetting.name}</p>
-            <p className="text-xs text-muted-foreground">{selectedSetting.description}</p>
-          </div>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">Current</span>
-          <span>{currentLabel}</span>
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">New Value</span>
-          <span className="font-bold text-primary">{newLabel}</span>
-        </div>
-      </div>
-    ) : null
-  }
-  onAuthorized={handleAuthComplete}
-/>
+onClick={() => { setShowUploadForm(false); setEditingPubId(null); }}
 ```
 
-This shows the old and new values clearly so authorizing officers know exactly what they're approving.
+**6. Wire the Edit button (line 852)**
+
+Add the `onClick` handler to the Edit button:
+```tsx
+<Button
+  size="sm"
+  variant="outline"
+  className="h-8 text-xs shrink-0"
+  onClick={() => handleEditPublication(pub)}
+>
+  <Edit className="h-3 w-3 mr-1" />
+  Edit
+</Button>
+```
+
+**7. Update "Upload New Publication" button behavior**
+
+When clicking "Upload New Publication" (line 607), ensure editing state is cleared:
+```tsx
+onClick={() => { setEditingPubId(null); setShowUploadForm(true); }}
+```
 
 ---
 
-### Files Modified
+### Summary
 
-| File | Change |
-|------|--------|
-| `src/components/admin/election/ElectionSettingsSection.tsx` | Replace AlertDialog with ModuleAuthorizationDrawer; update state and handlers |
-| `src/components/admin/authorization/authorizationActionConfigs.tsx` | Add `update_election_setting` config under the `elections` module |
+| Change | Location | Purpose |
+|--------|----------|---------|
+| Add `editingPubId` state | After line 68 | Track which publication is being edited |
+| Add `handleEditPublication` | After line 274 | Pre-fill form fields from publication data |
+| Update `handleUploadPublication` | Lines 206-231 | Support update toast alongside create toast, reset editing state |
+| Update form header/button | Lines 617, 781 | Show "Edit Publication" / "Save Changes" when editing |
+| Update form close | Line 620 | Reset editing state on close |
+| Wire Edit button `onClick` | Line 852 | Call `handleEditPublication(pub)` |
+| Clear editing on new upload | Line 607 | Reset `editingPubId` when creating new |
 
-### Authorization Flow (Elections Module)
-
-The `elections` module requires **3 signatories**:
-1. **President/Chairman** (required)
-2. **Secretary** (required)
-3. **One of:** PRO, Financial Secretary, or Legal Adviser (pick one)
-
-If a Vice President or Assistant Secretary signs in place of their primary, the quorum increases to 4 and the Legal Adviser becomes mandatory.
+All changes are in a single file. The form scrolls to the top on mobile when opened for editing, giving users a clear view of the pre-filled fields. The existing mobile optimizations (touch-action, text-base inputs, stopPropagation) remain intact.
