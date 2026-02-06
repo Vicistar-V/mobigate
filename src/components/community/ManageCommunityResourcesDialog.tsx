@@ -66,6 +66,7 @@ export function ManageCommunityResourcesDialog({
 
   // Publication upload form state
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [editingPubId, setEditingPubId] = useState<string | null>(null);
   const [pubTitle, setPubTitle] = useState("");
   const [pubDescription, setPubDescription] = useState("");
   const [pubType, setPubType] = useState<string>("");
@@ -214,8 +215,10 @@ export function ManageCommunityResourcesDialog({
     }
 
     toast({
-      title: "Publication Uploaded",
-      description: `"${pubTitle}" has been added to community publications`,
+      title: editingPubId ? "Publication Updated" : "Publication Uploaded",
+      description: editingPubId 
+        ? `"${pubTitle}" has been updated successfully`
+        : `"${pubTitle}" has been added to community publications`,
     });
     
     // Reset form
@@ -227,6 +230,7 @@ export function ManageCommunityResourcesDialog({
     setPubFeatured(false);
     setCoverImageFile(null);
     setPdfFile(null);
+    setEditingPubId(null);
     setShowUploadForm(false);
   };
 
@@ -271,6 +275,19 @@ export function ManageCommunityResourcesDialog({
       setShowDeleteConfirm(false);
       setItemToDelete(null);
     }
+  };
+
+  const handleEditPublication = (pub: typeof publications[0]) => {
+    setEditingPubId(pub.id);
+    setPubTitle(pub.title);
+    setPubDescription(pub.description);
+    setPubType(pub.type);
+    setPubEdition(pub.edition);
+    setPubPages(String(pub.pages));
+    setPubFeatured(pub.featured);
+    setCoverImageFile(pub.coverImage ? { name: "Current cover", preview: pub.coverImage } : null);
+    setPdfFile({ name: "Current PDF file" });
+    setShowUploadForm(true);
   };
 
   const handleAssignManager = () => {
@@ -604,7 +621,7 @@ export function ManageCommunityResourcesDialog({
                   {/* Upload Section */}
                   {!showUploadForm ? (
                     <Button 
-                      onClick={() => setShowUploadForm(true)} 
+                      onClick={() => { setEditingPubId(null); setShowUploadForm(true); }} 
                       className="w-full h-12"
                     >
                       <Upload className="h-4 w-4 mr-2" />
@@ -614,12 +631,12 @@ export function ManageCommunityResourcesDialog({
                     <Card>
                       <CardHeader className="pb-3">
                         <CardTitle className="text-base flex items-center justify-between">
-                          <span>Upload Publication</span>
+                          <span>{editingPubId ? "Edit Publication" : "Upload Publication"}</span>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => setShowUploadForm(false)}
+                            onClick={() => { setShowUploadForm(false); setEditingPubId(null); }}
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -779,7 +796,7 @@ export function ManageCommunityResourcesDialog({
                         </div>
 
                         <Button onClick={handleUploadPublication} className="w-full">
-                          Upload Publication
+                          {editingPubId ? "Save Changes" : "Upload Publication"}
                         </Button>
                       </CardContent>
                     </Card>
@@ -849,7 +866,12 @@ export function ManageCommunityResourcesDialog({
                                     </>
                                   )}
                                 </Button>
-                                <Button size="sm" variant="outline" className="h-8 text-xs shrink-0">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="h-8 text-xs shrink-0"
+                                  onClick={() => handleEditPublication(pub)}
+                                >
                                   <Edit className="h-3 w-3 mr-1" />
                                   Edit
                                 </Button>
