@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Vote, Users, CheckCircle, Clock, Trophy, FileText, Settings, ChevronRight, Shield, UserCheck, Coins } from "lucide-react";
+import { Vote, Users, CheckCircle, Clock, Trophy, FileText, Settings, ChevronRight, Shield, UserCheck, Coins, Sliders } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDr
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { AdminPrimaryManagementSheet } from "./election/AdminPrimaryManagementSheet";
 import { CampaignRoyaltySection } from "./election/CampaignRoyaltySection";
+import { CampaignGlobalSettingsDrawer } from "./election/CampaignGlobalSettingsDrawer";
 import { useToast } from "@/hooks/use-toast";
 
 interface ElectionActivityItemProps {
@@ -91,6 +92,7 @@ export function AdminElectionSection({
   // Primary management state
   const [showPrimaryManagement, setShowPrimaryManagement] = useState(false);
   const [showRoyaltySection, setShowRoyaltySection] = useState(false);
+  const [showCampaignSettings, setShowCampaignSettings] = useState(false);
 
   const handleAnnounceWithAuth = () => {
     setAuthAction({
@@ -181,6 +183,12 @@ export function AdminElectionSection({
         </SheetContent>
       </Sheet>
 
+      {/* Campaign Settings Drawer */}
+      <CampaignGlobalSettingsDrawer
+        open={showCampaignSettings}
+        onOpenChange={setShowCampaignSettings}
+      />
+
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="election" className="border rounded-lg overflow-hidden">
           <AccordionTrigger className="px-3 hover:no-underline">
@@ -235,6 +243,10 @@ export function AdminElectionSection({
                 <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onConfigureVoting}>
                   <Settings className="h-4 w-4 text-muted-foreground" />
                   Voting Settings
+                </button>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={() => setShowCampaignSettings(true)}>
+                  <Sliders className="h-4 w-4 text-muted-foreground" />
+                  Campaign Settings
                 </button>
                 <button className="flex items-center gap-3 py-2.5 text-sm font-medium text-primary hover:bg-muted/50 -mx-1 px-1 rounded" onClick={handleAnnounceWithAuth}>
                   <Trophy className="h-4 w-4 text-primary" />
