@@ -18,6 +18,8 @@ import {
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 // Voter interface for detailed voter info
 export interface CandidateVoter {
@@ -108,6 +110,8 @@ export function CandidateVotersListSheet({
 }: CandidateVotersListSheetProps) {
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
 
   // Generate mock voters
   const voters = generateMockVoters(candidateId, voteCount);
@@ -117,6 +121,22 @@ export function CandidateVotersListSheet({
     voter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     voter.accreditationNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Map voter to ExecutiveMember for MemberPreviewDialog
+  const mapVoterToMember = (voter: CandidateVoter): ExecutiveMember => ({
+    id: voter.id,
+    name: voter.name,
+    position: "Community Member",
+    tenure: "",
+    imageUrl: voter.avatar,
+    level: "officer",
+    committee: "executive",
+  });
+
+  const handleVoterClick = (voter: CandidateVoter) => {
+    setSelectedMember(mapVoterToMember(voter));
+    setShowMemberPreview(true);
+  };
 
   // Count remarks
   const remarksCount = voters.filter(v => v.remarks).length;
@@ -195,7 +215,11 @@ export function CandidateVotersListSheet({
         ) : (
           <div className="space-y-2">
             {filteredVoters.map((voter) => (
-              <Card key={voter.id} className="overflow-hidden">
+              <Card 
+                key={voter.id} 
+                className="overflow-hidden cursor-pointer active:bg-muted/50 transition-colors"
+                onClick={() => handleVoterClick(voter)}
+              >
                 <CardContent className="p-3">
                   {/* Voter Header */}
                   <div className="flex items-start gap-3">
@@ -229,6 +253,8 @@ export function CandidateVotersListSheet({
                         </div>
                       </div>
                     </div>
+
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-3" />
                   </div>
 
                   {/* Voter Remarks */}
@@ -259,35 +285,49 @@ export function CandidateVotersListSheet({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh]">
-          <DrawerHeader className="border-b pb-3">
-            <DrawerTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              Voters List
-            </DrawerTitle>
-          </DrawerHeader>
-          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto" style={{ maxHeight: 'calc(92vh - 80px)' }}>
-            <Content />
-          </ScrollArea>
-        </DrawerContent>
-      </Drawer>
+      <>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="max-h-[92vh]">
+            <DrawerHeader className="border-b pb-3">
+              <DrawerTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Voters List
+              </DrawerTitle>
+            </DrawerHeader>
+            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto" style={{ maxHeight: 'calc(92vh - 80px)' }}>
+              <Content />
+            </ScrollArea>
+          </DrawerContent>
+        </Drawer>
+        <MemberPreviewDialog
+          member={selectedMember}
+          open={showMemberPreview}
+          onOpenChange={setShowMemberPreview}
+        />
+      </>
     );
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-lg">
-        <SheetHeader className="pb-3">
-          <SheetTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            Voters List
-          </SheetTitle>
-        </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-          <Content />
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="right" className="w-full sm:max-w-lg">
+          <SheetHeader className="pb-3">
+            <SheetTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Voters List
+            </SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(100vh-100px)] pr-4">
+            <Content />
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+      <MemberPreviewDialog
+        member={selectedMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
+      />
+    </>
   );
 }
