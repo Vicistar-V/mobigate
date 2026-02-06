@@ -84,7 +84,7 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
 
           {/* Scrollable Body */}
           <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-            <div className="p-4 space-y-4 pb-8">
+            <div className="px-2 py-4 space-y-4 pb-8">
               {/* Balance Card */}
               <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-background">
                 <CardContent className="p-4 space-y-3">
@@ -97,14 +97,14 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="p-2.5 bg-green-50 dark:bg-green-950/30 rounded-lg text-center border border-green-200">
-                      <p className="text-[10px] text-muted-foreground">Available</p>
+                      <p className="text-xs text-muted-foreground">Available</p>
                       <p className="font-bold text-sm text-green-600">{formatLocalAmount(wallet.availableBalance, "NGN")}</p>
-                      <p className="text-[9px] text-muted-foreground">({formatMobiAmount(wallet.availableBalance)})</p>
+                      <p className="text-xs text-muted-foreground">({formatMobiAmount(wallet.availableBalance)})</p>
                     </div>
                     <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-center border border-amber-200">
-                      <p className="text-[10px] text-muted-foreground">Reserved for Payouts</p>
+                      <p className="text-xs text-muted-foreground">Reserved for Payouts</p>
                       <p className="font-bold text-sm text-amber-600">{formatLocalAmount(wallet.reservedForPayouts, "NGN")}</p>
-                      <p className="text-[9px] text-muted-foreground">({formatMobiAmount(wallet.reservedForPayouts)})</p>
+                      <p className="text-xs text-muted-foreground">({formatMobiAmount(wallet.reservedForPayouts)})</p>
                     </div>
                   </div>
                 </CardContent>
@@ -134,15 +134,15 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center border border-blue-200">
-                  <p className="text-[10px] text-muted-foreground">Stakes In</p>
+                  <p className="text-xs text-muted-foreground">Stakes In</p>
                   <p className="font-bold text-sm text-blue-600">{formatLocalAmount(wallet.totalStakeIncome, "NGN")}</p>
                 </div>
                 <div className="p-2.5 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200">
-                  <p className="text-[10px] text-muted-foreground">Payouts</p>
+                  <p className="text-xs text-muted-foreground">Payouts</p>
                   <p className="font-bold text-sm text-red-600">{formatLocalAmount(wallet.totalWinningPayouts, "NGN")}</p>
                 </div>
                 <div className={cn("p-2.5 rounded-lg text-center border", netPosition >= 0 ? "bg-green-50 dark:bg-green-950/30 border-green-200" : "bg-red-50 dark:bg-red-950/30 border-red-200")}>
-                  <p className="text-[10px] text-muted-foreground">Net Position</p>
+                  <p className="text-xs text-muted-foreground">Net Position</p>
                   <p className={cn("font-bold text-sm", netPosition >= 0 ? "text-green-600" : "text-red-600")}>
                     {netPosition >= 0 ? "+" : ""}{formatLocalAmount(netPosition, "NGN")}
                   </p>
@@ -201,7 +201,7 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                     {transferMode === "withdraw" && (
                       <div className="flex items-start gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
                         <Info className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
-                        <p className="text-[10px] text-amber-700">Max transferable: {formatLocalFirst(wallet.availableBalance, "NGN")} (reserved funds excluded)</p>
+                        <p className="text-xs text-amber-700">Max transferable: {formatLocalFirst(wallet.availableBalance, "NGN")} (reserved funds excluded)</p>
                       </div>
                     )}
                     <Button
@@ -252,12 +252,12 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium line-clamp-1">{tx.description}</p>
                         <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                          <Badge variant="outline" className="text-[9px] px-1.5 py-0">{config.label}</Badge>
+                          <Badge variant="outline" className="text-xs px-1.5 py-0">{config.label}</Badge>
                           {tx.playerName && (
-                            <span className="text-[10px] text-muted-foreground">{tx.playerName}</span>
+                            <span className="text-xs text-muted-foreground">{tx.playerName}</span>
                           )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(tx.date).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })} • {tx.reference}
                         </p>
                       </div>
@@ -265,7 +265,7 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                         <p className={cn("font-bold text-sm", isDebit ? "text-red-600" : "text-green-600")}>
                           {isDebit ? "-" : "+"}{formatLocalAmount(tx.amount, "NGN")}
                         </p>
-                        <p className="text-[9px] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           ({isDebit ? "-" : "+"}{formatMobiAmount(tx.amount)})
                         </p>
                       </div>
