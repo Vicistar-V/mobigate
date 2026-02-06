@@ -2,7 +2,7 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, MapPin, Phone, Mail, Globe, ThumbsUp, MessageSquare, Share2, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { X, MapPin, Phone, Mail, Globe, ThumbsUp, MessageSquare, Share2, ChevronLeft, ChevronRight, AlertCircle, Megaphone } from "lucide-react";
 import { useState } from "react";
 import { getCategoryLabel } from "@/data/advertisementData";
 import type { AdvertisementFormData } from "@/types/advertisementSystem";
@@ -84,6 +84,11 @@ export function AdvertisementPreviewSheet({ open, onOpenChange, formData }: Adve
                     </div>
                   </>
                 )}
+                {/* Sponsored Badge */}
+                <Badge className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] border-0 shadow-md">
+                  <Megaphone className="h-3 w-3 mr-1" />
+                  Sponsored Advert
+                </Badge>
                 <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
                   {currentPhotoIndex + 1}/{formData.photos.length}
                 </div>

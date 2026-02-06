@@ -69,6 +69,10 @@ export function AdvertisementsListSheet({
             <h4 className="font-semibold text-sm leading-tight truncate">{ad.businessName}</h4>
             <p className="text-xs text-primary font-medium truncate">{ad.productTitle}</p>
             <div className="flex items-center gap-2 flex-wrap">
+              <Badge className="bg-amber-600 text-white text-[10px] px-1.5 py-0 border-0">
+                <Megaphone className="h-2.5 w-2.5 mr-0.5" />
+                Sponsored
+              </Badge>
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                 {getCategoryLabel(ad.category)}
               </Badge>

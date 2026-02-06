@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   X, MapPin, Phone, Mail, Globe, ChevronLeft, ChevronRight,
-  Flag, Eye, Calendar, ThumbsUp, MessageSquare, Share2,
+  Flag, Eye, Calendar, ThumbsUp, MessageSquare, Share2, Megaphone,
 } from "lucide-react";
 import { getCategoryLabel } from "@/data/advertisementData";
 import { formatMobiAmount, calculateDaysRemaining } from "@/lib/campaignFeeDistribution";
@@ -92,6 +92,11 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement }
                     </div>
                   </>
                 )}
+                {/* Sponsored Badge */}
+                <Badge className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] border-0 shadow-md">
+                  <Megaphone className="h-3 w-3 mr-1" />
+                  Sponsored Advert
+                </Badge>
                 {/* Stats Overlay */}
                 <div className="absolute top-2 right-2 flex gap-1.5">
                   <Badge className="bg-black/60 text-white text-[10px] border-0">
