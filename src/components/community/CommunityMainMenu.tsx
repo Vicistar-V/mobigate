@@ -9,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MoreVertical, Settings, Play, LayoutDashboard, UserPlus } from "lucide-react";
+import { MoreVertical, Settings, Play, LayoutDashboard, UserPlus, Megaphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import { GuestLoginDialog } from "./GuestLoginDialog";
@@ -43,6 +43,8 @@ import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
 import { MemberImpeachmentDrawer } from "./elections/MemberImpeachmentDrawer";
 import { NominateCandidateSheet } from "./elections/NominateCandidateSheet";
 import { VerifyCertificateDrawer } from "./elections/VerifyCertificateDrawer";
+import { CreateAdvertisementDrawer } from "./advertisements/CreateAdvertisementDrawer";
+import { AdvertisementsListSheet } from "./advertisements/AdvertisementsListSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -99,6 +101,9 @@ export function CommunityMainMenu({
   const [impeachmentMode, setImpeachmentMode] = useState<"start" | "view">("view");
   const [showNominateCandidate, setShowNominateCandidate] = useState(false);
   const [showVerifyCertificate, setShowVerifyCertificate] = useState(false);
+  const [showCreateAdvert, setShowCreateAdvert] = useState(false);
+  const [showAdvertisements, setShowAdvertisements] = useState(false);
+  const [showMyAdverts, setShowMyAdverts] = useState(false);
 
   const pendingSettingsCount = getPendingProposalsCount();
 
@@ -507,6 +512,49 @@ export function CommunityMainMenu({
                 </AccordionContent>
               </AccordionItem>
             )}
+
+            {/* Advertisement */}
+            <AccordionItem value="advertisement" className="border rounded-lg px-3 data-[state=open]:bg-muted/30 border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
+              <AccordionTrigger className="text-base font-semibold">
+                <div className="flex items-center gap-2">
+                  <Megaphone className="h-4 w-4 text-amber-600" />
+                  <span>Advertisement</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-10 transition-colors duration-200 bg-amber-100/50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-medium"
+                  onClick={() => {
+                    setShowCreateAdvert(true);
+                    setOpen(false);
+                  }}
+                >
+                  <Megaphone className="h-4 w-4 mr-2" />
+                  Create Advertisement
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => {
+                    setShowAdvertisements(true);
+                    setOpen(false);
+                  }}
+                >
+                  View Advertisements
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => {
+                    setShowMyAdverts(true);
+                    setOpen(false);
+                  }}
+                >
+                  My Advertisements
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
 
             {/* Administration/Leadership */}
             <AccordionItem value="administration" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
@@ -1321,6 +1369,24 @@ export function CommunityMainMenu({
       <VerifyCertificateDrawer
         open={showVerifyCertificate}
         onOpenChange={setShowVerifyCertificate}
+      />
+
+      {/* Advertisement Drawers */}
+      <CreateAdvertisementDrawer
+        open={showCreateAdvert}
+        onOpenChange={setShowCreateAdvert}
+      />
+      <AdvertisementsListSheet
+        open={showAdvertisements}
+        onOpenChange={setShowAdvertisements}
+        initialTab="active"
+        onCreateNew={() => setShowCreateAdvert(true)}
+      />
+      <AdvertisementsListSheet
+        open={showMyAdverts}
+        onOpenChange={setShowMyAdverts}
+        initialTab="mine"
+        onCreateNew={() => setShowCreateAdvert(true)}
       />
     </>
   );
