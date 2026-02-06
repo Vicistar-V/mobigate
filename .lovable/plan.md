@@ -1,65 +1,83 @@
 
 
-## Fix Non-Working Edit/Hide/Delete Buttons in Gallery Albums
+## Fix Text Writing Errors in Content Moderation Edit Form
 
-### Root Cause
+### Problem
 
-The `ManageCommunityGalleryDialog.tsx` component defines its main content as an inner component function:
+The "Edit News" (and Edit Event/Article/Vibe) form in Content Moderation has text input focus loss on mobile. The user annotated "Texts writing errors - trying to edit" on the Title and Full Content fields.
 
-```tsx
-const Content = () => ( ... );  // Line 392
+The root cause: all `Input` and `Textarea` elements are inside a `ScrollArea` within a `Drawer`, but none have the mobile-optimized attributes needed to prevent the scroll logic from stealing focus during typing.
+
+### Solution
+
+Apply the established mobile input fix pattern to every `Input` and `Textarea` in `ContentFormDialog.tsx`:
+
+- `style={{ touchAction: 'manipulation' }}` -- prevents scroll interference during typing
+- `onClick={(e) => e.stopPropagation()}` -- prevents ScrollArea from stealing focus
+- `autoComplete="off"` -- prevents mobile keyboard issues
+- `className` with `text-base` -- prevents iOS auto-zoom on input focus
+
+---
+
+### File: `src/components/admin/content/ContentFormDialog.tsx`
+
+**All inputs and textareas that need the mobile fix (14 total):**
+
+| Line | Field | Type |
+|------|-------|------|
+| 436-440 | Title | Input |
+| 447-452 | Full Content / Caption | Textarea |
+| 152-160 | News custom category | Input |
+| 196-204 | Event custom category | Input |
+| 237-246 | Custom platform venue | Input |
+| 253-257 | Venue address | Input |
+| 263-266 | Start date/time | Input |
+| 270-272 | End date/time | Input |
+| 278-283 | Capacity | Input |
+| 327-332 | Article excerpt | Textarea |
+| 336-341 | Article full content | Textarea |
+| 346-351 | Article tag input | Input |
+| 403-407 | Vibe duration | Input |
+
+**Pattern applied to each Input:**
+```
+Before:
+<Input value={...} onChange={...} placeholder={...} />
+
+After:
+<Input
+  value={...}
+  onChange={...}
+  placeholder={...}
+  className="text-base"
+  style={{ touchAction: 'manipulation' }}
+  onClick={(e) => e.stopPropagation()}
+  autoComplete="off"
+/>
 ```
 
-Then renders it as a JSX component:
-
-```tsx
-<Content />   // Lines 1193 and 1202
+**Pattern applied to each Textarea:**
 ```
+Before:
+<Textarea value={...} onChange={...} placeholder={...} rows={3} />
 
-This is the same pattern that has been fixed across 10+ other components in this project. When React sees `<Content />`, it treats it as a new component type on every parent re-render, unmounting and remounting the entire DOM tree. This causes:
-
-- Buttons (Edit, Hide, Delete) to lose their click handlers mid-tap
-- Inputs to lose focus while typing
-- State updates to feel unresponsive
-
-### Fix
-
-**File: `src/components/community/ManageCommunityGalleryDialog.tsx`**
-
-**Change 1: Convert JSX component invocation to direct function call (mobile)**
-
-Line 1193:
+After:
+<Textarea
+  value={...}
+  onChange={...}
+  placeholder={...}
+  rows={3}
+  className="text-base resize-none"
+  style={{ touchAction: 'manipulation' }}
+  onClick={(e) => e.stopPropagation()}
+/>
 ```
-Before: <Content />
-After:  {Content()}
-```
-
-**Change 2: Convert JSX component invocation to direct function call (desktop)**
-
-Line 1202:
-```
-Before: <Content />
-After:  {Content()}
-```
-
-**Change 3: Fix search input for mobile text entry**
-
-Line 403-408 -- add mobile-optimized attributes to the search input:
-- `style={{ touchAction: 'manipulation' }}` to prevent scroll interference
-- `onClick={(e) => e.stopPropagation()}` to prevent ScrollArea from stealing focus
-- `autoComplete="off"` to prevent mobile keyboard issues
-- `className="pl-9 h-10 text-base"` to prevent iOS zoom on focus
-
-### Summary
-
-| Change | Location | Purpose |
-|--------|----------|---------|
-| `Content()` instead of `<Content />` | Lines 1193, 1202 | Prevent DOM unmount/remount on re-render |
-| Mobile input attributes | Line 403-408 | Prevent search input focus loss on mobile |
 
 ### What This Fixes
 
-- Edit button on album cards will open the edit form
-- Hide/Show button will toggle album visibility
-- Delete button will trigger the confirmation dialog
-- Search input will work properly on mobile without focus loss
+- Title field will maintain focus while typing on mobile
+- Full Content / Caption field will maintain focus while typing on mobile
+- All conditional fields (custom category, venue address, platform, etc.) will work on mobile
+- iOS auto-zoom on input focus is prevented with `text-base`
+- No desktop impact -- these attributes are harmless on desktop browsers
+
