@@ -148,17 +148,21 @@ export function AdvertisementSettingsSheet({
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Photos:</span>
-                      <span>{formData.photos.length} of 4</span>
+                      <span className="text-muted-foreground">Media:</span>
+                      <span>{formData.media.length} of 4</span>
                     </div>
                   </div>
                 </Card>
 
-                {formData.photos.length > 0 && (
+                {formData.media.length > 0 && (
                   <div className="grid grid-cols-4 gap-1.5">
-                    {formData.photos.map((photo, i) => (
-                      <div key={i} className="aspect-square rounded-md overflow-hidden border">
-                        <img src={photo} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                    {formData.media.map((item, i) => (
+                      <div key={i} className="aspect-square rounded-md overflow-hidden border relative">
+                        {item.type === 'video' ? (
+                          <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                        ) : (
+                          <img src={item.url} alt={`Media ${i + 1}`} className="w-full h-full object-cover" />
+                        )}
                       </div>
                     ))}
                   </div>

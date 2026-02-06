@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   X, MapPin, Phone, Mail, Globe, ChevronLeft, ChevronRight,
-  Flag, Eye, Calendar, ThumbsUp, MessageSquare, Share2, Megaphone,
+  Flag, Eye, Calendar, ThumbsUp, MessageSquare, Share2, Megaphone, Play,
 } from "lucide-react";
 import { getCategoryLabel } from "@/data/advertisementData";
 import { formatMobiAmount, calculateDaysRemaining } from "@/lib/campaignFeeDistribution";
@@ -19,21 +19,27 @@ interface AdvertisementFullViewSheetProps {
 }
 
 export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement }: AdvertisementFullViewSheetProps) {
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!advertisement) return null;
 
   const ad = advertisement;
   const daysRemaining = calculateDaysRemaining(ad.endDate);
+  const mediaItems = ad.media;
+  const currentItem = mediaItems[currentMediaIndex];
 
-  const nextPhoto = () => {
-    if (ad.photos.length > 0) {
-      setCurrentPhotoIndex((prev) => (prev + 1) % ad.photos.length);
+  const nextMedia = () => {
+    if (mediaItems.length > 0) {
+      setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
+      setIsVideoPlaying(false);
     }
   };
-  const prevPhoto = () => {
-    if (ad.photos.length > 0) {
-      setCurrentPhotoIndex((prev) => (prev - 1 + ad.photos.length) % ad.photos.length);
+  const prevMedia = () => {
+    if (mediaItems.length > 0) {
+      setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
+      setIsVideoPlaying(false);
     }
   };
 
@@ -43,6 +49,17 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement }
 
   const handleWhatsApp = (phone: string) => {
     window.open(`https://wa.me/${phone.replace(/[\s+]/g, "")}`, "_blank");
+  };
+
+  const handleVideoTap = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+      setIsVideoPlaying(true);
+    } else {
+      videoRef.current.pause();
+      setIsVideoPlaying(false);
+    }
   };
 
   return (
@@ -69,36 +86,57 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement }
 
         <ScrollArea className="flex-1 overflow-y-auto touch-auto">
           <div className="pb-6">
-            {/* Photo Carousel */}
-            {ad.photos.length > 0 && (
+            {/* Media Carousel */}
+            {mediaItems.length > 0 && (
               <div className="relative bg-muted aspect-[4/3] overflow-hidden">
-                <img
-                  src={ad.photos[currentPhotoIndex]}
-                  alt={`Product ${currentPhotoIndex + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                {ad.photos.length > 1 && (
+                {currentItem?.type === 'video' ? (
+                  <div className="relative w-full h-full bg-black" onClick={handleVideoTap}>
+                    <video
+                      ref={videoRef}
+                      src={currentItem.url}
+                      className="w-full h-full object-contain"
+                      playsInline
+                      muted
+                      preload="metadata"
+                      controls={isVideoPlaying}
+                    />
+                    {!isVideoPlaying && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-14 w-14 rounded-full bg-black/50 flex items-center justify-center">
+                          <Play className="h-7 w-7 text-white ml-1" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <img
+                    src={currentItem?.url}
+                    alt={`Product ${currentMediaIndex + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {mediaItems.length > 1 && (
                   <>
-                    <Button variant="ghost" size="icon" className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60" onClick={prevPhoto}>
+                    <Button variant="ghost" size="icon" className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60 z-10" onClick={(e) => { e.stopPropagation(); prevMedia(); }}>
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60" onClick={nextPhoto}>
+                    <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60 z-10" onClick={(e) => { e.stopPropagation(); nextMedia(); }}>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                      {ad.photos.map((_, i) => (
-                        <div key={i} className={`w-2 h-2 rounded-full ${i === currentPhotoIndex ? "bg-white" : "bg-white/50"}`} />
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                      {mediaItems.map((_, i) => (
+                        <div key={i} className={`w-2 h-2 rounded-full ${i === currentMediaIndex ? "bg-white" : "bg-white/50"}`} />
                       ))}
                     </div>
                   </>
                 )}
                 {/* Sponsored Badge */}
-                <Badge className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] border-0 shadow-md">
+                <Badge className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] border-0 shadow-md z-10">
                   <Megaphone className="h-3 w-3 mr-1" />
                   Sponsored Advert
                 </Badge>
                 {/* Stats Overlay */}
-                <div className="absolute top-2 right-2 flex gap-1.5">
+                <div className="absolute top-2 right-2 flex gap-1.5 z-10">
                   <Badge className="bg-black/60 text-white text-[10px] border-0">
                     <Eye className="h-3 w-3 mr-1" />{ad.views.toLocaleString()}
                   </Badge>

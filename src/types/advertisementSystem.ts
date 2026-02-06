@@ -19,6 +19,13 @@ export interface AdvertisementCategoryOption {
   icon: string;
 }
 
+// Media Item (photo or video)
+export interface AdMediaItem {
+  url: string;
+  type: 'image' | 'video';
+  thumbnailUrl?: string;
+}
+
 // Advertisement Form Data
 export interface AdvertisementFormData {
   businessName: string;
@@ -30,7 +37,7 @@ export interface AdvertisementFormData {
   phone2?: string;
   email?: string;
   website?: string;
-  photos: string[]; // max 4 base64 previews
+  media: AdMediaItem[]; // max 4 photos/videos
   audienceTargets: CampaignAudience[];
   durationDays: CampaignDurationDays;
 }
@@ -64,7 +71,7 @@ export interface EnhancedAdvertisement {
   phone2?: string;
   email?: string;
   website?: string;
-  photos: string[]; // max 4
+  media: AdMediaItem[]; // max 4
 
   // Audience Settings
   audienceTargets: CampaignAudience[];

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, MapPin, Eye, Calendar, Plus, Megaphone } from "lucide-react";
+import { X, MapPin, Eye, Calendar, Plus, Megaphone, Play } from "lucide-react";
 import {
   getActiveAdvertisements,
   getMyAdvertisements,
@@ -46,6 +46,7 @@ export function AdvertisementsListSheet({
   const AdCard = ({ ad }: { ad: EnhancedAdvertisement }) => {
     const daysRemaining = calculateDaysRemaining(ad.endDate);
     const isEnded = ad.status === "ended";
+    const firstMedia = ad.media[0];
 
     return (
       <Card
@@ -54,9 +55,26 @@ export function AdvertisementsListSheet({
       >
         <div className="flex gap-3 p-3">
           {/* Thumbnail */}
-          <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0">
-            {ad.photos.length > 0 ? (
-              <img src={ad.photos[0]} alt={ad.businessName} className="w-full h-full object-cover" />
+          <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0 relative">
+            {firstMedia ? (
+              firstMedia.type === 'video' ? (
+                <div className="relative w-full h-full">
+                  <video
+                    src={firstMedia.url}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <div className="h-7 w-7 rounded-full bg-black/60 flex items-center justify-center">
+                      <Play className="h-3.5 w-3.5 text-white ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <img src={firstMedia.url} alt={ad.businessName} className="w-full h-full object-cover" />
+              )
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Megaphone className="h-6 w-6 text-muted-foreground" />
