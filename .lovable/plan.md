@@ -1,169 +1,150 @@
 
 
-## Fix Non-Active Upload Buttons in Publications Tab
+## Fix Resource Managers Click + Publications Text Input Errors
 
-### Problem
+### Issues Identified
 
-The "Cover Image" and "PDF File" upload areas in the Publications tab are purely visual -- they look clickable (`cursor-pointer`) but have no `onClick` handler and no hidden `<input type="file">` element behind them. Tapping them on mobile does nothing.
+**Issue 1: Team Tab - Resource Manager cards are not clickable**
+The Resource Manager cards (Margaret Okonkwo, Robert Adeyemi) in the Team tab are static -- tapping them does nothing. Per the user's annotation, clicking should open the member's profile preview via `MemberPreviewDialog`.
 
-### Solution
-
-Add proper file selection functionality using the standard React pattern: hidden `<input type="file">` elements triggered via `useRef`. When a file is selected, show visual feedback (file name, image preview) so the user knows it worked.
-
-Since this is a UI template (no actual backend uploads), the files are stored in local state and a toast confirms the action.
+**Issue 2: Pubs Tab - Search input has text writing errors**
+The "Search publications..." input loses focus while typing on mobile. This is a known pattern where inputs inside `ScrollArea` within mobile drawers need `touch-action: manipulation`, `onClick` with `e.stopPropagation()`, and mobile-optimized styling to prevent scroll logic from stealing focus.
 
 ---
 
 ### Changes in `src/components/community/ManageCommunityResourcesDialog.tsx`
 
-**A. Add state variables and refs for file handling**
+**A. Add MemberPreviewDialog import and state**
 
-After the existing publication form state (around line 72), add:
-```tsx
-const coverInputRef = useRef<HTMLInputElement>(null);
-const pdfInputRef = useRef<HTMLInputElement>(null);
-const [coverImageFile, setCoverImageFile] = useState<{ name: string; preview: string } | null>(null);
-const [pdfFile, setPdfFile] = useState<{ name: string } | null>(null);
+Add to imports:
+- Import `MemberPreviewDialog` from `@/components/community/MemberPreviewDialog`
+- Import `ExecutiveMember` from `@/data/communityExecutivesData`
+
+Add state variables:
+```
+const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+const [showMemberPreview, setShowMemberPreview] = useState(false);
 ```
 
-Also add `useRef` to the React import at the top of the file.
+**B. Add member click handler**
 
-**B. Add file selection handlers**
-
-After the existing `handleUploadPublication` function (around line 217), add two handlers:
-
-```tsx
-const handleCoverImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    toast({ title: "Invalid File", description: "Please select an image file (JPG, PNG, etc.)", variant: "destructive" });
-    return;
-  }
-  const preview = URL.createObjectURL(file);
-  setCoverImageFile({ name: file.name, preview });
-  toast({ title: "Cover Image Selected", description: file.name });
-};
-
-const handlePDFSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  if (file.type !== "application/pdf") {
-    toast({ title: "Invalid File", description: "Please select a PDF file", variant: "destructive" });
-    return;
-  }
-  setPdfFile({ name: file.name });
-  toast({ title: "PDF File Selected", description: file.name });
+Create a handler to map resource manager data to `ExecutiveMember` format and open the preview:
+```
+const handleManagerClick = (manager: typeof mockResourceManagers[0]) => {
+  setSelectedMember({
+    id: manager.id,
+    name: manager.name,
+    position: "Resource Manager",
+    tenure: "",
+    imageUrl: manager.photo,
+    level: "officer",
+    committee: "executive",
+  });
+  setShowMemberPreview(true);
 };
 ```
 
-**C. Update the form reset in `handleUploadPublication`**
+**C. Make Resource Manager cards clickable (lines 929-961)**
 
-Add clearing the file states when form resets:
+Add `onClick` and `active:scale-[0.99]` styling to each manager card, wrapping the existing card content in a clickable container:
+- Add `cursor-pointer active:scale-[0.99] transition-transform` to the Card
+- Add `onClick={() => handleManagerClick(manager)}` to the Card
+- Move the Remove button's `onClick` to use `e.stopPropagation()` so it doesn't trigger the card click
+
+**D. Fix all search inputs for mobile text entry**
+
+For every `Input` element (ID Cards/Letters search on line 367-371 and Publications search on line 754-758), plus the upload form inputs (Title, Description, Edition, Pages):
+- Add `style={{ touchAction: 'manipulation' }}` to prevent scroll interference
+- Add `onClick={(e) => e.stopPropagation()}` to prevent ScrollArea from stealing focus
+- Add `autoComplete="off"` to prevent mobile keyboard issues
+
+The Pubs search input (line 754-758) specifically needs these mobile fixes applied.
+
+The upload form inputs (Title, Description, Edition, Pages on lines 609-660) also need the same mobile fixes.
+
+**E. Add MemberPreviewDialog component at the bottom**
+
+Add the `MemberPreviewDialog` component alongside the existing `OfficialLetterDisplay` and `DigitalIDCardDisplay` at the bottom of the JSX return, right before the closing `</>`:
+
 ```tsx
-setCoverImageFile(null);
-setPdfFile(null);
-```
-
-**D. Update the Cover Image upload area (lines 641-648)**
-
-Replace the static div with a working upload zone:
-
-```tsx
-<div className="space-y-2">
-  <Label>Cover Image</Label>
-  <input
-    ref={coverInputRef}
-    type="file"
-    accept="image/*"
-    className="hidden"
-    onChange={handleCoverImageSelect}
+{selectedMember && (
+  <MemberPreviewDialog
+    member={selectedMember}
+    open={showMemberPreview}
+    onOpenChange={setShowMemberPreview}
   />
-  <div
-    className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 active:bg-muted/70 transition-colors"
-    onClick={() => coverInputRef.current?.click()}
-  >
-    {coverImageFile ? (
-      <div className="space-y-2">
-        <img
-          src={coverImageFile.preview}
-          alt="Cover preview"
-          className="h-20 w-auto mx-auto rounded object-cover"
-        />
-        <p className="text-xs text-muted-foreground truncate">
-          {coverImageFile.name}
-        </p>
-        <p className="text-xs text-primary font-medium">
-          Tap to change
-        </p>
-      </div>
-    ) : (
-      <>
-        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          Click to upload cover image
-        </p>
-      </>
-    )}
-  </div>
-</div>
-```
-
-**E. Update the PDF File upload area (lines 651-658)**
-
-Replace the static div with a working upload zone:
-
-```tsx
-<div className="space-y-2">
-  <Label>PDF File *</Label>
-  <input
-    ref={pdfInputRef}
-    type="file"
-    accept=".pdf,application/pdf"
-    className="hidden"
-    onChange={handlePDFSelect}
-  />
-  <div
-    className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 active:bg-muted/70 transition-colors"
-    onClick={() => pdfInputRef.current?.click()}
-  >
-    {pdfFile ? (
-      <div className="space-y-1">
-        <FileText className="h-8 w-8 mx-auto text-green-600" />
-        <p className="text-xs text-foreground font-medium truncate">
-          {pdfFile.name}
-        </p>
-        <p className="text-xs text-primary font-medium">
-          Tap to change
-        </p>
-      </div>
-    ) : (
-      <>
-        <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          Click to upload PDF file
-        </p>
-      </>
-    )}
-  </div>
-</div>
+)}
 ```
 
 ---
 
-### Summary
+### Technical Details
+
+**Manager Card clickability (lines 929-961):**
+
+Current:
+```tsx
+<Card key={manager.id}>
+  <CardContent className="p-4">
+    ...
+    {isOwner && (
+      <Button onClick={() => handleRemoveManager(manager.id, manager.name)}>
+```
+
+New:
+```tsx
+<Card key={manager.id} className="cursor-pointer active:scale-[0.99] transition-transform" onClick={() => handleManagerClick(manager)}>
+  <CardContent className="p-4">
+    ...
+    {isOwner && (
+      <Button onClick={(e) => { e.stopPropagation(); handleRemoveManager(manager.id, manager.name); }}>
+```
+
+**Input mobile fixes pattern:**
+
+Current:
+```tsx
+<Input
+  placeholder="Search publications..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="pl-9"
+/>
+```
+
+New:
+```tsx
+<Input
+  placeholder="Search publications..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="pl-9 h-10 text-base"
+  style={{ touchAction: 'manipulation' }}
+  onClick={(e) => e.stopPropagation()}
+  autoComplete="off"
+/>
+```
+
+This fix is applied to all input fields in the dialog:
+1. ID Cards/Letters search input (line 367)
+2. Publications search input (line 754)
+3. Publication Title input (line 609)
+4. Publication Description textarea (line 618)
+5. Publication Edition input (line 644)
+6. Publication Pages input (line 655)
+
+---
+
+### Files Modified
 
 | File | Change |
 |------|--------|
-| `ManageCommunityResourcesDialog.tsx` | Add `useRef` import, file state variables, hidden file inputs, click handlers, file validation, visual feedback (preview/filename), and form reset logic |
+| `ManageCommunityResourcesDialog.tsx` | Add MemberPreviewDialog import/state, make manager cards clickable with profile preview, fix all text inputs for mobile with touch-action and stopPropagation |
 
 ### What This Fixes
 
-- Tapping "Cover Image" area opens the device file picker (images only)
-- Tapping "PDF File" area opens the device file picker (PDF only)
-- Selected files show visual feedback (image preview or filename with green icon)
-- File type validation with error toasts for wrong types
-- Both areas show "Tap to change" after selection for re-selection
-- Mobile-optimized with `active:bg-muted/70` touch feedback
-- Form reset clears selected files
+- Tapping a Resource Manager card opens their community profile preview
+- The Remove button still works independently without triggering the profile
+- All search and form inputs in the dialog work properly on mobile without focus loss or character dropping
+- Text inputs have proper sizing (`text-base` to prevent iOS zoom) and touch behavior
 
