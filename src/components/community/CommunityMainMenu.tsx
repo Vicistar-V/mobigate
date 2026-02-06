@@ -1278,7 +1278,7 @@ export function CommunityMainMenu({
       <ExitCommunityDialog open={showExitCommunity} onOpenChange={setShowExitCommunity} />
 
       {/* Finance Dialogs */}
-      <FinancialOverviewDialog open={showFinancialOverview} onOpenChange={setShowFinancialOverview} />
+      <FinancialOverviewDialog open={showFinancialOverview} onOpenChange={setShowFinancialOverview} isAdmin={isAdmin} isOwner={isOwner} />
       <FinancialObligationsDialog open={showFinancialObligations} onOpenChange={setShowFinancialObligations} />
       <FinancialStatusDialog open={showFinancialStatus} onOpenChange={setShowFinancialStatus} />
       <FinancialAuditDialog open={showFinancialAudit} onOpenChange={setShowFinancialAudit} />

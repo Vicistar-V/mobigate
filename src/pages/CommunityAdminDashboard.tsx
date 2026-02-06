@@ -342,6 +342,8 @@ const CommunityAdminDashboard = () => {
       <FinancialOverviewDialog
         open={showFinancialOverview}
         onOpenChange={setShowFinancialOverview}
+        isAdmin={true}
+        isOwner={true}
       />
 
       {/* FinancialAuditDialog removed - unified into AdminFinancialAuditDialog in AdminFinanceSection */}
