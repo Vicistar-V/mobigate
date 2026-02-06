@@ -45,6 +45,7 @@ import { NominateCandidateSheet } from "./elections/NominateCandidateSheet";
 import { VerifyCertificateDrawer } from "./elections/VerifyCertificateDrawer";
 import { CreateAdvertisementDrawer } from "./advertisements/CreateAdvertisementDrawer";
 import { AdvertisementsListSheet } from "./advertisements/AdvertisementsListSheet";
+import { QuizWalletDrawer } from "./QuizWalletDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -104,6 +105,7 @@ export function CommunityMainMenu({
   const [showCreateAdvert, setShowCreateAdvert] = useState(false);
   const [showAdvertisements, setShowAdvertisements] = useState(false);
   const [showMyAdverts, setShowMyAdverts] = useState(false);
+  const [showQuizWallet, setShowQuizWallet] = useState(false);
 
   const pendingSettingsCount = getPendingProposalsCount();
 
@@ -632,6 +634,19 @@ export function CommunityMainMenu({
                   <Play className="h-4 w-4 mr-2 text-amber-600" />
                   <span className="text-amber-700 dark:text-amber-400 font-medium">Play Mobigate Quiz</span>
                 </Button>
+                {(isAdmin || isOwner) && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start pl-4 text-primary h-9 transition-colors duration-200"
+                    onClick={() => {
+                      setShowQuizWallet(true);
+                      setOpen(false);
+                    }}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Quiz Wallet (Admin)
+                  </Button>
+                )}
               </AccordionContent>
             </AccordionItem>
 
@@ -1313,6 +1328,14 @@ export function CommunityMainMenu({
       <CommunityQuizDialog 
         open={showCommunityQuiz} 
         onOpenChange={setShowCommunityQuiz}
+        isAdmin={isAdmin}
+        isOwner={isOwner}
+      />
+
+      {/* Quiz Wallet Drawer (Admin) */}
+      <QuizWalletDrawer
+        open={showQuizWallet}
+        onOpenChange={setShowQuizWallet}
       />
 
       {/* Mobigate Quiz Dialog */}

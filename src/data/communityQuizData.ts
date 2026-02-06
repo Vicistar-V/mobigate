@@ -64,12 +64,32 @@ export interface CommunityQuizStats {
   communityRank: number;
 }
 
+// --- Quiz Wallet Transaction Types ---
+export interface QuizWalletTransaction {
+  id: string;
+  type: 'stake_income' | 'winning_payout' | 'transfer_in' | 'transfer_out';
+  amount: number;
+  description: string;
+  date: Date;
+  reference: string;
+  relatedQuizId?: string;
+  playerName?: string;
+}
+
 export interface CommunityQuizWallet {
   communityId: string;
   balance: number;
   totalStakesReceived: number;
   totalPayouts: number;
   lastUpdated: Date;
+  // New dedicated quiz wallet fields
+  incomeFromMainWallet: number;
+  transfersToMainWallet: number;
+  totalWinningPayouts: number;
+  totalStakeIncome: number;
+  reservedForPayouts: number;
+  availableBalance: number;
+  transactions: QuizWalletTransaction[];
 }
 
 export const COMMUNITY_ANSWER_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
@@ -468,13 +488,158 @@ export const communityQuizPlayerStats: CommunityQuizStats = {
   communityRank: 12
 };
 
-// Community Quiz Wallet
+// --- Quiz Wallet Transaction History (mock data) ---
+const quizWalletTransactions: QuizWalletTransaction[] = [
+  {
+    id: "qwt-1",
+    type: "transfer_in",
+    amount: 100000,
+    description: "Initial funding from Main Community Wallet",
+    date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    reference: "TRF-QW-001",
+  },
+  {
+    id: "qwt-2",
+    type: "transfer_in",
+    amount: 80000,
+    description: "Monthly top-up from Main Community Wallet",
+    date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+    reference: "TRF-QW-002",
+  },
+  {
+    id: "qwt-3",
+    type: "stake_income",
+    amount: 500,
+    description: "Quiz stake received — Know Your Leaders",
+    date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
+    reference: "STK-QW-101",
+    relatedQuizId: "comm-quiz-2",
+    playerName: "Adebayo Johnson",
+  },
+  {
+    id: "qwt-4",
+    type: "winning_payout",
+    amount: 5000,
+    description: "Winning payout — Know Your Leaders (10/10)",
+    date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
+    reference: "WIN-QW-201",
+    relatedQuizId: "comm-quiz-2",
+    playerName: "Adebayo Johnson",
+  },
+  {
+    id: "qwt-5",
+    type: "stake_income",
+    amount: 300,
+    description: "Quiz stake received — Community Heritage Challenge",
+    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+    reference: "STK-QW-102",
+    relatedQuizId: "comm-quiz-1",
+    playerName: "Chidinma Okafor",
+  },
+  {
+    id: "qwt-6",
+    type: "winning_payout",
+    amount: 3000,
+    description: "Winning payout — Community Heritage Challenge (10/10)",
+    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+    reference: "WIN-QW-202",
+    relatedQuizId: "comm-quiz-1",
+    playerName: "Chidinma Okafor",
+  },
+  {
+    id: "qwt-7",
+    type: "stake_income",
+    amount: 200,
+    description: "Quiz stake received — Founding Members Trivia",
+    date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+    reference: "STK-QW-103",
+    relatedQuizId: "comm-quiz-3",
+    playerName: "Fatima Abubakar",
+  },
+  {
+    id: "qwt-8",
+    type: "stake_income",
+    amount: 500,
+    description: "Quiz stake received — Know Your Leaders",
+    date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    reference: "STK-QW-104",
+    relatedQuizId: "comm-quiz-2",
+    playerName: "Emeka Nwosu",
+  },
+  {
+    id: "qwt-9",
+    type: "winning_payout",
+    amount: 1000,
+    description: "Partial payout — Know Your Leaders (9/10, 20%)",
+    date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    reference: "WIN-QW-203",
+    relatedQuizId: "comm-quiz-2",
+    playerName: "Emeka Nwosu",
+  },
+  {
+    id: "qwt-10",
+    type: "stake_income",
+    amount: 300,
+    description: "Quiz stake received — Community Heritage Challenge",
+    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    reference: "STK-QW-105",
+    relatedQuizId: "comm-quiz-1",
+    playerName: "Grace Eze",
+  },
+  {
+    id: "qwt-11",
+    type: "winning_payout",
+    amount: 600,
+    description: "Partial payout — Community Heritage Challenge (8/10, 20%)",
+    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    reference: "WIN-QW-204",
+    relatedQuizId: "comm-quiz-1",
+    playerName: "Grace Eze",
+  },
+  {
+    id: "qwt-12",
+    type: "transfer_out",
+    amount: 50000,
+    description: "Surplus transfer to Main Community Wallet",
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    reference: "TRF-QW-003",
+  },
+  {
+    id: "qwt-13",
+    type: "stake_income",
+    amount: 200,
+    description: "Quiz stake received — Founding Members Trivia",
+    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    reference: "STK-QW-106",
+    relatedQuizId: "comm-quiz-3",
+    playerName: "Ibrahim Suleiman",
+  },
+];
+
+// Compute reserved amount: sum of winningAmount for all active quizzes
+const computeReservedForPayouts = (): number => {
+  return activeCommunityQuizzes
+    .filter(q => q.status === "active")
+    .reduce((sum, q) => sum + q.winningAmount, 0);
+};
+
+const quizWalletBalance = 180000;
+const reservedAmount = computeReservedForPayouts(); // 3000 + 5000 + 2000 = 10000
+
+// Community Quiz Wallet (Enhanced with dedicated wallet fields)
 export const communityQuizWalletData: CommunityQuizWallet = {
   communityId: "comm-1",
-  balance: 180000,
+  balance: quizWalletBalance,
   totalStakesReceived: 125000,
   totalPayouts: 95000,
-  lastUpdated: new Date()
+  lastUpdated: new Date(),
+  incomeFromMainWallet: 180000,
+  transfersToMainWallet: 50000,
+  totalWinningPayouts: 9600,
+  totalStakeIncome: 2000,
+  reservedForPayouts: reservedAmount,
+  availableBalance: quizWalletBalance - reservedAmount,
+  transactions: quizWalletTransactions,
 };
 
 // Community Quiz Rules
@@ -482,19 +647,37 @@ export const communityQuizRules = [
   "Community Quizzes are exclusive to registered community members only",
   "Each quiz focuses on our community's history, culture, and achievements",
   "10 questions per quiz with 8 answer options (A-H) each",
-  "Stakes support community development projects and scholarships",
+  "Stakes are deposited into the dedicated Quiz Wallet, not the main Community Wallet",
+  "Winnings are paid out from the Quiz Wallet directly to the player's wallet",
   "100% correct = Full prize | 8-9 correct = 20% prize | Below 8 = No prize",
-  "All proceeds (minus Mobigate fees) go to the Community Development Fund",
+  "Quiz Games require sufficient funds in the Quiz Wallet to cover potential winnings",
+  "If the Quiz Wallet has insufficient funds, all games are paused until funded",
   "Top performers each month receive special recognition at community meetings",
   "Quiz topics rotate monthly to cover different aspects of our community",
   "Members who win 3 consecutive quizzes earn the 'Quiz Champion' badge",
   "Questions are reviewed and approved by the Community Education Committee"
 ];
 
-// Helper functions
-export const isCommunityQuizAvailable = (quiz: CommunityQuiz, walletBalance: number): { available: boolean; reason?: string } => {
-  const requiredBalance = quiz.winningAmount * 10;
-  
+// --- Availability Check (Revised) ---
+// For each active quiz, reserve enough to pay one full winner (winningAmount).
+// If total wallet balance < total required reserve, mark ALL games unavailable.
+export const getQuizWalletAvailability = (): { available: boolean; reason?: string; totalRequired: number } => {
+  const totalRequired = activeCommunityQuizzes
+    .filter(q => q.status === "active")
+    .reduce((sum, q) => sum + q.winningAmount, 0);
+
+  if (communityQuizWalletData.balance < totalRequired) {
+    return {
+      available: false,
+      reason: "Quiz Game Unavailable Right Now! Please try again later.",
+      totalRequired,
+    };
+  }
+  return { available: true, totalRequired };
+};
+
+// Per-quiz availability (checks wallet + quiz status)
+export const isCommunityQuizAvailable = (quiz: CommunityQuiz, _walletBalance?: number): { available: boolean; reason?: string } => {
   if (quiz.status === "disabled") {
     return { available: false, reason: "Quiz is currently disabled" };
   }
@@ -506,11 +689,13 @@ export const isCommunityQuizAvailable = (quiz: CommunityQuiz, walletBalance: num
   if (quiz.status === "completed") {
     return { available: false, reason: "Quiz has ended" };
   }
-  
-  if (walletBalance < requiredBalance) {
+
+  // Check dedicated Quiz Wallet availability
+  const walletAvailability = getQuizWalletAvailability();
+  if (!walletAvailability.available) {
     return { 
       available: false, 
-      reason: `Community wallet has insufficient funds` 
+      reason: "Quiz Game Unavailable Right Now! Please try again later."
     };
   }
   
