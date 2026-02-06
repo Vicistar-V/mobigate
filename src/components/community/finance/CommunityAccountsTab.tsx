@@ -23,6 +23,7 @@ import { CheckIndebtednessSheet } from "../elections/CheckIndebtednessSheet";
 import { mockTransactions, mockAccountBalance, mockMemberFinancialRecord } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
 import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
+import { FinancialStatusDialog } from "./FinancialStatusDialog";
 import { toast } from "sonner";
 
 export const CommunityAccountsTab = () => {
@@ -33,6 +34,7 @@ export const CommunityAccountsTab = () => {
   const [showReceiptsFormatSheet, setShowReceiptsFormatSheet] = useState(false);
   const [debtsChecked, setDebtsChecked] = useState(false);
   const [receiptsChecked, setReceiptsChecked] = useState(false);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
 
   const filteredTransactions = mockTransactions.filter((transaction) => {
     if (activeFilter === 'credit') return transaction.type === 'credit';
@@ -42,7 +44,7 @@ export const CommunityAccountsTab = () => {
 
   const handleDebtsClearing = () => {
     if (debtsChecked) {
-      toast.success("Processing debt clearance from your wallet...");
+      setShowIndebtednessSheet(true);
     } else {
       toast.error("Please check the box to confirm debt clearance.");
     }
@@ -183,7 +185,7 @@ export const CommunityAccountsTab = () => {
       <div className="flex flex-col gap-2.5">
         <Button 
           className="bg-yellow-400 text-black hover:bg-yellow-500 w-full font-bold py-4 text-sm"
-          onClick={() => toast.info("Generating financial status report...")}
+          onClick={() => setShowStatusDialog(true)}
         >
           Financial Status Report
         </Button>
@@ -258,6 +260,12 @@ export const CommunityAccountsTab = () => {
         title="Download Receipts"
         documentName="Financial Receipts"
         availableFormats={["pdf", "jpeg", "png", "txt"]}
+      />
+
+      {/* Financial Status Dialog */}
+      <FinancialStatusDialog
+        open={showStatusDialog}
+        onOpenChange={setShowStatusDialog}
       />
     </div>
   );
