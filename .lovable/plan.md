@@ -1,48 +1,60 @@
 
+## Fix "Accredited Voters" Menu Navigation
 
-## Fix "Accreditation Complete" Text Overflow
+### Problem Identified
 
-### Problem
-The "Accreditation Complete!" text is still getting cut off on mobile viewports even after reducing to `text-base` (16px). The button width is constrained and the text plus icon doesn't fit.
+Clicking "Accredited Voters" in the Community Menu does nothing because:
 
-### Solution
-Further reduce the font size and optimize the button layout for narrow mobile screens.
+1. **Missing Tab Handler**: The menu uses `"election-accredited-voters"` but `CommunityProfile.tsx` has no matching route handler for this tab ID
+2. **Isolated Subtab State**: The `ElectionAccreditationTab` component manages its own internal subtab state (`'financial' | 'activities' | 'accredited'`) and doesn't accept props to initialize to a specific view
+
+---
+
+## Solution
+
+Create a dedicated route for "Accredited Voters" that renders `ElectionAccreditationTab` with the `'accredited'` subtab pre-selected.
 
 ---
 
 ## Implementation Details
 
-### File: `src/components/community/elections/ElectionAccreditationTab.tsx`
+### 1. Update ElectionAccreditationTab to Accept Initial Subtab
 
-**Lines 317-343 - Changes:**
+**File**: `src/components/community/elections/ElectionAccreditationTab.tsx`
 
-| Element | Current | New |
-|---------|---------|-----|
-| Button text size | `text-base` | `text-sm` |
-| Gap between icon and text | `gap-2` | `gap-1.5` |
-| Icon size | `h-5 w-5` | `h-4 w-4` |
-| Button padding | `py-5` | `py-4` |
+**Changes**:
+- Add optional `initialSubTab` prop to component
+- Initialize `activeSubTab` state from prop (default to `'financial'`)
 
-**Updated Code:**
 ```tsx
-<Button 
-  className={`w-full text-sm font-bold py-4 transition-all duration-300 ${...}`}
-  ...
->
-  {isAccreditationLoading ? (
-    <div className="flex items-center justify-center gap-1.5">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      <span>Processing...</span>
-    </div>
-  ) : isAccredited ? (
-    <div className="flex items-center justify-center gap-1.5">
-      <CheckCircle2 className="h-4 w-4" />
-      <span>Accreditation Complete!</span>
-    </div>
-  ) : (
-    "Get Accreditation Now!"
-  )}
-</Button>
+interface ElectionAccreditationTabProps {
+  initialSubTab?: 'financial' | 'activities' | 'accredited';
+}
+
+export const ElectionAccreditationTab = ({ 
+  initialSubTab = 'financial' 
+}: ElectionAccreditationTabProps) => {
+  const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities' | 'accredited'>(initialSubTab);
+  // ... rest of component
+}
+```
+
+---
+
+### 2. Add Route Handler in CommunityProfile.tsx
+
+**File**: `src/pages/CommunityProfile.tsx`
+
+**Changes**:
+- Add new conditional render for `"election-accredited-voters"` tab
+- Pass `initialSubTab="accredited"` to `ElectionAccreditationTab`
+
+```tsx
+{activeTab === "election-accredited-voters" && (
+  <div className="mt-6">
+    <ElectionAccreditationTab initialSubTab="accredited" />
+  </div>
+)}
 ```
 
 ---
@@ -51,12 +63,14 @@ Further reduce the font size and optimize the button layout for narrow mobile sc
 
 | File | Change |
 |------|--------|
-| `src/components/community/elections/ElectionAccreditationTab.tsx` | Reduce `text-base` to `text-sm`, icons to `h-4 w-4`, gap to `gap-1.5` |
+| `src/components/community/elections/ElectionAccreditationTab.tsx` | Add `initialSubTab` prop with TypeScript interface |
+| `src/pages/CommunityProfile.tsx` | Add `"election-accredited-voters"` tab handler |
 
 ---
 
 ## Expected Outcome
-- "Accreditation Complete!" text fits fully within the button on all mobile viewports
-- Button maintains proper touch target height (44px minimum)
-- Icon and text are properly aligned with tighter spacing
 
+1. Tapping "Accredited Voters" in the Community Menu navigates to the Election Accreditation view
+2. The "Accredited Voters" subtab is automatically selected on entry
+3. Users can still switch between Financial, Activities, and Accredited Voters tabs within the view
+4. Existing navigation to `"election-accreditation"` continues to work with default "Financial" subtab
