@@ -404,7 +404,10 @@ export function ManageCommunityGalleryDialog({
             placeholder="Search albums or items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-9 h-10 text-base"
+            style={{ touchAction: 'manipulation' }}
+            onClick={(e) => e.stopPropagation()}
+            autoComplete="off"
           />
         </div>
       </div>
@@ -1190,7 +1193,7 @@ export function ManageCommunityGalleryDialog({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
-          <Content />
+          {Content()}
         </DrawerContent>
       </Drawer>
     );
@@ -1199,7 +1202,7 @@ export function ManageCommunityGalleryDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 flex flex-col">
-        <Content />
+        {Content()}
       </DialogContent>
     </Dialog>
   );
