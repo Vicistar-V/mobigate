@@ -16,6 +16,7 @@ import { Wallet, Building2, Plus, CheckCircle2, AlertCircle, Clock } from "lucid
 import { useToast } from "@/hooks/use-toast";
 import { TransactionAuthorizationPanel } from "./TransactionAuthorizationPanel";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { getMinimumWithdrawal } from "@/data/platformSettingsData";
 
 interface WalletWithdrawDialogProps {
   open: boolean;
@@ -48,7 +49,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
   const { toast } = useToast();
 
   const walletBalance = 50000; // Mock balance
-  const minWithdrawal = 1000;
+  const minWithdrawal = getMinimumWithdrawal(); // Dynamic minimum from platform settings (M10,000)
 
   const handleContinue = () => {
     const withdrawAmount = parseFloat(amount);

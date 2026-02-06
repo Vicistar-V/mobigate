@@ -22,6 +22,7 @@ import {
 import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
+import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
@@ -67,7 +68,7 @@ export default function MobigateAdminDashboard() {
 
       <div className="p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-3 h-auto mb-4">
+          <TabsList className="w-full grid grid-cols-4 h-auto mb-4">
             <TabsTrigger value="overview" className="text-xs py-2">
               <LayoutDashboard className="h-4 w-4 mr-1" />
               Overview
@@ -79,6 +80,10 @@ export default function MobigateAdminDashboard() {
             <TabsTrigger value="revenue" className="text-xs py-2">
               <Wallet className="h-4 w-4 mr-1" />
               Revenue
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs py-2">
+              <Settings className="h-4 w-4 mr-1" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -414,6 +419,36 @@ export default function MobigateAdminDashboard() {
 
                 {/* Currency Info Banner */}
                 <MobiCurrencyInfoBanner currencyCode="NGN" />
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-0">
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-4 pb-6">
+                {/* Mobigate-Only Notice */}
+                <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <Shield className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium">Platform Settings</p>
+                    <p className="text-xs text-muted-foreground">
+                      Configure platform-wide policies and limits
+                    </p>
+                  </div>
+                </div>
+
+                {/* Withdrawal Settings */}
+                <WithdrawalSettingsCard />
+
+                {/* Future Settings Placeholder */}
+                <div className="p-4 border border-dashed rounded-lg text-center">
+                  <Settings className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                  <p className="text-sm font-medium text-muted-foreground">More Settings Coming Soon</p>
+                  <p className="text-xs text-muted-foreground">
+                    Additional platform configuration options will appear here
+                  </p>
+                </div>
               </div>
             </ScrollArea>
           </TabsContent>
