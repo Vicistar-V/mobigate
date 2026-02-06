@@ -68,7 +68,7 @@ export const FinancialAccreditationTab = () => {
 
       {/* Accreditation List */}
       <Card className="p-2">
-        <h3 className="font-bold text-base mb-2 px-0.5">Member Accreditation Status</h3>
+        <h3 className="font-bold text-base mb-2 px-0.5">Members' Accreditation Status</h3>
         <div className="space-y-2">
           {membersWithAccreditation.map(member => (
             <div 
