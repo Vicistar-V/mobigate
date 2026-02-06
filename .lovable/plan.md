@@ -1,135 +1,86 @@
 
 
-## Make Campaign Elements Interactive: Profile Links and Feedback Reader
+## Add "Sponsored Advert" Badge to Advertisement Components
 
-### What This Fixes
+The screenshot shows the user wants a prominent **"Sponsored Advert"** badge on all advertisement displays, mirroring the **"Election Campaign"** badge pattern used on campaign banner cards.
 
-From the screenshots, three elements in the Election Campaign UI are currently non-interactive and need to be wired up:
+### What Gets Changed
 
-1. **Candidate Name/Photo** on the Campaign Full View sheet -- tapping should open the candidate's main profile
-2. **"16 responses" badge** in the Write Feedback dialog -- tapping should open the CandidateFeedbackSheet so users can read existing feedback
-3. **Candidate Avatar/Name** in the Write Feedback dialog -- tapping should open the candidate's main profile
+The "Election Campaign" badge uses this pattern on the banner image:
+```
+Badge (absolute top-2 right-2, text-[10px])
+  Vote icon + "Election Campaign"
+```
+
+The same approach will be applied to advertisements using:
+```
+Badge (absolute top-2 right-2, amber-600 bg, text-[10px])
+  Megaphone icon + "Sponsored Advert"
+```
 
 ---
 
 ### Files to Modify
 
-| File | Changes |
-|------|---------|
-| `CampaignFullViewSheet.tsx` | Make candidate name + avatar clickable to navigate to `/profile/:candidateId` |
-| `CampaignFeedbackDialog.tsx` | Wire "responses" badge to open `CandidateFeedbackSheet`; make avatar + name clickable to navigate to profile |
-| `CampaignBannerCard.tsx` | Make candidate name clickable to navigate to profile |
+| File | What Changes |
+|------|-------------|
+| `AdvertisementsListSheet.tsx` | Add "Sponsored Advert" badge to thumbnail corner of each ad card |
+| `AdvertisementFullViewSheet.tsx` | Add "Sponsored Advert" badge overlay on photo carousel (top-left, since top-right has stats) |
+| `AdvertisementPreviewSheet.tsx` | Add "Sponsored Advert" badge overlay on photo carousel |
 
 ---
 
-### File 1: `src/components/community/elections/CampaignFullViewSheet.tsx`
+### File 1: `src/components/community/advertisements/AdvertisementsListSheet.tsx`
 
-**Changes:**
-- Import `useNavigate` from react-router-dom
-- Wrap the candidate Avatar and Name in the header section with a clickable container
-- On tap, navigate to `/profile/${campaign.candidateId}`
-- Add `touch-manipulation active:scale-[0.97]` for mobile feedback
-- Add a subtle visual indicator (e.g., underline or chevron) showing the name is tappable
+**Change: Add badge to the AdCard thumbnail area**
 
-**Implementation detail:**
-```
-// In the SheetHeader section (around lines 74-86):
-// Wrap avatar + name in a clickable div
-<div
-  className="flex items-start gap-3 cursor-pointer touch-manipulation active:opacity-80"
-  onClick={() => navigate(`/profile/${campaign.candidateId}`)}
->
-  <Avatar>...</Avatar>
-  <div>
-    <SheetTitle className="text-lg underline-offset-2 hover:underline">
-      {campaign.candidateName}
-    </SheetTitle>
-    <p className="text-sm text-primary">Candidate for {campaign.office}</p>
-  </div>
-</div>
-```
+The thumbnail is a 80x80 box (lines 57-65). Add a small "Sponsored Advert" badge positioned at the bottom of the thumbnail:
 
-### File 2: `src/components/community/elections/CampaignFeedbackDialog.tsx`
+- Inside the thumbnail div, add an absolute-positioned Badge
+- Use amber color scheme to distinguish from election (blue) badges
+- Badge text: "Sponsored Advert" with Megaphone icon
+- Position: bottom-0 left-0 (small overlay on thumbnail)
 
-**Changes:**
+Since the thumbnail is small (80x80), the badge will be compact: just the Megaphone icon + abbreviated "Ad" text to fit the space. The full "Sponsored Advert" label appears in the info section instead, as a secondary badge alongside the category badge.
 
-**A. Make "responses" badge clickable to open feedback reader:**
-- Import `CandidateFeedbackSheet` component
-- Add state: `showFeedbackList` (boolean)
-- Change the Badge from static to a `<button>` / clickable element
-- On tap, set `showFeedbackList(true)` to open the `CandidateFeedbackSheet`
-- Render `CandidateFeedbackSheet` at the bottom of the component
+Implementation:
+- Add a `Badge` with amber styling next to the category badge in the info section (line 72-74 area)
+- Text: "Sponsored Advert" with Megaphone icon, amber-600 background
 
-**B. Make candidate avatar + name clickable to open profile:**
-- Import `useNavigate` from react-router-dom
-- Wrap the avatar + name section in a clickable container
-- On tap, navigate to `/profile/${campaign.candidateId}`
-- Add touch feedback styling
+### File 2: `src/components/community/advertisements/AdvertisementFullViewSheet.tsx`
 
-**Implementation detail for the responses badge:**
-```
-// Change Badge to clickable:
-<Badge
-  variant="outline"
-  className="shrink-0 text-xs font-medium px-2.5 py-1 border-primary/30 bg-primary/5 
-             cursor-pointer touch-manipulation active:scale-[0.95] hover:bg-primary/10"
-  onClick={() => setShowFeedbackList(true)}
->
-  {campaign.feedbackCount} responses
+**Change: Add "Sponsored Advert" badge on photo carousel**
+
+The photo carousel already has stats badges (Eye count, days left) at `top-2 right-2` (lines 96-105). Add the "Sponsored Advert" badge at `top-2 left-2` to avoid collision:
+
+- Badge with amber-600 background, white text
+- Megaphone icon + "Sponsored Advert"
+- Position: absolute top-2 left-2
+- Same text-[10px] sizing as campaign badge
+
+### File 3: `src/components/community/advertisements/AdvertisementPreviewSheet.tsx`
+
+**Change: Add "Sponsored Advert" badge on preview photo carousel**
+
+Same as full view -- add badge overlay on the photo area at top-2 left-2 (the photo counter is at top-2 right-2, so left side is available):
+
+- Badge with amber-600 background, white text
+- Megaphone icon + "Sponsored Advert"
+
+---
+
+### Technical Details
+
+**Badge style (consistent across all 3 files):**
+```tsx
+<Badge className="bg-amber-600 text-white text-[10px] border-0">
+  <Megaphone className="h-3 w-3 mr-1" />
+  Sponsored Advert
 </Badge>
-
-// At the bottom, render the sheet:
-<CandidateFeedbackSheet
-  open={showFeedbackList}
-  onOpenChange={setShowFeedbackList}
-  campaign={campaign}
-/>
 ```
 
-**Implementation detail for the avatar/name:**
-```
-// Wrap avatar + candidate info in clickable container:
-<div
-  className="flex items-start gap-3 cursor-pointer touch-manipulation active:opacity-80"
-  onClick={() => navigate(`/profile/${campaign.candidateId}`)}
->
-  <Avatar>...</Avatar>
-  <div>
-    <h4 className="font-semibold text-base leading-tight underline-offset-2 hover:underline">
-      {campaign.candidateName}
-    </h4>
-    <p className="text-sm text-muted-foreground">Candidate for {campaign.office}</p>
-  </div>
-</div>
-```
+**Positioning:**
+- Full view and Preview: `absolute top-2 left-2` (on photo carousel)
+- List card: Inline badge in the info section alongside category badge
 
-### File 3: `src/components/community/elections/CampaignBannerCard.tsx`
-
-**Changes:**
-- Import `useNavigate` from react-router-dom
-- Make the candidate name text clickable (not the entire card, since the card already has an onClick for viewing the campaign)
-- On tap of name, stop propagation and navigate to `/profile/${campaign.candidateId}`
-
-**Implementation detail:**
-```
-// In the full-size card (line 91):
-<h4
-  className="font-bold text-sm cursor-pointer touch-manipulation active:opacity-70 hover:underline"
-  onClick={(e) => {
-    e.stopPropagation();
-    navigate(`/profile/${campaign.candidateId}`);
-  }}
->
-  {campaign.candidateName}
-</h4>
-```
-
----
-
-### Technical Summary
-
-- All three components get `useNavigate` for profile navigation
-- The `CampaignFeedbackDialog` gets a new state + renders `CandidateFeedbackSheet` for reading responses
-- Touch feedback is achieved with `touch-manipulation active:scale-[0.95]` or `active:opacity-80`
-- `e.stopPropagation()` is used on the banner card name to prevent triggering the parent card's onClick
-- No new files need to be created -- all changes use existing components (`CandidateFeedbackSheet`, profile route)
+**No new files or dependencies needed** -- all changes use existing Badge and Megaphone icon imports already present in each file.
