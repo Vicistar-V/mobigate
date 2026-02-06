@@ -1,184 +1,134 @@
 
-## Fix Community Resources Dialog - Mobile Layout and Functionality
 
-### Issues Identified from Screenshots
+## Fix Inactive Publication Download Buttons - Mobile First
 
-1. **ID Card not fitting properly, cutting on edges** -- The inline ID card preview uses a 3-column horizontal layout (Avatar + Name + QR Code) that overflows on narrow mobile screens. The avatar (h-20 w-20 = 80px), name section, and QR code block (h-12 w-12 with padding) compete for horizontal space, causing content to cut off.
+### Problem
 
-2. **Download button inactive on Letters tab** -- The screenshot shows the Download button on the "Membership Confirmation Letter" (approved, with letterNumber "CMT/LTR/2024/001") appears inactive. The code has the `onClick` handler wired, but the button only renders when `request.letterNumber` exists. The issue is likely that the Dialog container is intercepting taps or the button needs explicit z-index/pointer events. Looking more carefully, the code appears correct -- the onClick IS wired. The user may be tapping and nothing happens because the `OfficialLetterDisplay` component opens as a Drawer which may conflict with the parent Dialog's z-index.
+The "Download" and "Get" buttons on the Publications tab in Community Resources only show a toast notification saying "Downloading Publication" but don't actually do anything meaningful. They need to open the `DownloadFormatSheet` drawer so users can pick a format (PDF, JPEG, PNG, etc.) and trigger a proper download flow -- just like ID Cards and Letters already do.
 
-3. **Missing "Renew ID Card" button** -- The user explicitly annotated "Add button: Renew ID Card" in their screenshot.
+### Solution
 
----
+Integrate the existing `DownloadFormatSheet` component into the Publications tab. When a user taps "Download" or "Get", the parent dialog closes (to avoid z-index conflicts on mobile), the format picker opens, and after downloading, the parent dialog re-opens.
 
-### Changes to: `src/components/community/CommunityResourcesDialog.tsx`
+### File: `src/components/community/CommunityResourcesDialog.tsx`
 
-**Fix 1: Restack ID card layout for mobile**
+**Change 1: Import DownloadFormatSheet**
 
-Replace the current 3-column horizontal layout (Avatar + Name/ID + QR Code) with a mobile-friendly vertically stacked layout:
-- Community name banner at top (already present, keep as-is)
-- Center the member photo (reduce from h-20 to h-16)
-- Name and Member ID below the photo, centered
-- Status badge below name
-- QR code smaller and inline with card number row
-- Grid of card details (Card Number, Issue Date, Expiry Date, Status) stays as 2x2 grid but with reduced gap
-
-This prevents any horizontal overflow on narrow screens.
-
-**Fix 2: Add "Renew ID Card" button**
-
-Add a third button row below the existing "Request New Card" / "Download Digital" buttons:
+Add the import for the existing download format picker component:
 ```tsx
-<Button 
-  onClick={handleRenewCard} 
-  className="w-full" 
-  variant="default"
->
-  <CreditCard className="h-4 w-4 mr-2" />
-  Renew ID Card
-</Button>
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 ```
-Add a `handleRenewCard` handler that shows a toast: "Renewal Request Submitted".
 
-**Fix 3: Fix Letter Download button z-index/interaction**
+**Change 2: Add state variables for publication download flow**
 
-The `OfficialLetterDisplay` and `DigitalIDCardDisplay` components use Drawer (on mobile) which may conflict with the parent Dialog's stacking context. Fix by:
-- Ensuring the parent Dialog closes or the overlays have proper z-indexing
-- Adding `className="relative z-50"` or ensuring Drawer portals correctly above the Dialog
+After the existing state declarations (around line 30), add:
+```tsx
+const [showPubDownload, setShowPubDownload] = useState(false);
+const [selectedPubForDownload, setSelectedPubForDownload] = useState<{ title: string; fileSize: string } | null>(null);
+const [isDownloading, setIsDownloading] = useState(false);
+```
 
-After investigation, the actual fix is simpler: the download button IS wired correctly in the code. The issue is that the `OfficialLetterDisplay` Drawer opens *behind* the parent Dialog. We need to either:
-  - Close the parent dialog before opening the letter/ID preview, OR  
-  - Ensure the Drawer renders with higher z-index
+**Change 3: Replace `handleDownloadPublication` with proper flow**
 
-The cleanest approach: temporarily hide the parent dialog when showing the ID card or letter preview, then restore it when the preview closes.
-
----
-
-### Detailed Implementation
-
-**1. Add `handleRenewCard` handler (after `handleRequestCard`)**
+Replace the current toast-only handler (lines 89-94) with a handler that closes the parent dialog and opens the format sheet:
 
 ```tsx
-const handleRenewCard = () => {
-  toast({
-    title: "Renewal Request Submitted",
-    description: "Your ID card renewal will be processed within 5 business days",
-  });
+const handleDownloadPublication = (pub: { title: string; fileSize: string }) => {
+  setSelectedPubForDownload(pub);
+  onOpenChange(false);
+  setTimeout(() => setShowPubDownload(true), 150);
+};
+
+const handlePubDownloadConfirm = (format: DownloadFormat) => {
+  setIsDownloading(true);
+  setTimeout(() => {
+    setIsDownloading(false);
+    setShowPubDownload(false);
+    toast({
+      title: "Download Complete",
+      description: `${selectedPubForDownload?.title} downloaded as ${format.toUpperCase()}`,
+    });
+    setTimeout(() => onOpenChange(true), 150);
+  }, 1500);
+};
+
+const handleClosePubDownload = (open: boolean) => {
+  setShowPubDownload(open);
+  if (!open) {
+    setTimeout(() => onOpenChange(true), 150);
+  }
 };
 ```
 
-**2. Restack ID card preview layout for mobile (lines 125-174)**
+**Change 4: Update Featured Publication "Download" buttons (line 390)**
 
-Replace the current member details section with a centered vertical stack:
-
+Update the onClick to pass the full publication object instead of just the title:
 ```tsx
-<div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary/20 rounded-xl overflow-hidden">
-  {/* Community Name Header - unchanged */}
-  <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3">
-    <div className="flex items-center gap-2">
-      <Shield className="h-4 w-4" />
-      <div>
-        <h4 className="text-xs font-bold uppercase tracking-wider">Ndigbo Progressive Union</h4>
-        <p className="text-[9px] opacity-80">Official Community ID Card</p>
-      </div>
-    </div>
-  </div>
-
-  {/* Member Details - Vertically Stacked for Mobile */}
-  <div className="p-4 space-y-3">
-    {/* Photo + Name centered */}
-    <div className="flex flex-col items-center text-center gap-2">
-      <Avatar className="h-16 w-16 border-2 border-primary/20">
-        <AvatarImage src={mockIDCard.memberPhoto} alt={mockIDCard.memberName} />
-        <AvatarFallback>{mockIDCard.memberName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-      </Avatar>
-      <div>
-        <h3 className="font-bold text-base">{mockIDCard.memberName}</h3>
-        <p className="text-sm text-muted-foreground">{mockIDCard.memberId}</p>
-        <Badge className="mt-1" variant={mockIDCard.status === "active" ? "default" : "secondary"}>
-          {mockIDCard.status}
-        </Badge>
-      </div>
-    </div>
-
-    {/* Card Details Grid */}
-    <div className="grid grid-cols-2 gap-2 text-xs">
-      <div className="bg-muted/50 rounded-lg p-2.5">
-        <p className="text-muted-foreground text-[10px]">Card Number</p>
-        <p className="font-medium">{mockIDCard.cardNumber}</p>
-      </div>
-      <div className="bg-muted/50 rounded-lg p-2.5">
-        <p className="text-muted-foreground text-[10px]">Issue Date</p>
-        <p className="font-medium">{mockIDCard.issueDate.toLocaleDateString()}</p>
-      </div>
-      <div className="bg-muted/50 rounded-lg p-2.5">
-        <p className="text-muted-foreground text-[10px]">Expiry Date</p>
-        <p className="font-medium">{mockIDCard.expiryDate.toLocaleDateString()}</p>
-      </div>
-      <div className="bg-muted/50 rounded-lg p-2.5 flex items-center gap-1.5">
-        <QrCode className="h-4 w-4 text-primary shrink-0" />
-        <div>
-          <p className="text-muted-foreground text-[10px]">Verified</p>
-          <p className="font-medium capitalize">{mockIDCard.status}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<Button
+  onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
+  size="sm"
+  className="shrink-0"
+>
+  <Download className="h-3 w-3 mr-1" />
+  Download
+</Button>
 ```
 
-**3. Add "Renew ID Card" button below the existing 2 buttons (after line 190)**
+**Change 5: Update All Publications "Get" buttons (line 422-429)**
 
-Change the button layout from a 2-column grid to a vertical stack with 3 buttons:
-
+Same pattern for the non-featured publications:
 ```tsx
-<div className="space-y-2">
-  <div className="grid grid-cols-2 gap-2">
-    <Button onClick={handleRequestCard} variant="outline" size="sm">
-      <CreditCard className="h-4 w-4 mr-2" />
-      Request New
-    </Button>
-    <Button variant="outline" size="sm" onClick={() => setShowIDCardPreview(true)}>
-      <Download className="h-4 w-4 mr-2" />
-      Download Digital
-    </Button>
-  </div>
-  <Button onClick={handleRenewCard} variant="default" className="w-full" size="sm">
-    <CreditCard className="h-4 w-4 mr-2" />
-    Renew ID Card
-  </Button>
-</div>
+<Button
+  onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
+  size="sm"
+  variant="ghost"
+>
+  <Download className="h-3 w-3 mr-1" />
+  Get
+</Button>
 ```
 
-**4. Fix overlay stacking for ID Card and Letter previews**
+**Change 6: Render `DownloadFormatSheet` at the bottom of the component (before the closing Fragment tag, after the OfficialLetterDisplay)**
 
-When opening the ID card or letter preview, temporarily close the parent dialog to avoid z-index conflicts. Update the button handlers and preview close callbacks:
-
-- ID Card: `onClick` sets `showIDCardPreview(true)` and `onOpenChange(false)` on the parent dialog
-- Letter Download: same pattern -- close parent dialog, open letter preview
-- When either preview closes, reopen the parent dialog
-
-This requires a small state coordination:
 ```tsx
-const [parentDialogOpen, setParentDialogOpen] = useState(true);
+{selectedPubForDownload && (
+  <DownloadFormatSheet
+    open={showPubDownload}
+    onOpenChange={handleClosePubDownload}
+    onDownload={handlePubDownloadConfirm}
+    title="Download Publication"
+    documentName={selectedPubForDownload.title}
+    availableFormats={["pdf", "jpeg", "png"]}
+    isDownloading={isDownloading}
+  />
+)}
 ```
-
-But since the parent dialog's `open` prop comes from the parent component, a simpler approach is to use CSS z-index. Add `style={{ zIndex: 60 }}` to the DigitalIDCardDisplay and OfficialLetterDisplay Drawer/Dialog wrappers. However, since we can't modify those components' internal z-index easily, the cleanest fix is to keep the parent Dialog open but ensure the child Drawers portal above it by wrapping them outside the Dialog in the JSX (which is already done in the current code -- they render as siblings in a fragment).
-
-The real issue may be that the Drawer's backdrop isn't blocking the Dialog. This is already handled correctly since both render outside the Dialog. I'll verify by checking if the component actually works -- and if not, add explicit portal behavior.
 
 ---
+
+### How It Works on Mobile
+
+1. User taps "Download" or "Get" on any publication card
+2. The parent Community Resources dialog closes smoothly (150ms)
+3. The `DownloadFormatSheet` drawer slides up from the bottom, showing the publication name and format options (PDF recommended, plus JPEG, PNG)
+4. User selects a format and taps "Download as .PDF"
+5. A 1.5s spinner animation plays, then a success toast appears
+6. The format sheet closes and the Community Resources dialog re-opens automatically
+
+This follows the exact same pattern already used for ID Card and Letter downloads, ensuring consistency across the entire Resources feature.
 
 ### Summary
 
 | Change | Purpose |
 |--------|---------|
-| Vertically stack ID card member info | Prevent horizontal overflow and edge cutting on mobile |
-| Center photo and name | Clean mobile-first card layout |
-| Replace plain grid cells with styled rounded boxes | Better visual hierarchy for card details |
-| Add "Renew ID Card" button | User-requested feature |
-| Add `handleRenewCard` handler | Toast confirmation for renewal |
-| Ensure preview overlays render above parent dialog | Fix Download button appearing inactive |
+| Import `DownloadFormatSheet` | Reuse existing multi-format download component |
+| Add download state variables | Track selected publication and downloading status |
+| Replace toast-only handler | Open format picker instead of just showing toast |
+| Add download confirm handler | Simulate download with loading state and success toast |
+| Add close handler with re-open | Close parent dialog before opening drawer to fix z-index on mobile |
+| Update both Download and Get button onClick | Pass publication data to the new handler |
+| Render DownloadFormatSheet | Add the drawer component outside the Dialog |
 
 ### Single File Modified
 `src/components/community/CommunityResourcesDialog.tsx`
+
