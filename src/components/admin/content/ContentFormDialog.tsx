@@ -156,7 +156,10 @@ export function ContentFormDialog({
                     setCustomCategory(e.target.value);
                     setFormData(prev => ({ ...prev, category: e.target.value.toLowerCase() }));
                   }}
-                  className="mt-2"
+                  className="mt-2 text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoComplete="off"
                 />
               )}
             </div>
@@ -200,7 +203,10 @@ export function ContentFormDialog({
                     setCustomCategory(e.target.value);
                     setFormData(prev => ({ ...prev, category: e.target.value.toLowerCase() }));
                   }}
-                  className="mt-2"
+                  className="mt-2 text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoComplete="off"
                 />
               )}
             </div>
@@ -242,7 +248,10 @@ export function ContentFormDialog({
                     venue: e.target.value
                   }))}
                   placeholder="Enter platform or venue name..."
-                  className="mt-2"
+                  className="mt-2 text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoComplete="off"
                 />
               )}
             </div>
@@ -254,6 +263,10 @@ export function ContentFormDialog({
                   value={formData.venueAddress || ""} 
                   onChange={(e) => setFormData(prev => ({ ...prev, venueAddress: e.target.value }))}
                   placeholder="Enter venue address..."
+                  className="text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoComplete="off"
                 />
               </div>
             )}
@@ -263,6 +276,9 @@ export function ContentFormDialog({
                 <Input 
                   type="datetime-local" 
                   onChange={(e) => setFormData(prev => ({ ...prev, eventDate: new Date(e.target.value) }))}
+                  className="text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
               <div className="space-y-2">
@@ -270,6 +286,9 @@ export function ContentFormDialog({
                 <Input 
                   type="datetime-local" 
                   onChange={(e) => setFormData(prev => ({ ...prev, eventEndDate: new Date(e.target.value) }))}
+                  className="text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             </div>
@@ -280,6 +299,10 @@ export function ContentFormDialog({
                 value={formData.capacity || ""} 
                 onChange={(e) => setFormData(prev => ({ ...prev, capacity: parseInt(e.target.value) || undefined }))}
                 placeholder="Maximum attendees"
+                className="text-base"
+                style={{ touchAction: 'manipulation' }}
+                onClick={(e) => e.stopPropagation()}
+                autoComplete="off"
               />
             </div>
           </>
@@ -318,7 +341,10 @@ export function ContentFormDialog({
                     setCustomCategory(e.target.value);
                     setFormData(prev => ({ ...prev, category: e.target.value.toLowerCase() }));
                   }}
-                  className="mt-2"
+                  className="mt-2 text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoComplete="off"
                 />
               )}
             </div>
@@ -329,6 +355,9 @@ export function ContentFormDialog({
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Brief summary of the article"
                 rows={2}
+                className="text-base resize-none"
+                style={{ touchAction: 'manipulation' }}
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
             <div className="space-y-2">
@@ -338,6 +367,9 @@ export function ContentFormDialog({
                 onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                 placeholder="Article content..."
                 rows={6}
+                className="text-base resize-none"
+                style={{ touchAction: 'manipulation' }}
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
             <div className="space-y-2">
@@ -348,6 +380,10 @@ export function ContentFormDialog({
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder="Add tag"
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                  className="text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoComplete="off"
                 />
                 <Button type="button" size="icon" variant="outline" onClick={addTag}>
                   <Plus className="h-4 w-4" />
@@ -404,6 +440,10 @@ export function ContentFormDialog({
                   value={formData.duration || ""} 
                   onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
                   placeholder="e.g., 3:45"
+                  className="text-base"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoComplete="off"
                 />
               </div>
             )}
@@ -437,6 +477,10 @@ export function ContentFormDialog({
                 value={formData.title || ""} 
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder={`Enter ${contentType} title`}
+                className="text-base"
+                style={{ touchAction: 'manipulation' }}
+                onClick={(e) => e.stopPropagation()}
+                autoComplete="off"
               />
             </div>
 
@@ -444,11 +488,14 @@ export function ContentFormDialog({
             {contentType !== "article" && (
               <div className="space-y-2">
                 <Label>{contentType === "vibe" ? "Caption" : "Full Content"}</Label>
-                <Textarea 
+              <Textarea 
                   value={formData.description || ""} 
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   placeholder={contentType === "vibe" ? "Write a caption..." : "Enter full content..."}
                   rows={3}
+                  className="text-base resize-none"
+                  style={{ touchAction: 'manipulation' }}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             )}
