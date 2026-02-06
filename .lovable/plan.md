@@ -1,196 +1,104 @@
 
-## Make Active Buttons and Fix Text in Election Views
 
-### What This Does
+## Standardize Pagination Display at 50 Items
 
-Three improvements to the election results and voters list screens, all mobile-focused:
+### Problem
 
----
+The badge and info text always show "X of Y" format (e.g., "19 of 527", "5 of 20", "50 of 316") regardless of whether there are actually more items to load. This creates confusing variations:
 
-### 1. Make "Total Votes" and "With Remarks" Stat Boxes Clickable (CandidateVotersListSheet)
+- When search narrows 527 voters to 19, it shows "19 of 19" -- redundant
+- When a candidate only has 20 votes, it shows "20 of 20" -- no pagination needed but looks like it
+- When there are 527 voters, it shows "50 of 527" -- this is the only case where the "X of Y" format makes sense
 
-Currently, the "54 Total Votes" and "27 With Remarks" stat boxes in the candidate summary card are static display elements. They will become active, tappable buttons:
+### Rule
 
-- **"Total Votes" tap**: Scrolls down to the voters list section and clears any active filter (shows all voters)
-- **"With Remarks" tap**: Filters the voters list to show ONLY voters who left remarks, updates the search/display accordingly
-
-Visual changes:
-- Add `cursor-pointer active:bg-primary/10 transition-colors` to the Total Votes box
-- Add `cursor-pointer active:bg-orange-500/10 transition-colors` to the With Remarks box
-- Both get a subtle ring/border on tap for touch feedback
-
-**File:** `src/components/admin/election/CandidateVotersListSheet.tsx`
-
-Changes:
-- Add a `filterMode` state: `"all" | "remarks_only"` (default `"all"`)
-- When `filterMode === "remarks_only"`, additionally filter voters to only those with remarks
-- Update the `filteredVoters` logic to respect both search AND filter mode
-- Make "Total Votes" box clickable - resets filter to "all" and clears search
-- Make "With Remarks" box clickable - sets filter to "remarks_only"
-- Add a visual active/selected indicator on the currently active filter box
-- When filter changes, reset `displayCount` back to `PAGE_SIZE`
-
----
-
-### 2. Make Candidate Names/Avatars Clickable to Open Profile (AdminMainElectionSection and AdminPrimaryElectionsSection)
-
-In the election results view (Image 282), clicking on a candidate's name or avatar should open the MemberPreviewDialog, allowing navigation to their full Mobigate profile.
-
-**File:** `src/components/admin/election/AdminMainElectionSection.tsx`
-
-Changes:
-- Import `MemberPreviewDialog` and `ExecutiveMember` type
-- Add `selectedMember` and `showMemberPreview` state
-- Create `handleCandidateClick` that maps a candidate to `ExecutiveMember` and opens the preview
-- Make the candidate name + avatar area clickable (the row with number, avatar, name) with touch feedback
-- Keep the "Voters List" button separate (should NOT trigger the profile preview)
-- Render `MemberPreviewDialog` at root level
-
-**File:** `src/components/admin/election/AdminPrimaryElectionsSection.tsx`
-
-Same pattern as above:
-- Import `MemberPreviewDialog` and `ExecutiveMember`
-- Add state and handler
-- Make candidate name/avatar rows clickable
-- Render `MemberPreviewDialog`
-
----
-
-### 3. Fix Text Display (Already Fixed in Code)
-
-The screenshot shows old text "Showing first 50 voters of 54 total" which was already corrected in the last edit to "Showing 50 of 54 voters". This is already deployed - the screenshot was taken before the fix was applied. No further changes needed.
+- **50 or fewer items**: Display all items, no "Load More" button, no "X of Y" text. Badge simply shows the total count (e.g., "19 voters" or "20 voters").
+- **More than 50 items**: Display first 50, show "Load More" button, badge shows "50 of 527", info text says "Showing 50 of 527 voters".
 
 ---
 
 ### Technical Details
 
-#### CandidateVotersListSheet.tsx Changes
+#### File: `src/components/admin/election/CandidateVotersListSheet.tsx`
 
-**Add filter state:**
+**1. Simplify the count badge logic (lines 246-248)**
+
+Replace the always-showing "X of Y" badge with conditional display:
+
+- When all filtered voters are displayed (`displayedVoters.length === filteredVoters.length`): Show just the count, e.g., `"19 voters"`
+- When there are more to load (`hasMore` is true): Show the "X of Y" format, e.g., `"50 of 527"`
+
 ```tsx
-const [filterMode, setFilterMode] = useState<"all" | "remarks_only">("all");
+<Badge variant="secondary" className="text-xs">
+  {hasMore
+    ? `${displayedVoters.length} of ${filteredVoters.length}`
+    : `${filteredVoters.length} voters`
+  }
+</Badge>
 ```
 
-**Update filteredVoters logic:**
+**2. Simplify the info text (lines 252-255)**
+
+Replace the always-showing "Showing X of Y voters" line with conditional display:
+
+- When there are more to load: Show `"Showing 50 of 527 voters"`
+- When a search/filter narrowed results from a larger set: Show `"Found 19 voters"` (so the user knows their filter is active)
+- When all items are shown and no filter: Show nothing (remove the text entirely to save space)
+
 ```tsx
-const filteredVoters = voters.filter(voter => {
-  const matchesSearch = voter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    voter.accreditationNumber.toLowerCase().includes(searchQuery.toLowerCase());
-  const matchesFilter = filterMode === "all" || voter.remarks;
-  return matchesSearch && matchesFilter;
-});
+{hasMore ? (
+  <p className="text-xs text-muted-foreground">
+    Showing {displayedVoters.length} of {filteredVoters.length} voters
+  </p>
+) : searchQuery || filterMode !== "all" ? (
+  <p className="text-xs text-muted-foreground">
+    Found {filteredVoters.length} of {voteCount} voters
+  </p>
+) : null}
 ```
 
-**Make stat boxes interactive:**
-```tsx
-<div className="grid grid-cols-2 gap-3 mt-4">
-  <button 
-    className={cn(
-      "text-center p-2 bg-background rounded-lg transition-colors",
-      filterMode === "all" 
-        ? "ring-2 ring-primary/30" 
-        : "active:bg-primary/10"
-    )}
-    onClick={() => {
-      setFilterMode("all");
-      setSearchQuery("");
-      setDisplayCount(PAGE_SIZE);
-    }}
-  >
-    <p className="text-xl font-bold text-primary">{voteCount}</p>
-    <p className="text-xs text-muted-foreground">Total Votes</p>
-  </button>
-  <button 
-    className={cn(
-      "text-center p-2 bg-background rounded-lg transition-colors",
-      filterMode === "remarks_only" 
-        ? "ring-2 ring-orange-500/30" 
-        : "active:bg-orange-500/10"
-    )}
-    onClick={() => {
-      setFilterMode("remarks_only");
-      setSearchQuery("");
-      setDisplayCount(PAGE_SIZE);
-    }}
-  >
-    <p className="text-xl font-bold text-orange-500">{remarksCount}</p>
-    <p className="text-xs text-muted-foreground">With Remarks</p>
-  </button>
-</div>
-```
+**3. No changes needed to the Load More button logic**
 
-**Add filter indicator in the list header:**
-```tsx
-{filterMode === "remarks_only" && (
-  <Badge 
-    variant="secondary" 
-    className="text-xs bg-orange-100 text-orange-700 cursor-pointer"
-    onClick={() => {
-      setFilterMode("all");
-      setDisplayCount(PAGE_SIZE);
-    }}
-  >
-    Remarks only x
-  </Badge>
-)}
-```
+The existing `hasMore` check already handles this correctly -- the button only appears when `filteredVoters.length > displayCount`. Since `displayCount` starts at 50, lists with 50 or fewer items never show the button.
 
 ---
 
-#### AdminMainElectionSection.tsx Changes
+### Expected Results
 
-**Add imports:**
-```tsx
-import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
-import { ExecutiveMember } from "@/data/communityExecutivesData";
+**Candidate with 20 votes (no search):**
+```
+Badge: "20 voters"
+Info text: (none)
+Load More: (hidden)
 ```
 
-**Add state:**
-```tsx
-const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
-const [showMemberPreview, setShowMemberPreview] = useState(false);
+**Candidate with 527 votes (no search):**
+```
+Badge: "50 of 527"
+Info text: "Showing 50 of 527 voters"
+Load More: [Load More (477 remaining)]
 ```
 
-**Add handler:**
-```tsx
-const handleCandidateClick = (candidate: { id: string; name: string; avatar: string }) => {
-  setSelectedMember({
-    id: candidate.id,
-    name: candidate.name,
-    position: "Community Member",
-    tenure: "",
-    imageUrl: candidate.avatar,
-    level: "officer",
-    committee: "executive",
-  });
-  setShowMemberPreview(true);
-};
+**Candidate with 527 votes (search "j" returns 19):**
+```
+Badge: "19 voters"
+Info text: "Found 19 of 527 voters"
+Load More: (hidden)
 ```
 
-**Make the candidate name/avatar row clickable:**
-```tsx
-<div 
-  className="flex items-center gap-3 mb-2 cursor-pointer active:opacity-70 transition-opacity"
-  onClick={() => handleCandidateClick(candidate)}
->
-  {/* existing avatar + name content */}
-</div>
+**Candidate with 527 votes (search "j" returns 65):**
+```
+Badge: "50 of 65"
+Info text: "Showing 50 of 65 voters"
+Load More: [Load More (15 remaining)]
 ```
 
-**Add MemberPreviewDialog at component root:**
-```tsx
-<MemberPreviewDialog
-  member={selectedMember}
-  open={showMemberPreview}
-  onOpenChange={setShowMemberPreview}
-/>
+**After tapping "Load More" on 527 voters:**
 ```
-
----
-
-#### AdminPrimaryElectionsSection.tsx Changes
-
-Identical pattern to AdminMainElectionSection - add imports, state, handler, clickable row, and dialog.
+Badge: "100 of 527"  ->  tap again -> "150 of 527"  -> ... -> "527 voters"
+Info text: updates accordingly -> disappears when all shown
+Load More: disappears when all shown
+```
 
 ---
 
@@ -198,14 +106,11 @@ Identical pattern to AdminMainElectionSection - add imports, state, handler, cli
 
 | File | Change |
 |------|--------|
-| `src/components/admin/election/CandidateVotersListSheet.tsx` | Make stat boxes interactive with filter toggle |
-| `src/components/admin/election/AdminMainElectionSection.tsx` | Make candidate names clickable to open profile |
-| `src/components/admin/election/AdminPrimaryElectionsSection.tsx` | Make candidate names clickable to open profile |
+| `src/components/admin/election/CandidateVotersListSheet.tsx` | Update badge and info text to use conditional display logic |
 
-### Mobile UX
+### Mobile UX Impact
 
-- All interactive elements use `active:` states for touch feedback
-- Filter toggle on stat boxes uses ring highlight to show active state
-- Candidate rows use opacity transition on tap
-- MemberPreviewDialog opens as bottom drawer on mobile (built-in behavior)
-- "Remarks only" filter can be cleared via a dismissable badge
+- Cleaner display for small lists (no redundant "5 of 5" or "20 of 20")
+- Clear pagination indicator only when there are actually more items to load
+- Search results clearly indicate they are filtered from a larger set
+- Less visual noise on mobile screens
