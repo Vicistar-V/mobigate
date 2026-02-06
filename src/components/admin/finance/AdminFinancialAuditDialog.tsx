@@ -456,7 +456,7 @@ export const AdminFinancialAuditDialog = ({
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
               <div className="px-4 pb-6">
-                <Content />
+                {Content()}
               </div>
             </div>
           </DrawerContent>
@@ -509,7 +509,7 @@ export const AdminFinancialAuditDialog = ({
             <DialogTitle>Financial Audit</DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4">
-            <Content />
+            {Content()}
           </ScrollArea>
         </DialogContent>
       </Dialog>

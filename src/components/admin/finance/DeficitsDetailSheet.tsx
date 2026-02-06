@@ -473,7 +473,7 @@ export const DeficitsDetailSheet = ({
             <DrawerTitle>{sourceLabel}</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
+            {Content()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -487,7 +487,7 @@ export const DeficitsDetailSheet = ({
           <DialogTitle>{sourceLabel}</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <Content />
+          {Content()}
         </ScrollArea>
       </DialogContent>
     </Dialog>
@@ -613,7 +613,7 @@ const DebtDetailModal = ({
             <DrawerTitle>Payable Details</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <DetailContent />
+            {DetailContent()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -627,7 +627,7 @@ const DebtDetailModal = ({
           <DialogTitle>Payable Details</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <DetailContent />
+          {DetailContent()}
         </ScrollArea>
       </DialogContent>
     </Dialog>

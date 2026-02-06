@@ -461,7 +461,7 @@ export const ManageDuesLeviesDialog = ({
               <DrawerTitle>Manage Dues & Levies</DrawerTitle>
             </DrawerHeader>
             <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-              <Content />
+              {Content()}
             </ScrollArea>
           </DrawerContent>
         </Drawer>
@@ -494,7 +494,7 @@ export const ManageDuesLeviesDialog = ({
             <DialogTitle>Manage Dues & Levies</DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4">
-            <Content />
+            {Content()}
           </ScrollArea>
         </DialogContent>
       </Dialog>
