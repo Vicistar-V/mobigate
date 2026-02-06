@@ -36,6 +36,38 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
     });
   };
 
+  const handleRenewCard = () => {
+    toast({
+      title: "Renewal Request Submitted",
+      description: "Your ID card renewal will be processed within 5 business days",
+    });
+  };
+
+  const handleOpenIDCardPreview = () => {
+    onOpenChange(false);
+    setTimeout(() => setShowIDCardPreview(true), 150);
+  };
+
+  const handleOpenLetterPreview = (letterData: LetterData) => {
+    setSelectedLetterData(letterData);
+    onOpenChange(false);
+    setTimeout(() => setShowLetterPreview(true), 150);
+  };
+
+  const handleCloseIDCardPreview = (open: boolean) => {
+    setShowIDCardPreview(open);
+    if (!open) {
+      setTimeout(() => onOpenChange(true), 150);
+    }
+  };
+
+  const handleCloseLetterPreview = (open: boolean) => {
+    setShowLetterPreview(open);
+    if (!open) {
+      setTimeout(() => onOpenChange(true), 150);
+    }
+  };
+
   const handleRequestLetter = () => {
     if (!selectedTemplate || !letterPurpose.trim()) {
       toast({
@@ -121,7 +153,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* ID Card Preview */}
+                    {/* ID Card Preview - Mobile Optimized Vertical Stack */}
                     <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary/20 rounded-xl overflow-hidden">
                       {/* Community Name Header */}
                       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3">
@@ -134,58 +166,67 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                         </div>
                       </div>
 
-                      {/* Member Details */}
-                      <div className="p-4">
-                        <div className="flex items-start gap-4 mb-4">
-                          <Avatar className="h-20 w-20 border-2 border-background">
+                      {/* Member Details - Vertically Stacked for Mobile */}
+                      <div className="p-4 space-y-3">
+                        {/* Photo + Name centered */}
+                        <div className="flex flex-col items-center text-center gap-2">
+                          <Avatar className="h-16 w-16 border-2 border-primary/20">
                             <AvatarImage src={mockIDCard.memberPhoto} alt={mockIDCard.memberName} />
                             <AvatarFallback>{mockIDCard.memberName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
-                            <h3 className="font-bold text-lg">{mockIDCard.memberName}</h3>
+                          <div>
+                            <h3 className="font-bold text-base">{mockIDCard.memberName}</h3>
                             <p className="text-sm text-muted-foreground">{mockIDCard.memberId}</p>
-                            <Badge className="mt-2" variant={mockIDCard.status === "active" ? "default" : "secondary"}>
+                            <Badge className="mt-1" variant={mockIDCard.status === "active" ? "default" : "secondary"}>
                               {mockIDCard.status}
                             </Badge>
                           </div>
-                          <div className="bg-white p-2 rounded">
-                            <QrCode className="h-12 w-12" />
-                          </div>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-3 text-xs">
-                          <div>
-                            <p className="text-muted-foreground">Card Number</p>
+
+                        {/* Card Details Grid */}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="bg-muted/50 rounded-lg p-2.5">
+                            <p className="text-muted-foreground text-[10px]">Card Number</p>
                             <p className="font-medium">{mockIDCard.cardNumber}</p>
                           </div>
-                          <div>
-                            <p className="text-muted-foreground">Issue Date</p>
+                          <div className="bg-muted/50 rounded-lg p-2.5">
+                            <p className="text-muted-foreground text-[10px]">Issue Date</p>
                             <p className="font-medium">{mockIDCard.issueDate.toLocaleDateString()}</p>
                           </div>
-                          <div>
-                            <p className="text-muted-foreground">Expiry Date</p>
+                          <div className="bg-muted/50 rounded-lg p-2.5">
+                            <p className="text-muted-foreground text-[10px]">Expiry Date</p>
                             <p className="font-medium">{mockIDCard.expiryDate.toLocaleDateString()}</p>
                           </div>
-                          <div>
-                            <p className="text-muted-foreground">Status</p>
-                            <p className="font-medium capitalize">{mockIDCard.status}</p>
+                          <div className="bg-muted/50 rounded-lg p-2.5 flex items-center gap-1.5">
+                            <QrCode className="h-4 w-4 text-primary shrink-0" />
+                            <div>
+                              <p className="text-muted-foreground text-[10px]">Verified</p>
+                              <p className="font-medium capitalize">{mockIDCard.status}</p>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button onClick={handleRequestCard} variant="outline" size="sm">
+                    {/* Action Buttons - Mobile Vertical Stack */}
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button onClick={handleRequestCard} variant="outline" size="sm">
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Request New
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleOpenIDCardPreview}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Digital
+                        </Button>
+                      </div>
+                      <Button onClick={handleRenewCard} variant="default" className="w-full" size="sm">
                         <CreditCard className="h-4 w-4 mr-2" />
-                        Request New Card
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowIDCardPreview(true)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download Digital
+                        Renew ID Card
                       </Button>
                     </div>
 
@@ -283,7 +324,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                                 size="sm" 
                                 variant="outline"
                                 onClick={() => {
-                                  setSelectedLetterData({
+                                  handleOpenLetterPreview({
                                     templateTitle: template?.title || "",
                                     letterNumber: request.letterNumber!,
                                     requestedBy: request.requestedBy,
@@ -293,7 +334,6 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                                     signedBy: request.approvedBy || "Community Secretary",
                                     verificationCode: `VER-${request.letterNumber?.replace(/\//g, "-")}`,
                                   });
-                                  setShowLetterPreview(true);
                                 }}
                               >
                                 <Download className="h-3 w-3 mr-1" />
@@ -410,7 +450,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
       {/* ID Card Full Preview with Download */}
       <DigitalIDCardDisplay
         open={showIDCardPreview}
-        onOpenChange={setShowIDCardPreview}
+        onOpenChange={handleCloseIDCardPreview}
         cardData={{
           memberName: mockIDCard.memberName,
           memberId: mockIDCard.memberId,
@@ -427,7 +467,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
       {selectedLetterData && (
         <OfficialLetterDisplay
           open={showLetterPreview}
-          onOpenChange={setShowLetterPreview}
+          onOpenChange={handleCloseLetterPreview}
           letterData={selectedLetterData}
         />
       )}
