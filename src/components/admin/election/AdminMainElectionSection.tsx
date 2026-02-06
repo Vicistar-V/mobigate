@@ -18,6 +18,7 @@ import {
   Flag,
   ListChecks
 } from "lucide-react";
+import { ModuleAuthorizationDrawer } from "../authorization/ModuleAuthorizationDrawer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +101,10 @@ export function AdminMainElectionSection() {
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const [showAnnounceDialog, setShowAnnounceDialog] = useState(false);
   
+  // Authorization state for individual office announcements
+  const [showAuthDrawer, setShowAuthDrawer] = useState(false);
+  const [officeToAnnounce, setOfficeToAnnounce] = useState<MainElectionOffice | null>(null);
+  
   // Voters List Sheet state
   const [votersListOpen, setVotersListOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<{
@@ -141,6 +146,25 @@ export function AdminMainElectionSection() {
       description: "Election results have been published to all members",
     });
     setShowAnnounceDialog(false);
+  };
+
+  const handleAnnounceOfficeResult = (office: MainElectionOffice) => {
+    setOfficeToAnnounce(office);
+    setShowDetailSheet(false); // Close detail sheet to prevent modal stacking
+    setTimeout(() => {
+      setShowAuthDrawer(true);
+    }, 150); // Slight delay for smooth transition
+  };
+
+  const handleAuthComplete = () => {
+    if (officeToAnnounce) {
+      toast({
+        title: "Result Announced",
+        description: `Election result for ${officeToAnnounce.officeName} has been published`,
+      });
+    }
+    setOfficeToAnnounce(null);
+    setShowAuthDrawer(false);
   };
 
   const openOfficeDetail = (office: MainElectionOffice) => {
@@ -500,6 +524,7 @@ export function AdminMainElectionSection() {
                 {selectedOffice.status === 'completed' && (
                   <Button 
                     className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={() => handleAnnounceOfficeResult(selectedOffice)}
                   >
                     <Megaphone className="h-4 w-4 mr-2" />
                     Announce Result
@@ -549,6 +574,32 @@ export function AdminMainElectionSection() {
           isWinner={selectedCandidate.isWinner}
         />
       )}
+
+      {/* Office Result Authorization Drawer */}
+      <ModuleAuthorizationDrawer
+        open={showAuthDrawer}
+        onOpenChange={setShowAuthDrawer}
+        module="elections"
+        actionTitle="Announce Election Result"
+        actionDescription="Multi-signature authorization required to publish election result"
+        actionDetails={
+          officeToAnnounce && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Megaphone className="h-5 w-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-sm">{officeToAnnounce.officeName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Winner: {officeToAnnounce.winner || "To be announced"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
+        }
+        initiatorRole="secretary"
+        onAuthorized={handleAuthComplete}
+      />
     </div>
   );
 }
