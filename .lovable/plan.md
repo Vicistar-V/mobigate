@@ -1,38 +1,115 @@
 
 
-## Fix Inactive Buttons in Community Accounts
+## Make Advertisement Banner Clickable / Navigable
 
 ### Problem
 
-The "Debts Clearance Now" button (circled in the screenshot) does nothing meaningful when tapped -- it only shows a brief toast notification instead of opening an actual debt clearance flow. Similarly, the "Financial Status Report" button also just shows a toast.
-
-Both of these buttons have fully built components that should be wired to them but are not connected.
+The "Need an Architect for your Dream-Project? Click Here!" ad banner in the Community Accounts section is completely static -- tapping it does nothing. Since it's an advertisement, it should open/navigate to the advertiser's destination when tapped.
 
 ### Solution
 
-Wire the two inactive buttons to their existing components in `CommunityAccountsTab.tsx`:
+Make the entire ad banner card a clickable element that opens the advertiser's URL in a new browser tab when tapped. This applies to:
 
-**1. "Debts Clearance Now" button (line 203-208)**
-- Currently: `handleDebtsClearing()` shows a toast message
-- Fix: When checkbox is checked, open the `CheckIndebtednessSheet` (already imported and rendered in the file) which has the full debt clearance flow with itemized debts, penalty calculation, and "Clear Debt Now" payment processing
-- Update `handleDebtsClearing` to call `setShowIndebtednessSheet(true)` instead of `toast.success()`
+1. **The inline "Architect" ad banner** -- the small gradient card between the filter buttons and the Sort dropdown
+2. **The PremiumAdCard standard/compact layouts** -- make the entire card surface clickable (not just the CTA button), so users on mobile can tap anywhere on the ad to navigate
 
-**2. "Financial Status Report" button (line 184-188)**
-- Currently: Shows a toast "Generating financial status report..."
-- Fix: Open the `FinancialStatusDialog` component which shows financial standing, compliance rate, outstanding balance, and payment history
-- Add new state: `showStatusDialog`
-- Import `FinancialStatusDialog` from `./FinancialStatusDialog`
-- Render `<FinancialStatusDialog>` at the bottom of the component
+---
 
-### Technical Changes -- Single File
+### File Changes
 
-**File: `src/components/community/finance/CommunityAccountsTab.tsx`**
+#### 1. `src/components/community/finance/CommunityAccountsTab.tsx` (lines 139-147)
 
-- Add import: `FinancialStatusDialog` from `./FinancialStatusDialog`
-- Add state: `const [showStatusDialog, setShowStatusDialog] = useState(false)`
-- Update "Financial Status Report" button onClick: `() => setShowStatusDialog(true)`
-- Update `handleDebtsClearing`: replace `toast.success(...)` with `setShowIndebtednessSheet(true)`
-- Add `<FinancialStatusDialog open={showStatusDialog} onOpenChange={setShowStatusDialog} />` alongside the existing sheets at the bottom
+**Current:** The Card and Button have no onClick handler.
 
-Both target components (`CheckIndebtednessSheet` and `FinancialStatusDialog`) are already fully built with mobile-optimized layouts, payment flows, and proper drawer/dialog patterns.
+**Fix:** Wrap the Card in a clickable container or add `onClick` + `cursor-pointer` to the Card itself. When tapped, open a sample advertiser URL (`window.open("https://example.com/architect-services", "_blank")`). Add `role="link"` and `cursor-pointer` for accessibility and visual feedback.
+
+Replace:
+- Static `Card` with a clickable Card that has `onClick={() => window.open("https://example.com/architect-services", "_blank")}` and `className` updated to include `cursor-pointer active:scale-[0.98] transition-transform touch-manipulation`
+- The "Click Here!" Button also gets the same onClick so either tapping the card or the button works
+
+#### 2. `src/components/PremiumAdCard.tsx` -- Standard layout (line 261)
+
+**Current:** Only the CTA button at the bottom calls `handleCTA()` which opens `content.ctaUrl`.
+
+**Fix:** Make the Card's main content area (media + headline + description) clickable too:
+- Add `onClick={handleCTA}` and `cursor-pointer` to the media container div
+- This way tapping the ad image/headline area navigates, not just the small CTA button
+- Use `e.stopPropagation()` on the Close button, AlertCircle button, and EngagementBar to prevent them from triggering navigation
+
+#### 3. `src/components/PremiumAdCard.tsx` -- Compact layout (line 441)
+
+**Same treatment as standard:** Add `onClick={handleCTA}` and `cursor-pointer` to the main content wrapper div, with `e.stopPropagation()` on interactive child elements (close button, engagement bar).
+
+#### 4. `src/components/AdCard.tsx` (line 22)
+
+**Current:** The Card is non-interactive -- no navigation at all.
+
+**Fix:** Add an optional `url` prop to `AdCardProps` and wire `onClick={() => url && window.open(url, "_blank")}` with `cursor-pointer` on the Card. The EngagementBar and its child dialogs use `e.stopPropagation()` to avoid triggering navigation.
+
+---
+
+### Technical Details
+
+**CommunityAccountsTab inline ad banner:**
+```tsx
+<Card 
+  className="p-2.5 bg-gradient-to-r from-yellow-50 to-orange-50 border-orange-200 overflow-hidden cursor-pointer active:scale-[0.98] transition-transform touch-manipulation"
+  onClick={() => window.open("https://example.com/architect-services", "_blank")}
+>
+  <div className="flex items-center justify-between gap-2 text-xs">
+    <span className="min-w-0 truncate">Need an <strong>Architect</strong> for your Dream-Project?</span>
+    <span className="text-red-600 text-xs font-semibold shrink-0">Click Here!</span>
+  </div>
+</Card>
+```
+
+**PremiumAdCard -- standard layout media area:**
+```tsx
+{/* Clickable media + content area */}
+<div onClick={handleCTA} className="cursor-pointer">
+  {/* Media section */}
+  ...
+  {/* Headline + Description */}
+  ...
+</div>
+{/* Non-clickable footer (engagement bar, close) with stopPropagation */}
+```
+
+**PremiumAdCard -- compact layout:**
+```tsx
+<div onClick={handleCTA} className="cursor-pointer flex gap-3 items-start">
+  {/* Media Thumbnail */}
+  ...
+  {/* Title and Advertiser */}
+  ...
+</div>
+```
+
+**AdCard:**
+```tsx
+interface AdCardProps {
+  image?: string;
+  content?: string;
+  timeRemaining?: string;
+  url?: string;  // NEW
+}
+
+<Card 
+  className="p-4 col-span-3 bg-muted/30 space-y-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation"
+  onClick={() => url && window.open(url, "_blank")}
+>
+```
+
+### Summary
+
+| File | Change |
+|------|--------|
+| CommunityAccountsTab.tsx | Add onClick + cursor-pointer to inline ad Card |
+| PremiumAdCard.tsx | Make standard/compact layout media+content area clickable via handleCTA |
+| AdCard.tsx | Add optional `url` prop, wire onClick to Card |
+
+### Files Modified
+1. `src/components/community/finance/CommunityAccountsTab.tsx`
+2. `src/components/PremiumAdCard.tsx`
+3. `src/components/AdCard.tsx`
 
