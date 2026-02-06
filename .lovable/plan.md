@@ -1,124 +1,118 @@
 
 
-# Dedicated Quiz Wallet System
+# Swipeable Wallet Carousel in Financial Overview
 
-## Overview
+## What Changes
 
-The Community Quiz Games will receive a dedicated wallet, separate from the main Community Wallet. This wallet manages all quiz-related funds: player stake debits, winning payouts, and transfers to/from the main community wallet. If the Quiz Wallet has insufficient funds to cover potential winnings, all quiz games are disabled with the message: "Quiz Game Unavailable Right Now! Please try again later".
+The Financial Overview dialog currently shows a single "Community Main Wallet" balance card at the top. This update transforms that single card into a **horizontally swipeable carousel of two wallet cards**:
 
----
+1. **Slide 1 (default)**: Community Main Wallet -- uses the existing green/primary theme, showing total balance, last updated, income/expenses summary, and the Top Up / Transfer / Withdraw action buttons
+2. **Slide 2 (swipe left to reveal)**: Quiz Wallet -- uses a blue theme, showing total balance, available balance, reserved for payouts, and quiz-specific stats (stakes in, payouts, net position)
 
-## What Gets Built
-
-### 1. Enhanced Quiz Wallet Data Layer
-
-**File: `src/data/communityQuizData.ts`** (modify)
-
-- Expand `CommunityQuizWallet` interface with new fields:
-  - `incomeFromMainWallet` -- total transferred in from main wallet
-  - `transfersToMainWallet` -- total transferred out to main wallet
-  - `totalWinningPayouts` -- total paid to winners
-  - `totalStakeIncome` -- total received from player stakes
-  - `reservedForPayouts` -- funds currently earmarked for active quiz winnings
-  - `availableBalance` -- balance minus reserved amount
-  - `transactions` -- array of `QuizWalletTransaction` records
-- Add `QuizWalletTransaction` interface:
-  - `id`, `type` (stake_income | winning_payout | transfer_in | transfer_out), `amount`, `description`, `date`, `reference`, `relatedQuizId?`, `playerName?`
-- Update `communityQuizWalletData` mock with realistic transaction history
-- Refine `isCommunityQuizAvailable` to check if wallet balance can cover the quiz's `winningAmount` (for full 10/10 win), returning the exact message: "Quiz Game Unavailable Right Now! Please try again later"
-
-### 2. Quiz Wallet Management Dialog
-
-**File: `src/components/community/QuizWalletDrawer.tsx`** (new)
-
-A mobile-first Drawer component for managing the dedicated quiz wallet. Follows the existing `FinancialOverviewDialog` pattern:
-
-- **Header**: Blue-themed gradient header with "Quiz Wallet" title and wallet icon
-- **Balance Card**: Large balance display in dual currency (Local-First Protocol)
-  - Total Balance, Available Balance (minus reserved), Reserved for Payouts
-- **Quick Stats Grid** (3-column):
-  - Total Stakes In | Total Payouts | Net Position
-- **Transfer Actions** (2 buttons):
-  - "Fund from Main Wallet" -- opens a simple transfer-in flow (amount input, confirm)
-  - "Transfer to Main Wallet" -- opens a transfer-out flow (amount input, confirm)
-- **Transaction History**: Scrollable list of all quiz wallet transactions with type icons, amounts (dual currency), dates, and descriptions
-  - Stake income: green arrow-down icon
-  - Winning payouts: red arrow-up icon
-  - Transfer in: blue arrow-down icon
-  - Transfer out: orange arrow-up icon
-- **Availability Status Banner**: At the bottom, shows whether the wallet has sufficient funds for active quizzes. If insufficient, displays a prominent amber warning.
-
-### 3. Updated Community Quiz Dialog
-
-**File: `src/components/community/CommunityQuizDialog.tsx`** (modify)
-
-- Replace the existing "Your Wallet" card in the Quizzes tab with two cards:
-  1. **Your Player Wallet** (personal balance, same as now)
-  2. **Quiz Wallet Status** (dedicated quiz wallet balance + availability indicator)
-- Add a "Manage Quiz Wallet" button (admin/owner only) that opens the `QuizWalletDrawer`
-- When `isCommunityQuizAvailable` returns false due to insufficient quiz wallet funds:
-  - Show a full-width amber alert banner: "Quiz Game Unavailable Right Now! Please try again later"
-  - Disable all "Play Now" buttons on quiz cards
-  - Replace button text with "Currently Unavailable"
-
-### 4. Updated Quiz Gameplay Dialog
-
-**File: `src/components/community/CommunityQuizPlayDialog.tsx`** (modify)
-
-- Update `startGame` toast message to clarify the stake is deducted from player's wallet and deposited into the Quiz Wallet
-- Update `handleGameCompleteClick` to clarify winnings are paid from the Quiz Wallet
-- Add a small info line in the pre-game screen: "Stakes go to Quiz Wallet. Winnings paid from Quiz Wallet."
-
-### 5. Menu Integration
-
-**File: `src/components/community/CommunityMainMenu.tsx`** (modify)
-
-- In the "Quiz Game" accordion section, add a new admin-only button:
-  ```
-  Manage Quiz Wallet (Admin)
-  ```
-  with the Settings icon, text-primary styling, same pattern as other admin actions
+Each wallet displays its own dedicated information, actions, and parameters. The user swipes left to reveal the Quiz Wallet, or swipes right to go back to the Main Wallet. Dot indicators below the carousel show which wallet is active.
 
 ---
 
-## Technical Details
+## File to Modify
 
-### Quiz Wallet Transaction Types
+| File | Action |
+|------|--------|
+| `src/components/community/finance/FinancialOverviewDialog.tsx` | Major modify -- add swipeable wallet carousel |
 
+No new files or dependencies needed. The project already has `react-swipeable` installed and the pattern is proven in `PremiumAdCarousel.tsx`.
+
+---
+
+## Implementation Details
+
+### Carousel Mechanics (using `useSwipeable`)
+
+Following the existing `PremiumAdCarousel.tsx` pattern:
+- `useSwipeable` hook with `onSwipedLeft` / `onSwipedRight` to toggle between wallet index 0 and 1
+- `translateX` CSS transform with `transition-transform duration-300 ease-out` for smooth sliding
+- `overflow-hidden` container so only one card shows at a time
+- Dot indicators (2 dots) below the carousel to show active wallet
+- A visible right-edge "peek" of the next card (about 8% visible as a blue strip, matching the screenshot) to hint swipeability
+
+### Slide 1: Community Main Wallet
+
+Keeps the existing balance card layout but styled distinctly:
+- Green gradient background (`bg-gradient-to-br from-primary/10 via-primary/5`)
+- Shows: "Total Balance" label, large Naira amount, Mobi equivalent, wallet icon, last updated timestamp
+- Below the carousel: the existing Top Up / Transfer / Withdraw buttons + Income/Expenses monthly summary + Recent Transactions -- these remain static (not swiped) and always visible
+
+### Slide 2: Quiz Wallet
+
+Blue-themed card with dedicated Quiz Wallet information:
+- Blue gradient background (`bg-gradient-to-br from-blue-50 to-blue-100`)
+- Shows: "Quiz Wallet" label with Shield icon, total balance (large), Mobi equivalent, last updated timestamp
+- Below the main balance: Available vs Reserved split (2-column grid)
+- Quick stats row: Stakes In | Payouts | Net Position
+- Availability status indicator (green checkmark or amber warning)
+- "Manage Quiz Wallet" button (for admins) linking to the existing `QuizWalletDrawer`
+
+### Below-Carousel Content (always visible, not swiped)
+
+The content below the wallet carousel changes based on which wallet is active:
+
+**When Main Wallet is active (index 0):**
+- Quick Actions grid (Top Up, Transfer, Withdraw)
+- Monthly Income/Expenses summary cards
+- Recent Transactions list
+
+**When Quiz Wallet is active (index 1):**
+- Quick Stats grid (Stakes In, Payouts, Net Position)
+- Transfer Actions (Fund from Main, Transfer to Main)
+- Quiz Wallet Transaction History
+- Availability Banner
+
+This ensures each wallet displays "its own very information and parameters."
+
+### Dot Indicators
+
+Two dots centered below the carousel:
+- Active dot: wider pill shape (w-6 h-1.5), primary color for Main Wallet or blue-600 for Quiz Wallet
+- Inactive dot: small circle (w-1.5 h-1.5), muted color
+- Tappable to switch wallets directly
+
+### Visual "Peek" Hint
+
+The carousel items use `basis-[92%]` so that 8% of the next card peeks through on the right edge, providing a visual cue that there is more content to swipe to. This matches the blue strip visible in the screenshot.
+
+---
+
+## Technical Approach
+
+### State Management
 ```text
-QuizWalletTransaction {
-  id: string
-  type: 'stake_income' | 'winning_payout' | 'transfer_in' | 'transfer_out'
-  amount: number
-  description: string
-  date: Date
-  reference: string
-  relatedQuizId?: string
-  playerName?: string
-}
+walletIndex: number (0 = Main, 1 = Quiz)
 ```
 
-### Availability Logic (refined)
+### Swipe Handler
+```text
+useSwipeable({
+  onSwipedLeft: () => setWalletIndex(1)
+  onSwipedRight: () => setWalletIndex(0)
+  preventScrollOnSwipe: true
+  delta: 50
+})
+```
 
-The current check uses `quiz.winningAmount * 10` as a buffer. The new logic:
-- For each active quiz, the required reserve = `quiz.winningAmount` (enough to pay one full winner)
-- Total required reserve = sum of all active quizzes' `winningAmount`
-- If `quizWallet.balance < totalRequiredReserve`, mark all games as unavailable
-- Message: "Quiz Game Unavailable Right Now! Please try again later"
+### Props Update
+The component will need `isAdmin` and `isOwner` props added to control the "Manage Quiz Wallet" button visibility on the Quiz Wallet slide.
 
-### Dual Currency Display
+### Data Imports
+Add imports from `communityQuizData.ts` for the quiz wallet data, and from `mobiCurrencyTranslation.ts` for formatting utilities.
 
-All amounts follow the Local-First Dual Currency Protocol:
-- Primary: Nigerian Naira with full formatting (e.g., "N150,000.00")
-- Secondary: Mobi equivalent in parentheses (e.g., "(M150,000)")
+---
 
-### Files Summary
+## Mobile-First Focus
 
-| File | Action | Description |
-|------|--------|-------------|
-| `src/data/communityQuizData.ts` | Modify | Expand wallet interface, add transactions, refine availability check |
-| `src/components/community/QuizWalletDrawer.tsx` | New | Dedicated quiz wallet management drawer |
-| `src/components/community/CommunityQuizDialog.tsx` | Modify | Add quiz wallet status card, availability banner, admin button |
-| `src/components/community/CommunityQuizPlayDialog.tsx` | Modify | Clarify stake/payout flow references to Quiz Wallet |
-| `src/components/community/CommunityMainMenu.tsx` | Modify | Add "Manage Quiz Wallet" admin menu item |
+- Full-width swipeable cards optimized for thumb gestures
+- Touch-friendly 50px swipe delta
+- Smooth CSS transitions (300ms ease-out)
+- Large, readable balance amounts
+- Dot indicators with generous tap targets
+- The "peek" strip provides intuitive discoverability without needing instructions
+- All content below adapts to the selected wallet, keeping the viewport uncluttered
 
