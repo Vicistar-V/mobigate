@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DigitalIDCardDisplay, IDCardData } from "@/components/community/resources/DigitalIDCardDisplay";
 import { OfficialLetterDisplay, LetterData } from "@/components/community/resources/OfficialLetterDisplay";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 
 interface CommunityResourcesDialogProps {
   open: boolean;
@@ -28,6 +29,9 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
   const [showIDCardPreview, setShowIDCardPreview] = useState(false);
   const [showLetterPreview, setShowLetterPreview] = useState(false);
   const [selectedLetterData, setSelectedLetterData] = useState<LetterData | null>(null);
+  const [showPubDownload, setShowPubDownload] = useState(false);
+  const [selectedPubForDownload, setSelectedPubForDownload] = useState<{ title: string; fileSize: string } | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleRequestCard = () => {
     toast({
@@ -86,11 +90,30 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
     setLetterPurpose("");
   };
 
-  const handleDownloadPublication = (title: string) => {
-    toast({
-      title: "Downloading Publication",
-      description: `${title} will be downloaded`,
-    });
+  const handleDownloadPublication = (pub: { title: string; fileSize: string }) => {
+    setSelectedPubForDownload(pub);
+    onOpenChange(false);
+    setTimeout(() => setShowPubDownload(true), 150);
+  };
+
+  const handlePubDownloadConfirm = (format: DownloadFormat) => {
+    setIsDownloading(true);
+    setTimeout(() => {
+      setIsDownloading(false);
+      setShowPubDownload(false);
+      toast({
+        title: "Download Complete",
+        description: `${selectedPubForDownload?.title} downloaded as ${format.toUpperCase()}`,
+      });
+      setTimeout(() => onOpenChange(true), 150);
+    }, 1500);
+  };
+
+  const handleClosePubDownload = (open: boolean) => {
+    setShowPubDownload(open);
+    if (!open) {
+      setTimeout(() => onOpenChange(true), 150);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -387,7 +410,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                                     <p>{pub.pages} pages • {pub.fileSize}</p>
                                   </div>
                                   <Button
-                                    onClick={() => handleDownloadPublication(pub.title)}
+                                    onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
                                     size="sm"
                                     className="shrink-0"
                                   >
@@ -420,7 +443,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                               <div className="flex items-center justify-between">
                                 <span className="text-xs text-muted-foreground">{pub.fileSize}</span>
                                 <Button
-                                  onClick={() => handleDownloadPublication(pub.title)}
+                                  onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
                                   size="sm"
                                   variant="ghost"
                                 >
@@ -469,6 +492,19 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
           open={showLetterPreview}
           onOpenChange={handleCloseLetterPreview}
           letterData={selectedLetterData}
+        />
+      )}
+
+      {/* Publication Download Format Sheet */}
+      {selectedPubForDownload && (
+        <DownloadFormatSheet
+          open={showPubDownload}
+          onOpenChange={handleClosePubDownload}
+          onDownload={handlePubDownloadConfirm}
+          title="Download Publication"
+          documentName={selectedPubForDownload.title}
+          availableFormats={["pdf", "jpeg", "png"]}
+          isDownloading={isDownloading}
         />
       )}
     </>
