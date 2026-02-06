@@ -159,11 +159,12 @@ export function AdminClearancesTab() {
                   </Avatar>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-base truncate leading-tight">{request.candidateName}</h4>
-                        <p className="text-sm text-primary">{request.office}</p>
-                      </div>
+                    {/* Name on its own line - full width, no truncation */}
+                    <h4 className="font-semibold text-base leading-tight">{request.candidateName}</h4>
+                    
+                    {/* Office + Badge on same line */}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-sm text-primary">{request.office}</p>
                       <Badge className={`text-xs shrink-0 capitalize whitespace-nowrap ${getStatusColor(request.status)}`}>
                         {request.status.replace('_', ' ')}
                       </Badge>
