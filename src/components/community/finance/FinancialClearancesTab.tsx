@@ -121,34 +121,40 @@ export const FinancialClearancesTab = () => {
         >
           Check Total Indebtedness
         </Button>
-        <div className="flex items-center gap-2.5">
-          <Checkbox 
-            id="debts-clearances"
-            checked={debtsChecked}
-            onCheckedChange={(checked) => setDebtsChecked(checked as boolean)}
-            className="shrink-0"
-          />
-          <Button 
-            className="bg-green-600 hover:bg-green-700 flex-1 font-bold py-4 text-sm min-w-0 touch-manipulation active:scale-[0.97] transition-transform"
-            onClick={handleDebtsClearing}
-          >
-            Debts Clearance Now
-          </Button>
+        <div>
+          <div className="flex items-center gap-2.5">
+            <Checkbox 
+              id="debts-clearances"
+              checked={debtsChecked}
+              onCheckedChange={(checked) => setDebtsChecked(checked as boolean)}
+              className="shrink-0"
+            />
+            <Button 
+              className="bg-green-600 hover:bg-green-700 flex-1 font-bold py-4 text-sm min-w-0 touch-manipulation active:scale-[0.97] transition-transform"
+              onClick={handleDebtsClearing}
+            >
+              Debts Clearance Now
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground pl-7 mt-1">Tick the box first, then tap the button</p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <Checkbox 
-            id="receipts-clearances"
-            checked={receiptsChecked}
-            onCheckedChange={(checked) => setReceiptsChecked(checked as boolean)}
-            className="shrink-0"
-          />
-          <Button 
-            className="bg-blue-600 hover:bg-blue-700 flex-1 font-bold py-4 text-sm min-w-0 touch-manipulation active:scale-[0.97] transition-transform"
-            onClick={handleDownloadReceipts}
-          >
-            <Download className="w-4 h-4 mr-1.5 shrink-0" />
-            Download Receipts
-          </Button>
+        <div>
+          <div className="flex items-center gap-2.5">
+            <Checkbox 
+              id="receipts-clearances"
+              checked={receiptsChecked}
+              onCheckedChange={(checked) => setReceiptsChecked(checked as boolean)}
+              className="shrink-0"
+            />
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 flex-1 font-bold py-4 text-sm min-w-0 touch-manipulation active:scale-[0.97] transition-transform"
+              onClick={handleDownloadReceipts}
+            >
+              <Download className="w-4 h-4 mr-1.5 shrink-0" />
+              Download Receipts
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground pl-7 mt-1">Tick the box first, then tap the button</p>
         </div>
       </div>
 

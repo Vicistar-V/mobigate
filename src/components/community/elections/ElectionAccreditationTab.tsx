@@ -145,43 +145,49 @@ export const ElectionAccreditationTab = ({
           {/* Financial Action Buttons */}
           <div className="flex flex-col gap-3">
             <Button 
-              className="bg-red-600 hover:bg-red-700 font-bold py-6"
+              className="bg-red-600 hover:bg-red-700 font-bold py-6 touch-manipulation active:scale-[0.97] transition-transform"
               onClick={() => setShowIndebtednessSheet(true)}
             >
               Check Total Indebtedness
             </Button>
             
-            <div className="flex items-center gap-3">
-              <Checkbox 
-                id="debts" 
-                checked={debtsChecked}
-                onCheckedChange={(checked) => setDebtsChecked(checked as boolean)}
-              />
-              <Button 
-                className="bg-yellow-400 text-black hover:bg-yellow-500 flex-1 font-bold py-6"
-                onClick={handleDebtsClearing}
-              >
-                Debts Clearance Now
-              </Button>
+            <div>
+              <div className="flex items-center gap-3">
+                <Checkbox 
+                  id="debts" 
+                  checked={debtsChecked}
+                  onCheckedChange={(checked) => setDebtsChecked(checked as boolean)}
+                />
+                <Button 
+                  className="bg-yellow-400 text-black hover:bg-yellow-500 flex-1 font-bold py-6 touch-manipulation active:scale-[0.97] transition-transform"
+                  onClick={handleDebtsClearing}
+                >
+                  Debts Clearance Now
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground pl-7 mt-1">Tick the box first, then tap the button</p>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Checkbox 
-                id="receipts"
-                checked={receiptsChecked}
-                onCheckedChange={(checked) => setReceiptsChecked(checked as boolean)}
-              />
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700 flex-1 font-bold py-6"
-                onClick={handleDownloadReceipts}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download Receipts
-              </Button>
+            <div>
+              <div className="flex items-center gap-3">
+                <Checkbox 
+                  id="receipts"
+                  checked={receiptsChecked}
+                  onCheckedChange={(checked) => setReceiptsChecked(checked as boolean)}
+                />
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 flex-1 font-bold py-6 touch-manipulation active:scale-[0.97] transition-transform"
+                  onClick={handleDownloadReceipts}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Receipts
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground pl-7 mt-1">Tick the box first, then tap the button</p>
             </div>
             
             <Button 
-              className="bg-yellow-400 text-black hover:bg-yellow-500 font-bold py-6"
+              className="bg-yellow-400 text-black hover:bg-yellow-500 font-bold py-6 touch-manipulation active:scale-[0.97] transition-transform"
               onClick={() => setShowFinancialStatusDialog(true)}
             >
               Financial Status Report
