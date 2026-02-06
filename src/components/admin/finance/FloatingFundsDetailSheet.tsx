@@ -442,7 +442,7 @@ export const FloatingFundsDetailSheet = ({
             <DrawerTitle>{sourceLabel} Details</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
+            {Content()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -456,7 +456,7 @@ export const FloatingFundsDetailSheet = ({
           <DialogTitle>{sourceLabel} Details</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <Content />
+          {Content()}
         </ScrollArea>
       </DialogContent>
     </Dialog>
@@ -600,7 +600,7 @@ const FloatingFundDetailModal = ({
             <DrawerTitle>Floating Fund Details</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <DetailContent />
+            {DetailContent()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -614,7 +614,7 @@ const FloatingFundDetailModal = ({
           <DialogTitle>Floating Fund Details</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <DetailContent />
+          {DetailContent()}
         </ScrollArea>
       </DialogContent>
     </Dialog>

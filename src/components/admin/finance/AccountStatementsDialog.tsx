@@ -484,7 +484,7 @@ ${index + 1}. ${txn.description}
               <DrawerTitle>Account Statements</DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 overflow-y-auto touch-auto overscroll-contain p-4">
-              <Content />
+              {Content()}
             </div>
           </DrawerContent>
         </Drawer>
@@ -495,7 +495,7 @@ ${index + 1}. ${txn.description}
               <DialogTitle>Account Statements</DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto p-4">
-              <Content />
+              {Content()}
             </div>
           </DialogContent>
         </Dialog>

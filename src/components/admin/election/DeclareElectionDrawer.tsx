@@ -667,8 +667,8 @@ export function DeclareElectionDrawer({
                 {getStepTitle()}
               </DrawerTitle>
             </DrawerHeader>
-            <DrawerBodyContent />
-            <FooterContent />
+            {DrawerBodyContent()}
+            {FooterContent()}
           </DrawerContent>
         </Drawer>
 
@@ -714,9 +714,9 @@ export function DeclareElectionDrawer({
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-hidden">
-            <DrawerBodyContent />
+            {DrawerBodyContent()}
           </div>
-          <FooterContent />
+          {FooterContent()}
         </DialogContent>
       </Dialog>
 
