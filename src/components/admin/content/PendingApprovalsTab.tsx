@@ -55,6 +55,17 @@ export function PendingApprovalsTab({
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<ContentType | "all">("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [actionedItems, setActionedItems] = useState<Record<string, 'approved' | 'rejected'>>({});
+
+  const handleLocalApprove = (id: string) => {
+    setActionedItems(prev => ({ ...prev, [id]: 'approved' }));
+    setTimeout(() => onApprove(id), 1200);
+  };
+
+  const handleLocalReject = (id: string) => {
+    setActionedItems(prev => ({ ...prev, [id]: 'rejected' }));
+    setTimeout(() => onReject(id), 1200);
+  };
 
   const filtered = pendingItems.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase());
@@ -273,22 +284,34 @@ export function PendingApprovalsTab({
 
                   {/* Actions Row */}
                   <div className="flex gap-2 mt-3">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-9 text-sm gap-1.5 text-green-600 flex-1"
-                      onClick={() => onApprove(item.id)}
-                    >
-                      <Check className="h-4 w-4" /> Approve
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-9 text-sm gap-1.5 text-red-600 flex-1"
-                      onClick={() => onReject(item.id)}
-                    >
-                      <X className="h-4 w-4" /> Reject
-                    </Button>
+                    {actionedItems[item.id] === 'approved' ? (
+                      <Button size="sm" variant="outline" className="h-9 text-sm gap-1.5 text-green-600 bg-green-50 border-green-200 flex-1" disabled>
+                        <Check className="h-4 w-4" /> Approved
+                      </Button>
+                    ) : actionedItems[item.id] === 'rejected' ? (
+                      <Button size="sm" variant="outline" className="h-9 text-sm gap-1.5 text-red-600 bg-red-50 border-red-200 flex-1" disabled>
+                        <X className="h-4 w-4" /> Rejected
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-9 text-sm gap-1.5 text-green-600 flex-1"
+                          onClick={() => handleLocalApprove(item.id)}
+                        >
+                          <Check className="h-4 w-4" /> Approve
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-9 text-sm gap-1.5 text-red-600 flex-1"
+                          onClick={() => handleLocalReject(item.id)}
+                        >
+                          <X className="h-4 w-4" /> Reject
+                        </Button>
+                      </>
+                    )}
                     <Button 
                       size="sm" 
                       variant="ghost" 

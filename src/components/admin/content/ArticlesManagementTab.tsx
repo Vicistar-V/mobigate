@@ -262,6 +262,16 @@ export function ArticlesManagementTab({
 
                   {/* Actions */}
                   <div className="flex gap-1 mt-3">
+                    {item.status === 'published' && (
+                      <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 text-green-600 bg-green-50 border-green-200" disabled>
+                        <Check className="h-3 w-3" /> Approved
+                      </Button>
+                    )}
+                    {item.status === 'rejected' && (
+                      <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 text-red-600 bg-red-50 border-red-200" disabled>
+                        <X className="h-3 w-3" /> Rejected
+                      </Button>
+                    )}
                     {item.status === 'pending' && (
                       <>
                         <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1 text-green-600" onClick={() => onApprove(item.id)}>
