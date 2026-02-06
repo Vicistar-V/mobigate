@@ -1,57 +1,80 @@
 
+# Fix Inactive Buttons on Mobile -- Financial Action Buttons
 
-# Mobile Optimization: Financial Accreditation Member Cards
+## The Problem
 
-## Problems Identified
+Four action buttons across the financial pages ("Financial Status Report", "Check Total Indebtedness", "Debts Clearance Now", "Download Receipts") feel inactive and unresponsive on mobile because:
 
-From the screenshot on a ~360px mobile screen:
+1. **Missing touch-manipulation CSS** -- Without this, mobile browsers apply a 300ms tap delay making buttons feel dead
+2. **No active-state feedback** -- No visual scale-down on press, so users can't tell if their tap registered
+3. **Hidden checkbox requirement** -- "Debts Clearance Now" and "Download Receipts" require a small checkbox to be ticked first. On mobile, this tiny checkbox is easily missed, so when users tap the button nothing visible happens (toast error appears briefly but can be missed)
 
-1. **Right margin clipping**: The "View Details" buttons are cut off on the right edge. This is caused by cumulative padding: main container (8px) + Card wrapper (12px) + member item (12px) = 32px per side, leaving only ~296px for actual content
-2. **Buttons appear inactive**: The yellow "View Details" button on the yellow member card background has poor contrast, making it look disabled/inactive
-3. **Horizontal cramming**: Row 2 tries to fit status badge + cleared count + "View Details" button all in one row, which overflows
+## The Fix
 
-## Solution
-
-Restructure the member cards in `FinancialAccreditationTab.tsx` with a fully restacked vertical layout optimized for narrow mobile screens.
+Add `touch-manipulation active:scale-[0.97] transition-transform` to all action buttons in affected files, and make the checkbox requirement more obvious with inline helper text.
 
 ---
 
-## File to Modify
+## Files to Modify
+
+### 1. CommunityAccountsTab.tsx (lines 186-228)
+
+All four buttons get `touch-manipulation active:scale-[0.97] transition-transform` added to their className. This matches the pattern already used in FinancialClearancesTab.
+
+Additionally, add small helper text below each checkbox row: "Tick the box first, then tap the button" in `text-[10px] text-muted-foreground` to make the checkbox requirement obvious on mobile.
+
+**Buttons affected:**
+- "Financial Status Report" (line 188) -- add touch classes
+- "Check Total Indebtedness" (line 194) -- add touch classes
+- "Debts Clearance Now" (line 207) -- add touch classes + helper text
+- "Download Receipts" (line 221) -- add touch classes + helper text
+
+### 2. ElectionAccreditationTab.tsx (lines 146-189)
+
+Same treatment -- add `touch-manipulation active:scale-[0.97] transition-transform` to all four action buttons. Add checkbox helper text to the two checkbox-gated buttons.
+
+**Buttons affected:**
+- "Check Total Indebtedness" (line 148) -- add touch classes
+- "Debts Clearance Now" (line 161) -- add touch classes + helper text
+- "Download Receipts" (line 175) -- add touch classes + helper text
+- "Financial Status Report" (line 184) -- add touch classes
+
+### 3. FinancialClearancesTab.tsx (lines 111-153)
+
+Already has `touch-manipulation` -- only add the checkbox helper text for consistency.
+
+---
+
+## Technical Details
+
+### Touch Classes Added
+
+```
+touch-manipulation active:scale-[0.97] transition-transform
+```
+
+- `touch-manipulation` -- Removes the 300ms tap delay on mobile browsers by telling the browser this element only needs pan/pinch gestures
+- `active:scale-[0.97]` -- Provides instant visual feedback (slight shrink) on press so users know their tap registered
+- `transition-transform` -- Smooths the scale animation
+
+### Checkbox Helper Text
+
+Below each checkbox + button row, a small text note:
+
+```tsx
+<p className="text-[10px] text-muted-foreground pl-7 -mt-1">
+  Tick the box first, then tap the button
+</p>
+```
+
+The `pl-7` aligns the text with the button (past the checkbox), and `-mt-1` keeps it compact.
+
+---
+
+## Summary
 
 | File | What Changes |
 |------|-------------|
-| `src/components/community/finance/FinancialAccreditationTab.tsx` | Restructure member cards for mobile |
-
----
-
-## Changes in Detail
-
-### Member Card Restructure (lines 70-133)
-
-**Current layout** (horizontal, causes clipping):
-```text
-Row 1: [Avatar] [Name + Registration]
-Row 2: [Badge] [X/Y cleared]  ......  [View Details]  <-- clips here
-```
-
-**New layout** (vertical, mobile-safe):
-```text
-Row 1: [Avatar] [Name]
-                [Registration]
-Row 2: [Badge "Pending"]  [6/7 items cleared]
-Row 3: [====== View Details (full-width button) ======]
-```
-
-Specific changes:
-
-1. **Reduce card padding**: From `p-3` to `p-2.5` to reclaim horizontal space
-2. **Reduce card parent padding**: From `p-3` to `p-2` on the wrapping Card
-3. **Row 2 becomes status-only**: Remove the button from the badge row. Show badge and cleared count text, no button competing for space
-4. **Row 3 is a full-width button**: "View Details" becomes its own full-width row at the bottom of the card. This eliminates any possibility of right-edge clipping
-5. **Fix button contrast**: 
-   - Pending cards: Use a dark foreground button (e.g., `bg-amber-700 text-white`) instead of yellow-on-yellow
-   - Accredited cards: Use a green outline button with visible border
-6. **Reduce gap between rows**: From `space-y-2.5` to `space-y-2` for compactness
-7. **Text sizes**: Ensure all text meets the minimum `text-xs` (12px) standard per project typography rules
-
-This restacking pattern follows the existing `mobile-list-item-restacking` convention used in Member Requests, Content entries, and Candidate Clearance cards.
+| `src/components/community/finance/CommunityAccountsTab.tsx` | Add touch-manipulation + active feedback to 4 buttons; add checkbox helper text |
+| `src/components/community/elections/ElectionAccreditationTab.tsx` | Add touch-manipulation + active feedback to 4 buttons; add checkbox helper text |
+| `src/components/community/finance/FinancialClearancesTab.tsx` | Add checkbox helper text for consistency |
