@@ -51,6 +51,8 @@ import {
 import { MainElection, MainElectionOffice, MainElectionPhase } from "@/types/electionProcesses";
 import { cn } from "@/lib/utils";
 import { CandidateVotersListSheet } from "./CandidateVotersListSheet";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 const getPhaseStatusColor = (status: MainElectionPhase['status']) => {
   switch (status) {
@@ -116,11 +118,28 @@ export function AdminMainElectionSection() {
     officeName: string;
   } | null>(null);
 
+  // Member Preview state
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+
   const openVotersList = (candidate: typeof selectedCandidate, officeName: string) => {
     if (candidate) {
       setSelectedCandidate({ ...candidate, officeName });
       setVotersListOpen(true);
     }
+  };
+
+  const handleCandidateClick = (candidate: { id: string; name: string; avatar?: string }) => {
+    setSelectedMember({
+      id: candidate.id,
+      name: candidate.name,
+      position: "Community Member",
+      tenure: "",
+      imageUrl: candidate.avatar || "/placeholder.svg",
+      level: "officer",
+      committee: "executive",
+    });
+    setShowMemberPreview(true);
   };
 
   const stats = getMainElectionStats();
@@ -445,7 +464,13 @@ export function AdminMainElectionSection() {
                               : "bg-muted/30 border-transparent"
                           )}
                         >
-                          <div className="flex items-center gap-3 mb-2">
+                          <div 
+                            className="flex items-center gap-3 mb-2 cursor-pointer active:opacity-70 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCandidateClick(candidate);
+                            }}
+                          >
                             <span className="text-sm font-bold text-muted-foreground w-5">
                               {idx + 1}.
                             </span>
@@ -574,6 +599,13 @@ export function AdminMainElectionSection() {
           isWinner={selectedCandidate.isWinner}
         />
       )}
+
+      {/* Member Preview Dialog */}
+      <MemberPreviewDialog
+        member={selectedMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
+      />
 
       {/* Office Result Authorization Drawer */}
       <ModuleAuthorizationDrawer

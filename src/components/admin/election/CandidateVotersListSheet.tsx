@@ -17,6 +17,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
@@ -114,16 +115,19 @@ export function CandidateVotersListSheet({
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
+  const [filterMode, setFilterMode] = useState<"all" | "remarks_only">("all");
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const [showMemberPreview, setShowMemberPreview] = useState(false);
 
   // Generate mock voters
   const voters = generateMockVoters(candidateId, voteCount);
   
-  const filteredVoters = voters.filter(voter =>
-    voter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    voter.accreditationNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredVoters = voters.filter(voter => {
+    const matchesSearch = voter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      voter.accreditationNumber.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterMode === "all" || voter.remarks;
+    return matchesSearch && matchesFilter;
+  });
 
   const displayedVoters = filteredVoters.slice(0, displayCount);
   const hasMore = filteredVoters.length > displayCount;
@@ -131,6 +135,12 @@ export function CandidateVotersListSheet({
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
+    setDisplayCount(PAGE_SIZE);
+  };
+
+  const handleFilterChange = (mode: "all" | "remarks_only") => {
+    setFilterMode(mode);
+    setSearchQuery("");
     setDisplayCount(PAGE_SIZE);
   };
 
@@ -177,14 +187,30 @@ export function CandidateVotersListSheet({
           </div>
           
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <div className="text-center p-2 bg-background rounded-lg">
+            <button 
+              className={cn(
+                "text-center p-2 bg-background rounded-lg transition-all",
+                filterMode === "all" 
+                  ? "ring-2 ring-primary/30" 
+                  : "active:bg-primary/10"
+              )}
+              onClick={() => handleFilterChange("all")}
+            >
               <p className="text-xl font-bold text-primary">{voteCount}</p>
               <p className="text-xs text-muted-foreground">Total Votes</p>
-            </div>
-            <div className="text-center p-2 bg-background rounded-lg">
+            </button>
+            <button 
+              className={cn(
+                "text-center p-2 bg-background rounded-lg transition-all",
+                filterMode === "remarks_only" 
+                  ? "ring-2 ring-orange-500/30" 
+                  : "active:bg-orange-500/10"
+              )}
+              onClick={() => handleFilterChange("remarks_only")}
+            >
               <p className="text-xl font-bold text-orange-500">{remarksCount}</p>
               <p className="text-xs text-muted-foreground">With Remarks</p>
-            </div>
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -207,9 +233,20 @@ export function CandidateVotersListSheet({
             <Users className="h-4 w-4 text-primary" />
             Voters List
           </h3>
-          <Badge variant="secondary" className="text-xs">
-            {displayedVoters.length} of {voteCount}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            {filterMode === "remarks_only" && (
+              <Badge 
+                variant="secondary" 
+                className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 cursor-pointer"
+                onClick={() => handleFilterChange("all")}
+              >
+                Remarks only ✕
+              </Badge>
+            )}
+            <Badge variant="secondary" className="text-xs">
+              {displayedVoters.length} of {filteredVoters.length}
+            </Badge>
+          </div>
         </div>
 
         <p className="text-xs text-muted-foreground">
