@@ -1,217 +1,121 @@
 
-## Add "Verify Certificate" Button
 
-### Overview
-Implement a certificate verification feature allowing anyone to verify a Certificate of Return by entering its verification code. This will be accessible from both the Admin area (Certificate Generator) and public dashboards (Elections/Voting section).
+## Fix "Schedule New Primary" Button Not Working
+
+### Problem Identified
+The "Schedule New Primary" button in `AdminPrimaryElectionsSection.tsx` (line 149) is completely inactive because it has **no `onClick` handler**:
+
+```tsx
+<Button className="w-full bg-green-600 hover:bg-green-700 gap-2">
+  <Plus className="h-4 w-4" />
+  Schedule New Primary
+</Button>
+```
+
+---
+
+## Solution
+
+Create a new mobile-first `SchedulePrimaryDrawer` component and connect it to the button.
 
 ---
 
 ## Implementation Details
 
-### 1. Create New Component: `VerifyCertificateDrawer.tsx`
+### 1. Create New Component: `SchedulePrimaryDrawer.tsx`
 
-**Location:** `src/components/community/elections/VerifyCertificateDrawer.tsx`
+**Location:** `src/components/admin/election/SchedulePrimaryDrawer.tsx`
 
-A mobile-first bottom drawer that allows users to verify certificates by entering a verification code.
+A mobile-optimized bottom drawer (92vh) for scheduling new primary elections.
 
-**Key Features:**
-- Input field for 8-character verification code
-- "Verify Now" button to trigger verification
-- Loading state during verification
-- Success state showing certificate summary
-- Error state for invalid codes
-- Button to view full certificate on success
-- Touch-optimized inputs with mobile focus protection
+**Form Fields:**
+- **Office Selection** - Dropdown of offices requiring a primary
+- **Scheduled Date** - Date picker for primary election day
+- **Start Time** - Time input (e.g., 09:00)
+- **End Time** - Time input (e.g., 17:00)
+- **Advancement Rules** (display-only)
+  - Auto-qualify threshold: 25%
+  - Maximum advancing: 4
+  - Minimum advancing: 2
 
-**UI Layout:**
+**UI Layout (Mobile):**
 ```text
 +---------------------------------------+
-| [ShieldCheck] Verify Certificate   X  |
+| [<] Schedule Primary Election         |
 +---------------------------------------+
+| Select Office *                       |
+| [  Secretary General       v  ]       |
 |                                       |
-| [Award Icon]                          |
-| Certificate Verification              |
-| Enter the verification code from a    |
-| Certificate of Return to verify its   |
-| authenticity.                         |
+| Scheduled Date *                      |
+| [  Feb 28, 2025            📅  ]      |
 |                                       |
-+---------------------------------------+
-| Verification Code *                   |
-| [  Y5LE6SLJ  ]                       |
-| Enter the 8-character code            |
-+---------------------------------------+
-|                                       |
-| [     Verify Now      ]               |
+| Voting Time *                         |
+| Start [09:00]     End [17:00]         |
 |                                       |
 +---------------------------------------+
-```
-
-**Success State:**
-```text
+| [Info] Advancement Rules              |
+| • ≥25% = Auto-qualifies               |
+| • Max 4 candidates advance            |
+| • Min 2 candidates required           |
 +---------------------------------------+
-| [CheckCircle] Certificate Verified!   |
-+---------------------------------------+
-| +-----------------------------------+ |
-| | Winner: Daniel Obiora Chibueze    | |
-| | Office: Secretary                 | |
-| | Community: Ndigbo Progressive...  | |
-| | Tenure: 2026 - 2030               | |
-| | Issued: February 4, 2026          | |
-| +-----------------------------------+ |
 |                                       |
-| [View Full Certificate]               |
-| [Verify Another Certificate]          |
-+---------------------------------------+
-```
-
-**Error State:**
-```text
-+---------------------------------------+
-| [XCircle] Verification Failed         |
+| [   Schedule Primary   ]              |
 |                                       |
-| The verification code you entered     |
-| could not be found. Please check      |
-| the code and try again.               |
-|                                       |
-| [Try Again]                           |
 +---------------------------------------+
 ```
 
 ---
 
-### 2. Admin Area Integration
+### 2. Integrate Drawer in AdminPrimaryElectionsSection
 
-**File:** `src/components/admin/election/CertificateOfReturnGenerator.tsx`
-
-Add "Verify Certificate" button below the "Issued Certificates" section.
+**File:** `src/components/admin/election/AdminPrimaryElectionsSection.tsx`
 
 **Changes:**
-- Import the new `VerifyCertificateDrawer` component
-- Add state: `const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);`
-- Add button after line 261 (after the "Issued Certificates" description):
+1. Import the new `SchedulePrimaryDrawer` component
+2. Add state: `const [showScheduleDrawer, setShowScheduleDrawer] = useState(false);`
+3. Add `onClick` handler to the button:
 
 ```tsx
-{/* Verify Certificate Section */}
-<Button
-  variant="outline"
-  className="w-full gap-2"
-  onClick={() => setShowVerifyDrawer(true)}
+<Button 
+  className="w-full bg-green-600 hover:bg-green-700 gap-2"
+  onClick={() => setShowScheduleDrawer(true)}
 >
-  <ShieldCheck className="h-4 w-4" />
-  Verify Certificate
+  <Plus className="h-4 w-4" />
+  Schedule New Primary
 </Button>
 ```
 
-- Render the drawer at the end of the component:
+4. Render the drawer at the end of the component:
+
 ```tsx
-<VerifyCertificateDrawer
-  open={showVerifyDrawer}
-  onOpenChange={setShowVerifyDrawer}
+<SchedulePrimaryDrawer
+  open={showScheduleDrawer}
+  onOpenChange={setShowScheduleDrawer}
+  onScheduled={() => {
+    toast({
+      title: "Primary Scheduled",
+      description: "The primary election has been scheduled successfully"
+    });
+    setShowScheduleDrawer(false);
+  }}
 />
 ```
 
 ---
 
-### 3. Public Dashboard Integration (Community Menu)
+### 3. Data for Office Selection
 
-**File:** `src/components/community/CommunityMainMenu.tsx`
-
-Add "Verify Certificate" button to the Election/Voting accordion section (around line 715, after "Accredited Voters").
-
-**Changes:**
-- Import `VerifyCertificateDrawer` and `ShieldCheck` icon
-- Add state: `const [showVerifyCertificate, setShowVerifyCertificate] = useState(false);`
-- Add button in Elections accordion:
-
-```tsx
-<Button
-  variant="ghost"
-  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
-  onClick={() => {
-    setShowVerifyCertificate(true);
-    setOpen(false);
-  }}
->
-  <ShieldCheck className="h-4 w-4 mr-2" />
-  Verify Certificate
-</Button>
-```
-
-- Render the drawer component
-
----
-
-### 4. Election Winners Tab Integration
-
-**File:** `src/components/community/elections/ElectionWinnersTab.tsx`
-
-Add a "Verify Certificate" button in the header section for easy public access.
-
-**Changes:**
-- Import `VerifyCertificateDrawer` and `ShieldCheck` icon
-- Add state: `const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);`
-- Add button in the header (line 119, after the title):
-
-```tsx
-<div className="flex items-center justify-between">
-  <div className="flex items-center gap-2">
-    <Menu className="w-5 h-5" />
-    <h1 className="text-2xl font-bold">Election Winners</h1>
-  </div>
-  <Button
-    variant="outline"
-    size="sm"
-    className="gap-1.5"
-    onClick={() => setShowVerifyDrawer(true)}
-  >
-    <ShieldCheck className="h-4 w-4" />
-    <span className="hidden sm:inline">Verify</span>
-  </Button>
-</div>
-```
-
----
-
-## Component Structure: VerifyCertificateDrawer.tsx
+Filter offices that need primaries from `mockPrimaryElections` or create a list of available offices:
 
 ```typescript
-interface VerifyCertificateDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-// States
-const [verificationCode, setVerificationCode] = useState("");
-const [isVerifying, setIsVerifying] = useState(false);
-const [verificationResult, setVerificationResult] = useState<{
-  status: 'idle' | 'success' | 'error';
-  certificate?: CertificateOfReturn;
-  message?: string;
-}>({ status: 'idle' });
-const [showFullCertificate, setShowFullCertificate] = useState(false);
-
-// Verification logic (mock for UI template)
-const handleVerify = async () => {
-  if (!verificationCode.trim()) return;
-  
-  setIsVerifying(true);
-  await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-  
-  // Mock verification - matches against mockCertificate
-  if (verificationCode.toUpperCase() === mockCertificate.verificationCode) {
-    setVerificationResult({
-      status: 'success',
-      certificate: mockCertificate
-    });
-  } else {
-    setVerificationResult({
-      status: 'error',
-      message: 'Certificate not found. Please check the code and try again.'
-    });
-  }
-  
-  setIsVerifying(false);
-};
+// Offices available for primary scheduling
+const availableOffices = [
+  { id: "office-3", name: "Secretary General" },
+  { id: "office-4", name: "Treasurer" },
+  { id: "office-5", name: "Financial Secretary" },
+  { id: "office-6", name: "Public Relations Officer" },
+  { id: "office-7", name: "Welfare Officer" },
+];
 ```
 
 ---
@@ -220,42 +124,65 @@ const handleVerify = async () => {
 
 | File | Action |
 |------|--------|
-| `src/components/community/elections/VerifyCertificateDrawer.tsx` | **CREATE** - New verification drawer component |
-| `src/components/admin/election/CertificateOfReturnGenerator.tsx` | **MODIFY** - Add Verify Certificate button |
-| `src/components/community/CommunityMainMenu.tsx` | **MODIFY** - Add Verify Certificate to Elections menu |
-| `src/components/community/elections/ElectionWinnersTab.tsx` | **MODIFY** - Add Verify button in header |
+| `src/components/admin/election/SchedulePrimaryDrawer.tsx` | **CREATE** - New drawer component for scheduling primaries |
+| `src/components/admin/election/AdminPrimaryElectionsSection.tsx` | **MODIFY** - Add state, onClick handler, and render drawer |
 
 ---
 
 ## Mobile Optimizations
 
-All implementations follow established mobile patterns:
-- Drawer uses 92vh max height with rounded top corners
-- Touch-optimized input with `touch-manipulation` class
-- `autoComplete="off"`, `autoCorrect="off"`, `spellCheck={false}` on input
-- `onClick={(e) => e.stopPropagation()}` to prevent scroll issues
-- Minimum 44px touch targets for all buttons
-- Clear visual feedback with loading states and result indicators
+Following established patterns:
+- Drawer uses `max-h-[92vh]` with rounded top corners (`rounded-t-2xl`)
+- Container uses `p-0` with internal padding on scrollable body
+- Touch-optimized inputs with `touch-manipulation` class
+- `autoComplete="off"`, `autoCorrect="off"`, `spellCheck={false}` on inputs
+- `onClick={(e) => e.stopPropagation()}` to prevent scroll stealing focus
+- Minimum 44px touch targets for all interactive elements
+- Date picker uses mobile-friendly calendar popup
+- Time inputs use native time pickers where possible
+
+---
+
+## Component Structure
+
+```typescript
+interface SchedulePrimaryDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onScheduled?: () => void;
+}
+
+// Form state
+const [selectedOffice, setSelectedOffice] = useState("");
+const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
+const [startTime, setStartTime] = useState("09:00");
+const [endTime, setEndTime] = useState("17:00");
+const [isSubmitting, setIsSubmitting] = useState(false);
+
+// Validation
+const isValid = selectedOffice && scheduledDate && startTime && endTime;
+
+// Submit handler
+const handleSchedule = () => {
+  if (!isValid) return;
+  setIsSubmitting(true);
+  // Simulate API call
+  setTimeout(() => {
+    onScheduled?.();
+    setIsSubmitting(false);
+    // Reset form
+  }, 1000);
+};
+```
 
 ---
 
 ## Expected Outcome
 
-1. **Admin Area (Certificate Generator):**
-   - "Verify Certificate" button appears below "Issued Certificates" section
-   - Opens mobile-first verification drawer
+1. Tapping "Schedule New Primary" opens the scheduling drawer
+2. Admin selects an office from the dropdown
+3. Admin sets the date and voting time range
+4. Advancement rules are displayed for reference
+5. On submit, shows loading state then success toast
+6. Drawer closes and the new primary appears in the list
 
-2. **Public Dashboard (Community Menu > Election/Voting):**
-   - "Verify Certificate" option in Elections accordion
-   - Accessible to all community members and visitors
-   - Enables banks and third parties to verify leadership credentials
-
-3. **Election Winners Tab:**
-   - Quick "Verify" button in the header
-   - Most visible public entry point for verification
-
-4. **Verification Flow:**
-   - User enters 8-character verification code
-   - System validates and returns certificate details
-   - On success, shows summary with option to view full certificate
-   - On error, shows clear message with retry option
