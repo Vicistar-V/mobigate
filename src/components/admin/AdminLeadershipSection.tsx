@@ -23,7 +23,7 @@ interface ExecutiveCardProps {
 const ExecutiveCard = ({ member, onClick }: ExecutiveCardProps) => (
   <button
     onClick={() => onClick(member.id)}
-    className="w-full flex items-center gap-3 py-2.5 hover:bg-muted/50 -mx-1 px-1 rounded transition-colors text-left"
+    className="w-full flex items-center gap-3 py-2.5 hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded transition-colors text-left touch-manipulation"
   >
     <Avatar className="h-9 w-9 shrink-0">
       <AvatarImage src={member.imageUrl} alt={member.name} />
@@ -181,19 +181,19 @@ export function AdminLeadershipSection({
 
               {/* Action Buttons - list style with dividers */}
               <div className="flex flex-col gap-0 divide-y divide-border">
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onManageLeadership}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onManageLeadership}>
                   <Crown className="h-4 w-4 text-muted-foreground" />
                   Manage Leadership
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm font-medium text-primary hover:bg-muted/50 -mx-1 px-1 rounded" onClick={handleApplyResultsWithAuth}>
+                <button className="flex items-center gap-3 py-2.5 text-sm font-medium text-primary hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={handleApplyResultsWithAuth}>
                   <Trophy className="h-4 w-4 text-primary" />
                   Apply Election Results
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewChangeHistory}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewChangeHistory}>
                   <History className="h-4 w-4 text-muted-foreground" />
                   View Change History
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={handleAssignAdhocWithAuth}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={handleAssignAdhocWithAuth}>
                   <Users className="h-4 w-4 text-muted-foreground" />
                   Manage Ad-hoc Committees
                 </button>

@@ -216,39 +216,39 @@ export function AdminElectionSection({
 
               {/* Action Buttons - list style with dividers */}
               <div className="flex flex-col gap-0 divide-y divide-border">
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewCampaigns}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewCampaigns}>
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   View Campaigns
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewResults}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewResults}>
                   <Trophy className="h-4 w-4 text-muted-foreground" />
                   View Results
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onManageAccreditation}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onManageAccreditation}>
                   <Users className="h-4 w-4 text-muted-foreground" />
                   Manage Accreditation
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onProcessClearances}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onProcessClearances}>
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
                   Process Clearances
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={() => setShowPrimaryManagement(true)}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={() => setShowPrimaryManagement(true)}>
                   <UserCheck className="h-4 w-4 text-muted-foreground" />
                   Manage Primaries
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={() => setShowRoyaltySection(true)}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={() => setShowRoyaltySection(true)}>
                   <Coins className="h-4 w-4 text-muted-foreground" />
                   Campaign Royalties
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onConfigureVoting}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onConfigureVoting}>
                   <Settings className="h-4 w-4 text-muted-foreground" />
                   Voting Settings
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={() => setShowCampaignSettings(true)}>
+                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={() => setShowCampaignSettings(true)}>
                   <Sliders className="h-4 w-4 text-muted-foreground" />
                   Campaign Settings
                 </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm font-medium text-primary hover:bg-muted/50 -mx-1 px-1 rounded" onClick={handleAnnounceWithAuth}>
+                <button className="flex items-center gap-3 py-2.5 text-sm font-medium text-primary hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={handleAnnounceWithAuth}>
                   <Trophy className="h-4 w-4 text-primary" />
                   Announce Winners
                 </button>
