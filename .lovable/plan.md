@@ -1,121 +1,196 @@
 
+## Make Active Buttons and Fix Text in Election Views
 
-## Add "Load More" Pagination to Voters List
+### What This Does
 
-### Problem
-Currently, the `generateMockVoters` function caps at 50 voters (`Math.min(voteCount, 50)`), and when the total vote count exceeds 50 (e.g., 54 votes), the remaining voters are inaccessible. The UI shows "Showing first 50 voters of 54 total" but provides no way to view the rest.
+Three improvements to the election results and voters list screens, all mobile-focused:
 
-### Solution
-Replace the hard 50-voter cap with a paginated "Load More" approach that generates ALL voters upfront but displays them in pages of 50, with a prominent "Load More" button at the bottom to reveal the next batch.
+---
+
+### 1. Make "Total Votes" and "With Remarks" Stat Boxes Clickable (CandidateVotersListSheet)
+
+Currently, the "54 Total Votes" and "27 With Remarks" stat boxes in the candidate summary card are static display elements. They will become active, tappable buttons:
+
+- **"Total Votes" tap**: Scrolls down to the voters list section and clears any active filter (shows all voters)
+- **"With Remarks" tap**: Filters the voters list to show ONLY voters who left remarks, updates the search/display accordingly
+
+Visual changes:
+- Add `cursor-pointer active:bg-primary/10 transition-colors` to the Total Votes box
+- Add `cursor-pointer active:bg-orange-500/10 transition-colors` to the With Remarks box
+- Both get a subtle ring/border on tap for touch feedback
+
+**File:** `src/components/admin/election/CandidateVotersListSheet.tsx`
+
+Changes:
+- Add a `filterMode` state: `"all" | "remarks_only"` (default `"all"`)
+- When `filterMode === "remarks_only"`, additionally filter voters to only those with remarks
+- Update the `filteredVoters` logic to respect both search AND filter mode
+- Make "Total Votes" box clickable - resets filter to "all" and clears search
+- Make "With Remarks" box clickable - sets filter to "remarks_only"
+- Add a visual active/selected indicator on the currently active filter box
+- When filter changes, reset `displayCount` back to `PAGE_SIZE`
+
+---
+
+### 2. Make Candidate Names/Avatars Clickable to Open Profile (AdminMainElectionSection and AdminPrimaryElectionsSection)
+
+In the election results view (Image 282), clicking on a candidate's name or avatar should open the MemberPreviewDialog, allowing navigation to their full Mobigate profile.
+
+**File:** `src/components/admin/election/AdminMainElectionSection.tsx`
+
+Changes:
+- Import `MemberPreviewDialog` and `ExecutiveMember` type
+- Add `selectedMember` and `showMemberPreview` state
+- Create `handleCandidateClick` that maps a candidate to `ExecutiveMember` and opens the preview
+- Make the candidate name + avatar area clickable (the row with number, avatar, name) with touch feedback
+- Keep the "Voters List" button separate (should NOT trigger the profile preview)
+- Render `MemberPreviewDialog` at root level
+
+**File:** `src/components/admin/election/AdminPrimaryElectionsSection.tsx`
+
+Same pattern as above:
+- Import `MemberPreviewDialog` and `ExecutiveMember`
+- Add state and handler
+- Make candidate name/avatar rows clickable
+- Render `MemberPreviewDialog`
+
+---
+
+### 3. Fix Text Display (Already Fixed in Code)
+
+The screenshot shows old text "Showing first 50 voters of 54 total" which was already corrected in the last edit to "Showing 50 of 54 voters". This is already deployed - the screenshot was taken before the fix was applied. No further changes needed.
 
 ---
 
 ### Technical Details
 
-#### File: `src/components/admin/election/CandidateVotersListSheet.tsx`
+#### CandidateVotersListSheet.tsx Changes
 
-**1. Remove the 50-voter cap from `generateMockVoters`**
-
-Change line 62 from:
+**Add filter state:**
 ```tsx
-const voterCount = Math.min(voteCount, 50);
-```
-to:
-```tsx
-const voterCount = voteCount;
+const [filterMode, setFilterMode] = useState<"all" | "remarks_only">("all");
 ```
 
-This generates all voters (the full `voteCount`), not just the first 50.
-
----
-
-**2. Add pagination state**
-
-Add a `displayCount` state to track how many voters are currently visible, starting at 50:
-
+**Update filteredVoters logic:**
 ```tsx
-const [displayCount, setDisplayCount] = useState(50);
+const filteredVoters = voters.filter(voter => {
+  const matchesSearch = voter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    voter.accreditationNumber.toLowerCase().includes(searchQuery.toLowerCase());
+  const matchesFilter = filterMode === "all" || voter.remarks;
+  return matchesSearch && matchesFilter;
+});
 ```
 
-Also add a constant for page size:
+**Make stat boxes interactive:**
 ```tsx
-const PAGE_SIZE = 50;
-```
-
----
-
-**3. Slice the filtered voters for display**
-
-Instead of rendering all `filteredVoters`, only render the first `displayCount`:
-
-```tsx
-const displayedVoters = filteredVoters.slice(0, displayCount);
-const hasMore = filteredVoters.length > displayCount;
-const remainingCount = filteredVoters.length - displayCount;
-```
-
----
-
-**4. Add "Load More" button after the voter cards**
-
-After the voter cards list and before the footer note, add a "Load More" button that appears only when there are more voters to show:
-
-```tsx
-{hasMore && (
-  <Button
-    variant="outline"
-    className="w-full h-11 text-sm font-medium"
-    onClick={() => setDisplayCount(prev => prev + PAGE_SIZE)}
+<div className="grid grid-cols-2 gap-3 mt-4">
+  <button 
+    className={cn(
+      "text-center p-2 bg-background rounded-lg transition-colors",
+      filterMode === "all" 
+        ? "ring-2 ring-primary/30" 
+        : "active:bg-primary/10"
+    )}
+    onClick={() => {
+      setFilterMode("all");
+      setSearchQuery("");
+      setDisplayCount(PAGE_SIZE);
+    }}
   >
-    <ChevronDown className="h-4 w-4 mr-2" />
-    Load More ({remainingCount} remaining)
-  </Button>
+    <p className="text-xl font-bold text-primary">{voteCount}</p>
+    <p className="text-xs text-muted-foreground">Total Votes</p>
+  </button>
+  <button 
+    className={cn(
+      "text-center p-2 bg-background rounded-lg transition-colors",
+      filterMode === "remarks_only" 
+        ? "ring-2 ring-orange-500/30" 
+        : "active:bg-orange-500/10"
+    )}
+    onClick={() => {
+      setFilterMode("remarks_only");
+      setSearchQuery("");
+      setDisplayCount(PAGE_SIZE);
+    }}
+  >
+    <p className="text-xl font-bold text-orange-500">{remarksCount}</p>
+    <p className="text-xs text-muted-foreground">With Remarks</p>
+  </button>
+</div>
+```
+
+**Add filter indicator in the list header:**
+```tsx
+{filterMode === "remarks_only" && (
+  <Badge 
+    variant="secondary" 
+    className="text-xs bg-orange-100 text-orange-700 cursor-pointer"
+    onClick={() => {
+      setFilterMode("all");
+      setDisplayCount(PAGE_SIZE);
+    }}
+  >
+    Remarks only x
+  </Badge>
 )}
 ```
 
 ---
 
-**5. Update the badge and info text**
+#### AdminMainElectionSection.tsx Changes
 
-Update the badge to show displayed vs total:
+**Add imports:**
 ```tsx
-<Badge variant="secondary" className="text-xs">
-  {displayedVoters.length} of {voteCount}
-</Badge>
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 ```
 
-Update the info text:
+**Add state:**
 ```tsx
-<p className="text-xs text-muted-foreground">
-  Showing {displayedVoters.length} of {filteredVoters.length} voters
-  {filteredVoters.length < voteCount ? ` (filtered from ${voteCount})` : ""}
-</p>
+const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+const [showMemberPreview, setShowMemberPreview] = useState(false);
 ```
 
----
-
-**6. Reset display count when search changes**
-
-When the user types a search query, reset the display count back to 50 so pagination starts fresh for filtered results:
-
+**Add handler:**
 ```tsx
-const handleSearchChange = (value: string) => {
-  setSearchQuery(value);
-  setDisplayCount(PAGE_SIZE);
+const handleCandidateClick = (candidate: { id: string; name: string; avatar: string }) => {
+  setSelectedMember({
+    id: candidate.id,
+    name: candidate.name,
+    position: "Community Member",
+    tenure: "",
+    imageUrl: candidate.avatar,
+    level: "officer",
+    committee: "executive",
+  });
+  setShowMemberPreview(true);
 };
 ```
 
+**Make the candidate name/avatar row clickable:**
+```tsx
+<div 
+  className="flex items-center gap-3 mb-2 cursor-pointer active:opacity-70 transition-opacity"
+  onClick={() => handleCandidateClick(candidate)}
+>
+  {/* existing avatar + name content */}
+</div>
+```
+
+**Add MemberPreviewDialog at component root:**
+```tsx
+<MemberPreviewDialog
+  member={selectedMember}
+  open={showMemberPreview}
+  onOpenChange={setShowMemberPreview}
+/>
+```
+
 ---
 
-**7. Add `ChevronDown` icon import**
+#### AdminPrimaryElectionsSection.tsx Changes
 
-Add `ChevronDown` to the lucide-react imports for the "Load More" button icon.
-
----
-
-**8. Add `Button` import**
-
-Add `Button` from `@/components/ui/button` since it's not currently imported.
+Identical pattern to AdminMainElectionSection - add imports, state, handler, clickable row, and dialog.
 
 ---
 
@@ -123,40 +198,14 @@ Add `Button` from `@/components/ui/button` since it's not currently imported.
 
 | File | Change |
 |------|--------|
-| `src/components/admin/election/CandidateVotersListSheet.tsx` | Remove 50-cap, add pagination state, "Load More" button, update counts |
+| `src/components/admin/election/CandidateVotersListSheet.tsx` | Make stat boxes interactive with filter toggle |
+| `src/components/admin/election/AdminMainElectionSection.tsx` | Make candidate names clickable to open profile |
+| `src/components/admin/election/AdminPrimaryElectionsSection.tsx` | Make candidate names clickable to open profile |
 
----
+### Mobile UX
 
-### Mobile UX Details
-
-- The "Load More" button uses `h-11` for comfortable touch target
-- Full-width button (`w-full`) for easy tapping
-- Shows exact remaining count (e.g., "Load More (4 remaining)")
-- Automatically disappears when all voters are shown
-- Search resets pagination to prevent confusion
-- Button placed right after the last voter card, before the footer
-
----
-
-### Expected Result
-
-```text
-[Voter Card 1]
-[Voter Card 2]
-...
-[Voter Card 50]
-
-[ Load More (4 remaining) ]   <-- New button
-
-[Footer Note]
-```
-
-After tapping "Load More":
-```text
-[Voter Card 1]
-...
-[Voter Card 54]
-
-[Footer Note]   <-- Button disappears, all shown
-```
-
+- All interactive elements use `active:` states for touch feedback
+- Filter toggle on stat boxes uses ring highlight to show active state
+- Candidate rows use opacity transition on tap
+- MemberPreviewDialog opens as bottom drawer on mobile (built-in behavior)
+- "Remarks only" filter can be cleared via a dismissable badge
