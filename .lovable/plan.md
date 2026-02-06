@@ -1,194 +1,145 @@
 
 
-## Implement Minimum Withdrawal Settings for Mobigate Admin
+## Fix Elements Cutting on Right Margin - Financial Overview
 
-### Overview
-Update the minimum withdrawal amount from M1,000 to M10,000 and create a Mobigate Admin settings interface to configure this value dynamically.
+### Problem Identified
+The Financial Overview dialog content is being cut off on the right margin on mobile devices. Looking at the screenshot, the "Withdraw" button text is clipped, indicating the dialog isn't properly respecting mobile viewport boundaries.
+
+**Root Cause:** The `FinancialOverviewDialog.tsx` uses a standard `Dialog` component with `max-w-2xl` which doesn't properly handle mobile viewports. Unlike other wallet dialogs (`WalletTopUpDialog`, `WalletTransferDialog`) that use the mobile-first `Drawer` pattern, this dialog lacks proper mobile handling.
 
 ---
 
-### Current State Analysis
+### Solution Overview
 
-**Hardcoded Value Location:**
-- File: `src/components/community/finance/WalletWithdrawDialog.tsx` (Line 51)
-- Current value: `const minWithdrawal = 1000;`
-
-**Mobigate Admin Dashboard:**
-- File: `src/pages/admin/MobigateAdminDashboard.tsx`
-- Has 3 tabs: Overview, Elections, Revenue
-- Currently no dedicated "Settings" tab for platform-wide configurations
+Convert `FinancialOverviewDialog` to use the established mobile-first pattern:
+- Use `Drawer` component on mobile devices (via `useIsMobile` hook)
+- Use `Dialog` on larger screens
+- Apply proper padding and constraints to prevent margin clipping
 
 ---
 
 ### Implementation Details
 
-#### 1. Create Platform Settings Data File
+#### File: `src/components/community/finance/FinancialOverviewDialog.tsx`
 
-**File:** `src/data/platformSettingsData.ts`
+**Changes to make:**
 
-Create a centralized configuration file for all platform-level settings accessible only to Mobigate Admin:
+1. **Add imports for Drawer components and useIsMobile hook:**
+```tsx
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
+```
 
-```typescript
-export const platformWithdrawalSettings = {
-  minimumWithdrawal: 10000,  // M10,000 (updated from 1,000)
-  minimumWithdrawalMin: 1000,   // Slider minimum
-  minimumWithdrawalMax: 50000,  // Slider maximum
-  lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
-};
+2. **Add mobile detection:**
+```tsx
+const isMobile = useIsMobile();
+```
 
-export function getMinimumWithdrawal(): number {
-  return platformWithdrawalSettings.minimumWithdrawal;
+3. **Create shared content component for reuse:**
+```tsx
+const Content = () => (
+  <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
+    <div className="px-4 pb-6 space-y-4">
+      {/* Wallet Balance Card */}
+      {/* Quick Actions */}
+      {/* Monthly Summary */}
+      {/* Recent Transactions */}
+    </div>
+  </div>
+);
+```
+
+4. **Conditional rendering based on device:**
+```tsx
+if (isMobile) {
+  return (
+    <>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <DrawerHeader className="pb-2 border-b shrink-0">
+            <DrawerTitle>Financial Overview</DrawerTitle>
+          </DrawerHeader>
+          <Content />
+        </DrawerContent>
+      </Drawer>
+      {/* Wallet Action Dialogs */}
+    </>
+  );
 }
+
+return (
+  <>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-4 pt-4 pb-2 shrink-0 border-b">
+          <DialogTitle>Financial Overview</DialogTitle>
+        </DialogHeader>
+        <Content />
+      </DialogContent>
+    </Dialog>
+    {/* Wallet Action Dialogs */}
+  </>
+);
 ```
 
 ---
 
-#### 2. Create Withdrawal Settings Component
+### Mobile-Specific Fixes
 
-**File:** `src/components/mobigate/WithdrawalSettingsCard.tsx`
+| Issue | Fix |
+|-------|-----|
+| Right margin clipping | Drawer uses `max-h-[92vh]` with proper internal padding (`px-4`) |
+| Dialog too wide on mobile | Drawer slides from bottom, respects safe areas |
+| ScrollArea stealing focus | Use native `overflow-y-auto touch-auto` instead |
+| Button text truncation | Grid buttons get proper spacing with `gap-3` instead of `gap-2` |
 
-A mobile-first settings card (modeled after `ServiceChargeConfigCard.tsx`):
+---
 
-**Features:**
-- Current minimum withdrawal display with Badge
-- Slider for adjusting value (M1,000 - M50,000 range)
-- Real-time preview showing both Mobi and local currency (following dual-currency protocol)
-- Save button with loading state
-- Info note explaining the setting
+### Detailed Code Structure
 
-**UI Layout (Mobile):**
+**Mobile Layout (Drawer):**
 ```text
 +---------------------------------------+
-| [Wallet] Minimum Withdrawal           |
-|         Platform-wide limit      [M10K]
+| Financial Overview           [Handle] |  <- DrawerHeader
 +---------------------------------------+
 |                                       |
-| [=====|==========] Slider             |
-| M1,000    M10,000        M50,000      |
+|  +-------------------------------+    |
+|  | Total Balance                 |    |  <- Wallet Card
+|  | ₦125,000 (M125,000)          |    |
+|  +-------------------------------+    |
+|                                       |
+|  [Top Up]  [Transfer]  [Withdraw]     |  <- 3-col grid, gap-3
+|                                       |
+|  +--Income--+  +--Expenses--+         |  <- 2-col grid
+|  | +₦45,000 |  | -₦28,000   |         |
+|  +----------+  +------------+         |
+|                                       |
+|  Recent Transactions                  |  <- Scrollable list
+|  ...                                  |
 |                                       |
 +---------------------------------------+
-| [!] This is the minimum amount users  |
-|     can withdraw from their wallet    |
-+---------------------------------------+
-|                                       |
-| [ Save Minimum Withdrawal ]           |
-|                                       |
-+---------------------------------------+
 ```
 
 ---
 
-#### 3. Add Settings Tab to Mobigate Admin Dashboard
+### Files to Modify
 
-**File:** `src/pages/admin/MobigateAdminDashboard.tsx`
-
-**Changes:**
-1. Add new "Settings" tab to the TabsList (making it 4 columns)
-2. Create new TabsContent for settings
-3. Import and render `WithdrawalSettingsCard`
-
-**Updated Tab Bar:**
-```tsx
-<TabsList className="w-full grid grid-cols-4 h-auto mb-4">
-  <TabsTrigger value="overview">Overview</TabsTrigger>
-  <TabsTrigger value="elections">Elections</TabsTrigger>
-  <TabsTrigger value="revenue">Revenue</TabsTrigger>
-  <TabsTrigger value="settings">Settings</TabsTrigger>
-</TabsList>
-```
-
-**Settings Tab Content:**
-```tsx
-<TabsContent value="settings">
-  <ScrollArea className="h-[calc(100vh-200px)]">
-    <div className="space-y-4 pb-6">
-      {/* Mobigate-Only Notice */}
-      <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg">
-        <Shield className="h-5 w-5 text-primary" />
-        <div>
-          <p className="text-sm font-medium">Platform Settings</p>
-          <p className="text-xs text-muted-foreground">
-            Configure platform-wide policies and limits
-          </p>
-        </div>
-      </div>
-
-      {/* Withdrawal Settings */}
-      <WithdrawalSettingsCard />
-
-      {/* Future: More platform settings can go here */}
-    </div>
-  </ScrollArea>
-</TabsContent>
-```
-
----
-
-#### 4. Update WalletWithdrawDialog to Use Dynamic Value
-
-**File:** `src/components/community/finance/WalletWithdrawDialog.tsx`
-
-**Changes (Line 51):**
-```tsx
-// Before:
-const minWithdrawal = 1000;
-
-// After:
-import { getMinimumWithdrawal } from "@/data/platformSettingsData";
-// ...
-const minWithdrawal = getMinimumWithdrawal();
-```
-
-This ensures the withdrawal dialog dynamically reads the current minimum from the platform settings.
-
----
-
-### Files to Create/Modify
-
-| File | Action | Description |
-|------|--------|-------------|
-| `src/data/platformSettingsData.ts` | **CREATE** | Platform-wide settings data file |
-| `src/components/mobigate/WithdrawalSettingsCard.tsx` | **CREATE** | Mobile-first settings card component |
-| `src/pages/admin/MobigateAdminDashboard.tsx` | **MODIFY** | Add Settings tab with WithdrawalSettingsCard |
-| `src/components/community/finance/WalletWithdrawDialog.tsx` | **MODIFY** | Import and use dynamic minimum value |
-
----
-
-### Mobile Optimizations
-
-Following established patterns:
-- Card uses full-width layout with proper padding
-- Slider has clear min/max labels with current value displayed
-- Touch-optimized slider with adequate touch target (44px)
-- Dual-currency display (Mobi primary, local currency secondary)
-- Save button full-width with loading state
-- Info alerts use compact mobile-friendly layout
-
----
-
-### Technical Details
-
-**Dual Currency Protocol:**
-- Mobigate-managed values lead with Mobi (M): `M10,000 (≈ ₦10,000)`
-- Using existing `formatMobi()` and `formatLocalAmount()` utilities
-
-**Component Props:**
-```typescript
-interface WithdrawalSettingsCardProps {
-  currentMinimum?: number;
-  onSave?: (newMinimum: number) => void;
-}
-```
+| File | Action |
+|------|--------|
+| `src/components/community/finance/FinancialOverviewDialog.tsx` | **MODIFY** - Add Drawer pattern for mobile |
 
 ---
 
 ### Expected Outcome
 
-1. Minimum withdrawal updates from M1,000 to M10,000 immediately
-2. Mobigate Admin Dashboard shows new "Settings" tab
-3. Settings tab contains "Minimum Withdrawal" configuration card
-4. Admin can adjust value using slider (M1,000 - M50,000 range)
-5. Changes persist and apply to all member withdrawal interfaces
-6. WalletWithdrawDialog shows updated minimum with dual-currency display
+1. On mobile: Financial Overview opens as a bottom drawer (92vh height)
+2. All content has proper padding (`px-4`) with no edge clipping
+3. "Withdraw" button and all other elements display fully without truncation
+4. Native scroll behavior with `touch-auto` for smooth mobile scrolling
+5. Desktop users see the same Dialog experience (unchanged)
 
