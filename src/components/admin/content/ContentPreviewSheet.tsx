@@ -235,6 +235,26 @@ export function ContentPreviewSheet({
 
         {/* Fixed Footer Actions */}
         <div className="shrink-0 flex gap-2 px-4 py-3 border-t bg-background">
+          {content.status === "published" && onApprove && onReject && (
+            <Button 
+              variant="outline" 
+              className="flex-1 text-green-600 bg-green-50 border-green-200"
+              disabled
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Approved
+            </Button>
+          )}
+          {content.status === "rejected" && onApprove && onReject && (
+            <Button 
+              variant="outline" 
+              className="flex-1 text-red-600 bg-red-50 border-red-200"
+              disabled
+            >
+              <X className="h-4 w-4 mr-2" />
+              Rejected
+            </Button>
+          )}
           {content.status === "pending" && onApprove && onReject && (
             <>
               <Button 
@@ -254,13 +274,23 @@ export function ContentPreviewSheet({
               </Button>
             </>
           )}
-          {content.status !== "pending" && onEdit && (
+          {content.status !== "pending" && content.status !== "published" && content.status !== "rejected" && onEdit && (
             <Button 
               className="w-full"
               onClick={() => onEdit(content.id)}
             >
               <Edit className="h-4 w-4 mr-2" />
               Edit Content
+            </Button>
+          )}
+          {(content.status === "published" || content.status === "rejected") && onEdit && (
+            <Button 
+              variant="outline"
+              className="flex-1"
+              onClick={() => onEdit(content.id)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
             </Button>
           )}
         </div>

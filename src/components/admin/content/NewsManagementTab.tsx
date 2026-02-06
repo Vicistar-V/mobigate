@@ -220,6 +220,16 @@ export function NewsManagementTab({
 
                 {/* Actions Row */}
                 <div className="flex flex-wrap gap-2 mt-3">
+                  {item.status === 'published' && (
+                    <Button size="sm" variant="outline" className="h-9 text-sm gap-1.5 text-green-600 bg-green-50 border-green-200" disabled>
+                      <Check className="h-4 w-4" /> Approved
+                    </Button>
+                  )}
+                  {item.status === 'rejected' && (
+                    <Button size="sm" variant="outline" className="h-9 text-sm gap-1.5 text-red-600 bg-red-50 border-red-200" disabled>
+                      <X className="h-4 w-4" /> Rejected
+                    </Button>
+                  )}
                   {item.status === 'pending' && (
                     <>
                       <Button size="sm" variant="outline" className="h-9 text-sm gap-1.5 text-green-600" onClick={() => onApprove(item.id)}>

@@ -228,6 +228,16 @@ export function VibesManagementTab({
 
                     {/* Actions */}
                     <div className="flex gap-1 mt-2">
+                      {item.status === 'published' && (
+                        <Button size="sm" variant="outline" className="h-6 w-6 p-0 text-green-600 bg-green-50 border-green-200" disabled>
+                          <Check className="h-3 w-3" />
+                        </Button>
+                      )}
+                      {item.status === 'rejected' && (
+                        <Button size="sm" variant="outline" className="h-6 w-6 p-0 text-red-600 bg-red-50 border-red-200" disabled>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
                       {item.status === 'pending' && (
                         <>
                           <Button size="sm" variant="outline" className="h-6 w-6 p-0 text-green-600" onClick={() => onApprove(item.id)}>
