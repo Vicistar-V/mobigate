@@ -1,218 +1,173 @@
 
-## Create Campaign Duration & Fees Settings Interface
 
-### Problem
-Currently, the campaign duration options (3 Days = M500, 7 Days = M1,000, etc.) are hardcoded in `src/data/campaignSystemData.ts`. There is no admin interface to configure these values. Admins cannot adjust campaign pricing without modifying code.
+## Add Campaign Duration/Fees to Election Settings
 
-### Solution
-Create a new **Campaign Global Settings** drawer that allows admins to:
-- View and edit existing duration tiers and their fees
-- Add new duration options
-- Remove existing options
-- Toggle "Popular" badge for tiers
-- Multi-signature authorization for changes
+### Overview
+Add a "Campaign Duration/Fees" setting row within the Election Settings accordion in Community Settings. Tapping this row will open the existing `CampaignGlobalSettingsDrawer` to manage campaign pricing tiers. Also update the base fees to the new values specified.
 
 ---
 
-## Implementation Details
+## Changes Required
 
-### 1. New File: `CampaignGlobalSettingsDrawer.tsx`
+### 1. Update Base Fees in Campaign Data
 
-**Location:** `src/components/admin/election/CampaignGlobalSettingsDrawer.tsx`
+**File:** `src/data/campaignSystemData.ts`
 
-**Key Features:**
+Update the `campaignDurationOptions` array with new fee values and add the missing 45 Days tier:
 
-#### Header Section
-- Title: "Campaign Duration & Fees"
-- Icon: Clock + Settings
-- Description: "Configure pricing for campaign durations"
-
-#### Current Configuration Display
-- Grid showing all duration tiers with their fees
-- Each card displays:
-  - Duration label (e.g., "7 Days")
-  - Current fee (e.g., "M1,000")
-  - "Popular" badge if applicable
-  - Edit/Delete action buttons
-
-#### Duration Tier Editor
-When editing a tier:
-- Duration input (number of days)
-- Fee input (in Mobi)
-- Description field
-- "Mark as Popular" toggle
-
-#### Add New Duration Button
-- Opens inline form to add new tier
-- Validates for duplicate durations
-- Saves to local state
-
-#### Authorization Notice
-- Multi-signature required (President + Secretary + Legal Adviser)
-- Submit button triggers authorization flow
+| Duration | Old Fee | New Fee |
+|----------|---------|---------|
+| 3 Days   | M500    | M5,000  |
+| 7 Days   | M1,000  | M10,000 |
+| 14 Days  | M1,800  | M18,000 |
+| 21 Days  | M2,500  | M25,000 |
+| 30 Days  | M3,200  | M32,000 |
+| 45 Days  | (new)   | M40,000 |
+| 60 Days  | M5,500  | M55,000 |
+| 90 Days  | M7,500  | M75,000 |
 
 ---
 
-### 2. UI Layout (Mobile-First)
+### 2. Add Campaign Fees Setting to Election Settings Data
 
-```text
-+---------------------------------------+
-| [Clock+Cog] Campaign Duration & Fees  |
-|             Configure pricing tiers   |
-+---------------------------------------+
-|                                       |
-| Current Duration Tiers                |
-|                                       |
-| +-----------------------------------+ |
-| | 3 Days          M500              | |
-| | Quick visibility boost   [Edit]  | |
-| +-----------------------------------+ |
-|                                       |
-| +-----------------------------------+ |
-| | 7 Days          M1,000 [Popular] | |
-| | Standard campaign        [Edit]  | |
-| +-----------------------------------+ |
-|                                       |
-| +-----------------------------------+ |
-| | 14 Days         M1,800            | |
-| | Extended reach           [Edit]  | |
-| +-----------------------------------+ |
-|                                       |
-| +-----------------------------------+ |
-| | 21 Days         M2,500 [Popular] | |
-| | Comprehensive coverage   [Edit]  | |
-| +-----------------------------------+ |
-|                                       |
-| +-----------------------------------+ |
-| | 30 Days         M3,200            | |
-| | Full month visibility    [Edit]  | |
-| +-----------------------------------+ |
-|                                       |
-| +-----------------------------------+ |
-| | 60 Days         M5,500            | |
-| | Extended two-month       [Edit]  | |
-| +-----------------------------------+ |
-|                                       |
-| +-----------------------------------+ |
-| | 90 Days         M7,500            | |
-| | Maximum exposure         [Edit]  | |
-| +-----------------------------------+ |
-|                                       |
-| [+ Add New Duration Tier]             |
-|                                       |
-+---------------------------------------+
-| [Shield] Multi-signature required     |
-|          President + Secretary + LA   |
-+---------------------------------------+
-| [Submit Changes for Authorization]    |
-+---------------------------------------+
-```
+**File:** `src/data/adminSettingsData.ts`
 
----
-
-### 3. Edit Tier Modal (Inline Form)
-
-When user taps "Edit" on a tier:
-
-```text
-+---------------------------------------+
-| Editing: 7 Days                       |
-+---------------------------------------+
-| Duration (Days) *                     |
-| [  7  ]                              |
-+---------------------------------------+
-| Fee (in Mobi) *                       |
-| [  1000  ]                           |
-+---------------------------------------+
-| Description                           |
-| [Standard campaign period    ]        |
-+---------------------------------------+
-| [ ] Mark as Popular                   |
-+---------------------------------------+
-| [Cancel]  [Save Changes]              |
-+---------------------------------------+
-```
-
----
-
-### 4. Integration with Admin Section
-
-**File:** `src/components/admin/AdminElectionSection.tsx`
-
-Add new button in the action list:
-```tsx
-<button 
-  className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" 
-  onClick={() => setShowCampaignSettings(true)}
->
-  <Settings className="h-4 w-4 text-muted-foreground" />
-  Campaign Settings
-</button>
-```
-
-Add state and import:
-```tsx
-const [showCampaignSettings, setShowCampaignSettings] = useState(false);
-
-// Import
-import { CampaignGlobalSettingsDrawer } from "./election/CampaignGlobalSettingsDrawer";
-```
-
----
-
-### 5. Component Structure
+Add a new special setting entry to `electionSettings` array that indicates it opens a custom drawer:
 
 ```typescript
-// Types for editing
-interface EditableDurationOption {
-  id: string;
-  days: number;
-  feeInMobi: number;
-  label: string;
-  description: string;
-  popular: boolean;
+{
+  id: "election-6",
+  key: "campaign_duration_fees",
+  name: "Campaign Duration & Fees",
+  description: "Configure campaign pricing tiers for election advertisements",
+  category: "election_settings",
+  currentValue: "8_tiers", // Display value showing number of tiers
+  options: [], // Empty - uses custom drawer
+  approvalPercentage: 100,
+  hasPendingChange: false,
+  isLocked: false,
+  requiresMultiSig: true,
+  lastUpdated: new Date("2025-02-01"),
+  updatedBy: "System",
+  isCustomDrawer: true, // New flag to indicate special handling
 }
-
-interface CampaignGlobalSettingsDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-// State management
-const [durationTiers, setDurationTiers] = useState<EditableDurationOption[]>([...]);
-const [editingTier, setEditingTier] = useState<EditableDurationOption | null>(null);
-const [showAddForm, setShowAddForm] = useState(false);
 ```
 
 ---
 
-### 6. Mobile Input Optimizations
+### 3. Integrate Drawer in Settings Tab
 
-All inputs will include:
-- `touch-manipulation` class
-- `autoComplete="off"`
-- `autoCorrect="off"`
-- `spellCheck={false}`
-- `onClick={(e) => e.stopPropagation()}`
+**File:** `src/components/admin/settings/AdminSettingsTab.tsx`
+
+Add state and logic to open the `CampaignGlobalSettingsDrawer` when the Campaign Duration/Fees setting is clicked:
+
+1. Import `CampaignGlobalSettingsDrawer`
+2. Add state: `const [showCampaignSettings, setShowCampaignSettings] = useState(false);`
+3. Modify `handleSettingClick` to check for `campaign_duration_fees` key and open the drawer instead of the standard detail sheet
+4. Add the drawer component to the JSX
 
 ---
 
-## Files to Create/Modify
+### 4. UI Layout in Election Settings
 
-| File | Action |
-|------|--------|
-| `src/components/admin/election/CampaignGlobalSettingsDrawer.tsx` | **CREATE** - New campaign settings drawer |
-| `src/components/admin/AdminElectionSection.tsx` | **MODIFY** - Add button to open settings drawer |
+After implementation, the Election Settings accordion will show:
+
+```text
+Election Settings                    1 pending  ^
+6 settings
+
++---------------------------------------+
+| Voting Eligibility            🔒  >  |
+| Financial Members (95%)              |
++---------------------------------------+
+| Candidate Eligibility Period  🔒  >  |
+| 2 Years (82%)                        |
++---------------------------------------+
+| Voting Period Duration    ⏳ 🔒  >  |
+| 3 Days (70%)              Pending    |
++---------------------------------------+
+| Vote Change Window            🔒  >  |
+| 30 Minutes (65%)                     |
++---------------------------------------+
+| Primary Election Threshold    🔒  >  |
+| 25% (78%)                            |
++---------------------------------------+
+| Campaign Duration & Fees      🔒  >  | <-- NEW
+| 8 tiers configured (100%)            |
++---------------------------------------+
+```
+
+---
+
+### 5. Mobile Optimizations
+
+All changes follow established mobile patterns:
+- Drawer opens at 92vh max height
+- Touch-optimized inputs with `touch-manipulation`
+- `autoComplete="off"` and `spellCheck={false}` on inputs
+- `onClick={(e) => e.stopPropagation()}` to prevent scroll issues
+
+---
+
+## Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/data/campaignSystemData.ts` | Update fee values, add 45 Days tier |
+| `src/data/adminSettingsData.ts` | Add new Campaign Duration/Fees setting to electionSettings |
+| `src/components/admin/settings/AdminSettingsTab.tsx` | Import drawer, add state, handle special click for campaign_duration_fees |
+
+---
+
+## Technical Implementation Details
+
+### campaignSystemData.ts Changes
+```typescript
+export const campaignDurationOptions: CampaignDurationOption[] = [
+  { days: 3,  feeInMobi: 5000,  label: "3 Days",  description: "Quick visibility boost" },
+  { days: 7,  feeInMobi: 10000, label: "7 Days",  description: "Standard campaign period", popular: true },
+  { days: 14, feeInMobi: 18000, label: "14 Days", description: "Extended reach campaign" },
+  { days: 21, feeInMobi: 25000, label: "21 Days", description: "Comprehensive coverage", popular: true },
+  { days: 30, feeInMobi: 32000, label: "30 Days", description: "Full month visibility" },
+  { days: 45, feeInMobi: 40000, label: "45 Days", description: "Extended campaign period" },
+  { days: 60, feeInMobi: 55000, label: "60 Days", description: "Extended two-month campaign" },
+  { days: 90, feeInMobi: 75000, label: "90 Days", description: "Maximum exposure quarter" }
+];
+```
+
+### AdminSettingsTab.tsx Changes
+```typescript
+// Import
+import { CampaignGlobalSettingsDrawer } from "../election/CampaignGlobalSettingsDrawer";
+
+// State
+const [showCampaignSettings, setShowCampaignSettings] = useState(false);
+
+// Modified click handler
+const handleSettingClick = (setting: AdminSetting) => {
+  if (setting.key === "campaign_duration_fees") {
+    setShowCampaignSettings(true);
+    return;
+  }
+  setSelectedSetting(setting);
+  setShowSettingDetail(true);
+};
+
+// Add to JSX
+<CampaignGlobalSettingsDrawer
+  open={showCampaignSettings}
+  onOpenChange={setShowCampaignSettings}
+/>
+```
 
 ---
 
 ## Expected Outcome
 
-- Admins can view all campaign duration tiers and their fees
-- Admins can edit existing tier fees and descriptions
-- Admins can add new duration tiers (e.g., 45 Days = M4,000)
-- Admins can remove tiers they no longer want to offer
-- Admins can mark/unmark tiers as "Popular"
+- "Campaign Duration & Fees" appears in Election Settings accordion
+- Tapping opens the dedicated drawer with all 8 pricing tiers
+- Fees reflect new values (M5,000 to M75,000)
+- Admins can edit, add, or remove tiers
 - Changes require multi-signature authorization
-- All inputs are optimized for mobile text entry
-- Consistent with existing mobile-first drawer patterns
+- All interfaces are mobile-optimized
+
