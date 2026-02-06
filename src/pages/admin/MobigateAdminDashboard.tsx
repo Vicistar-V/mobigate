@@ -23,6 +23,7 @@ import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
+import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
@@ -441,14 +442,8 @@ export default function MobigateAdminDashboard() {
                 {/* Withdrawal Settings */}
                 <WithdrawalSettingsCard />
 
-                {/* Future Settings Placeholder */}
-                <div className="p-4 border border-dashed rounded-lg text-center">
-                  <Settings className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-                  <p className="text-sm font-medium text-muted-foreground">More Settings Coming Soon</p>
-                  <p className="text-xs text-muted-foreground">
-                    Additional platform configuration options will appear here
-                  </p>
-                </div>
+                {/* Quiz Settings */}
+                <QuizSettingsCard />
               </div>
             </ScrollArea>
           </TabsContent>

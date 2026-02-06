@@ -94,7 +94,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["2010", "2012", "2015", "2018", "2019", "2020", "2021", "2022"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community History"
   },
@@ -104,7 +104,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["Chief Okonkwo", "Dr. Amina Bello", "Prof. Eze Williams", "Elder Musa Ibrahim", "Mrs. Ngozi Okafor", "Mr. Tunde Adeyemi", "Chief Fatima Hassan", "Dr. Emeka Nwosu"],
     correctAnswer: 1,
     correctAnswerLabel: "B",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Leadership & Governance"
   },
@@ -114,7 +114,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["Unity is Strength", "Together We Rise", "One Heart, One Goal", "Progress Through Unity", "Strength in Diversity", "Forward Together", "United We Stand", "Building Tomorrow"],
     correctAnswer: 0,
     correctAnswerLabel: "A",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community Culture"
   },
@@ -124,7 +124,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["5", "7", "10", "12", "15", "20", "25", "30"],
     correctAnswer: 3,
     correctAnswerLabel: "D",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community History"
   },
@@ -134,7 +134,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["January", "March", "May", "July", "August", "September", "October", "December"],
     correctAnswer: 4,
     correctAnswerLabel: "E",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Events & Milestones"
   },
@@ -144,7 +144,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["The Beacon", "Community Voice", "Unity Times", "Progress Report", "Together News", "Our Heritage", "The Connector", "Community Pulse"],
     correctAnswer: 1,
     correctAnswerLabel: "B",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community Culture"
   },
@@ -154,7 +154,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["3", "5", "7", "9", "10", "12", "15", "18"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Leadership & Governance"
   },
@@ -164,7 +164,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["16", "18", "21", "25", "30", "No limit", "15", "20"],
     correctAnswer: 1,
     correctAnswerLabel: "B",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community Traditions"
   },
@@ -174,7 +174,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["Ade Johnson", "Chioma Nwosu", "Ibrahim Suleiman", "Grace Okonkwo", "Peter Adegoke", "Fatima Bello", "Samuel Eze", "Mary Okafor"],
     correctAnswer: 3,
     correctAnswerLabel: "D",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Member Achievements"
   },
@@ -184,7 +184,7 @@ const communityQuestions: CommunityQuizQuestion[] = [
     options: ["Red", "Blue", "Green", "Purple", "Orange", "Gold", "Maroon", "Teal"],
     correctAnswer: 5,
     correctAnswerLabel: "F",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community Culture"
   }
@@ -198,7 +198,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["Town Hall", "Church Premises", "School Building", "Private Residence", "Community Center", "Hotel Conference Room", "Open Field", "Cultural Center"],
     correctAnswer: 3,
     correctAnswerLabel: "D",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community History"
   },
@@ -208,7 +208,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["M500", "M1,000", "M2,000", "M5,000", "M10,000", "Free", "M3,000", "M7,500"],
     correctAnswer: 1,
     correctAnswerLabel: "B",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community History"
   },
@@ -218,7 +218,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"],
     correctAnswer: 3,
     correctAnswerLabel: "D",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Events & Milestones"
   },
@@ -228,7 +228,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["10", "25", "50", "75", "100", "150", "200", "250"],
     correctAnswer: 4,
     correctAnswerLabel: "E",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Member Achievements"
   },
@@ -238,7 +238,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["Rise Together", "Our Heritage", "Unity Song", "The Bond", "Together Strong", "Community Hymn", "One Family", "Forward March"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community Culture"
   },
@@ -248,7 +248,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["A Professional Agency", "A Member Volunteer", "The Founder", "A Design Competition Winner", "External Consultant", "Youth Committee", "Anonymous Donor", "Founding Committee"],
     correctAnswer: 3,
     correctAnswerLabel: "D",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community History"
   },
@@ -258,7 +258,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["Give Back Day", "Community Care", "Hearts United", "Helping Hands", "Love in Action", "Charity Gala", "Unity Outreach", "Kindness Week"],
     correctAnswer: 4,
     correctAnswerLabel: "E",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Events & Milestones"
   },
@@ -268,7 +268,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["5", "10", "15", "20", "25", "30", "35", "All 36"],
     correctAnswer: 5,
     correctAnswerLabel: "F",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Member Spotlight"
   },
@@ -278,7 +278,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["2017", "2018", "2019", "2020", "2021", "2022", "Not yet acquired", "2023"],
     correctAnswer: 4,
     correctAnswerLabel: "E",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Community History"
   },
@@ -288,7 +288,7 @@ const communityHistoryQuestions: CommunityQuizQuestion[] = [
     options: ["Chief Adeyemo", "Dr. Okonjo-Iweala", "Prof. Yakubu", "Senator Ndume", "Gov. Sanwo-Olu", "Chief Mrs. Alakija", "Dr. Dangote", "Prof. Soludo"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 30,
+    timeLimit: 10,
     points: 10,
     category: "Leadership & Governance"
   }
@@ -306,7 +306,7 @@ export const activeCommunityQuizzes: CommunityQuiz[] = [
     winningAmount: 3000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 35,
+    timeLimitPerQuestion: 10,
     participants: 89,
     gamesPlayed: 234,
     status: "active",
@@ -326,7 +326,7 @@ export const activeCommunityQuizzes: CommunityQuiz[] = [
     winningAmount: 5000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 25,
+    timeLimitPerQuestion: 10,
     participants: 156,
     gamesPlayed: 412,
     status: "active",
@@ -346,7 +346,7 @@ export const activeCommunityQuizzes: CommunityQuiz[] = [
     winningAmount: 2000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 45,
+    timeLimitPerQuestion: 10,
     participants: 67,
     gamesPlayed: 189,
     status: "active",
@@ -366,7 +366,7 @@ export const activeCommunityQuizzes: CommunityQuiz[] = [
     winningAmount: 15000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 30,
+    timeLimitPerQuestion: 10,
     participants: 0,
     gamesPlayed: 0,
     status: "upcoming",
@@ -483,7 +483,7 @@ export const communityQuizRules = [
   "Each quiz focuses on our community's history, culture, and achievements",
   "10 questions per quiz with 8 answer options (A-H) each",
   "Stakes support community development projects and scholarships",
-  "100% correct = Full prize | 8-9 correct = 50% prize | Below 8 = No prize",
+  "100% correct = Full prize | 8-9 correct = 20% prize | Below 8 = No prize",
   "All proceeds (minus Mobigate fees) go to the Community Development Fund",
   "Top performers each month receive special recognition at community meetings",
   "Quiz topics rotate monthly to cover different aspects of our community",
@@ -521,7 +521,7 @@ export const calculateCommunityWinnings = (questionsCorrect: number, winningAmou
   if (questionsCorrect === 10) {
     return { percentage: 100, amount: winningAmount, status: "won" };
   } else if (questionsCorrect >= 8) {
-    return { percentage: 50, amount: winningAmount * 0.5, status: "partial_win" };
+    return { percentage: 20, amount: winningAmount * 0.2, status: "partial_win" };
   } else {
     return { percentage: 0, amount: 0, status: "lost" };
   }

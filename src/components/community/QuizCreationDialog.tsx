@@ -36,7 +36,7 @@ const createEmptyQuestion = (index: number): QuizQuestion => ({
   options: ["", "", "", "", "", "", "", ""], // 8 empty options
   correctAnswer: 0,
   correctAnswerLabel: "A",
-  timeLimit: 30,
+  timeLimit: 10,
   points: 10,
   questionImage: undefined
 });
@@ -50,7 +50,7 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
   const [quizDescription, setQuizDescription] = useState("");
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState<"Easy" | "Medium" | "Hard">("Medium");
-  const [timeLimitPerQuestion, setTimeLimitPerQuestion] = useState("30");
+  const [timeLimitPerQuestion, setTimeLimitPerQuestion] = useState("10");
   const [stakeAmount, setStakeAmount] = useState("");
   const [winningAmount, setWinningAmount] = useState("");
   const [privacySetting, setPrivacySetting] = useState<"members_only" | "public">("members_only");
@@ -188,7 +188,7 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
     setQuizDescription("");
     setCategory("");
     setDifficulty("Medium");
-    setTimeLimitPerQuestion("30");
+    setTimeLimitPerQuestion("10");
     setStakeAmount("");
     setWinningAmount("");
     setPrivacySetting("members_only");

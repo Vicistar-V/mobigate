@@ -100,7 +100,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Germany", "Argentina", "Brazil", "France", "Italy", "Spain", "England", "Uruguay"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Sports Champions"
   },
@@ -110,7 +110,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Michelangelo", "Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Raphael", "Rembrandt", "Claude Monet", "Salvador Dalí"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "History Makers"
   },
@@ -120,7 +120,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Saturn", "Neptune", "Jupiter", "Uranus", "Earth", "Mars", "Venus", "Mercury"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Science & Tech"
   },
@@ -130,7 +130,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Amazon Prime", "Disney+", "Netflix", "HBO Max", "Apple TV+", "Hulu", "Paramount+", "Peacock"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Entertainment"
   },
@@ -140,7 +140,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Sydney", "Melbourne", "Canberra", "Brisbane", "Perth", "Adelaide", "Darwin", "Hobart"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Geography Explorer"
   },
@@ -150,7 +150,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Jeff Bezos", "Tim Cook", "Elon Musk", "Mark Zuckerberg", "Sundar Pichai", "Satya Nadella", "Bill Gates", "Larry Page"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Current Affairs"
   },
@@ -160,7 +160,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Michael Jackson", "Quincy Jones", "Beyoncé", "Stevie Wonder", "Taylor Swift", "Adele", "Paul Simon", "Kanye West"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Pop Culture"
   },
@@ -170,7 +170,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["2005", "2006", "2007", "2008", "2009", "2010", "2004", "2011"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Science & Tech"
   },
@@ -180,7 +180,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Russia", "Brazil", "Qatar", "USA", "Germany", "England", "France", "Japan"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Sports Champions"
   },
@@ -190,7 +190,7 @@ const globalKnowledgeQuestions: MobigateQuizQuestion[] = [
     options: ["Spanish", "Hindi", "English", "Mandarin Chinese", "Arabic", "Portuguese", "Bengali", "French"],
     correctAnswer: 3,
     correctAnswerLabel: "D",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "World Trivia"
   }
@@ -204,7 +204,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["BLACKPINK", "TWICE", "BTS", "EXO", "Stray Kids", "NCT", "Red Velvet", "aespa"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Pop Culture"
   },
@@ -214,7 +214,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Avengers: Endgame", "Titanic", "Avatar", "Star Wars", "Gone with the Wind", "The Lion King", "Jurassic Park", "Spider-Man: No Way Home"],
     correctAnswer: 4,
     correctAnswerLabel: "E",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Entertainment"
   },
@@ -224,7 +224,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Instagram", "Snapchat", "TikTok", "Twitter", "YouTube", "Pinterest", "WhatsApp", "Telegram"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Science & Tech"
   },
@@ -234,7 +234,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Stephen King", "Dan Brown", "J.K. Rowling", "George R.R. Martin", "Rick Riordan", "Suzanne Collins", "Stephenie Meyer", "John Green"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Entertainment"
   },
@@ -244,7 +244,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Cristiano Ronaldo", "Pelé", "Lionel Messi", "Diego Maradona", "Zinedine Zidane", "Ronaldinho", "Neymar", "Kylian Mbappé"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Sports Champions"
   },
@@ -254,7 +254,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Blue Origin", "Virgin Galactic", "SpaceX", "Rocket Lab", "Boeing", "Lockheed Martin", "Northrop Grumman", "Sierra Nevada"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Science & Tech"
   },
@@ -264,7 +264,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Rihanna", "Taylor Swift", "Beyoncé", "Adele", "Lady Gaga", "Dua Lipa", "Ariana Grande", "Billie Eilish"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Pop Culture"
   },
@@ -274,7 +274,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Ethereum", "Dogecoin", "Bitcoin", "Litecoin", "Ripple", "Cardano", "Solana", "Polkadot"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Science & Tech"
   },
@@ -284,7 +284,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Netflix", "Amazon Prime", "Disney+", "HBO Max", "Apple TV+", "Hulu", "Paramount+", "Peacock"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Entertainment"
   },
@@ -294,7 +294,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
     options: ["Kylie Jenner", "Dwayne Johnson", "Cristiano Ronaldo", "Kim Kardashian", "Ariana Grande", "Selena Gomez", "Beyoncé", "Justin Bieber"],
     correctAnswer: 2,
     correctAnswerLabel: "C",
-    timeLimit: 25,
+    timeLimit: 10,
     points: 10,
     category: "Pop Culture"
   }
@@ -312,7 +312,7 @@ export const activeMobigateQuizzes: MobigateQuiz[] = [
     winningAmount: 5000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 25,
+    timeLimitPerQuestion: 10,
     participants: 2847,
     gamesPlayed: 8934,
     status: "trending",
@@ -331,7 +331,7 @@ export const activeMobigateQuizzes: MobigateQuiz[] = [
     winningAmount: 3000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 30,
+    timeLimitPerQuestion: 10,
     participants: 4521,
     gamesPlayed: 12456,
     status: "active",
@@ -350,7 +350,7 @@ export const activeMobigateQuizzes: MobigateQuiz[] = [
     winningAmount: 10000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 20,
+    timeLimitPerQuestion: 10,
     participants: 1893,
     gamesPlayed: 5672,
     status: "active",
@@ -371,7 +371,7 @@ export const activeMobigateQuizzes: MobigateQuiz[] = [
     winningAmount: 25000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 20,
+    timeLimitPerQuestion: 10,
     participants: 987,
     gamesPlayed: 2341,
     status: "active",
@@ -392,7 +392,7 @@ export const activeMobigateQuizzes: MobigateQuiz[] = [
     winningAmount: 20000,
     currency: "MOBI",
     totalQuestions: 10,
-    timeLimitPerQuestion: 25,
+    timeLimitPerQuestion: 10,
     participants: 0,
     gamesPlayed: 0,
     status: "upcoming",
@@ -536,7 +536,7 @@ export const mobigateQuizRules = [
   "Compete with players from around the world for massive prizes",
   "10 questions per quiz with 8 answer options (A-H) each",
   "Faster completion times give you higher rankings on the leaderboard",
-  "100% correct = Full prize | 8-9 correct = 50% prize | Below 8 = No prize",
+  "100% correct = Full prize | 8-9 correct = 20% prize | Below 8 = No prize",
   "Build winning streaks to earn bonus multipliers and badges",
   "Top 10 weekly players earn exclusive rewards and recognition",
   "Sponsored quizzes may offer additional prizes from partners",
@@ -565,7 +565,7 @@ export const calculateMobigateWinnings = (questionsCorrect: number, winningAmoun
   if (questionsCorrect === 10) {
     return { percentage: 100, amount: winningAmount, status: "won" };
   } else if (questionsCorrect >= 8) {
-    return { percentage: 50, amount: winningAmount * 0.5, status: "partial_win" };
+    return { percentage: 20, amount: winningAmount * 0.2, status: "partial_win" };
   } else {
     return { percentage: 0, amount: 0, status: "lost" };
   }
