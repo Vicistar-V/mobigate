@@ -176,7 +176,7 @@ export function CampaignRoyaltyDetailSheet({
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
+            {Content()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -193,7 +193,7 @@ export function CampaignRoyaltyDetailSheet({
           </SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-          <Content />
+          {Content()}
         </ScrollArea>
       </SheetContent>
     </Sheet>

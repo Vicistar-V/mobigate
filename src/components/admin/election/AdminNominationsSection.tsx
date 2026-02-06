@@ -450,7 +450,7 @@ export function AdminNominationsSection() {
                 Nomination Details
               </DrawerTitle>
             </DrawerHeader>
-            <DetailContent />
+            {DetailContent()}
           </DrawerContent>
         </Drawer>
       ) : (
@@ -462,7 +462,7 @@ export function AdminNominationsSection() {
                 Nomination Details
               </DialogTitle>
             </DialogHeader>
-            <DetailContent />
+            {DetailContent()}
           </DialogContent>
         </Dialog>
       )}

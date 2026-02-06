@@ -1053,13 +1053,13 @@ export function AdminImpeachmentTab() {
       {isMobile ? (
         <Drawer open={showDetailsSheet} onOpenChange={setShowDetailsSheet}>
           <DrawerContent className="max-h-[92vh] flex flex-col">
-            <DetailsSheetContent />
+            {DetailsSheetContent()}
           </DrawerContent>
         </Drawer>
       ) : (
         <Dialog open={showDetailsSheet} onOpenChange={setShowDetailsSheet}>
           <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0">
-            <DetailsSheetContent />
+            {DetailsSheetContent()}
           </DialogContent>
         </Dialog>
       )}
