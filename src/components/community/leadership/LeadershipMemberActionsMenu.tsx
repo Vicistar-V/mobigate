@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
@@ -18,6 +21,8 @@ import { MemberContributionsSheet } from "./MemberContributionsSheet";
 import { MemberManifestoSheet } from "./MemberManifestoSheet";
 import { MemberCommentsSheet } from "./MemberCommentsSheet";
 import { MemberReportSheet } from "./MemberReportSheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MoreVertical,
   User,
@@ -35,6 +40,10 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  ChevronRight,
+  Edit,
+  ArrowLeftRight,
+  Trash2,
 } from "lucide-react";
 
 interface LeadershipMemberActionsMenuProps {
@@ -55,6 +64,9 @@ export function LeadershipMemberActionsMenu({
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  // Drawer state
+  const [isOpen, setIsOpen] = useState(false);
+  
   // Dialog states
   const [showAddToCircle, setShowAddToCircle] = useState(false);
   const [showContributions, setShowContributions] = useState(false);
@@ -68,21 +80,28 @@ export function LeadershipMemberActionsMenu({
   const [isFriend, setIsFriend] = useState(member.isFriend ?? false);
   const [isBlocked, setIsBlocked] = useState(false);
 
+  // Close drawer helper
+  const closeDrawer = () => setIsOpen(false);
+
   // Action handlers
   const handleViewProfile = () => {
+    closeDrawer();
     navigate(`/profile/${member.id}`);
   };
 
   const handleViewContributions = () => {
+    closeDrawer();
     setShowContributions(true);
   };
 
   const handleViewManifesto = () => {
+    closeDrawer();
     setShowManifesto(true);
   };
 
   const handleAddFriend = () => {
     setIsFriend(true);
+    closeDrawer();
     toast({
       title: "Friend Request Sent",
       description: `Friend request sent to ${member.name}`,
@@ -91,6 +110,7 @@ export function LeadershipMemberActionsMenu({
 
   const handleUnfriend = () => {
     setIsFriend(false);
+    closeDrawer();
     toast({
       title: "Unfriended",
       description: `You have unfriended ${member.name}`,
@@ -98,10 +118,12 @@ export function LeadershipMemberActionsMenu({
   };
 
   const handleAddToCircle = () => {
+    closeDrawer();
     setShowAddToCircle(true);
   };
 
   const handleSendMessage = () => {
+    closeDrawer();
     // Dispatch custom event to open Mobi-Chat with this member
     window.dispatchEvent(
       new CustomEvent('openChatWithUser', {
@@ -119,37 +141,44 @@ export function LeadershipMemberActionsMenu({
   };
 
   const handleAddComment = () => {
+    closeDrawer();
     setCommentsViewType("add");
     setShowComments(true);
   };
 
   const handleViewComments = () => {
+    closeDrawer();
     setCommentsViewType("view");
     setShowComments(true);
   };
 
   const handleNewReport = () => {
+    closeDrawer();
     setReportViewType("new");
     setShowReport(true);
   };
 
   const handleViewPendingReports = () => {
+    closeDrawer();
     setReportViewType("pending");
     setShowReport(true);
   };
 
   const handleViewResolvedReports = () => {
+    closeDrawer();
     setReportViewType("resolved");
     setShowReport(true);
   };
 
   const handleViewAbsolvedReports = () => {
+    closeDrawer();
     setReportViewType("absolved");
     setShowReport(true);
   };
 
   const handleBlock = () => {
     setIsBlocked(true);
+    closeDrawer();
     toast({
       title: "Member Blocked",
       description: `${member.name} has been blocked`,
@@ -158,16 +187,90 @@ export function LeadershipMemberActionsMenu({
 
   const handleUnblock = () => {
     setIsBlocked(false);
+    closeDrawer();
     toast({
       title: "Member Unblocked",
       description: `${member.name} has been unblocked`,
     });
   };
 
+  // Admin action handlers
+  const handleEdit = () => {
+    closeDrawer();
+    onEdit?.(member);
+  };
+
+  const handleTransfer = () => {
+    closeDrawer();
+    onTransfer?.(member);
+  };
+
+  const handleRemove = () => {
+    closeDrawer();
+    onRemove?.(member);
+  };
+
+  // Action button component for consistent styling
+  const ActionButton = ({ 
+    icon: Icon, 
+    label, 
+    onClick, 
+    variant = "default",
+    iconClassName = ""
+  }: { 
+    icon: React.ElementType; 
+    label: string; 
+    onClick: () => void;
+    variant?: "default" | "destructive" | "success";
+    iconClassName?: string;
+  }) => (
+    <button
+      onClick={onClick}
+      className={`flex items-center h-12 w-full gap-3 px-3 text-sm rounded-lg active:bg-muted/80 transition-colors ${
+        variant === "destructive" 
+          ? "text-destructive hover:bg-destructive/10" 
+          : variant === "success"
+          ? "text-green-600 hover:bg-green-500/10"
+          : "hover:bg-muted/50"
+      }`}
+    >
+      <Icon className={`h-5 w-5 shrink-0 ${iconClassName}`} />
+      <span className="flex-1 text-left">{label}</span>
+      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+    </button>
+  );
+
+  // Sub-action button for accordion content
+  const SubActionButton = ({ 
+    icon: Icon, 
+    label, 
+    onClick,
+    variant = "default",
+    iconClassName = ""
+  }: { 
+    icon: React.ElementType; 
+    label: string; 
+    onClick: () => void;
+    variant?: "default" | "destructive";
+    iconClassName?: string;
+  }) => (
+    <button
+      onClick={onClick}
+      className={`flex items-center h-11 w-full gap-3 pl-10 pr-3 text-sm rounded-lg active:bg-muted/80 transition-colors ${
+        variant === "destructive" 
+          ? "text-destructive hover:bg-destructive/10" 
+          : "hover:bg-muted/50"
+      }`}
+    >
+      <Icon className={`h-4 w-4 shrink-0 ${iconClassName}`} />
+      <span className="flex-1 text-left">{label}</span>
+    </button>
+  );
+
   return (
     <>
-      <DropdownMenu modal={true}>
-        <DropdownMenuTrigger asChild>
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerTrigger asChild>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -176,143 +279,143 @@ export function LeadershipMemberActionsMenu({
           >
             <MoreVertical className="h-5 w-5" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          align="end" 
-          className="w-48 z-[100]"
-          sideOffset={4}
-          onCloseAutoFocus={(e) => e.preventDefault()}
-        >
-          {/* View Profile */}
-          <DropdownMenuItem onClick={handleViewProfile} className="py-2.5 text-sm">
-            <User className="h-4 w-4 mr-2" />
-            View Profile
-          </DropdownMenuItem>
+        </DrawerTrigger>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="pb-2 border-b">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 shrink-0">
+                <AvatarImage src={member.imageUrl} alt={member.name} />
+                <AvatarFallback className="text-sm font-medium">
+                  {member.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0 text-left">
+                <DrawerTitle className="text-base truncate">{member.name}</DrawerTitle>
+                <p className="text-sm text-muted-foreground truncate">{member.position}</p>
+              </div>
+            </div>
+          </DrawerHeader>
 
-          {/* Contributions */}
-          <DropdownMenuItem onClick={handleViewContributions} className="py-2.5 text-sm">
-            <Coins className="h-4 w-4 mr-2" />
-            Contributions
-          </DropdownMenuItem>
+          <ScrollArea className="flex-1 overflow-y-auto touch-auto">
+            <div className="p-3 space-y-1">
+              {/* Primary Actions */}
+              <ActionButton icon={User} label="View Profile" onClick={handleViewProfile} />
+              <ActionButton icon={Coins} label="Contributions" onClick={handleViewContributions} />
+              <ActionButton icon={FileText} label="Manifesto" onClick={handleViewManifesto} />
 
-          {/* Manifesto */}
-          <DropdownMenuItem onClick={handleViewManifesto} className="py-2.5 text-sm">
-            <FileText className="h-4 w-4 mr-2" />
-            Manifesto
-          </DropdownMenuItem>
+              {/* Separator */}
+              <div className="h-px bg-border my-2" />
 
-          <DropdownMenuSeparator />
-
-          {/* Add Friend / Unfriend */}
-          {isFriend ? (
-            <DropdownMenuItem onClick={handleUnfriend} className="py-2.5 text-sm">
-              <UserMinus className="h-4 w-4 mr-2" />
-              Unfriend
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={handleAddFriend} className="py-2.5 text-sm">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Friend
-            </DropdownMenuItem>
-          )}
-
-          {/* Add to Circle */}
-          <DropdownMenuItem onClick={handleAddToCircle} className="py-2.5 text-sm">
-            <Users className="h-4 w-4 mr-2" />
-            Add to Circle
-          </DropdownMenuItem>
-
-          {/* Send Message/Chat */}
-          <DropdownMenuItem onClick={handleSendMessage} className="py-2.5 text-sm">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Message
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-
-          {/* Comment Sub-menu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="py-2.5 text-sm">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Comment
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 z-[110]">
-              <DropdownMenuItem onClick={handleAddComment} className="py-2 text-sm">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Add
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleViewComments} className="py-2 text-sm">
-                <Eye className="h-4 w-4 mr-2" />
-                View All
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          {/* Report Sub-menu */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="py-2.5 text-sm">
-              <Flag className="h-4 w-4 mr-2" />
-              Report
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 z-[110]">
-              <DropdownMenuItem onClick={handleNewReport} className="py-2 text-sm text-destructive focus:text-destructive">
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                New Report
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleViewPendingReports} className="py-2 text-sm">
-                <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-                Pending
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleViewResolvedReports} className="py-2 text-sm">
-                <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                Resolved
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleViewAbsolvedReports} className="py-2 text-sm">
-                <ShieldCheck className="h-4 w-4 mr-2 text-blue-500" />
-                Absolved
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          <DropdownMenuSeparator />
-
-          {/* Block / Unblock */}
-          {isBlocked ? (
-            <DropdownMenuItem onClick={handleUnblock} className="py-2.5 text-sm">
-              <ShieldCheck className="h-4 w-4 mr-2 text-green-500" />
-              Unblock
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={handleBlock} className="py-2.5 text-sm text-destructive focus:text-destructive">
-              <Ban className="h-4 w-4 mr-2" />
-              Block
-            </DropdownMenuItem>
-          )}
-
-          {/* Admin Actions (if enabled) */}
-          {showAdminActions && (
-            <>
-              <DropdownMenuSeparator />
-              {onEdit && (
-                <DropdownMenuItem onClick={() => onEdit(member)} className="py-2.5 text-sm">
-                  Edit Member
-                </DropdownMenuItem>
+              {/* Social Actions */}
+              {isFriend ? (
+                <ActionButton icon={UserMinus} label="Unfriend" onClick={handleUnfriend} />
+              ) : (
+                <ActionButton icon={UserPlus} label="Add Friend" onClick={handleAddFriend} />
               )}
-              {onTransfer && (
-                <DropdownMenuItem onClick={() => onTransfer(member)} className="py-2.5 text-sm">
-                  Transfer
-                </DropdownMenuItem>
+              <ActionButton icon={Users} label="Add to Circle" onClick={handleAddToCircle} />
+              <ActionButton icon={MessageSquare} label="Message" onClick={handleSendMessage} />
+
+              {/* Separator */}
+              <div className="h-px bg-border my-2" />
+
+              {/* Feedback Accordions */}
+              <Accordion type="single" collapsible className="w-full">
+                {/* Comment Section */}
+                <AccordionItem value="comment" className="border-none">
+                  <AccordionTrigger className="flex items-center h-12 w-full gap-3 px-3 text-sm rounded-lg hover:bg-muted/50 hover:no-underline py-0">
+                    <MessageCircle className="h-5 w-5 shrink-0 text-foreground" />
+                    <span className="flex-1 text-left font-normal">Comment</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-1 pt-0">
+                    <SubActionButton icon={MessageCircle} label="Add Comment" onClick={handleAddComment} />
+                    <SubActionButton icon={Eye} label="View All Comments" onClick={handleViewComments} />
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Report Section */}
+                <AccordionItem value="report" className="border-none">
+                  <AccordionTrigger className="flex items-center h-12 w-full gap-3 px-3 text-sm rounded-lg hover:bg-muted/50 hover:no-underline py-0">
+                    <Flag className="h-5 w-5 shrink-0 text-foreground" />
+                    <span className="flex-1 text-left font-normal">Report</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-1 pt-0">
+                    <SubActionButton 
+                      icon={AlertTriangle} 
+                      label="New Report" 
+                      onClick={handleNewReport}
+                      variant="destructive"
+                    />
+                    <SubActionButton 
+                      icon={Clock} 
+                      label="Pending Reports" 
+                      onClick={handleViewPendingReports}
+                      iconClassName="text-yellow-500"
+                    />
+                    <SubActionButton 
+                      icon={CheckCircle} 
+                      label="Resolved Reports" 
+                      onClick={handleViewResolvedReports}
+                      iconClassName="text-green-500"
+                    />
+                    <SubActionButton 
+                      icon={ShieldCheck} 
+                      label="Absolved Reports" 
+                      onClick={handleViewAbsolvedReports}
+                      iconClassName="text-blue-500"
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              {/* Separator */}
+              <div className="h-px bg-border my-2" />
+
+              {/* Block / Unblock */}
+              {isBlocked ? (
+                <ActionButton 
+                  icon={ShieldCheck} 
+                  label="Unblock" 
+                  onClick={handleUnblock}
+                  variant="success"
+                  iconClassName="text-green-500"
+                />
+              ) : (
+                <ActionButton 
+                  icon={Ban} 
+                  label="Block" 
+                  onClick={handleBlock}
+                  variant="destructive"
+                />
               )}
-              {onRemove && (
-                <DropdownMenuItem onClick={() => onRemove(member)} className="py-2.5 text-sm text-destructive focus:text-destructive">
-                  Remove
-                </DropdownMenuItem>
+
+              {/* Admin Actions */}
+              {showAdminActions && (onEdit || onTransfer || onRemove) && (
+                <>
+                  <div className="h-px bg-border my-2" />
+                  <p className="text-xs font-medium text-muted-foreground px-3 py-1.5">Admin Actions</p>
+                  {onEdit && (
+                    <ActionButton icon={Edit} label="Edit Member" onClick={handleEdit} />
+                  )}
+                  {onTransfer && (
+                    <ActionButton icon={ArrowLeftRight} label="Transfer" onClick={handleTransfer} />
+                  )}
+                  {onRemove && (
+                    <ActionButton 
+                      icon={Trash2} 
+                      label="Remove Member" 
+                      onClick={handleRemove}
+                      variant="destructive"
+                    />
+                  )}
+                </>
               )}
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+
+              {/* Bottom padding for safe area */}
+              <div className="h-6" />
+            </div>
+          </ScrollArea>
+        </DrawerContent>
+      </Drawer>
 
       {/* Dialogs and Sheets */}
       <AddToCircleDialog
