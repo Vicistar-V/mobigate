@@ -1,20 +1,12 @@
 
 
-## Make Voter Cards Clickable to Open User Profile
+## Add "Load More" Pagination to Voters List
 
-### What This Does
-Each voter card in the "Voters List" (shown in the screenshot) will become fully tappable. Clicking anywhere on a voter card (John Garcia, Daniel Garcia, John Udeh, etc.) will open the Member Preview drawer, which shows the user's photo, name, position, and provides a "View Profile" button to navigate to their full Mobigate profile.
+### Problem
+Currently, the `generateMockVoters` function caps at 50 voters (`Math.min(voteCount, 50)`), and when the total vote count exceeds 50 (e.g., 54 votes), the remaining voters are inaccessible. The UI shows "Showing first 50 voters of 54 total" but provides no way to view the rest.
 
-### Flow
-```text
-Tap voter card (e.g. "John Garcia")
-        |
-        v
-Opens MemberPreviewDialog (bottom drawer)
-  - Shows photo, name, online status
-  - "View Profile" button -> /profile/:id
-  - Add Friend / Message / Add to Circle
-```
+### Solution
+Replace the hard 50-voter cap with a paginated "Load More" approach that generates ALL voters upfront but displays them in pages of 50, with a prominent "Load More" button at the bottom to reveal the next batch.
 
 ---
 
@@ -22,66 +14,108 @@ Opens MemberPreviewDialog (bottom drawer)
 
 #### File: `src/components/admin/election/CandidateVotersListSheet.tsx`
 
-**1. Add MemberPreviewDialog import and state**
+**1. Remove the 50-voter cap from `generateMockVoters`**
 
-Add imports for `MemberPreviewDialog` and the `ExecutiveMember` type. Add state variables to track:
-- `selectedMember` - the voter mapped to an `ExecutiveMember` object
-- `showMemberPreview` - whether the preview drawer is open
-
-**2. Create voter-to-member mapper function**
-
-Since `MemberPreviewDialog` expects an `ExecutiveMember` object, create a helper that maps a `CandidateVoter` to the required shape:
-
+Change line 62 from:
 ```tsx
-const mapVoterToMember = (voter: CandidateVoter): ExecutiveMember => ({
-  id: voter.id,
-  name: voter.name,
-  position: "Community Member",
-  tenure: "",
-  imageUrl: voter.avatar,
-  level: "officer",
-  committee: "executive",
-});
+const voterCount = Math.min(voteCount, 50);
+```
+to:
+```tsx
+const voterCount = voteCount;
 ```
 
-**3. Add click handler**
+This generates all voters (the full `voteCount`), not just the first 50.
+
+---
+
+**2. Add pagination state**
+
+Add a `displayCount` state to track how many voters are currently visible, starting at 50:
 
 ```tsx
-const handleVoterClick = (voter: CandidateVoter) => {
-  setSelectedMember(mapVoterToMember(voter));
-  setShowMemberPreview(true);
-};
+const [displayCount, setDisplayCount] = useState(50);
 ```
 
-**4. Make voter cards fully tappable**
-
-Wrap each voter `Card` content with a clickable container:
-- Change the outer `Card` to have `cursor-pointer` and `active:bg-muted/50` for touch feedback
-- Add `onClick={() => handleVoterClick(voter)}` to the Card
-- Add a subtle `ChevronRight` indicator on the right side (already imported but unused)
-
-**5. Add MemberPreviewDialog to JSX**
-
-Render the dialog outside the drawer/sheet to prevent z-index conflicts:
-
+Also add a constant for page size:
 ```tsx
-<MemberPreviewDialog
-  member={selectedMember}
-  open={showMemberPreview}
-  onOpenChange={setShowMemberPreview}
-/>
+const PAGE_SIZE = 50;
 ```
 
 ---
 
-### Visual Changes on Mobile
+**3. Slice the filtered voters for display**
 
-**Before:** Voter cards are static display-only items
-**After:** Each voter card has:
-- Touch ripple/feedback on tap (`active:bg-muted/50 transition-colors`)
-- A subtle chevron indicator on the right side showing it's tappable
-- Opens the member preview drawer on tap
-- From the preview, users can navigate to the full Mobigate profile
+Instead of rendering all `filteredVoters`, only render the first `displayCount`:
+
+```tsx
+const displayedVoters = filteredVoters.slice(0, displayCount);
+const hasMore = filteredVoters.length > displayCount;
+const remainingCount = filteredVoters.length - displayCount;
+```
+
+---
+
+**4. Add "Load More" button after the voter cards**
+
+After the voter cards list and before the footer note, add a "Load More" button that appears only when there are more voters to show:
+
+```tsx
+{hasMore && (
+  <Button
+    variant="outline"
+    className="w-full h-11 text-sm font-medium"
+    onClick={() => setDisplayCount(prev => prev + PAGE_SIZE)}
+  >
+    <ChevronDown className="h-4 w-4 mr-2" />
+    Load More ({remainingCount} remaining)
+  </Button>
+)}
+```
+
+---
+
+**5. Update the badge and info text**
+
+Update the badge to show displayed vs total:
+```tsx
+<Badge variant="secondary" className="text-xs">
+  {displayedVoters.length} of {voteCount}
+</Badge>
+```
+
+Update the info text:
+```tsx
+<p className="text-xs text-muted-foreground">
+  Showing {displayedVoters.length} of {filteredVoters.length} voters
+  {filteredVoters.length < voteCount ? ` (filtered from ${voteCount})` : ""}
+</p>
+```
+
+---
+
+**6. Reset display count when search changes**
+
+When the user types a search query, reset the display count back to 50 so pagination starts fresh for filtered results:
+
+```tsx
+const handleSearchChange = (value: string) => {
+  setSearchQuery(value);
+  setDisplayCount(PAGE_SIZE);
+};
+```
+
+---
+
+**7. Add `ChevronDown` icon import**
+
+Add `ChevronDown` to the lucide-react imports for the "Load More" button icon.
+
+---
+
+**8. Add `Button` import**
+
+Add `Button` from `@/components/ui/button` since it's not currently imported.
 
 ---
 
@@ -89,7 +123,40 @@ Render the dialog outside the drawer/sheet to prevent z-index conflicts:
 
 | File | Change |
 |------|--------|
-| `src/components/admin/election/CandidateVotersListSheet.tsx` | Add MemberPreviewDialog integration, make voter cards clickable |
+| `src/components/admin/election/CandidateVotersListSheet.tsx` | Remove 50-cap, add pagination state, "Load More" button, update counts |
 
-No new files needed. Uses existing `MemberPreviewDialog` component and `ExecutiveMember` interface.
+---
+
+### Mobile UX Details
+
+- The "Load More" button uses `h-11` for comfortable touch target
+- Full-width button (`w-full`) for easy tapping
+- Shows exact remaining count (e.g., "Load More (4 remaining)")
+- Automatically disappears when all voters are shown
+- Search resets pagination to prevent confusion
+- Button placed right after the last voter card, before the footer
+
+---
+
+### Expected Result
+
+```text
+[Voter Card 1]
+[Voter Card 2]
+...
+[Voter Card 50]
+
+[ Load More (4 remaining) ]   <-- New button
+
+[Footer Note]
+```
+
+After tapping "Load More":
+```text
+[Voter Card 1]
+...
+[Voter Card 54]
+
+[Footer Note]   <-- Button disappears, all shown
+```
 
