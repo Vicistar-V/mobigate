@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { AddToCircleDialog } from "@/components/AddToCircleDialog";
-import { MemberContributionsSheet } from "./MemberContributionsSheet";
+
 import { MemberManifestoSheet } from "./MemberManifestoSheet";
 import { MemberCommentsSheet } from "./MemberCommentsSheet";
 import { MemberReportSheet } from "./MemberReportSheet";
@@ -26,7 +26,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MoreVertical,
   User,
-  Coins,
+  
   FileText,
   UserPlus,
   UserMinus,
@@ -69,7 +69,7 @@ export function LeadershipMemberActionsMenu({
   
   // Dialog states
   const [showAddToCircle, setShowAddToCircle] = useState(false);
-  const [showContributions, setShowContributions] = useState(false);
+  
   const [showManifesto, setShowManifesto] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showReport, setShowReport] = useState(false);
@@ -89,10 +89,6 @@ export function LeadershipMemberActionsMenu({
     navigate(`/profile/${member.id}`);
   };
 
-  const handleViewContributions = () => {
-    closeDrawer();
-    setShowContributions(true);
-  };
 
   const handleViewManifesto = () => {
     closeDrawer();
@@ -300,7 +296,7 @@ export function LeadershipMemberActionsMenu({
             <div className="p-3 space-y-1">
               {/* Primary Actions */}
               <ActionButton icon={User} label="View Profile" onClick={handleViewProfile} />
-              <ActionButton icon={Coins} label="Contributions" onClick={handleViewContributions} />
+              
               <ActionButton icon={FileText} label="Manifesto" onClick={handleViewManifesto} />
 
               {/* Separator */}
@@ -424,11 +420,6 @@ export function LeadershipMemberActionsMenu({
         userName={member.name}
       />
 
-      <MemberContributionsSheet
-        open={showContributions}
-        onOpenChange={setShowContributions}
-        member={member}
-      />
 
       <MemberManifestoSheet
         open={showManifesto}
