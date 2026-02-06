@@ -32,9 +32,11 @@ export const CommunityAccountsTab = () => {
   const [sortBy, setSortBy] = useState('all');
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
   const [showReceiptsFormatSheet, setShowReceiptsFormatSheet] = useState(false);
+  const [showSummaryDownloadSheet, setShowSummaryDownloadSheet] = useState(false);
   const [debtsChecked, setDebtsChecked] = useState(false);
   const [receiptsChecked, setReceiptsChecked] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [summarySort, setSummarySort] = useState('all');
 
   const filteredTransactions = mockTransactions.filter((transaction) => {
     if (activeFilter === 'credit') return transaction.type === 'credit';
@@ -61,6 +63,11 @@ export const CommunityAccountsTab = () => {
   const handleReceiptsFormatDownload = (selectedFormat: DownloadFormat) => {
     toast.success(`Receipts downloaded as ${selectedFormat.toUpperCase()}`);
     setShowReceiptsFormatSheet(false);
+  };
+
+  const handleSummaryDownload = (selectedFormat: DownloadFormat) => {
+    toast.success(`Financial summary downloaded as ${selectedFormat.toUpperCase()}`);
+    setShowSummaryDownloadSheet(false);
   };
 
   const getBalanceInfo = () => {
@@ -240,8 +247,10 @@ export const CommunityAccountsTab = () => {
         <h2 className="text-lg font-bold mb-3">Financial Summary</h2>
         <FinancialSummaryTable 
           member={mockMemberFinancialRecord}
-          sortFilter="all"
-          onSortChange={() => {}}
+          sortFilter={summarySort}
+          onSortChange={setSummarySort}
+          onDownload={() => setShowSummaryDownloadSheet(true)}
+          onClose={() => setIsTableCollapsed(true)}
         />
       </div>
 
@@ -268,6 +277,16 @@ export const CommunityAccountsTab = () => {
       <FinancialStatusDialog
         open={showStatusDialog}
         onOpenChange={setShowStatusDialog}
+      />
+
+      {/* Summary Download Format Sheet */}
+      <DownloadFormatSheet
+        open={showSummaryDownloadSheet}
+        onOpenChange={setShowSummaryDownloadSheet}
+        onDownload={handleSummaryDownload}
+        title="Download Financial Summary"
+        documentName="Financial Summary Report"
+        availableFormats={["pdf", "jpeg", "png", "csv"]}
       />
     </div>
   );
