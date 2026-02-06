@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { OfficialLetterDisplay, LetterData } from "@/components/community/resources/OfficialLetterDisplay";
 import { DigitalIDCardDisplay, IDCardData } from "@/components/community/resources/DigitalIDCardDisplay";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 interface ManageCommunityResourcesDialogProps {
   open: boolean;
@@ -76,6 +78,10 @@ export function ManageCommunityResourcesDialog({
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const [coverImageFile, setCoverImageFile] = useState<{ name: string; preview: string } | null>(null);
   const [pdfFile, setPdfFile] = useState<{ name: string } | null>(null);
+
+  // Member preview state
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
 
   // Assign manager state
   const [showAssignManager, setShowAssignManager] = useState(false);
@@ -293,6 +299,19 @@ export function ManageCommunityResourcesDialog({
     });
   };
 
+  const handleManagerClick = (manager: typeof mockResourceManagers[0]) => {
+    setSelectedMember({
+      id: manager.id,
+      name: manager.name,
+      position: "Resource Manager",
+      tenure: "",
+      imageUrl: manager.photo,
+      level: "officer",
+      committee: "executive",
+    });
+    setShowMemberPreview(true);
+  };
+
   const filteredIDCardRequests = mockIDCardRequests.filter(req => {
     const matchesStatus = statusFilter === "all" || req.status === statusFilter;
     const matchesSearch = searchQuery === "" || 
@@ -368,7 +387,10 @@ export function ManageCommunityResourcesDialog({
                       placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 h-10"
+                      className="pl-9 h-10 text-base"
+                      style={{ touchAction: 'manipulation' }}
+                      onClick={(e) => e.stopPropagation()}
+                      autoComplete="off"
                     />
                   </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -610,6 +632,10 @@ export function ManageCommunityResourcesDialog({
                             value={pubTitle}
                             onChange={(e) => setPubTitle(e.target.value)}
                             placeholder="Publication title..."
+                            className="h-10 text-base"
+                            style={{ touchAction: 'manipulation' }}
+                            onClick={(e) => e.stopPropagation()}
+                            autoComplete="off"
                           />
                         </div>
                         
@@ -620,6 +646,9 @@ export function ManageCommunityResourcesDialog({
                             onChange={(e) => setPubDescription(e.target.value)}
                             placeholder="Brief description..."
                             rows={3}
+                            className="text-base"
+                            style={{ touchAction: 'manipulation' }}
+                            onClick={(e) => e.stopPropagation()}
                           />
                         </div>
 
@@ -645,6 +674,10 @@ export function ManageCommunityResourcesDialog({
                               value={pubEdition}
                               onChange={(e) => setPubEdition(e.target.value)}
                               placeholder="Vol. X, Issue Y"
+                              className="h-10 text-base"
+                              style={{ touchAction: 'manipulation' }}
+                              onClick={(e) => e.stopPropagation()}
+                              autoComplete="off"
                             />
                           </div>
                         </div>
@@ -657,6 +690,10 @@ export function ManageCommunityResourcesDialog({
                               value={pubPages}
                               onChange={(e) => setPubPages(e.target.value)}
                               placeholder="Number of pages"
+                              className="h-10 text-base"
+                              style={{ touchAction: 'manipulation' }}
+                              onClick={(e) => e.stopPropagation()}
+                              autoComplete="off"
                             />
                           </div>
                           
@@ -755,7 +792,10 @@ export function ManageCommunityResourcesDialog({
                       placeholder="Search publications..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
+                      className="pl-9 h-10 text-base"
+                      style={{ touchAction: 'manipulation' }}
+                      onClick={(e) => e.stopPropagation()}
+                      autoComplete="off"
                     />
                   </div>
 
@@ -926,7 +966,11 @@ export function ManageCommunityResourcesDialog({
                     <h3 className="font-semibold text-sm mb-3">Current Resource Managers</h3>
                     <div className="space-y-3">
                       {mockResourceManagers.map((manager) => (
-                        <Card key={manager.id}>
+                        <Card 
+                          key={manager.id} 
+                          className="cursor-pointer active:scale-[0.99] transition-transform"
+                          onClick={() => handleManagerClick(manager)}
+                        >
                           <CardContent className="p-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-12 w-12 border">
@@ -951,7 +995,7 @@ export function ManageCommunityResourcesDialog({
                                   size="sm"
                                   variant="outline"
                                   className="text-destructive h-8"
-                                  onClick={() => handleRemoveManager(manager.id, manager.name)}
+                                  onClick={(e) => { e.stopPropagation(); handleRemoveManager(manager.id, manager.name); }}
                                 >
                                   <UserMinus className="h-3 w-3" />
                                 </Button>
@@ -1018,6 +1062,15 @@ export function ManageCommunityResourcesDialog({
             if (!open) setSelectedIDCardData(null);
           }}
           cardData={selectedIDCardData}
+        />
+      )}
+
+      {/* Member Preview Dialog */}
+      {selectedMember && (
+        <MemberPreviewDialog
+          member={selectedMember}
+          open={showMemberPreview}
+          onOpenChange={setShowMemberPreview}
         />
       )}
     </>
