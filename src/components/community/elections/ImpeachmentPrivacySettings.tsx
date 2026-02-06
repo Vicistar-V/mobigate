@@ -115,7 +115,7 @@ export function ImpeachmentPrivacySettings({
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh] flex flex-col">
+        <DrawerContent className="max-h-[90vh] flex flex-col overflow-hidden">
           <DrawerHeader className="shrink-0 border-b px-4">
             <DrawerTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
@@ -205,15 +205,15 @@ export function ImpeachmentPrivacySettings({
                           )} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium text-sm">{setting.settingName}</p>
                             {setting.memberVote === null && (
-                              <Badge className="text-[10px] bg-amber-500 text-white shrink-0">
+                              <Badge className="text-xs bg-amber-500 text-white shrink-0">
                                 Vote
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1">
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">
                             {setting.settingDescription}
                           </p>
                         </div>
@@ -339,7 +339,7 @@ export function ImpeachmentPrivacySettings({
 
       {/* Vote Drawer */}
       <Drawer open={showVoteDrawer} onOpenChange={setShowVoteDrawer}>
-        <DrawerContent className="max-h-[85vh] flex flex-col">
+        <DrawerContent className="max-h-[85vh] flex flex-col overflow-hidden">
           <DrawerHeader className="shrink-0 border-b px-4">
             <DrawerTitle className="flex items-center gap-2">
               <Vote className="h-5 w-5 text-primary" />
@@ -352,29 +352,30 @@ export function ImpeachmentPrivacySettings({
               {/* Setting Info */}
               <Card className="mb-4">
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-start gap-3 mb-3">
                     {(() => {
                       const Icon = getSettingIcon(selectedSetting.settingKey);
                       return (
-                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                           <Icon className="h-6 w-6 text-primary" />
                         </div>
                       );
                     })()}
-                    <div>
-                      <h3 className="font-semibold">{selectedSetting.settingName}</h3>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm leading-tight">{selectedSetting.settingName}</h3>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                         {selectedSetting.settingDescription}
                       </p>
                     </div>
                   </div>
 
                   {/* Current Status */}
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <span className="text-sm text-muted-foreground">Current setting:</span>
+                  <div className="flex items-center justify-between gap-2 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-sm text-muted-foreground shrink-0">Current setting:</span>
                     <Badge 
                       variant="outline" 
                       className={cn(
+                        "shrink-0",
                         selectedSetting.currentValue === 'visible'
                           ? "bg-green-50 text-green-600 border-green-200"
                           : "bg-muted text-muted-foreground"
@@ -430,18 +431,18 @@ export function ImpeachmentPrivacySettings({
                   )}
                   onClick={() => handleVote(selectedSetting.settingId, 'visible')}
                 >
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center shrink-0">
+                  <div className="flex items-start gap-3 w-full">
+                    <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center shrink-0 mt-0.5">
                       <Eye className="h-5 w-5 text-green-600" />
                     </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium">Show Information</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="font-medium text-sm">Show Information</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
                         Make this data visible to all valid members
                       </p>
                     </div>
                     {selectedSetting.memberVote === 'visible' && (
-                      <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                      <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                     )}
                   </div>
                 </Button>
@@ -454,18 +455,18 @@ export function ImpeachmentPrivacySettings({
                   )}
                   onClick={() => handleVote(selectedSetting.settingId, 'hidden')}
                 >
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <div className="flex items-start gap-3 w-full">
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5">
                       <EyeOff className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium">Hide Information</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="font-medium text-sm">Hide Information</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
                         Protect member identity and privacy
                       </p>
                     </div>
                     {selectedSetting.memberVote === 'hidden' && (
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                     )}
                   </div>
                 </Button>
