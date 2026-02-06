@@ -258,7 +258,7 @@ export function CandidateVotersListSheet({
           </p>
         ) : (searchQuery || filterMode !== "all") ? (
           <p className="text-xs text-muted-foreground">
-            Found {filteredVoters.length} of {voteCount} voters
+            {filteredVoters.length} matching voters found
           </p>
         ) : null}
 
