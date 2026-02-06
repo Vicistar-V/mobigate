@@ -86,7 +86,7 @@ export const OFFICER_DISPLAY_TITLES: Record<ExtendedOfficerRole, string> = {
   treasurer: "Treasurer",
   financial_secretary: "Financial Secretary",
   publicity_secretary: "PRO",
-  director_of_socials: "Dir. of Socials",
+  director_of_socials: "Director of Socials",
   legal_adviser: "Legal Adviser",
 };
 
@@ -371,7 +371,7 @@ export function getRequirementsDescription(
     case "content":
       return "Secretary + PRO, or President + one of them";
     case "leadership":
-      return "President + Secretary + (PRO or Dir. of Socials)";
+      return "President + Secretary + (PRO or Director of Socials)";
     case "settings":
       return "President + Secretary + Legal Adviser";
     default:

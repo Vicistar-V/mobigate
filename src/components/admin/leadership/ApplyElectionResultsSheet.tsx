@@ -185,7 +185,7 @@ export function ApplyElectionResultsSheet({ open, onOpenChange }: SheetProps) {
             ? "Apply Election Result"
             : `Apply All Results (${pendingResults.length})`
         }
-        actionDescription="Multi-signature authorization required: President + Secretary + (PRO or Dir. of Socials)"
+        actionDescription="Multi-signature authorization required: President + Secretary + (PRO or Director of Socials)"
         actionDetails={getAuthActionDetails()}
         initiatorRole="secretary"
         onAuthorized={handleAuthorizationComplete}
@@ -222,15 +222,15 @@ export function ApplyElectionResultsSheet({ open, onOpenChange }: SheetProps) {
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-white/60 dark:bg-black/20 rounded-lg p-2">
                       <p className="text-lg font-bold text-green-700 dark:text-green-300">{results.length}</p>
-                      <p className="text-[10px] text-muted-foreground">Total Offices</p>
+                      <p className="text-xs text-muted-foreground">Total Offices</p>
                     </div>
                     <div className="bg-white/60 dark:bg-black/20 rounded-lg p-2">
                       <p className="text-lg font-bold text-amber-600">{pendingResults.length}</p>
-                      <p className="text-[10px] text-muted-foreground">Pending</p>
+                      <p className="text-xs text-muted-foreground">Pending</p>
                     </div>
                     <div className="bg-white/60 dark:bg-black/20 rounded-lg p-2">
                       <p className="text-lg font-bold text-green-600">{appliedResults.length}</p>
-                      <p className="text-[10px] text-muted-foreground">Applied</p>
+                      <p className="text-xs text-muted-foreground">Applied</p>
                     </div>
                   </div>
                 </CardContent>
@@ -303,7 +303,7 @@ export function ApplyElectionResultsSheet({ open, onOpenChange }: SheetProps) {
                             <p className="text-xs text-muted-foreground">{result.position}</p>
                             <p className="font-medium text-sm truncate">{result.winnerName}</p>
                           </div>
-                          <Badge variant="secondary" className="shrink-0 text-[10px]">
+                          <Badge variant="secondary" className="shrink-0 text-xs">
                             <CheckCircle2 className="h-3 w-3 mr-1" />
                             Applied
                           </Badge>
@@ -318,7 +318,7 @@ export function ApplyElectionResultsSheet({ open, onOpenChange }: SheetProps) {
               <div className="flex items-start gap-2 pt-3 border-t">
                 <Shield className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Leadership changes require multi-signature approval: President + Secretary + (PRO or Dir. of Socials).
+                  Leadership changes require multi-signature approval: President + Secretary + (PRO or Director of Socials).
                   If President/Secretary unavailable, 4 signatories including Legal Adviser required.
                 </p>
               </div>

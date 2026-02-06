@@ -598,8 +598,8 @@ export function DeclareElectionDrawer({
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <p className="text-xs">
               This declaration requires authorization from: 
-              <strong> President + Secretary + (PRO or Dir. of Socials)</strong>, 
-              OR <strong>Secretary + PRO + Legal Adviser + (Dir. of Socials or another Admin)</strong> if President is unavailable.
+              <strong> President + Secretary + (PRO or Director of Socials)</strong>, 
+              OR <strong>Secretary + PRO + Legal Adviser + (Director of Socials or another Admin)</strong> if President is unavailable.
             </p>
           </div>
         </CardContent>

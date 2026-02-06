@@ -136,8 +136,8 @@ export const AdminFinancialAuditDialog = ({
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="p-3 bg-green-50 border-green-200 min-w-0">
+        <div className="grid grid-cols-2 gap-2">
+          <Card className="p-2.5 bg-green-50 border-green-200 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <ArrowDownLeft className="h-4 w-4 text-green-600 shrink-0" />
               <span className="text-xs text-muted-foreground">Funds Received</span>
@@ -146,7 +146,7 @@ export const AdminFinancialAuditDialog = ({
               {formatCurrency(currentAudit.totalFundsReceived)}
             </p>
           </Card>
-          <Card className="p-3 bg-red-50 border-red-200 min-w-0">
+          <Card className="p-2.5 bg-red-50 border-red-200 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <ArrowUpRight className="h-4 w-4 text-red-600 shrink-0" />
               <span className="text-xs text-muted-foreground">Funds Spent</span>
@@ -155,7 +155,7 @@ export const AdminFinancialAuditDialog = ({
               {formatCurrency(currentAudit.totalFundsSpent)}
             </p>
           </Card>
-          <Card className="p-3 bg-blue-50 border-blue-200 min-w-0">
+          <Card className="p-2.5 bg-blue-50 border-blue-200 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <Wallet className="h-4 w-4 text-blue-600 shrink-0" />
               <span className="text-xs text-muted-foreground">Closing Balance</span>
@@ -164,7 +164,7 @@ export const AdminFinancialAuditDialog = ({
               {formatCurrency(currentAudit.closingBalance)}
             </p>
           </Card>
-          <Card className={`p-3 min-w-0 ${isPositive ? "bg-emerald-50 border-emerald-200" : "bg-orange-50 border-orange-200"}`}>
+          <Card className={`p-2.5 min-w-0 ${isPositive ? "bg-emerald-50 border-emerald-200" : "bg-orange-50 border-orange-200"}`}>
             <div className="flex items-center gap-2 mb-1">
               {isPositive ? (
                 <TrendingUp className="h-4 w-4 text-emerald-600 shrink-0" />
@@ -180,37 +180,33 @@ export const AdminFinancialAuditDialog = ({
         </div>
 
         {/* Risk Indicators */}
-        <Card className="p-4">
+        <Card className="p-2.5">
           <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             Risk Indicators
           </h3>
-          <div className="space-y-3">
-            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Minus className="h-4 w-4 text-amber-600 shrink-0" />
-                  <span className="text-xs text-muted-foreground">Total Deficits</span>
-                </div>
-                <p className="text-base font-bold text-amber-600 text-right">
-                  {formatCurrency(currentAudit.totalDeficits)}
-                </p>
+          <div className="space-y-2.5">
+            <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Minus className="h-4 w-4 text-amber-600 shrink-0" />
+                <span className="text-xs text-muted-foreground">Total Deficits</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1.5">
+              <p className="text-base font-bold text-amber-600 leading-tight break-words">
+                {formatCurrency(currentAudit.totalDeficits)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Debts community owes
               </p>
             </div>
-            <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-purple-600 shrink-0" />
-                  <span className="text-xs text-muted-foreground">Floating Funds</span>
-                </div>
-                <p className="text-base font-bold text-purple-600 text-right">
-                  {formatCurrency(currentAudit.floatingFunds)}
-                </p>
+            <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Clock className="h-4 w-4 text-purple-600 shrink-0" />
+                <span className="text-xs text-muted-foreground">Floating Funds</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1.5">
+              <p className="text-base font-bold text-purple-600 leading-tight break-words">
+                {formatCurrency(currentAudit.floatingFunds)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Recoverable/pending amounts
               </p>
             </div>
@@ -227,7 +223,7 @@ export const AdminFinancialAuditDialog = ({
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-3 mt-0">
             {/* Balance Flow */}
-            <Card className="p-4">
+            <Card className="p-3">
               <h4 className="font-medium text-sm mb-3">Balance Flow</h4>
               <div className="space-y-3">
                 <div className="flex flex-col gap-0.5">
@@ -258,7 +254,7 @@ export const AdminFinancialAuditDialog = ({
             </Card>
 
             {/* Deficits Breakdown - Community Payables */}
-            <Card className="p-4">
+            <Card className="p-3">
               <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
                 Deficits Breakdown (Community Debts)
@@ -290,7 +286,7 @@ export const AdminFinancialAuditDialog = ({
             </Card>
 
             {/* Floating Funds Breakdown */}
-            <Card className="p-4">
+            <Card className="p-3">
               <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
                 <RefreshCw className="h-4 w-4 text-purple-600" />
                 Floating Funds (Recoverable)
@@ -455,7 +451,7 @@ export const AdminFinancialAuditDialog = ({
               <DrawerTitle>Financial Audit</DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
-              <div className="px-4 pb-6">
+              <div className="px-2 pb-6">
                 {Content()}
               </div>
             </div>
