@@ -5,9 +5,30 @@ import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { mockMemberFinancialRecord } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
+import { DownloadFormatSheet, type DownloadFormat } from "@/components/common/DownloadFormatSheet";
+import { useToast } from "@/hooks/use-toast";
 
-export const FinancialSummaryTab = () => {
+interface FinancialSummaryTabProps {
+  onClose?: () => void;
+}
+
+export const FinancialSummaryTab = ({ onClose }: FinancialSummaryTabProps) => {
+  const { toast } = useToast();
   const [sortFilter, setSortFilter] = useState("all");
+  const [showDownloadSheet, setShowDownloadSheet] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async (format: DownloadFormat) => {
+    setIsDownloading(true);
+    // Simulate download
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsDownloading(false);
+    setShowDownloadSheet(false);
+    toast({
+      title: "Download Complete",
+      description: `Financial Summary downloaded as ${format.toUpperCase()}`,
+    });
+  };
 
   return (
     <div className="space-y-6 pb-20">
@@ -21,6 +42,18 @@ export const FinancialSummaryTab = () => {
         member={mockMemberFinancialRecord}
         sortFilter={sortFilter}
         onSortChange={setSortFilter}
+        onDownload={() => setShowDownloadSheet(true)}
+        onClose={onClose}
+      />
+
+      {/* Download Format Sheet */}
+      <DownloadFormatSheet
+        open={showDownloadSheet}
+        onOpenChange={setShowDownloadSheet}
+        onDownload={handleDownload}
+        documentName="Financial Summary"
+        isDownloading={isDownloading}
+        availableFormats={["pdf", "docx", "csv"]}
       />
 
       {/* Other Members' Financial Summaries */}

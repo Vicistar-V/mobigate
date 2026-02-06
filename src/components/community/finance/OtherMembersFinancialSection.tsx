@@ -89,7 +89,7 @@ export const OtherMembersFinancialSection = () => {
                     <Button
                       variant="link"
                       size="sm"
-                      className="h-auto p-0 text-xs touch-manipulation"
+                      className="h-auto p-0 text-xs touch-manipulation active:scale-[0.97]"
                       disabled={isFriendRequested}
                       onClick={() => handleFriendRequest(member.id, member.name)}
                     >
@@ -98,7 +98,7 @@ export const OtherMembersFinancialSection = () => {
                     <Button
                       variant="link"
                       size="sm"
-                      className="h-auto p-0 text-xs touch-manipulation"
+                      className="h-auto p-0 text-xs touch-manipulation active:scale-[0.97]"
                       onClick={() => handleViewProfile(member)}
                     >
                       Profile
@@ -106,7 +106,7 @@ export const OtherMembersFinancialSection = () => {
                     <Button
                       variant="link"
                       size="sm"
-                      className="h-auto p-0 text-xs touch-manipulation"
+                      className="h-auto p-0 text-xs touch-manipulation active:scale-[0.97]"
                       onClick={handleViewReport}
                     >
                       View Report

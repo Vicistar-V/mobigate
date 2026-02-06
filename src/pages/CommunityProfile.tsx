@@ -760,7 +760,7 @@ const CommunityProfile = () => {
                 </TabsList>
                 
                 <TabsContent value="summary">
-                  <FinancialSummaryTab />
+                  <FinancialSummaryTab onClose={() => handleTabChange("status")} />
                 </TabsContent>
                 
                 <TabsContent value="clearances">
@@ -1071,7 +1071,7 @@ const CommunityProfile = () => {
           {/* Financial Tabs */}
           {activeTab === "finance-summary" && (
             <div className="mt-6">
-              <FinancialSummaryTab />
+              <FinancialSummaryTab onClose={() => handleTabChange("status")} />
             </div>
           )}
           {activeTab === "finance-clearances" && (

@@ -31,7 +31,7 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange, onDown
           Financial Summary
         </div>
         <Select value={sortFilter} onValueChange={onSortChange}>
-          <SelectTrigger className="w-full border font-bold text-xs">
+          <SelectTrigger className="w-full border font-bold text-xs touch-manipulation">
             <SelectValue placeholder="SORT BY" />
           </SelectTrigger>
           <SelectContent className="bg-card z-50">
