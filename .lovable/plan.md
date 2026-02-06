@@ -1,86 +1,105 @@
 
 
-## Add "Sponsored Advert" Badge to Advertisement Components
+# Add Video Support to Advertisement Media
 
-The screenshot shows the user wants a prominent **"Sponsored Advert"** badge on all advertisement displays, mirroring the **"Election Campaign"** badge pattern used on campaign banner cards.
+## What Changes
 
-### What Gets Changed
+Currently, advertisements only support photos. This update adds **video support** so advertisers can upload a mix of photos and videos (up to 4 items total per ad). Every component that displays or handles ad media needs to be updated.
 
-The "Election Campaign" badge uses this pattern on the banner image:
-```
-Badge (absolute top-2 right-2, text-[10px])
-  Vote icon + "Election Campaign"
-```
+## Technical Approach
 
-The same approach will be applied to advertisements using:
-```
-Badge (absolute top-2 right-2, amber-600 bg, text-[10px])
-  Megaphone icon + "Sponsored Advert"
+Replace the `photos: string[]` field with a `media: AdMediaItem[]` array where each item tracks both the URL/data and the file type (image or video).
+
+```text
+AdMediaItem {
+  url: string          -- base64 data URL or remote URL
+  type: 'image' | 'video'
+  thumbnailUrl?: string -- auto-generated for videos
+}
 ```
 
 ---
 
-### Files to Modify
+## Files to Modify (8 files)
 
-| File | What Changes |
-|------|-------------|
-| `AdvertisementsListSheet.tsx` | Add "Sponsored Advert" badge to thumbnail corner of each ad card |
-| `AdvertisementFullViewSheet.tsx` | Add "Sponsored Advert" badge overlay on photo carousel (top-left, since top-right has stats) |
-| `AdvertisementPreviewSheet.tsx` | Add "Sponsored Advert" badge overlay on photo carousel |
+### 1. `src/types/advertisementSystem.ts`
+- Add new `AdMediaItem` interface with `url`, `type`, and optional `thumbnailUrl`
+- Change `photos: string[]` to `media: AdMediaItem[]` in both `AdvertisementFormData` and `EnhancedAdvertisement`
+
+### 2. `src/components/community/advertisements/AdvertisementPhotoUploader.tsx`
+- Rename to **AdvertisementMediaUploader** (new file, old file kept as re-export for safety)
+- Accept `media: AdMediaItem[]` instead of `photos: string[]`
+- Update file input `accept` to include `video/mp4,video/webm,video/quicktime`
+- Increase max size for videos to 10MB (keep 2MB for images)
+- Render video thumbnails with a play icon overlay in the 2x2 grid
+- Show media type indicator badge (photo/video icon) on each slot
+- Update label: "Product Photos & Videos (X/4)"
+- Update helper text: "JPG, PNG, WebP, MP4, WebM -- Images max 2MB, Videos max 10MB"
+
+### 3. `src/components/community/advertisements/CreateAdvertisementDrawer.tsx`
+- Import updated MediaUploader
+- Change `formData.photos` references to `formData.media`
+- Update the uploader component usage
+
+### 4. `src/components/community/advertisements/AdvertisementPreviewSheet.tsx`
+- Change `formData.photos` to `formData.media`
+- In the carousel, check `media[i].type`:
+  - If `'image'`: render `<img>` (same as now)
+  - If `'video'`: render `<video>` with `controls`, `playsInline`, `muted` attributes, with poster frame
+- Update counter text and empty state message
+
+### 5. `src/components/community/advertisements/AdvertisementFullViewSheet.tsx`
+- Change `ad.photos` to `ad.media`
+- Same image/video rendering logic as preview
+- Add play icon overlay on video carousel items
+- Videos play inline with controls on tap
+
+### 6. `src/components/community/advertisements/AdvertisementsListSheet.tsx`
+- Change `ad.photos` to `ad.media` for thumbnail rendering
+- If first media item is a video, show video thumbnail with small play icon overlay
+- Otherwise show image as before
+
+### 7. `src/components/community/advertisements/AdvertisementSettingsSheet.tsx`
+- Update any references to `formData.photos` to `formData.media`
+- Update step 1 summary to show "X media items" instead of "X photos"
+
+### 8. `src/data/advertisementData.ts`
+- Convert all `photos: [...]` arrays to `media: [...]` with `{ url: "...", type: "image" }` format
+- Add one mock video entry to one of the advertisements for demo purposes
 
 ---
 
-### File 1: `src/components/community/advertisements/AdvertisementsListSheet.tsx`
+## Mobile-Specific Details
 
-**Change: Add badge to the AdCard thumbnail area**
+**Video Playback in Carousel:**
+- Videos render with `playsInline`, `muted`, and `controls` attributes for smooth mobile playback
+- A centered play icon overlay appears on video frames before interaction
+- Tap to play/pause within the carousel
 
-The thumbnail is a 80x80 box (lines 57-65). Add a small "Sponsored Advert" badge positioned at the bottom of the thumbnail:
+**Media Uploader Grid:**
+- Each 2x2 grid slot shows a small badge icon in the corner:
+  - Camera icon for photos
+  - Video icon for videos
+- Videos display a static first frame with a semi-transparent play button overlay
+- The empty slot button text changes to "Add Media" instead of "Add Photo"
 
-- Inside the thumbnail div, add an absolute-positioned Badge
-- Use amber color scheme to distinguish from election (blue) badges
-- Badge text: "Sponsored Advert" with Megaphone icon
-- Position: bottom-0 left-0 (small overlay on thumbnail)
-
-Since the thumbnail is small (80x80), the badge will be compact: just the Megaphone icon + abbreviated "Ad" text to fit the space. The full "Sponsored Advert" label appears in the info section instead, as a secondary badge alongside the category badge.
-
-Implementation:
-- Add a `Badge` with amber styling next to the category badge in the info section (line 72-74 area)
-- Text: "Sponsored Advert" with Megaphone icon, amber-600 background
-
-### File 2: `src/components/community/advertisements/AdvertisementFullViewSheet.tsx`
-
-**Change: Add "Sponsored Advert" badge on photo carousel**
-
-The photo carousel already has stats badges (Eye count, days left) at `top-2 right-2` (lines 96-105). Add the "Sponsored Advert" badge at `top-2 left-2` to avoid collision:
-
-- Badge with amber-600 background, white text
-- Megaphone icon + "Sponsored Advert"
-- Position: absolute top-2 left-2
-- Same text-[10px] sizing as campaign badge
-
-### File 3: `src/components/community/advertisements/AdvertisementPreviewSheet.tsx`
-
-**Change: Add "Sponsored Advert" badge on preview photo carousel**
-
-Same as full view -- add badge overlay on the photo area at top-2 left-2 (the photo counter is at top-2 right-2, so left side is available):
-
-- Badge with amber-600 background, white text
-- Megaphone icon + "Sponsored Advert"
+**File Validation:**
+- Images: JPG, PNG, WebP -- max 2MB each
+- Videos: MP4, WebM -- max 10MB each
+- Total: 4 items combined
 
 ---
 
-### Technical Details
+## Summary Table
 
-**Badge style (consistent across all 3 files):**
-```tsx
-<Badge className="bg-amber-600 text-white text-[10px] border-0">
-  <Megaphone className="h-3 w-3 mr-1" />
-  Sponsored Advert
-</Badge>
-```
+| File | Action |
+|------|--------|
+| `src/types/advertisementSystem.ts` | Modify -- add `AdMediaItem`, change `photos` to `media` |
+| `AdvertisementPhotoUploader.tsx` | Modify -- support video files, rename labels, add play overlays |
+| `CreateAdvertisementDrawer.tsx` | Modify -- update `photos` refs to `media` |
+| `AdvertisementPreviewSheet.tsx` | Modify -- render videos in carousel |
+| `AdvertisementFullViewSheet.tsx` | Modify -- render videos in carousel |
+| `AdvertisementsListSheet.tsx` | Modify -- video thumbnail support |
+| `AdvertisementSettingsSheet.tsx` | Modify -- update photo refs to media |
+| `advertisementData.ts` | Modify -- convert photos arrays to media format |
 
-**Positioning:**
-- Full view and Preview: `absolute top-2 left-2` (on photo carousel)
-- List card: Inline badge in the info section alongside category badge
-
-**No new files or dependencies needed** -- all changes use existing Badge and Megaphone icon imports already present in each file.
