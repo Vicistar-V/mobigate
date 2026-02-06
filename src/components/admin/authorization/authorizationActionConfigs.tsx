@@ -207,6 +207,20 @@ export const MODULE_ACTION_CONFIGS: Record<AuthorizationModule, Record<string, A
       iconComponent: Crown,
       iconColorClass: "text-indigo-600",
     },
+    apply_single_result: {
+      title: "Apply Election Result",
+      description: "Multi-signature authorization to update single leadership position",
+      icon: <Crown className="h-5 w-5 text-indigo-600" />,
+      iconComponent: Crown,
+      iconColorClass: "text-indigo-600",
+    },
+    apply_batch_results: {
+      title: "Apply Multiple Results",
+      description: "Multi-signature authorization to update multiple leadership positions",
+      icon: <Crown className="h-5 w-5 text-green-600" />,
+      iconComponent: Crown,
+      iconColorClass: "text-green-600",
+    },
     add_executive: {
       title: "Add Executive Member",
       description: "Multi-signature authorization to add executive",
