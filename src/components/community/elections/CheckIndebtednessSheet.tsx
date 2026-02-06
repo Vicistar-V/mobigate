@@ -97,13 +97,13 @@ const IndebtednessContent = () => {
           <div className="mt-8">
             {!isCleared ? (
               <Button 
-                className="w-full bg-red-600 hover:bg-red-700 text-lg font-bold py-6"
+                className="w-full bg-red-600 hover:bg-red-700 text-base font-bold py-4"
                 onClick={handleClearDebt}
                 disabled={isClearing}
               >
                 {isClearing ? (
                   <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Processing Debit...
                   </>
                 ) : (
@@ -112,10 +112,10 @@ const IndebtednessContent = () => {
               </Button>
             ) : (
               <Button 
-                className="w-full bg-green-600 hover:bg-green-600 text-lg font-bold py-6"
+                className="w-full bg-green-600 hover:bg-green-600 text-base font-bold py-4"
                 disabled
               >
-                <CheckCircle2 className="h-5 w-5 mr-2" />
+                <CheckCircle2 className="h-4 w-4 mr-2" />
                 Debt Cleared Successfully
               </Button>
             )}
@@ -131,13 +131,13 @@ const IndebtednessContent = () => {
           <div className="mt-6">
             {!isAccredited ? (
               <Button 
-                className={`w-full text-lg font-bold py-6 ${isCleared ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400'}`}
+                className={`w-full text-base font-bold py-4 ${isCleared ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400'}`}
                 disabled={!isCleared || isAccrediting}
                 onClick={handleGetAccreditation}
               >
                 {isAccrediting ? (
                   <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Processing Accreditation...
                   </>
                 ) : (
@@ -146,10 +146,10 @@ const IndebtednessContent = () => {
               </Button>
             ) : (
               <Button 
-                className="w-full bg-primary hover:bg-primary text-lg font-bold py-6"
+                className="w-full bg-primary hover:bg-primary text-base font-bold py-4"
                 disabled
               >
-                <CheckCircle2 className="h-5 w-5 mr-2" />
+                <CheckCircle2 className="h-4 w-4 mr-2" />
                 Accredited Successfully!
               </Button>
             )}
