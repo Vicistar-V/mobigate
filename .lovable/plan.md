@@ -1,61 +1,59 @@
 
-## Fix "Accredited Voters" Menu Navigation
+## Fix Candidate Clearance Card Layout for Mobile
 
 ### Problem Identified
 
-Clicking "Accredited Voters" in the Community Menu does nothing because:
+Looking at the screenshot, two issues are visible:
 
-1. **Missing Tab Handler**: The menu uses `"election-accredited-voters"` but `CommunityProfile.tsx` has no matching route handler for this tab ID
-2. **Isolated Subtab State**: The `ElectionAccreditationTab` component manages its own internal subtab state (`'financial' | 'activities' | 'accredited'`) and doesn't accept props to initialize to a specific view
-
----
-
-## Solution
-
-Create a dedicated route for "Accredited Voters" that renders `ElectionAccreditationTab` with the `'accredited'` subtab pre-selected.
+1. **Candidate names are truncated** - "Paulson Chinedu Okonkwo" shows as "Paulson Chin..." due to the `truncate` class
+2. **Status badge position** - The "Approved" badge is on the same line as the name, but should be on the same line as the office (President General)
 
 ---
 
 ## Implementation Details
 
-### 1. Update ElectionAccreditationTab to Accept Initial Subtab
+### File: `src/components/admin/election/AdminClearancesTab.tsx`
 
-**File**: `src/components/community/elections/ElectionAccreditationTab.tsx`
-
-**Changes**:
-- Add optional `initialSubTab` prop to component
-- Initialize `activeSubTab` state from prop (default to `'financial'`)
-
+**Lines 161-171 - Current Layout:**
 ```tsx
-interface ElectionAccreditationTabProps {
-  initialSubTab?: 'financial' | 'activities' | 'accredited';
-}
+<div className="flex-1 min-w-0">
+  <div className="flex items-start gap-2">
+    <div className="flex-1 min-w-0">
+      <h4 className="font-semibold text-base truncate leading-tight">{request.candidateName}</h4>
+      <p className="text-sm text-primary">{request.office}</p>
+    </div>
+    <Badge className={`text-xs shrink-0 capitalize whitespace-nowrap ${getStatusColor(request.status)}`}>
+      {request.status.replace('_', ' ')}
+    </Badge>
+  </div>
+</div>
+```
 
-export const ElectionAccreditationTab = ({ 
-  initialSubTab = 'financial' 
-}: ElectionAccreditationTabProps) => {
-  const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities' | 'accredited'>(initialSubTab);
-  // ... rest of component
-}
+**New Layout (Full name on its own line, Badge with Office):**
+```tsx
+<div className="flex-1 min-w-0">
+  {/* Name on its own line - full width, no truncation */}
+  <h4 className="font-semibold text-base leading-tight">{request.candidateName}</h4>
+  
+  {/* Office + Badge on same line */}
+  <div className="flex items-center gap-2 mt-0.5">
+    <p className="text-sm text-primary">{request.office}</p>
+    <Badge className={`text-xs shrink-0 capitalize whitespace-nowrap ${getStatusColor(request.status)}`}>
+      {request.status.replace('_', ' ')}
+    </Badge>
+  </div>
+</div>
 ```
 
 ---
 
-### 2. Add Route Handler in CommunityProfile.tsx
+## Changes Summary
 
-**File**: `src/pages/CommunityProfile.tsx`
-
-**Changes**:
-- Add new conditional render for `"election-accredited-voters"` tab
-- Pass `initialSubTab="accredited"` to `ElectionAccreditationTab`
-
-```tsx
-{activeTab === "election-accredited-voters" && (
-  <div className="mt-6">
-    <ElectionAccreditationTab initialSubTab="accredited" />
-  </div>
-)}
-```
+| Element | Before | After |
+|---------|--------|-------|
+| Candidate name | `truncate` class (cuts off long names) | No truncate (shows full name) |
+| Badge position | Same row as name | Same row as office |
+| Layout structure | Nested flex with name+badge | Name on own line, office+badge row below |
 
 ---
 
@@ -63,14 +61,13 @@ export const ElectionAccreditationTab = ({
 
 | File | Change |
 |------|--------|
-| `src/components/community/elections/ElectionAccreditationTab.tsx` | Add `initialSubTab` prop with TypeScript interface |
-| `src/pages/CommunityProfile.tsx` | Add `"election-accredited-voters"` tab handler |
+| `src/components/admin/election/AdminClearancesTab.tsx` | Restructure lines 161-171 to show full names and move badge to office row |
 
 ---
 
 ## Expected Outcome
 
-1. Tapping "Accredited Voters" in the Community Menu navigates to the Election Accreditation view
-2. The "Accredited Voters" subtab is automatically selected on entry
-3. Users can still switch between Financial, Activities, and Accredited Voters tabs within the view
-4. Existing navigation to `"election-accreditation"` continues to work with default "Financial" subtab
+- Full candidate names displayed (e.g., "Paulson Chinedu Okonkwo" instead of "Paulson Chin...")
+- "Approved" badge appears on the same line as "President General"
+- Clean vertical stacking for mobile readability
+- No text overflow or truncation issues
