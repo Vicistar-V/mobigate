@@ -275,7 +275,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
           </DrawerHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
-            <div className="px-4 pt-3">
+            <div className="px-2 pt-3">
               <TabsList className="w-full grid grid-cols-3 h-auto p-1">
                 <TabsTrigger 
                   value="blocked" 
@@ -302,7 +302,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
             </div>
 
             <ScrollArea className="flex-1 min-h-0 touch-auto">
-              <div className="p-4 space-y-4">
+              <div className="px-2 py-3 space-y-3">
                 {/* BLOCKED USERS TAB */}
                 <TabsContent value="blocked" className="mt-0 space-y-4">
                   {/* Search and Filter */}
@@ -358,8 +358,8 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
                         >
                           <CardContent className="p-0">
                             {/* User Header */}
-                            <div className="p-4 space-y-3">
-                              <div className="flex items-start gap-3">
+                            <div className="p-2.5 space-y-2.5">
+                              <div className="flex items-start gap-2.5">
                                 <Avatar className="h-11 w-11 border-2 border-destructive/20">
                                   <AvatarImage src={user.avatar} alt={user.name} />
                                   <AvatarFallback className="bg-destructive/10 text-destructive text-sm">
@@ -369,7 +369,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <p className="font-semibold text-sm truncate">{user.name}</p>
+                                    <p className="font-semibold text-sm">{user.name}</p>
                                     {renderUserTypeBadge(user.userType)}
                                   </div>
                                   
@@ -424,8 +424,8 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
                               </div>
 
                               {/* Block Details */}
-                              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                                <div className="flex items-center justify-between text-xs">
+                              <div className="bg-muted/50 rounded-lg p-2.5 space-y-2">
+                                <div className="flex flex-col gap-0.5 text-xs">
                                   <span className="text-muted-foreground flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
                                     Blocked {format(user.blockedDate, "PPP")}
@@ -439,7 +439,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
                                   <span className="font-medium">Reason:</span> {user.reason}
                                 </p>
 
-                                <div className="flex items-center justify-between pt-1">
+                                <div className="flex items-center justify-between flex-wrap gap-y-1 pt-1">
                                   <div className="flex items-center gap-1.5">
                                     <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                                     {user.isPermaBan ? (
@@ -462,7 +462,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
                             </div>
 
                             {/* Quick Actions */}
-                            <div className="border-t bg-muted/30 px-4 py-2 flex gap-2">
+                            <div className="border-t bg-muted/30 px-2.5 py-2 flex gap-2">
                               <Button 
                                 size="sm" 
                                 variant="outline"
