@@ -1,105 +1,91 @@
 
 
-# Mobile Optimization: Block Management and Members' Financial Reports
+# Mobile Optimization: Primary Election Details Sheet
 
-## Problems Identified
+## Problem
 
-All three screens share the same root cause: **cumulative padding causing right-edge clipping** on ~360px mobile screens.
+The "Primary Election Details" bottom sheet has right-edge clipping on mobile (~360px screens). The screenshots show:
 
-### Block Management Drawer (`BlockManagementDrawer.tsx`)
-- Outer ScrollArea content has `p-4` (16px each side)
-- Each Card has `CardContent` with `p-4` internally
-- Block details section has another `p-3`
-- Total horizontal padding: ~16 + 16 = 32px per side = 64px lost from 360px = only 296px for content
-- Result: "Blocked 2x" badge, email text, and action buttons clip on the right
+1. **"Completed" badge** on the election info card is clipped on the right
+2. **Vote counts** (549, 850) in the Voter Turnout section are cut off at the right edge
+3. **"2 advancing" badge** in the Candidates Results header is partially hidden
+4. **Progress bar percentage text** and threshold markers clip on the right
 
-### Members Financial Reports (`MembersFinancialReportsDialog.tsx`)
-- **Pay-ins tab**: ScrollArea has `p-4`, search Card has `p-3`, each payment Card has `p-3` with a flex layout. The right-aligned amounts (+₦15,000, M15,000, completed badge, PAY-2025-00...) clip off the right edge
-- **Status tab**: Same padding stack. The progress bar row with percentage (100%), due dates, and last-paid dates clip on the right
+### Root Cause
+
+The content area uses `px-4 py-4` (16px each side) on the ScrollArea's inner div (line 312), plus `p-3` (12px) on each card inside it. Combined: 16 + 12 = 28px per side = 56px total lost from 360px = only 304px for content. The status badge, vote numbers, and advancing badge all fight for that remaining space.
 
 ---
 
-## Files to Modify
+## File to Modify
 
-| File | What Changes |
-|------|-------------|
-| `src/components/community/BlockManagementDrawer.tsx` | Reduce padding, restack card content vertically |
-| `src/components/admin/finance/MembersFinancialReportsDialog.tsx` | Reduce padding, restack payment/obligation cards vertically |
+`src/components/admin/election/AdminPrimaryElectionsSection.tsx`
 
 ---
 
 ## Detailed Changes
 
-### 1. BlockManagementDrawer.tsx
+### 1. Sheet Header (line 303)
+- Change `px-4 pt-4 pb-3` to `px-3 pt-4 pb-3` -- saves 4px per side on the header to match the body
 
-**Container padding (line 305):**
-- Change `p-4 space-y-4` to `px-2 py-3 space-y-3` -- reclaims 16px total horizontal space
+### 2. ScrollArea inner container (line 312)
+- Change `px-4 py-4` to `px-2 py-3` -- reclaims 16px total horizontal space
 
-**Card content padding (line 361):**
-- Change `p-4 space-y-3` to `p-2.5 space-y-2.5` -- saves another 12px total
+### 3. Election Info card (line 314)
+- Change `p-3` to `p-2.5` -- saves another 4px total
+- The office name + status badge row (line 315): already has `gap-2` and `min-w-0 flex-1`, which is good
 
-**User header row (lines 362-396):**
-- Keep avatar + name row as-is but remove `truncate` from name so it wraps instead of clipping
-- The DropdownMenu trigger (three dots) stays flex-shrink-0 at the end
+### 4. Date and Time boxes (lines 324-339)
+- Change the `text-[10px]` "Date" and "Time" labels to `text-xs` to meet the project's minimum typography standard
+- Keep the side-by-side layout as it works well
 
-**Block details section (line 427):**
+### 5. Voter Turnout card (line 344)
 - Change `p-3` to `p-2.5`
-- The date/admin row (line 428): change from horizontal `flex justify-between` to vertical stack so "Blocked October 15, 2024" and "By: Admin Fatima" each get their own line instead of fighting for horizontal space
-- The "Permanent Ban" badge + "Blocked 2x" row (lines 442-459): keep horizontal since badges are compact, but add `flex-wrap` so they wrap if needed
+- The vote count rows (lines 350-357): these use `flex justify-between` which is correct, but the numbers clip because the parent padding eats the space. The reduced padding from step 2 and this step will fix it.
 
-**Quick action buttons (line 465):**
-- Change `px-4 py-2` to `px-2.5 py-2`
-
-**Tab trigger padding (line 278):**
-- Change `px-4 pt-3` to `px-2 pt-3` for the TabsList wrapper to match reduced padding
-
-**Search and filter row (lines 309-339):**
-- Already fine, just reduce parent padding carries through
-
-### 2. MembersFinancialReportsDialog.tsx
-
-**Drawer content (line 384):**
-- Change `p-4` to `px-2 py-3` on the ScrollArea -- reclaims 16px horizontal
-
-**Search card (line 143):**
+### 6. Advancement Rules card (line 370)
 - Change `p-3` to `p-2.5`
+- Change the advancement rules header `gap-2.5` to `gap-2`
 
-**Payment cards -- Pay-ins tab (lines 198-242):**
-Current layout tries to fit name+obligation on left and amount+badge on right in a single row -- this clips.
+### 7. Candidates Results section
 
-Restack to:
-```
-Row 1: [Avatar]  [Name]                    [+N15,000]
-                 [Obligation Name]          [(M15,000)]
-                                            [completed badge]
-Row 2: [wallet icon] wallet    Feb 6, 2026    PAY-2025-00...
-```
+**Header row (lines 403-411)**:
+- The "2 advancing" Badge uses `text-[10px]` -- change to `text-xs`
 
-Specific changes:
-- Keep the flex row with avatar, but reduce gap from `gap-3` to `gap-2.5`
+**Auto-qualified summary text (line 414)**:
+- Change `text-[10px]` to `text-xs`
+
+**Candidate cards (lines 430-516)**:
 - Change card padding from `p-3` to `p-2.5`
-- The metadata row (line 231-238): add `flex-wrap` and reduce `gap-3` to `gap-2` so items wrap instead of clipping
+- Change the candidate row gap from `gap-3` to `gap-2.5`
+- Change the candidate rank number width from `w-5` to `w-4` to save horizontal space
+- The progress bar area (line 471): change `ml-8` to `ml-7` since the rank number is now narrower
+- The threshold text (line 492-494): change `text-[10px]` to `text-xs`
 
-**Disbursement cards -- Pay-outs tab (lines 256-290):**
-Same treatment as Pay-ins: reduce card padding to `p-2.5`, reduce gap, add flex-wrap to metadata row.
+### 8. Status badges (lines 52-64, used throughout)
+- Change `text-[10px]` to `text-xs` on all status badges (Completed, Ongoing, Scheduled, Cancelled)
 
-**Obligation cards -- Status tab (lines 320-371):**
-- Reduce card padding from `p-3` to `p-2.5`
-- Reduce gap from `gap-3` to `gap-2.5`
-- The amounts row (lines 347-354): already stacked vertically, keep as-is
-- The due/last-paid row (lines 359-366): add `flex-wrap gap-y-0.5` so it wraps on narrow screens
-- Summary cards grid (lines 305-318): keep grid-cols-2 but reduce Card padding from `p-2` to `p-2` (already minimal, fine)
+### 9. StatCard label (line 79)
+- Change `text-[10px]` to `text-xs` on the stat card labels
+
+### 10. Primary list cards (lines 186-295)
+- The voter turnout detail text at line 215-218 uses `text-[10px]` -- change to `text-xs`
+- Candidate preview name at line 257 uses `truncate max-w-[120px]` -- change to `max-w-[140px]` since we have more space from reduced padding
+- Candidate vote detail at line 269 uses `text-[10px]` -- change to `text-xs`
+- The AvatarFallback at line 255 uses `text-[10px]` -- change to `text-xs`
 
 ---
 
-## Summary of Space Savings
+## Summary of Space Savings in Detail Sheet
 
 | Area | Before | After | Saved |
 |------|--------|-------|-------|
-| Block Management outer padding | 16px each side | 8px each side | 16px total |
-| Block Management card padding | 16px each side | 10px each side | 12px total |
-| Financial Reports outer padding | 16px each side | 8px each side | 16px total |
-| Financial Reports card padding | 12px each side | 10px each side | 4px total |
-| **Total horizontal savings** | | | **~28-32px** |
+| ScrollArea inner padding | 16px each side | 8px each side | 16px total |
+| Card padding | 12px each side | 10px each side | 4px total |
+| Candidate rank width | 20px | 16px | 4px |
+| **Total horizontal savings** | | | **~24px** |
 
-This brings the effective content width from ~296px back to ~324-328px on a 360px screen, which is enough to prevent all the observed clipping.
+This brings usable content width from ~304px to ~328px on a 360px screen -- enough to show badges, vote counts, and percentages without clipping.
+
+All `text-[10px]` instances are bumped to `text-xs` to meet the project's typography standard.
+
