@@ -6,6 +6,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { TransactionAuthorizationPanel } from "./TransactionAuthorizationPanel";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { getMinimumWithdrawal } from "@/data/platformSettingsData";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WalletWithdrawDialogProps {
   open: boolean;
@@ -42,6 +49,7 @@ const mockBankAccounts = [
 ];
 
 export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialogProps) {
+  const isMobile = useIsMobile();
   const [amount, setAmount] = useState("");
   const [selectedAccount, setSelectedAccount] = useState(mockBankAccounts[0].id);
   const [step, setStep] = useState<"amount" | "account" | "confirm" | "authorize">("amount");
@@ -137,19 +145,13 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
 
   const selectedAccountDetails = mockBankAccounts.find((acc) => acc.id === selectedAccount);
 
-  return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-primary" />
-            Withdraw Funds
-          </DialogTitle>
-        </DialogHeader>
-
+  // Shared content
+  const WithdrawContent = () => (
+    <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
+      <div className="px-2 pb-6 space-y-4">
         {step === "amount" && (
           <div className="space-y-4">
-            <Card className="p-4 bg-muted">
+            <Card className="p-3 bg-muted">
               <p className="text-sm text-muted-foreground">Available Balance</p>
               <p className="text-2xl font-bold">{formatMobiAmount(walletBalance)}</p>
               <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(walletBalance, "NGN")}</p>
@@ -164,10 +166,13 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
                 <Input
                   id="withdraw-amount"
                   type="number"
+                  inputMode="decimal"
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="pl-8"
+                  className="pl-8 h-12 touch-manipulation"
+                  autoComplete="off"
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -186,43 +191,41 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               </div>
             </div>
 
-            <DialogFooter>
-              <Button onClick={handleContinue} className="w-full">
-                Continue
-              </Button>
-            </DialogFooter>
+            <Button onClick={handleContinue} className="w-full h-12 touch-manipulation">
+              Continue
+            </Button>
           </div>
         )}
 
         {step === "account" && (
           <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
+            <Card className="p-3 bg-muted">
               <p className="text-sm text-muted-foreground">Withdrawal Amount</p>
               <p className="text-2xl font-bold">{formatMobiAmount(parseFloat(amount))}</p>
               <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(parseFloat(amount), "NGN")}</p>
-            </div>
+            </Card>
 
             <div className="space-y-2">
               <Label>Select Bank Account</Label>
               <RadioGroup value={selectedAccount} onValueChange={setSelectedAccount}>
                 {mockBankAccounts.map((account) => (
-                  <Card key={account.id} className="p-4">
+                  <Card key={account.id} className="p-3 touch-manipulation">
                     <div className="flex items-start space-x-3">
                       <RadioGroupItem value={account.id} id={account.id} className="mt-1" />
                       <Label htmlFor={account.id} className="flex-1 cursor-pointer">
                         <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-5 w-5 text-primary" />
-                            <div>
-                              <p className="font-medium">{account.bankName}</p>
-                              <p className="text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <Building2 className="h-5 w-5 text-primary shrink-0" />
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm">{account.bankName}</p>
+                              <p className="text-xs text-muted-foreground">
                                 {account.accountNumber}
                               </p>
                               <p className="text-xs text-muted-foreground">{account.accountName}</p>
                             </div>
                           </div>
                           {account.isPrimary && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs shrink-0">
                               Primary
                             </Badge>
                           )}
@@ -236,21 +239,21 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               <Button
                 variant="outline"
                 onClick={() => setShowAddAccount(true)}
-                className="w-full"
+                className="w-full h-12 touch-manipulation"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add New Bank Account
               </Button>
             </div>
 
-            <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-              <Button variant="outline" onClick={() => setStep("amount")} className="w-full sm:w-auto">
-                Back
-              </Button>
-              <Button onClick={handleSelectAccount} className="w-full sm:w-auto">
+            <div className="flex flex-col gap-2">
+              <Button onClick={handleSelectAccount} className="w-full h-12 touch-manipulation">
                 Continue
               </Button>
-            </DialogFooter>
+              <Button variant="outline" onClick={() => setStep("amount")} className="w-full h-12 touch-manipulation">
+                Back
+              </Button>
+            </div>
           </div>
         )}
 
@@ -258,27 +261,27 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
           <div className="space-y-4">
             <div className="text-center space-y-2">
               <div className="flex justify-center">
-                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Wallet className="h-10 w-10 text-primary" />
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Wallet className="h-8 w-8 text-primary" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold">Confirm Withdrawal</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-lg font-bold">Confirm Withdrawal</h3>
+              <p className="text-xs text-muted-foreground">
                 Please review the details before proceeding
               </p>
             </div>
 
-            <Card className="p-4 space-y-3">
+            <Card className="p-3 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Amount</span>
                 <div className="text-right">
-                  <span className="font-bold text-lg">{formatMobiAmount(parseFloat(amount))}</span>
+                  <span className="font-bold text-base">{formatMobiAmount(parseFloat(amount))}</span>
                   <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(parseFloat(amount), "NGN")}</p>
                 </div>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Bank</span>
-                <span className="font-medium">{selectedAccountDetails.bankName}</span>
+                <span className="font-medium text-right">{selectedAccountDetails.bankName}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Account</span>
@@ -286,27 +289,27 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Account Name</span>
-                <span className="font-medium">{selectedAccountDetails.accountName}</span>
+                <span className="font-medium text-right">{selectedAccountDetails.accountName}</span>
               </div>
             </Card>
 
             <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-yellow-800 dark:text-yellow-200">
                   <strong>Note:</strong> This transaction requires multi-signature authorization from community executives.
                 </p>
               </div>
             </div>
 
-            <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-              <Button variant="outline" onClick={() => setStep("account")} className="w-full sm:w-auto">
-                Back
-              </Button>
-              <Button onClick={handleProceedToAuthorize} className="w-full sm:w-auto">
+            <div className="flex flex-col gap-2">
+              <Button onClick={handleProceedToAuthorize} className="w-full h-12 touch-manipulation">
                 Proceed to Authorization
               </Button>
-            </DialogFooter>
+              <Button variant="outline" onClick={() => setStep("account")} className="w-full h-12 touch-manipulation">
+                Back
+              </Button>
+            </div>
           </div>
         )}
 
@@ -324,7 +327,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
 
         {/* Add Account Modal */}
         {showAddAccount && (
-          <div className="absolute inset-0 bg-background z-50 p-6 space-y-4">
+          <div className="absolute inset-0 bg-background z-50 p-4 space-y-4">
             <div>
               <h3 className="text-lg font-bold mb-2">Add Bank Account</h3>
               <p className="text-sm text-muted-foreground">Enter your bank account details</p>
@@ -333,28 +336,58 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label>Bank Name</Label>
-                <Input placeholder="Select your bank..." />
+                <Input placeholder="Select your bank..." className="h-12 touch-manipulation" autoComplete="off" onClick={(e) => e.stopPropagation()} />
               </div>
               <div className="space-y-2">
                 <Label>Account Number</Label>
-                <Input placeholder="0000000000" />
+                <Input placeholder="0000000000" className="h-12 touch-manipulation" inputMode="numeric" autoComplete="off" onClick={(e) => e.stopPropagation()} />
               </div>
               <div className="space-y-2">
                 <Label>Account Name</Label>
-                <Input placeholder="Will be verified automatically" disabled />
+                <Input placeholder="Will be verified automatically" disabled className="h-12" />
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowAddAccount(false)} className="flex-1">
-                Cancel
-              </Button>
-              <Button onClick={handleAddAccount} className="flex-1">
+            <div className="flex flex-col gap-2">
+              <Button onClick={handleAddAccount} className="w-full h-12 touch-manipulation">
                 Add Account
+              </Button>
+              <Button variant="outline" onClick={() => setShowAddAccount(false)} className="w-full h-12 touch-manipulation">
+                Cancel
               </Button>
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={handleClose}>
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <DrawerHeader className="pb-2 border-b shrink-0">
+            <DrawerTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-primary" />
+              Withdraw Funds
+            </DrawerTitle>
+          </DrawerHeader>
+          <WithdrawContent />
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-4 pt-4 pb-2 shrink-0 border-b">
+          <DialogTitle className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-primary" />
+            Withdraw Funds
+          </DialogTitle>
+        </DialogHeader>
+        <WithdrawContent />
       </DialogContent>
     </Dialog>
   );

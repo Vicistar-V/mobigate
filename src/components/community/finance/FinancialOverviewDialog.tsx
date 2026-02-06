@@ -90,7 +90,7 @@ export function FinancialOverviewDialog({
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-red-300 text-red-600 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-950/40">
+                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-red-300 text-red-600 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-950/40">
                         Main Wallet
                       </Badge>
                     </div>
@@ -125,7 +125,7 @@ export function FinancialOverviewDialog({
                     </span>
                   </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   Last updated: {walletData.lastUpdated.toLocaleString()}
                 </p>
               </CardContent>
@@ -139,7 +139,7 @@ export function FinancialOverviewDialog({
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-blue-300 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-950/40">
+                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-blue-300 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-950/40">
                         Quiz Wallet
                       </Badge>
                     </div>
@@ -158,19 +158,19 @@ export function FinancialOverviewDialog({
                 {/* Available / Reserved row */}
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <div className="bg-blue-50/60 dark:bg-blue-900/20 rounded-lg p-2">
-                    <p className="text-[10px] text-muted-foreground">Available</p>
+                    <p className="text-xs text-muted-foreground">Available</p>
                     <p className="text-sm font-bold text-blue-700 dark:text-blue-300">
                       ₦{quizWallet.availableBalance.toLocaleString()}
                     </p>
                   </div>
                   <div className="bg-amber-50/60 dark:bg-amber-900/20 rounded-lg p-2">
-                    <p className="text-[10px] text-muted-foreground">Reserved</p>
+                    <p className="text-xs text-muted-foreground">Reserved</p>
                     <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
                       ₦{quizWallet.reservedForPayouts.toLocaleString()}
                     </p>
                   </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   Last updated: {quizWallet.lastUpdated.toLocaleString()}
                 </p>
               </CardContent>
@@ -205,16 +205,16 @@ export function FinancialOverviewDialog({
   const MainWalletContent = () => (
     <div className="space-y-4">
       {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-3">
-        <Button onClick={() => setShowTopUpDialog(true)} className="flex-col h-auto py-3 gap-1.5">
+      <div className="grid grid-cols-3 gap-2">
+        <Button onClick={() => setShowTopUpDialog(true)} className="flex-col h-auto py-3 gap-1.5 touch-manipulation active:scale-[0.98]">
           <ArrowDownRight className="h-4 w-4" />
           <span className="text-xs">Top Up</span>
         </Button>
-        <Button onClick={() => setShowTransferDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5">
+        <Button onClick={() => setShowTransferDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5 touch-manipulation active:scale-[0.98]">
           <RefreshCw className="h-4 w-4" />
           <span className="text-xs">Transfer</span>
         </Button>
-        <Button onClick={() => setShowWithdrawDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5">
+        <Button onClick={() => setShowWithdrawDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5 touch-manipulation active:scale-[0.98]">
           <ArrowUpRight className="h-4 w-4" />
           <span className="text-xs">Withdraw</span>
         </Button>
@@ -233,10 +233,10 @@ export function FinancialOverviewDialog({
             <p className="text-lg font-bold text-green-600">
               +₦{walletData.monthlyIncome.toLocaleString()}
             </p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               (M{walletData.monthlyIncome.toLocaleString()})
             </p>
-            <p className="text-[10px] text-muted-foreground mt-1">This month</p>
+            <p className="text-xs text-muted-foreground mt-1">This month</p>
           </CardContent>
         </Card>
 
@@ -251,10 +251,10 @@ export function FinancialOverviewDialog({
             <p className="text-lg font-bold text-red-600">
               -₦{walletData.monthlyExpenditure.toLocaleString()}
             </p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               (M{walletData.monthlyExpenditure.toLocaleString()})
             </p>
-            <p className="text-[10px] text-muted-foreground mt-1">This month</p>
+            <p className="text-xs text-muted-foreground mt-1">This month</p>
           </CardContent>
         </Card>
       </div>
@@ -281,7 +281,7 @@ export function FinancialOverviewDialog({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-xs truncate">{transaction.description}</p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {transaction.date.toLocaleDateString()}
                   </p>
                 </div>
@@ -293,7 +293,7 @@ export function FinancialOverviewDialog({
                   showSign="auto"
                   size="sm"
                 />
-                <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-[10px] mt-0.5">
+                <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-xs mt-0.5">
                   {transaction.status}
                 </Badge>
               </div>
@@ -316,7 +316,7 @@ export function FinancialOverviewDialog({
               <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
                 {quizAvailability.reason}
               </p>
-              <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
                 Required reserve: ₦{quizAvailability.totalRequired.toLocaleString()} — Fund from Main Wallet to resume games.
               </p>
             </div>
@@ -337,25 +337,25 @@ export function FinancialOverviewDialog({
       <div className="grid grid-cols-3 gap-2">
         <Card>
           <CardContent className="p-2.5 text-center">
-            <p className="text-[10px] text-muted-foreground mb-0.5">Stakes In</p>
+            <p className="text-xs text-muted-foreground mb-0.5">Stakes In</p>
             <p className="text-sm font-bold text-green-600">
               ₦{quizWallet.totalStakeIncome.toLocaleString()}
             </p>
-            <p className="text-[9px] text-muted-foreground">(M{quizWallet.totalStakeIncome.toLocaleString()})</p>
+            <p className="text-xs text-muted-foreground">(M{quizWallet.totalStakeIncome.toLocaleString()})</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-2.5 text-center">
-            <p className="text-[10px] text-muted-foreground mb-0.5">Payouts</p>
+            <p className="text-xs text-muted-foreground mb-0.5">Payouts</p>
             <p className="text-sm font-bold text-red-600">
               ₦{quizWallet.totalWinningPayouts.toLocaleString()}
             </p>
-            <p className="text-[9px] text-muted-foreground">(M{quizWallet.totalWinningPayouts.toLocaleString()})</p>
+            <p className="text-xs text-muted-foreground">(M{quizWallet.totalWinningPayouts.toLocaleString()})</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-2.5 text-center">
-            <p className="text-[10px] text-muted-foreground mb-0.5">Net</p>
+            <p className="text-xs text-muted-foreground mb-0.5">Net</p>
             <p className={cn(
               "text-sm font-bold",
               (quizWallet.totalStakeIncome - quizWallet.totalWinningPayouts) >= 0
@@ -364,7 +364,7 @@ export function FinancialOverviewDialog({
             )}>
               ₦{Math.abs(quizWallet.totalStakeIncome - quizWallet.totalWinningPayouts).toLocaleString()}
             </p>
-            <p className="text-[9px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               (M{Math.abs(quizWallet.totalStakeIncome - quizWallet.totalWinningPayouts).toLocaleString()})
             </p>
           </CardContent>
@@ -421,11 +421,11 @@ export function FinancialOverviewDialog({
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-xs truncate">{tx.description}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {new Date(tx.date).toLocaleDateString()}
                       </p>
                       {tx.playerName && (
-                        <Badge variant="secondary" className="text-[9px] px-1 py-0">
+                        <Badge variant="secondary" className="text-xs px-1 py-0">
                           {tx.playerName}
                         </Badge>
                       )}
@@ -442,7 +442,7 @@ export function FinancialOverviewDialog({
                     {tx.type === "stake_income" || tx.type === "transfer_in" ? "+" : "-"}
                     ₦{tx.amount.toLocaleString()}
                   </p>
-                  <p className="text-[9px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     (M{tx.amount.toLocaleString()})
                   </p>
                 </div>
@@ -457,7 +457,7 @@ export function FinancialOverviewDialog({
   // Shared content component
   const Content = () => (
     <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
-      <div className="px-4 pb-6 space-y-4">
+      <div className="px-2 pb-6 space-y-4">
         {/* Swipeable Wallet Carousel */}
         <WalletCarousel />
 

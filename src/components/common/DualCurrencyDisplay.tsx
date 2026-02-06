@@ -68,7 +68,7 @@ export function DualCurrencyDisplay({
   };
 
   const mobiSizeClasses = {
-    sm: "text-[10px]",
+    sm: "text-xs",
     md: "text-xs",
     lg: "text-sm",
   };
