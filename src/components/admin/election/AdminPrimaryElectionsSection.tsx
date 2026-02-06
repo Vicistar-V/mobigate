@@ -183,18 +183,21 @@ export function AdminPrimaryElectionsSection() {
             className="overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
             onClick={() => openPrimaryDetail(primary)}
           >
-            <CardContent className="p-3">
+            <CardContent className="p-2.5">
               {/* Header */}
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <h4 className="font-semibold text-sm">{primary.officeName}</h4>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                    <Calendar className="h-3 w-3" />
-                    {format(primary.scheduledDate, "MMM d, yyyy")}
-                    <span className="mx-1">•</span>
-                    <Clock className="h-3 w-3" />
-                    {primary.startTime} - {primary.endTime}
-                  </p>
+                  <div className="flex flex-col gap-0.5 mt-0.5">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3 w-3 shrink-0" />
+                      {format(primary.scheduledDate, "MMM d, yyyy")}
+                    </p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3 shrink-0" />
+                      {primary.startTime} - {primary.endTime}
+                    </p>
+                  </div>
                 </div>
                 {getStatusBadge(primary.status)}
               </div>
@@ -240,33 +243,37 @@ export function AdminPrimaryElectionsSection() {
                         <div 
                           key={candidate.id}
                           className={cn(
-                            "flex items-center justify-between p-2 rounded-lg",
+                            "p-2 rounded-lg",
                             isAutoQualified ? "bg-emerald-50 dark:bg-emerald-950/20" : 
                             isTopVotes ? "bg-amber-50 dark:bg-amber-950/20" : 
                             "bg-muted/30"
                           )}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-muted-foreground w-4">
+                            <span className="text-xs font-medium text-muted-foreground w-4 shrink-0">
                               {idx + 1}.
                             </span>
-                            <Avatar className="h-6 w-6">
+                            <Avatar className="h-6 w-6 shrink-0">
                               <AvatarImage src={candidate.avatar} />
                               <AvatarFallback className="text-xs">{candidate.name[0]}</AvatarFallback>
                             </Avatar>
-                            <span className="text-xs font-medium truncate max-w-[140px]">
-                              {candidate.name}
-                            </span>
-                            {isAutoQualified && (
-                              <Star className="h-3 w-3 text-emerald-500 fill-emerald-500" />
-                            )}
-                            {isTopVotes && (
-                              <Trophy className="h-3 w-3 text-amber-500" />
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <span className="text-xs font-bold">{candidate.percentage}%</span>
-                            <p className="text-xs text-muted-foreground">{candidate.votes} votes</p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs font-medium truncate">
+                                  {candidate.name}
+                                </span>
+                                {isAutoQualified && (
+                                  <Star className="h-3 w-3 text-emerald-500 fill-emerald-500 shrink-0" />
+                                )}
+                                {isTopVotes && (
+                                  <Trophy className="h-3 w-3 text-amber-500 shrink-0" />
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-xs font-bold">{candidate.percentage}%</span>
+                                <span className="text-xs text-muted-foreground">· {candidate.votes} votes</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );
@@ -453,7 +460,7 @@ export function AdminPrimaryElectionsSection() {
                                     <AvatarFallback>{candidate.name[0]}</AvatarFallback>
                                   </Avatar>
                                   <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-sm truncate">{candidate.name}</p>
+                                    <p className="font-semibold text-sm">{candidate.name}</p>
                                     {isAutoQualified && (
                                       <Badge className="bg-emerald-500 text-white text-xs mt-0.5">
                                         <Star className="h-2.5 w-2.5 mr-1 fill-white" />
