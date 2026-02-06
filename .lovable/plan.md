@@ -1,58 +1,145 @@
 
 
-## Fix Content Clipping in Election Clearance Cards
+## Integrate Multi-Signature Authorization into Election Settings
 
-### Problem
+### What Changes
 
-The "Ngozi Patricia Udoh" clearance card in the Admin Clearances section is not displaying fully on mobile:
+Currently, when an admin changes an Election Setting (e.g., "Candidate Eligibility Period" from 2 Years to 3 Years) and taps "Submit Change," a simple confirmation dialog appears. This bypasses the established multi-signature authorization system.
 
-1. The **rejection reason** text is truncated by `line-clamp-2`, hiding the amount ("M45,000") at the end
-2. The **outer container** has `overflow-hidden` which may clip content near the bottom of the scrollable area
-3. The **notes** text (e.g., "ID verification document is unclear...") also uses `line-clamp-2` and could be cut off
+The fix: Replace the simple `AlertDialog` with the `ModuleAuthorizationDrawer`, which enforces the **Elections** module rules: **President + Secretary + (PRO, Fin. Sec, or Legal Adviser)** -- 3 signatories required.
 
-### Fix
+### What the User Will See
 
-**File: `src/components/admin/election/AdminClearancesTab.tsx`**
+1. Admin changes a setting value (e.g., selects "3 Years" for Candidate Eligibility)
+2. Taps "Submit Change"
+3. The **ModuleAuthorizationDrawer** slides up (92vh on mobile)
+4. Shows the setting being changed with old and new values
+5. Each required officer enters their password to authorize
+6. Once all 3+ signatures are collected, the change is applied
+7. Toast confirms: "Change Submitted for Approval"
 
-**Change 1: Remove `overflow-hidden` from outer container (line 108)**
+---
 
-The parent container has `overflow-hidden` which clips content. Replace it with just padding for scroll safety:
+### File: `src/components/admin/election/ElectionSettingsSection.tsx`
 
+**1. Add imports for the authorization system (lines 1-43)**
+
+Add these imports:
+- `ModuleAuthorizationDrawer` from `@/components/admin/authorization/ModuleAuthorizationDrawer`
+- `Settings` icon from lucide (already imported)
+- `renderActionDetails` and `getActionConfig` from `@/components/admin/authorization/authorizationActionConfigs`
+
+**2. Add new action config for election settings (in authorizationActionConfigs.tsx)**
+
+Add a new config entry under `elections` module:
 ```
-Before: <div className="space-y-3 sm:space-y-4 pb-20 overflow-hidden">
-After:  <div className="space-y-3 sm:space-y-4 pb-20">
+update_election_setting: {
+  title: "Update Election Setting",
+  description: "Multi-signature authorization to modify election rules",
+  icon: <Settings className="h-5 w-5 text-green-600" />,
+  iconComponent: Settings,
+  iconColorClass: "text-green-600",
+}
 ```
 
-**Change 2: Remove `line-clamp-2` from notes text (line 192)**
+**3. Replace state and handlers (lines 179-228)**
 
-Allow the full note to display so no information is hidden:
+Replace:
+- `showConfirmDialog` state with `showAuthDrawer` state
+- `handleSave` to open the auth drawer instead of the dialog
+- `confirmSave` becomes `handleAuthComplete` (called after successful multi-sig)
 
-```
-Before: <p className="mt-2.5 text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded line-clamp-2">
-After:  <p className="mt-2.5 text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded break-words">
-```
-
-**Change 3: Remove `line-clamp-2` from rejection reason text (line 199)**
-
-Allow the full rejection reason (including the amount) to display:
-
-```
-Before: <p className="mt-2.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-2 rounded line-clamp-2">
-After:  <p className="mt-2.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-2 rounded break-words">
+New state:
+```tsx
+const [showAuthDrawer, setShowAuthDrawer] = useState(false);
+const [selectedSetting, setSelectedSetting] = useState<ElectionSetting | null>(null);
 ```
 
-### Summary
+New handler flow:
+```tsx
+const handleSave = (setting: ElectionSetting) => {
+  setSelectedSetting(setting);
+  setShowAuthDrawer(true);
+};
 
-| Change | Line | Purpose |
-|--------|------|---------|
-| Remove `overflow-hidden` | 108 | Prevent container from clipping bottom content |
-| Remove `line-clamp-2`, add `break-words` on notes | 192 | Show full note text without truncation |
-| Remove `line-clamp-2`, add `break-words` on rejection reason | 199 | Show full rejection reason including the amount |
+const handleAuthComplete = () => {
+  // Apply the change after successful multi-sig authorization
+  if (!selectedSetting) return;
+  const newValue = pendingChanges[selectedSetting.id];
+  if (!newValue) return;
 
-### What This Fixes
+  setSettings(prev => prev.map(s =>
+    s.id === selectedSetting.id
+      ? { ...s, currentValue: newValue, hasPendingChange: true, lastUpdated: new Date() }
+      : s
+  ));
+  setPendingChanges(prev => {
+    const { [selectedSetting.id]: _, ...rest } = prev;
+    return rest;
+  });
+  toast({ title: "Setting Updated", description: "..." });
+  setSelectedSetting(null);
+};
+```
 
-- The full rejection reason "Outstanding financial obligations to the community have not been cleared. Amount owing: M45,000" will be fully visible
-- Notes like "ID verification document is unclear. Please resubmit with a clearer image." will show completely
-- No content will be clipped at the bottom of the card list
-- `break-words` ensures long text wraps properly on narrow mobile screens
+**4. Replace AlertDialog with ModuleAuthorizationDrawer (lines 336-359)**
 
+Remove the entire `AlertDialog` block and replace with:
+
+```tsx
+<ModuleAuthorizationDrawer
+  open={showAuthDrawer}
+  onOpenChange={setShowAuthDrawer}
+  module="elections"
+  actionTitle="Update Election Setting"
+  actionDescription={
+    selectedSetting
+      ? `Change "${selectedSetting.name}" requires multi-signature authorization`
+      : ""
+  }
+  actionDetails={
+    selectedSetting ? (
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-green-500/10">
+            <selectedSetting.icon className="h-5 w-5 text-green-600" />
+          </div>
+          <div>
+            <p className="font-medium text-sm">{selectedSetting.name}</p>
+            <p className="text-xs text-muted-foreground">{selectedSetting.description}</p>
+          </div>
+        </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">Current</span>
+          <span>{currentLabel}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">New Value</span>
+          <span className="font-bold text-primary">{newLabel}</span>
+        </div>
+      </div>
+    ) : null
+  }
+  onAuthorized={handleAuthComplete}
+/>
+```
+
+This shows the old and new values clearly so authorizing officers know exactly what they're approving.
+
+---
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/components/admin/election/ElectionSettingsSection.tsx` | Replace AlertDialog with ModuleAuthorizationDrawer; update state and handlers |
+| `src/components/admin/authorization/authorizationActionConfigs.tsx` | Add `update_election_setting` config under the `elections` module |
+
+### Authorization Flow (Elections Module)
+
+The `elections` module requires **3 signatories**:
+1. **President/Chairman** (required)
+2. **Secretary** (required)
+3. **One of:** PRO, Financial Secretary, or Legal Adviser (pick one)
+
+If a Vice President or Assistant Secretary signs in place of their primary, the quorum increases to 4 and the Legal Adviser becomes mandatory.
