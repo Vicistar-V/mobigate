@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, CreditCard, FileText, BookOpen, QrCode, Download, ExternalLink, Search, Shield } from "lucide-react";
+import { X, CreditCard, FileText, BookOpen, QrCode, Download, ExternalLink, Search, Shield, MoreHorizontal, Scale, HelpCircle, MessageCircle, ChevronRight, ExternalLink as LinkIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DigitalIDCardDisplay, IDCardData } from "@/components/community/resources/DigitalIDCardDisplay";
 import { OfficialLetterDisplay, LetterData } from "@/components/community/resources/OfficialLetterDisplay";
 import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
+import { ConstitutionViewer } from "@/components/community/ConstitutionViewer";
+import { constitutionSections, constitutionMetadata } from "@/data/constitutionData";
+import { format } from "date-fns";
 
 interface CommunityResourcesDialogProps {
   open: boolean;
@@ -32,6 +35,10 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
   const [showPubDownload, setShowPubDownload] = useState(false);
   const [selectedPubForDownload, setSelectedPubForDownload] = useState<{ title: string; fileSize: string } | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showConstitutionViewer, setShowConstitutionViewer] = useState(false);
+
+  // Get only article-level sections for the constitution summary
+  const constitutionArticles = constitutionSections.filter(s => s.type === "article");
 
   const handleRequestCard = () => {
     toast({
@@ -116,6 +123,24 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
     }
   };
 
+  const handleOpenConstitutionViewer = () => {
+    onOpenChange(false);
+    setTimeout(() => setShowConstitutionViewer(true), 150);
+  };
+
+  const handleCloseConstitutionViewer = (open: boolean) => {
+    setShowConstitutionViewer(open);
+    if (!open) {
+      setTimeout(() => onOpenChange(true), 150);
+    }
+  };
+
+  const handleDownloadConstitution = () => {
+    setSelectedPubForDownload({ title: constitutionMetadata.title, fileSize: "2.4 MB" });
+    onOpenChange(false);
+    setTimeout(() => setShowPubDownload(true), 150);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved":
@@ -158,10 +183,16 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
 
           <Tabs defaultValue="id-cards" className="flex-1">
             <div className="px-4 sm:px-6">
-              <TabsList className="w-full grid grid-cols-3 text-xs">
-                <TabsTrigger value="id-cards">ID Cards</TabsTrigger>
-                <TabsTrigger value="letters">Letters</TabsTrigger>
-                <TabsTrigger value="publications">Publications</TabsTrigger>
+              <TabsList className="w-full grid grid-cols-4 text-xs">
+                <TabsTrigger value="id-cards" className="text-[11px] px-1">ID Cards</TabsTrigger>
+                <TabsTrigger value="letters" className="text-[11px] px-1">Letters</TabsTrigger>
+                <TabsTrigger value="constitution" className="text-[11px] px-1">
+                  Constitution
+                </TabsTrigger>
+                <TabsTrigger value="more" className="text-[11px] px-1 gap-1">
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                  More
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -371,51 +402,167 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                 </Card>
               </TabsContent>
 
-              {/* PUBLICATIONS TAB */}
-              <TabsContent value="publications" className="mt-0 p-4 sm:p-6 space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search publications..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
+              {/* CONSTITUTION TAB */}
+              <TabsContent value="constitution" className="mt-0 p-4 sm:p-6 space-y-4">
+                {/* Constitution Header Card */}
+                <Card className="border-2 border-primary/20">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <Scale className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-sm leading-tight">{constitutionMetadata.title}</h3>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          <Badge variant="secondary" className="text-[10px]">
+                            Version {constitutionMetadata.version}
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px]">
+                            Effective {format(constitutionMetadata.effectiveDate, "MMM d, yyyy")}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Metadata Grid */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-muted/50 rounded-lg p-2.5">
+                        <p className="text-muted-foreground text-[10px]">Adopted</p>
+                        <p className="font-medium">{format(constitutionMetadata.adoptedDate, "MMM d, yyyy")}</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-2.5">
+                        <p className="text-muted-foreground text-[10px]">Last Amended</p>
+                        <p className="font-medium">{format(constitutionMetadata.lastAmendedDate, "MMM d, yyyy")}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Articles List */}
+                <div>
+                  <h3 className="font-semibold text-sm mb-2">Articles</h3>
+                  <div className="space-y-1.5">
+                    {constitutionArticles.map((article) => (
+                      <button
+                        key={article.id}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors text-left"
+                        onClick={handleOpenConstitutionViewer}
+                      >
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <span className="text-[10px] font-bold text-primary">
+                            {article.number ? article.number.replace("ARTICLE ", "") : "P"}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{article.title}</p>
+                          {article.number && (
+                            <p className="text-[10px] text-muted-foreground">{article.number}</p>
+                          )}
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {filteredPublications.filter(p => p.featured).length > 0 && (
+                {/* Constitution Actions */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button onClick={handleOpenConstitutionViewer} className="w-full h-11">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    View Full Document
+                  </Button>
+                  <Button onClick={handleDownloadConstitution} variant="outline" className="w-full h-11">
+                    <Download className="h-4 w-4 mr-2" />
+                    Download PDF
+                  </Button>
+                </div>
+              </TabsContent>
+
+              {/* MORE TAB */}
+              <TabsContent value="more" className="mt-0 p-4 sm:p-6 space-y-6">
+                {/* Publications Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    <h3 className="font-bold text-base">Publications</h3>
+                  </div>
+
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search publications..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+
+                  {filteredPublications.filter(p => p.featured).length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-sm mb-3">Featured Publications</h4>
+                      <div className="grid gap-4">
+                        {filteredPublications.filter(p => p.featured).map((pub) => (
+                          <Card key={pub.id} className="border-l-4 border-l-primary">
+                            <CardContent className="p-4">
+                              <div className="flex gap-4">
+                                <div className="bg-primary/10 rounded-lg p-4 flex items-center justify-center shrink-0">
+                                  <BookOpen className="h-8 w-8 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between gap-2 mb-1">
+                                    <h4 className="font-semibold text-sm line-clamp-1">{pub.title}</h4>
+                                    <Badge variant="secondary" className="shrink-0 text-xs">
+                                      {pub.type}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                                    {pub.description}
+                                  </p>
+                                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <div className="space-y-1">
+                                      <p>{pub.edition}</p>
+                                      <p>{pub.pages} pages • {pub.fileSize}</p>
+                                    </div>
+                                    <Button
+                                      onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
+                                      size="sm"
+                                      className="shrink-0"
+                                    >
+                                      <Download className="h-3 w-3 mr-1" />
+                                      Download
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <h3 className="font-semibold mb-3">Featured Publications</h3>
-                    <div className="grid gap-4">
-                      {filteredPublications.filter(p => p.featured).map((pub) => (
-                        <Card key={pub.id} className="border-l-4 border-l-primary">
-                          <CardContent className="p-4">
-                            <div className="flex gap-4">
-                              <div className="bg-primary/10 rounded-lg p-4 flex items-center justify-center shrink-0">
-                                <BookOpen className="h-8 w-8 text-primary" />
+                    <h4 className="font-semibold text-sm mb-3">All Publications</h4>
+                    <div className="grid gap-3">
+                      {filteredPublications.filter(p => !p.featured).map((pub) => (
+                        <Card key={pub.id}>
+                          <CardContent className="p-3">
+                            <div className="flex items-start gap-3">
+                              <div className="bg-muted rounded p-2 shrink-0">
+                                <BookOpen className="h-5 w-5" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2 mb-1">
-                                  <h4 className="font-semibold text-sm line-clamp-1">{pub.title}</h4>
-                                  <Badge variant="secondary" className="shrink-0 text-xs">
-                                    {pub.type}
-                                  </Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-                                  {pub.description}
-                                </p>
-                                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                  <div className="space-y-1">
-                                    <p>{pub.edition}</p>
-                                    <p>{pub.pages} pages • {pub.fileSize}</p>
-                                  </div>
+                                <h4 className="font-medium text-sm line-clamp-1 mb-1">{pub.title}</h4>
+                                <p className="text-xs text-muted-foreground mb-2">{pub.edition}</p>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">{pub.fileSize}</span>
                                   <Button
                                     onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
                                     size="sm"
-                                    className="shrink-0"
+                                    variant="ghost"
                                   >
                                     <Download className="h-3 w-3 mr-1" />
-                                    Download
+                                    Get
                                   </Button>
                                 </div>
                               </div>
@@ -425,45 +572,74 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                       ))}
                     </div>
                   </div>
-                )}
 
-                <div>
-                  <h3 className="font-semibold mb-3">All Publications</h3>
-                  <div className="grid gap-3">
-                    {filteredPublications.filter(p => !p.featured).map((pub) => (
-                      <Card key={pub.id}>
-                        <CardContent className="p-3">
-                          <div className="flex items-start gap-3">
-                            <div className="bg-muted rounded p-2 shrink-0">
-                              <BookOpen className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-sm line-clamp-1 mb-1">{pub.title}</h4>
-                              <p className="text-xs text-muted-foreground mb-2">{pub.edition}</p>
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-muted-foreground">{pub.fileSize}</span>
-                                <Button
-                                  onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
-                                  size="sm"
-                                  variant="ghost"
-                                >
-                                  <Download className="h-3 w-3 mr-1" />
-                                  Get
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  {filteredPublications.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No publications found matching "{searchQuery}"
+                    </div>
+                  )}
                 </div>
 
-                {filteredPublications.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No publications found matching "{searchQuery}"
+                {/* Other Resources Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-5 w-5 text-primary" />
+                    <h3 className="font-bold text-base">Other Resources</h3>
                   </div>
-                )}
+
+                  <div className="space-y-2.5">
+                    <Card className="hover:bg-muted/30 transition-colors cursor-pointer">
+                      <CardContent className="p-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                            <MessageCircle className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm">Community Forum</h4>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              Discuss topics with fellow community members
+                            </p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="hover:bg-muted/30 transition-colors cursor-pointer">
+                      <CardContent className="p-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                            <HelpCircle className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm">Help Center</h4>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              Get answers to frequently asked questions
+                            </p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="hover:bg-muted/30 transition-colors cursor-pointer">
+                      <CardContent className="p-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                            <FileText className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm">FAQs</h4>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              Common questions about membership and services
+                            </p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               </TabsContent>
             </ScrollArea>
           </Tabs>
@@ -507,6 +683,12 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
           isDownloading={isDownloading}
         />
       )}
+
+      {/* Constitution Full Viewer */}
+      <ConstitutionViewer
+        open={showConstitutionViewer}
+        onOpenChange={handleCloseConstitutionViewer}
+      />
     </>
   );
 }

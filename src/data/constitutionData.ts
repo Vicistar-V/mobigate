@@ -240,7 +240,7 @@ export const constitutionSections: ConstitutionSection[] = [
 ];
 
 export const constitutionMetadata = {
-  title: "Constitution of [Community Name]",
+  title: "Constitution of Ndigbo Progressive Union",
   adoptedDate: new Date("2024-01-15"),
   lastAmendedDate: new Date("2024-06-20"),
   version: "2.1",
