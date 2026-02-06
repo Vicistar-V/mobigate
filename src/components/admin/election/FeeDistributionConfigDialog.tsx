@@ -228,7 +228,7 @@ export function FeeDistributionConfigDialog({
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
+            {Content()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -245,7 +245,7 @@ export function FeeDistributionConfigDialog({
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <Content />
+          {Content()}
         </ScrollArea>
       </DialogContent>
     </Dialog>

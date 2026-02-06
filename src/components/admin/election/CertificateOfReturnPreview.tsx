@@ -385,8 +385,8 @@ and all official documentation purposes.
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <CertificateDocument />
-            <ActionButtons />
+            {CertificateDocument()}
+            {ActionButtons()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -403,8 +403,8 @@ and all official documentation purposes.
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <CertificateDocument />
-          <ActionButtons />
+          {CertificateDocument()}
+          {ActionButtons()}
         </ScrollArea>
       </DialogContent>
     </Dialog>

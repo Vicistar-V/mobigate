@@ -365,7 +365,7 @@ export function CandidateVotersListSheet({
               </DrawerTitle>
             </DrawerHeader>
             <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto" style={{ maxHeight: 'calc(92vh - 80px)' }}>
-              <Content />
+              {Content()}
             </ScrollArea>
           </DrawerContent>
         </Drawer>
@@ -389,7 +389,7 @@ export function CandidateVotersListSheet({
             </SheetTitle>
           </SheetHeader>
           <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-            <Content />
+            {Content()}
           </ScrollArea>
         </SheetContent>
       </Sheet>

@@ -509,8 +509,8 @@ export function NominateCandidateDrawer({
                 Nominate Candidate
               </DrawerTitle>
             </DrawerHeader>
-            <DrawerBodyContent />
-            <FooterContent />
+            {DrawerBodyContent()}
+            {FooterContent()}
           </DrawerContent>
         </Drawer>
 
@@ -546,9 +546,9 @@ export function NominateCandidateDrawer({
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-hidden">
-            <DrawerBodyContent />
+            {DrawerBodyContent()}
           </div>
-          <FooterContent />
+          {FooterContent()}
         </DialogContent>
       </Dialog>
 

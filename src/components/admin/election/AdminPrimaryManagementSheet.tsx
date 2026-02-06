@@ -531,7 +531,7 @@ export function AdminPrimaryManagementSheet({
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <MainContent />
+            {MainContent()}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -548,7 +548,7 @@ export function AdminPrimaryManagementSheet({
           </SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-          <MainContent />
+          {MainContent()}
         </ScrollArea>
       </SheetContent>
     </Sheet>
