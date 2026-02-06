@@ -51,13 +51,13 @@ import {
 const getStatusBadge = (status: PrimaryElection['status']) => {
   switch (status) {
     case 'completed':
-      return <Badge className="bg-emerald-500 text-white text-[10px]">Completed</Badge>;
+      return <Badge className="bg-emerald-500 text-white text-xs">Completed</Badge>;
     case 'ongoing':
-      return <Badge className="bg-blue-500 text-white text-[10px]">Ongoing</Badge>;
+      return <Badge className="bg-blue-500 text-white text-xs">Ongoing</Badge>;
     case 'scheduled':
-      return <Badge className="bg-amber-500 text-white text-[10px]">Scheduled</Badge>;
+      return <Badge className="bg-amber-500 text-white text-xs">Scheduled</Badge>;
     case 'cancelled':
-      return <Badge className="bg-red-500 text-white text-[10px]">Cancelled</Badge>;
+      return <Badge className="bg-red-500 text-white text-xs">Cancelled</Badge>;
     default:
       return null;
   }
@@ -76,7 +76,7 @@ const StatCard = ({ icon, value, label, color }: StatCardProps) => (
       {icon}
       <span className="text-lg font-bold">{value}</span>
     </div>
-    <span className="text-[10px] text-muted-foreground">{label}</span>
+    <span className="text-xs text-muted-foreground">{label}</span>
   </div>
 );
 
@@ -212,7 +212,7 @@ export function AdminPrimaryElectionsSection() {
                     value={(primary.totalVotesCast / primary.totalEligibleVoters) * 100} 
                     className="h-1.5"
                   />
-                  <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>{primary.totalVotesCast} votes</span>
                     <span>{primary.totalEligibleVoters} eligible</span>
                   </div>
@@ -252,9 +252,9 @@ export function AdminPrimaryElectionsSection() {
                             </span>
                             <Avatar className="h-6 w-6">
                               <AvatarImage src={candidate.avatar} />
-                              <AvatarFallback className="text-[10px]">{candidate.name[0]}</AvatarFallback>
+                              <AvatarFallback className="text-xs">{candidate.name[0]}</AvatarFallback>
                             </Avatar>
-                            <span className="text-xs font-medium truncate max-w-[120px]">
+                            <span className="text-xs font-medium truncate max-w-[140px]">
                               {candidate.name}
                             </span>
                             {isAutoQualified && (
@@ -266,7 +266,7 @@ export function AdminPrimaryElectionsSection() {
                           </div>
                           <div className="text-right">
                             <span className="text-xs font-bold">{candidate.percentage}%</span>
-                            <p className="text-[10px] text-muted-foreground">{candidate.votes} votes</p>
+                            <p className="text-xs text-muted-foreground">{candidate.votes} votes</p>
                           </div>
                         </div>
                       );
@@ -300,7 +300,7 @@ export function AdminPrimaryElectionsSection() {
       {/* Primary Election Detail Sheet - Mobile optimized */}
       <Sheet open={showDetailSheet} onOpenChange={setShowDetailSheet}>
         <SheetContent side="bottom" className="h-[92vh] rounded-t-2xl p-0 flex flex-col">
-          <SheetHeader className="px-4 pt-4 pb-3 border-b shrink-0">
+          <SheetHeader className="px-3 pt-4 pb-3 border-b shrink-0">
             <SheetTitle className="flex items-center gap-2">
               <Vote className="h-5 w-5 text-primary" />
               Primary Election Details
@@ -309,9 +309,9 @@ export function AdminPrimaryElectionsSection() {
 
           {selectedPrimary && (
             <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-              <div className="space-y-3 px-4 py-4">
+              <div className="space-y-3 px-2 py-3">
                 {/* Election Info - Compact card */}
-                <div className="p-3 rounded-lg border bg-card space-y-3">
+                <div className="p-2.5 rounded-lg border bg-card space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <h3 className="font-bold text-sm leading-tight">{selectedPrimary.officeName}</h3>
@@ -325,14 +325,14 @@ export function AdminPrimaryElectionsSection() {
                     <div className="flex items-center gap-2 flex-1 p-2 bg-muted/50 rounded-lg">
                       <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-[10px] text-muted-foreground leading-tight">Date</p>
+                        <p className="text-xs text-muted-foreground leading-tight">Date</p>
                         <p className="font-medium text-xs">{format(selectedPrimary.scheduledDate, "MMM d, yyyy")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-1 p-2 bg-muted/50 rounded-lg">
                       <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-[10px] text-muted-foreground leading-tight">Time</p>
+                        <p className="text-xs text-muted-foreground leading-tight">Time</p>
                         <p className="font-medium text-xs">{selectedPrimary.startTime} - {selectedPrimary.endTime}</p>
                       </div>
                     </div>
@@ -341,7 +341,7 @@ export function AdminPrimaryElectionsSection() {
 
                 {/* Turnout Stats - Compact */}
                 {selectedPrimary.status !== 'scheduled' && (
-                  <div className="p-3 rounded-lg border bg-card space-y-2">
+                  <div className="p-2.5 rounded-lg border bg-card space-y-2">
                     <div className="flex items-center gap-2">
                       <BarChart3 className="h-4 w-4 text-primary shrink-0" />
                       <span className="text-sm font-semibold">Voter Turnout</span>
@@ -367,8 +367,8 @@ export function AdminPrimaryElectionsSection() {
 
               {/* Advancement Rules Info - Compact list */}
                 {selectedPrimary.candidates.length > 0 && (
-                  <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
-                    <div className="flex items-start gap-2.5">
+                  <div className="p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                    <div className="flex items-start gap-2">
                       <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                       <div className="text-xs space-y-1 min-w-0">
                         <p className="font-semibold text-blue-700 dark:text-blue-400">Advancement Rules</p>
@@ -405,13 +405,13 @@ export function AdminPrimaryElectionsSection() {
                           <Users className="h-4 w-4 text-primary shrink-0" />
                           <span className="text-sm font-semibold">Candidates Results</span>
                         </div>
-                        <Badge variant="secondary" className="text-[10px]">
+                        <Badge variant="secondary" className="text-xs">
                           {advancementResult.totalAdvancing} advancing
                         </Badge>
                       </div>
                       
                       {advancementResult.autoQualifiedCount > 0 && (
-                        <p className="text-[10px] text-muted-foreground px-1">
+                        <p className="text-xs text-muted-foreground px-1">
                           {advancementResult.autoQualifiedCount} auto-qualified (≥25%)
                           {advancementResult.topVoteFilledCount > 0 && 
                             ` • ${advancementResult.topVoteFilledCount} by top votes`
@@ -430,7 +430,7 @@ export function AdminPrimaryElectionsSection() {
                               <div 
                                 key={candidate.id}
                                 className={cn(
-                                  "p-3 rounded-lg border",
+                                  "p-2.5 rounded-lg border",
                                   isAutoQualified 
                                     ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800" 
                                     : isTopVotes
@@ -439,13 +439,13 @@ export function AdminPrimaryElectionsSection() {
                                 )}
                               >
                                 <div 
-                                  className="flex items-center gap-3 mb-2 cursor-pointer active:opacity-70 transition-opacity"
+                                  className="flex items-center gap-2.5 mb-2 cursor-pointer active:opacity-70 transition-opacity"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleCandidateClick(candidate);
                                   }}
                                 >
-                                  <span className="text-sm font-bold text-muted-foreground w-5">
+                                  <span className="text-sm font-bold text-muted-foreground w-4">
                                     {idx + 1}.
                                   </span>
                                   <Avatar className="h-9 w-9">
@@ -455,20 +455,20 @@ export function AdminPrimaryElectionsSection() {
                                   <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-sm truncate">{candidate.name}</p>
                                     {isAutoQualified && (
-                                      <Badge className="bg-emerald-500 text-white text-[10px] mt-0.5">
+                                      <Badge className="bg-emerald-500 text-white text-xs mt-0.5">
                                         <Star className="h-2.5 w-2.5 mr-1 fill-white" />
                                         Auto-Qualified ({candidate.percentage}%)
                                       </Badge>
                                     )}
                                     {isTopVotes && (
-                                      <Badge className="bg-amber-500 text-white text-[10px] mt-0.5">
+                                      <Badge className="bg-amber-500 text-white text-xs mt-0.5">
                                         <Trophy className="h-2.5 w-2.5 mr-1" />
                                         Advances (Top Votes)
                                       </Badge>
                                     )}
                                   </div>
                                 </div>
-                                <div className="ml-8">
+                                <div className="ml-7">
                                   <div className="flex justify-between text-xs mb-1">
                                     <span className="text-muted-foreground">{candidate.votes.toLocaleString()} votes</span>
                                     <span className="font-bold">{candidate.percentage}%</span>
@@ -489,7 +489,7 @@ export function AdminPrimaryElectionsSection() {
                                       style={{ left: '25%' }}
                                     />
                                   </div>
-                                  <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                                  <div className="flex justify-between text-xs text-muted-foreground mt-0.5">
                                     <span></span>
                                     <span className="text-red-500/80">25% threshold ↑</span>
                                   </div>
