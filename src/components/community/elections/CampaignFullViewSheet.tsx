@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ export function CampaignFullViewSheet({
   campaign,
   onWriteFeedback
 }: CampaignFullViewSheetProps) {
+  const navigate = useNavigate();
   if (!campaign) return null;
 
   const daysRemaining = calculateDaysRemaining(campaign.endDate);
@@ -54,8 +56,11 @@ export function CampaignFullViewSheet({
             <div className="h-20 bg-gradient-to-r from-primary/20 to-primary/5" />
           )}
           
-          {/* Candidate Avatar - Overlapping */}
-          <div className={`absolute ${campaign.campaignImage ? '-bottom-8' : '-bottom-6'} left-4`}>
+          {/* Candidate Avatar - Overlapping & Clickable */}
+          <div 
+            className={`absolute ${campaign.campaignImage ? '-bottom-8' : '-bottom-6'} left-4 cursor-pointer touch-manipulation active:scale-[0.95]`}
+            onClick={() => navigate(`/profile/${campaign.candidateId}`)}
+          >
             <Avatar className="h-16 w-16 ring-4 ring-background shadow-lg">
               <AvatarImage src={campaign.candidatePhoto} />
               <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
@@ -73,7 +78,12 @@ export function CampaignFullViewSheet({
         
         <SheetHeader className="px-4 pt-10 pb-2">
           <div>
-            <SheetTitle className="text-lg">{campaign.candidateName}</SheetTitle>
+            <SheetTitle 
+              className="text-lg cursor-pointer touch-manipulation active:opacity-80 underline-offset-2 hover:underline w-fit"
+              onClick={() => navigate(`/profile/${campaign.candidateId}`)}
+            >
+              {campaign.candidateName}
+            </SheetTitle>
             <p className="text-sm text-primary font-medium">Candidate for {campaign.office}</p>
             {/* Community Name */}
             <div className="flex items-center gap-1.5 mt-2 px-2 py-1.5 bg-muted/50 rounded-md w-fit">

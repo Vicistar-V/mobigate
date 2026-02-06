@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export function CampaignBannerCard({
   onWriteFeedback,
   compact = false 
 }: CampaignBannerCardProps) {
+  const navigate = useNavigate();
   const daysRemaining = calculateDaysRemaining(campaign.endDate);
   
   if (compact) {
@@ -88,7 +90,15 @@ export function CampaignBannerCard({
           </Avatar>
           
           <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-sm">{campaign.candidateName}</h4>
+            <h4 
+              className="font-bold text-sm cursor-pointer touch-manipulation active:opacity-70 underline-offset-2 hover:underline w-fit"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/profile/${campaign.candidateId}`);
+              }}
+            >
+              {campaign.candidateName}
+            </h4>
             <p className="text-xs text-primary font-medium">for {campaign.office}</p>
           </div>
           
