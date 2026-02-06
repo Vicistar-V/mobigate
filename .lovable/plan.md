@@ -1,107 +1,132 @@
 
 
-## Add Constitution Tab and "More" Resources - Mobile First
+## Update Quiz Time to 10 Seconds and Winning Structure to 20%
 
 ### What's Changing
 
-The Community Resources dialog currently has 3 tabs: **ID Cards**, **Letters**, **Publications**. Based on the screenshot annotation, the user wants **Constitution** added as a tab, with a **More** option for additional resources.
+Based on the screenshots, two values need updating across the entire quiz system:
 
-### Approach
+1. **Time per Question**: Change default from 35s/30s/25s/etc. to **10 seconds** for all quizzes
+2. **Winning Structure for 8-9/10**: Change from **50% Win** to **20% Win**
+3. **Mobigate Admin**: Add a Quiz Settings card to the Mobigate Admin Dashboard so admins can edit these values
 
-Instead of cramming 5+ tabs into a narrow mobile TabsList, the layout will use **4 tabs**: "ID Cards", "Letters", "Constitution", and "More" (with a horizontal dots icon). The "More" tab consolidates Publications and Other Resources into one place, keeping the mobile tab bar clean.
+### Files to Modify
 
-### File 1: `src/components/community/CommunityResourcesDialog.tsx`
+#### 1. `src/data/platformSettingsData.ts` -- Add Quiz Platform Settings
 
-**Tab restructure (line 161)**
-- Change `grid-cols-3` to `grid-cols-4`
-- Keep "ID Cards" and "Letters" tabs
-- Add new "Constitution" tab (replacing Publications from the top-level)
-- Add "More" tab with a `MoreHorizontal` icon that contains:
-  - Publications section (moved here from its own tab)
-  - Other Resources section with placeholder cards (Community Forum link, Help Center, FAQs, etc.)
+Add a new `PlatformQuizSettings` interface and export alongside existing withdrawal/fee settings:
+- `defaultTimePerQuestion`: 10 (seconds), range 5-60
+- `partialWinPercentage`: 20 (%), range 10-50
+- `partialWinThreshold`: 8 (minimum correct for partial win)
+- Getter/setter functions following the same pattern as `getMinimumWithdrawal()`
 
-**New state: `showConstitutionViewer`**
-- When user taps the "View Full Document" button inside the Constitution tab, close the parent dialog and open `ConstitutionViewer` (same z-index pattern as ID Card and Letter downloads)
+#### 2. `src/data/quizGameData.ts` -- Update Mock Data and Logic
 
-**Constitution tab content**
-- A summary card showing:
-  - Constitution title: "Constitution of Ndigbo Progressive Union"
-  - Version, adopted date, last amended date, effective date
-  - A list of article titles (compact, scrollable)
-  - "View Full Document" button that opens the existing `ConstitutionViewer`
-  - "Download PDF" button
+- Change all `timeLimitPerQuestion` values from 30/25/45/30 to **10** (4 quizzes, lines 241, 260, 279, 298)
+- Update `calculateWinnings` function (line 596-603): change `0.5` to `0.2` for partial win
+- Update `quizRules` text (line 560): change "50% winning amount" to "20% winning amount"
+- Update `createEmptyQuestion` default `timeLimit` from 30 to 10
 
-**More tab content**
-- **Publications** subsection (the existing publications UI moved here unchanged)
-- **Other Resources** subsection with cards for:
-  - Community Forum
-  - Help Center
-  - FAQs
-  - Each card has a title, description, and action button
+#### 3. `src/data/communityQuizData.ts` -- Update Community Quiz Data and Logic
 
-**Import additions**
-- `ConstitutionViewer` from `@/components/community/ConstitutionViewer`
-- `constitutionSections, constitutionMetadata` from `@/data/constitutionData`
-- `MoreHorizontal`, `Scale`, `HelpCircle`, `MessageCircle` icons from lucide-react
+- Change all `timeLimitPerQuestion` values from 35/25/45/30 to **10** (lines 309, 329, 349, 369)
+- Update `calculateCommunityWinnings` (line 520-528): change `0.5` to `0.2`
+- Update `communityQuizRules` text (line 486): change "50% prize" to "20% prize"
 
-### File 2: `src/data/constitutionData.ts`
+#### 4. `src/data/mobigateQuizData.ts` -- Update Mobigate Quiz Data and Logic
 
-**Update constitution metadata title (line 243)**
-- Change `"Constitution of [Community Name]"` to `"Constitution of Ndigbo Progressive Union"`
+- Change all `timeLimitPerQuestion` values from 25/30/20/20/25 to **10** (lines 315, 334, 353, 374, 395)
+- Update `calculateMobigateWinnings` (line 564-572): change `0.5` to `0.2`
+- Update `mobigateQuizRules` text (line 539): change "50% prize" to "20% prize"
 
-### Implementation Details
+#### 5. `src/components/community/QuizCreationDialog.tsx` -- Update Default Time
 
-**Constitution Tab UI (mobile-optimized)**
+- Change default `timeLimitPerQuestion` state from `"30"` to `"10"` (line 53)
+- Change `createEmptyQuestion` default `timeLimit` from 30 to 10 (line 39)
+
+#### 6. UI: Winning Structure Displays (3 play dialogs)
+
+Update the "50% Win" text to "20% Win" in the pre-game info cards:
+
+- **`src/components/community/QuizGamePlayDialog.tsx`** (line 304): Change "50% Win" to "20% Win"
+- **`src/components/community/CommunityQuizPlayDialog.tsx`** (line 152): Change "50% Win" to "20% Win"  
+- **`src/components/community/MobigateQuizPlayDialog.tsx`** (line 142): Change "50% Win" to "20% Win"
+
+#### 7. `src/components/mobigate/QuizSettingsCard.tsx` -- New File
+
+Create a new Mobigate Admin settings card (following the `WithdrawalSettingsCard` pattern) with:
+- **Time per Question** slider: Range 5s-60s, step 5s, default 10s
+- **Partial Win Percentage** slider: Range 10%-50%, step 5%, default 20%
+- Save button with toast confirmation
+- Platform-wide info note explaining changes apply to all quizzes
+- Mobile-optimized layout with touch-manipulation sliders
+
+#### 8. `src/pages/admin/MobigateAdminDashboard.tsx` -- Wire New Settings Card
+
+Replace the "More Settings Coming Soon" placeholder (lines 444-451) with the new `QuizSettingsCard` component.
+
+---
+
+### Technical Details
+
+**Data layer changes** (platformSettingsData.ts):
+```typescript
+export interface PlatformQuizSettings {
+  defaultTimePerQuestion: number;    // seconds
+  timePerQuestionMin: number;
+  timePerQuestionMax: number;
+  partialWinPercentage: number;      // percentage
+  partialWinMin: number;
+  partialWinMax: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformQuizSettings: PlatformQuizSettings = {
+  defaultTimePerQuestion: 10,
+  timePerQuestionMin: 5,
+  timePerQuestionMax: 60,
+  partialWinPercentage: 20,
+  partialWinMin: 10,
+  partialWinMax: 50,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
 ```
-+----------------------------------+
-| [Scale icon] Constitution        |
-| of Ndigbo Progressive Union     |
-| Version 2.1 | Effective 7/1/24  |
-+----------------------------------+
-| Adopted: Jan 15, 2024           |
-| Last Amended: Jun 20, 2024      |
-+----------------------------------+
-| Articles:                        |
-| [I] Name and Identity        >  |
-| [II] Objectives and Purpose  >  |
-| [III] Membership              >  |
-| [IV] Governance               >  |
-| ... (scrollable list)           |
-+----------------------------------+
-| [View Full Document]  [PDF]     |
-+----------------------------------+
+
+**Winning calculation change** (all 3 data files):
+```typescript
+// Before
+} else if (questionsCorrect >= 8) {
+  return { percentage: 50, amount: winningAmount * 0.5, status: "partial_win" };
+}
+
+// After
+} else if (questionsCorrect >= 8) {
+  return { percentage: 20, amount: winningAmount * 0.2, status: "partial_win" };
+}
 ```
 
-**More Tab UI (mobile-optimized)**
-```
-+----------------------------------+
-| Publications                     |
-| [Search bar]                     |
-| [Featured pub cards...]         |
-| [All publications list...]      |
-+----------------------------------+
-| Other Resources                  |
-| [Community Forum card]          |
-| [Help Center card]              |
-| [FAQs card]                     |
-+----------------------------------+
-```
-
-**Dialog close/reopen pattern for Constitution Viewer**
-Same as ID Card and Letter downloads:
-1. Close parent dialog
-2. Wait 150ms
-3. Open ConstitutionViewer
-4. When ConstitutionViewer closes, reopen parent dialog after 150ms
+**QuizSettingsCard** will follow the exact same mobile-optimized card pattern as `WithdrawalSettingsCard`:
+- Card with icon header and current value badge
+- Central value display
+- Slider with min/max labels
+- Dual display for both settings
+- Info note about platform-wide impact
+- Save button that appears only when values change
 
 ### Summary
 
-| Change | File | Purpose |
-|--------|------|---------|
-| Update tab grid to 4 columns | CommunityResourcesDialog.tsx | Fit Constitution and More tabs |
-| Add Constitution tab content | CommunityResourcesDialog.tsx | Article summary, metadata, and full viewer link |
-| Move Publications into More tab | CommunityResourcesDialog.tsx | Free up tab space for Constitution |
-| Add Other Resources section | CommunityResourcesDialog.tsx | Community Forum, Help Center, FAQs cards |
-| Wire ConstitutionViewer with z-index pattern | CommunityResourcesDialog.tsx | Open viewer without overlay conflicts |
-| Update constitution title | constitutionData.ts | Replace placeholder with "Ndigbo Progressive Union" |
+| File | Change |
+|------|--------|
+| platformSettingsData.ts | Add PlatformQuizSettings interface, defaults, getters/setters |
+| quizGameData.ts | All timeLimitPerQuestion to 10, winning calc 50% to 20%, rules text |
+| communityQuizData.ts | All timeLimitPerQuestion to 10, winning calc 50% to 20%, rules text |
+| mobigateQuizData.ts | All timeLimitPerQuestion to 10, winning calc 50% to 20%, rules text |
+| QuizCreationDialog.tsx | Default time 30 to 10 |
+| QuizGamePlayDialog.tsx | Display "20% Win" instead of "50% Win" |
+| CommunityQuizPlayDialog.tsx | Display "20% Win" instead of "50% Win" |
+| MobigateQuizPlayDialog.tsx | Display "20% Win" instead of "50% Win" |
+| QuizSettingsCard.tsx | New Mobigate Admin quiz settings card |
+| MobigateAdminDashboard.tsx | Wire QuizSettingsCard into Settings tab |
 
