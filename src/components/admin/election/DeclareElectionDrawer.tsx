@@ -416,6 +416,11 @@ export function DeclareElectionDrawer({
               placeholder={`e.g., ${new Date().getFullYear()} ${electionType === "general" ? "General" : "Supplementary"} Election`}
               value={electionName}
               onChange={(e) => setElectionName(e.target.value)}
+              className="touch-manipulation"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
 
@@ -428,6 +433,8 @@ export function DeclareElectionDrawer({
                 type="date"
                 value={nominationStartDate}
                 onChange={(e) => setNominationStartDate(e.target.value)}
+                className="touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
             <div className="space-y-2">
@@ -437,6 +444,8 @@ export function DeclareElectionDrawer({
                 type="date"
                 value={electionDate}
                 onChange={(e) => setElectionDate(e.target.value)}
+                className="touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           </div>
@@ -482,6 +491,11 @@ export function DeclareElectionDrawer({
                           onChange={(e) =>
                             updateVacancyReason(officeId, "other", e.target.value)
                           }
+                          className="touch-manipulation"
+                          autoComplete="off"
+                          autoCorrect="off"
+                          spellCheck={false}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       )}
                     </CardContent>
@@ -500,6 +514,11 @@ export function DeclareElectionDrawer({
               value={additionalNotes}
               onChange={(e) => setAdditionalNotes(e.target.value)}
               rows={3}
+              className="touch-manipulation"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
         </div>
