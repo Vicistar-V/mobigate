@@ -38,9 +38,21 @@ import { ManageLeadershipDialog } from "@/components/community/leadership/Manage
 import { ManageCommunityGalleryDialog } from "@/components/community/ManageCommunityGalleryDialog";
 import { ManageCommunityResourcesDialog } from "@/components/community/ManageCommunityResourcesDialog";
 import { FinancialOverviewDialog } from "@/components/community/finance/FinancialOverviewDialog";
-// FinancialAuditDialog removed - now handled by AdminFinancialAuditDialog in AdminFinanceSection
 import { FinancialObligationsDialog } from "@/components/community/finance/FinancialObligationsDialog";
 import { ConstitutionViewer } from "@/components/community/ConstitutionViewer";
+
+// Leadership Sheets
+import { ApplyElectionResultsSheet } from "@/components/admin/leadership/ApplyElectionResultsSheet";
+import { LeadershipHistorySheet } from "@/components/admin/leadership/LeadershipHistorySheet";
+import { AdhocCommitteesSheet } from "@/components/admin/leadership/AdhocCommitteesSheet";
+
+// Executive Detail
+import { ExecutiveDetailSheet } from "@/components/community/ExecutiveDetailSheet";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
+
+// Edit Dialogs
+import { EditCommunityProfileDialog } from "@/components/community/EditCommunityProfileDialog";
+import { EditCommunityPhotoDialog } from "@/components/community/EditCommunityPhotoDialog";
 
 // Mock Data
 import {
@@ -63,14 +75,14 @@ import communityPerson4 from "@/assets/community-person-4.jpg";
 import communityPerson5 from "@/assets/community-person-5.jpg";
 import communityPerson6 from "@/assets/community-person-6.jpg";
 
-// Mock executives for leadership section
-const mockExecutives = [
-  { id: "exec-1", name: "Chief Emeka Obi", position: "President", avatar: communityPerson1 },
-  { id: "exec-2", name: "Dr. Amaka Eze", position: "Vice President", avatar: communityPerson2 },
-  { id: "exec-3", name: "Barr. Ngozi Okonkwo", position: "Secretary", avatar: communityPerson3 },
-  { id: "exec-4", name: "Mr. Chidi Okoro", position: "Treasurer", avatar: communityPerson4 },
-  { id: "exec-5", name: "Mrs. Ada Nwosu", position: "PRO", avatar: communityPerson5 },
-  { id: "exec-6", name: "Engr. Obinna Ibe", position: "Welfare", avatar: communityPerson6 },
+// Mock executives for leadership section (extended with ExecutiveMember type properties)
+const mockExecutives: ExecutiveMember[] = [
+  { id: "exec-1", name: "Chief Emeka Obi", position: "President", imageUrl: communityPerson1, tenure: "2024-2028", level: "topmost", committee: "executive" },
+  { id: "exec-2", name: "Dr. Amaka Eze", position: "Vice President", imageUrl: communityPerson2, tenure: "2024-2028", level: "deputy", committee: "executive" },
+  { id: "exec-3", name: "Barr. Ngozi Okonkwo", position: "Secretary", imageUrl: communityPerson3, tenure: "2024-2028", level: "officer", committee: "executive" },
+  { id: "exec-4", name: "Mr. Chidi Okoro", position: "Treasurer", imageUrl: communityPerson4, tenure: "2024-2028", level: "officer", committee: "executive" },
+  { id: "exec-5", name: "Mrs. Ada Nwosu", position: "PRO", imageUrl: communityPerson5, tenure: "2024-2028", level: "officer", committee: "executive" },
+  { id: "exec-6", name: "Engr. Obinna Ibe", position: "Welfare", imageUrl: communityPerson6, tenure: "2024-2028", level: "officer", committee: "executive" },
 ];
 
 const CommunityAdminDashboard = () => {
@@ -100,6 +112,17 @@ const CommunityAdminDashboard = () => {
   const [showResolutions, setShowResolutions] = useState(false);
   const [showConflicts, setShowConflicts] = useState(false);
   const [showRollCall, setShowRollCall] = useState(false);
+
+  // Leadership Sheet States
+  const [showApplyResults, setShowApplyResults] = useState(false);
+  const [showLeadershipHistory, setShowLeadershipHistory] = useState(false);
+  const [showAdhocCommittees, setShowAdhocCommittees] = useState(false);
+  const [selectedExecutive, setSelectedExecutive] = useState<ExecutiveMember | null>(null);
+  const [showExecutiveDetail, setShowExecutiveDetail] = useState(false);
+
+  // Profile & Photo Edit States
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showEditPhoto, setShowEditPhoto] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -255,21 +278,27 @@ const CommunityAdminDashboard = () => {
             <AdminLeadershipSection
               executives={mockExecutives}
               onManageLeadership={() => setShowLeadershipDialog(true)}
-              onApplyElectionResults={() => showToast("Apply Results", "Opening election results application...")}
-              onViewChangeHistory={() => showToast("History", "Opening leadership change history...")}
-              onManageAdhoc={() => showToast("Ad-hoc", "Opening ad-hoc committees...")}
-              onViewExecutive={(id) => showToast("Executive", `Viewing executive ${id}...`)}
+              onApplyElectionResults={() => setShowApplyResults(true)}
+              onViewChangeHistory={() => setShowLeadershipHistory(true)}
+              onManageAdhoc={() => setShowAdhocCommittees(true)}
+              onViewExecutive={(id) => {
+                const exec = mockExecutives.find(e => e.id === id);
+                if (exec) {
+                  setSelectedExecutive(exec);
+                  setShowExecutiveDetail(true);
+                }
+              }}
             />
 
             {/* Community Settings */}
             <AdminSettingsSection
-              onEditProfile={() => showToast("Profile", "Opening profile editor...")}
-              onEditPhotos={() => showToast("Photos", "Opening photo editor...")}
+              onEditProfile={() => setShowEditProfile(true)}
+              onEditPhotos={() => setShowEditPhoto(true)}
               onManageConstitution={() => setShowConstitution(true)}
               onManageResources={() => setShowResourcesDialog(true)}
-              onPrivacySettings={() => showToast("Privacy", "Opening privacy settings...")}
-              onNotificationSettings={() => showToast("Notifications", "Opening notification settings...")}
-              onCommunityRules={() => showToast("Rules", "Opening community rules...")}
+              onPrivacySettings={() => setShowSettingsTab(true)}
+              onNotificationSettings={() => setShowSettingsTab(true)}
+              onCommunityRules={() => setShowSettingsTab(true)}
               onDemocraticPrivacy={() => setShowDemocraticPrivacy(true)}
             />
           </div>
@@ -362,6 +391,49 @@ const CommunityAdminDashboard = () => {
         open={showRollCall}
         onOpenChange={setShowRollCall}
       />
+
+      {/* Leadership Management Sheets */}
+      <ApplyElectionResultsSheet
+        open={showApplyResults}
+        onOpenChange={setShowApplyResults}
+      />
+      <LeadershipHistorySheet
+        open={showLeadershipHistory}
+        onOpenChange={setShowLeadershipHistory}
+      />
+      <AdhocCommitteesSheet
+        open={showAdhocCommittees}
+        onOpenChange={setShowAdhocCommittees}
+      />
+
+      {/* Executive Detail Sheet */}
+      <ExecutiveDetailSheet
+        member={selectedExecutive}
+        open={showExecutiveDetail}
+        onOpenChange={setShowExecutiveDetail}
+      />
+
+      {/* Profile & Photo Edit Dialogs */}
+      {selectedExecutive && (
+        <>
+          <EditCommunityProfileDialog
+            open={showEditProfile}
+            onOpenChange={setShowEditProfile}
+            member={selectedExecutive}
+            onSave={(profile, milestones) => {
+              console.log("Saved profile:", profile, milestones);
+            }}
+          />
+          <EditCommunityPhotoDialog
+            open={showEditPhoto}
+            onOpenChange={setShowEditPhoto}
+            currentImage={selectedExecutive.imageUrl}
+            onSave={(newImage) => {
+              console.log("Saved photo:", newImage);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 };
