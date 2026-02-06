@@ -54,7 +54,7 @@ const ProcessCard = ({ icon, title, subtitle, stats, isActive, onClick }: Proces
               <Badge 
                 key={idx} 
                 variant="secondary" 
-                className={cn("text-[10px] py-0", stat.color)}
+                className={cn("text-xs py-0", stat.color)}
               >
                 {stat.value} {stat.label}
               </Badge>
@@ -171,15 +171,15 @@ export function AdminElectionProcessesTab() {
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
               <p className="text-2xl font-bold text-green-700 dark:text-green-300">{nominationStats.total}</p>
-              <p className="text-[10px] text-muted-foreground">Total Nominations</p>
+              <p className="text-xs text-muted-foreground">Total Nominations</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-green-700 dark:text-green-300">{primaryStats.total}</p>
-              <p className="text-[10px] text-muted-foreground">Primaries</p>
+              <p className="text-xs text-muted-foreground">Primaries</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-green-700 dark:text-green-300">{mainStats.turnout}%</p>
-              <p className="text-[10px] text-muted-foreground">Turnout</p>
+              <p className="text-xs text-muted-foreground">Turnout</p>
             </div>
           </div>
         </CardContent>

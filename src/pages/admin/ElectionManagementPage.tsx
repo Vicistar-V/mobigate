@@ -101,7 +101,7 @@ export default function ElectionManagementPage() {
           </ScrollArea>
         </div>
 
-        <div className="p-3 sm:p-4 overflow-hidden">
+        <div className="px-2 py-3 sm:p-4 overflow-hidden">
           <TabsContent value="declare" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminDeclareElectionTab onDeclareElection={() => setShowDeclareElection(true)} />
           </TabsContent>
