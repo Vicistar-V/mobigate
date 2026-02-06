@@ -105,7 +105,7 @@ export function AdminClearancesTab() {
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4 pb-20 overflow-hidden">
+    <div className="space-y-3 sm:space-y-4 pb-20">
       {/* Stats Row */}
       <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
         <StatCard value={stats.pending} label="Pending" icon={Clock} color="bg-amber-500/10" />
@@ -189,14 +189,14 @@ export function AdminClearancesTab() {
 
                 {/* Notes if any */}
                 {request.notes && (
-                  <p className="mt-2.5 text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded line-clamp-2">
+                  <p className="mt-2.5 text-sm text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded break-words">
                     📝 {request.notes}
                   </p>
                 )}
 
                 {/* Rejection Reason */}
                 {request.rejectionReason && (
-                  <p className="mt-2.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-2 rounded line-clamp-2">
+                  <p className="mt-2.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-2 rounded break-words">
                     ❌ {request.rejectionReason}
                   </p>
                 )}
