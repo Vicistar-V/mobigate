@@ -7,9 +7,11 @@ interface FinancialSummaryTableProps {
   member: MemberFinancialRecord;
   sortFilter: string;
   onSortChange: (value: string) => void;
+  onDownload?: () => void;
+  onClose?: () => void;
 }
 
-export const FinancialSummaryTable = ({ member, sortFilter, onSortChange }: FinancialSummaryTableProps) => {
+export const FinancialSummaryTable = ({ member, sortFilter, onSortChange, onDownload, onClose }: FinancialSummaryTableProps) => {
   const years = [2025, 2024, 2023, 2022];
   
   const filteredItems = financialItems.filter(item => {
@@ -123,10 +125,20 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange }: Fina
 
       {/* Action Buttons - Outside scrollable area, full width */}
       <div className="flex gap-2 w-full pt-3 border-t mt-3">
-        <Button variant="outline" size="sm" className="flex-1 text-xs">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex-1 text-xs touch-manipulation active:scale-[0.97] transition-transform"
+          onClick={() => onDownload?.()}
+        >
           DOWNLOAD SUMMARIES
         </Button>
-        <Button variant="outline" size="sm" className="flex-1 text-xs">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex-1 text-xs touch-manipulation active:scale-[0.97] transition-transform"
+          onClick={() => onClose?.()}
+        >
           Close
         </Button>
       </div>

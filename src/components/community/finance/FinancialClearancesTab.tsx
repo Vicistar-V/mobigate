@@ -1,12 +1,45 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Download } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { financialItems, mockMembersWithClearance } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
+import { FinancialStatusDialog } from "./FinancialStatusDialog";
+import { CheckIndebtednessSheet } from "../elections/CheckIndebtednessSheet";
+import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
+import { toast } from "sonner";
 
 export const FinancialClearancesTab = () => {
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
+  const [showReceiptsSheet, setShowReceiptsSheet] = useState(false);
+  const [debtsChecked, setDebtsChecked] = useState(false);
+  const [receiptsChecked, setReceiptsChecked] = useState(false);
+
+  const handleDebtsClearing = () => {
+    if (debtsChecked) {
+      setShowIndebtednessSheet(true);
+    } else {
+      toast.error("Please check the box to confirm debt clearance.");
+    }
+  };
+
+  const handleDownloadReceipts = () => {
+    if (receiptsChecked) {
+      setShowReceiptsSheet(true);
+    } else {
+      toast.error("Please check the box to confirm receipt download.");
+    }
+  };
+
+  const handleReceiptsFormatDownload = (selectedFormat: DownloadFormat) => {
+    toast.success(`Receipts downloaded as ${selectedFormat.toUpperCase()}`);
+    setShowReceiptsSheet(false);
+  };
+
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
@@ -68,25 +101,55 @@ export const FinancialClearancesTab = () => {
         </div>
       </Card>
 
+      {/* Green Info Text */}
+      <div className="text-xs text-green-700 text-center p-3 bg-green-50 rounded border border-green-300">
+        <p className="font-semibold">You can Clear up all your outstanding indebtedness now!</p>
+        <p className="text-xs mt-1">You must fund your main Wallet adequately and sufficiently!</p>
+      </div>
+
       {/* Action Buttons */}
-      <div className="flex flex-col gap-3">
-        <Button className="bg-yellow-400 text-black hover:bg-yellow-500 w-full font-bold">
+      <div className="flex flex-col gap-2.5">
+        <Button 
+          className="bg-yellow-400 text-black hover:bg-yellow-500 w-full font-bold py-4 text-sm touch-manipulation active:scale-[0.97] transition-transform"
+          onClick={() => setShowStatusDialog(true)}
+        >
           Financial Status Report
         </Button>
-        <Button className="bg-red-600 hover:bg-red-700 w-full font-bold">
+        <Button 
+          className="bg-red-600 hover:bg-red-700 w-full font-bold py-4 text-sm touch-manipulation active:scale-[0.97] transition-transform"
+          onClick={() => setShowIndebtednessSheet(true)}
+        >
           Check Total Indebtedness
         </Button>
-        <div className="text-sm text-green-700 text-center p-4 bg-green-50 rounded border border-green-300">
-          <p className="font-semibold">You can Clear up all your outstanding indebtedness now!</p>
-          <p className="text-xs mt-1">You must fund your main Wallet adequately and sufficiently!</p>
+        <div className="flex items-center gap-2.5">
+          <Checkbox 
+            id="debts-clearances"
+            checked={debtsChecked}
+            onCheckedChange={(checked) => setDebtsChecked(checked as boolean)}
+            className="shrink-0"
+          />
+          <Button 
+            className="bg-green-600 hover:bg-green-700 flex-1 font-bold py-4 text-sm min-w-0 touch-manipulation active:scale-[0.97] transition-transform"
+            onClick={handleDebtsClearing}
+          >
+            Debts Clearance Now
+          </Button>
         </div>
-        <Button className="bg-green-600 hover:bg-green-700 w-full font-bold">
-          Debts Clearance Now
-        </Button>
-        <Button className="bg-blue-600 hover:bg-blue-700 w-full font-bold">
-          <Download className="w-4 h-4 mr-2" />
-          Download Receipts
-        </Button>
+        <div className="flex items-center gap-2.5">
+          <Checkbox 
+            id="receipts-clearances"
+            checked={receiptsChecked}
+            onCheckedChange={(checked) => setReceiptsChecked(checked as boolean)}
+            className="shrink-0"
+          />
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 flex-1 font-bold py-4 text-sm min-w-0 touch-manipulation active:scale-[0.97] transition-transform"
+            onClick={handleDownloadReceipts}
+          >
+            <Download className="w-4 h-4 mr-1.5 shrink-0" />
+            Download Receipts
+          </Button>
+        </div>
       </div>
 
       {/* Ads */}
@@ -98,6 +161,28 @@ export const FinancialClearancesTab = () => {
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
+
+      {/* Financial Status Dialog */}
+      <FinancialStatusDialog
+        open={showStatusDialog}
+        onOpenChange={setShowStatusDialog}
+      />
+
+      {/* Check Indebtedness Sheet */}
+      <CheckIndebtednessSheet
+        open={showIndebtednessSheet}
+        onOpenChange={setShowIndebtednessSheet}
+      />
+
+      {/* Download Receipts Format Sheet */}
+      <DownloadFormatSheet
+        open={showReceiptsSheet}
+        onOpenChange={setShowReceiptsSheet}
+        onDownload={handleReceiptsFormatDownload}
+        title="Download Receipts"
+        documentName="Financial Clearance Receipts"
+        availableFormats={["pdf", "jpeg", "png", "txt"]}
+      />
     </div>
   );
 };
