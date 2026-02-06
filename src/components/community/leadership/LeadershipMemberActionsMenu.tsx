@@ -102,11 +102,20 @@ export function LeadershipMemberActionsMenu({
   };
 
   const handleSendMessage = () => {
+    // Dispatch custom event to open Mobi-Chat with this member
+    window.dispatchEvent(
+      new CustomEvent('openChatWithUser', {
+        detail: {
+          userId: member.id,
+          userName: member.name,
+        },
+      })
+    );
+    
     toast({
       title: "Opening Chat",
       description: `Starting conversation with ${member.name}`,
     });
-    // Navigate to chat or open chat drawer
   };
 
   const handleAddComment = () => {
