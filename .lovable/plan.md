@@ -1,158 +1,154 @@
 
 
-## Mobile Optimization: Fix Right-Edge Clipping in Community Resources Dialog
+# Advertisement Feature for Community Businesses
 
-### Root Causes Identified
+## Overview
 
-The screenshots show content clipping on the right edge across **all tabs** (ID Cards, Letters, Publications/More). Three structural problems cause this:
+Add a full "Advertisement" section to the Community Main Menu, modeled exactly after the Election Campaign system. Community members can advertise their businesses/products within their community, choosing target audiences, uploading photos, and paying advert fees with the same revenue-sharing formula (60% Community / 40% Mobigate).
 
-1. **Excessive padding**: `p-4 sm:p-6` and `px-4 sm:px-6` are used throughout. On a 360px mobile screen, that is 16px padding on each side = 32px lost. Combined with card borders, internal padding, and the Dialog's built-in `gap-4`, content runs out of horizontal room.
+## New Files to Create
 
-2. **Horizontal flex layouts with rigid children**: Publication cards use a large 64px icon thumbnail + text + badge + button all in one row. Letter request cards put title + badge side-by-side. These overflow on narrow screens.
+### 1. `src/types/advertisementSystem.ts`
+Type definitions for the advertisement system, mirroring `campaignSystem.ts`:
 
-3. **No overflow containment**: The dialog and its inner cards lack `overflow-hidden`, allowing children to push beyond the visible area and create horizontal scroll.
+- `AdvertisementFormData` -- advertiser name, product title, description, city, phone numbers (up to 2), email, website, photos (max 4), audience targets, duration
+- `EnhancedAdvertisement` -- full advert record with fees, stats, status, feedback
+- `AdvertisementCategory` -- predefined business categories (e.g., Fashion, Electronics, Food, Real Estate, Services, Health, Education, Other)
+- Reuse `CampaignAudience`, `CampaignDurationDays`, `FeeDistributionConfig` from existing campaign types (same audiences, same durations, same fee structure)
 
----
+### 2. `src/data/advertisementData.ts`
+Mock data for advertisements:
 
-### Changes Overview
+- `advertisementCategories` -- list of business categories with icons
+- `mockAdvertisements` -- 4-5 sample adverts with realistic Nigerian business data (e.g., "Amara's Kitchen -- Catering Services", "TechZone -- Electronics Store", "Prestige Homes -- Real Estate")
+- Helper functions: `getActiveAdvertisements()`, `getAdvertisementStats()`
+- Reuses `campaignAudienceOptions`, `campaignDurationOptions`, and fee distribution from existing campaign data
 
-| File | What Gets Fixed |
-|------|----------------|
-| `CommunityResourcesDialog.tsx` | All tabs: reduce padding, restack cards, add overflow containment |
-| `ConstitutionViewer.tsx` | Reduce header/content padding, tighten mobile layout |
+### 3. `src/components/community/advertisements/CreateAdvertisementDrawer.tsx`
+The primary creation form (mirrors `LaunchCampaignDialog.tsx`):
 
----
+- Mobile Drawer with scrollable body and fixed footer
+- Form fields (all with `h-12` touch inputs):
+  - Business/Product Name (Input, required)
+  - Category (Select dropdown from categories list)
+  - Product Description (Textarea, max 500 chars)
+  - City/Location (Input)
+  - Phone Number 1 (Input, required)
+  - Phone Number 2 (Input, optional)
+  - Email Address (Input, optional)
+  - Website URL (Input, optional)
+  - Photo Upload section (max 4 photos, using grid layout with add/remove)
+- Footer buttons:
+  - "Preview Advert" -- opens preview sheet
+  - "Configure Advert (Audience and Fees)" -- opens settings dialog
+  - "Quick Submit (Free)" -- submits to community-only audience
 
-### File 1: `src/components/community/CommunityResourcesDialog.tsx`
+### 4. `src/components/community/advertisements/AdvertisementSettingsSheet.tsx`
+3-step audience/fee configuration (mirrors `CampaignSettingsDialog.tsx`):
 
-#### A. Dialog Container - Add overflow containment
+- Step 1: Review advert details (read-only summary of business info + photos)
+- Step 2: Choose audience targets (same checkboxes as campaign -- community, members, mobigate, users, marketplace)
+- Step 3: Duration and Payment (same duration options + fee breakdown + wallet balance)
+- Uses the exact same `calculateCampaignFee` and `distributeCampaignFee` functions from `campaignFeeDistribution.ts`
+- Bottom sheet pattern (`SheetContent side="bottom"` at 90vh)
 
-Change DialogContent class from:
-```
-max-w-3xl max-h-[90vh] p-0
-```
-To:
-```
-max-w-3xl max-h-[90vh] p-0 overflow-x-hidden
-```
+### 5. `src/components/community/advertisements/AdvertisementPreviewSheet.tsx`
+Mobile preview of how the advert will look (mirrors `CampaignPreviewSheet.tsx`):
 
-#### B. Header - Reduce padding
+- Drawer with simulated ad card display
+- Shows: business name, product photos (carousel if multiple), description, city, contact buttons (WhatsApp/Call, Email, Website)
+- Simulated engagement bar (likes, comments, shares)
+- "Looks Good" dismiss button
 
-Change DialogHeader from `p-4 sm:p-6` to `p-3 pb-0`.
+### 6. `src/components/community/advertisements/AdvertisementPhotoUploader.tsx`
+Simplified photo uploader for up to 4 product photos:
 
-#### C. Tab List - Tighten horizontal padding
+- Grid layout (2x2) showing uploaded photos with remove buttons
+- "Add Photo" button for each empty slot
+- File validation (image types, max 2MB per photo)
+- Thumbnail previews with numbering
 
-Change the TabsList wrapper from `px-4 sm:px-6` to `px-3`. Keep tab text at `text-[11px]` but ensure proper truncation.
+### 7. `src/components/community/advertisements/AdvertisementsListSheet.tsx`
+View all advertisements (mirrors `ElectionCampaignsTab.tsx`):
 
-#### D. ScrollArea - Reduce all tab content padding
+- Tab bar: Active | My Adverts | Ended
+- Each advert card shows: thumbnail, business name, category badge, city, days remaining, view count
+- Tap to open full advert view
+- "Create New Advert" floating action button
 
-Change every `TabsContent` from `p-4 sm:p-6` to `p-3` consistently.
+### 8. `src/components/community/advertisements/AdvertisementFullViewSheet.tsx`
+Full view of a single advertisement (mirrors `CampaignFullViewSheet.tsx`):
 
-#### E. ID Cards Tab - Tighten card internals
+- Photo carousel at top
+- Business name, category, city
+- Full description
+- Contact buttons row (Call, WhatsApp, Email, Website)
+- Engagement bar
+- "Report Ad" option
+- Share button
 
-- Reduce Card's `CardHeader` and `CardContent` internal padding
-- Ensure the centered photo/name/badge layout has `overflow-hidden` on wrapping container
-- Change the ID card gradient container internal padding from `p-4` to `p-3`
-- Reduce detail grid gap from `gap-2` to `gap-1.5`
+## Existing Files to Modify
 
-#### F. Letters Tab - Restack letter request cards
+### 9. `src/components/community/CommunityMainMenu.tsx`
+Add the "Advertisement" accordion between "Admins" and "Administration/Leadership" (as shown in screenshot):
 
-The letter request history cards currently use `flex items-start justify-between` which puts the title and badge side-by-side. On narrow screens the badge clips.
+- New state: `showCreateAdvert`, `showAdvertisements`
+- New AccordionItem with value "advertisement":
+  - "Create Advertisement" button (highlighted with orange/amber accent, like the EoI button in Elections)
+  - "View Advertisements" button
+  - "My Advertisements" button
+- Render the `CreateAdvertisementDrawer` and `AdvertisementsListSheet` dialogs at the bottom alongside other dialogs
 
-**Restack to vertical:**
-- Row 1: Title (full width, no truncation)
-- Row 2: Status badge + date side-by-side (both small)
-- Row 3: Purpose text
-- Row 4: Letter number + Download button (if available)
+## Technical Implementation Details
 
-#### G. More Tab (Publications) - Restack featured publication cards
+### Fee System (Reused from Campaign)
+- Same duration options: 3, 7, 14, 21, 30, 45, 60, 90 days
+- Same audience targets with same premium multipliers
+- Same 60/40 Community/Mobigate revenue split
+- Same wallet balance check and payment processing
+- Import directly from `campaignFeeDistribution.ts` -- no duplication
 
-The featured publications use a horizontal layout with a 64px icon box + content that overflows.
+### Photo Upload System
+- Max 4 photos (vs campaign's banner + profile + 4 artworks)
+- Each photo: max 2MB, JPG/PNG/WebP
+- Stored as base64 previews (UI template only, no backend)
+- 2x2 grid layout on mobile with numbered badges
 
-**Restack to vertical:**
-- Remove the large icon box entirely (or shrink to 40px inline icon)
-- Row 1: Title + type badge (with `flex-wrap` to prevent badge clipping)
-- Row 2: Description (line-clamp-2)
-- Row 3: Edition + file size + Download button
+### Mobile-First Patterns (Consistent with Existing)
+- All drawers: `max-h-[92vh]` with `DrawerBody` for scroll
+- All inputs: `h-12 text-base touch-manipulation`
+- All buttons: `touch-manipulation active:scale-[0.97]`
+- All containers: `overflow-x-hidden`
+- All text: `min-w-0 truncate` on flex children
 
-For "All Publications" cards:
-- Shrink the icon from `p-2` to smaller
-- Ensure title uses `line-clamp-1` with proper `min-w-0`
-- Ensure Download button has `shrink-0`
-
-#### H. Other Resources Section
-
-- Reduce `CardContent p-3.5` to `p-3`
-- Ensure all text has `min-w-0` and `truncate` on description lines
-
----
-
-### File 2: `src/components/community/ConstitutionViewer.tsx`
-
-#### A. Dialog Container
-
-Change DialogContent from `max-w-4xl max-h-[95vh] p-0` to `max-w-3xl max-h-[95vh] p-0 overflow-x-hidden`.
-
-#### B. Header padding
-
-Change from `p-4 sm:p-6` to `p-3 pb-0`.
-
-#### C. Tab list container
-
-Change from `px-4 sm:px-6` to `px-3`.
-
-#### D. Content padding
-
-Change from `p-4 sm:p-6` to `p-3`.
-
----
-
-### Technical Details
-
-**Key CSS patterns applied throughout:**
+### Data Architecture
 
 ```text
-overflow-x-hidden  -- on dialog containers to prevent horizontal scroll
-p-3                -- consistent mobile padding (12px) instead of 16px/24px
-min-w-0            -- on all flex children that contain text
-shrink-0           -- on fixed-size elements (icons, badges, buttons)
-overflow-hidden    -- on card containers with complex layouts
-flex-wrap          -- on rows containing title + badge combinations
+AdvertisementFormData
+  businessName: string
+  category: string
+  description: string
+  city: string
+  phone1: string
+  phone2?: string
+  email?: string
+  website?: string
+  photos: string[] (max 4, base64 previews)
+  audienceTargets: CampaignAudience[] (reused)
+  durationDays: CampaignDurationDays (reused)
 ```
 
-**Publication card restack (before vs after):**
+## Files Summary
 
-Before:
-```
-[64px Icon Box] [Title .... Badge]
-                [Description text....]
-                [Edition | Download]
-```
-
-After:
-```
-[Title text here]              [Badge]
-[Description text, line-clamp-2]
-[Edition info]      [Download button]
-```
-
-**Letter request card restack (before vs after):**
-
-Before:
-```
-[Title text here]         [approved]  <-- badge clips
-[Requested: date]
-```
-
-After:
-```
-[Title text here]
-[approved badge] [Requested: date]
-[Purpose: text...]
-[Letter#]              [Download]
-```
-
-### Files Modified
-1. `src/components/community/CommunityResourcesDialog.tsx`
-2. `src/components/community/ConstitutionViewer.tsx`
+| # | File | Action |
+|---|------|--------|
+| 1 | `src/types/advertisementSystem.ts` | Create |
+| 2 | `src/data/advertisementData.ts` | Create |
+| 3 | `src/components/community/advertisements/CreateAdvertisementDrawer.tsx` | Create |
+| 4 | `src/components/community/advertisements/AdvertisementSettingsSheet.tsx` | Create |
+| 5 | `src/components/community/advertisements/AdvertisementPreviewSheet.tsx` | Create |
+| 6 | `src/components/community/advertisements/AdvertisementPhotoUploader.tsx` | Create |
+| 7 | `src/components/community/advertisements/AdvertisementsListSheet.tsx` | Create |
+| 8 | `src/components/community/advertisements/AdvertisementFullViewSheet.tsx` | Create |
+| 9 | `src/components/community/CommunityMainMenu.tsx` | Modify (add accordion + state + dialog renders) |
 
