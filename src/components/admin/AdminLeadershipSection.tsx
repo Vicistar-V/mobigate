@@ -203,7 +203,7 @@ export function AdminLeadershipSection({
               <div className="flex items-start gap-2 pt-2 border-t border-border/50">
                 <Shield className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
                 <span className="text-xs text-muted-foreground leading-snug">
-                  Leadership changes require President + Secretary + (PRO or Dir. Socials)
+                  Leadership changes require President + Secretary + (PRO or Director of Socials)
                 </span>
               </div>
             </div>

@@ -95,7 +95,7 @@ export function AdminDeclareElectionTab({ onDeclareElection }: AdminDeclareElect
   const getStatusBadge = (status: DeclaredElection['status']) => {
     switch (status) {
       case 'pending_authorization':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">Pending Auth</Badge>;
+        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">Pending Authorization</Badge>;
       case 'active':
         return <Badge className="bg-green-600 text-white text-xs">Active</Badge>;
       case 'nominations_open':
@@ -159,7 +159,7 @@ export function AdminDeclareElectionTab({ onDeclareElection }: AdminDeclareElect
           <div className="flex items-start gap-2">
             <Shield className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
             <div className="text-xs text-blue-700">
-              <span className="font-medium">Multi-Signature Required:</span> President + Secretary + (PRO or Dir. of Socials)
+              <span className="font-medium">Multi-Signature Required:</span> President + Secretary + (PRO or Director of Socials)
             </div>
           </div>
         </CardContent>

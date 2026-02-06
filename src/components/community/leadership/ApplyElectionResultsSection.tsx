@@ -169,7 +169,7 @@ export function ApplyElectionResultsSection() {
             ? "Apply Leadership Change"
             : `Apply ${pendingAction?.winnerIds?.length || 0} Changes`
         }
-        actionDescription="Multi-signature authorization required: President + Secretary + (PRO or Dir. of Socials)"
+        actionDescription="Multi-signature authorization required: President + Secretary + (PRO or Director of Socials)"
         actionDetails={getAuthActionDetails()}
         initiatorRole="secretary"
         onAuthorized={handleAuthorizationComplete}
@@ -304,7 +304,7 @@ export function ApplyElectionResultsSection() {
         <div className="flex items-start gap-2 pt-3 border-t">
           <Shield className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Leadership changes require multi-signature approval: President + Secretary + (PRO or Dir. of Socials).
+            Leadership changes require multi-signature approval: President + Secretary + (PRO or Director of Socials).
             If President/Secretary unavailable, 4 signatories including Legal Adviser required.
           </p>
         </div>
