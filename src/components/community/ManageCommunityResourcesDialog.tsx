@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { 
   X, CreditCard, FileText, BookOpen, Users, Search, Check, 
   XCircle, Send, Upload, Edit, Trash2, Star, StarOff, Eye,
@@ -70,6 +70,12 @@ export function ManageCommunityResourcesDialog({
   const [pubEdition, setPubEdition] = useState("");
   const [pubPages, setPubPages] = useState("");
   const [pubFeatured, setPubFeatured] = useState(false);
+
+  // File upload refs and state
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const [coverImageFile, setCoverImageFile] = useState<{ name: string; preview: string } | null>(null);
+  const [pdfFile, setPdfFile] = useState<{ name: string } | null>(null);
 
   // Assign manager state
   const [showAssignManager, setShowAssignManager] = useState(false);
@@ -213,7 +219,32 @@ export function ManageCommunityResourcesDialog({
     setPubEdition("");
     setPubPages("");
     setPubFeatured(false);
+    setCoverImageFile(null);
+    setPdfFile(null);
     setShowUploadForm(false);
+  };
+
+  const handleCoverImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid File", description: "Please select an image file (JPG, PNG, etc.)", variant: "destructive" });
+      return;
+    }
+    const preview = URL.createObjectURL(file);
+    setCoverImageFile({ name: file.name, preview });
+    toast({ title: "Cover Image Selected", description: file.name });
+  };
+
+  const handlePDFSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid File", description: "Please select a PDF file", variant: "destructive" });
+      return;
+    }
+    setPdfFile({ name: file.name });
+    toast({ title: "PDF File Selected", description: file.name });
   };
 
   const handleToggleFeatured = (pubId: string, currentFeatured: boolean) => {
@@ -640,21 +671,73 @@ export function ManageCommunityResourcesDialog({
 
                         <div className="space-y-2">
                           <Label>Cover Image</Label>
-                          <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors">
-                            <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">
-                              Click to upload cover image
-                            </p>
+                          <input
+                            ref={coverInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleCoverImageSelect}
+                          />
+                          <div
+                            className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 active:bg-muted/70 transition-colors"
+                            onClick={() => coverInputRef.current?.click()}
+                          >
+                            {coverImageFile ? (
+                              <div className="space-y-2">
+                                <img
+                                  src={coverImageFile.preview}
+                                  alt="Cover preview"
+                                  className="h-20 w-auto mx-auto rounded object-cover"
+                                />
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {coverImageFile.name}
+                                </p>
+                                <p className="text-xs text-primary font-medium">
+                                  Tap to change
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground">
+                                  Click to upload cover image
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
 
                         <div className="space-y-2">
                           <Label>PDF File *</Label>
-                          <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors">
-                            <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">
-                              Click to upload PDF file
-                            </p>
+                          <input
+                            ref={pdfInputRef}
+                            type="file"
+                            accept=".pdf,application/pdf"
+                            className="hidden"
+                            onChange={handlePDFSelect}
+                          />
+                          <div
+                            className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 active:bg-muted/70 transition-colors"
+                            onClick={() => pdfInputRef.current?.click()}
+                          >
+                            {pdfFile ? (
+                              <div className="space-y-1">
+                                <FileText className="h-8 w-8 mx-auto text-green-600" />
+                                <p className="text-xs text-foreground font-medium truncate">
+                                  {pdfFile.name}
+                                </p>
+                                <p className="text-xs text-primary font-medium">
+                                  Tap to change
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                                <p className="text-sm text-muted-foreground">
+                                  Click to upload PDF file
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
 
