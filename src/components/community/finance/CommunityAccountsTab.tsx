@@ -24,6 +24,7 @@ import { mockTransactions, mockAccountBalance, mockMemberFinancialRecord } from 
 import { contentsAdSlots } from "@/data/profileAds";
 import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 import { FinancialStatusDialog } from "./FinancialStatusDialog";
+import { InlineBannerAd } from "../advertisements/InlineBannerAd";
 import { toast } from "sonner";
 
 export const CommunityAccountsTab = () => {
@@ -143,17 +144,8 @@ export const CommunityAccountsTab = () => {
       {/* Balance Info */}
       {getBalanceInfo()}
 
-      {/* Small Ad Banner */}
-      <Card 
-        className="p-2.5 bg-gradient-to-r from-yellow-50 to-orange-50 border-orange-200 overflow-hidden cursor-pointer active:scale-[0.98] transition-transform touch-manipulation"
-        onClick={() => window.open("https://example.com/architect-services", "_blank")}
-        role="link"
-      >
-        <div className="flex items-center justify-between gap-2 text-xs">
-          <span className="min-w-0 truncate">Need an <strong>Architect</strong> for your Dream-Project?</span>
-          <span className="text-red-600 text-xs font-semibold shrink-0">Click Here!</span>
-        </div>
-      </Card>
+      {/* Managed Inline Ad Banner */}
+      <InlineBannerAd />
 
       {/* SORT BY Dropdown */}
       <div className="flex justify-end">
