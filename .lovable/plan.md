@@ -1,180 +1,124 @@
 
-# Constitution Management: Active Download + Upload/Manage UI + Multi-Signature Authorization
 
-## What's Being Fixed
+# Mobile Optimization: Financial Overview/Wallet Drawer
 
-1. **Download button is inactive** -- it only shows a toast message, no actual download happens
-2. **No upload/management interface** -- no way to upload, modify, delete, or deactivate constitution documents
-3. **Multi-signature authorization missing for management actions** -- uploads, modifications, deletions, and deactivations should require PG/Chairman + Secretary + Legal Adviser approval (with deputy substitution rules)
+## Problem
 
-## Architecture Overview
+The Financial Overview drawer clips content on the right edge on mobile (~360px screens). The screenshots show:
 
-The Constitution currently opens as a read-only viewer (`ConstitutionViewer.tsx`) from two places:
-- Community Resources dialog (member view) -- should get working download
-- Admin Settings section -- after authorization, should open a **management interface** instead of just the viewer
+1. **"Withdraw" button text cut off** on the right side of the 3-column quick action buttons
+2. **Expenses card amounts clipped** on the right margin (e.g., "-N28,000" partially visible)
+3. **Cumulative padding overload**: The drawer uses `px-4` (16px each side = 32px) on the content wrapper, plus card internal padding `p-3`/`p-4` (another 12-16px each side), consuming ~56-64px of a 360px viewport = only ~296px for actual content
 
-The plan creates a new `AdminConstitutionManagementSheet` component for admin-side management, while enhancing the existing `ConstitutionViewer` with a working download via the `DownloadFormatSheet`.
-
----
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/components/admin/settings/AdminConstitutionManagementSheet.tsx` | Full constitution management UI (upload, modify, delete, deactivate) with multi-sig authorization |
+Additionally, the `WalletWithdrawDialog` still uses a plain `Dialog` instead of the mobile `Drawer` pattern, and multiple components have `text-[9px]` and `text-[10px]` instances that violate the project's minimum `text-xs` (12px) standard.
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/components/community/ConstitutionViewer.tsx` | Wire download button to `DownloadFormatSheet` instead of toast |
-| `src/components/admin/authorization/authorizationActionConfigs.tsx` | Add new constitution-specific action configs (upload, delete, deactivate) |
-| `src/components/admin/AdminSettingsSection.tsx` | Open management sheet instead of just viewer after authorization |
-| `src/pages/CommunityAdminDashboard.tsx` | Add state and rendering for new management sheet |
-
----
+| `src/components/community/finance/FinancialOverviewDialog.tsx` | Reduce outer padding, fix typography, add touch feedback |
+| `src/components/community/finance/WalletWithdrawDialog.tsx` | Convert to mobile Drawer pattern, reduce padding |
+| `src/components/common/DualCurrencyDisplay.tsx` | Upgrade `text-[10px]` to `text-xs` in sm variant |
+| `src/components/community/QuizWalletDrawer.tsx` | Reduce padding, fix all `text-[9px]`/`text-[10px]` to `text-xs` |
 
 ## Detailed Changes
 
-### 1. ConstitutionViewer.tsx -- Active Download Button
+### 1. FinancialOverviewDialog.tsx -- Reclaim horizontal space and fix typography
 
-Replace the toast-only `handleDownload` function with a flow that opens the existing `DownloadFormatSheet` component (same pattern used by publications and other documents).
+**Content wrapper (line 460):**
+- Change `px-4` to `px-2` on the inner content div -- saves 16px total horizontal space
 
-**Changes:**
-- Import `DownloadFormatSheet` and `DownloadFormat`
-- Add state: `showDownloadSheet`, `isDownloading`
-- Download button click opens the `DownloadFormatSheet` drawer
-- On format selection, simulate download with a loading state and success toast
-- Available formats: PDF, DOCX, TXT
-- Render the `DownloadFormatSheet` component at the bottom of the return
+**Wallet card badges (lines 93, 142):**
+- Change `text-[10px]` to `text-xs` on the "Main Wallet" and "Quiz Wallet" badge labels
 
-### 2. New: AdminConstitutionManagementSheet.tsx
+**"Last updated" text (lines 128, 173):**
+- Change `text-[10px]` to `text-xs`
 
-A full-screen mobile bottom sheet for managing constitution documents. This is the admin-only interface.
+**Quiz Wallet Available/Reserved labels (lines 161, 167):**
+- Change `text-[10px]` to `text-xs`
 
-**Layout (mobile-first, bottom sheet):**
+**Quick Action buttons (lines 208-221):**
+- Add `touch-manipulation active:scale-[0.98]` to all three buttons (Top Up, Transfer, Withdraw)
+- These are the 3-column buttons visible in the screenshot
 
-```text
-[Header: Constitution Management]
+**Monthly Summary cards (lines 224-260):**
+- Change `text-[10px]` on Mobi amounts (lines 236-238, 254-256) to `text-xs`
+- Change `text-[10px]` on "This month" labels (lines 239, 257) to `text-xs`
 
-[Stats Row]
-  Active: 1  |  Archived: 2  |  Total: 3
+**Transaction list items (lines 269-301):**
+- Change `text-[10px]` on transaction dates (line 284) to `text-xs`
+- Change `text-[10px]` on status badges (line 296) to `text-xs`
 
-[Upload New Document] -- primary button, triggers multi-sig auth
+**Quiz Wallet Transaction items (lines 416-450):**
+- Change `text-[10px]` on dates (line 424) to `text-xs`
+- Change `text-[9px]` on player name badges (line 428) to `text-xs`
+- Change `text-[9px]` on Mobi amounts (line 445) to `text-xs`
 
-[Active Document Card]
-  - Title, version, effective date, file size
-  - Status badge (Active / Hidden / Archived)
-  - Actions: View, Download, Modify, Deactivate, Delete
-  - Each destructive action triggers multi-sig authorization
+**Quiz Wallet Quick Stats (lines 337-372):**
+- Change `text-[10px]` labels (lines 340, 349, 358) to `text-xs`
+- Change `text-[9px]` Mobi amounts (lines 344, 353, 367-368) to `text-xs`
 
-[Document History List]
-  - Previous versions with dates and status
-  - Download option for each
+**Quiz availability text (lines 319-320):**
+- Change `text-[10px]` to `text-xs`
 
-[Authorization Info Footer]
-  "Constitution changes require President + Secretary + Legal Adviser"
-```
+### 2. WalletWithdrawDialog.tsx -- Convert to mobile Drawer pattern
 
-**Authorization integration:**
-- Uses `ModuleAuthorizationDrawer` with module="settings"
-- Four action types that trigger authorization:
-  - `upload_constitution` -- uploading a new document
-  - `update_constitution` -- modifying the active document (already exists)
-  - `delete_constitution` -- removing a document
-  - `deactivate_constitution` -- hiding/deactivating a document
-- Each action shows the appropriate authorization drawer before proceeding
-- On authorization complete, shows success toast
-
-**Mock data includes:**
-- Active document: "Community Constitution v2.1" (2.4 MB PDF, effective Jul 1, 2024)
-- Archived documents: v2.0 and v1.0 with historical dates
-
-**Upload UI (within the sheet):**
-- File input styled as a dashed-border drop zone
-- Accepts PDF, DOCX formats
-- Shows selected file name, size
-- Version number input
-- Effective date input
-- Notes/changelog textarea
-- Submit triggers multi-sig authorization
-
-**Mobile optimization:**
-- All touch targets minimum 44px
-- `touch-manipulation` on all interactive elements
-- `active:bg-muted/70` feedback on buttons
-- Vertical stacking for all content
-- `px-2` outer padding to maximize content width
-- Text sizes: `text-xs` minimum (no `text-[10px]`)
-
-### 3. authorizationActionConfigs.tsx -- New Constitution Actions
-
-Add three new action configs under the `settings` module:
-
-```typescript
-upload_constitution: {
-  title: "Upload Constitution",
-  description: "Multi-signature authorization to upload new constitution document",
-  icon: <FileText className="h-5 w-5 text-green-600" />,
-  iconComponent: FileText,
-  iconColorClass: "text-green-600",
-},
-delete_constitution: {
-  title: "Delete Constitution",
-  description: "Multi-signature authorization to delete constitution document",
-  icon: <FileText className="h-5 w-5 text-red-600" />,
-  iconComponent: FileText,
-  iconColorClass: "text-red-600",
-},
-deactivate_constitution: {
-  title: "Deactivate Constitution",
-  description: "Multi-signature authorization to deactivate constitution document",
-  icon: <FileText className="h-5 w-5 text-amber-600" />,
-  iconComponent: FileText,
-  iconColorClass: "text-amber-600",
-},
-```
-
-Also update the `SettingsActionType` in `AdminSettingsSection.tsx` to include the new action types.
-
-### 4. AdminSettingsSection.tsx -- Open Management Sheet
-
-Currently, after authorization, the "Constitution" button calls `onManageConstitution()` which opens the read-only `ConstitutionViewer`. 
-
-**Change:**
-- Add a new prop `onManageConstitutionAdmin` that opens the management sheet
-- After authorization completes for `update_constitution`, call `onManageConstitutionAdmin` instead of `onManageConstitution`
-- Keep the authorization gating on the button click (existing behavior)
-
-### 5. CommunityAdminDashboard.tsx -- Wire Up Management Sheet
+Currently uses a plain `Dialog` on all screen sizes, which doesn't provide the bottom-drawer experience on mobile.
 
 **Changes:**
-- Import `AdminConstitutionManagementSheet`
-- Add state: `showConstitutionManagement`
-- Pass `onManageConstitutionAdmin={() => setShowConstitutionManagement(true)}` to `AdminSettingsSection`
-- Render `AdminConstitutionManagementSheet` alongside other sheets
+- Import `Drawer`, `DrawerContent`, `DrawerHeader`, `DrawerTitle` from `@/components/ui/drawer`
+- Import `useIsMobile` from `@/hooks/use-mobile`
+- Wrap content in a shared `Content` component (same pattern as `WalletTransferDialog`)
+- On mobile: render as `Drawer` with `max-h-[92vh]`, bottom sheet
+- On desktop: keep existing `Dialog`
+- Add `touch-manipulation` to all interactive elements (buttons, inputs)
+- Reduce internal padding from `p-4` to `p-3` on cards within the flow
 
----
+### 3. DualCurrencyDisplay.tsx -- Fix minimum typography
+
+**sm variant Mobi text (line 71):**
+- Change `text-[10px]` to `text-xs` in the `mobiSizeClasses.sm` entry
+- This fixes the secondary currency text size across all components that use `DualCurrencyDisplay` with `size="sm"`, including the transaction list in the Financial Overview
+
+### 4. QuizWalletDrawer.tsx -- Reduce padding and fix typography
+
+**Body padding (line 87):**
+- Change `p-4` to `px-2 py-4` -- saves 16px horizontal space
+
+**Balance card Available/Reserved labels (lines 100, 105):**
+- Change `text-[10px]` to `text-xs`
+
+**Balance card Mobi amounts (lines 102, 107):**
+- Change `text-[9px]` to `text-xs`
+
+**Quick Stats labels (lines 137, 141, 145):**
+- Change `text-[10px]` to `text-xs`
+
+**Transfer warning text (line 204):**
+- Change `text-[10px]` to `text-xs`
+
+**Transaction history items (lines 255-261):**
+- Change `text-[9px]` on badge (line 255) to `text-xs`
+- Change `text-[10px]` on player name (line 257) to `text-xs`
+- Change `text-[10px]` on date/reference (line 260) to `text-xs`
+
+**Transaction amount Mobi display (lines 268-269):**
+- Change `text-[9px]` to `text-xs`
+
+## Space Savings Summary
+
+| Area | Before | After | Saved |
+|------|--------|-------|-------|
+| Content wrapper px | 16px each side | 8px each side | 16px total |
+| Quiz drawer body px | 16px each side | 8px each side | 16px total |
+| **Total reclaimed** | | | **16px per drawer** |
+
+On a 360px screen, this means content goes from ~296px usable to ~312px usable -- enough to prevent the "Withdraw" button and expense amounts from clipping.
 
 ## Technical Notes
 
-### Authorization Rules (already configured)
+- The `WalletWithdrawDialog` conversion follows the exact same `isMobile ? Drawer : Dialog` pattern already established in `WalletTransferDialog` and `WalletTopUpDialog`
+- Typography upgrades from `text-[9px]`/`text-[10px]` to `text-xs` (12px) follow the project's established minimum readability standard
+- No structural layout changes to grids -- the padding reduction alone provides sufficient horizontal space
+- All touch targets already meet 44px minimum; we're adding `touch-manipulation` for faster response
 
-The `settings` module authorization in `adminAuthorization.ts` already requires:
-- **3 signatories**: President + Secretary + Legal Adviser
-- **Deputy substitution**: Vice President can substitute for President, Assistant Secretary for Secretary
-- **If deputy acts**: 4-signatory quorum forced, Legal Adviser must be included
-
-This existing configuration automatically covers all constitution management actions since they all use `module="settings"`.
-
-### No Backend Needed
-
-Per project custom knowledge, this is a UI template. All data is mock/static. The upload UI will simulate file selection and show the file info, but won't actually upload to any storage. The management actions show authorization flows and success toasts.
-
-### Mobile Focus
-
-- Sheet uses `side="bottom"` with `h-[92vh]` and `rounded-t-2xl` (same pattern as all other admin sheets)
-- All buttons use `touch-manipulation` class
-- All interactive items have `active:bg-muted/70` or `active:scale-[0.98]` feedback
-- No horizontal layouts that could overflow on 360px screens
-- Vertical stacking for document cards and action buttons
