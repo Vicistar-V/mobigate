@@ -20,7 +20,7 @@ interface MeetingItemProps {
 
 const MeetingItem = ({ meeting, onView }: MeetingItemProps) => (
   <button 
-    className="w-full py-3 flex items-center gap-2.5 text-left hover:bg-muted/50 -mx-1 px-1 rounded transition-colors"
+    className="w-full py-3 flex items-center gap-2.5 text-left hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded transition-colors touch-manipulation"
     onClick={() => onView(meeting.id)}
   >
     <div className="p-1.5 rounded-md bg-teal-500/10 shrink-0">
@@ -113,31 +113,31 @@ export function AdminMeetingSection({
 
             {/* Action Buttons - list style with dividers */}
             <div className="flex flex-col gap-0 divide-y divide-border">
-              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewUpcoming}>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewUpcoming}>
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 Upcoming Meetings
               </button>
-              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewPast}>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewPast}>
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 Past Meetings
               </button>
-              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewAttendance}>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewAttendance}>
                 <Users className="h-4 w-4 text-muted-foreground" />
                 Attendance Records
               </button>
-              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewResolutions}>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewResolutions}>
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 Resolutions
               </button>
-              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onViewConflicts}>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onViewConflicts}>
                 <Scale className="h-4 w-4 text-muted-foreground" />
                 Conflicts & Disputes
               </button>
-              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onManageRollCall}>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={onManageRollCall}>
                 <Users className="h-4 w-4 text-muted-foreground" />
                 Roll-Call Management
               </button>
-              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={() => setShowMinutesSettings(true)}>
+              <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={() => setShowMinutesSettings(true)}>
                 <Settings className="h-4 w-4 text-muted-foreground" />
                 Minutes Settings
               </button>
