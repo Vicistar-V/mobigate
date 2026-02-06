@@ -13,8 +13,10 @@ import {
   Clock,
   MessageSquare,
   Shield,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
@@ -58,8 +60,7 @@ const generateMockVoters = (candidateId: string, voteCount: number): CandidateVo
     null, null, null, null, null // Many voters don't leave remarks
   ];
 
-  // Generate a realistic number of mock voters (max 50 for UI performance)
-  const voterCount = Math.min(voteCount, 50);
+  const voterCount = voteCount;
   
   return Array.from({ length: voterCount }, (_, i) => {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
@@ -87,6 +88,8 @@ const generateMockVoters = (candidateId: string, voteCount: number): CandidateVo
   });
 };
 
+const PAGE_SIZE = 50;
+
 interface CandidateVotersListSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -110,17 +113,26 @@ export function CandidateVotersListSheet({
 }: CandidateVotersListSheetProps) {
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const [showMemberPreview, setShowMemberPreview] = useState(false);
 
   // Generate mock voters
   const voters = generateMockVoters(candidateId, voteCount);
   
-  // Filter by search
   const filteredVoters = voters.filter(voter =>
     voter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     voter.accreditationNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const displayedVoters = filteredVoters.slice(0, displayCount);
+  const hasMore = filteredVoters.length > displayCount;
+  const remainingCount = filteredVoters.length - displayCount;
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setDisplayCount(PAGE_SIZE);
+  };
 
   // Map voter to ExecutiveMember for MemberPreviewDialog
   const mapVoterToMember = (voter: CandidateVoter): ExecutiveMember => ({
@@ -183,7 +195,7 @@ export function CandidateVotersListSheet({
         <Input
           placeholder="Search by name or accreditation..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-8 h-9 text-sm"
         />
       </div>
@@ -196,12 +208,13 @@ export function CandidateVotersListSheet({
             Voters List
           </h3>
           <Badge variant="secondary" className="text-xs">
-            {filteredVoters.length} of {voteCount}
+            {displayedVoters.length} of {voteCount}
           </Badge>
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Showing first {voters.length} voters{voteCount > 50 ? ` of ${voteCount} total` : ""}
+          Showing {displayedVoters.length} of {filteredVoters.length} voters
+          {filteredVoters.length < voteCount ? ` (filtered from ${voteCount})` : ""}
         </p>
 
         {filteredVoters.length === 0 ? (
@@ -214,7 +227,7 @@ export function CandidateVotersListSheet({
           </Card>
         ) : (
           <div className="space-y-2">
-            {filteredVoters.map((voter) => (
+            {displayedVoters.map((voter) => (
               <Card 
                 key={voter.id} 
                 className="overflow-hidden cursor-pointer active:bg-muted/50 transition-colors"
@@ -273,6 +286,18 @@ export function CandidateVotersListSheet({
               </Card>
             ))}
           </div>
+        )}
+
+        {/* Load More Button */}
+        {hasMore && (
+          <Button
+            variant="outline"
+            className="w-full h-11 text-sm font-medium"
+            onClick={() => setDisplayCount(prev => prev + PAGE_SIZE)}
+          >
+            <ChevronDown className="h-4 w-4 mr-2" />
+            Load More ({remainingCount} remaining)
+          </Button>
         )}
       </div>
 
