@@ -124,13 +124,13 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[92vh] p-0">
+        <SheetContent side="bottom" className="h-[92vh] p-0 overflow-hidden">
           <SheetHeader className="px-4 py-3 border-b sticky top-0 bg-background z-10">
             <div className="flex items-center gap-2">
-              <Vote className="h-5 w-5 text-primary" />
-              <SheetTitle>Community Privacy Settings</SheetTitle>
+              <Vote className="h-5 w-5 text-primary shrink-0" />
+              <SheetTitle className="text-left">Community Privacy Settings</SheetTitle>
             </div>
-            <p className="text-sm text-muted-foreground text-left">
+            <p className="text-xs text-muted-foreground text-left leading-relaxed">
               Vote on how your community handles privacy. Majority rules!
             </p>
           </SheetHeader>
@@ -141,7 +141,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
               <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     Each setting is decided by member votes. The option with the most votes 
                     (&gt;50% for majority) becomes the community default.
                   </p>
@@ -165,8 +165,8 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                         onClick={() => toggleExpanded(setting.settingId)}
                       >
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-sm">{setting.settingName}</h4>
+                          <div className="flex items-start gap-2 flex-wrap mb-1">
+                            <h4 className="font-medium text-sm leading-tight">{setting.settingName}</h4>
                             {setting.memberVote && (
                               <Badge variant="outline" className="text-xs shrink-0">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -174,24 +174,24 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
+                          <p className="text-xs text-muted-foreground leading-relaxed">
                             {setting.settingDescription}
                           </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-sm text-muted-foreground">Current:</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {getOptionIcon(setting.currentValue)}
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <span className="text-xs text-muted-foreground">Current:</span>
+                            <Badge variant="secondary" className="text-xs shrink-0">
+                              <span className="shrink-0">{getOptionIcon(setting.currentValue)}</span>
                               <span className="ml-1">{PRIVACY_OPTION_LABELS[setting.currentValue]}</span>
                             </Badge>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-xs text-muted-foreground shrink-0">
                               ({result.percentage.toFixed(0)}%)
                             </span>
                           </div>
                         </div>
                         {isExpanded ? (
-                          <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                         ) : (
-                          <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                         )}
                       </button>
 
@@ -213,11 +213,11 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
 
                                     return (
                                       <div key={option} className="space-y-1">
-                                        <div className="flex items-center justify-between text-sm">
-                                          <span className={isWinner ? 'font-medium' : 'text-muted-foreground'}>
+                                        <div className="flex items-center justify-between gap-2 text-xs">
+                                          <span className={`min-w-0 flex-1 ${isWinner ? 'font-medium' : 'text-muted-foreground'}`}>
                                             {PRIVACY_OPTION_LABELS[option]}
                                           </span>
-                                          <span className="text-muted-foreground">
+                                          <span className="text-muted-foreground shrink-0">
                                             {votes} ({percentage.toFixed(0)}%)
                                           </span>
                                         </div>
@@ -257,16 +257,16 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
                                       <RadioGroupItem
                                         value={option}
                                         id={`${setting.settingId}-${option}`}
-                                        className="mt-0.5"
+                                        className="mt-0.5 shrink-0"
                                       />
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                          {getOptionIcon(option)}
+                                          <span className="shrink-0">{getOptionIcon(option)}</span>
                                           <span className="font-medium text-sm">
                                             {PRIVACY_OPTION_LABELS[option]}
                                           </span>
                                         </div>
-                                        <p className="text-sm text-muted-foreground mt-0.5">
+                                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                                           {PRIVACY_OPTION_DESCRIPTIONS[option]}
                                         </p>
                                       </div>
@@ -307,22 +307,24 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
 
                 {/* Impeachment Privacy Settings Link */}
                 <Card 
-                  className="overflow-hidden cursor-pointer touch-manipulation border-red-200 bg-red-50/30 hover:bg-red-50/50 transition-colors"
+                  className="overflow-hidden cursor-pointer touch-manipulation border-red-200 bg-red-50/30 hover:bg-red-50/50 transition-colors dark:bg-red-950/20 dark:border-red-800"
                   onClick={() => setShowImpeachmentPrivacy(true)}
                 >
-                  <div className="p-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                  <div className="p-4 flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center shrink-0 mt-0.5">
                         <Gavel className="h-5 w-5 text-red-600" />
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="font-medium text-sm text-red-800">Impeachment Privacy Settings</h4>
-                        <p className="text-sm text-red-600/80 line-clamp-2">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-sm text-red-800 dark:text-red-300 leading-tight">
+                          Impeachment Privacy Settings
+                        </h4>
+                        <p className="text-xs text-red-600/80 dark:text-red-400/80 leading-relaxed mt-0.5">
                           Vote on what impeachment data to show or hide (70% threshold)
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-red-400 shrink-0" />
+                    <ChevronRight className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                   </div>
                 </Card>
               </div>
@@ -331,7 +333,7 @@ export function MemberPrivacyVotingSheet({ open, onOpenChange }: MemberPrivacyVo
               <Card className="bg-muted/30">
                 <CardContent className="p-4">
                   <h4 className="font-medium text-sm mb-2">How Voting Works</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1.5">
+                  <ul className="text-xs text-muted-foreground space-y-1.5 leading-relaxed">
                     <li>• Each member gets one vote per setting</li>
                     <li>• You can change your vote at any time</li>
                     <li>• The option with &gt;50% votes becomes permanent</li>
