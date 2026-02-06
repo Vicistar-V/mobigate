@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Trophy, Clock, Users, Play, Book, Award, Inbox, Wallet, Lock, BarChart3, History, Star, Crown, Shield } from "lucide-react";
+import { X, Trophy, Clock, Users, Play, Book, Award, Inbox, Wallet, Lock, BarChart3, History, Star, Crown, Shield, AlertTriangle, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,28 +14,35 @@ import {
   communityQuizWalletData,
   communityQuizRules,
   isCommunityQuizAvailable,
+  getQuizWalletAvailability,
   CommunityQuiz
 } from "@/data/communityQuizData";
 import { CommunityQuizPlayDialog } from "./CommunityQuizPlayDialog";
+import { QuizWalletDrawer } from "./QuizWalletDrawer";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 
 interface CommunityQuizDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isAdmin?: boolean;
+  isOwner?: boolean;
 }
 
-export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogProps) {
+export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwner = false }: CommunityQuizDialogProps) {
   const [activeTab, setActiveTab] = useState("quizzes");
   const [selectedQuiz, setSelectedQuiz] = useState<CommunityQuiz | null>(null);
   const [showGamePlay, setShowGamePlay] = useState(false);
+  const [showQuizWallet, setShowQuizWallet] = useState(false);
   const { toast } = useToast();
 
   const playerWalletBalance = 15000;
+  const quizWalletAvailability = getQuizWalletAvailability();
+  const quizWalletUnavailable = !quizWalletAvailability.available;
 
   const handleStartQuiz = (quiz: CommunityQuiz) => {
-    const availability = isCommunityQuizAvailable(quiz, communityQuizWalletData.balance);
+    const availability = isCommunityQuizAvailable(quiz);
     
     if (!availability.available) {
       toast({
@@ -49,7 +56,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
     if (playerWalletBalance < quiz.stakeAmount) {
       toast({
         title: "Insufficient Balance",
-        description: `You need at least ${formatMobiAmount(quiz.stakeAmount)} (≈ ${formatLocalAmount(quiz.stakeAmount, "NGN")}) to play.`,
+        description: `You need at least ${formatLocalFirst(quiz.stakeAmount, "NGN")} to play.`,
         variant: "destructive"
       });
       return;
@@ -63,7 +70,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
     toast({
       title: result.amountWon > 0 ? "🎉 Congratulations!" : "Game Over",
       description: result.amountWon > 0 
-        ? `You won ${formatMobiAmount(result.amountWon)} (≈ ${formatLocalAmount(result.amountWon, "NGN")}) for the community!` 
+        ? `You won ${formatLocalFirst(result.amountWon, "NGN")}! Paid from the Quiz Wallet.` 
         : "Better luck next time!",
     });
     setShowGamePlay(false);
@@ -109,17 +116,32 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
               <div className="p-4">
                 {/* Quizzes Tab */}
                 <TabsContent value="quizzes" className="mt-0 space-y-4">
-                  {/* Community Wallet Balance Card */}
+                  {/* Unavailability Banner */}
+                  {quizWalletUnavailable && (
+                    <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 rounded-xl">
+                      <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
+                          Quiz Game Unavailable Right Now!
+                        </p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                          Please try again later.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Player Wallet Card */}
                   <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Wallet className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm text-blue-700 dark:text-blue-300">Your Wallet</span>
+                          <span className="text-sm text-blue-700 dark:text-blue-300">Your Player Wallet</span>
                         </div>
                         <div className="text-right">
-                          <span className="font-bold text-blue-700 dark:text-blue-300">{formatMobiAmount(playerWalletBalance)}</span>
-                          <p className="text-[10px] text-blue-500">≈ {formatLocalAmount(playerWalletBalance, "NGN")}</p>
+                          <span className="font-bold text-blue-700 dark:text-blue-300">{formatLocalAmount(playerWalletBalance, "NGN")}</span>
+                          <p className="text-[10px] text-blue-500">({formatMobiAmount(playerWalletBalance)})</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
@@ -134,6 +156,59 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                     </CardContent>
                   </Card>
 
+                  {/* Quiz Wallet Status Card */}
+                  <Card className={cn(
+                    "border-2",
+                    quizWalletUnavailable
+                      ? "border-amber-300 bg-amber-50/50 dark:bg-amber-950/20"
+                      : "border-green-200 bg-green-50/50 dark:bg-green-950/20"
+                  )}>
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Wallet className={cn("h-4 w-4", quizWalletUnavailable ? "text-amber-600" : "text-green-600")} />
+                          <span className={cn("text-sm font-medium", quizWalletUnavailable ? "text-amber-700 dark:text-amber-300" : "text-green-700 dark:text-green-300")}>
+                            Quiz Wallet
+                          </span>
+                        </div>
+                        <Badge variant={quizWalletUnavailable ? "destructive" : "outline"} className={cn(
+                          "text-[10px]",
+                          !quizWalletUnavailable && "bg-green-100 text-green-600 border-green-300"
+                        )}>
+                          {quizWalletUnavailable ? "Insufficient" : "Active"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div>
+                          <p className="text-[10px] text-muted-foreground">Available Balance</p>
+                          <p className={cn("font-bold text-sm", quizWalletUnavailable ? "text-amber-700" : "text-green-700")}>
+                            {formatLocalAmount(communityQuizWalletData.availableBalance, "NGN")}
+                          </p>
+                          <p className="text-[9px] text-muted-foreground">({formatMobiAmount(communityQuizWalletData.availableBalance)})</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-muted-foreground">Reserved</p>
+                          <p className="font-semibold text-sm text-amber-600">{formatLocalAmount(communityQuizWalletData.reservedForPayouts, "NGN")}</p>
+                          <p className="text-[9px] text-muted-foreground">({formatMobiAmount(communityQuizWalletData.reservedForPayouts)})</p>
+                        </div>
+                      </div>
+                      {(isAdmin || isOwner) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-2 text-xs h-8 border-blue-300 text-blue-700"
+                          onClick={() => {
+                            onOpenChange(false);
+                            setTimeout(() => setShowQuizWallet(true), 150);
+                          }}
+                        >
+                          <Settings className="h-3 w-3 mr-1" />
+                          Manage Quiz Wallet
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+
                   {availableQuizzes.length === 0 && upcomingQuizzes.length === 0 ? (
                     <Card>
                       <CardContent className="p-8 text-center">
@@ -145,9 +220,15 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                   ) : (
                     <>
                       {availableQuizzes.map((quiz) => {
-                        const availability = isCommunityQuizAvailable(quiz, communityQuizWalletData.balance);
+                        const availability = isCommunityQuizAvailable(quiz);
+                        const isDisabledByWallet = quizWalletUnavailable;
+                        const isDisabledByBalance = playerWalletBalance < quiz.stakeAmount;
+                        const isDisabled = !availability.available || isDisabledByBalance || isDisabledByWallet;
                         return (
-                          <Card key={quiz.id} className="overflow-hidden border-blue-200 dark:border-blue-800 hover:border-blue-400 transition-colors">
+                          <Card key={quiz.id} className={cn(
+                            "overflow-hidden border-blue-200 dark:border-blue-800 transition-colors",
+                            isDisabledByWallet ? "opacity-70" : "hover:border-blue-400"
+                          )}>
                             <CardContent className="p-4 space-y-3">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1">
@@ -178,13 +259,13 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200 dark:border-red-800">
                                   <p className="text-[10px] text-muted-foreground">Stake</p>
-                                  <p className="font-bold text-sm text-red-600">{formatMobiAmount(quiz.stakeAmount)}</p>
-                                  <p className="text-[9px] text-red-400">≈ {formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                                  <p className="font-bold text-sm text-red-600">{formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
+                                  <p className="text-[9px] text-muted-foreground">({formatMobiAmount(quiz.stakeAmount)})</p>
                                 </div>
                                 <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
                                   <p className="text-[10px] text-muted-foreground">Win Up To</p>
-                                  <p className="font-bold text-sm text-blue-600">{formatMobiAmount(quiz.winningAmount)}</p>
-                                  <p className="text-[9px] text-blue-400">≈ {formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                                  <p className="font-bold text-sm text-blue-600">{formatLocalAmount(quiz.winningAmount, "NGN")}</p>
+                                  <p className="text-[9px] text-muted-foreground">({formatMobiAmount(quiz.winningAmount)})</p>
                                 </div>
                               </div>
 
@@ -198,13 +279,27 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                               </div>
 
                               <Button 
-                                className="w-full bg-blue-600 hover:bg-blue-700" 
+                                className={cn(
+                                  "w-full",
+                                  isDisabledByWallet ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-600 hover:bg-blue-700"
+                                )}
                                 size="sm"
                                 onClick={() => handleStartQuiz(quiz)}
-                                disabled={!availability.available || playerWalletBalance < quiz.stakeAmount}
+                                disabled={isDisabled}
                               >
-                                <Play className="h-4 w-4 mr-2" />
-                                {playerWalletBalance < quiz.stakeAmount ? "Insufficient Balance" : "Play Now"}
+                                {isDisabledByWallet ? (
+                                  <>
+                                    <AlertTriangle className="h-4 w-4 mr-2" />
+                                    Currently Unavailable
+                                  </>
+                                ) : isDisabledByBalance ? (
+                                  "Insufficient Balance"
+                                ) : (
+                                  <>
+                                    <Play className="h-4 w-4 mr-2" />
+                                    Play Now
+                                  </>
+                                )}
                               </Button>
                             </CardContent>
                           </Card>
@@ -226,8 +321,8 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                                 </div>
                                 <p className="text-xs text-muted-foreground">{quiz.description}</p>
                                 <div className="flex justify-between text-xs text-muted-foreground">
-                                  <span>Stake: {formatMobiAmount(quiz.stakeAmount)}</span>
-                                  <span className="text-blue-600 font-semibold">Win: {formatMobiAmount(quiz.winningAmount)}</span>
+                                  <span>Stake: {formatLocalFirst(quiz.stakeAmount, "NGN")}</span>
+                                  <span className="text-blue-600 font-semibold">Win: {formatLocalFirst(quiz.winningAmount, "NGN")}</span>
                                 </div>
                                 <Button variant="outline" size="sm" className="w-full border-blue-300 text-blue-600" disabled>
                                   <Clock className="h-4 w-4 mr-2" />
@@ -277,8 +372,8 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-blue-600 text-sm">{formatMobiAmount(entry.amountWon)}</p>
-                        <p className="text-[10px] text-muted-foreground">{entry.winningPercentage}% win</p>
+                        <p className="font-bold text-blue-600 text-sm">{formatLocalAmount(entry.amountWon, "NGN")}</p>
+                        <p className="text-[10px] text-muted-foreground">({formatMobiAmount(entry.amountWon)})</p>
                       </div>
                     </div>
                   ))}
@@ -286,7 +381,6 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
 
                 {/* Statistics Tab */}
                 <TabsContent value="stats" className="mt-0 space-y-4">
-                  {/* Your Stats */}
                   <Card className="border-blue-200 dark:border-blue-800">
                     <CardContent className="p-4 space-y-3">
                       <h3 className="font-semibold text-sm flex items-center gap-2 text-blue-700 dark:text-blue-300">
@@ -327,7 +421,8 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                       <div className="flex justify-between text-sm p-3 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-950/50 dark:to-blue-900/30 rounded-lg border border-blue-200">
                         <span className="text-blue-700">Net Profit</span>
                         <span className={cn("font-bold", communityQuizPlayerStats.netProfit >= 0 ? "text-green-600" : "text-destructive")}>
-                          {communityQuizPlayerStats.netProfit >= 0 ? "+" : ""}{formatMobiAmount(communityQuizPlayerStats.netProfit)}
+                          {communityQuizPlayerStats.netProfit >= 0 ? "+" : ""}{formatLocalAmount(communityQuizPlayerStats.netProfit, "NGN")}
+                          <span className="text-xs font-normal text-muted-foreground ml-1">({formatMobiAmount(communityQuizPlayerStats.netProfit)})</span>
                         </span>
                       </div>
                     </CardContent>
@@ -345,7 +440,7 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
                       <div className="p-3 bg-white dark:bg-background rounded-lg border border-blue-200">
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Total Contributed</span>
-                          <span className="font-bold text-blue-600">{formatMobiAmount(communityQuizPlayerStats.totalStakePaid * 0.7)}</span>
+                          <span className="font-bold text-blue-600">{formatLocalFirst(communityQuizPlayerStats.totalStakePaid * 0.7, "NGN")}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -385,6 +480,12 @@ export function CommunityQuizDialog({ open, onOpenChange }: CommunityQuizDialogP
         quiz={selectedQuiz}
         playerWalletBalance={playerWalletBalance}
         onGameComplete={handleGameComplete}
+      />
+
+      {/* Quiz Wallet Management Drawer (Admin) */}
+      <QuizWalletDrawer
+        open={showQuizWallet}
+        onOpenChange={setShowQuizWallet}
       />
     </>
   );
