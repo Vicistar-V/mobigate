@@ -56,18 +56,18 @@ export const FinancialClearancesTab = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="bg-pink-200 p-2 border border-gray-300 text-center text-xs font-bold w-10">S/N</th>
-                <th className="bg-pink-200 p-2 border border-gray-300 text-left text-xs font-bold min-w-[140px]">
+                <th className="bg-pink-200 p-2 border border-gray-300 text-center text-sm font-bold w-10">S/N</th>
+                <th className="bg-pink-200 p-2 border border-gray-300 text-left text-sm font-bold min-w-[140px]">
                   Member Name
                 </th>
                 {financialItems.map(item => (
-                  <th key={item.id} className="p-2 border border-gray-300 text-center min-w-[80px]">
-                    <div className="text-[10px] font-semibold mb-1 leading-tight">{item.name}</div>
-                    <div className="flex gap-0.5 justify-center">
-                      <div className="bg-green-100 border border-green-600 px-1.5 py-0.5 text-[9px] font-bold">
+                  <th key={item.id} className="p-2 border border-gray-300 text-center min-w-[100px]">
+                    <div className="text-xs font-semibold mb-1 leading-tight">{item.name}</div>
+                    <div className="flex gap-1 justify-center">
+                      <div className="bg-green-100 border border-green-600 px-2 py-1 text-xs font-bold">
                         ✓
                       </div>
-                      <div className="bg-red-100 border border-red-600 px-1.5 py-0.5 text-[9px] font-bold">
+                      <div className="bg-red-100 border border-red-600 px-2 py-1 text-xs font-bold">
                         X
                       </div>
                     </div>
@@ -78,19 +78,19 @@ export const FinancialClearancesTab = () => {
             <tbody>
               {mockMembersWithClearance.map((member, index) => (
                 <tr key={member.id}>
-                  <td className="bg-pink-200 p-2 border border-gray-300 text-center font-bold text-xs">
+                  <td className="bg-pink-200 p-2 border border-gray-300 text-center font-bold text-sm">
                     {index + 1}
                   </td>
-                  <td className="bg-pink-200 p-2 border border-gray-300 font-semibold text-xs">
+                  <td className="bg-pink-200 p-2 border border-gray-300 font-bold text-sm">
                     <div>{member.name}</div>
-                    <div className="text-[10px] text-gray-600">{member.registration}</div>
+                    <div className="text-xs text-gray-600">{member.registration}</div>
                   </td>
                   {member.clearances.map(clearance => (
                     <td key={clearance.itemId} className="p-1 border border-gray-300 text-center bg-white">
                       {clearance.hasClearance ? (
-                        <div className="text-green-600 text-lg font-bold">✓</div>
+                        <div className="text-green-600 text-xl font-bold">✓</div>
                       ) : (
-                        <div className="text-red-600 text-lg font-bold">X</div>
+                        <div className="text-red-600 text-xl font-bold">X</div>
                       )}
                     </td>
                   ))}
