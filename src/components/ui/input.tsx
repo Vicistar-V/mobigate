@@ -8,7 +8,14 @@ export interface InputProps extends React.ComponentProps<"input"> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, allowImagePaste = false, onPaste, ...props }, ref) => {
+  ({ className, type, allowImagePaste = false, onPaste, onClick, ...props }, ref) => {
+    const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      if (onClick) {
+        onClick(e);
+      }
+    };
+
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
       // Call custom onPaste handler first if provided
       if (onPaste) {
@@ -43,6 +50,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         ref={ref}
         onPaste={handlePaste}
+        onClick={handleClick}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"

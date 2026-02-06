@@ -8,7 +8,14 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, allowImagePaste = false, onPaste, ...props }, ref) => {
+  ({ className, allowImagePaste = false, onPaste, onClick, ...props }, ref) => {
+    const handleClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+      e.stopPropagation();
+      if (onClick) {
+        onClick(e);
+      }
+    };
+
     const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
       // Call custom onPaste handler first if provided
       if (onPaste) {
@@ -42,6 +49,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         ref={ref}
         onPaste={handlePaste}
+        onClick={handleClick}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
