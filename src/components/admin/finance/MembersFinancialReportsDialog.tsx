@@ -140,7 +140,7 @@ export const MembersFinancialReportsDialog = ({
   const Content = () => (
     <div className="space-y-4">
       {/* Search and Filter */}
-      <Card className="p-3">
+      <Card className="p-2.5">
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -196,8 +196,8 @@ export const MembersFinancialReportsDialog = ({
           </div>
 
           {filteredPayments.map((payment) => (
-            <Card key={payment.id} className="p-3">
-              <div className="flex items-start gap-3">
+            <Card key={payment.id} className="p-2.5">
+              <div className="flex items-start gap-2.5">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={payment.memberAvatar} />
                   <AvatarFallback>{payment.memberName.charAt(0)}</AvatarFallback>
@@ -228,7 +228,7 @@ export const MembersFinancialReportsDialog = ({
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center flex-wrap gap-2 gap-y-0.5 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       {getPaymentMethodIcon(payment.paymentMethod)}
                       {payment.paymentMethod.replace("_", " ")}
@@ -254,8 +254,8 @@ export const MembersFinancialReportsDialog = ({
           </div>
 
           {filteredDisbursements.map((disbursement) => (
-            <Card key={disbursement.id} className="p-3">
-              <div className="flex items-start gap-3">
+            <Card key={disbursement.id} className="p-2.5">
+              <div className="flex items-start gap-2.5">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={disbursement.memberAvatar} />
                   <AvatarFallback>{disbursement.memberName.charAt(0)}</AvatarFallback>
@@ -280,7 +280,7 @@ export const MembersFinancialReportsDialog = ({
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between flex-wrap gap-y-0.5 mt-2 text-xs text-muted-foreground">
                     <span>Approved by: {disbursement.approvedBy}</span>
                     <span>{format(disbursement.disbursementDate, "MMM d, yyyy")}</span>
                   </div>
@@ -323,8 +323,8 @@ export const MembersFinancialReportsDialog = ({
             );
 
             return (
-              <Card key={obligation.id} className="p-3">
-                <div className="flex items-start gap-3">
+              <Card key={obligation.id} className="p-2.5">
+                <div className="flex items-start gap-2.5">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={obligation.memberAvatar} />
                     <AvatarFallback>{obligation.memberName.charAt(0)}</AvatarFallback>
@@ -356,7 +356,7 @@ export const MembersFinancialReportsDialog = ({
                       <Progress value={progressPercentage} className="h-1.5" />
                     </div>
 
-                    <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between flex-wrap gap-y-0.5 mt-2 text-xs text-muted-foreground">
                       <span>Due: {format(obligation.dueDate, "MMM d, yyyy")}</span>
                       {obligation.lastPaymentDate && (
                         <span>
@@ -381,7 +381,7 @@ export const MembersFinancialReportsDialog = ({
           <DrawerHeader className="border-b">
             <DrawerTitle>Members Financial Reports</DrawerTitle>
           </DrawerHeader>
-          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+          <ScrollArea className="flex-1 px-2 py-3 overflow-y-auto touch-auto">
             {Content()}
           </ScrollArea>
         </DrawerContent>
