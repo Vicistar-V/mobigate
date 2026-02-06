@@ -78,7 +78,7 @@ export const ElectionAccreditationTab = ({
     setIsActivityDebtCleared(true);
     setIsActivityDebtClearing(false);
     
-    toast.success(`₦${activitiesData.totalPenalty.toLocaleString()} (M${activitiesData.totalPenalty.toLocaleString()}) debited from your Mobi Wallet. Activity debts cleared!`);
+    toast.success(`₦${activitiesData.totalPenalty.toLocaleString()} (M${activitiesData.totalPenalty.toLocaleString()}) debited on your Mobi Wallet. Activity debts cleared!`);
   };
 
   const handleDebtsClearing = () => {
@@ -313,7 +313,7 @@ export const ElectionAccreditationTab = ({
           
           {!isActivityDebtCleared && (
             <p className="text-xs text-muted-foreground text-center leading-relaxed">
-              This will debit <strong>M{activitiesData.totalPenalty.toLocaleString()}</strong> (≈ ₦{activitiesData.totalPenalty.toLocaleString()}) from your Mobi Wallet.
+              This will debit <strong>M{activitiesData.totalPenalty.toLocaleString()}</strong> (≈ ₦{activitiesData.totalPenalty.toLocaleString()}) on your Mobi Wallet.
             </p>
           )}
         </div>

@@ -31,7 +31,7 @@ const IndebtednessContent = () => {
       setIsClearing(false);
       setIsCleared(true);
       toast.success(
-        `Debt Cleared! ${formatMobiAmount(totalWithPenalty)} (≈ ${formatLocalAmount(totalWithPenalty, "NGN")}) has been debited from your Mobi Wallet.`,
+        `Debt Cleared! ${formatMobiAmount(totalWithPenalty)} (≈ ${formatLocalAmount(totalWithPenalty, "NGN")}) has been debited on your Mobi Wallet.`,
         { duration: 5000 }
       );
     }, 2000);
@@ -122,7 +122,7 @@ const IndebtednessContent = () => {
             
             {!isCleared && (
               <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                This will debit <strong>{formatMobiAmount(totalWithPenalty)}</strong> (≈ {formatLocalAmount(totalWithPenalty, "NGN")}) from your Mobi Wallet to clear all outstanding debts.
+                This will debit <strong>{formatMobiAmount(totalWithPenalty)}</strong> (≈ {formatLocalAmount(totalWithPenalty, "NGN")}) on your Mobi Wallet to clear all outstanding debts.
               </p>
             )}
           </div>

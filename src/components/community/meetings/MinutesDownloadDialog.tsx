@@ -130,7 +130,7 @@ export const MinutesDownloadDialog = ({
     // Show wallet debit toast first
     toast({
       title: "Payment Processed",
-      description: `${formatMobiAmount(minutes.downloadFee)} (≈ ${formatLocalAmount(minutes.downloadFee, "NGN")}) debited from your Mobi Wallet.`,
+      description: `${formatMobiAmount(minutes.downloadFee)} (≈ ${formatLocalAmount(minutes.downloadFee, "NGN")}) debited on your Mobi Wallet.`,
     });
 
     // Show community credit toast

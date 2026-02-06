@@ -43,26 +43,28 @@ export const FinancialAccreditationTab = () => {
       <h1 className="text-lg font-bold px-1">Financial Accreditation</h1>
 
       {/* Stats Summary - Always 3 cols */}
-      <div className="grid grid-cols-3 gap-2">
-        <Card className="p-2.5 bg-green-50 border-green-300">
-          <div className="text-xl font-bold text-green-700 leading-tight">
-            {membersWithAccreditation.filter(m => m.isAccredited).length}
+      <Card className="p-0 overflow-hidden">
+        <div className="grid grid-cols-3 divide-x divide-border">
+          <div className="py-2.5 px-2 text-center">
+            <div className="text-2xl font-bold text-green-600 leading-none">
+              {membersWithAccreditation.filter(m => m.isAccredited).length}
+            </div>
+            <div className="text-xs text-green-600 mt-1">Accredited</div>
           </div>
-          <div className="text-[11px] text-green-600 leading-tight mt-0.5">Accredited</div>
-        </Card>
-        <Card className="p-2.5 bg-yellow-50 border-yellow-300">
-          <div className="text-xl font-bold text-yellow-700 leading-tight">
-            {membersWithAccreditation.filter(m => !m.isAccredited).length}
+          <div className="py-2.5 px-2 text-center">
+            <div className="text-2xl font-bold text-amber-600 leading-none">
+              {membersWithAccreditation.filter(m => !m.isAccredited).length}
+            </div>
+            <div className="text-xs text-amber-600 mt-1">Pending</div>
           </div>
-          <div className="text-[11px] text-yellow-600 leading-tight mt-0.5">Pending</div>
-        </Card>
-        <Card className="p-2.5 bg-blue-50 border-blue-300">
-          <div className="text-xl font-bold text-blue-700 leading-tight">
-            {membersWithAccreditation.length}
+          <div className="py-2.5 px-2 text-center">
+            <div className="text-2xl font-bold text-blue-600 leading-none">
+              {membersWithAccreditation.length}
+            </div>
+            <div className="text-xs text-blue-600 mt-1">Total</div>
           </div>
-          <div className="text-[11px] text-blue-600 leading-tight mt-0.5">Total</div>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
       {/* Accreditation List */}
       <Card className="p-3">

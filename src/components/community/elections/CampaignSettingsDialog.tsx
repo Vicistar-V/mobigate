@@ -162,7 +162,7 @@ export function CampaignSettingsDialog({
     if (paymentResult.success) {
       toast({
         title: "Campaign Launched Successfully! 🎉",
-        description: `${formatMobiAmount(feeCalculation.totalFee)} has been debited from your Mobi Wallet. Your campaign is now active!`,
+        description: `${formatMobiAmount(feeCalculation.totalFee)} has been debited on your Mobi Wallet. Your campaign is now active!`,
       });
       
       if (onLaunchCampaign) {

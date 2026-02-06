@@ -51,7 +51,7 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
     const formatted = formatLocalPrimary(status.outstandingBalance);
     toast({
       title: "Payment Successful!",
-      description: `Your payment of ${formatted.local} (${formatted.mobi}) has been debited from your Mobi Wallet.`,
+      description: `Your payment of ${formatted.local} (${formatted.mobi}) has been debited on your Mobi Wallet.`,
     });
     
     setIsProcessingPayment(false);
@@ -255,7 +255,7 @@ export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDia
                 {outstandingFormatted.local}
               </span>{" "}
               ({outstandingFormatted.mobi}) to clear your outstanding balance.
-              This amount will be debited from your Mobi Wallet.
+              This amount will be debited on your Mobi Wallet.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
