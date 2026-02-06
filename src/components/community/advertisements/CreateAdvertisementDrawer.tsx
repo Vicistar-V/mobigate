@@ -29,7 +29,7 @@ const initialFormData: AdvertisementFormData = {
   phone2: "",
   email: "",
   website: "",
-  photos: [],
+  media: [],
   audienceTargets: ["community_interface"],
   durationDays: 7,
 };
@@ -200,10 +200,10 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                 />
               </div>
 
-              {/* Photo Uploader */}
+              {/* Media Uploader */}
               <AdvertisementPhotoUploader
-                photos={formData.photos}
-                onPhotosChange={(photos) => updateField("photos", photos)}
+                media={formData.media}
+                onMediaChange={(media) => updateField("media", media)}
               />
             </div>
           </ScrollArea>

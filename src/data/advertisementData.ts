@@ -51,11 +51,11 @@ export const mockAdvertisements: EnhancedAdvertisement[] = [
     phone2: "+234 909 876 5432",
     email: "orders@amaraskitchen.ng",
     website: "https://amaraskitchen.ng",
-    photos: [
-      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400",
-      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
-      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400",
+    media: [
+      { url: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400", type: "image" },
     ],
     audienceTargets: ["community_interface", "members_interface", "mobigate_interface"],
     durationDays: 21,
@@ -90,10 +90,10 @@ export const mockAdvertisements: EnhancedAdvertisement[] = [
     phone1: "+234 803 456 7890",
     email: "sales@techzone.ng",
     website: "https://techzone.ng",
-    photos: [
-      "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=400",
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400",
+    media: [
+      { url: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400", type: "image" },
     ],
     audienceTargets: ["community_interface", "mobi_store_marketplace"],
     durationDays: 14,
@@ -129,9 +129,9 @@ export const mockAdvertisements: EnhancedAdvertisement[] = [
     phone2: "+234 701 234 5678",
     email: "info@prestigehomes.ng",
     website: "https://prestigehomes.ng",
-    photos: [
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400",
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
+    media: [
+      { url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400", type: "image" },
     ],
     audienceTargets: ["community_interface", "mobigate_interface", "mobigate_users"],
     durationDays: 30,
@@ -164,11 +164,11 @@ export const mockAdvertisements: EnhancedAdvertisement[] = [
     description: "We deal in clean and affordable Tokunbo and Nigerian-used cars. Toyota, Honda, Mercedes-Benz, and more. All vehicles are properly inspected and come with documentation. Trade-ins accepted. Visit our lot in Berger, Lagos.",
     city: "Berger, Lagos",
     phone1: "+234 802 345 6789",
-    photos: [
-      "https://images.unsplash.com/photo-1549317661-bd32c8ce0afa?w=400",
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400",
-      "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400",
-      "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400",
+    media: [
+      { url: "https://images.unsplash.com/photo-1549317661-bd32c8ce0afa?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400", type: "image" },
+      { url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400", type: "image" },
     ],
     audienceTargets: ["community_interface"],
     durationDays: 7,
@@ -202,8 +202,8 @@ export const mockAdvertisements: EnhancedAdvertisement[] = [
     city: "Lagos, Nigeria",
     phone1: "+234 801 234 5678",
     email: "orders@amaraskitchen.ng",
-    photos: [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400",
+    media: [
+      { url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400", type: "image" },
     ],
     audienceTargets: ["community_interface", "members_interface"],
     durationDays: 7,
