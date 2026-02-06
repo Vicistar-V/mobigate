@@ -1,12 +1,15 @@
 
 
-## Connect Message Action to Mobi-Chat
+## Fix Report & Comment Submenus for Mobile
 
 ### Problem
-The "Message" action in the leadership member actions menu (shown in screenshot) only displays a toast notification but doesn't actually open the Mobi-Chat interface.
+The "Report" and "Comment" dropdown menu items use `DropdownMenuSub` which creates side-positioned nested menus. On mobile devices, these submenus:
+- Often appear off-screen or get clipped
+- Don't respond well to touch interactions
+- Are designed for desktop hover, not mobile tap
 
 ### Solution
-Update the `handleSendMessage` function to dispatch the `openChatWithUser` custom event, which the `MessagesSheet` component is already listening for.
+Replace the entire `DropdownMenu` with a mobile-optimized `Drawer` (bottom sheet) and convert the nested submenus into inline `Accordion` sections.
 
 ---
 
@@ -14,47 +17,75 @@ Update the `handleSendMessage` function to dispatch the `openChatWithUser` custo
 
 ### File: `src/components/community/leadership/LeadershipMemberActionsMenu.tsx`
 
-**Lines 104-110 - Current Code:**
-```tsx
-const handleSendMessage = () => {
-  toast({
-    title: "Opening Chat",
-    description: `Starting conversation with ${member.name}`,
-  });
-  // Navigate to chat or open chat drawer
-};
-```
+**Key Changes:**
+1. Replace `DropdownMenu` with `Drawer` component
+2. Replace `DropdownMenuSub` (Comment) with `Accordion` inline expansion
+3. Replace `DropdownMenuSub` (Report) with `Accordion` inline expansion
+4. Ensure all action items have minimum 48px (h-12) touch targets
+5. Add proper separators between action groups
 
-**Updated Code:**
+**New Structure:**
+
 ```tsx
-const handleSendMessage = () => {
-  // Dispatch custom event to open Mobi-Chat with this member
-  window.dispatchEvent(
-    new CustomEvent('openChatWithUser', {
-      detail: {
-        userId: member.id,
-        userName: member.name,
-      },
-    })
-  );
-  
-  toast({
-    title: "Opening Chat",
-    description: `Starting conversation with ${member.name}`,
-  });
-};
+<Drawer open={isOpen} onOpenChange={setIsOpen}>
+  <DrawerTrigger asChild>
+    <Button variant="ghost" size="icon" className="h-10 w-10">
+      <MoreVertical className="h-5 w-5" />
+    </Button>
+  </DrawerTrigger>
+  <DrawerContent>
+    <DrawerHeader>
+      <DrawerTitle>{member.name}</DrawerTitle>
+      <DrawerDescription>{member.position}</DrawerDescription>
+    </DrawerHeader>
+    <DrawerBody>
+      {/* Regular action buttons - h-12 touch targets */}
+      <button className="flex items-center h-12 w-full gap-3 ...">
+        <User /> View Profile
+      </button>
+      
+      {/* Comment section - Accordion */}
+      <Accordion type="single" collapsible>
+        <AccordionItem value="comment">
+          <AccordionTrigger className="h-12">
+            <MessageCircle /> Comment
+          </AccordionTrigger>
+          <AccordionContent>
+            <button onClick={handleAddComment}>Add Comment</button>
+            <button onClick={handleViewComments}>View All</button>
+          </AccordionContent>
+        </AccordionItem>
+        
+        {/* Report section - Accordion */}
+        <AccordionItem value="report">
+          <AccordionTrigger className="h-12">
+            <Flag /> Report
+          </AccordionTrigger>
+          <AccordionContent>
+            <button onClick={handleNewReport}>New Report</button>
+            <button onClick={handleViewPendingReports}>Pending</button>
+            <button onClick={handleViewResolvedReports}>Resolved</button>
+            <button onClick={handleViewAbsolvedReports}>Absolved</button>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      
+      {/* Block/Admin actions */}
+    </DrawerBody>
+  </DrawerContent>
+</Drawer>
 ```
 
 ---
 
-## How It Works
+## UI Improvements
 
-1. User taps "Message" in the leadership member dropdown menu
-2. `handleSendMessage` dispatches a custom event with the member's `userId` and `userName`
-3. `MessagesSheet` component (already mounted in app layout) receives the event
-4. The sheet searches for a matching conversation by `userId` or `userName`
-5. If found, it selects that conversation and opens the chat sheet
-6. If not found, it defaults to the first conversation or opens the empty sheet
+| Element | Before | After |
+|---------|--------|-------|
+| Menu Container | Dropdown (overlay) | Drawer (bottom sheet) |
+| Comment/Report | DropdownMenuSub (side-positioned) | Accordion (inline expansion) |
+| Touch Targets | py-2.5 (~40px) | h-12 (48px) |
+| Submenu Access | Tap opens side panel | Tap expands inline |
 
 ---
 
@@ -62,14 +93,14 @@ const handleSendMessage = () => {
 
 | File | Change |
 |------|--------|
-| `src/components/community/leadership/LeadershipMemberActionsMenu.tsx` | Update `handleSendMessage` to dispatch `openChatWithUser` event |
+| `src/components/community/leadership/LeadershipMemberActionsMenu.tsx` | Complete refactor to use Drawer + Accordion pattern |
 
 ---
 
 ## Expected Outcome
 
-- Tapping "Message" on any leadership member opens the Mobi-Chat sheet
-- If a conversation exists with that member, it's automatically selected
-- Full mobile-optimized chat interface opens immediately
-- Toast notification confirms the action
+- Tapping "Comment" expands inline to show "Add" and "View All" options
+- Tapping "Report" expands inline to show "New Report", "Pending", "Resolved", "Absolved" options
+- All actions are visible and accessible on mobile without off-screen positioning
+- Consistent with mobile-first design patterns
 
