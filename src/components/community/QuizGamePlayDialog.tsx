@@ -301,7 +301,7 @@ export function QuizGamePlayDialog({
                         <CheckCircle className="h-4 w-4 text-yellow-500" />
                         8-9/10 correct
                       </span>
-                      <span className="font-semibold text-yellow-600">50% Win</span>
+                      <span className="font-semibold text-yellow-600">20% Win</span>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-destructive/10 rounded-lg">
                       <span className="flex items-center gap-2">
