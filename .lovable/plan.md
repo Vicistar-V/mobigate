@@ -1,123 +1,158 @@
 
 
-## Fix Mobile Overflow and Wire Inactive Buttons in Financial Accreditation Tab
+## Mobile Optimization: Fix Right-Edge Clipping in Community Resources Dialog
 
-### Problems Identified
+### Root Causes Identified
 
-From the screenshots, the **Financial Accreditation Tab** (`FinancialAccreditationTab.tsx`) has two major issues:
+The screenshots show content clipping on the right edge across **all tabs** (ID Cards, Letters, Publications/More). Three structural problems cause this:
 
-1. **Mobile overflow / edge clipping**: The member cards use `flex items-center gap-4` with a large avatar (h-14 w-14), member info text, AND a "View Details" button all in one horizontal row. On narrow mobile screens, the avatar clips on the left, and the "View Details" button clips on the right, causing unwanted horizontal scrolling.
+1. **Excessive padding**: `p-4 sm:p-6` and `px-4 sm:px-6` are used throughout. On a 360px mobile screen, that is 16px padding on each side = 32px lost. Combined with card borders, internal padding, and the Dialog's built-in `gap-4`, content runs out of horizontal room.
 
-2. **Inactive "View Details" button**: The button has no `onClick` handler -- tapping it does nothing.
+2. **Horizontal flex layouts with rigid children**: Publication cards use a large 64px icon thumbnail + text + badge + button all in one row. Letter request cards put title + badge side-by-side. These overflow on narrow screens.
 
----
-
-### Solution
-
-#### 1. Restack Member Cards Vertically for Mobile
-
-Replace the current single-row horizontal layout with a **two-row vertically stacked** layout:
-
-- **Row 1**: Avatar + Name + Registration (compact, no overflow)
-- **Row 2**: Status Badge + Clearance Count + "View Details" button
-
-This follows the existing `mobile-list-item-restacking` pattern used elsewhere in the app.
-
-**Specific changes:**
-
-| Current | Fixed |
-|---------|-------|
-| `flex items-center gap-4` (single row) | Vertical stack with two rows |
-| Avatar `h-14 w-14` (too large for mobile row) | Reduced to `h-10 w-10` |
-| "View Details" button in same row as avatar + text | Moved to second row, full-width |
-| `gap-4` (too much spacing) | `gap-3` for tighter mobile fit |
-
-#### 2. Wire "View Details" Button
-
-When tapped, open the `CheckIndebtednessSheet` (existing component) which shows:
-- Itemized list of financial obligations
-- Total indebtedness with penalty calculation
-- "Clear Debt Now" button
-- "Get Accreditation Now!" button
-
-This is the most appropriate existing component since "View Details" for a pending member means viewing what they owe and providing a path to clear it.
-
-For already-accredited members, open the `FinancialStatusDialog` instead which shows compliance rate and payment history.
-
-#### 3. Fix Stats Grid
-
-Change `grid-cols-1 md:grid-cols-3` to just `grid-cols-3` so all three stat cards show side-by-side even on mobile (they're small enough). Reduce padding for mobile.
+3. **No overflow containment**: The dialog and its inner cards lack `overflow-hidden`, allowing children to push beyond the visible area and create horizontal scroll.
 
 ---
 
-### File Modified
+### Changes Overview
 
-**`src/components/community/finance/FinancialAccreditationTab.tsx`**
+| File | What Gets Fixed |
+|------|----------------|
+| `CommunityResourcesDialog.tsx` | All tabs: reduce padding, restack cards, add overflow containment |
+| `ConstitutionViewer.tsx` | Reduce header/content padding, tighten mobile layout |
 
-#### Import additions:
-- `useState` from React
-- `FinancialStatusDialog` from `./FinancialStatusDialog`
-- `CheckIndebtednessSheet` from `../elections/CheckIndebtednessSheet`
-- `toast` from `sonner`
+---
 
-#### State additions:
-- `showIndebtednessSheet` -- boolean to control the CheckIndebtednessSheet
-- `showStatusDialog` -- boolean to control FinancialStatusDialog
+### File 1: `src/components/community/CommunityResourcesDialog.tsx`
 
-#### Layout changes:
+#### A. Dialog Container - Add overflow containment
 
-**Stats grid** -- change to `grid-cols-3` with reduced padding (`p-3` instead of `p-4`), smaller text sizes for mobile fit.
-
-**Member cards** -- restructure from:
+Change DialogContent class from:
 ```
-[Avatar] [Name / Reg / Badge] [View Details Button]
+max-w-3xl max-h-[90vh] p-0
 ```
-To vertically stacked:
+To:
 ```
-[Avatar] [Name / Registration]
-[Badge + Clearance Count] [View Details Button]
+max-w-3xl max-h-[90vh] p-0 overflow-x-hidden
 ```
 
-**View Details button** -- wire `onClick`:
-- If member is accredited: `setShowStatusDialog(true)`
-- If member is pending: `setShowIndebtednessSheet(true)`
+#### B. Header - Reduce padding
 
-Add `touch-manipulation active:scale-[0.97]` to the button for mobile feedback.
+Change DialogHeader from `p-4 sm:p-6` to `p-3 pb-0`.
 
-#### Render dialogs at bottom:
-- `<FinancialStatusDialog>` controlled by `showStatusDialog`
-- `<CheckIndebtednessSheet>` controlled by `showIndebtednessSheet`
+#### C. Tab List - Tighten horizontal padding
+
+Change the TabsList wrapper from `px-4 sm:px-6` to `px-3`. Keep tab text at `text-[11px]` but ensure proper truncation.
+
+#### D. ScrollArea - Reduce all tab content padding
+
+Change every `TabsContent` from `p-4 sm:p-6` to `p-3` consistently.
+
+#### E. ID Cards Tab - Tighten card internals
+
+- Reduce Card's `CardHeader` and `CardContent` internal padding
+- Ensure the centered photo/name/badge layout has `overflow-hidden` on wrapping container
+- Change the ID card gradient container internal padding from `p-4` to `p-3`
+- Reduce detail grid gap from `gap-2` to `gap-1.5`
+
+#### F. Letters Tab - Restack letter request cards
+
+The letter request history cards currently use `flex items-start justify-between` which puts the title and badge side-by-side. On narrow screens the badge clips.
+
+**Restack to vertical:**
+- Row 1: Title (full width, no truncation)
+- Row 2: Status badge + date side-by-side (both small)
+- Row 3: Purpose text
+- Row 4: Letter number + Download button (if available)
+
+#### G. More Tab (Publications) - Restack featured publication cards
+
+The featured publications use a horizontal layout with a 64px icon box + content that overflows.
+
+**Restack to vertical:**
+- Remove the large icon box entirely (or shrink to 40px inline icon)
+- Row 1: Title + type badge (with `flex-wrap` to prevent badge clipping)
+- Row 2: Description (line-clamp-2)
+- Row 3: Edition + file size + Download button
+
+For "All Publications" cards:
+- Shrink the icon from `p-2` to smaller
+- Ensure title uses `line-clamp-1` with proper `min-w-0`
+- Ensure Download button has `shrink-0`
+
+#### H. Other Resources Section
+
+- Reduce `CardContent p-3.5` to `p-3`
+- Ensure all text has `min-w-0` and `truncate` on description lines
+
+---
+
+### File 2: `src/components/community/ConstitutionViewer.tsx`
+
+#### A. Dialog Container
+
+Change DialogContent from `max-w-4xl max-h-[95vh] p-0` to `max-w-3xl max-h-[95vh] p-0 overflow-x-hidden`.
+
+#### B. Header padding
+
+Change from `p-4 sm:p-6` to `p-3 pb-0`.
+
+#### C. Tab list container
+
+Change from `px-4 sm:px-6` to `px-3`.
+
+#### D. Content padding
+
+Change from `p-4 sm:p-6` to `p-3`.
+
+---
 
 ### Technical Details
 
-```tsx
-// Restacked member card layout
-<div className="space-y-2.5 p-3 rounded-lg border-2 ...">
-  {/* Row 1: Avatar + Identity */}
-  <div className="flex items-center gap-3">
-    <Avatar className="h-10 w-10 shrink-0">...</Avatar>
-    <div className="min-w-0 flex-1">
-      <div className="font-semibold text-sm truncate">{member.name}</div>
-      <div className="text-xs text-muted-foreground">{member.registration}</div>
-    </div>
-  </div>
-  {/* Row 2: Badge + Action */}
-  <div className="flex items-center justify-between gap-2">
-    <div className="flex items-center gap-2">
-      <Badge>...</Badge>
-      <span className="text-xs">6/7 items cleared</span>
-    </div>
-    <Button 
-      size="sm" 
-      onClick={() => { /* open dialog */ }}
-      className="touch-manipulation active:scale-[0.97] shrink-0"
-    >
-      View Details
-    </Button>
-  </div>
-</div>
+**Key CSS patterns applied throughout:**
+
+```text
+overflow-x-hidden  -- on dialog containers to prevent horizontal scroll
+p-3                -- consistent mobile padding (12px) instead of 16px/24px
+min-w-0            -- on all flex children that contain text
+shrink-0           -- on fixed-size elements (icons, badges, buttons)
+overflow-hidden    -- on card containers with complex layouts
+flex-wrap          -- on rows containing title + badge combinations
+```
+
+**Publication card restack (before vs after):**
+
+Before:
+```
+[64px Icon Box] [Title .... Badge]
+                [Description text....]
+                [Edition | Download]
+```
+
+After:
+```
+[Title text here]              [Badge]
+[Description text, line-clamp-2]
+[Edition info]      [Download button]
+```
+
+**Letter request card restack (before vs after):**
+
+Before:
+```
+[Title text here]         [approved]  <-- badge clips
+[Requested: date]
+```
+
+After:
+```
+[Title text here]
+[approved badge] [Requested: date]
+[Purpose: text...]
+[Letter#]              [Download]
 ```
 
 ### Files Modified
-1. `src/components/community/finance/FinancialAccreditationTab.tsx`
+1. `src/components/community/CommunityResourcesDialog.tsx`
+2. `src/components/community/ConstitutionViewer.tsx`
 
