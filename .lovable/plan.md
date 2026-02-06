@@ -1,116 +1,181 @@
 
-## Fix Mobile Input Errors in All Election Voters List Views
 
-### Problem
+## Auto-Generate Letters, ID Cards, and Scrollable Publication Actions
 
-When typing into text fields (search inputs, textareas) inside election-related drawers and sheets on mobile, the input loses focus, characters get dropped, or the field flickers. This makes it impossible to type properly.
+### Overview
 
-### Root Cause
+Three improvements to the Manage Resources dialog, all focused on mobile:
 
-The issue is caused by **inner component functions** defined inside parent components and rendered as JSX tags (e.g., `<Content />`). Because these functions are redefined on every render, React treats them as new component types on each keystroke. This causes the input to unmount and remount, destroying focus.
-
-**Example of the problem pattern:**
-```text
-// BAD - causes focus loss on mobile
-const Content = () => (
-  <div>
-    <Input value={searchQuery} onChange={...} />
-  </div>
-);
-
-return <Content />;  // React sees a NEW component each render
-```
-
-**The fix:**
-```text
-// GOOD - preserves focus
-const Content = () => (
-  <div>
-    <Input value={searchQuery} onChange={...} />
-  </div>
-);
-
-return Content();  // React sees the same elements, no remount
-```
-
-Changing `<Content />` to `{Content()}` converts the JSX tag invocation (which React treats as a component boundary) into a plain function call (which React treats as inline elements in the parent tree).
+1. **Letters Tab** - "Issue Letter" button auto-generates a professional official letter document (like Certificate of Return) with download capability
+2. **ID Cards Tab** - "Issue Card" button auto-generates a digital community ID card document with download capability
+3. **Publications Tab** - Action buttons (Feature/Unfeature, Edit, Delete) become horizontally scrollable instead of wrapping
 
 ---
 
-### Files to Fix (10 files)
+### 1. Create Official Letter Display Component
 
-| # | File | Inner Components | Lines to Change |
-|---|------|-----------------|-----------------|
-| 1 | `CandidateVotersListSheet.tsx` | `Content` | Lines 368, 392: `<Content />` to `{Content()}` |
-| 2 | `NominateCandidateDrawer.tsx` | `DrawerBodyContent`, `FooterContent` | Lines 512, 513, 549, 551 |
-| 3 | `FeeDistributionConfigDialog.tsx` | `Content` | Lines 231, 248 |
-| 4 | `CertificateOfReturnGenerator.tsx` | `Content` | Lines 291, 326 |
-| 5 | `CampaignRoyaltyDetailSheet.tsx` | `Content` | Lines 179, 196 |
-| 6 | `CampaignFeeDetailSheet.tsx` | `Content` | Lines 264, 281 |
-| 7 | `AdminPrimaryManagementSheet.tsx` | `MainContent` (combines `Content` + `CandidateDetailContent`) | Lines 534, 551 |
-| 8 | `AdminNominationsSection.tsx` | `DetailContent` | Lines 453, 465 |
-| 9 | `AdminImpeachmentTab.tsx` | `DetailsSheetContent` | Lines 1056, 1062 |
-| 10 | `CertificateOfReturnPreview.tsx` | `CertificateDocument`, `ActionButtons` | Lines 388-389, 406-407 |
+**New file: `src/components/community/resources/OfficialLetterDisplay.tsx`**
+
+A professional letter document display, following the same pattern as `CertificateOfReturnDisplay.tsx`:
+
+- Professional formal letter layout with community letterhead
+- Blue-themed design with community name, logo area, and official styling
+- Letter content auto-populated from the request data (template title, requester name, purpose, letter number)
+- Verification code and QR code section for authenticity
+- Issued date, signatory section
+- Download button that opens `DownloadFormatSheet` (PDF, JPEG, PNG, TXT)
+- Uses `html2canvas` + `jsPDF` for high-resolution export (already in project dependencies)
+- Mobile: Drawer (92vh); Desktop: Dialog (85vh)
+
+Letter content structure:
+```text
+[Community Letterhead]
+[Date]
+[Reference: CMT/LTR/2024/001]
+
+TO WHOM IT MAY CONCERN
+
+RE: MEMBERSHIP CONFIRMATION LETTER
+
+This is to certify that [Member Name] is a registered and 
+active member of [Community Name].
+
+Purpose: [Stated purpose from request]
+
+This letter is issued upon request for the purpose stated above.
+
+[Verification Code]
+[Signed by: Community Secretary]
+```
+
+### 2. Create Digital ID Card Display Component
+
+**New file: `src/components/community/resources/DigitalIDCardDisplay.tsx`**
+
+A professional digital ID card document, following the same pattern:
+
+- Card-style layout with community branding (gradient background)
+- Member photo, name, member ID, card number
+- QR code section for verification
+- Issue date and expiry date
+- Status badge (Active)
+- Verification code for authenticity
+- Download button with `DownloadFormatSheet` (PDF, JPEG, PNG)
+- Uses `html2canvas` + `jsPDF` for export
+- Mobile: Drawer (92vh); Desktop: Dialog (85vh)
+
+Card layout:
+```text
+[Community Name - Header with gradient]
+[Member Photo]  [QR Code]
+[Member Name]
+[Member ID: MEM-2024-0234]
+[Card Number: CMT-001-0234]
+[Issue: 02/02/2026]  [Expiry: 02/02/2028]
+[Status: Active]
+[Verification Code]
+```
+
+### 3. Update ManageCommunityResourcesDialog
+
+**File: `src/components/community/ManageCommunityResourcesDialog.tsx`**
+
+Changes:
+
+**A. ID Cards Tab - "Issue Card" button:**
+- Add state for `showIDCardPreview` and `selectedIDCardRequest`
+- When "Issue Card" is clicked: generate card data, show the `DigitalIDCardDisplay` component
+- When "View Card" is clicked (for already-issued cards): also show the `DigitalIDCardDisplay`
+
+**B. Letters Tab - "Issue Letter" button:**
+- Add state for `showLetterPreview` and `selectedLetterRequest`
+- When "Issue Letter" is clicked: generate letter data, show the `OfficialLetterDisplay` component
+- When "Preview" is clicked (for already-issued letters): also show the `OfficialLetterDisplay`
+
+**C. Publications Tab - Scrollable action buttons:**
+- Wrap the action buttons row in a horizontally scrollable container
+- Replace `flex flex-wrap gap-2` with `flex gap-2 overflow-x-auto` and `whitespace-nowrap` on buttons
+- Add `shrink-0` on each button to prevent compression
+- This allows swiping left-right to reveal all buttons on narrow screens
 
 ---
 
 ### Technical Details
 
-For each file, every `<InnerComponent />` usage is changed to `{InnerComponent()}`:
+**OfficialLetterDisplay.tsx structure:**
+```text
+Props:
+  - open: boolean
+  - onOpenChange: (open: boolean) => void
+  - letterData: {
+      templateTitle: string
+      letterNumber: string
+      requestedBy: string
+      purpose: string
+      issuedDate: Date
+      communityName: string
+      signedBy: string
+      verificationCode: string
+    }
 
-**1. CandidateVotersListSheet.tsx**
-- Line 368: `<Content />` becomes `{Content()}`
-- Line 392: `<Content />` becomes `{Content()}`
+Internal:
+  - useRef for printable area (html2canvas capture)
+  - DownloadFormatSheet integration
+  - Mobile Drawer / Desktop Dialog pattern
+```
 
-**2. NominateCandidateDrawer.tsx**
-- Line 512: `<DrawerBodyContent />` becomes `{DrawerBodyContent()}`
-- Line 513: `<FooterContent />` becomes `{FooterContent()}`
-- Line 549: `<DrawerBodyContent />` becomes `{DrawerBodyContent()}`
-- Line 551: `<FooterContent />` becomes `{FooterContent()}`
+**DigitalIDCardDisplay.tsx structure:**
+```text
+Props:
+  - open: boolean
+  - onOpenChange: (open: boolean) => void
+  - cardData: {
+      memberName: string
+      memberId: string
+      memberPhoto: string
+      cardNumber: string
+      issueDate: Date
+      expiryDate: Date
+      communityName: string
+      verificationCode: string
+      qrCode: string
+    }
 
-**3. FeeDistributionConfigDialog.tsx**
-- Line 231: `<Content />` becomes `{Content()}`
-- Line 248: `<Content />` becomes `{Content()}`
+Internal:
+  - useRef for printable area (html2canvas capture)
+  - DownloadFormatSheet integration
+  - Mobile Drawer / Desktop Dialog pattern
+```
 
-**4. CertificateOfReturnGenerator.tsx**
-- Line 291: `<Content />` becomes `{Content()}`
-- Line 326: `<Content />` becomes `{Content()}`
+**Publications scrollable buttons change:**
+```text
+Current (line 642):
+  <div className="flex flex-wrap gap-2 mt-3">
 
-**5. CampaignRoyaltyDetailSheet.tsx**
-- Line 179: `<Content />` becomes `{Content()}`
-- Line 196: `<Content />` becomes `{Content()}`
-
-**6. CampaignFeeDetailSheet.tsx**
-- Line 264: `<Content />` becomes `{Content()}`
-- Line 281: `<Content />` becomes `{Content()}`
-
-**7. AdminPrimaryManagementSheet.tsx**
-- Line 534: `<MainContent />` becomes `{MainContent()}`
-- Line 551: `<MainContent />` becomes `{MainContent()}`
-
-**8. AdminNominationsSection.tsx**
-- Line 453: `<DetailContent />` becomes `{DetailContent()}`
-- Line 465: `<DetailContent />` becomes `{DetailContent()}`
-
-**9. AdminImpeachmentTab.tsx**
-- Line 1056: `<DetailsSheetContent />` becomes `{DetailsSheetContent()}`
-- Line 1062: `<DetailsSheetContent />` becomes `{DetailsSheetContent()}`
-
-**10. CertificateOfReturnPreview.tsx**
-- Lines 388-389: `<CertificateDocument />` and `<ActionButtons />` become `{CertificateDocument()}` and `{ActionButtons()}`
-- Lines 406-407: Same changes
+New:
+  <div className="flex gap-2 mt-3 overflow-x-auto pb-1 -mb-1">
+    + add shrink-0 to each Button
+```
 
 ---
 
-### What This Fixes
+### Files to Create
 
-- Search inputs in Voters List sheets will hold focus while typing
-- Textarea inputs in Impeachment reason forms will work properly
-- All text fields inside election drawers/sheets will accept input without flickering or losing characters
-- Mobile keyboard stays open and responsive during typing
+| File | Purpose |
+|------|---------|
+| `src/components/community/resources/OfficialLetterDisplay.tsx` | Auto-generated official letter document with download |
+| `src/components/community/resources/DigitalIDCardDisplay.tsx` | Auto-generated digital ID card document with download |
 
-### Why This Works
+### Files to Modify
 
-When React encounters `<Content />`, it creates a component boundary. If `Content` is a new function reference (which it is on every re-render since it's defined inside the parent), React unmounts the old component tree and mounts a new one -- destroying any focused input.
+| File | Change |
+|------|--------|
+| `src/components/community/ManageCommunityResourcesDialog.tsx` | Wire up Issue Letter/Card buttons to open preview components; make publication buttons scrollable |
 
-When React encounters `{Content()}`, it receives the JSX elements directly as part of the parent's render tree. No component boundary means no unmount/remount cycle, so input focus is preserved.
+### Dependencies Used (already installed)
+
+- `html2canvas` - For capturing document as image
+- `jspdf` - For PDF generation
+- `date-fns` - For date formatting
+- `DownloadFormatSheet` - Existing reusable download format picker
+
