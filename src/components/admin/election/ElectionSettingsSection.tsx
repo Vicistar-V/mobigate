@@ -13,16 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ModuleAuthorizationDrawer } from "@/components/admin/authorization/ModuleAuthorizationDrawer";
 import { 
   Settings, 
   Vote, 
@@ -179,7 +170,7 @@ const electionSettingsData: ElectionSetting[] = [
 export function ElectionSettingsSection() {
   const [settings, setSettings] = useState(electionSettingsData);
   const [pendingChanges, setPendingChanges] = useState<Record<string, string>>({});
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAuthDrawer, setShowAuthDrawer] = useState(false);
   const [selectedSetting, setSelectedSetting] = useState<ElectionSetting | null>(null);
 
   const hasUnsavedChanges = Object.keys(pendingChanges).length > 0;
@@ -198,10 +189,10 @@ export function ElectionSettingsSection() {
 
   const handleSave = (setting: ElectionSetting) => {
     setSelectedSetting(setting);
-    setShowConfirmDialog(true);
+    setShowAuthDrawer(true);
   };
 
-  const confirmSave = () => {
+  const handleAuthComplete = () => {
     if (!selectedSetting) return;
     
     const newValue = pendingChanges[selectedSetting.id];
@@ -219,11 +210,10 @@ export function ElectionSettingsSection() {
     });
 
     toast({
-      title: "Change Submitted for Approval",
-      description: `${selectedSetting.name} change requires multi-signature authorization.`,
+      title: "Setting Updated",
+      description: `${selectedSetting.name} has been authorized and updated successfully.`,
     });
 
-    setShowConfirmDialog(false);
     setSelectedSetting(null);
   };
 
@@ -332,31 +322,48 @@ export function ElectionSettingsSection() {
         </div>
       </ScrollArea>
 
-      {/* Confirmation Dialog */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-base">Submit Setting Change</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
-              {selectedSetting && (
-                <>
-                  Changing <strong>{selectedSetting.name}</strong> requires authorization from 
-                  President + (Secretary or PRO). The change will be applied once approved.
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmSave}
-              className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
-            >
-              Submit for Approval
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Multi-Signature Authorization Drawer */}
+      <ModuleAuthorizationDrawer
+        open={showAuthDrawer}
+        onOpenChange={setShowAuthDrawer}
+        module="elections"
+        actionTitle="Update Election Setting"
+        actionDescription={
+          selectedSetting
+            ? `Change "${selectedSetting.name}" requires multi-signature authorization`
+            : ""
+        }
+        actionDetails={
+          selectedSetting ? (() => {
+            const Icon = selectedSetting.icon;
+            const currentLabel = selectedSetting.options.find(o => o.value === selectedSetting.currentValue)?.label || selectedSetting.currentValue;
+            const newValue = pendingChanges[selectedSetting.id];
+            const newLabel = selectedSetting.options.find(o => o.value === newValue)?.label || newValue;
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-500/10">
+                    <Icon className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{selectedSetting.name}</p>
+                    <p className="text-xs text-muted-foreground">{selectedSetting.description}</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Current</span>
+                  <span>{currentLabel}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">New Value</span>
+                  <span className="font-bold text-primary">{newLabel}</span>
+                </div>
+              </div>
+            );
+          })() : undefined
+        }
+        onAuthorized={handleAuthComplete}
+      />
     </div>
   );
 }

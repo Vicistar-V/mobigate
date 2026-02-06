@@ -154,6 +154,13 @@ export const MODULE_ACTION_CONFIGS: Record<AuthorizationModule, Record<string, A
       iconComponent: Vote,
       iconColorClass: "text-red-600",
     },
+    update_election_setting: {
+      title: "Update Election Setting",
+      description: "Multi-signature authorization to modify election rules",
+      icon: <Settings className="h-5 w-5 text-green-600" />,
+      iconComponent: Settings,
+      iconColorClass: "text-green-600",
+    },
   },
   content: {
     publish_news: {
