@@ -1,73 +1,59 @@
 
-# Fix Inactive Buttons on Mobile -- Financial Action Buttons
+# Mobile Optimization: Financial Tables -- Increase Sizes and Readability
 
-## The Problem
+## Problems Identified (from screenshots)
 
-Four action buttons across the financial pages ("Financial Status Report", "Check Total Indebtedness", "Debts Clearance Now", "Download Receipts") feel inactive and unresponsive on mobile because:
+Both the **Financial Clearances** table and the **Financial Summary** table show text that is "too tiny and almost unreadable" on mobile:
 
-1. **Missing touch-manipulation CSS** -- Without this, mobile browsers apply a 300ms tap delay making buttons feel dead
-2. **No active-state feedback** -- No visual scale-down on press, so users can't tell if their tap registered
-3. **Hidden checkbox requirement** -- "Debts Clearance Now" and "Download Receipts" require a small checkbox to be ticked first. On mobile, this tiny checkbox is easily missed, so when users tap the button nothing visible happens (toast error appears briefly but can be missed)
+1. **Clearances table** (`FinancialClearancesTab.tsx`): Column headers use `text-[10px]` and check/X indicator boxes use `text-[9px]` -- both violate the project's minimum `text-xs` (12px) typography standard
+2. **Registration numbers** in member rows use `text-[10px]` instead of `text-xs`
+3. **Column header names** ("Membership Registration Fees", "General Annual Dues & Levies", etc.) are long multi-word labels crammed into `min-w-[80px]` cells, making them wrap into unreadable slivers
+4. **Check/X marks** (`text-lg`) are OK size-wise but their wrapper boxes (`px-1.5 py-0.5 text-[9px]`) are too small for the tap-target and readability
 
-## The Fix
+## Solution
 
-Add `touch-manipulation active:scale-[0.97] transition-transform` to all action buttons in affected files, and make the checkbox requirement more obvious with inline helper text.
+### File 1: `src/components/community/finance/FinancialClearancesTab.tsx` (lines 55-97)
 
----
+**Table header cells (lines 64-74)**:
+- Change `text-[10px]` to `text-xs` for column header names
+- Change `text-[9px]` to `text-xs` for the check/X indicator labels
+- Increase `min-w-[80px]` to `min-w-[100px]` for each column to give more breathing room
+- Increase padding from `px-1.5 py-0.5` to `px-2 py-1` on indicator boxes
 
-## Files to Modify
+**Table header row (line 59)**:
+- Change S/N header from `text-xs` to `text-sm` for better visibility
+- Change Member Name header from `text-xs` to `text-sm`
 
-### 1. CommunityAccountsTab.tsx (lines 186-228)
+**Table body cells (lines 79-97)**:
+- Change member S/N from `text-xs` to `text-sm`
+- Change member name from `text-xs` to `text-sm font-bold`
+- Change registration number from `text-[10px]` to `text-xs` (meets minimum standard)
+- Increase check/X marks from `text-lg` to `text-xl` for clearer visibility
 
-All four buttons get `touch-manipulation active:scale-[0.97] transition-transform` added to their className. This matches the pattern already used in FinancialClearancesTab.
+**Table min-width**: Keep at `min-w-[700px]` since horizontal scroll is expected, but the increased cell widths will make scrolled content readable.
 
-Additionally, add small helper text below each checkbox row: "Tick the box first, then tap the button" in `text-[10px] text-muted-foreground` to make the checkbox requirement obvious on mobile.
+### File 2: `src/components/community/finance/FinancialSummaryTable.tsx` (lines 52-113)
 
-**Buttons affected:**
-- "Financial Status Report" (line 188) -- add touch classes
-- "Check Total Indebtedness" (line 194) -- add touch classes
-- "Debts Clearance Now" (line 207) -- add touch classes + helper text
-- "Download Receipts" (line 221) -- add touch classes + helper text
+**Table header (lines 55-60)**:
+- Change member name from `text-xs` to `text-sm font-bold`
+- Change registration from `text-xs text-gray-600` to `text-xs text-gray-600` (already meets minimum)
 
-### 2. ElectionAccreditationTab.tsx (lines 146-189)
+**Year headers (lines 63-69)**:
+- Change year and "Date" labels from `text-xs` to `text-sm` for better readability
 
-Same treatment -- add `touch-manipulation active:scale-[0.97] transition-transform` to all four action buttons. Add checkbox helper text to the two checkbox-gated buttons.
+**Table body items (lines 78-82)**:
+- Change item number and name from `text-xs` to `text-sm` for readability
+- Increase `min-w-[160px]` to `min-w-[180px]` for item name column to prevent wrapping
 
-**Buttons affected:**
-- "Check Total Indebtedness" (line 148) -- add touch classes
-- "Debts Clearance Now" (line 161) -- add touch classes + helper text
-- "Download Receipts" (line 175) -- add touch classes + helper text
-- "Financial Status Report" (line 184) -- add touch classes
+**Amount cells (lines 88-94)**:
+- Change amount text from `text-xs` to `text-sm` with `font-bold tabular-nums`
+- Increase min-width from `min-w-[80px]` to `min-w-[90px]`
 
-### 3. FinancialClearancesTab.tsx (lines 111-153)
+**Date cells (lines 97-104)**:
+- Change date text from `text-xs` to `text-sm`
+- Increase min-width from `min-w-[65px]` to `min-w-[75px]`
 
-Already has `touch-manipulation` -- only add the checkbox helper text for consistency.
-
----
-
-## Technical Details
-
-### Touch Classes Added
-
-```
-touch-manipulation active:scale-[0.97] transition-transform
-```
-
-- `touch-manipulation` -- Removes the 300ms tap delay on mobile browsers by telling the browser this element only needs pan/pinch gestures
-- `active:scale-[0.97]` -- Provides instant visual feedback (slight shrink) on press so users know their tap registered
-- `transition-transform` -- Smooths the scale animation
-
-### Checkbox Helper Text
-
-Below each checkbox + button row, a small text note:
-
-```tsx
-<p className="text-[10px] text-muted-foreground pl-7 -mt-1">
-  Tick the box first, then tap the button
-</p>
-```
-
-The `pl-7` aligns the text with the button (past the checkbox), and `-mt-1` keeps it compact.
+**Overall table min-width**: Increase from `min-w-[900px]` to `min-w-[1000px]` to accommodate the larger text without cramming
 
 ---
 
@@ -75,6 +61,7 @@ The `pl-7` aligns the text with the button (past the checkbox), and `-mt-1` keep
 
 | File | What Changes |
 |------|-------------|
-| `src/components/community/finance/CommunityAccountsTab.tsx` | Add touch-manipulation + active feedback to 4 buttons; add checkbox helper text |
-| `src/components/community/elections/ElectionAccreditationTab.tsx` | Add touch-manipulation + active feedback to 4 buttons; add checkbox helper text |
-| `src/components/community/finance/FinancialClearancesTab.tsx` | Add checkbox helper text for consistency |
+| `src/components/community/finance/FinancialClearancesTab.tsx` | Increase all table text sizes to meet `text-xs` minimum; bump key labels to `text-sm`; enlarge check/X marks; widen column min-widths |
+| `src/components/community/finance/FinancialSummaryTable.tsx` | Increase all table text from `text-xs` to `text-sm`; widen column min-widths for breathing room |
+
+Both tables remain horizontally scrollable (this is expected and correct for data-heavy tables on mobile), but every piece of text will now be clearly legible at proper sizes.
