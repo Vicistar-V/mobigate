@@ -10,16 +10,20 @@ interface AdCardProps {
   image?: string;
   content?: string;
   timeRemaining?: string;
+  url?: string;
 }
 
-export const AdCard = ({ image, content, timeRemaining }: AdCardProps) => {
+export const AdCard = ({ image, content, timeRemaining, url }: AdCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const shareUrl = generateShareUrl('ad', 'ad-rotation');
 
   return (
     <>
-      <Card className="p-4 col-span-3 bg-muted/30 space-y-3">
+      <Card 
+        className="p-4 col-span-3 bg-muted/30 space-y-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation"
+        onClick={() => url && window.open(url, "_blank")}
+      >
         <div className="relative h-32 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
           {image ? (
             <>
@@ -45,16 +49,18 @@ export const AdCard = ({ image, content, timeRemaining }: AdCardProps) => {
           )}
         </div>
 
-        <EngagementBar
-          itemId="ad-rotation"
-          itemType="ad"
-          initialLikes="0"
-          initialComments="0"
-          initialShares="0"
-          onComment={() => setShowComments(true)}
-          onShare={() => setShowShare(true)}
-          variant="compact"
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <EngagementBar
+            itemId="ad-rotation"
+            itemType="ad"
+            initialLikes="0"
+            initialComments="0"
+            initialShares="0"
+            onComment={() => setShowComments(true)}
+            onShare={() => setShowShare(true)}
+            variant="compact"
+          />
+        </div>
       </Card>
 
       <CommentDialog

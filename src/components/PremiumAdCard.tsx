@@ -303,8 +303,8 @@ export const PremiumAdCard = ({
           </div>
         </div>
 
-        {/* Media Content */}
-        <div className="flex-1 min-h-0">
+        {/* Media Content - Clickable */}
+        <div className="flex-1 min-h-0 cursor-pointer" onClick={handleCTA}>
           {media.type === 'carousel' ? (
             <PremiumAdCarousel items={media.items} />
           ) : media.type === 'video' ? (
@@ -333,7 +333,7 @@ export const PremiumAdCard = ({
 
         {/* Content Footer */}
         <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 flex-shrink-0">
-          <div className="space-y-1.5 sm:space-y-2">
+          <div className="space-y-1.5 sm:space-y-2 cursor-pointer" onClick={handleCTA}>
             <h3 className="text-base sm:text-xl md:text-2xl font-bold text-foreground leading-tight">
               {content.headline}
             </h3>
@@ -399,16 +399,18 @@ export const PremiumAdCard = ({
               {content.ctaText}
             </Button>
           )}
-          <EngagementBar
-            itemId={id}
-            itemType="ad"
-            initialLikes="0"
-            initialComments="0"
-            initialShares="0"
-            onComment={() => setShowComments(true)}
-            onShare={() => setShowShare(true)}
-            className="pt-3 border-t"
-          />
+          <div onClick={(e) => e.stopPropagation()}>
+            <EngagementBar
+              itemId={id}
+              itemType="ad"
+              initialLikes="0"
+              initialComments="0"
+              initialShares="0"
+              onComment={() => setShowComments(true)}
+              onShare={() => setShowShare(true)}
+              className="pt-3 border-t"
+            />
+          </div>
         </div>
 
         <CommentDialog
@@ -441,7 +443,7 @@ export const PremiumAdCard = ({
     <Card className="w-full h-full overflow-hidden bg-card border border-border flex flex-col">
       <div className="p-3 sm:p-4 space-y-3 flex-1">
         {/* Top Row: Image, Title, and Close Button */}
-        <div className="flex gap-3 items-start">
+        <div className="flex gap-3 items-start cursor-pointer" onClick={handleCTA}>
           {/* Media Thumbnail */}
           <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-muted">
             {media.type === 'video' ? (
@@ -489,7 +491,7 @@ export const PremiumAdCard = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleClose}
+            onClick={(e) => { e.stopPropagation(); handleClose(); }}
             className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground flex-shrink-0"
           >
             <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -557,17 +559,19 @@ export const PremiumAdCard = ({
         )}
 
         {/* Engagement Bar */}
-        <EngagementBar
-          itemId={id}
-          itemType="ad"
-          initialLikes="0"
-          initialComments="0"
-          initialShares="0"
-          onComment={() => setShowComments(true)}
-          onShare={() => setShowShare(true)}
-          variant="compact"
-          className="pt-2 border-t"
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <EngagementBar
+            itemId={id}
+            itemType="ad"
+            initialLikes="0"
+            initialComments="0"
+            initialShares="0"
+            onComment={() => setShowComments(true)}
+            onShare={() => setShowShare(true)}
+            variant="compact"
+            className="pt-2 border-t"
+          />
+        </div>
       </div>
 
       <CommentDialog

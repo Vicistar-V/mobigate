@@ -137,12 +137,14 @@ export const CommunityAccountsTab = () => {
       {getBalanceInfo()}
 
       {/* Small Ad Banner */}
-      <Card className="p-2.5 bg-gradient-to-r from-yellow-50 to-orange-50 border-orange-200 overflow-hidden">
+      <Card 
+        className="p-2.5 bg-gradient-to-r from-yellow-50 to-orange-50 border-orange-200 overflow-hidden cursor-pointer active:scale-[0.98] transition-transform touch-manipulation"
+        onClick={() => window.open("https://example.com/architect-services", "_blank")}
+        role="link"
+      >
         <div className="flex items-center justify-between gap-2 text-xs">
           <span className="min-w-0 truncate">Need an <strong>Architect</strong> for your Dream-Project?</span>
-          <Button size="sm" variant="link" className="text-red-600 h-auto p-0 text-xs shrink-0">
-            Click Here!
-          </Button>
+          <span className="text-red-600 text-xs font-semibold shrink-0">Click Here!</span>
         </div>
       </Card>
 
