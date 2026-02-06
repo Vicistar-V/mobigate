@@ -1,188 +1,172 @@
 
 
-## Fix "Schedule New Primary" Button Not Working
+## Fix Mobile Text Input Flickering Issue
 
 ### Problem Identified
-The "Schedule New Primary" button in `AdminPrimaryElectionsSection.tsx` (line 149) is completely inactive because it has **no `onClick` handler**:
+Text inputs inside ScrollArea components are flickering and writing incorrectly on mobile devices. The issue occurs in:
 
-```tsx
-<Button className="w-full bg-green-600 hover:bg-green-700 gap-2">
-  <Plus className="h-4 w-4" />
-  Schedule New Primary
-</Button>
-```
+1. **Election Details** - "Additional Notes" textarea
+2. **Manage Dues & Levies** - "Obligation Name" input and "Description" textarea  
+3. **Account Statements** - Search input
 
----
-
-## Solution
-
-Create a new mobile-first `SchedulePrimaryDrawer` component and connect it to the button.
+**Root Cause:** When inputs are inside a Radix ScrollArea component, mobile browsers can lose and regain focus rapidly due to the scroll viewport intercepting touch events. The inputs are missing the critical `onClick={(e) => e.stopPropagation()}` handler that prevents the scroll logic from stealing focus.
 
 ---
 
-## Implementation Details
+### Solution
 
-### 1. Create New Component: `SchedulePrimaryDrawer.tsx`
-
-**Location:** `src/components/admin/election/SchedulePrimaryDrawer.tsx`
-
-A mobile-optimized bottom drawer (92vh) for scheduling new primary elections.
-
-**Form Fields:**
-- **Office Selection** - Dropdown of offices requiring a primary
-- **Scheduled Date** - Date picker for primary election day
-- **Start Time** - Time input (e.g., 09:00)
-- **End Time** - Time input (e.g., 17:00)
-- **Advancement Rules** (display-only)
-  - Auto-qualify threshold: 25%
-  - Maximum advancing: 4
-  - Minimum advancing: 2
-
-**UI Layout (Mobile):**
-```text
-+---------------------------------------+
-| [<] Schedule Primary Election         |
-+---------------------------------------+
-| Select Office *                       |
-| [  Secretary General       v  ]       |
-|                                       |
-| Scheduled Date *                      |
-| [  Feb 28, 2025            📅  ]      |
-|                                       |
-| Voting Time *                         |
-| Start [09:00]     End [17:00]         |
-|                                       |
-+---------------------------------------+
-| [Info] Advancement Rules              |
-| • ≥25% = Auto-qualifies               |
-| • Max 4 candidates advance            |
-| • Min 2 candidates required           |
-+---------------------------------------+
-|                                       |
-| [   Schedule Primary   ]              |
-|                                       |
-+---------------------------------------+
-```
-
----
-
-### 2. Integrate Drawer in AdminPrimaryElectionsSection
-
-**File:** `src/components/admin/election/AdminPrimaryElectionsSection.tsx`
-
-**Changes:**
-1. Import the new `SchedulePrimaryDrawer` component
-2. Add state: `const [showScheduleDrawer, setShowScheduleDrawer] = useState(false);`
-3. Add `onClick` handler to the button:
+Apply the established mobile input optimization pattern to all affected form inputs:
 
 ```tsx
-<Button 
-  className="w-full bg-green-600 hover:bg-green-700 gap-2"
-  onClick={() => setShowScheduleDrawer(true)}
->
-  <Plus className="h-4 w-4" />
-  Schedule New Primary
-</Button>
-```
-
-4. Render the drawer at the end of the component:
-
-```tsx
-<SchedulePrimaryDrawer
-  open={showScheduleDrawer}
-  onOpenChange={setShowScheduleDrawer}
-  onScheduled={() => {
-    toast({
-      title: "Primary Scheduled",
-      description: "The primary election has been scheduled successfully"
-    });
-    setShowScheduleDrawer(false);
-  }}
+<Input
+  className="touch-manipulation"
+  autoComplete="off"
+  autoCorrect="off"
+  spellCheck={false}
+  onClick={(e) => e.stopPropagation()}  // Prevents scroll stealing focus
 />
 ```
 
 ---
 
-### 3. Data for Office Selection
+### Files to Modify
 
-Filter offices that need primaries from `mockPrimaryElections` or create a list of available offices:
+#### 1. `src/components/admin/finance/ManageDuesLeviesDialog.tsx`
 
-```typescript
-// Offices available for primary scheduling
-const availableOffices = [
-  { id: "office-3", name: "Secretary General" },
-  { id: "office-4", name: "Treasurer" },
-  { id: "office-5", name: "Financial Secretary" },
-  { id: "office-6", name: "Public Relations Officer" },
-  { id: "office-7", name: "Welfare Officer" },
-];
+**Lines 286-290** - Obligation Name Input:
+```tsx
+<Input
+  placeholder="e.g., Annual Dues 2025"
+  value={formData.name}
+  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+  className="touch-manipulation"
+  autoComplete="off"
+  autoCorrect="off"
+  spellCheck={false}
+  onClick={(e) => e.stopPropagation()}
+/>
+```
+
+**Lines 321-326** - Amount Input:
+```tsx
+<Input
+  type="number"
+  placeholder="15000"
+  value={formData.amount}
+  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+  inputMode="decimal"
+  className="touch-manipulation"
+  onClick={(e) => e.stopPropagation()}
+/>
+```
+
+**Lines 330-334** - Due Date Input:
+```tsx
+<Input
+  type="date"
+  value={formData.dueDate}
+  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+  className="touch-manipulation"
+  onClick={(e) => e.stopPropagation()}
+/>
+```
+
+**Lines 340-345** - Description Textarea:
+```tsx
+<Textarea
+  placeholder="Describe this obligation..."
+  value={formData.description}
+  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+  className="min-h-[80px] touch-manipulation"
+  autoComplete="off"
+  autoCorrect="off"
+  spellCheck={false}
+  onClick={(e) => e.stopPropagation()}
+/>
+```
+
+**Lines 351-357** - Grace Period Input:
+```tsx
+<Input
+  type="number"
+  value={formData.gracePeriodDays}
+  onChange={(e) => setFormData({ ...formData, gracePeriodDays: e.target.value })}
+  inputMode="numeric"
+  className="touch-manipulation"
+  onClick={(e) => e.stopPropagation()}
+/>
+```
+
+**Lines 362-365** - Late Fee Input:
+```tsx
+<Input
+  type="number"
+  value={formData.lateFee}
+  onChange={(e) => setFormData({ ...formData, lateFee: e.target.value })}
+  className="flex-1 touch-manipulation"
+  inputMode="decimal"
+  onClick={(e) => e.stopPropagation()}
+/>
 ```
 
 ---
 
-## Files to Create/Modify
+#### 2. `src/components/admin/finance/AccountStatementsDialog.tsx`
 
-| File | Action |
-|------|--------|
-| `src/components/admin/election/SchedulePrimaryDrawer.tsx` | **CREATE** - New drawer component for scheduling primaries |
-| `src/components/admin/election/AdminPrimaryElectionsSection.tsx` | **MODIFY** - Add state, onClick handler, and render drawer |
+**Lines 288-294** - Search Input:
+```tsx
+<Input
+  placeholder="Search by description or reference..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="pl-9 touch-manipulation"
+  autoComplete="off"
+  autoCorrect="off"
+  spellCheck={false}
+  onClick={(e) => e.stopPropagation()}
+/>
+```
 
----
+**Lines 336-341** - From Date Input:
+```tsx
+<Input
+  type="date"
+  value={dateFrom}
+  onChange={(e) => setDateFrom(e.target.value)}
+  className="h-9 touch-manipulation"
+  onClick={(e) => e.stopPropagation()}
+/>
+```
 
-## Mobile Optimizations
-
-Following established patterns:
-- Drawer uses `max-h-[92vh]` with rounded top corners (`rounded-t-2xl`)
-- Container uses `p-0` with internal padding on scrollable body
-- Touch-optimized inputs with `touch-manipulation` class
-- `autoComplete="off"`, `autoCorrect="off"`, `spellCheck={false}` on inputs
-- `onClick={(e) => e.stopPropagation()}` to prevent scroll stealing focus
-- Minimum 44px touch targets for all interactive elements
-- Date picker uses mobile-friendly calendar popup
-- Time inputs use native time pickers where possible
-
----
-
-## Component Structure
-
-```typescript
-interface SchedulePrimaryDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onScheduled?: () => void;
-}
-
-// Form state
-const [selectedOffice, setSelectedOffice] = useState("");
-const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
-const [startTime, setStartTime] = useState("09:00");
-const [endTime, setEndTime] = useState("17:00");
-const [isSubmitting, setIsSubmitting] = useState(false);
-
-// Validation
-const isValid = selectedOffice && scheduledDate && startTime && endTime;
-
-// Submit handler
-const handleSchedule = () => {
-  if (!isValid) return;
-  setIsSubmitting(true);
-  // Simulate API call
-  setTimeout(() => {
-    onScheduled?.();
-    setIsSubmitting(false);
-    // Reset form
-  }, 1000);
-};
+**Lines 348-352** - To Date Input:
+```tsx
+<Input
+  type="date"
+  value={dateTo}
+  onChange={(e) => setDateTo(e.target.value)}
+  className="h-9 touch-manipulation"
+  onClick={(e) => e.stopPropagation()}
+/>
 ```
 
 ---
 
-## Expected Outcome
+### Summary of Changes
 
-1. Tapping "Schedule New Primary" opens the scheduling drawer
-2. Admin selects an office from the dropdown
-3. Admin sets the date and voting time range
-4. Advancement rules are displayed for reference
-5. On submit, shows loading state then success toast
-6. Drawer closes and the new primary appears in the list
+| File | Inputs Fixed |
+|------|--------------|
+| `ManageDuesLeviesDialog.tsx` | Obligation Name, Amount, Due Date, Description, Grace Period, Late Fee (6 inputs) |
+| `AccountStatementsDialog.tsx` | Search, From Date, To Date (3 inputs) |
+
+---
+
+### Technical Details
+
+The fix uses the established pattern from `memory/constraints/mobile-input-interaction-optimization`:
+
+1. **`onClick={(e) => e.stopPropagation()}`** - Prevents the ScrollArea's viewport from capturing the click event and stealing focus
+2. **`touch-manipulation`** - Enables native touch behaviors while disabling double-tap zoom
+3. **`autoComplete="off"`, `autoCorrect="off"`, `spellCheck={false}`** - Prevents browser features that can interfere with mobile input
+
+The `DeclareElectionDrawer.tsx` already has these optimizations applied correctly (lines 418-424, 511-522), which is why its inputs work properly. The other files need the same treatment.
 
