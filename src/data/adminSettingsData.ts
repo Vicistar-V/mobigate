@@ -269,6 +269,21 @@ export const electionSettings: AdminSetting[] = [
     requiresMultiSig: true,
     lastUpdated: new Date("2024-11-01"),
   },
+  {
+    id: "election-6",
+    key: "campaign_duration_fees",
+    name: "Campaign Duration & Fees",
+    description: "Configure campaign pricing tiers for election advertisements",
+    category: "election_settings",
+    currentValue: "8_tiers",
+    options: [],
+    approvalPercentage: 100,
+    hasPendingChange: false,
+    isLocked: false,
+    requiresMultiSig: true,
+    lastUpdated: new Date("2025-02-01"),
+    updatedBy: "System",
+  },
 ];
 
 // Finance Settings

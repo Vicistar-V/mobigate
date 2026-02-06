@@ -54,6 +54,7 @@ import {
   getSettingsStats,
 } from "@/data/adminSettingsData";
 import { SettingsDetailSheet } from "./SettingsDetailSheet";
+import { CampaignGlobalSettingsDrawer } from "../election/CampaignGlobalSettingsDrawer";
 import { format } from "date-fns";
 
 interface AdminSettingsTabProps {
@@ -135,6 +136,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSetting, setSelectedSetting] = useState<AdminSetting | null>(null);
   const [showSettingDetail, setShowSettingDetail] = useState(false);
+  const [showCampaignSettings, setShowCampaignSettings] = useState(false);
   
   const stats = getSettingsStats();
   const allSettings = getAllSettings();
@@ -148,6 +150,11 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
     : null;
 
   const handleSettingClick = (setting: AdminSetting) => {
+    // Special handling for campaign duration/fees - opens dedicated drawer
+    if (setting.key === "campaign_duration_fees") {
+      setShowCampaignSettings(true);
+      return;
+    }
     setSelectedSetting(setting);
     setShowSettingDetail(true);
   };
@@ -390,6 +397,11 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
           setting={selectedSetting}
           onProposalSubmit={handleProposalSubmit}
         />
+
+        <CampaignGlobalSettingsDrawer
+          open={showCampaignSettings}
+          onOpenChange={setShowCampaignSettings}
+        />
       </>
     );
   }
@@ -415,6 +427,11 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
         onOpenChange={setShowSettingDetail}
         setting={selectedSetting}
         onProposalSubmit={handleProposalSubmit}
+      />
+
+      <CampaignGlobalSettingsDrawer
+        open={showCampaignSettings}
+        onOpenChange={setShowCampaignSettings}
       />
     </>
   );

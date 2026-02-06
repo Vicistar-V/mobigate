@@ -15,7 +15,7 @@ export interface CampaignAudienceOption {
 }
 
 // Campaign Duration Options with Fees
-export type CampaignDurationDays = 3 | 7 | 14 | 21 | 30 | 60 | 90;
+export type CampaignDurationDays = 3 | 7 | 14 | 21 | 30 | 45 | 60 | 90;
 
 export interface CampaignDurationOption {
   days: CampaignDurationDays;
