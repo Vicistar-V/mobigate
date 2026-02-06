@@ -137,43 +137,43 @@ export const AdminFinancialAuditDialog = ({
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <Card className="p-3 bg-green-50 border-green-200">
+          <Card className="p-3 bg-green-50 border-green-200 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <ArrowDownLeft className="h-4 w-4 text-green-600" />
+              <ArrowDownLeft className="h-4 w-4 text-green-600 shrink-0" />
               <span className="text-xs text-muted-foreground">Funds Received</span>
             </div>
-            <p className="text-lg font-bold text-green-600 whitespace-normal break-words leading-tight">
+            <p className="text-base font-bold text-green-600 leading-tight break-words">
               {formatCurrency(currentAudit.totalFundsReceived)}
             </p>
           </Card>
-          <Card className="p-3 bg-red-50 border-red-200">
+          <Card className="p-3 bg-red-50 border-red-200 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <ArrowUpRight className="h-4 w-4 text-red-600" />
+              <ArrowUpRight className="h-4 w-4 text-red-600 shrink-0" />
               <span className="text-xs text-muted-foreground">Funds Spent</span>
             </div>
-            <p className="text-lg font-bold text-red-600 whitespace-normal break-words leading-tight">
+            <p className="text-base font-bold text-red-600 leading-tight break-words">
               {formatCurrency(currentAudit.totalFundsSpent)}
             </p>
           </Card>
-          <Card className="p-3 bg-blue-50 border-blue-200">
+          <Card className="p-3 bg-blue-50 border-blue-200 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Wallet className="h-4 w-4 text-blue-600" />
+              <Wallet className="h-4 w-4 text-blue-600 shrink-0" />
               <span className="text-xs text-muted-foreground">Closing Balance</span>
             </div>
-            <p className="text-lg font-bold text-blue-600 whitespace-normal break-words leading-tight">
+            <p className="text-base font-bold text-blue-600 leading-tight break-words">
               {formatCurrency(currentAudit.closingBalance)}
             </p>
           </Card>
-          <Card className={`p-3 ${isPositive ? "bg-emerald-50 border-emerald-200" : "bg-orange-50 border-orange-200"}`}>
+          <Card className={`p-3 min-w-0 ${isPositive ? "bg-emerald-50 border-emerald-200" : "bg-orange-50 border-orange-200"}`}>
             <div className="flex items-center gap-2 mb-1">
               {isPositive ? (
-                <TrendingUp className="h-4 w-4 text-emerald-600" />
+                <TrendingUp className="h-4 w-4 text-emerald-600 shrink-0" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-orange-600" />
+                <TrendingDown className="h-4 w-4 text-orange-600 shrink-0" />
               )}
               <span className="text-xs text-muted-foreground">Net Flow</span>
             </div>
-            <p className={`text-lg font-bold ${isPositive ? "text-emerald-600" : "text-orange-600"} whitespace-normal break-words leading-tight`}>
+            <p className={`text-base font-bold leading-tight break-words ${isPositive ? "text-emerald-600" : "text-orange-600"}`}>
               {formatCurrency(netFlow, isPositive ? "+" : undefined)}
             </p>
           </Card>
@@ -185,28 +185,32 @@ export const AdminFinancialAuditDialog = ({
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             Risk Indicators
           </h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-              <div className="flex items-center gap-2 mb-1">
-                <Minus className="h-4 w-4 text-amber-600" />
-                <span className="text-xs text-muted-foreground">Total Deficits</span>
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Minus className="h-4 w-4 text-amber-600 shrink-0" />
+                  <span className="text-xs text-muted-foreground">Total Deficits</span>
+                </div>
+                <p className="text-base font-bold text-amber-600 text-right">
+                  {formatCurrency(currentAudit.totalDeficits)}
+                </p>
               </div>
-              <p className="text-lg font-bold text-amber-600 whitespace-normal break-words leading-tight">
-                {formatCurrency(currentAudit.totalDeficits)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 Debts community owes
               </p>
             </div>
-            <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="h-4 w-4 text-purple-600" />
-                <span className="text-xs text-muted-foreground">Floating Funds</span>
+            <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-purple-600 shrink-0" />
+                  <span className="text-xs text-muted-foreground">Floating Funds</span>
+                </div>
+                <p className="text-base font-bold text-purple-600 text-right">
+                  {formatCurrency(currentAudit.floatingFunds)}
+                </p>
               </div>
-              <p className="text-lg font-bold text-purple-600 whitespace-normal break-words leading-tight">
-                {formatCurrency(currentAudit.floatingFunds)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 Recoverable/pending amounts
               </p>
             </div>
@@ -226,27 +230,27 @@ export const AdminFinancialAuditDialog = ({
             <Card className="p-4">
               <h4 className="font-medium text-sm mb-3">Balance Flow</h4>
               <div className="space-y-3">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-0.5">
                   <span className="text-sm text-muted-foreground">Opening Balance</span>
-                  <span className="font-medium text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                  <span className="font-medium text-base">
                     {formatCurrency(currentAudit.openingBalance)}
                   </span>
                 </div>
-                <div className="flex items-start justify-between gap-3 text-green-600">
+                <div className="flex flex-col gap-0.5 text-green-600">
                   <span className="text-sm">+ Funds Received</span>
-                  <span className="font-medium text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                  <span className="font-medium text-base">
                     {formatCurrency(currentAudit.totalFundsReceived, "+")}
                   </span>
                 </div>
-                <div className="flex items-start justify-between gap-3 text-red-600">
+                <div className="flex flex-col gap-0.5 text-red-600">
                   <span className="text-sm">- Funds Spent</span>
-                  <span className="font-medium text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                  <span className="font-medium text-base">
                     {formatCurrency(currentAudit.totalFundsSpent, "-")}
                   </span>
                 </div>
-                <div className="border-t pt-2 flex items-start justify-between gap-3 font-semibold">
+                <div className="border-t pt-2 flex flex-col gap-0.5 font-semibold">
                   <span>Closing Balance</span>
-                  <span className="text-blue-600 text-right whitespace-normal break-words leading-tight max-w-[55%]">
+                  <span className="text-blue-600 text-base">
                     {formatCurrency(currentAudit.closingBalance)}
                   </span>
                 </div>
@@ -446,13 +450,15 @@ export const AdminFinancialAuditDialog = ({
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[92vh]">
-            <DrawerHeader className="border-b">
+          <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+            <DrawerHeader className="border-b shrink-0 px-4">
               <DrawerTitle>Financial Audit</DrawerTitle>
             </DrawerHeader>
-            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-              <Content />
-            </ScrollArea>
+            <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
+              <div className="px-4 pb-6">
+                <Content />
+              </div>
+            </div>
           </DrawerContent>
         </Drawer>
         
