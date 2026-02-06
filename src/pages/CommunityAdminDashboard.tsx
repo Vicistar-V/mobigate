@@ -20,6 +20,16 @@ import { AdminLeadershipSection } from "@/components/admin/AdminLeadershipSectio
 import { AdminSettingsSection } from "@/components/admin/AdminSettingsSection";
 import { AdminSettingsTab } from "@/components/admin/settings/AdminSettingsTab";
 
+// Meeting Management Drawers
+import {
+  AdminUpcomingMeetingsSheet,
+  AdminPastMeetingsSheet,
+  AdminAttendanceSheet,
+  AdminResolutionsSheet,
+  AdminConflictsSheet,
+  AdminRollCallSheet,
+} from "@/components/admin/AdminMeetingsDrawers";
+
 // Existing Community Dialogs
 import { ManageMembershipRequestsDialog } from "@/components/community/ManageMembershipRequestsDialog";
 import { BlockManagementDrawer } from "@/components/community/BlockManagementDrawer";
@@ -82,6 +92,14 @@ const CommunityAdminDashboard = () => {
   const [showConstitution, setShowConstitution] = useState(false);
   const [showDemocraticPrivacy, setShowDemocraticPrivacy] = useState(false);
   const [showSettingsTab, setShowSettingsTab] = useState(false);
+
+  // Meeting Management Dialog States
+  const [showUpcomingMeetings, setShowUpcomingMeetings] = useState(false);
+  const [showPastMeetings, setShowPastMeetings] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(false);
+  const [showResolutions, setShowResolutions] = useState(false);
+  const [showConflicts, setShowConflicts] = useState(false);
+  const [showRollCall, setShowRollCall] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -225,12 +243,12 @@ const CommunityAdminDashboard = () => {
             <AdminMeetingSection
               stats={mockAdminStats}
               upcomingMeetings={mockUpcomingMeetings}
-              onViewUpcoming={() => showToast("Upcoming", "Opening upcoming meetings...")}
-              onViewPast={() => showToast("Past Meetings", "Opening past meetings...")}
-              onViewAttendance={() => showToast("Attendance", "Opening attendance records...")}
-              onViewResolutions={() => showToast("Resolutions", "Opening resolutions...")}
-              onViewConflicts={() => showToast("Conflicts", "Opening conflicts of interest...")}
-              onManageRollCall={() => showToast("Roll-Call", "Opening roll-call management...")}
+              onViewUpcoming={() => setShowUpcomingMeetings(true)}
+              onViewPast={() => setShowPastMeetings(true)}
+              onViewAttendance={() => setShowAttendance(true)}
+              onViewResolutions={() => setShowResolutions(true)}
+              onViewConflicts={() => setShowConflicts(true)}
+              onManageRollCall={() => setShowRollCall(true)}
             />
 
             {/* Leadership Management */}
@@ -317,6 +335,32 @@ const CommunityAdminDashboard = () => {
       <AdminSettingsTab
         open={showSettingsTab}
         onOpenChange={setShowSettingsTab}
+      />
+
+      {/* Meeting Management Drawers */}
+      <AdminUpcomingMeetingsSheet
+        open={showUpcomingMeetings}
+        onOpenChange={setShowUpcomingMeetings}
+      />
+      <AdminPastMeetingsSheet
+        open={showPastMeetings}
+        onOpenChange={setShowPastMeetings}
+      />
+      <AdminAttendanceSheet
+        open={showAttendance}
+        onOpenChange={setShowAttendance}
+      />
+      <AdminResolutionsSheet
+        open={showResolutions}
+        onOpenChange={setShowResolutions}
+      />
+      <AdminConflictsSheet
+        open={showConflicts}
+        onOpenChange={setShowConflicts}
+      />
+      <AdminRollCallSheet
+        open={showRollCall}
+        onOpenChange={setShowRollCall}
       />
     </div>
   );
