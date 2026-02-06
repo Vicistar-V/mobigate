@@ -315,7 +315,7 @@ export const ElectionAccreditationTab = () => {
 
       {/* Get Accreditation Now button */}
       <Button 
-        className={`w-full text-base font-bold py-5 transition-all duration-300 ${
+        className={`w-full text-sm font-bold py-4 transition-all duration-300 ${
           isAccredited 
             ? "bg-green-700 hover:bg-green-700 cursor-default" 
             : isAccreditationLoading 
@@ -328,13 +328,13 @@ export const ElectionAccreditationTab = () => {
         disabled={isAccreditationLoading || isAccredited || (activeSubTab === 'activities' && !isActivityDebtCleared)}
       >
         {isAccreditationLoading ? (
-          <div className="flex items-center justify-center gap-2">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Processing Accreditation...</span>
+          <div className="flex items-center justify-center gap-1.5">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Processing...</span>
           </div>
         ) : isAccredited ? (
-          <div className="flex items-center justify-center gap-2">
-            <CheckCircle2 className="h-5 w-5" />
+          <div className="flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4" />
             <span>Accreditation Complete!</span>
           </div>
         ) : (
