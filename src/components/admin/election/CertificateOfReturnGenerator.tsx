@@ -17,7 +17,8 @@ import {
   User,
   Shield,
   Printer,
-  Eye
+  Eye,
+  ShieldCheck
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -27,6 +28,7 @@ import { mockWinnerResults } from "@/data/adminElectionData";
 import { format, addYears } from "date-fns";
 import { CertificateOfReturn } from "@/types/certificateOfReturn";
 import { CertificateOfReturnDisplay } from "@/components/community/elections/CertificateOfReturnDisplay";
+import { VerifyCertificateDrawer } from "@/components/community/elections/VerifyCertificateDrawer";
 
 interface CertificateOfReturnGeneratorProps {
   open: boolean;
@@ -47,6 +49,7 @@ export function CertificateOfReturnGenerator({
   const [generatedCertificate, setGeneratedCertificate] = useState<CertificateOfReturn | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);
 
   const announcedWinners = mockWinnerResults
     .filter(r => r.announced)
@@ -259,6 +262,16 @@ export function CertificateOfReturnGenerator({
           Certificates are generated and stored for each announced winner.
           You can view, download, or print them as needed.
         </p>
+
+        {/* Verify Certificate Button */}
+        <Button
+          variant="outline"
+          className="w-full h-11 gap-2 mt-3"
+          onClick={() => setShowVerifyDrawer(true)}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          Verify Certificate
+        </Button>
       </div>
     </div>
   );
@@ -281,6 +294,7 @@ export function CertificateOfReturnGenerator({
         </Drawer>
 
         {/* Certificate Preview */}
+        {/* Certificate Preview */}
         {generatedCertificate && (
           <CertificateOfReturnDisplay
             open={showPreview}
@@ -288,6 +302,12 @@ export function CertificateOfReturnGenerator({
             certificate={generatedCertificate}
           />
         )}
+
+        {/* Verify Certificate Drawer */}
+        <VerifyCertificateDrawer
+          open={showVerifyDrawer}
+          onOpenChange={setShowVerifyDrawer}
+        />
       </>
     );
   }
@@ -308,7 +328,7 @@ export function CertificateOfReturnGenerator({
         </DialogContent>
       </Dialog>
 
-      {/* Certificate Preview */}
+      {/* Certificate Preview - Desktop */}
       {generatedCertificate && (
         <CertificateOfReturnDisplay
           open={showPreview}
@@ -316,6 +336,12 @@ export function CertificateOfReturnGenerator({
           certificate={generatedCertificate}
         />
       )}
+
+      {/* Verify Certificate Drawer - Desktop */}
+      <VerifyCertificateDrawer
+        open={showVerifyDrawer}
+        onOpenChange={setShowVerifyDrawer}
+      />
     </>
   );
 }

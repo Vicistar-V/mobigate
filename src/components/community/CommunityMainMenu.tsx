@@ -42,10 +42,11 @@ import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestShe
 import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
 import { MemberImpeachmentDrawer } from "./elections/MemberImpeachmentDrawer";
 import { NominateCandidateSheet } from "./elections/NominateCandidateSheet";
+import { VerifyCertificateDrawer } from "./elections/VerifyCertificateDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { Vote, Settings2, Flag, Gavel } from "lucide-react";
+import { Vote, Settings2, Flag, Gavel, ShieldCheck } from "lucide-react";
 import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
 
 interface CommunityMainMenuProps {
@@ -97,6 +98,7 @@ export function CommunityMainMenu({
   const [showImpeachment, setShowImpeachment] = useState(false);
   const [impeachmentMode, setImpeachmentMode] = useState<"start" | "view">("view");
   const [showNominateCandidate, setShowNominateCandidate] = useState(false);
+  const [showVerifyCertificate, setShowVerifyCertificate] = useState(false);
 
   const pendingSettingsCount = getPendingProposalsCount();
 
@@ -713,6 +715,18 @@ export function CommunityMainMenu({
                 >
                   Accredited Voters
                 </Button>
+                {/* Verify Certificate */}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => {
+                    setShowVerifyCertificate(true);
+                    setOpen(false);
+                  }}
+                >
+                  <ShieldCheck className="h-4 w-4 mr-2" />
+                  Verify Certificate
+                </Button>
                 {/* Impeachment Sub-Accordion */}
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="impeachment" className="border-none">
@@ -1301,6 +1315,12 @@ export function CommunityMainMenu({
         open={showNominateCandidate}
         onOpenChange={setShowNominateCandidate}
         onNominationComplete={() => setShowNominateCandidate(false)}
+      />
+
+      {/* Verify Certificate Drawer */}
+      <VerifyCertificateDrawer
+        open={showVerifyCertificate}
+        onOpenChange={setShowVerifyCertificate}
       />
     </>
   );

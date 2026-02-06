@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Menu, Calendar, Filter, X, ChevronDown, Trophy } from "lucide-react";
+import { Menu, Calendar, Filter, X, ChevronDown, Trophy, ShieldCheck } from "lucide-react";
 import { WinnersView } from "./WinnersView";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
@@ -12,6 +12,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
+import { VerifyCertificateDrawer } from "./VerifyCertificateDrawer";
 
 export const ElectionWinnersTab = () => {
   // Filter states
@@ -21,6 +22,7 @@ export const ElectionWinnersTab = () => {
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   const [officeFilter, setOfficeFilter] = useState<string>("all");
   const [electionTypeFilter, setElectionTypeFilter] = useState<string>("all");
+  const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);
 
   // Get unique offices and election types from data
   const offices = useMemo(() => {
@@ -117,6 +119,15 @@ export const ElectionWinnersTab = () => {
           <Menu className="w-5 h-5" />
           <h1 className="text-2xl font-bold">Election Winners</h1>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          onClick={() => setShowVerifyDrawer(true)}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          <span className="hidden sm:inline">Verify</span>
+        </Button>
       </div>
 
       {/* Filters Section */}
@@ -276,6 +287,12 @@ export const ElectionWinnersTab = () => {
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
+
+      {/* Verify Certificate Drawer */}
+      <VerifyCertificateDrawer
+        open={showVerifyDrawer}
+        onOpenChange={setShowVerifyDrawer}
+      />
     </div>
   );
 };
