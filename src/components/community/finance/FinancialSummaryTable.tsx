@@ -49,11 +49,11 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange, onDown
         <div className="text-xs text-muted-foreground px-1 pb-1.5">
           Scroll for more →
         </div>
-        <table className="min-w-[900px] border-collapse">
+        <table className="min-w-[1000px] border-collapse">
           <thead>
             <tr>
-              <th className="bg-pink-200 p-2 text-left min-w-[160px] sticky left-0 z-20 border border-gray-300">
-                <div className="text-xs font-bold">
+              <th className="bg-pink-200 p-2 text-left min-w-[180px] sticky left-0 z-20 border border-gray-300">
+                <div className="text-sm font-bold">
                   {member.memberName}<br/>
                   <span className="text-xs text-gray-600">{member.memberRegistration}</span>
                 </div>
@@ -61,10 +61,10 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange, onDown
               {years.map(year => (
                 <>
                   <th key={`year-${year}`} className="bg-green-600 text-white p-2 text-center min-w-[100px] border border-gray-300">
-                    <div className="text-xs font-bold">{year}</div>
+                    <div className="text-sm font-bold">{year}</div>
                   </th>
                   <th key={`date-${year}`} className="bg-green-600 text-white p-2 text-center min-w-[80px] border border-gray-300">
-                    <div className="text-xs font-bold">Date</div>
+                    <div className="text-sm font-bold">Date</div>
                   </th>
                 </>
               ))}
@@ -77,8 +77,8 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange, onDown
                 <tr key={item.id}>
                   <td className="bg-pink-200 p-2 font-semibold sticky left-0 z-20 border border-gray-300">
                     <div className="flex items-start gap-1">
-                      <span className="text-xs">{index + 1}.</span>
-                      <span className="text-xs">{item.name}</span>
+                      <span className="text-sm">{index + 1}.</span>
+                      <span className="text-sm">{item.name}</span>
                     </div>
                   </td>
                   {years.map(year => {
@@ -87,8 +87,8 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange, onDown
                       <>
                         <td key={`amount-${year}`} className="p-1 border border-gray-300 bg-white">
                           <div className="flex justify-center">
-                            <div className="border border-green-600 bg-green-50 px-1.5 py-1 text-center min-w-[80px]">
-                              <div className="text-xs font-bold tabular-nums">
+                            <div className="border border-green-600 bg-green-50 px-2 py-1 text-center min-w-[90px]">
+                              <div className="text-sm font-bold tabular-nums">
                                 {period?.amount ? period.amount.toLocaleString() : '---'}
                               </div>
                             </div>
@@ -96,8 +96,8 @@ export const FinancialSummaryTable = ({ member, sortFilter, onSortChange, onDown
                         </td>
                         <td key={`date-${year}`} className="p-1 border border-gray-300 bg-white">
                           <div className="flex justify-center">
-                            <div className="border border-gray-400 bg-gray-50 px-1.5 py-1 text-center min-w-[65px]">
-                              <div className="text-xs font-semibold">
+                            <div className="border border-gray-400 bg-gray-50 px-2 py-1 text-center min-w-[75px]">
+                              <div className="text-sm font-semibold">
                                 {period?.date || '---'}
                               </div>
                             </div>
