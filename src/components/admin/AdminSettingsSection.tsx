@@ -18,12 +18,13 @@ import { mockAdminProposals, mockMemberRecommendations } from "@/data/communityD
 import { DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
 
 // Action types for settings module
-type SettingsActionType = "update_constitution" | "change_privacy" | "update_rules" | "enable_feature" | "disable_feature";
+type SettingsActionType = "update_constitution" | "change_privacy" | "update_rules" | "enable_feature" | "disable_feature" | "upload_constitution" | "delete_constitution" | "deactivate_constitution";
 
 interface AdminSettingsSectionProps {
   onEditProfile: () => void;
   onEditPhotos: () => void;
   onManageConstitution: () => void;
+  onManageConstitutionAdmin?: () => void;
   onManageResources: () => void;
   onPrivacySettings: () => void;
   onNotificationSettings: () => void;
@@ -35,6 +36,7 @@ export function AdminSettingsSection({
   onEditProfile,
   onEditPhotos,
   onManageConstitution,
+  onManageConstitutionAdmin,
   onManageResources,
   onPrivacySettings,
   onNotificationSettings,
@@ -89,7 +91,11 @@ export function AdminSettingsSection({
       });
       switch (authAction.type) {
         case "update_constitution":
-          onManageConstitution();
+          if (onManageConstitutionAdmin) {
+            onManageConstitutionAdmin();
+          } else {
+            onManageConstitution();
+          }
           break;
         case "change_privacy":
           onPrivacySettings();
@@ -166,7 +172,7 @@ export function AdminSettingsSection({
                   <Lock className="h-2.5 w-2.5" />
                 </p>
                 <div className="flex flex-col gap-0 divide-y divide-border">
-                  <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={handleConstitutionWithAuth}>
+                  <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 active:bg-muted/70 -mx-1 px-1 rounded touch-manipulation" onClick={() => onManageConstitutionAdmin ? onManageConstitutionAdmin() : handleConstitutionWithAuth()}>
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     Constitution
                   </button>

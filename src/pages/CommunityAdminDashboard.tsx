@@ -40,6 +40,7 @@ import { ManageCommunityResourcesDialog } from "@/components/community/ManageCom
 import { FinancialOverviewDialog } from "@/components/community/finance/FinancialOverviewDialog";
 import { FinancialObligationsDialog } from "@/components/community/finance/FinancialObligationsDialog";
 import { ConstitutionViewer } from "@/components/community/ConstitutionViewer";
+import { AdminConstitutionManagementSheet } from "@/components/admin/settings/AdminConstitutionManagementSheet";
 
 // Leadership Sheets
 import { ApplyElectionResultsSheet } from "@/components/admin/leadership/ApplyElectionResultsSheet";
@@ -102,6 +103,7 @@ const CommunityAdminDashboard = () => {
   // showFinancialAudit removed - now handled by AdminFinanceSection's AdminFinancialAuditDialog
   const [showFinancialObligations, setShowFinancialObligations] = useState(false);
   const [showConstitution, setShowConstitution] = useState(false);
+  const [showConstitutionManagement, setShowConstitutionManagement] = useState(false);
   const [showDemocraticPrivacy, setShowDemocraticPrivacy] = useState(false);
   const [showSettingsTab, setShowSettingsTab] = useState(false);
 
@@ -295,6 +297,7 @@ const CommunityAdminDashboard = () => {
               onEditProfile={() => setShowEditProfile(true)}
               onEditPhotos={() => setShowEditPhoto(true)}
               onManageConstitution={() => setShowConstitution(true)}
+              onManageConstitutionAdmin={() => setShowConstitutionManagement(true)}
               onManageResources={() => setShowResourcesDialog(true)}
               onPrivacySettings={() => setShowSettingsTab(true)}
               onNotificationSettings={() => setShowSettingsTab(true)}
@@ -356,6 +359,11 @@ const CommunityAdminDashboard = () => {
       <ConstitutionViewer
         open={showConstitution}
         onOpenChange={setShowConstitution}
+      />
+
+      <AdminConstitutionManagementSheet
+        open={showConstitutionManagement}
+        onOpenChange={setShowConstitutionManagement}
       />
 
       <MemberPrivacyVotingSheet

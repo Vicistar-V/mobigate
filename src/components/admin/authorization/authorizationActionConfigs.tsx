@@ -272,6 +272,27 @@ export const MODULE_ACTION_CONFIGS: Record<AuthorizationModule, Record<string, A
       iconComponent: Settings,
       iconColorClass: "text-gray-600",
     },
+    upload_constitution: {
+      title: "Upload Constitution",
+      description: "Multi-signature authorization to upload new constitution document",
+      icon: <FileText className="h-5 w-5 text-green-600" />,
+      iconComponent: FileText,
+      iconColorClass: "text-green-600",
+    },
+    delete_constitution: {
+      title: "Delete Constitution",
+      description: "Multi-signature authorization to delete constitution document",
+      icon: <FileText className="h-5 w-5 text-red-600" />,
+      iconComponent: FileText,
+      iconColorClass: "text-red-600",
+    },
+    deactivate_constitution: {
+      title: "Deactivate Constitution",
+      description: "Multi-signature authorization to deactivate constitution document",
+      icon: <FileText className="h-5 w-5 text-amber-600" />,
+      iconComponent: FileText,
+      iconColorClass: "text-amber-600",
+    },
     enable_feature: {
       title: "Enable Feature",
       description: "Multi-signature authorization to enable system feature",
