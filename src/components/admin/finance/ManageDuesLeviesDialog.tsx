@@ -287,6 +287,11 @@ export const ManageDuesLeviesDialog = ({
               placeholder="e.g., Annual Dues 2025"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="touch-manipulation"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
 
@@ -323,6 +328,9 @@ export const ManageDuesLeviesDialog = ({
                 placeholder="15000"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                inputMode="decimal"
+                className="touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
             <div className="space-y-2">
@@ -331,6 +339,8 @@ export const ManageDuesLeviesDialog = ({
                 type="date"
                 value={formData.dueDate}
                 onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                className="touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           </div>
@@ -341,7 +351,11 @@ export const ManageDuesLeviesDialog = ({
               placeholder="Describe this obligation..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="min-h-[80px]"
+              className="min-h-[80px] touch-manipulation"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
 
@@ -354,6 +368,9 @@ export const ManageDuesLeviesDialog = ({
                 onChange={(e) =>
                   setFormData({ ...formData, gracePeriodDays: e.target.value })
                 }
+                inputMode="numeric"
+                className="touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
             <div className="space-y-2">
@@ -363,7 +380,9 @@ export const ManageDuesLeviesDialog = ({
                   type="number"
                   value={formData.lateFee}
                   onChange={(e) => setFormData({ ...formData, lateFee: e.target.value })}
-                  className="flex-1"
+                  className="flex-1 touch-manipulation"
+                  inputMode="decimal"
+                  onClick={(e) => e.stopPropagation()}
                 />
                 <Select
                   value={formData.lateFeeType}

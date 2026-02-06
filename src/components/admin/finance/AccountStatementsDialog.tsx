@@ -291,6 +291,9 @@ ${index + 1}. ${txn.description}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 touch-manipulation"
               autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
 
@@ -338,6 +341,7 @@ ${index + 1}. ${txn.description}
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
                 className="h-9 touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
             <div className="space-y-1">
@@ -350,6 +354,7 @@ ${index + 1}. ${txn.description}
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
                 className="h-9 touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           </div>
