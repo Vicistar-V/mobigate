@@ -1,59 +1,53 @@
 
+# Fix Two Mobile UI Issues
 
-# Replace Hardcoded Ad Banner with Managed Inline Ad
+## Issue 1: Text Correction -- "on" not "from"
 
-## The Problem
+The user identified that all wallet debit messages incorrectly say "from your Mobi Wallet" when they should say "on your Mobi Wallet." This text appears in **5 files across 7 locations** and all will be corrected.
 
-The "Need an Architect" banner in Community Accounts is **hardcoded** -- it can't be edited, removed, or managed through the existing Advertisement console. The user wants it either removed or connected to the management system.
+### Files and Lines to Fix
 
-## The Solution
-
-Since the app already has a full **Advertisement Management Console** (Create Ad, View Ads, My Ads), we will replace the hardcoded banner with a new **InlineBannerAd** component that automatically pulls from active managed advertisements. This means every inline ad slot across the app will show ads created through the Advertisement console -- fully managed, rotatable, and tappable.
-
----
-
-## What Gets Built
-
-### 1. New Component: InlineBannerAd
-
-**File: `src/components/community/advertisements/InlineBannerAd.tsx`** (new)
-
-A compact, single-line banner ad that:
-- Pulls a random **active** advertisement from the managed pool (`getActiveAdvertisements()`)
-- Displays it in a slim card matching the screenshot style: business name on the left, "Click Here!" on the right
-- Rotates to a different ad every 30 seconds
-- On tap, opens the full advertisement view (AdvertisementFullViewSheet)
-- Shows a tiny "Ad" badge so users know it's sponsored
-- If no active ads exist, the banner simply doesn't render (returns null)
-- Fully mobile-optimized with touch-manipulation and active:scale feedback
-
-### 2. Update CommunityAccountsTab
-
-**File: `src/components/community/finance/CommunityAccountsTab.tsx`** (modify)
-
-- Remove the hardcoded "Need an Architect" banner (lines 146-156)
-- Replace it with the new `<InlineBannerAd />` component
-- Remove the unused `window.open` call to `example.com`
+| File | Line(s) | Current Text | Fixed Text |
+|------|---------|-------------|------------|
+| `ElectionAccreditationTab.tsx` | 81 | "debited from your Mobi Wallet" | "debited on your Mobi Wallet" |
+| `ElectionAccreditationTab.tsx` | 316 | "from your Mobi Wallet" | "on your Mobi Wallet" |
+| `CheckIndebtednessSheet.tsx` | 34 | "debited from your Mobi Wallet" | "debited on your Mobi Wallet" |
+| `CheckIndebtednessSheet.tsx` | 125 | "from your Mobi Wallet" | "on your Mobi Wallet" |
+| `FinancialStatusDialog.tsx` | 54 | "debited from your Mobi Wallet" | "debited on your Mobi Wallet" |
+| `FinancialStatusDialog.tsx` | 258 | "debited from your Mobi Wallet" | "debited on your Mobi Wallet" |
+| `MinutesDownloadDialog.tsx` | 133 | "debited from your Mobi Wallet" | "debited on your Mobi Wallet" |
+| `CampaignSettingsDialog.tsx` | 165 | "debited from your Mobi Wallet" | "debited on your Mobi Wallet" |
 
 ---
 
-## How It Works
+## Issue 2: Financial Accreditation Stat Boxes -- Compact Horizontal Fit
 
-The InlineBannerAd component:
-1. Calls `getActiveAdvertisements()` from the existing advertisement data
-2. Picks a random ad on mount and rotates every 30 seconds
-3. Renders a single-line banner: `[Ad] Amara's Kitchen - Premium Catering    Click Here!`
-4. On tap, opens the AdvertisementFullViewSheet showing the full ad details
-5. If no active advertisements exist, nothing is shown -- clean and unobtrusive
+The three stat cards (Accredited, Pending, Total) in the Financial Accreditation tab are taking up too much vertical space on mobile. They need to be restructured into a tighter, more compact horizontal row.
 
-This means any ad created through the "Create Advertisement" flow in the community menu will automatically appear in these inline banner slots.
+### File: `FinancialAccreditationTab.tsx` (lines 46-65)
+
+**Current**: Three `Card` components in a `grid-cols-3` with `p-2.5` padding, `text-xl` numbers, and somewhat long labels ("Accredited Members", "Pending Accreditation", "Total Members"). On small screens, the cards can appear tall with wasted space.
+
+**Fix**: Replace with a single compact stat bar using:
+- A single `Card` wrapper with a 3-column grid inside (no separate card borders per stat)
+- Centered alignment for each stat cell
+- Larger bold numbers (`text-2xl`) for emphasis
+- Short labels ("Accredited", "Pending", "Total") in `text-[10px]` for compact fit
+- Dividers between columns instead of separate card gaps
+- Reduced padding to make the entire row compact
+- Color-coded numbers (green, amber, blue) matching the stat meaning
+
+This transforms 3 tall separate boxes into one slim horizontal bar that fits cleanly on any mobile width.
 
 ---
 
-## Files Summary
+## Summary
 
-| File | Action | Description |
+| File | Action | What Changes |
 |------|--------|-------------|
-| `src/components/community/advertisements/InlineBannerAd.tsx` | New | Compact managed inline banner ad component |
-| `src/components/community/finance/CommunityAccountsTab.tsx` | Modify | Replace hardcoded banner with managed InlineBannerAd |
-
+| `src/components/community/elections/ElectionAccreditationTab.tsx` | Modify | Fix 2 "from" to "on" |
+| `src/components/community/elections/CheckIndebtednessSheet.tsx` | Modify | Fix 2 "from" to "on" |
+| `src/components/community/finance/FinancialStatusDialog.tsx` | Modify | Fix 2 "from" to "on" |
+| `src/components/community/meetings/MinutesDownloadDialog.tsx` | Modify | Fix 1 "from" to "on" |
+| `src/components/community/elections/CampaignSettingsDialog.tsx` | Modify | Fix 1 "from" to "on" |
+| `src/components/community/finance/FinancialAccreditationTab.tsx` | Modify | Restructure stat boxes into compact horizontal row |
