@@ -13,13 +13,7 @@ import {
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
-
-interface ExecutiveMember {
-  id: string;
-  name: string;
-  position: string;
-  avatar: string;
-}
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 interface ExecutiveCardProps {
   member: ExecutiveMember;
@@ -32,7 +26,7 @@ const ExecutiveCard = ({ member, onClick }: ExecutiveCardProps) => (
     className="w-full flex items-center gap-3 py-2.5 hover:bg-muted/50 -mx-1 px-1 rounded transition-colors text-left"
   >
     <Avatar className="h-9 w-9 shrink-0">
-      <AvatarImage src={member.avatar} alt={member.name} />
+      <AvatarImage src={member.imageUrl} alt={member.name} />
       <AvatarFallback className="text-xs">
         {member.name.split(' ').map(n => n[0]).join('')}
       </AvatarFallback>

@@ -148,11 +148,11 @@ export function AdminMeetingSection({
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-2">Upcoming</p>
                 <div className="divide-y divide-border/50">
-                  {upcomingMeetings.slice(0, 3).map((meeting) => (
+                {upcomingMeetings.slice(0, 3).map((meeting) => (
                     <MeetingItem 
                       key={meeting.id} 
                       meeting={meeting} 
-                      onView={(id) => {}} 
+                      onView={() => onViewUpcoming()} 
                     />
                   ))}
                 </div>
