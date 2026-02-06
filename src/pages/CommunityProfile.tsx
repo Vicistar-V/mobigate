@@ -909,6 +909,11 @@ const CommunityProfile = () => {
               <ElectionAccreditationTab />
             </div>
           )}
+          {activeTab === "election-accredited-voters" && (
+            <div className="mt-6">
+              <ElectionAccreditationTab initialSubTab="accredited" />
+            </div>
+          )}
           {activeTab === "election-clearances" && (
             <div className="mt-6">
               <ElectionClearancesTab />
