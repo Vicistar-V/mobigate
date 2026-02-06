@@ -1,143 +1,261 @@
 
+## Add "Verify Certificate" Button
 
-## Fix "Announce Results" Button Not Working
-
-### Problem
-The "Announce Result" button in the office detail sheet (shown when viewing a completed election office) is missing an `onClick` handler. Tapping the button does nothing because no action is attached to it.
-
-**Location:** `src/components/admin/election/AdminMainElectionSection.tsx`, lines 500-507
-
-```tsx
-{selectedOffice.status === 'completed' && (
-  <Button 
-    className="w-full bg-green-600 hover:bg-green-700"
-    // Missing onClick handler - button is inactive
-  >
-    <Megaphone className="h-4 w-4 mr-2" />
-    Announce Result
-  </Button>
-)}
-```
-
----
-
-## Solution
-
-Add proper click handling to trigger the announcement flow. There are two approaches:
-
-### Option A: Use Existing Announce Dialog (Simpler)
-When tapping "Announce Result" for a specific office, close the detail sheet and open the announce dialog.
-
-### Option B: Office-Specific Authorization (Recommended)
-Implement the multi-signature authorization flow consistent with other admin election actions. This requires integrating `ModuleAuthorizationDrawer`.
-
-I recommend **Option B** for consistency with the "Announce Winners" button in `AdminElectionSection.tsx` which properly uses authorization.
+### Overview
+Implement a certificate verification feature allowing anyone to verify a Certificate of Return by entering its verification code. This will be accessible from both the Admin area (Certificate Generator) and public dashboards (Elections/Voting section).
 
 ---
 
 ## Implementation Details
 
-### File: `src/components/admin/election/AdminMainElectionSection.tsx`
+### 1. Create New Component: `VerifyCertificateDrawer.tsx`
 
-#### 1. Add Import for ModuleAuthorizationDrawer
-```tsx
-import { ModuleAuthorizationDrawer } from "../authorization/ModuleAuthorizationDrawer";
-import { getActionConfig, renderActionDetails } from "../authorization/authorizationActionConfigs";
+**Location:** `src/components/community/elections/VerifyCertificateDrawer.tsx`
+
+A mobile-first bottom drawer that allows users to verify certificates by entering a verification code.
+
+**Key Features:**
+- Input field for 8-character verification code
+- "Verify Now" button to trigger verification
+- Loading state during verification
+- Success state showing certificate summary
+- Error state for invalid codes
+- Button to view full certificate on success
+- Touch-optimized inputs with mobile focus protection
+
+**UI Layout:**
+```text
++---------------------------------------+
+| [ShieldCheck] Verify Certificate   X  |
++---------------------------------------+
+|                                       |
+| [Award Icon]                          |
+| Certificate Verification              |
+| Enter the verification code from a    |
+| Certificate of Return to verify its   |
+| authenticity.                         |
+|                                       |
++---------------------------------------+
+| Verification Code *                   |
+| [  Y5LE6SLJ  ]                       |
+| Enter the 8-character code            |
++---------------------------------------+
+|                                       |
+| [     Verify Now      ]               |
+|                                       |
++---------------------------------------+
 ```
 
-#### 2. Add State for Authorization
-```tsx
-const [showAuthDrawer, setShowAuthDrawer] = useState(false);
-const [officeToAnnounce, setOfficeToAnnounce] = useState<MainElectionOffice | null>(null);
+**Success State:**
+```text
++---------------------------------------+
+| [CheckCircle] Certificate Verified!   |
++---------------------------------------+
+| +-----------------------------------+ |
+| | Winner: Daniel Obiora Chibueze    | |
+| | Office: Secretary                 | |
+| | Community: Ndigbo Progressive...  | |
+| | Tenure: 2026 - 2030               | |
+| | Issued: February 4, 2026          | |
+| +-----------------------------------+ |
+|                                       |
+| [View Full Certificate]               |
+| [Verify Another Certificate]          |
++---------------------------------------+
 ```
 
-#### 3. Add Handler for Announce Button
-```tsx
-const handleAnnounceOfficeResult = (office: MainElectionOffice) => {
-  setOfficeToAnnounce(office);
-  setShowDetailSheet(false); // Close detail sheet to prevent modal stacking
-  setTimeout(() => {
-    setShowAuthDrawer(true);
-  }, 150); // Slight delay for smooth transition
-};
-
-const handleAuthComplete = () => {
-  if (officeToAnnounce) {
-    toast({
-      title: "Result Announced",
-      description: `Election result for ${officeToAnnounce.officeName} has been published`,
-    });
-  }
-  setOfficeToAnnounce(null);
-  setShowAuthDrawer(false);
-};
+**Error State:**
+```text
++---------------------------------------+
+| [XCircle] Verification Failed         |
+|                                       |
+| The verification code you entered     |
+| could not be found. Please check      |
+| the code and try again.               |
+|                                       |
+| [Try Again]                           |
++---------------------------------------+
 ```
 
-#### 4. Update Button with onClick Handler
+---
+
+### 2. Admin Area Integration
+
+**File:** `src/components/admin/election/CertificateOfReturnGenerator.tsx`
+
+Add "Verify Certificate" button below the "Issued Certificates" section.
+
+**Changes:**
+- Import the new `VerifyCertificateDrawer` component
+- Add state: `const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);`
+- Add button after line 261 (after the "Issued Certificates" description):
+
 ```tsx
-{selectedOffice.status === 'completed' && (
-  <Button 
-    className="w-full bg-green-600 hover:bg-green-700"
-    onClick={() => handleAnnounceOfficeResult(selectedOffice)}
-  >
-    <Megaphone className="h-4 w-4 mr-2" />
-    Announce Result
-  </Button>
-)}
+{/* Verify Certificate Section */}
+<Button
+  variant="outline"
+  className="w-full gap-2"
+  onClick={() => setShowVerifyDrawer(true)}
+>
+  <ShieldCheck className="h-4 w-4" />
+  Verify Certificate
+</Button>
 ```
 
-#### 5. Add Authorization Drawer Component
-Add at the end of the JSX return, after the CandidateVotersListSheet:
+- Render the drawer at the end of the component:
 ```tsx
-{/* Office Result Authorization Drawer */}
-<ModuleAuthorizationDrawer
-  open={showAuthDrawer}
-  onOpenChange={setShowAuthDrawer}
-  module="elections"
-  actionTitle="Announce Election Result"
-  actionDescription="Multi-signature authorization required to publish election result"
-  actionDetails={
-    officeToAnnounce && (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Megaphone className="h-5 w-5 text-green-600" />
-          <div>
-            <p className="font-medium text-sm">{officeToAnnounce.officeName}</p>
-            <p className="text-xs text-muted-foreground">
-              Winner: {officeToAnnounce.winner || "To be announced"}
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  initiatorRole="secretary"
-  onAuthorized={handleAuthComplete}
+<VerifyCertificateDrawer
+  open={showVerifyDrawer}
+  onOpenChange={setShowVerifyDrawer}
 />
 ```
 
 ---
 
-## Files to Modify
+### 3. Public Dashboard Integration (Community Menu)
 
-| File | Changes |
-|------|---------|
-| `src/components/admin/election/AdminMainElectionSection.tsx` | Add onClick handler, state, authorization drawer integration |
+**File:** `src/components/community/CommunityMainMenu.tsx`
+
+Add "Verify Certificate" button to the Election/Voting accordion section (around line 715, after "Accredited Voters").
+
+**Changes:**
+- Import `VerifyCertificateDrawer` and `ShieldCheck` icon
+- Add state: `const [showVerifyCertificate, setShowVerifyCertificate] = useState(false);`
+- Add button in Elections accordion:
+
+```tsx
+<Button
+  variant="ghost"
+  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+  onClick={() => {
+    setShowVerifyCertificate(true);
+    setOpen(false);
+  }}
+>
+  <ShieldCheck className="h-4 w-4 mr-2" />
+  Verify Certificate
+</Button>
+```
+
+- Render the drawer component
+
+---
+
+### 4. Election Winners Tab Integration
+
+**File:** `src/components/community/elections/ElectionWinnersTab.tsx`
+
+Add a "Verify Certificate" button in the header section for easy public access.
+
+**Changes:**
+- Import `VerifyCertificateDrawer` and `ShieldCheck` icon
+- Add state: `const [showVerifyDrawer, setShowVerifyDrawer] = useState(false);`
+- Add button in the header (line 119, after the title):
+
+```tsx
+<div className="flex items-center justify-between">
+  <div className="flex items-center gap-2">
+    <Menu className="w-5 h-5" />
+    <h1 className="text-2xl font-bold">Election Winners</h1>
+  </div>
+  <Button
+    variant="outline"
+    size="sm"
+    className="gap-1.5"
+    onClick={() => setShowVerifyDrawer(true)}
+  >
+    <ShieldCheck className="h-4 w-4" />
+    <span className="hidden sm:inline">Verify</span>
+  </Button>
+</div>
+```
+
+---
+
+## Component Structure: VerifyCertificateDrawer.tsx
+
+```typescript
+interface VerifyCertificateDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+// States
+const [verificationCode, setVerificationCode] = useState("");
+const [isVerifying, setIsVerifying] = useState(false);
+const [verificationResult, setVerificationResult] = useState<{
+  status: 'idle' | 'success' | 'error';
+  certificate?: CertificateOfReturn;
+  message?: string;
+}>({ status: 'idle' });
+const [showFullCertificate, setShowFullCertificate] = useState(false);
+
+// Verification logic (mock for UI template)
+const handleVerify = async () => {
+  if (!verificationCode.trim()) return;
+  
+  setIsVerifying(true);
+  await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+  
+  // Mock verification - matches against mockCertificate
+  if (verificationCode.toUpperCase() === mockCertificate.verificationCode) {
+    setVerificationResult({
+      status: 'success',
+      certificate: mockCertificate
+    });
+  } else {
+    setVerificationResult({
+      status: 'error',
+      message: 'Certificate not found. Please check the code and try again.'
+    });
+  }
+  
+  setIsVerifying(false);
+};
+```
+
+---
+
+## Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `src/components/community/elections/VerifyCertificateDrawer.tsx` | **CREATE** - New verification drawer component |
+| `src/components/admin/election/CertificateOfReturnGenerator.tsx` | **MODIFY** - Add Verify Certificate button |
+| `src/components/community/CommunityMainMenu.tsx` | **MODIFY** - Add Verify Certificate to Elections menu |
+| `src/components/community/elections/ElectionWinnersTab.tsx` | **MODIFY** - Add Verify button in header |
 
 ---
 
 ## Mobile Optimizations
-- Use 150ms delay when transitioning between detail sheet and authorization drawer to prevent modal stacking issues
-- Authorization drawer uses established mobile patterns (92vh height, touch-optimized)
+
+All implementations follow established mobile patterns:
+- Drawer uses 92vh max height with rounded top corners
+- Touch-optimized input with `touch-manipulation` class
+- `autoComplete="off"`, `autoCorrect="off"`, `spellCheck={false}` on input
+- `onClick={(e) => e.stopPropagation()}` to prevent scroll issues
+- Minimum 44px touch targets for all buttons
+- Clear visual feedback with loading states and result indicators
 
 ---
 
 ## Expected Outcome
 
-- Tapping "Announce Result" button closes the office detail sheet
-- Opens multi-signature authorization drawer
-- Shows office name and winner information
-- Requires President + Secretary + (PRO or Dir. Socials) approval
-- Upon authorization, shows success toast confirming result announcement
-- Consistent with other admin election authorization patterns
+1. **Admin Area (Certificate Generator):**
+   - "Verify Certificate" button appears below "Issued Certificates" section
+   - Opens mobile-first verification drawer
 
+2. **Public Dashboard (Community Menu > Election/Voting):**
+   - "Verify Certificate" option in Elections accordion
+   - Accessible to all community members and visitors
+   - Enables banks and third parties to verify leadership credentials
+
+3. **Election Winners Tab:**
+   - Quick "Verify" button in the header
+   - Most visible public entry point for verification
+
+4. **Verification Flow:**
+   - User enters 8-character verification code
+   - System validates and returns certificate details
+   - On success, shows summary with option to view full certificate
+   - On error, shows clear message with retry option
