@@ -67,66 +67,68 @@ export const FinancialAccreditationTab = () => {
       </Card>
 
       {/* Accreditation List */}
-      <Card className="p-3">
-        <h3 className="font-bold text-base mb-3">Member Accreditation Status</h3>
-        <div className="space-y-2.5">
+      <Card className="p-2">
+        <h3 className="font-bold text-base mb-2 px-0.5">Member Accreditation Status</h3>
+        <div className="space-y-2">
           {membersWithAccreditation.map(member => (
             <div 
               key={member.id} 
-              className={`space-y-2.5 p-3 rounded-lg border-2 ${
+              className={`space-y-2 p-2.5 rounded-lg border-2 ${
                 member.isAccredited 
                   ? 'bg-green-50 border-green-300' 
                   : 'bg-yellow-50 border-yellow-300'
               }`}
             >
               {/* Row 1: Avatar + Identity */}
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <Avatar className="h-9 w-9 shrink-0">
                   <AvatarImage src={member.avatar} />
                   <AvatarFallback>{member.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold text-sm truncate">{member.name}</div>
+                  <div className="font-semibold text-sm leading-tight">{member.name}</div>
                   <div className="text-xs text-muted-foreground">{member.registration}</div>
                 </div>
               </div>
 
-              {/* Row 2: Status + Action */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
-                  {member.isAccredited ? (
-                    <>
-                      <Badge className="bg-green-600 hover:bg-green-700 text-[11px] px-1.5 py-0.5 shrink-0">
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                        Accredited
-                      </Badge>
-                      <span className="text-[11px] text-green-700 truncate">
-                        {member.accreditationDate}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <Badge className="bg-yellow-500 hover:bg-yellow-600 text-[11px] px-1.5 py-0.5 shrink-0">
-                        <XCircle className="w-3 h-3 mr-1" />
-                        Pending
-                      </Badge>
-                      <span className="text-[11px] text-yellow-700">
-                        {member.clearedCount}/{member.totalCount} cleared
-                      </span>
-                    </>
-                  )}
-                </div>
-                <Button 
-                  size="sm" 
-                  variant={member.isAccredited ? "outline" : "default"}
-                  className={`shrink-0 touch-manipulation active:scale-[0.97] text-xs h-8 px-3 ${
-                    member.isAccredited ? "" : "bg-yellow-500 hover:bg-yellow-600"
-                  }`}
-                  onClick={() => handleViewDetails(member.isAccredited)}
-                >
-                  View Details
-                </Button>
+              {/* Row 2: Status info only */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {member.isAccredited ? (
+                  <>
+                    <Badge className="bg-green-600 hover:bg-green-700 text-xs px-1.5 py-0.5 shrink-0">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Accredited
+                    </Badge>
+                    <span className="text-xs text-green-700">
+                      {member.accreditationDate}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Badge className="bg-amber-500 hover:bg-amber-600 text-xs px-1.5 py-0.5 shrink-0">
+                      <XCircle className="w-3 h-3 mr-1" />
+                      Pending
+                    </Badge>
+                    <span className="text-xs text-amber-700 font-medium">
+                      {member.clearedCount}/{member.totalCount} items cleared
+                    </span>
+                  </>
+                )}
               </div>
+
+              {/* Row 3: Full-width action button */}
+              <Button 
+                size="sm" 
+                variant={member.isAccredited ? "outline" : "default"}
+                className={`w-full touch-manipulation active:scale-[0.97] text-xs h-9 ${
+                  member.isAccredited 
+                    ? "border-green-600 text-green-700 hover:bg-green-100" 
+                    : "bg-amber-700 hover:bg-amber-800 text-white"
+                }`}
+                onClick={() => handleViewDetails(member.isAccredited)}
+              >
+                View Details
+              </Button>
             </div>
           ))}
         </div>
