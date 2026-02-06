@@ -50,45 +50,51 @@ export const campaignAudienceOptions: CampaignAudienceOption[] = [
 export const campaignDurationOptions: CampaignDurationOption[] = [
   {
     days: 3,
-    feeInMobi: 500,
+    feeInMobi: 5000,
     label: "3 Days",
     description: "Quick visibility boost"
   },
   {
     days: 7,
-    feeInMobi: 1000,
+    feeInMobi: 10000,
     label: "7 Days",
     description: "Standard campaign period",
     popular: true
   },
   {
     days: 14,
-    feeInMobi: 1800,
+    feeInMobi: 18000,
     label: "14 Days",
     description: "Extended reach campaign"
   },
   {
     days: 21,
-    feeInMobi: 2500,
+    feeInMobi: 25000,
     label: "21 Days",
     description: "Comprehensive coverage",
     popular: true
   },
   {
     days: 30,
-    feeInMobi: 3200,
+    feeInMobi: 32000,
     label: "30 Days",
     description: "Full month visibility"
   },
   {
+    days: 45,
+    feeInMobi: 40000,
+    label: "45 Days",
+    description: "Extended campaign period"
+  },
+  {
     days: 60,
-    feeInMobi: 5500,
+    feeInMobi: 55000,
     label: "60 Days",
     description: "Extended two-month campaign"
   },
   {
     days: 90,
-    feeInMobi: 7500,
+    feeInMobi: 75000,
     label: "90 Days",
     description: "Maximum exposure quarter"
   }
