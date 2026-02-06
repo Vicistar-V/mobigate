@@ -1,117 +1,189 @@
 
 
-## Fix Global Input Flickering Issue on Mobile
+## Mobile Optimization for Financial Audit Dialog
 
 ### Problem Identified
-Text input fields across the entire application (especially within Finance admin sections like Manage Dues & Levies, Account Statements, Members' Financial Reports, Financial Audit, and View Obligations) are experiencing flickering and erratic text entry on mobile devices.
+Looking at the screenshot, the "Risk Indicators" section content is being cut off on the right margin. The "Recoverable/pending amounts" text under "Floating Funds" is clipped. The issue is:
 
-**Root Cause:** The Radix UI `ScrollArea` and other container components (Drawer, Dialog, Sheet) intercept touch/click events to manage scrolling behavior. When an input field is inside these containers, the touch intended to focus the field gets captured by the parent, causing the input to lose and regain focus rapidly - resulting in:
-- Keyboard flickering/dismissal
-- Random characters appearing
-- Focus jumping away from input
-- Text entry becoming unstable
+1. **DrawerContent missing flex layout** - Line 449: `className="max-h-[92vh]"` needs `flex flex-col` for proper flex child behavior
+2. **ScrollArea wrapper not respecting padding** - Content padding is applied inside ScrollArea but the container structure allows overflow
+3. **Risk Indicators grid cells too constrained** - The 2-column grid doesn't give enough room for wrapped currency values on small screens
 
-### Solution: Global Fix at Base Component Level
+---
 
-Instead of adding `onClick={(e) => e.stopPropagation()}` to every individual input across 50+ files, the most effective fix is to modify the base UI components themselves.
+### Solution: Complete Mobile Layout Restructure
+
+#### File: `src/components/admin/finance/AdminFinancialAuditDialog.tsx`
+
+**Changes to make:**
+
+---
+
+#### 1. Fix Drawer Container Structure (Lines 448-456)
+
+**Before:**
+```tsx
+<Drawer open={open} onOpenChange={onOpenChange}>
+  <DrawerContent className="max-h-[92vh]">
+    <DrawerHeader className="border-b">
+      <DrawerTitle>Financial Audit</DrawerTitle>
+    </DrawerHeader>
+    <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+      <Content />
+    </ScrollArea>
+  </DrawerContent>
+</Drawer>
+```
+
+**After:**
+```tsx
+<Drawer open={open} onOpenChange={onOpenChange}>
+  <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+    <DrawerHeader className="border-b shrink-0 px-4">
+      <DrawerTitle>Financial Audit</DrawerTitle>
+    </DrawerHeader>
+    <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
+      <div className="px-4 pb-6">
+        <Content />
+      </div>
+    </div>
+  </DrawerContent>
+</Drawer>
+```
+
+---
+
+#### 2. Convert Risk Indicators to Single Column Layout (Lines 188-213)
+
+The 2-column grid causes clipping. Switch to stacked single-column layout for mobile clarity:
+
+**Before:**
+```tsx
+<div className="grid grid-cols-2 gap-3">
+  <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+    ...Total Deficits...
+  </div>
+  <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
+    ...Floating Funds...
+  </div>
+</div>
+```
+
+**After (Single Column Stack):**
+```tsx
+<div className="space-y-3">
+  <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center gap-2">
+        <Minus className="h-4 w-4 text-amber-600 shrink-0" />
+        <span className="text-xs text-muted-foreground">Total Deficits</span>
+      </div>
+      <p className="text-base font-bold text-amber-600 text-right">
+        {formatCurrency(currentAudit.totalDeficits)}
+      </p>
+    </div>
+    <p className="text-xs text-muted-foreground mt-1.5">
+      Debts community owes
+    </p>
+  </div>
+  <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center gap-2">
+        <Clock className="h-4 w-4 text-purple-600 shrink-0" />
+        <span className="text-xs text-muted-foreground">Floating Funds</span>
+      </div>
+      <p className="text-base font-bold text-purple-600 text-right">
+        {formatCurrency(currentAudit.floatingFunds)}
+      </p>
+    </div>
+    <p className="text-xs text-muted-foreground mt-1.5">
+      Recoverable/pending amounts
+    </p>
+  </div>
+</div>
+```
+
+---
+
+#### 3. Summary Cards - Keep 2x2 Grid but Optimize Text (Lines 139-180)
+
+The summary cards work but need tighter text handling:
+
+- Reduce font size from `text-lg` to `text-base` for currency values
+- Remove `whitespace-normal` in favor of controlled line breaks
+- Add `min-w-0` to container for proper truncation
+
+**Key Changes:**
+```tsx
+<Card className="p-3 bg-green-50 border-green-200 min-w-0">
+  <div className="flex items-center gap-2 mb-1">
+    <ArrowDownLeft className="h-4 w-4 text-green-600 shrink-0" />
+    <span className="text-xs text-muted-foreground">Funds Received</span>
+  </div>
+  <p className="text-base font-bold text-green-600 leading-tight break-words">
+    {formatCurrency(currentAudit.totalFundsReceived)}
+  </p>
+</Card>
+```
+
+Apply same pattern to all 4 summary cards.
+
+---
+
+#### 4. Balance Flow Section - Restack Layout (Lines 226-254)
+
+Use stacked rows instead of side-by-side for better mobile display:
+
+**Before:**
+```tsx
+<div className="flex items-start justify-between gap-3">
+  <span className="text-sm text-muted-foreground">Opening Balance</span>
+  <span className="font-medium text-right whitespace-normal break-words leading-tight max-w-[55%]">
+    {formatCurrency(currentAudit.openingBalance)}
+  </span>
+</div>
+```
+
+**After:**
+```tsx
+<div className="flex flex-col gap-0.5">
+  <span className="text-sm text-muted-foreground">Opening Balance</span>
+  <span className="font-medium text-base">
+    {formatCurrency(currentAudit.openingBalance)}
+  </span>
+</div>
+```
+
+Apply to all Balance Flow rows (Opening Balance, Funds Received, Funds Spent, Closing Balance).
+
+---
+
+### Mobile Layout Pattern Summary
+
+| Section | Before | After |
+|---------|--------|-------|
+| Risk Indicators | 2-column grid | Single column stack with horizontal label-value layout |
+| Summary Cards | 2x2 grid with `text-lg` | 2x2 grid with `text-base` and `min-w-0` |
+| Balance Flow | Side-by-side with `max-w-[55%]` | Stacked rows (label above value) |
+| Drawer Container | `max-h-[92vh]` only | `max-h-[92vh] flex flex-col overflow-hidden` with native scroll |
 
 ---
 
 ### Files to Modify
 
-| File | Action | Description |
-|------|--------|-------------|
-| `src/components/ui/input.tsx` | **MODIFY** | Add onClick with stopPropagation to prevent focus stealing |
-| `src/components/ui/textarea.tsx` | **MODIFY** | Add onClick with stopPropagation to prevent focus stealing |
-
----
-
-### Implementation Details
-
-#### 1. Update `src/components/ui/input.tsx`
-
-Add an `onClick` handler that stops event propagation while preserving any custom onClick handlers passed via props:
-
-```tsx
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, allowImagePaste = false, onPaste, onClick, ...props }, ref) => {
-    // ... existing handlePaste code ...
-
-    const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
-      e.stopPropagation();
-      if (onClick) {
-        onClick(e);
-      }
-    };
-
-    return (
-      <input
-        // ... existing props ...
-        onClick={handleClick}
-        {...props}
-      />
-    );
-  },
-);
-```
-
-#### 2. Update `src/components/ui/textarea.tsx`
-
-Apply the same pattern:
-
-```tsx
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, allowImagePaste = false, onPaste, onClick, ...props }, ref) => {
-    // ... existing handlePaste code ...
-
-    const handleClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
-      e.stopPropagation();
-      if (onClick) {
-        onClick(e);
-      }
-    };
-
-    return (
-      <textarea
-        // ... existing props ...
-        onClick={handleClick}
-        {...props}
-      />
-    );
-  }
-);
-```
-
----
-
-### Why This Fixes Everything
-
-This single change at the base component level will:
-
-1. **Fix ALL existing inputs** - Every Input and Textarea component across the entire app automatically gets the fix
-2. **Prevent future issues** - New inputs added in the future will automatically be protected
-3. **Remove redundant code** - Can remove individual `onClick={(e) => e.stopPropagation()}` handlers from files that were previously patched
-
----
-
-### Mobile Optimization Pattern Applied
-
-| Property | Already Present | Purpose |
-|----------|----------------|---------|
-| `touch-manipulation` | Yes | Prevents double-tap zoom interference |
-| `autoComplete="off"` | Yes | Prevents browser autocomplete popups |
-| `autoCorrect="off"` | Yes | Disables iOS auto-correction |
-| `spellCheck={false}` | Yes | Prevents spellcheck visual glitches |
-| `onClick={stopPropagation}` | **ADDING** | Prevents ScrollArea from stealing focus |
+| File | Action |
+|------|--------|
+| `src/components/admin/finance/AdminFinancialAuditDialog.tsx` | **MODIFY** - Complete mobile layout restructure |
 
 ---
 
 ### Expected Outcome
 
-1. All text inputs across admin sections work flawlessly on mobile
-2. No more flickering when tapping input fields
-3. Text appears correctly as typed without random characters
-4. Focus stays on input while typing
-5. Keyboard stays visible and doesn't dismiss unexpectedly
-6. Smooth typing experience within all Drawer, Dialog, Sheet, and ScrollArea containers
+1. No content clipped on right margin
+2. "Recoverable/pending amounts" text fully visible
+3. All currency values display without truncation
+4. Smooth native scrolling on mobile
+5. Proper flex layout ensures header stays fixed
+6. Single-column Risk Indicators prevent horizontal overflow
+7. Balance Flow rows use stacked layout for clarity
 
