@@ -1,91 +1,112 @@
 
+# Mobile Optimization: Financial Audit Clipping + Full Label Text Fixes
 
-# Mobile Optimization: Primary Election Details Sheet
+## Problems Identified (from screenshots)
 
-## Problem
+### Issue 1: Financial Audit -- Risk Indicators clipping (image 328)
+The "Recoverable/pending amounts" description under "Floating Funds" is clipped on the right edge. Root cause: the Drawer's inner container uses `px-4` (16px each side) plus `p-4` on the Risk Indicators Card plus `p-3` on each inner box = cumulative ~44px per side, leaving only ~272px on a 360px screen. The large currency amounts (N750,000.00 / M750,000.00) combined with the label text overflow the available width.
 
-The "Primary Election Details" bottom sheet has right-edge clipping on mobile (~360px screens). The screenshots show:
+### Issue 2: "Dir." should be "Director" (image 329)
+The multi-signature text reads "PRO or Dir. of Socials" throughout the app. The user wants "Director" written in full. This abbreviation exists in **9 locations across 7 files**.
 
-1. **"Completed" badge** on the election info card is clipped on the right
-2. **Vote counts** (549, 850) in the Voter Turnout section are cut off at the right edge
-3. **"2 advancing" badge** in the Candidates Results header is partially hidden
-4. **Progress bar percentage text** and threshold markers clip on the right
-
-### Root Cause
-
-The content area uses `px-4 py-4` (16px each side) on the ScrollArea's inner div (line 312), plus `p-3` (12px) on each card inside it. Combined: 16 + 12 = 28px per side = 56px total lost from 360px = only 304px for content. The status badge, vote numbers, and advancing badge all fight for that remaining space.
+### Issue 3: "Pending Auth" should be "Pending Authorization" (image 330)  
+The election status badge reads "Pending Auth" -- the user wants it to say the full word. This is in **1 file, 1 location**.
 
 ---
 
-## File to Modify
+## Files to Modify
 
-`src/components/admin/election/AdminPrimaryElectionsSection.tsx`
+| File | Changes |
+|------|---------|
+| `src/components/admin/finance/AdminFinancialAuditDialog.tsx` | Reduce drawer padding, restack Risk Indicators vertically with full-width layout |
+| `src/types/adminAuthorization.ts` | Change "Dir. of Socials" to "Director of Socials" in display titles and description function |
+| `src/components/admin/election/AdminDeclareElectionTab.tsx` | Change "Pending Auth" to "Pending Authorization"; change "Dir." to "Director" |
+| `src/components/admin/election/DeclareElectionDrawer.tsx` | Change "Dir. of Socials" to "Director of Socials" (2 occurrences) |
+| `src/components/community/leadership/ApplyElectionResultsSection.tsx` | Change "Dir. of Socials" to "Director of Socials" (2 occurrences) |
+| `src/components/admin/leadership/ApplyElectionResultsSheet.tsx` | Change "Dir. of Socials" to "Director of Socials" (2 occurrences) |
+| `src/components/admin/AdminLeadershipSection.tsx` | Change "Dir. Socials" to "Director of Socials" |
+| `src/components/admin/AdminElectionSection.tsx` | Change "Dir. Socials" to "Director of Socials" |
 
 ---
 
 ## Detailed Changes
 
-### 1. Sheet Header (line 303)
-- Change `px-4 pt-4 pb-3` to `px-3 pt-4 pb-3` -- saves 4px per side on the header to match the body
+### 1. Financial Audit Dialog (`AdminFinancialAuditDialog.tsx`)
 
-### 2. ScrollArea inner container (line 312)
-- Change `px-4 py-4` to `px-2 py-3` -- reclaims 16px total horizontal space
+**Drawer container padding (line 458)**:
+- Change `px-4 pb-6` to `px-2 pb-6` -- reclaims 16px total horizontal space
 
-### 3. Election Info card (line 314)
-- Change `p-3` to `p-2.5` -- saves another 4px total
-- The office name + status badge row (line 315): already has `gap-2` and `min-w-0 flex-1`, which is good
+**Risk Indicators Card (lines 183-218)**:
+- Change outer Card from `p-4` to `p-2.5` -- saves another 12px total
+- Change each inner risk indicator box from `p-3` to `p-2.5`
+- Change the layout of each risk indicator from horizontal `flex items-start justify-between gap-3` to a **vertical stack**: icon + label on one line, amount below it on its own line. This prevents the long currency string from competing with the label for horizontal space.
 
-### 4. Date and Time boxes (lines 324-339)
-- Change the `text-[10px]` "Date" and "Time" labels to `text-xs` to meet the project's minimum typography standard
-- Keep the side-by-side layout as it works well
+Current layout (clips):
+```text
+[icon] Total Deficits        N325,000.00 (M325,000.00)
+```
 
-### 5. Voter Turnout card (line 344)
-- Change `p-3` to `p-2.5`
-- The vote count rows (lines 350-357): these use `flex justify-between` which is correct, but the numbers clip because the parent padding eats the space. The reduced padding from step 2 and this step will fix it.
+New layout (fits):
+```text
+[icon] Total Deficits
+N325,000.00
+(M325,000.00)
+Debts community owes
+```
 
-### 6. Advancement Rules card (line 370)
-- Change `p-3` to `p-2.5`
-- Change the advancement rules header `gap-2.5` to `gap-2`
+**Summary Cards (lines 138-180)**:
+- Change the grid wrapper from `gap-3` to `gap-2` to tighten spacing
+- Change each summary Card from `p-3` to `p-2.5`
+- These cards already have `min-w-0` and `break-words` which is good
 
-### 7. Candidates Results section
+**Balance Flow Card (line 230)**:
+- Change from `p-4` to `p-3` to match the reduced outer padding
 
-**Header row (lines 403-411)**:
-- The "2 advancing" Badge uses `text-[10px]` -- change to `text-xs`
+**Deficits Breakdown Card (line 261) and Floating Funds Card (line 293)**:
+- Change from `p-4` to `p-3`
 
-**Auto-qualified summary text (line 414)**:
-- Change `text-[10px]` to `text-xs`
+### 2. "Dir." to "Director" -- All Occurrences
 
-**Candidate cards (lines 430-516)**:
-- Change card padding from `p-3` to `p-2.5`
-- Change the candidate row gap from `gap-3` to `gap-2.5`
-- Change the candidate rank number width from `w-5` to `w-4` to save horizontal space
-- The progress bar area (line 471): change `ml-8` to `ml-7` since the rank number is now narrower
-- The threshold text (line 492-494): change `text-[10px]` to `text-xs`
+**`src/types/adminAuthorization.ts`**:
+- Line 89: Change `"Dir. of Socials"` to `"Director of Socials"`
+- Line 374: Change `"President + Secretary + (PRO or Dir. of Socials)"` to `"President + Secretary + (PRO or Director of Socials)"`
 
-### 8. Status badges (lines 52-64, used throughout)
-- Change `text-[10px]` to `text-xs` on all status badges (Completed, Ongoing, Scheduled, Cancelled)
+**`src/components/admin/election/AdminDeclareElectionTab.tsx`**:
+- Line 162: Change `(PRO or Dir. of Socials)` to `(PRO or Director of Socials)`
 
-### 9. StatCard label (line 79)
-- Change `text-[10px]` to `text-xs` on the stat card labels
+**`src/components/admin/election/DeclareElectionDrawer.tsx`**:
+- Line 601: Change `(PRO or Dir. of Socials)` to `(PRO or Director of Socials)`
+- Line 602: Change `(Dir. of Socials or another Admin)` to `(Director of Socials or another Admin)`
 
-### 10. Primary list cards (lines 186-295)
-- The voter turnout detail text at line 215-218 uses `text-[10px]` -- change to `text-xs`
-- Candidate preview name at line 257 uses `truncate max-w-[120px]` -- change to `max-w-[140px]` since we have more space from reduced padding
-- Candidate vote detail at line 269 uses `text-[10px]` -- change to `text-xs`
-- The AvatarFallback at line 255 uses `text-[10px]` -- change to `text-xs`
+**`src/components/community/leadership/ApplyElectionResultsSection.tsx`**:
+- Line 172: Change `(PRO or Dir. of Socials)` to `(PRO or Director of Socials)`
+- Line 307: Change `(PRO or Dir. of Socials)` to `(PRO or Director of Socials)`
+
+**`src/components/admin/leadership/ApplyElectionResultsSheet.tsx`**:
+- Line 188: Change `(PRO or Dir. of Socials)` to `(PRO or Director of Socials)`
+- Line 321: Change `(PRO or Dir. of Socials)` to `(PRO or Director of Socials)`
+
+**`src/components/admin/AdminLeadershipSection.tsx`**:
+- Line 206: Change `(PRO or Dir. Socials)` to `(PRO or Director of Socials)`
+
+**`src/components/admin/AdminElectionSection.tsx`**:
+- Line 273: Change `(PRO or Dir. Socials)` to `(PRO or Director of Socials)`
+
+### 3. "Pending Auth" to "Pending Authorization"
+
+**`src/components/admin/election/AdminDeclareElectionTab.tsx`**:
+- Line 98: Change badge text from `Pending Auth` to `Pending Authorization`
 
 ---
 
-## Summary of Space Savings in Detail Sheet
+## Space Savings Summary (Financial Audit)
 
 | Area | Before | After | Saved |
 |------|--------|-------|-------|
-| ScrollArea inner padding | 16px each side | 8px each side | 16px total |
-| Card padding | 12px each side | 10px each side | 4px total |
-| Candidate rank width | 20px | 16px | 4px |
-| **Total horizontal savings** | | | **~24px** |
+| Drawer content padding | 16px each side | 8px each side | 16px total |
+| Risk Card outer padding | 16px each side | 10px each side | 12px total |
+| Risk indicator inner padding | 12px each side | 10px each side | 4px total |
+| Amount layout | Horizontal (competing) | Vertical (stacked) | Full width for amounts |
+| **Total horizontal savings** | | | ~32px |
 
-This brings usable content width from ~304px to ~328px on a 360px screen -- enough to show badges, vote counts, and percentages without clipping.
-
-All `text-[10px]` instances are bumped to `text-xs` to meet the project's typography standard.
-
+This brings effective content width from ~272px back to ~304px+ on a 360px screen, and the vertical restacking of amounts eliminates horizontal competition entirely.
