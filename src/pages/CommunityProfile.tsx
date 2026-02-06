@@ -437,11 +437,7 @@ const CommunityProfile = () => {
   };
 
   const handleFundRaiser = () => {
-    handleTabChange("fund-raiser");
-    toast({
-      title: "FundRaiser",
-      description: "Opening community fundraiser campaigns...",
-    });
+    handleTabChange("fundraiser-campaigns");
   };
 
   const handleQuizGame = () => {

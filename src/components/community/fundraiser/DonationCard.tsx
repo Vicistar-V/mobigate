@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { FundRaiserCampaign, currencyRates } from "@/data/fundraiserData";
-import { DollarSign, Calendar, Target, Clock } from "lucide-react";
+import { DollarSign, Calendar, Clock } from "lucide-react";
 import { differenceInDays, addDays, parseISO } from "date-fns";
 
 interface DonationCardProps {
@@ -35,17 +35,6 @@ export const DonationCard = ({ campaign, onDonate }: DonationCardProps) => {
 
   const remainingDays = calculateRemainingDays();
 
-  const convertAmount = (amount: number, toCurrency: 'USD' | 'MOBI') => {
-    if (campaign.currency === toCurrency) return amount;
-    
-    if (campaign.currency === 'USD' && toCurrency === 'MOBI') {
-      return amount * currencyRates.USD_TO_MOBI;
-    } else if (campaign.currency === 'MOBI' && toCurrency === 'USD') {
-      return amount * currencyRates.MOBI_TO_USD;
-    }
-    return amount;
-  };
-
   const getConvertedAmount = () => {
     const amount = parseFloat(donationAmount) || 0;
     const targetCurrency = currency === 'USD' ? 'MOBI' : 'USD';
@@ -57,72 +46,70 @@ export const DonationCard = ({ campaign, onDonate }: DonationCardProps) => {
   };
 
   return (
-    <Card className="p-6 border-4 border-green-500 shadow-lg">
+    <Card className="p-4 border-2 border-green-500 shadow-md">
       {/* Convener Info */}
-      <div className="flex items-center gap-3 mb-4">
-        <Avatar className="h-12 w-12">
+      <div className="flex items-center gap-2.5 mb-3">
+        <Avatar className="h-10 w-10 shrink-0">
           <AvatarImage src={campaign.convenerAvatar} />
           <AvatarFallback>{campaign.convenerName.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="flex-1">
-          <p className="font-semibold text-lg">{campaign.convenerName}</p>
-          <p className="text-sm text-blue-600">ID-CODE: {campaign.idCode}</p>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm leading-tight truncate">{campaign.convenerName}</p>
+          <p className="text-xs text-blue-600">ID-CODE: {campaign.idCode}</p>
         </div>
       </div>
 
       {/* Campaign Theme */}
-      <h3 className="text-xl font-bold mb-3">{campaign.theme}</h3>
+      <h3 className="text-base font-bold mb-2 leading-snug">{campaign.theme}</h3>
       
       {/* Description */}
-      <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
         {campaign.description}
       </p>
 
       {/* Progress Bar */}
-      <div className="mb-4">
-        <div className="flex justify-between text-sm mb-2">
+      <div className="mb-3">
+        <div className="flex justify-between text-xs mb-1.5">
           <span className="font-semibold">
             ${campaign.raisedAmount.toLocaleString()} raised
           </span>
           <span className="text-muted-foreground">
-            of ${campaign.targetAmount.toLocaleString()} goal
+            of ${campaign.targetAmount.toLocaleString()}
           </span>
         </div>
-        <Progress value={progressPercentage} className="h-3" />
+        <Progress value={progressPercentage} className="h-2.5" />
       </div>
 
-      {/* Campaign Details */}
-      <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-        <div className="flex items-center gap-2 bg-yellow-50 p-2 rounded">
-          <Calendar className="h-4 w-4 text-yellow-600" />
-          <span className="font-semibold">{campaign.urgencyLevel}</span>
+      {/* Campaign Details - 2 column */}
+      <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+        <div className="flex items-center gap-1.5 bg-yellow-50 p-2 rounded">
+          <Calendar className="h-3.5 w-3.5 text-yellow-600 shrink-0" />
+          <span className="font-medium truncate">{campaign.urgencyLevel}</span>
         </div>
         {campaign.timeFrame && (
-          <div className={`flex items-center gap-2 p-2 rounded ${
+          <div className={`flex items-center gap-1.5 p-2 rounded ${
             remainingDays !== null && remainingDays <= 7 
               ? 'bg-red-50' 
               : remainingDays !== null && remainingDays <= 14 
                 ? 'bg-orange-50' 
                 : 'bg-blue-50'
           }`}>
-            <Clock className={`h-4 w-4 ${
+            <Clock className={`h-3.5 w-3.5 shrink-0 ${
               remainingDays !== null && remainingDays <= 7 
                 ? 'text-red-600' 
                 : remainingDays !== null && remainingDays <= 14 
                   ? 'text-orange-600' 
                   : 'text-blue-600'
             }`} />
-            <span className={`font-medium ${
-              remainingDays !== null && remainingDays <= 0 
-                ? 'text-red-600' 
-                : remainingDays !== null && remainingDays <= 7
-                  ? 'text-red-600'
-                  : ''
+            <span className={`font-medium truncate ${
+              remainingDays !== null && remainingDays <= 7
+                ? 'text-red-600'
+                : ''
             }`}>
               {remainingDays !== null 
                 ? remainingDays <= 0 
                   ? 'Expired' 
-                  : `${remainingDays} days left`
+                  : `${remainingDays}d left`
                 : campaign.timeFrame
               }
             </span>
@@ -131,63 +118,63 @@ export const DonationCard = ({ campaign, onDonate }: DonationCardProps) => {
       </div>
 
       {/* Donation Amount Input */}
-      <div className="space-y-3 mb-4">
+      <div className="space-y-2 mb-3">
         <div className="flex gap-2">
           <Input
             type="number"
             placeholder="Enter amount"
             value={donationAmount}
             onChange={(e) => setDonationAmount(e.target.value)}
-            className="flex-1"
+            className="flex-1 h-10 text-sm"
           />
           <Button
             variant="outline"
             size="sm"
             onClick={() => setCurrency(currency === 'USD' ? 'MOBI' : 'USD')}
-            className="min-w-[80px]"
+            className="h-10 min-w-[70px] text-sm"
           >
             {currency === 'USD' ? 'US$' : 'Mobi'}
           </Button>
         </div>
         
         {donationAmount && (
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center">
             ≈ {getConvertedAmount()}
           </p>
         )}
       </div>
 
-      {/* Info Boxes */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-blue-50 p-3 rounded text-center">
-          <p className="text-xs text-muted-foreground">Target Amount</p>
-          <p className="font-bold">${campaign.targetAmount.toLocaleString()}</p>
+      {/* Info Boxes - Target & Minimum */}
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="bg-blue-50 p-2.5 rounded text-center">
+          <p className="text-xs text-muted-foreground">Target</p>
+          <p className="font-bold text-sm">${campaign.targetAmount.toLocaleString()}</p>
         </div>
-        <div className="bg-green-50 p-3 rounded text-center">
+        <div className="bg-green-50 p-2.5 rounded text-center">
           <p className="text-xs text-muted-foreground">Minimum</p>
-          <p className="font-bold">${campaign.minimumDonation}</p>
+          <p className="font-bold text-sm">${campaign.minimumDonation}</p>
         </div>
       </div>
 
-      {/* Donate Button */}
+      {/* Donate Button - Full width, touch-friendly */}
       <Button 
-        className="w-full bg-red-600 hover:bg-red-700 font-bold text-lg py-6"
+        className="w-full bg-red-600 hover:bg-red-700 font-bold text-base h-12"
         onClick={onDonate}
       >
-        <DollarSign className="h-5 w-5 mr-2" />
+        <DollarSign className="h-4 w-4 mr-1.5" />
         Donate
       </Button>
 
       {/* Token Donation Link */}
-      <p className="text-center mt-3 text-sm">
-        <span className="text-muted-foreground">Can't afford Cash Donation? </span>
-        <Button variant="link" className="text-blue-600 p-0 h-auto">
-          Send Token Donation here
+      <p className="text-center mt-2 text-xs">
+        <span className="text-muted-foreground">Can't afford Cash? </span>
+        <Button variant="link" className="text-blue-600 p-0 h-auto text-xs">
+          Send Token Donation
         </Button>
       </p>
 
       {/* Donors Count */}
-      <p className="text-center text-xs text-muted-foreground mt-2">
+      <p className="text-center text-xs text-muted-foreground mt-1.5">
         {campaign.donors.length} people have donated
       </p>
     </Card>

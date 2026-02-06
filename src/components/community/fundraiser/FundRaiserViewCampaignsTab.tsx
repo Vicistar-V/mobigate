@@ -31,14 +31,14 @@ export const FundRaiserViewCampaignsTab = () => {
   };
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-4 pb-20">
       <FundRaiserHeader />
 
       {/* Filter/Sort Controls */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Active Campaigns</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-bold">Active Campaigns</h2>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-[130px] h-9 text-sm">
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
           <SelectContent>
@@ -49,7 +49,7 @@ export const FundRaiserViewCampaignsTab = () => {
         </Select>
       </div>
 
-      {/* Campaign Cards Grid */}
+      {/* Campaign Cards */}
       <div className="space-y-4">
         {sortedCampaigns.map((campaign) => (
           <DonationCard
