@@ -244,15 +244,23 @@ export function CandidateVotersListSheet({
               </Badge>
             )}
             <Badge variant="secondary" className="text-xs">
-              {displayedVoters.length} of {filteredVoters.length}
+              {hasMore
+                ? `${displayedVoters.length} of ${filteredVoters.length}`
+                : `${filteredVoters.length} voters`
+              }
             </Badge>
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          Showing {displayedVoters.length} of {filteredVoters.length} voters
-          {filteredVoters.length < voteCount ? ` (filtered from ${voteCount})` : ""}
-        </p>
+        {hasMore ? (
+          <p className="text-xs text-muted-foreground">
+            Showing {displayedVoters.length} of {filteredVoters.length} voters
+          </p>
+        ) : (searchQuery || filterMode !== "all") ? (
+          <p className="text-xs text-muted-foreground">
+            Found {filteredVoters.length} of {voteCount} voters
+          </p>
+        ) : null}
 
         {filteredVoters.length === 0 ? (
           <Card>
