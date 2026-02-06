@@ -1,105 +1,124 @@
 
 
-# Add Video Support to Advertisement Media
+# Dedicated Quiz Wallet System
 
-## What Changes
+## Overview
 
-Currently, advertisements only support photos. This update adds **video support** so advertisers can upload a mix of photos and videos (up to 4 items total per ad). Every component that displays or handles ad media needs to be updated.
+The Community Quiz Games will receive a dedicated wallet, separate from the main Community Wallet. This wallet manages all quiz-related funds: player stake debits, winning payouts, and transfers to/from the main community wallet. If the Quiz Wallet has insufficient funds to cover potential winnings, all quiz games are disabled with the message: "Quiz Game Unavailable Right Now! Please try again later".
 
-## Technical Approach
+---
 
-Replace the `photos: string[]` field with a `media: AdMediaItem[]` array where each item tracks both the URL/data and the file type (image or video).
+## What Gets Built
+
+### 1. Enhanced Quiz Wallet Data Layer
+
+**File: `src/data/communityQuizData.ts`** (modify)
+
+- Expand `CommunityQuizWallet` interface with new fields:
+  - `incomeFromMainWallet` -- total transferred in from main wallet
+  - `transfersToMainWallet` -- total transferred out to main wallet
+  - `totalWinningPayouts` -- total paid to winners
+  - `totalStakeIncome` -- total received from player stakes
+  - `reservedForPayouts` -- funds currently earmarked for active quiz winnings
+  - `availableBalance` -- balance minus reserved amount
+  - `transactions` -- array of `QuizWalletTransaction` records
+- Add `QuizWalletTransaction` interface:
+  - `id`, `type` (stake_income | winning_payout | transfer_in | transfer_out), `amount`, `description`, `date`, `reference`, `relatedQuizId?`, `playerName?`
+- Update `communityQuizWalletData` mock with realistic transaction history
+- Refine `isCommunityQuizAvailable` to check if wallet balance can cover the quiz's `winningAmount` (for full 10/10 win), returning the exact message: "Quiz Game Unavailable Right Now! Please try again later"
+
+### 2. Quiz Wallet Management Dialog
+
+**File: `src/components/community/QuizWalletDrawer.tsx`** (new)
+
+A mobile-first Drawer component for managing the dedicated quiz wallet. Follows the existing `FinancialOverviewDialog` pattern:
+
+- **Header**: Blue-themed gradient header with "Quiz Wallet" title and wallet icon
+- **Balance Card**: Large balance display in dual currency (Local-First Protocol)
+  - Total Balance, Available Balance (minus reserved), Reserved for Payouts
+- **Quick Stats Grid** (3-column):
+  - Total Stakes In | Total Payouts | Net Position
+- **Transfer Actions** (2 buttons):
+  - "Fund from Main Wallet" -- opens a simple transfer-in flow (amount input, confirm)
+  - "Transfer to Main Wallet" -- opens a transfer-out flow (amount input, confirm)
+- **Transaction History**: Scrollable list of all quiz wallet transactions with type icons, amounts (dual currency), dates, and descriptions
+  - Stake income: green arrow-down icon
+  - Winning payouts: red arrow-up icon
+  - Transfer in: blue arrow-down icon
+  - Transfer out: orange arrow-up icon
+- **Availability Status Banner**: At the bottom, shows whether the wallet has sufficient funds for active quizzes. If insufficient, displays a prominent amber warning.
+
+### 3. Updated Community Quiz Dialog
+
+**File: `src/components/community/CommunityQuizDialog.tsx`** (modify)
+
+- Replace the existing "Your Wallet" card in the Quizzes tab with two cards:
+  1. **Your Player Wallet** (personal balance, same as now)
+  2. **Quiz Wallet Status** (dedicated quiz wallet balance + availability indicator)
+- Add a "Manage Quiz Wallet" button (admin/owner only) that opens the `QuizWalletDrawer`
+- When `isCommunityQuizAvailable` returns false due to insufficient quiz wallet funds:
+  - Show a full-width amber alert banner: "Quiz Game Unavailable Right Now! Please try again later"
+  - Disable all "Play Now" buttons on quiz cards
+  - Replace button text with "Currently Unavailable"
+
+### 4. Updated Quiz Gameplay Dialog
+
+**File: `src/components/community/CommunityQuizPlayDialog.tsx`** (modify)
+
+- Update `startGame` toast message to clarify the stake is deducted from player's wallet and deposited into the Quiz Wallet
+- Update `handleGameCompleteClick` to clarify winnings are paid from the Quiz Wallet
+- Add a small info line in the pre-game screen: "Stakes go to Quiz Wallet. Winnings paid from Quiz Wallet."
+
+### 5. Menu Integration
+
+**File: `src/components/community/CommunityMainMenu.tsx`** (modify)
+
+- In the "Quiz Game" accordion section, add a new admin-only button:
+  ```
+  Manage Quiz Wallet (Admin)
+  ```
+  with the Settings icon, text-primary styling, same pattern as other admin actions
+
+---
+
+## Technical Details
+
+### Quiz Wallet Transaction Types
 
 ```text
-AdMediaItem {
-  url: string          -- base64 data URL or remote URL
-  type: 'image' | 'video'
-  thumbnailUrl?: string -- auto-generated for videos
+QuizWalletTransaction {
+  id: string
+  type: 'stake_income' | 'winning_payout' | 'transfer_in' | 'transfer_out'
+  amount: number
+  description: string
+  date: Date
+  reference: string
+  relatedQuizId?: string
+  playerName?: string
 }
 ```
 
----
+### Availability Logic (refined)
 
-## Files to Modify (8 files)
+The current check uses `quiz.winningAmount * 10` as a buffer. The new logic:
+- For each active quiz, the required reserve = `quiz.winningAmount` (enough to pay one full winner)
+- Total required reserve = sum of all active quizzes' `winningAmount`
+- If `quizWallet.balance < totalRequiredReserve`, mark all games as unavailable
+- Message: "Quiz Game Unavailable Right Now! Please try again later"
 
-### 1. `src/types/advertisementSystem.ts`
-- Add new `AdMediaItem` interface with `url`, `type`, and optional `thumbnailUrl`
-- Change `photos: string[]` to `media: AdMediaItem[]` in both `AdvertisementFormData` and `EnhancedAdvertisement`
+### Dual Currency Display
 
-### 2. `src/components/community/advertisements/AdvertisementPhotoUploader.tsx`
-- Rename to **AdvertisementMediaUploader** (new file, old file kept as re-export for safety)
-- Accept `media: AdMediaItem[]` instead of `photos: string[]`
-- Update file input `accept` to include `video/mp4,video/webm,video/quicktime`
-- Increase max size for videos to 10MB (keep 2MB for images)
-- Render video thumbnails with a play icon overlay in the 2x2 grid
-- Show media type indicator badge (photo/video icon) on each slot
-- Update label: "Product Photos & Videos (X/4)"
-- Update helper text: "JPG, PNG, WebP, MP4, WebM -- Images max 2MB, Videos max 10MB"
+All amounts follow the Local-First Dual Currency Protocol:
+- Primary: Nigerian Naira with full formatting (e.g., "N150,000.00")
+- Secondary: Mobi equivalent in parentheses (e.g., "(M150,000)")
 
-### 3. `src/components/community/advertisements/CreateAdvertisementDrawer.tsx`
-- Import updated MediaUploader
-- Change `formData.photos` references to `formData.media`
-- Update the uploader component usage
+### Files Summary
 
-### 4. `src/components/community/advertisements/AdvertisementPreviewSheet.tsx`
-- Change `formData.photos` to `formData.media`
-- In the carousel, check `media[i].type`:
-  - If `'image'`: render `<img>` (same as now)
-  - If `'video'`: render `<video>` with `controls`, `playsInline`, `muted` attributes, with poster frame
-- Update counter text and empty state message
-
-### 5. `src/components/community/advertisements/AdvertisementFullViewSheet.tsx`
-- Change `ad.photos` to `ad.media`
-- Same image/video rendering logic as preview
-- Add play icon overlay on video carousel items
-- Videos play inline with controls on tap
-
-### 6. `src/components/community/advertisements/AdvertisementsListSheet.tsx`
-- Change `ad.photos` to `ad.media` for thumbnail rendering
-- If first media item is a video, show video thumbnail with small play icon overlay
-- Otherwise show image as before
-
-### 7. `src/components/community/advertisements/AdvertisementSettingsSheet.tsx`
-- Update any references to `formData.photos` to `formData.media`
-- Update step 1 summary to show "X media items" instead of "X photos"
-
-### 8. `src/data/advertisementData.ts`
-- Convert all `photos: [...]` arrays to `media: [...]` with `{ url: "...", type: "image" }` format
-- Add one mock video entry to one of the advertisements for demo purposes
-
----
-
-## Mobile-Specific Details
-
-**Video Playback in Carousel:**
-- Videos render with `playsInline`, `muted`, and `controls` attributes for smooth mobile playback
-- A centered play icon overlay appears on video frames before interaction
-- Tap to play/pause within the carousel
-
-**Media Uploader Grid:**
-- Each 2x2 grid slot shows a small badge icon in the corner:
-  - Camera icon for photos
-  - Video icon for videos
-- Videos display a static first frame with a semi-transparent play button overlay
-- The empty slot button text changes to "Add Media" instead of "Add Photo"
-
-**File Validation:**
-- Images: JPG, PNG, WebP -- max 2MB each
-- Videos: MP4, WebM -- max 10MB each
-- Total: 4 items combined
-
----
-
-## Summary Table
-
-| File | Action |
-|------|--------|
-| `src/types/advertisementSystem.ts` | Modify -- add `AdMediaItem`, change `photos` to `media` |
-| `AdvertisementPhotoUploader.tsx` | Modify -- support video files, rename labels, add play overlays |
-| `CreateAdvertisementDrawer.tsx` | Modify -- update `photos` refs to `media` |
-| `AdvertisementPreviewSheet.tsx` | Modify -- render videos in carousel |
-| `AdvertisementFullViewSheet.tsx` | Modify -- render videos in carousel |
-| `AdvertisementsListSheet.tsx` | Modify -- video thumbnail support |
-| `AdvertisementSettingsSheet.tsx` | Modify -- update photo refs to media |
-| `advertisementData.ts` | Modify -- convert photos arrays to media format |
+| File | Action | Description |
+|------|--------|-------------|
+| `src/data/communityQuizData.ts` | Modify | Expand wallet interface, add transactions, refine availability check |
+| `src/components/community/QuizWalletDrawer.tsx` | New | Dedicated quiz wallet management drawer |
+| `src/components/community/CommunityQuizDialog.tsx` | Modify | Add quiz wallet status card, availability banner, admin button |
+| `src/components/community/CommunityQuizPlayDialog.tsx` | Modify | Clarify stake/payout flow references to Quiz Wallet |
+| `src/components/community/CommunityMainMenu.tsx` | Modify | Add "Manage Quiz Wallet" admin menu item |
 
