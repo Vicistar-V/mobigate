@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { 
   Wallet, ArrowDownLeft, ArrowUpRight, ArrowDown, ArrowUp, 
-  Shield, AlertTriangle, CheckCircle, Send, X, Info, ChevronRight
+  Shield, AlertTriangle, CheckCircle, Send, X, Info, ChevronRight,
+  Gift, RotateCcw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,7 @@ import { formatLocalAmount, formatMobiAmount, formatLocalFirst } from "@/lib/mob
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { TransactionDetailDrawer, TransactionDetail } from "@/components/community/finance/TransactionDetailDrawer";
+import { QuizPlayerSelectDrawer } from "@/components/community/QuizPlayerSelectDrawer";
 
 interface QuizWalletDrawerProps {
   open: boolean;
@@ -38,6 +40,7 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
   const [transferMode, setTransferMode] = useState<TransferMode>(null);
   const [transferAmount, setTransferAmount] = useState("");
   const [selectedTx, setSelectedTx] = useState<TransactionDetail | null>(null);
+  const [playerSelectMode, setPlayerSelectMode] = useState<"bonus" | "refund" | null>(null);
   const wallet = communityQuizWalletData;
   const availability = getQuizWalletAvailability();
 
@@ -154,23 +157,43 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
 
               {/* Transfer Actions */}
               {transferMode === null ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    className="h-12 border-blue-300 text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 font-medium text-sm"
-                    onClick={() => setTransferMode("fund")}
-                  >
-                    <ArrowDown className="h-4 w-4 mr-2" />
-                    Fund from Main
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-12 border-orange-300 text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/30 font-medium text-sm"
-                    onClick={() => setTransferMode("withdraw")}
-                  >
-                    <ArrowUp className="h-4 w-4 mr-2" />
-                    Transfer to Main
-                  </Button>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      className="h-12 border-blue-300 text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 font-medium text-sm touch-manipulation active:scale-[0.97]"
+                      onClick={() => setTransferMode("fund")}
+                    >
+                      <ArrowDown className="h-4 w-4 mr-2" />
+                      Fund from Main
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-12 border-orange-300 text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/30 font-medium text-sm touch-manipulation active:scale-[0.97]"
+                      onClick={() => setTransferMode("withdraw")}
+                    >
+                      <ArrowUp className="h-4 w-4 mr-2" />
+                      Transfer to Main
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      className="h-12 border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-medium text-sm touch-manipulation active:scale-[0.97]"
+                      onClick={() => setPlayerSelectMode("bonus")}
+                    >
+                      <Gift className="h-4 w-4 mr-2" />
+                      Award Bonus
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-12 border-violet-300 text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-950/30 font-medium text-sm touch-manipulation active:scale-[0.97]"
+                      onClick={() => setPlayerSelectMode("refund")}
+                    >
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Refund to Player
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Card className={cn("border-2", transferMode === "fund" ? "border-blue-300" : "border-orange-300")}>
@@ -302,6 +325,14 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
       onOpenChange={(open) => !open && setSelectedTx(null)}
       transaction={selectedTx}
     />
+
+    {playerSelectMode && (
+      <QuizPlayerSelectDrawer
+        open={!!playerSelectMode}
+        onOpenChange={(open) => !open && setPlayerSelectMode(null)}
+        mode={playerSelectMode}
+      />
+    )}
     </>
   );
 }
