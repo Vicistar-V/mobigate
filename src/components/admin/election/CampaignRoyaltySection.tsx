@@ -103,7 +103,7 @@ export function CampaignRoyaltySection({ onViewFullReport }: CampaignRoyaltySect
                         {/* Royalty Amount - Only show Community Share */}
                         <div className="mt-2 p-2 bg-green-500/10 rounded-lg">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">Your Royalty</span>
+                            <span className="text-xs text-muted-foreground">Royalty Earned</span>
                             <span className="font-bold text-green-600">
                               {formatMobiAmount(campaign.communityShare)}
                             </span>
