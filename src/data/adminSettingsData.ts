@@ -352,7 +352,7 @@ export const financeSettings: AdminSetting[] = [
     currentValue: "all",
     options: [
       { value: "bank_only", label: "Bank Transfer Only" },
-      { value: "mobigate_only", label: "Mobigate Wallet Only" },
+      { value: "mobigate_only", label: "Mobi Wallet Only" },
       { value: "all", label: "All Methods", description: "Bank, Wallet, Card" },
     ],
     approvalPercentage: 95,

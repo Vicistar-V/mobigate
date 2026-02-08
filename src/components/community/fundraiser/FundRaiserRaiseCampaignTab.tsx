@@ -390,7 +390,7 @@ export const FundRaiserRaiseCampaignTab = () => {
       {/* Submission Section */}
       <Card className="p-6">
         <p className="text-sm font-semibold mb-4 text-center">
-          I UNDERSTAND MOBIGATE WILL CHARGE MY WALLET A TOKEN OF{" "}
+          I UNDERSTAND MOBI WILL CHARGE MY WALLET A TOKEN OF{" "}
           <span className="text-primary">1000 Mobi</span> FOR THIS REQUEST
         </p>
         
