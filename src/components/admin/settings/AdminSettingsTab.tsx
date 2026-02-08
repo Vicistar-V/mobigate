@@ -382,13 +382,13 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
           <DrawerContent className="max-h-[92vh] p-0">
-            <DrawerHeader className="border-b pb-3 shrink-0 px-3 pt-4">
+            <DrawerHeader className="border-b pb-3 shrink-0 px-4 pt-4">
               <DrawerTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5 text-primary shrink-0" />
                 Community Settings
               </DrawerTitle>
             </DrawerHeader>
-            <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 py-4 pb-8">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden touch-auto overscroll-contain px-4 py-4 pb-8">
               {Content()}
             </div>
           </DrawerContent>

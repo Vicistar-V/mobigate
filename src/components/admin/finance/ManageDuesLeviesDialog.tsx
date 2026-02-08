@@ -175,7 +175,7 @@ export const ManageDuesLeviesDialog = ({
       </TabsList>
 
       <TabsContent value="list" className="space-y-4 mt-0">
-        <Button onClick={handleCreateNew} className="w-full gap-2">
+        <Button onClick={handleCreateNew} className="w-full gap-2 h-11 touch-manipulation active:scale-[0.98]">
           <Plus className="h-4 w-4" />
           Create New Dues/Levy
         </Button>
@@ -187,73 +187,76 @@ export const ManageDuesLeviesDialog = ({
             );
 
             return (
-              <Card key={obligation.id} className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
+              <Card key={obligation.id} className="p-3 space-y-2.5 overflow-hidden">
+                {/* Row 1: Title + Status */}
+                <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-base truncate">{obligation.name}</h3>
-                      <Badge className={getObligationStatusColor(obligation.status)}>
-                        {getStatusIcon(obligation.status)}
-                        <span className="ml-1 capitalize">{obligation.status}</span>
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {getObligationTypeLabel(obligation.type)} • {formatLocalAmount(obligation.amount, "NGN")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      ≈ {formatMobiAmount(obligation.amount)}
-                    </p>
+                    <h3 className="font-semibold text-base leading-snug break-words">{obligation.name}</h3>
+                    <Badge className={`mt-1 ${getObligationStatusColor(obligation.status)}`}>
+                      {getStatusIcon(obligation.status)}
+                      <span className="ml-1 capitalize">{obligation.status}</span>
+                    </Badge>
                   </div>
-                  <Wallet className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                 </div>
 
-                <p className="text-sm text-muted-foreground line-clamp-2">
+                {/* Row 2: Type + Amount */}
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {getObligationTypeLabel(obligation.type)} • {formatLocalAmount(obligation.amount, "NGN")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    ≈ {formatMobiAmount(obligation.amount)}
+                  </p>
+                </div>
+
+                {/* Row 3: Description */}
+                <p className="text-sm text-muted-foreground line-clamp-2 break-words">
                   {obligation.description}
                 </p>
 
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
+                {/* Row 4: Due date + Paid count stacked */}
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
                     Due: {format(obligation.dueDate, "MMM d, yyyy")}
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Users className="h-3 w-3" />
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5 shrink-0" />
                     {obligation.paidCount}/{obligation.totalMembers} paid
-                  </div>
+                  </span>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-1">
-                      Collection Progress
-                      <MobiExplainerTooltip size="sm" />
-                    </span>
-                    <div className="text-right">
-                      <span className="font-medium">
-                        {formatLocalAmount(obligation.totalCollected, "NGN")} / {formatLocalAmount(obligation.totalExpected, "NGN")}
-                      </span>
-                    </div>
+                {/* Row 5: Collection Progress - stacked vertically */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1 text-sm">
+                    <span className="font-medium">Collection Progress</span>
+                    <MobiExplainerTooltip size="sm" />
                   </div>
-                  <p className="text-xs text-muted-foreground text-right">
+                  <div className="text-sm font-medium break-words">
+                    {formatLocalAmount(obligation.totalCollected, "NGN")} / {formatLocalAmount(obligation.totalExpected, "NGN")}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
                     ≈ {formatMobiAmount(obligation.totalCollected)} / {formatMobiAmount(obligation.totalExpected)}
                   </p>
                   <Progress value={progressPercentage} className="h-2" />
                   <p className="text-xs text-muted-foreground text-right">{progressPercentage}% collected</p>
                 </div>
 
+                {/* Row 6: Action buttons */}
                 <div className="flex gap-2 pt-2 border-t">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 h-10 touch-manipulation active:scale-[0.98]"
                     onClick={() => handleEdit(obligation)}
                   >
-                    <Edit2 className="h-4 w-4 mr-1" />
+                    <Edit2 className="h-4 w-4 mr-1.5" />
                     Edit
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
+                    className="h-10 w-10 touch-manipulation active:scale-[0.97]"
                     onClick={() => handleToggleStatus(obligation)}
                   >
                     {obligation.status === "active" ? (
@@ -265,6 +268,7 @@ export const ManageDuesLeviesDialog = ({
                   <Button
                     variant="outline"
                     size="sm"
+                    className="h-10 w-10 touch-manipulation active:scale-[0.97]"
                     onClick={() => {
                       setSelectedObligation(obligation);
                       setShowDeleteConfirm(true);
@@ -456,13 +460,13 @@ export const ManageDuesLeviesDialog = ({
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[92vh]">
-            <DrawerHeader className="border-b">
+          <DrawerContent className="max-h-[92vh] p-0">
+            <DrawerHeader className="border-b shrink-0 px-4 pt-4 pb-3">
               <DrawerTitle>Manage Dues & Levies</DrawerTitle>
             </DrawerHeader>
-            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden touch-auto overscroll-contain px-4 py-4 pb-8">
               {Content()}
-            </ScrollArea>
+            </div>
           </DrawerContent>
         </Drawer>
 
