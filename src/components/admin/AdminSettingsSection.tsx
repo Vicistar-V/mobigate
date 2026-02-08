@@ -153,17 +153,6 @@ export function AdminSettingsSection({
           </AccordionTrigger>
           <AccordionContent className="px-3 pb-3">
             <div className="space-y-3">
-              {/* Profile Actions - list style */}
-              <div className="flex flex-col gap-0 divide-y divide-border">
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onEditProfile}>
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  Edit Profile
-                </button>
-                <button className="flex items-center gap-3 py-2.5 text-sm hover:bg-muted/50 -mx-1 px-1 rounded" onClick={onEditPhotos}>
-                  <Image className="h-4 w-4 text-muted-foreground" />
-                  Edit Photos
-                </button>
-              </div>
 
               {/* Documents */}
               <div>
