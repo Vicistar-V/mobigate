@@ -302,27 +302,27 @@ export function AdminConstitutionManagementSheet({
           side="bottom"
           className="h-[92vh] rounded-t-2xl p-0 flex flex-col"
         >
-          <SheetHeader className="px-4 pt-4 pb-3 border-b shrink-0">
+          <SheetHeader className="px-3 pt-4 pb-3 border-b shrink-0">
             <SheetTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
+              <FileText className="h-5 w-5 text-primary shrink-0" />
               Constitution Management
             </SheetTitle>
           </SheetHeader>
 
-          <ScrollArea className="flex-1 h-[calc(92vh-60px)] overflow-y-auto touch-auto">
-            <div className="px-4 py-4 pb-6 space-y-4">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+            <div className="px-3 py-4 pb-8 space-y-4 w-full box-border">
               {/* Stats Row */}
-              <div className="grid grid-cols-3 gap-2">
-                <Card>
-                  <CardContent className="p-3 text-center">
+              <div className="grid grid-cols-3 gap-1.5 w-full box-border">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-2.5 text-center">
                     <div className="text-lg font-bold text-green-600">
                       {activeCount}
                     </div>
                     <div className="text-xs text-muted-foreground">Active</div>
                   </CardContent>
                 </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-2.5 text-center">
                     <div className="text-lg font-bold text-muted-foreground">
                       {archivedCount}
                     </div>
@@ -331,8 +331,8 @@ export function AdminConstitutionManagementSheet({
                     </div>
                   </CardContent>
                 </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-2.5 text-center">
                     <div className="text-lg font-bold">
                       {documents.length}
                     </div>
@@ -343,17 +343,17 @@ export function AdminConstitutionManagementSheet({
 
               {/* Upload New Document Button */}
               <Button
-                className="w-full h-12 font-semibold text-base touch-manipulation active:bg-primary/80"
+                className="w-full h-12 font-semibold text-sm touch-manipulation active:bg-primary/80"
                 onClick={() => setShowUploadForm(!showUploadForm)}
               >
-                <Upload className="h-5 w-5 mr-2" />
+                <Upload className="h-5 w-5 mr-2 shrink-0" />
                 Upload New Document
               </Button>
 
               {/* Upload Form */}
               {showUploadForm && (
-                <Card className="border-2 border-primary/30">
-                  <CardContent className="p-4 space-y-4">
+                <Card className="border-2 border-primary/30 w-full box-border overflow-hidden">
+                  <CardContent className="p-3 space-y-4">
                     <h3 className="font-semibold text-sm flex items-center gap-2">
                       <Upload className="h-4 w-4" />
                       Upload Constitution Document
@@ -455,23 +455,23 @@ export function AdminConstitutionManagementSheet({
                     </div>
 
                     {/* Submit */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        className="w-full h-11 text-sm touch-manipulation active:bg-primary/80"
+                        onClick={handleUploadWithAuth}
+                      >
+                        <Shield className="h-4 w-4 mr-2 shrink-0" />
+                        Submit for Authorization
+                      </Button>
                       <Button
                         variant="outline"
-                        className="flex-1 h-11 touch-manipulation active:bg-muted/70"
+                        className="w-full h-11 text-sm touch-manipulation active:bg-muted/70"
                         onClick={() => {
                           setShowUploadForm(false);
                           setSelectedFile(null);
                         }}
                       >
                         Cancel
-                      </Button>
-                      <Button
-                        className="flex-1 h-11 touch-manipulation active:bg-primary/80"
-                        onClick={handleUploadWithAuth}
-                      >
-                        <Shield className="h-4 w-4 mr-2" />
-                        Submit for Authorization
                       </Button>
                     </div>
                   </CardContent>
@@ -484,37 +484,35 @@ export function AdminConstitutionManagementSheet({
                   <h3 className="text-sm font-semibold text-muted-foreground px-1">
                     Active Document
                   </h3>
-                  <Card className="border-2 border-green-200 dark:border-green-800">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-sm leading-tight">
+                  <Card className="border-2 border-green-200 dark:border-green-800 w-full box-border overflow-hidden">
+                    <CardContent className="p-3 space-y-3">
+                      {/* Row 1: Title + Badge stacked */}
+                      <div className="space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-bold text-sm leading-tight break-words flex-1 min-w-0">
                             {activeDoc.title}
                           </h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Version {activeDoc.version} •{" "}
-                            {activeDoc.fileSize} {activeDoc.fileType}
-                          </p>
+                          {getStatusBadge(activeDoc.status)}
                         </div>
-                        {getStatusBadge(activeDoc.status)}
+                        <p className="text-xs text-muted-foreground">
+                          Version {activeDoc.version} • {activeDoc.fileSize} {activeDoc.fileType}
+                        </p>
                       </div>
 
+                      {/* Row 2: Metadata stacked */}
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="h-3.5 w-3.5 shrink-0" />
-                          Effective:{" "}
-                          {format(activeDoc.effectiveDate, "MMM d, yyyy")}
+                          <span className="break-words">Effective: {format(activeDoc.effectiveDate, "MMM d, yyyy")}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5 shrink-0" />
-                          Uploaded:{" "}
-                          {format(activeDoc.uploadedAt, "MMM d, yyyy")} by{" "}
-                          {activeDoc.uploadedBy}
+                        <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <Clock className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                          <span className="break-words">Uploaded: {format(activeDoc.uploadedAt, "MMM d, yyyy")} by {activeDoc.uploadedBy}</span>
                         </div>
                       </div>
 
                       {activeDoc.changelog && (
-                        <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2.5 leading-relaxed">
+                        <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2.5 leading-relaxed break-words">
                           {activeDoc.changelog}
                         </p>
                       )}
@@ -635,7 +633,7 @@ export function AdminConstitutionManagementSheet({
                 </div>
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </SheetContent>
       </Sheet>
     </>
