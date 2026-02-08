@@ -185,12 +185,12 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
       {/* ── Tabs ── */}
       <Tabs defaultValue="id-cards" className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <div className="shrink-0 px-3 pt-1 border-b bg-card">
-          <TabsList className="w-full grid grid-cols-4 h-9">
-            <TabsTrigger value="id-cards" className="text-xs px-1">ID Cards</TabsTrigger>
-            <TabsTrigger value="letters" className="text-xs px-1">Letters</TabsTrigger>
-            <TabsTrigger value="constitution" className="text-xs px-1">Constitution</TabsTrigger>
-            <TabsTrigger value="more" className="text-xs px-1 gap-0.5">
-              <MoreHorizontal className="h-3 w-3" />
+          <TabsList className="w-full grid grid-cols-4 h-10">
+            <TabsTrigger value="id-cards" className="text-sm px-1">ID Cards</TabsTrigger>
+            <TabsTrigger value="letters" className="text-sm px-1">Letters</TabsTrigger>
+            <TabsTrigger value="constitution" className="text-sm px-1">Constitution</TabsTrigger>
+            <TabsTrigger value="more" className="text-sm px-1 gap-0.5">
+              <MoreHorizontal className="h-3.5 w-3.5" />
               More
             </TabsTrigger>
           </TabsList>
@@ -240,24 +240,24 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                       </div>
 
                       {/* Card Details Grid */}
-                      <div className="grid grid-cols-2 gap-1.5 text-xs">
+                      <div className="grid grid-cols-2 gap-1.5">
                         <div className="bg-muted/50 rounded-lg p-2">
-                          <p className="text-xs text-muted-foreground">Card Number</p>
-                          <p className="font-medium text-xs break-words">{mockIDCard.cardNumber}</p>
+                          <p className="text-sm text-muted-foreground">Card Number</p>
+                          <p className="font-medium text-sm break-words">{mockIDCard.cardNumber}</p>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2">
-                          <p className="text-xs text-muted-foreground">Issue Date</p>
-                          <p className="font-medium text-xs">{mockIDCard.issueDate.toLocaleDateString()}</p>
+                          <p className="text-sm text-muted-foreground">Issue Date</p>
+                          <p className="font-medium text-sm">{mockIDCard.issueDate.toLocaleDateString()}</p>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2">
-                          <p className="text-xs text-muted-foreground">Expiry Date</p>
-                          <p className="font-medium text-xs">{mockIDCard.expiryDate.toLocaleDateString()}</p>
+                          <p className="text-sm text-muted-foreground">Expiry Date</p>
+                          <p className="font-medium text-sm">{mockIDCard.expiryDate.toLocaleDateString()}</p>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2 flex items-center gap-1.5">
-                          <QrCode className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <QrCode className="h-4 w-4 text-primary shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-xs text-muted-foreground">Verified</p>
-                            <p className="font-medium text-xs capitalize">{mockIDCard.status}</p>
+                            <p className="text-sm text-muted-foreground">Verified</p>
+                            <p className="font-medium text-sm capitalize">{mockIDCard.status}</p>
                           </div>
                         </div>
                       </div>
@@ -267,28 +267,28 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                   {/* Action Buttons */}
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-2">
-                      <Button onClick={handleRequestCard} variant="outline" size="sm" className="text-xs touch-manipulation active:scale-[0.97]">
-                        <CreditCard className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                      <Button onClick={handleRequestCard} variant="outline" size="sm" className="text-sm touch-manipulation active:scale-[0.97]">
+                        <CreditCard className="h-4 w-4 mr-1.5 shrink-0" />
                         Request New
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={handleOpenIDCardPreview}
-                        className="text-xs touch-manipulation active:scale-[0.97]"
+                        className="text-sm touch-manipulation active:scale-[0.97]"
                       >
-                        <Download className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                        <Download className="h-4 w-4 mr-1.5 shrink-0" />
                         Download
                       </Button>
                     </div>
-                    <Button onClick={handleRenewCard} variant="default" className="w-full text-xs touch-manipulation active:scale-[0.97]" size="sm">
-                      <CreditCard className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                    <Button onClick={handleRenewCard} variant="default" className="w-full text-sm touch-manipulation active:scale-[0.97]" size="sm">
+                      <CreditCard className="h-4 w-4 mr-1.5 shrink-0" />
                       Renew ID Card
                     </Button>
                   </div>
 
                   <div className="p-2.5 bg-muted rounded-lg">
-                    <p className="text-xs text-muted-foreground leading-relaxed break-words">
+                    <p className="text-sm text-muted-foreground leading-relaxed break-words">
                       Your ID card is valid for 2 years from issue date. Please renew before expiry to maintain uninterrupted access to community services.
                     </p>
                   </div>
@@ -307,7 +307,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                 </CardHeader>
                 <CardContent className="space-y-3 px-3 pb-3">
                   <div>
-                    <label className="text-xs font-medium mb-1.5 block">Letter Type</label>
+                    <label className="text-sm font-medium mb-1.5 block">Letter Type</label>
                     <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                       <SelectTrigger className="text-sm">
                         <SelectValue placeholder="Select letter type..." />
@@ -323,7 +323,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                   </div>
 
                   {selectedTemplate && (
-                    <div className="p-2.5 bg-muted rounded-lg text-xs">
+                    <div className="p-2.5 bg-muted rounded-lg text-sm">
                       <p className="text-muted-foreground break-words">
                         {letterTemplates.find(t => t.id === selectedTemplate)?.description}
                       </p>
@@ -336,7 +336,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                   )}
 
                   <div>
-                    <label className="text-xs font-medium mb-1.5 block">Purpose of Request</label>
+                    <label className="text-sm font-medium mb-1.5 block">Purpose of Request</label>
                     <Textarea
                       placeholder="Please provide detailed purpose for this letter..."
                       value={letterPurpose}
@@ -360,7 +360,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
               {/* Letter Requests History */}
               <Card className="overflow-hidden">
                 <CardHeader className="px-3 pt-3 pb-2">
-                  <CardTitle className="text-sm">Your Letter Requests</CardTitle>
+                  <CardTitle className="text-base">Your Letter Requests</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 px-3 pb-3">
                   {mockLetterRequests.map((request) => {
@@ -368,31 +368,31 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                     return (
                       <div key={request.id} className="p-2.5 border rounded-lg space-y-1.5 overflow-hidden">
                         {/* Row 1: Title */}
-                        <h4 className="font-semibold text-xs leading-snug break-words">{template?.title}</h4>
+                        <h4 className="font-semibold text-sm leading-snug break-words">{template?.title}</h4>
                         
                         {/* Row 2: Badge + Date */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className={`${getStatusColor(request.status)} text-xs shrink-0`}>
+                          <Badge className={`${getStatusColor(request.status)} text-sm shrink-0`}>
                             {request.status}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-sm text-muted-foreground">
                             {request.requestDate.toLocaleDateString()}
                           </span>
                         </div>
                         
                         {/* Row 3: Purpose */}
-                        <p className="text-xs text-muted-foreground line-clamp-2 break-words">
+                        <p className="text-sm text-muted-foreground line-clamp-2 break-words">
                           Purpose: {request.purpose}
                         </p>
                         
                         {/* Row 4: Letter number + Download */}
                         {request.letterNumber && (
                           <div className="flex items-center justify-between pt-1.5 border-t gap-2">
-                            <span className="text-xs font-medium break-words min-w-0 flex-1">{request.letterNumber}</span>
+                            <span className="text-sm font-medium break-words min-w-0 flex-1">{request.letterNumber}</span>
                             <Button 
                               size="sm" 
                               variant="outline"
-                              className="shrink-0 text-xs h-7 px-2 touch-manipulation active:scale-[0.97]"
+                              className="shrink-0 text-sm h-8 px-2.5 touch-manipulation active:scale-[0.97]"
                               onClick={() => {
                                 handleOpenLetterPreview({
                                   templateTitle: template?.title || "",
@@ -430,12 +430,12 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                       <Scale className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-xs leading-tight break-words">{constitutionMetadata.title}</h3>
+                      <h3 className="font-bold text-sm leading-tight break-words">{constitutionMetadata.title}</h3>
                       <div className="flex flex-wrap items-center gap-1 mt-1">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-sm">
                           v{constitutionMetadata.version}
                         </Badge>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-sm">
                           {format(constitutionMetadata.effectiveDate, "MMM d, yyyy")}
                         </Badge>
                       </div>
@@ -445,12 +445,12 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                   {/* Metadata Grid */}
                   <div className="grid grid-cols-2 gap-1.5">
                     <div className="bg-muted/50 rounded-lg p-2">
-                      <p className="text-xs text-muted-foreground">Adopted</p>
-                      <p className="font-medium text-xs">{format(constitutionMetadata.adoptedDate, "MMM d, yyyy")}</p>
+                      <p className="text-sm text-muted-foreground">Adopted</p>
+                      <p className="font-medium text-sm">{format(constitutionMetadata.adoptedDate, "MMM d, yyyy")}</p>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-2">
-                      <p className="text-xs text-muted-foreground">Last Amended</p>
-                      <p className="font-medium text-xs">{format(constitutionMetadata.lastAmendedDate, "MMM d, yyyy")}</p>
+                      <p className="text-sm text-muted-foreground">Last Amended</p>
+                      <p className="font-medium text-sm">{format(constitutionMetadata.lastAmendedDate, "MMM d, yyyy")}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -458,7 +458,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
 
               {/* Articles List */}
               <div>
-                <h3 className="font-semibold text-xs mb-1.5">Articles</h3>
+                <h3 className="font-semibold text-sm mb-1.5">Articles</h3>
                 <div className="space-y-1">
                   {constitutionArticles.map((article) => (
                     <button
@@ -474,9 +474,9 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium break-words">{article.title}</p>
+                        <p className="text-sm font-medium break-words">{article.title}</p>
                         {article.number && (
-                          <p className="text-xs text-muted-foreground">{article.number}</p>
+                          <p className="text-sm text-muted-foreground">{article.number}</p>
                         )}
                       </div>
                       <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -487,12 +487,12 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
 
               {/* Constitution Actions */}
               <div className="grid grid-cols-2 gap-2">
-                <Button onClick={handleOpenConstitutionViewer} className="w-full h-10 text-xs touch-manipulation active:scale-[0.97]">
-                  <BookOpen className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                <Button onClick={handleOpenConstitutionViewer} className="w-full h-10 text-sm touch-manipulation active:scale-[0.97]">
+                  <BookOpen className="h-4 w-4 mr-1.5 shrink-0" />
                   View Full
                 </Button>
-                <Button onClick={handleDownloadConstitution} variant="outline" className="w-full h-10 text-xs touch-manipulation active:scale-[0.97]">
-                  <Download className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                <Button onClick={handleDownloadConstitution} variant="outline" className="w-full h-10 text-sm touch-manipulation active:scale-[0.97]">
+                  <Download className="h-4 w-4 mr-1.5 shrink-0" />
                   Download
                 </Button>
               </div>
@@ -506,7 +506,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-primary shrink-0" />
-                  <h3 className="font-bold text-sm">Publications</h3>
+                  <h3 className="font-bold text-base">Publications</h3>
                 </div>
 
                 <div className="relative">
@@ -525,32 +525,32 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
 
                 {filteredPublications.filter(p => p.featured).length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-xs mb-2">Featured Publications</h4>
+                    <h4 className="font-semibold text-sm mb-2">Featured Publications</h4>
                     <div className="space-y-2">
                       {filteredPublications.filter(p => p.featured).map((pub) => (
                         <Card key={pub.id} className="border-l-4 border-l-primary overflow-hidden">
                           <CardContent className="p-2.5 space-y-1.5">
                             {/* Row 1: Title + Badge */}
                             <div className="flex items-start justify-between gap-2">
-                              <h4 className="font-semibold text-xs leading-snug flex-1 min-w-0 break-words line-clamp-2">{pub.title}</h4>
-                              <Badge variant="secondary" className="shrink-0 text-xs">
+                              <h4 className="font-semibold text-sm leading-snug flex-1 min-w-0 break-words line-clamp-2">{pub.title}</h4>
+                              <Badge variant="secondary" className="shrink-0 text-sm">
                                 {pub.type}
                               </Badge>
                             </div>
                             {/* Row 2: Description */}
-                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed break-words">
+                            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed break-words">
                               {pub.description}
                             </p>
                             {/* Row 3: Meta + Download */}
                             <div className="flex items-center justify-between gap-2">
                               <div className="min-w-0">
-                                <p className="text-xs text-muted-foreground break-words">{pub.edition}</p>
-                                <p className="text-xs text-muted-foreground">{pub.pages} pages • {pub.fileSize}</p>
+                                <p className="text-sm text-muted-foreground break-words">{pub.edition}</p>
+                                <p className="text-sm text-muted-foreground">{pub.pages} pages • {pub.fileSize}</p>
                               </div>
                               <Button
                                 onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
                                 size="sm"
-                                className="shrink-0 text-xs h-7 px-2.5 touch-manipulation active:scale-[0.97]"
+                                className="shrink-0 text-sm h-8 px-3 touch-manipulation active:scale-[0.97]"
                               >
                                 <Download className="h-3 w-3 mr-1" />
                                 Get
@@ -564,7 +564,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                 )}
 
                 <div>
-                  <h4 className="font-semibold text-xs mb-2">All Publications</h4>
+                  <h4 className="font-semibold text-sm mb-2">All Publications</h4>
                   <div className="space-y-1.5">
                     {filteredPublications.filter(p => !p.featured).map((pub) => (
                       <Card key={pub.id} className="overflow-hidden">
@@ -574,15 +574,15 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                               <BookOpen className="h-4 w-4" />
                             </div>
                             <div className="flex-1 min-w-0 space-y-1">
-                              <h4 className="font-medium text-xs break-words line-clamp-1">{pub.title}</h4>
-                              <p className="text-xs text-muted-foreground">{pub.edition}</p>
+                              <h4 className="font-medium text-sm break-words line-clamp-1">{pub.title}</h4>
+                              <p className="text-sm text-muted-foreground">{pub.edition}</p>
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-xs text-muted-foreground">{pub.fileSize}</span>
+                                <span className="text-sm text-muted-foreground">{pub.fileSize}</span>
                                 <Button
                                   onClick={() => handleDownloadPublication({ title: pub.title, fileSize: pub.fileSize })}
                                   size="sm"
                                   variant="ghost"
-                                  className="shrink-0 text-xs h-6 px-2 touch-manipulation"
+                                  className="shrink-0 text-sm h-7 px-2 touch-manipulation"
                                 >
                                   <Download className="h-3 w-3 mr-1" />
                                   Get
@@ -607,7 +607,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
               <div className="space-y-2.5">
                 <div className="flex items-center gap-2">
                   <ExternalLink className="h-4 w-4 text-primary shrink-0" />
-                  <h3 className="font-bold text-sm">Other Resources</h3>
+                  <h3 className="font-bold text-base">Other Resources</h3>
                 </div>
 
                 <div className="space-y-1.5">
@@ -626,8 +626,8 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                         <resource.icon className={`h-4 w-4 ${resource.color.split(" ")[0]}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-xs">{resource.title}</h4>
-                        <p className="text-xs text-muted-foreground break-words">
+                        <h4 className="font-semibold text-sm">{resource.title}</h4>
+                        <p className="text-sm text-muted-foreground break-words">
                           {resource.desc}
                         </p>
                       </div>
