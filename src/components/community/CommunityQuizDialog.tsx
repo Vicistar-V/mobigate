@@ -363,14 +363,14 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                   </div>
                   {communityQuizLeaderboard.map((entry) => (
                     <div key={entry.id} className={cn(
-                      "p-2.5 rounded-lg",
+                      "p-3 rounded-lg",
                       entry.rank === 1 && "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 border border-yellow-200",
                       entry.rank === 2 && "bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30 border border-gray-200",
                       entry.rank === 3 && "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200",
-                      entry.rank > 3 && "bg-blue-50/50 dark:bg-blue-950/20"
+                      entry.rank > 3 && "bg-blue-50/50 dark:bg-blue-950/20 border border-transparent"
                     )}>
-                      {/* Row 1: Rank + Avatar + Name + Prize */}
-                      <div className="flex items-center gap-2">
+                      {/* Row 1: Rank + Avatar + Name */}
+                      <div className="flex items-center gap-2.5">
                         <div className={cn(
                           "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                           entry.rank === 1 && "bg-yellow-500 text-yellow-950",
@@ -384,30 +384,33 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                           className="shrink-0 touch-manipulation active:scale-[0.95]"
                           onClick={() => handleOpenProfile(entry.playerName, entry.playerAvatar)}
                         >
-                          <Avatar className="h-9 w-9 border-2 border-blue-200">
+                          <Avatar className="h-10 w-10 border-2 border-blue-200">
                             <AvatarImage src={entry.playerAvatar} />
                             <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{entry.playerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                         </button>
                         <div className="flex-1 min-w-0">
                           <button
-                            className="font-medium text-sm truncate block w-full text-left touch-manipulation active:text-primary transition-colors"
+                            className="font-semibold text-sm truncate block w-full text-left touch-manipulation active:text-primary transition-colors"
                             onClick={() => handleOpenProfile(entry.playerName, entry.playerAvatar)}
                           >
                             {entry.playerName}
                           </button>
                         </div>
-                        <div className="text-right shrink-0 ml-1">
-                          <p className="font-bold text-blue-600 text-sm">{formatLocalAmount(entry.amountWon, "NGN")}</p>
-                          <p className="text-xs text-muted-foreground">({formatMobiAmount(entry.amountWon)})</p>
-                        </div>
                       </div>
-                      {/* Row 2: Metadata under avatar area */}
-                      <div className="ml-[calc(1.75rem+0.5rem+2.25rem+0.5rem)] mt-0.5">
-                        <p className="text-xs text-muted-foreground">{entry.questionsCorrect}/10 • {entry.completionTime}</p>
-                        {entry.memberSince && (
-                          <p className="text-xs text-blue-500">Member since {entry.memberSince}</p>
-                        )}
+
+                      {/* Row 2: Metadata + Prize — restacked below */}
+                      <div className="flex items-end justify-between mt-1.5 ml-[calc(1.75rem+0.625rem+2.5rem+0.625rem)]">
+                        <div>
+                          <p className="text-sm text-muted-foreground">{entry.questionsCorrect}/10 • {entry.completionTime}</p>
+                          {entry.memberSince && (
+                            <p className="text-sm text-blue-600 font-medium">Member since {entry.memberSince}</p>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0 ml-2">
+                          <p className="font-bold text-blue-600 text-base">{formatLocalAmount(entry.amountWon, "NGN")}</p>
+                          <p className="text-sm text-muted-foreground">({formatMobiAmount(entry.amountWon)})</p>
+                        </div>
                       </div>
                     </div>
                   ))}
