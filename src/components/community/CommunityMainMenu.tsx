@@ -1402,13 +1402,13 @@ export function CommunityMainMenu({
       <AdvertisementsListSheet
         open={showAdvertisements}
         onOpenChange={setShowAdvertisements}
-        initialTab="active"
+        initialTab="all_active"
         onCreateNew={() => setShowCreateAdvert(true)}
       />
       <AdvertisementsListSheet
         open={showMyAdverts}
         onOpenChange={setShowMyAdverts}
-        initialTab="mine"
+        initialTab="my_active"
         onCreateNew={() => setShowCreateAdvert(true)}
       />
     </>
