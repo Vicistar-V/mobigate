@@ -298,22 +298,21 @@ export const ElectionVotingCard = ({
                   : 'border-border'
               }`}
             >
-              {/* Row 1: Avatar + Name - Full Width */}
+              {/* Row 1: Avatar Photo + Name - Full Width */}
               <div className="flex items-center gap-3 mb-1">
                 <button
                   className="relative shrink-0 touch-manipulation active:scale-[0.95]"
                   onClick={() => handleNameClick(candidate)}
                 >
-                  <Avatar className="h-10 w-10">
+                  <Avatar className="h-12 w-12 border-2 border-muted">
                     <AvatarImage src={candidate.avatar} alt={candidate.name} />
-                    <AvatarFallback className="text-xs font-medium">
+                    <AvatarFallback className="text-sm font-semibold bg-muted">
                       {candidate.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background ${getCandidateColorClass(candidate.color)}`} />
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-background ${getCandidateColorClass(candidate.color)}`} />
                 </button>
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-base font-semibold text-foreground">+</span>
+                <div className="flex-1 min-w-0">
                   <button
                     className="text-base font-semibold text-foreground break-words leading-tight text-left touch-manipulation active:text-primary transition-colors"
                     onClick={() => handleNameClick(candidate)}
@@ -324,9 +323,9 @@ export const ElectionVotingCard = ({
               </div>
 
               {/* Row 1.5: Current Votes Stat */}
-              <div className="flex items-center gap-2 ml-7 mb-3">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <div className="flex items-center gap-2 ml-[calc(3rem+0.75rem)] mb-3">
+                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                   {candidate.votes.toLocaleString()} {candidate.votes === 1 ? 'Vote' : 'Votes'}
                 </span>
               </div>
