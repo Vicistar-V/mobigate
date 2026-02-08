@@ -80,7 +80,7 @@ export function AdvertisementSettingsSheet({
               </Button>
             )}
             <h2 className="font-semibold text-base">
-              Step {step} of 3 — {step === 1 ? "Review Details" : step === 2 ? "Target Audience" : "Duration & Payment"}
+              Step {step} of 3 — {step === 1 ? "Review Details" : step === 2 ? "Duration & Payment" : "Target Audience"}
             </h2>
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
@@ -204,8 +204,47 @@ export function AdvertisementSettingsSheet({
               </>
             )}
 
-            {/* STEP 2: Audience */}
+            {/* STEP 2: Duration & Payment */}
             {step === 2 && (
+              <>
+                <p className="text-sm text-muted-foreground">Choose ad duration:</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {campaignDurationOptions.map((option) => {
+                    const isSelected = formData.durationDays === option.days;
+                    return (
+                      <button
+                        key={option.days}
+                        onClick={() => setDuration(option.days)}
+                        className={`p-3 rounded-xl border-2 text-left transition-all touch-manipulation active:scale-[0.97] ${
+                          isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-sm">{option.label}</span>
+                          {option.popular && (
+                            <Badge className="text-xs px-1 bg-amber-500 text-white">Popular</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
+                        <p className="text-sm font-bold text-primary mt-1">{formatMobiAmount(option.feeInMobi)}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Base Fee Preview */}
+                <Card className="p-3 space-y-2 bg-muted/30">
+                  <h4 className="font-semibold text-sm">Selected Duration</h4>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Base Fee ({formData.durationDays} days):</span>
+                    <span className="font-bold text-primary">{formatMobiAmount(feeCalc.baseFee)}</span>
+                  </div>
+                </Card>
+              </>
+            )}
+
+            {/* STEP 3: Target Audience (with live fee buildup) */}
+            {step === 3 && (
               <>
                 <p className="text-sm text-muted-foreground">Select where your ad should appear:</p>
                 <div className="space-y-2">
@@ -238,38 +277,8 @@ export function AdvertisementSettingsSheet({
                     );
                   })}
                 </div>
-              </>
-            )}
 
-            {/* STEP 3: Duration & Payment */}
-            {step === 3 && (
-              <>
-                <p className="text-sm text-muted-foreground">Choose ad duration:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {campaignDurationOptions.map((option) => {
-                    const isSelected = formData.durationDays === option.days;
-                    return (
-                      <button
-                        key={option.days}
-                        onClick={() => setDuration(option.days)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all touch-manipulation active:scale-[0.97] ${
-                          isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-sm">{option.label}</span>
-                          {option.popular && (
-                            <Badge className="text-xs px-1 bg-amber-500 text-white">Popular</Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
-                        <p className="text-sm font-bold text-primary mt-1">{formatMobiAmount(option.feeInMobi)}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Fee Breakdown */}
+                {/* Live Fee Breakdown — updates as audiences are toggled */}
                 <Card className="p-3 space-y-2 bg-muted/30">
                   <h4 className="font-semibold text-sm">Fee Breakdown</h4>
                   <div className="space-y-1.5 text-sm">
@@ -277,10 +286,15 @@ export function AdvertisementSettingsSheet({
                       <span className="text-muted-foreground">Base Fee ({formData.durationDays} days):</span>
                       <span>{formatMobiAmount(feeCalc.baseFee)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Audience Premium:</span>
-                      <span>{formatMobiAmount(feeCalc.audiencePremium)}</span>
-                    </div>
+                    {feeCalc.breakdown.map((item) => {
+                      const audienceLabel = campaignAudienceOptions.find(a => a.value === item.audience)?.label || item.audience;
+                      return item.premium > 0 ? (
+                        <div key={item.audience} className="flex justify-between">
+                          <span className="text-muted-foreground">{audienceLabel} Premium:</span>
+                          <span>+{formatMobiAmount(item.premium)}</span>
+                        </div>
+                      ) : null;
+                    })}
                     <div className="flex justify-between font-bold border-t pt-1.5">
                       <span>Total Fee:</span>
                       <span className="text-primary">{formatMobiAmount(feeCalc.totalFee)}</span>
