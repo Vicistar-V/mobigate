@@ -99,24 +99,24 @@ export function AdvertisementSettingsSheet({
         </div>
 
         <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-          <div className="p-4 space-y-4 pb-32">
+          <div className="px-3 py-4 space-y-4 pb-32 min-w-0 overflow-hidden">
             {/* STEP 1: Review */}
             {step === 1 && (
               <>
-                <Card className="p-3 space-y-3">
+                <Card className="p-3 space-y-3 min-w-0 overflow-hidden">
                   <h3 className="font-semibold text-base">Advert Summary</h3>
-                  <div className="space-y-3 text-sm">
+                  <div className="space-y-3 text-sm min-w-0">
                     {/* Business Name */}
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 min-w-0">
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Business</span>
-                      <p className="text-sm font-semibold break-words">{formData.businessName}</p>
+                      <p className="text-sm font-semibold break-words overflow-wrap-anywhere">{formData.businessName}</p>
                     </div>
 
                     {/* Category */}
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 min-w-0">
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Category</span>
                       <div>
-                        <Badge variant="secondary" className="text-xs font-medium">
+                        <Badge variant="secondary" className="text-xs font-medium max-w-full truncate">
                           {formData.category === "other" && formData.customCategory
                             ? formData.customCategory
                             : getCategoryLabel(formData.category)}
@@ -125,52 +125,52 @@ export function AdvertisementSettingsSheet({
                     </div>
 
                     {/* Product Title */}
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 min-w-0">
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Product</span>
-                      <p className="text-sm font-semibold break-words">{formData.productTitle}</p>
+                      <p className="text-sm font-semibold break-words" style={{ overflowWrap: 'anywhere' }}>{formData.productTitle}</p>
                     </div>
 
                     {/* City */}
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 min-w-0">
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">City</span>
                       <p className="text-sm break-words flex items-start gap-1.5">
                         <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
-                        <span>{formData.city}</span>
+                        <span className="min-w-0 break-words" style={{ overflowWrap: 'anywhere' }}>{formData.city}</span>
                       </p>
                     </div>
 
-                    {/* Contact Details - 2-column grid for short values */}
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="space-y-0.5">
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone 1</span>
-                        <p className="text-sm font-medium">{formData.phone1}</p>
-                      </div>
-                      {formData.phone2 && (
-                        <div className="space-y-0.5">
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone 2</span>
-                          <p className="text-sm font-medium">{formData.phone2}</p>
-                        </div>
-                      )}
+                    {/* Phone 1 */}
+                    <div className="space-y-0.5 min-w-0">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone 1</span>
+                      <p className="text-sm font-medium">{formData.phone1}</p>
                     </div>
+
+                    {/* Phone 2 */}
+                    {formData.phone2 && (
+                      <div className="space-y-0.5 min-w-0">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone 2</span>
+                        <p className="text-sm font-medium">{formData.phone2}</p>
+                      </div>
+                    )}
 
                     {/* Email */}
                     {formData.email && (
-                      <div className="space-y-0.5">
+                      <div className="space-y-0.5 min-w-0">
                         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Email</span>
-                        <p className="text-sm break-all">{formData.email}</p>
+                        <p className="text-sm break-all" style={{ overflowWrap: 'anywhere' }}>{formData.email}</p>
                       </div>
                     )}
 
                     {/* Website */}
                     {formData.website && (
-                      <div className="space-y-0.5">
+                      <div className="space-y-0.5 min-w-0">
                         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Website</span>
-                        <p className="text-sm break-all text-primary">{formData.website}</p>
+                        <p className="text-sm break-all text-primary" style={{ overflowWrap: 'anywhere' }}>{formData.website}</p>
                       </div>
                     )}
 
                     {/* Media Count */}
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 min-w-0">
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Media</span>
                       <p className="text-sm font-medium">{formData.media.length} of 4 uploaded</p>
                     </div>
