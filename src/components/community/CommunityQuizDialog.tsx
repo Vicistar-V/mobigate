@@ -19,6 +19,8 @@ import {
 } from "@/data/communityQuizData";
 import { CommunityQuizPlayDialog } from "./CommunityQuizPlayDialog";
 import { QuizWalletDrawer } from "./QuizWalletDrawer";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
@@ -35,6 +37,8 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
   const [selectedQuiz, setSelectedQuiz] = useState<CommunityQuiz | null>(null);
   const [showGamePlay, setShowGamePlay] = useState(false);
   const [showQuizWallet, setShowQuizWallet] = useState(false);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const { toast } = useToast();
 
   const playerWalletBalance = 15000;
@@ -80,10 +84,24 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
   const availableQuizzes = activeCommunityQuizzes.filter(q => q.status === "active");
   const upcomingQuizzes = activeCommunityQuizzes.filter(q => q.status === "upcoming");
 
+  const handleOpenProfile = (name: string, avatar?: string) => {
+    const member: ExecutiveMember = {
+      id: name.toLowerCase().replace(/\s+/g, '-'),
+      name,
+      position: "Community Member",
+      tenure: "Active",
+      imageUrl: avatar || "/placeholder.svg",
+      level: "officer",
+      committee: "executive",
+    };
+    setSelectedMember(member);
+    setShowMemberPreview(true);
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[92vh] p-0 gap-0 overflow-hidden">
           {/* Blue-themed Header */}
           <DialogHeader className="p-4 pb-3 sticky top-0 bg-gradient-to-r from-blue-600 to-blue-500 z-10 border-b text-white">
             <div className="flex items-center justify-between">
@@ -338,21 +356,21 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                 </TabsContent>
 
                 {/* Leaderboard Tab */}
-                <TabsContent value="leaderboard" className="mt-0 space-y-3">
-                  <div className="flex items-center gap-2 mb-4">
+                <TabsContent value="leaderboard" className="mt-0 space-y-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <Crown className="h-5 w-5 text-blue-600" />
                     <h3 className="font-semibold text-blue-700 dark:text-blue-300">Community Champions</h3>
                   </div>
                   {communityQuizLeaderboard.map((entry) => (
                     <div key={entry.id} className={cn(
-                      "flex items-center gap-3 p-3 rounded-lg",
+                      "flex items-center gap-2.5 p-2.5 rounded-lg",
                       entry.rank === 1 && "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 border border-yellow-200",
                       entry.rank === 2 && "bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30 border border-gray-200",
                       entry.rank === 3 && "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200",
                       entry.rank > 3 && "bg-blue-50/50 dark:bg-blue-950/20"
                     )}>
                       <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                         entry.rank === 1 && "bg-yellow-500 text-yellow-950",
                         entry.rank === 2 && "bg-gray-300 text-gray-700",
                         entry.rank === 3 && "bg-amber-600 text-amber-950",
@@ -360,20 +378,30 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                       )}>
                         {entry.rank}
                       </div>
-                      <Avatar className="h-10 w-10 border-2 border-blue-200">
-                        <AvatarImage src={entry.playerAvatar} />
-                        <AvatarFallback className="bg-blue-100 text-blue-700">{entry.playerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
+                      <button
+                        className="shrink-0 touch-manipulation active:scale-[0.95]"
+                        onClick={() => handleOpenProfile(entry.playerName, entry.playerAvatar)}
+                      >
+                        <Avatar className="h-9 w-9 border-2 border-blue-200">
+                          <AvatarImage src={entry.playerAvatar} />
+                          <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{entry.playerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                      </button>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{entry.playerName}</p>
+                        <button
+                          className="font-medium text-sm truncate block w-full text-left touch-manipulation active:text-primary transition-colors"
+                          onClick={() => handleOpenProfile(entry.playerName, entry.playerAvatar)}
+                        >
+                          {entry.playerName}
+                        </button>
                         <p className="text-xs text-muted-foreground">{entry.questionsCorrect}/10 • {entry.completionTime}</p>
                         {entry.memberSince && (
-                          <p className="text-[10px] text-blue-500">Member since {entry.memberSince}</p>
+                          <p className="text-xs text-blue-500">Member since {entry.memberSince}</p>
                         )}
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-blue-600 text-sm">{formatLocalAmount(entry.amountWon, "NGN")}</p>
-                        <p className="text-[10px] text-muted-foreground">({formatMobiAmount(entry.amountWon)})</p>
+                      <div className="text-right shrink-0">
+                        <p className="font-bold text-blue-600 text-sm whitespace-nowrap">{formatLocalAmount(entry.amountWon, "NGN")}</p>
+                        <p className="text-xs text-muted-foreground whitespace-nowrap">({formatMobiAmount(entry.amountWon)})</p>
                       </div>
                     </div>
                   ))}
@@ -486,6 +514,13 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
       <QuizWalletDrawer
         open={showQuizWallet}
         onOpenChange={setShowQuizWallet}
+      />
+
+      {/* Member Profile Preview */}
+      <MemberPreviewDialog
+        member={selectedMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
       />
     </>
   );
