@@ -498,3 +498,4 @@ export const ElectionVotingCard = ({
     </Card>
   );
 };
+
