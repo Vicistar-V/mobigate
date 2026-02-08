@@ -181,7 +181,6 @@ export const ElectionVotingCard = ({
     setSelectedMember(mapCandidateToMember(candidate));
     setShowMemberPreview(true);
   };
-  };
 
   const getButtonColorClasses = (color: string, isVoted: boolean) => {
     if (isVoted) {
