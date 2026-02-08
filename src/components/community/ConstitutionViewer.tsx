@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { X, Search, Download, BookOpen, ChevronRight } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { X, Search, Download, BookOpen, ChevronRight, FileText, Scale } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { constitutionSections, constitutionMetadata } from "@/data/constitutionData";
 import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
@@ -25,6 +23,7 @@ export function ConstitutionViewer({ open, onOpenChange }: ConstitutionViewerPro
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
   const [showDownloadSheet, setShowDownloadSheet] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [activeTab, setActiveTab] = useState("content");
 
   const articles = constitutionSections.filter(s => s.type === "article");
   
@@ -54,193 +53,240 @@ export function ConstitutionViewer({ open, onOpenChange }: ConstitutionViewerPro
 
   const scrollToSection = (sectionId: string) => {
     setSelectedArticle(sectionId);
-    const element = document.getElementById(`section-${sectionId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    setActiveTab("content");
+    setTimeout(() => {
+      const element = document.getElementById(`section-${sectionId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   };
 
-  // Shared header content
-  const headerContent = (
-    <>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
-          <div className="bg-primary/10 p-1.5 rounded-lg shrink-0">
-            <BookOpen className="h-4 w-4 text-primary" />
+  /* ── MOBILE LAYOUT ── */
+  const mobileContent = (
+    <div className="flex flex-col h-full max-h-[92vh] overflow-hidden">
+      {/* ── Sticky header ── */}
+      <div className="shrink-0 px-3 pt-1 pb-2 border-b bg-card">
+        {/* Title row */}
+        <div className="flex items-start gap-2 mb-2">
+          <div className="bg-primary/10 p-1.5 rounded-lg shrink-0 mt-0.5">
+            <Scale className="h-4 w-4 text-primary" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-bold leading-tight break-words">
+            <h2 className="text-sm font-bold leading-snug break-words">
               {constitutionMetadata.title}
             </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              v{constitutionMetadata.version} • {constitutionMetadata.effectiveDate.toLocaleDateString()}
-            </p>
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                v{constitutionMetadata.version}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                Effective {constitutionMetadata.effectiveDate.toLocaleDateString()}
+              </span>
+            </div>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onOpenChange(false)}
-          className="h-8 w-8 shrink-0"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-      
-      <div className="flex gap-2 pb-2">
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 text-sm h-9 touch-manipulation"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-          />
+
+        {/* Search + Download row */}
+        <div className="flex gap-1.5">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search constitution..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 text-sm h-8 touch-manipulation"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+          <Button 
+            onClick={() => setShowDownloadSheet(true)} 
+            size="sm" 
+            variant="outline" 
+            className="shrink-0 h-8 w-8 p-0 touch-manipulation active:bg-muted/70"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </Button>
         </div>
-        <Button 
-          onClick={() => setShowDownloadSheet(true)} 
-          size="sm" 
-          variant="outline" 
-          className="shrink-0 h-9 px-2.5 touch-manipulation active:bg-muted/70"
-        >
-          <Download className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-    </>
-  );
-
-  // Shared body content
-  const bodyContent = (
-    <Tabs defaultValue="content" className="flex-1 flex flex-col overflow-hidden">
-      <div className="px-2 border-b shrink-0">
-        <TabsList className="w-full grid grid-cols-2">
-          <TabsTrigger value="content" className="text-xs">Full Document</TabsTrigger>
-          <TabsTrigger value="toc" className="text-xs">Contents</TabsTrigger>
-        </TabsList>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
-        <TabsContent value="content" className="mt-0 px-2 py-3">
-          {searchQuery && filteredSections.length > 0 ? (
-            <div className="space-y-3">
-              <p className="text-xs text-muted-foreground">
-                Found {filteredSections.length} result(s) for "{searchQuery}"
-              </p>
-              {filteredSections.map((section) => (
-                <Card key={section.id} className="border-l-4 border-l-primary overflow-hidden">
-                  <CardContent className="p-2.5">
-                    <div className="flex items-start gap-2 mb-1.5 flex-wrap">
-                      <Badge variant="outline" className="shrink-0 text-xs">
-                        {section.number}
-                      </Badge>
-                      <h4 className="font-semibold text-xs min-w-0">{section.title}</h4>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed break-words">{section.content}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : searchQuery && filteredSections.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground text-sm">No results found for "{searchQuery}"</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {constitutionSections.map((section) => {
-                if (section.type !== "article") return null;
-                const subsections = getArticleSections(section.id);
-                
-                return (
-                  <div
-                    key={section.id}
-                    id={`section-${section.id}`}
-                    className={`scroll-mt-4 ${selectedArticle === section.id ? "bg-primary/5 rounded-lg p-2.5 -mx-1" : ""}`}
-                  >
-                    <div className="mb-3">
-                      {section.number && (
-                        <Badge className="mb-1.5 text-xs">{section.number}</Badge>
-                      )}
-                      <h2 className="text-base font-bold mb-2 break-words">{section.title}</h2>
-                      <p className="text-sm text-muted-foreground leading-relaxed break-words">{section.content}</p>
-                    </div>
-                    
-                    {subsections.length > 0 && (
-                      <div className="space-y-2.5">
-                        {subsections.map((subsection) => (
-                          <Card key={subsection.id} className="border-l-2 border-l-primary/40 overflow-hidden">
-                            <CardContent className="p-2.5">
-                              <div className="flex items-start gap-1.5 mb-1.5 flex-wrap">
-                                <Badge variant="secondary" className="shrink-0 text-xs">
-                                  {subsection.number}
-                                </Badge>
-                                <h4 className="font-semibold text-xs min-w-0 break-words">{subsection.title}</h4>
-                              </div>
-                              <p className="text-xs text-muted-foreground leading-relaxed break-words">
-                                {subsection.content}
-                              </p>
-                            </CardContent>
-                          </Card>
-                        ))}
+      {/* ── Tab bar ── */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="shrink-0 px-3 pt-1.5 pb-1 border-b bg-card">
+          <TabsList className="w-full grid grid-cols-2 h-8">
+            <TabsTrigger value="content" className="text-xs h-7">
+              <FileText className="h-3 w-3 mr-1" />
+              Full Document
+            </TabsTrigger>
+            <TabsTrigger value="toc" className="text-xs h-7">
+              <BookOpen className="h-3 w-3 mr-1" />
+              Contents
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        {/* ── Scrollable body ── */}
+        <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
+          
+          {/* Full Document Tab */}
+          <TabsContent value="content" className="mt-0 m-0">
+            <div className="px-3 py-2.5">
+              {searchQuery && filteredSections.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {filteredSections.length} result(s) for "{searchQuery}"
+                  </p>
+                  {filteredSections.map((section) => (
+                    <div 
+                      key={section.id} 
+                      className="border-l-3 border-l-primary bg-muted/20 rounded-r-lg p-2.5"
+                    >
+                      <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                        {section.number && (
+                          <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 shrink-0">
+                            {section.number}
+                          </Badge>
+                        )}
+                        <span className="font-semibold text-xs break-words">{section.title}</span>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="toc" className="mt-0 px-2 py-3">
-          <div className="space-y-1.5">
-            {articles.map((article) => {
-              const sections = getArticleSections(article.id);
-              return (
-                <Card key={article.id} className="overflow-hidden">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-between p-3 h-auto touch-manipulation"
-                    onClick={() => {
-                      scrollToSection(article.id);
-                      const contentTab = document.querySelector('[value="content"]') as HTMLElement;
-                      contentTab?.click();
-                    }}
-                  >
-                    <div className="text-left min-w-0 flex-1">
-                      <p className="font-semibold text-xs mb-0.5">{article.number}</p>
-                      <p className="text-xs text-muted-foreground break-words">{article.title}</p>
-                    </div>
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 ml-2" />
-                  </Button>
-                  {sections.length > 0 && (
-                    <div className="border-t bg-muted/30 px-3 py-1.5">
-                      <p className="text-xs text-muted-foreground">
-                        {sections.length} section{sections.length > 1 ? "s" : ""}
+                      <p className="text-xs text-muted-foreground leading-relaxed break-words">
+                        {section.content}
                       </p>
                     </div>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
-        </TabsContent>
-      </div>
-    </Tabs>
+                  ))}
+                </div>
+              ) : searchQuery && filteredSections.length === 0 ? (
+                <div className="text-center py-10">
+                  <Search className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    No results for "{searchQuery}"
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {constitutionSections.map((section) => {
+                    if (section.type !== "article") return null;
+                    const subsections = getArticleSections(section.id);
+                    
+                    return (
+                      <div
+                        key={section.id}
+                        id={`section-${section.id}`}
+                        className={`scroll-mt-2 ${
+                          selectedArticle === section.id 
+                            ? "bg-primary/5 rounded-lg p-2 -mx-0.5" 
+                            : ""
+                        }`}
+                      >
+                        {/* Article header */}
+                        <div className="mb-2">
+                          {section.number && (
+                            <Badge className="text-xs px-1.5 py-0 h-5 mb-1">
+                              {section.number}
+                            </Badge>
+                          )}
+                          <h3 className="text-sm font-bold break-words leading-snug">
+                            {section.title}
+                          </h3>
+                          <p className="text-xs text-muted-foreground leading-relaxed mt-1 break-words">
+                            {section.content}
+                          </p>
+                        </div>
+                        
+                        {/* Sub-sections */}
+                        {subsections.length > 0 && (
+                          <div className="space-y-1.5 ml-1">
+                            {subsections.map((sub) => (
+                              <div 
+                                key={sub.id} 
+                                className="border-l-2 border-l-primary/30 pl-2.5 py-1.5"
+                              >
+                                <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                                  <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 shrink-0">
+                                    {sub.number}
+                                  </Badge>
+                                  <span className="font-semibold text-xs break-words">
+                                    {sub.title}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-relaxed break-words">
+                                  {sub.content}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Separator between articles */}
+                        <div className="border-b border-border/50 mt-3" />
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Bottom safe area */}
+                  <div className="h-6" />
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Table of Contents Tab */}
+          <TabsContent value="toc" className="mt-0 m-0">
+            <div className="px-3 py-2.5 space-y-1">
+              {articles.map((article, index) => {
+                const sections = getArticleSections(article.id);
+                return (
+                  <button
+                    key={article.id}
+                    className="w-full text-left rounded-lg p-2.5 bg-muted/30 hover:bg-muted/60 active:bg-muted/80 active:scale-[0.98] transition-all touch-manipulation"
+                    tabIndex={-1}
+                    onPointerDown={(e) => e.preventDefault()}
+                    onClick={() => scrollToSection(article.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center h-6 w-6 rounded-md bg-primary/10 text-primary text-xs font-bold shrink-0">
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        {article.number && (
+                          <p className="text-xs font-bold text-primary mb-0.5">
+                            {article.number}
+                          </p>
+                        )}
+                        <p className="text-xs break-words leading-snug">
+                          {article.title}
+                        </p>
+                        {sections.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {sections.length} section{sections.length > 1 ? "s" : ""}
+                          </p>
+                        )}
+                      </div>
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    </div>
+                  </button>
+                );
+              })}
+              
+              {/* Bottom safe area */}
+              <div className="h-6" />
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
+    </div>
   );
 
   if (isMobile) {
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden p-0">
-            <div className="px-3 pt-3 border-b shrink-0">
-              {headerContent}
-            </div>
-            {bodyContent}
+          <DrawerContent className="max-h-[92vh] p-0 overflow-hidden" showClose={false}>
+            {mobileContent}
           </DrawerContent>
         </Drawer>
 
@@ -257,14 +303,12 @@ export function ConstitutionViewer({ open, onOpenChange }: ConstitutionViewerPro
     );
   }
 
+  /* ── DESKTOP LAYOUT (kept minimal) ── */
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-          <DialogHeader className="px-4 pt-4 pb-0 shrink-0 border-b">
-            {headerContent}
-          </DialogHeader>
-          {bodyContent}
+          {mobileContent}
         </DialogContent>
       </Dialog>
 
