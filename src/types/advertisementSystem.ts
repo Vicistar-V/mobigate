@@ -30,6 +30,7 @@ export interface AdMediaItem {
 export interface AdvertisementFormData {
   businessName: string;
   category: AdvertisementCategory;
+  customCategory?: string;
   productTitle: string;
   description: string;
   city: string;
