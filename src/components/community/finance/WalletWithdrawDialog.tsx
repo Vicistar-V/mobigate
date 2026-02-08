@@ -145,8 +145,8 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
 
   const selectedAccountDetails = mockBankAccounts.find((acc) => acc.id === selectedAccount);
 
-  // Shared content
-  const WithdrawContent = () => (
+  // Shared content as JSX variable (NOT a component function) to prevent remounting on state changes
+  const withdrawContent = (
     <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
       <div className="px-2 pb-6 space-y-4">
         {step === "amount" && (
@@ -165,13 +165,22 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
                 </span>
                 <Input
                   id="withdraw-amount"
-                  type="number"
+                  type="text"
                   inputMode="decimal"
                   placeholder="0.00"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                      setAmount(val);
+                    }
+                  }}
                   className="pl-8 h-12 touch-manipulation"
                   autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -336,11 +345,28 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label>Bank Name</Label>
-                <Input placeholder="Select your bank..." className="h-12 touch-manipulation" autoComplete="off" onClick={(e) => e.stopPropagation()} />
+                <Input
+                  placeholder="Select your bank..."
+                  className="h-12 touch-manipulation"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Account Number</Label>
-                <Input placeholder="0000000000" className="h-12 touch-manipulation" inputMode="numeric" autoComplete="off" onClick={(e) => e.stopPropagation()} />
+                <Input
+                  placeholder="0000000000"
+                  className="h-12 touch-manipulation"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Account Name</Label>
@@ -372,7 +398,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
               Withdraw Funds
             </DrawerTitle>
           </DrawerHeader>
-          <WithdrawContent />
+          {withdrawContent}
         </DrawerContent>
       </Drawer>
     );
@@ -387,7 +413,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
             Withdraw Funds
           </DialogTitle>
         </DialogHeader>
-        <WithdrawContent />
+        {withdrawContent}
       </DialogContent>
     </Dialog>
   );
