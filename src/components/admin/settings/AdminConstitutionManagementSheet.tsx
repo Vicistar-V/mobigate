@@ -302,37 +302,35 @@ export function AdminConstitutionManagementSheet({
           side="bottom"
           className="h-[92vh] rounded-t-2xl p-0 flex flex-col overflow-hidden"
         >
-          <SheetHeader className="px-3 pt-4 pb-3 border-b shrink-0">
-            <SheetTitle className="flex items-center gap-2 break-words">
+          <SheetHeader className="px-4 pt-4 pb-3 border-b shrink-0">
+            <SheetTitle className="flex items-center gap-2 pr-8">
               <FileText className="h-5 w-5 text-primary shrink-0" />
-              <span className="break-words">Constitution Management</span>
+              <span className="truncate">Constitution Management</span>
             </SheetTitle>
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden touch-auto overscroll-contain">
-            <div className="px-2.5 py-4 pb-8 space-y-3 w-full max-w-full box-border">
+            <div className="px-4 py-4 pb-8 space-y-3">
               {/* Stats Row */}
-              <div className="grid grid-cols-3 gap-1.5 w-full max-w-full box-border">
-                <Card className="overflow-hidden min-w-0">
-                  <CardContent className="p-2 text-center">
+              <div className="grid grid-cols-3 gap-2">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-2.5 text-center">
                     <div className="text-lg font-bold text-green-600">
                       {activeCount}
                     </div>
                     <div className="text-xs text-muted-foreground">Active</div>
                   </CardContent>
                 </Card>
-                <Card className="overflow-hidden min-w-0">
-                  <CardContent className="p-2 text-center">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-2.5 text-center">
                     <div className="text-lg font-bold text-muted-foreground">
                       {archivedCount}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Archived
-                    </div>
+                    <div className="text-xs text-muted-foreground">Archived</div>
                   </CardContent>
                 </Card>
-                <Card className="overflow-hidden min-w-0">
-                  <CardContent className="p-2 text-center">
+                <Card className="overflow-hidden">
+                  <CardContent className="p-2.5 text-center">
                     <div className="text-lg font-bold">
                       {documents.length}
                     </div>
@@ -343,20 +341,20 @@ export function AdminConstitutionManagementSheet({
 
               {/* Upload New Document Button */}
               <Button
-                className="w-full max-w-full h-12 font-semibold text-sm touch-manipulation active:bg-primary/80 overflow-hidden"
+                className="w-full h-12 font-semibold text-sm touch-manipulation active:scale-[0.98]"
                 onClick={() => setShowUploadForm(!showUploadForm)}
               >
                 <Upload className="h-5 w-5 mr-2 shrink-0" />
-                <span className="truncate">Upload New Document</span>
+                Upload New Document
               </Button>
 
               {/* Upload Form */}
               {showUploadForm && (
-                <Card className="border-2 border-primary/30 w-full max-w-full box-border overflow-hidden">
-                  <CardContent className="p-2.5 space-y-3">
-                    <h3 className="font-semibold text-sm flex items-center gap-2 break-words">
+                <Card className="border-2 border-primary/30">
+                  <CardContent className="p-3 space-y-3">
+                    <h3 className="font-semibold text-sm flex items-center gap-2">
                       <Upload className="h-4 w-4 shrink-0" />
-                      <span className="break-words">Upload Constitution Document</span>
+                      Upload Constitution Document
                     </h3>
 
                     {/* File Drop Zone */}
@@ -457,11 +455,11 @@ export function AdminConstitutionManagementSheet({
                     {/* Submit */}
                     <div className="flex flex-col gap-2">
                       <Button
-                        className="w-full h-11 text-sm touch-manipulation active:bg-primary/80 overflow-hidden"
+                        className="w-full h-11 text-sm touch-manipulation active:scale-[0.98]"
                         onClick={handleUploadWithAuth}
                       >
                         <Shield className="h-4 w-4 mr-2 shrink-0" />
-                        <span className="truncate">Submit for Authorization</span>
+                        Submit for Authorization
                       </Button>
                       <Button
                         variant="outline"
@@ -484,8 +482,8 @@ export function AdminConstitutionManagementSheet({
                   <h3 className="text-sm font-semibold text-muted-foreground px-0.5">
                     Active Document
                   </h3>
-                  <Card className="border-2 border-green-200 dark:border-green-800 w-full max-w-full box-border overflow-hidden">
-                    <CardContent className="p-2.5 space-y-2.5">
+                  <Card className="border-2 border-green-200 dark:border-green-800">
+                    <CardContent className="p-3 space-y-2.5">
                       {/* Row 1: Title + Badge */}
                       <div className="space-y-1">
                         <div className="flex items-start gap-2">
@@ -569,8 +567,8 @@ export function AdminConstitutionManagementSheet({
                     Document History
                   </h3>
                   {historyDocs.map((doc) => (
-                    <Card key={doc.id} className="w-full max-w-full box-border overflow-hidden">
-                      <CardContent className="p-2.5 space-y-2">
+                    <Card key={doc.id} className="overflow-hidden">
+                      <CardContent className="p-3 space-y-2">
                         <div className="flex items-start gap-2">
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-sm leading-tight break-words">
@@ -594,11 +592,11 @@ export function AdminConstitutionManagementSheet({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 h-10 touch-manipulation active:bg-muted/70 overflow-hidden"
+                            className="flex-1 h-10 touch-manipulation active:scale-[0.98]"
                             onClick={() => handleDownload(doc)}
                           >
                             <Download className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                            <span className="truncate">Download</span>
+                            Download
                           </Button>
                           <Button
                             variant="outline"
