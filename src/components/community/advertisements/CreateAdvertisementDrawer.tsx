@@ -22,6 +22,7 @@ interface CreateAdvertisementDrawerProps {
 const initialFormData: AdvertisementFormData = {
   businessName: "",
   category: "other",
+  customCategory: "",
   productTitle: "",
   description: "",
   city: "",
@@ -128,6 +129,24 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Custom Category Input (when "Other" is selected) */}
+              {formData.category === "other" && (
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">Specify Category *</Label>
+                  <Input
+                    value={formData.customCategory || ""}
+                    onChange={(e) => updateField("customCategory", e.target.value)}
+                    placeholder="e.g. Pet Supplies, Sports Equipment..."
+                    className="h-12 text-base touch-manipulation"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
 
               {/* Product Title */}
               <div className="space-y-1.5">
