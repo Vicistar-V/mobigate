@@ -302,21 +302,6 @@ export function AdvertisementSettingsSheet({
                   </div>
                 </Card>
 
-                {/* Revenue Split */}
-                <Card className="p-3 space-y-2">
-                  <h4 className="font-semibold text-sm">Revenue Distribution</h4>
-                  <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Community Share ({feeDist.communityPercentage}%):</span>
-                      <span className="text-emerald-600 font-medium">{formatMobiAmount(feeDist.communityShare)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Mobigate Share ({feeDist.mobigatePercentage}%):</span>
-                      <span>{formatMobiAmount(feeDist.mobigateShare)}</span>
-                    </div>
-                  </div>
-                </Card>
-
                 {/* Wallet */}
                 <Card className={`p-3 flex items-center justify-between ${canAfford ? "bg-emerald-50 dark:bg-emerald-950/20" : "bg-red-50 dark:bg-red-950/20"}`}>
                   <div className="flex items-center gap-2">
