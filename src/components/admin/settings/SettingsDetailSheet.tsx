@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { 
   Check, 
   Clock, 
@@ -46,6 +47,7 @@ export function SettingsDetailSheet({
   const { toast } = useToast();
   
   const [selectedValue, setSelectedValue] = useState<string>("");
+  const [customValue, setCustomValue] = useState("");
   const [reason, setReason] = useState("");
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +63,9 @@ export function SettingsDetailSheet({
 
   if (!setting) return null;
 
-  const hasChanged = selectedValue && selectedValue !== setting.currentValue;
+  const isOtherSelected = selectedValue === "__other__";
+  const effectiveValue = isOtherSelected ? customValue : selectedValue;
+  const hasChanged = selectedValue && selectedValue !== setting.currentValue && (!isOtherSelected || customValue.trim().length > 0);
   const isApproved = setting.approvalPercentage >= DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD;
   const currentOption = setting.options.find(o => o.value === setting.currentValue);
 
@@ -71,7 +75,7 @@ export function SettingsDetailSheet({
     setIsSubmitting(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    onProposalSubmit?.(setting.id, selectedValue, reason);
+    onProposalSubmit?.(setting.id, effectiveValue, reason);
     
     toast({
       title: "Proposal Submitted",
@@ -198,6 +202,33 @@ export function SettingsDetailSheet({
               </div>
             );
           })}
+          {/* Other (Specify) Option */}
+          <div
+            className={`flex flex-col gap-2 p-3 rounded-lg border transition-colors w-full box-border ${
+              isOtherSelected
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:bg-muted/50'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <RadioGroupItem value="__other__" id="__other__" className="mt-0.5 shrink-0" />
+              <Label htmlFor="__other__" className="text-sm font-medium cursor-pointer break-words">
+                Other (Specify)
+              </Label>
+            </div>
+            {isOtherSelected && (
+              <Input
+                value={customValue}
+                onChange={(e) => setCustomValue(e.target.value)}
+                placeholder="Enter custom value..."
+                className="text-sm touch-manipulation ml-7"
+                autoComplete="off"
+                spellCheck={false}
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+              />
+            )}
+          </div>
         </RadioGroup>
       </div>
 
