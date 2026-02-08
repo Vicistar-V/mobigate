@@ -103,61 +103,85 @@ export function AdvertisementSettingsSheet({
             {/* STEP 1: Review */}
             {step === 1 && (
               <>
-                <Card className="p-3 space-y-2 overflow-hidden">
-                  <h3 className="font-semibold text-sm">Advert Summary</h3>
-                  <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Business:</span>
-                      <span className="font-medium text-right min-w-0 truncate ml-2">{formData.businessName}</span>
+                <Card className="p-3 space-y-3">
+                  <h3 className="font-semibold text-base">Advert Summary</h3>
+                  <div className="space-y-3 text-sm">
+                    {/* Business Name */}
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Business</span>
+                      <p className="text-sm font-semibold break-words">{formData.businessName}</p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Category:</span>
-                      <Badge variant="secondary" className="text-xs">{getCategoryLabel(formData.category)}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Product:</span>
-                      <span className="font-medium text-right min-w-0 truncate ml-2">{formData.productTitle}</span>
-                    </div>
-                    <div className="flex items-start justify-between">
-                      <span className="text-muted-foreground shrink-0">City:</span>
-                      <span className="flex items-center gap-1 text-right ml-2">
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        {formData.city}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Phone 1:</span>
-                      <span>{formData.phone1}</span>
-                    </div>
-                    {formData.phone2 && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Phone 2:</span>
-                        <span>{formData.phone2}</span>
+
+                    {/* Category */}
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Category</span>
+                      <div>
+                        <Badge variant="secondary" className="text-xs font-medium">
+                          {formData.category === "other" && formData.customCategory
+                            ? formData.customCategory
+                            : getCategoryLabel(formData.category)}
+                        </Badge>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Product Title */}
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Product</span>
+                      <p className="text-sm font-semibold break-words">{formData.productTitle}</p>
+                    </div>
+
+                    {/* City */}
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">City</span>
+                      <p className="text-sm break-words flex items-start gap-1.5">
+                        <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
+                        <span>{formData.city}</span>
+                      </p>
+                    </div>
+
+                    {/* Contact Details - 2-column grid for short values */}
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone 1</span>
+                        <p className="text-sm font-medium">{formData.phone1}</p>
+                      </div>
+                      {formData.phone2 && (
+                        <div className="space-y-0.5">
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone 2</span>
+                          <p className="text-sm font-medium">{formData.phone2}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Email */}
                     {formData.email && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Email:</span>
-                        <span className="truncate ml-2">{formData.email}</span>
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Email</span>
+                        <p className="text-sm break-all">{formData.email}</p>
                       </div>
                     )}
+
+                    {/* Website */}
                     {formData.website && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Website:</span>
-                        <span className="truncate ml-2">{formData.website}</span>
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Website</span>
+                        <p className="text-sm break-all text-primary">{formData.website}</p>
                       </div>
                     )}
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Media:</span>
-                      <span>{formData.media.length} of 4</span>
+
+                    {/* Media Count */}
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Media</span>
+                      <p className="text-sm font-medium">{formData.media.length} of 4 uploaded</p>
                     </div>
                   </div>
                 </Card>
 
+                {/* Media Grid */}
                 {formData.media.length > 0 && (
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {formData.media.map((item, i) => (
-                      <div key={i} className="aspect-square rounded-md overflow-hidden border relative">
+                      <div key={i} className="aspect-video rounded-lg overflow-hidden border relative">
                         {item.type === 'video' ? (
                           <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                         ) : (
@@ -168,9 +192,15 @@ export function AdvertisementSettingsSheet({
                   </div>
                 )}
 
-                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
-                  {formData.description}
-                </p>
+                {/* Description */}
+                {formData.description && (
+                  <div className="space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Description</span>
+                    <p className="text-sm text-foreground leading-relaxed break-words">
+                      {formData.description}
+                    </p>
+                  </div>
+                )}
               </>
             )}
 
