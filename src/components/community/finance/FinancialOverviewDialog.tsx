@@ -266,9 +266,10 @@ export function FinancialOverviewDialog({
         </CardHeader>
         <CardContent className="px-3 pb-3 space-y-2">
           {mockTransactions.slice(0, 5).map((transaction) => (
-            <div key={transaction.id} className="flex items-center justify-between p-2.5 rounded-lg border">
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className={`p-1.5 rounded-full shrink-0 ${
+            <div key={transaction.id} className="p-2.5 rounded-lg border space-y-1.5">
+              {/* Row 1: Icon + Description + Amount */}
+              <div className="flex items-start gap-2">
+                <div className={`p-1.5 rounded-full shrink-0 mt-0.5 ${
                   transaction.type === "credit"
                     ? "bg-green-500/10"
                     : "bg-red-500/10"
@@ -281,19 +282,26 @@ export function FinancialOverviewDialog({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-xs truncate">{transaction.description}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <DualCurrencyDisplay
+                    mobiAmount={transaction.amount}
+                    transactionType={transaction.type}
+                    showSign="auto"
+                    size="sm"
+                    showMobiInline={false}
+                  />
                   <p className="text-xs text-muted-foreground">
-                    {transaction.date.toLocaleDateString()}
+                    (M{Math.abs(transaction.amount).toLocaleString()})
                   </p>
                 </div>
               </div>
-              <div className="text-right shrink-0 ml-2">
-                <DualCurrencyDisplay
-                  mobiAmount={transaction.amount}
-                  transactionType={transaction.type}
-                  showSign="auto"
-                  size="sm"
-                />
-                <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-xs mt-0.5">
+              {/* Row 2: Date + Status Badge */}
+              <div className="flex items-center justify-between pl-9">
+                <p className="text-xs text-muted-foreground">
+                  {transaction.date.toLocaleDateString()}
+                </p>
+                <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-xs">
                   {transaction.status}
                 </Badge>
               </div>
@@ -412,39 +420,39 @@ export function FinancialOverviewDialog({
           {sortedQuizTxns.map((tx) => {
             const config = txTypeConfig[tx.type];
             const Icon = config.icon;
+            const isPositive = tx.type === "stake_income" || tx.type === "transfer_in";
             return (
-              <div key={tx.id} className="flex items-center justify-between p-2.5 rounded-lg border">
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <div className={cn("p-1.5 rounded-full shrink-0", config.bg)}>
+              <div key={tx.id} className="p-2.5 rounded-lg border space-y-1.5">
+                {/* Row 1: Icon + Description + Amount */}
+                <div className="flex items-start gap-2">
+                  <div className={cn("p-1.5 rounded-full shrink-0 mt-0.5", config.bg)}>
                     <Icon className={cn("h-3.5 w-3.5", config.color)} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-xs truncate">{tx.description}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(tx.date).toLocaleDateString()}
-                      </p>
-                      {tx.playerName && (
-                        <Badge variant="secondary" className="text-xs px-1 py-0">
-                          {tx.playerName}
-                        </Badge>
-                      )}
-                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className={cn(
+                      "text-sm font-semibold",
+                      isPositive ? "text-green-600" : "text-red-600"
+                    )}>
+                      {isPositive ? "+" : "-"}₦{tx.amount.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      (M{tx.amount.toLocaleString()})
+                    </p>
                   </div>
                 </div>
-                <div className="text-right shrink-0 ml-2">
-                  <p className={cn(
-                    "text-sm font-semibold",
-                    tx.type === "stake_income" || tx.type === "transfer_in"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  )}>
-                    {tx.type === "stake_income" || tx.type === "transfer_in" ? "+" : "-"}
-                    ₦{tx.amount.toLocaleString()}
-                  </p>
+                {/* Row 2: Date + Player Badge */}
+                <div className="flex items-center gap-2 pl-9 flex-wrap">
                   <p className="text-xs text-muted-foreground">
-                    (M{tx.amount.toLocaleString()})
+                    {new Date(tx.date).toLocaleDateString()}
                   </p>
+                  {tx.playerName && (
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                      {tx.playerName}
+                    </Badge>
+                  )}
                 </div>
               </div>
             );
