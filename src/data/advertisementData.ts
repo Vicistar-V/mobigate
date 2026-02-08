@@ -234,6 +234,14 @@ export const getMyAdvertisements = (userId: string = "user-001"): EnhancedAdvert
   return mockAdvertisements.filter((ad) => ad.advertiserId === userId);
 };
 
+export const getMyActiveAdvertisements = (userId: string = "user-001"): EnhancedAdvertisement[] => {
+  return mockAdvertisements.filter((ad) => ad.advertiserId === userId && ad.status === "active");
+};
+
+export const getMyInactiveAdvertisements = (userId: string = "user-001"): EnhancedAdvertisement[] => {
+  return mockAdvertisements.filter((ad) => ad.advertiserId === userId && ad.status === "ended");
+};
+
 export const getEndedAdvertisements = (): EnhancedAdvertisement[] => {
   return mockAdvertisements.filter((ad) => ad.status === "ended");
 };

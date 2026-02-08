@@ -5,37 +5,39 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, MapPin, Eye, Calendar, Plus, Megaphone, Play } from "lucide-react";
+import { X, MapPin, Eye, Calendar, Plus, Megaphone, Play, RefreshCw } from "lucide-react";
 import {
   getActiveAdvertisements,
-  getMyAdvertisements,
-  getEndedAdvertisements,
+  getMyActiveAdvertisements,
+  getMyInactiveAdvertisements,
   getCategoryLabel,
   getAdvertisementStats,
 } from "@/data/advertisementData";
 import { calculateDaysRemaining, formatMobiAmount } from "@/lib/campaignFeeDistribution";
 import { AdvertisementFullViewSheet } from "./AdvertisementFullViewSheet";
+import { useToast } from "@/hooks/use-toast";
 import type { EnhancedAdvertisement } from "@/types/advertisementSystem";
 
 interface AdvertisementsListSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialTab?: "active" | "mine" | "ended";
+  initialTab?: "all_active" | "my_active" | "my_inactive";
   onCreateNew?: () => void;
 }
 
 export function AdvertisementsListSheet({
   open,
   onOpenChange,
-  initialTab = "active",
+  initialTab = "all_active",
   onCreateNew,
 }: AdvertisementsListSheetProps) {
+  const { toast } = useToast();
   const [selectedAd, setSelectedAd] = useState<EnhancedAdvertisement | null>(null);
   const [showFullView, setShowFullView] = useState(false);
 
-  const activeAds = getActiveAdvertisements();
-  const myAds = getMyAdvertisements();
-  const endedAds = getEndedAdvertisements();
+  const allActiveAds = getActiveAdvertisements();
+  const myActiveAds = getMyActiveAdvertisements();
+  const myInactiveAds = getMyInactiveAdvertisements();
   const stats = getAdvertisementStats();
 
   const openAdvert = (ad: EnhancedAdvertisement) => {
@@ -43,7 +45,15 @@ export function AdvertisementsListSheet({
     setShowFullView(true);
   };
 
-  const AdCard = ({ ad }: { ad: EnhancedAdvertisement }) => {
+  const handleReactivateAd = (ad: EnhancedAdvertisement, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast({
+      title: "Reactivate Advertisement",
+      description: `Redirecting to renew "${ad.businessName}" subscription...`,
+    });
+  };
+
+  const AdCard = ({ ad, showReactivate = false }: { ad: EnhancedAdvertisement; showReactivate?: boolean }) => {
     const daysRemaining = calculateDaysRemaining(ad.endDate);
     const isEnded = ad.status === "ended";
     const firstMedia = ad.media[0];
@@ -87,17 +97,17 @@ export function AdvertisementsListSheet({
             <h4 className="font-semibold text-sm leading-tight truncate">{ad.businessName}</h4>
             <p className="text-xs text-primary font-medium truncate">{ad.productTitle}</p>
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge className="bg-amber-600 text-white text-[10px] px-1.5 py-0 border-0">
+              <Badge className="bg-amber-600 text-white text-xs px-1.5 py-0 border-0">
                 <Megaphone className="h-2.5 w-2.5 mr-0.5" />
                 Sponsored
               </Badge>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+              <Badge variant="secondary" className="text-xs px-1.5 py-0">
                 {getCategoryLabel(ad.category)}
               </Badge>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3 shrink-0" />
-                <span className="truncate">{ad.city}</span>
-              </div>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">{ad.city}</span>
             </div>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
@@ -109,13 +119,27 @@ export function AdvertisementsListSheet({
                 </span>
               )}
               {isEnded && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground">
+                <Badge variant="outline" className="text-xs px-1.5 py-0 text-muted-foreground">
                   Ended
                 </Badge>
               )}
             </div>
           </div>
         </div>
+
+        {/* Reactivate Button for inactive ads */}
+        {showReactivate && (
+          <div className="px-3 pb-3 pt-0">
+            <Button
+              size="sm"
+              className="w-full h-9 text-xs font-medium touch-manipulation active:scale-[0.97] bg-amber-600 hover:bg-amber-700"
+              onClick={(e) => handleReactivateAd(ad, e)}
+            >
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              Reactivate Ad
+            </Button>
+          </div>
+        )}
       </Card>
     );
   };
@@ -139,47 +163,53 @@ export function AdvertisementsListSheet({
           <div className="grid grid-cols-3 gap-1 px-4 py-2 border-b flex-shrink-0">
             <div className="text-center p-1.5 bg-emerald-50 dark:bg-emerald-950/20 rounded">
               <p className="text-sm font-bold text-emerald-600">{stats.active}</p>
-              <p className="text-[10px] text-muted-foreground">Active</p>
+              <p className="text-xs text-muted-foreground">Active</p>
             </div>
             <div className="text-center p-1.5 bg-blue-50 dark:bg-blue-950/20 rounded">
               <p className="text-sm font-bold text-blue-600">{stats.total}</p>
-              <p className="text-[10px] text-muted-foreground">Total</p>
+              <p className="text-xs text-muted-foreground">Total</p>
             </div>
             <div className="text-center p-1.5 bg-amber-50 dark:bg-amber-950/20 rounded">
               <p className="text-sm font-bold text-amber-600">{formatMobiAmount(stats.totalFees)}</p>
-              <p className="text-[10px] text-muted-foreground">Revenue</p>
+              <p className="text-xs text-muted-foreground">Revenue</p>
             </div>
           </div>
 
           <Tabs defaultValue={initialTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="w-full justify-start px-4 pt-2 bg-transparent flex-shrink-0">
-              <TabsTrigger value="active" className="text-xs flex-1">Active ({activeAds.length})</TabsTrigger>
-              <TabsTrigger value="mine" className="text-xs flex-1">My Adverts ({myAds.length})</TabsTrigger>
-              <TabsTrigger value="ended" className="text-xs flex-1">Ended ({endedAds.length})</TabsTrigger>
+            <TabsList className="w-full justify-start px-3 pt-2 bg-transparent flex-shrink-0">
+              <TabsTrigger value="all_active" className="text-xs flex-1">
+                All Active ({allActiveAds.length})
+              </TabsTrigger>
+              <TabsTrigger value="my_active" className="text-xs flex-1">
+                My Active ({myActiveAds.length})
+              </TabsTrigger>
+              <TabsTrigger value="my_inactive" className="text-xs flex-1">
+                My Inactive ({myInactiveAds.length})
+              </TabsTrigger>
             </TabsList>
 
             <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-              <TabsContent value="active" className="p-3 space-y-2 mt-0">
-                {activeAds.length === 0 ? (
+              <TabsContent value="all_active" className="p-3 space-y-2 mt-0">
+                {allActiveAds.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">No active advertisements</p>
                 ) : (
-                  activeAds.map((ad) => <AdCard key={ad.id} ad={ad} />)
+                  allActiveAds.map((ad) => <AdCard key={ad.id} ad={ad} />)
                 )}
               </TabsContent>
 
-              <TabsContent value="mine" className="p-3 space-y-2 mt-0">
-                {myAds.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">You haven't created any ads yet</p>
+              <TabsContent value="my_active" className="p-3 space-y-2 mt-0">
+                {myActiveAds.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">You have no active ads</p>
                 ) : (
-                  myAds.map((ad) => <AdCard key={ad.id} ad={ad} />)
+                  myActiveAds.map((ad) => <AdCard key={ad.id} ad={ad} />)
                 )}
               </TabsContent>
 
-              <TabsContent value="ended" className="p-3 space-y-2 mt-0">
-                {endedAds.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No ended advertisements</p>
+              <TabsContent value="my_inactive" className="p-3 space-y-2 mt-0">
+                {myInactiveAds.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">You have no inactive ads</p>
                 ) : (
-                  endedAds.map((ad) => <AdCard key={ad.id} ad={ad} />)
+                  myInactiveAds.map((ad) => <AdCard key={ad.id} ad={ad} showReactivate />)
                 )}
               </TabsContent>
             </ScrollArea>
