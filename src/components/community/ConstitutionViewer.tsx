@@ -64,7 +64,7 @@ export function ConstitutionViewer({ open, onOpenChange }: ConstitutionViewerPro
 
   /* ── MOBILE LAYOUT ── */
   const mobileContent = (
-    <div className="flex flex-col h-full max-h-[92vh] overflow-hidden">
+    <div className="flex flex-col h-full max-h-[92vh] overflow-hidden w-full box-border">
       {/* ── Sticky header ── */}
       <div className="shrink-0 px-3 pt-1 pb-2 border-b bg-card">
         {/* Title row */}
