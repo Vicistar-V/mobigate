@@ -184,16 +184,18 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
 
       {/* ── Tabs ── */}
       <Tabs defaultValue="id-cards" className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className="shrink-0 px-3 pt-1 border-b bg-card">
-          <TabsList className="w-full grid grid-cols-4 h-10">
-            <TabsTrigger value="id-cards" className="text-sm px-1">ID Cards</TabsTrigger>
-            <TabsTrigger value="letters" className="text-sm px-1">Letters</TabsTrigger>
-            <TabsTrigger value="constitution" className="text-sm px-1">Constitution</TabsTrigger>
-            <TabsTrigger value="more" className="text-sm px-1 gap-0.5">
-              <MoreHorizontal className="h-3.5 w-3.5" />
-              More
-            </TabsTrigger>
-          </TabsList>
+        <div className="shrink-0 px-3 pt-1 pb-1 border-b bg-card">
+          <div className="overflow-x-auto touch-pan-x scrollbar-none -mx-1">
+            <TabsList className="inline-flex w-auto h-11 gap-1 px-1 bg-muted/60">
+              <TabsTrigger value="id-cards" className="text-sm font-medium px-4 whitespace-nowrap">ID Cards</TabsTrigger>
+              <TabsTrigger value="letters" className="text-sm font-medium px-4 whitespace-nowrap">Letters</TabsTrigger>
+              <TabsTrigger value="constitution" className="text-sm font-medium px-4 whitespace-nowrap">Constitution</TabsTrigger>
+              <TabsTrigger value="more" className="text-sm font-medium px-4 whitespace-nowrap gap-1">
+                <MoreHorizontal className="h-4 w-4" />
+                More
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
 
         {/* ── Scrollable Body ── */}
@@ -303,7 +305,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
               {/* Request New Letter */}
               <Card className="overflow-hidden">
                 <CardHeader className="px-3 pt-3 pb-2">
-                  <CardTitle className="text-sm">Request Official Letter</CardTitle>
+                  <CardTitle className="text-base">Request Official Letter</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 px-3 pb-3">
                   <div>
@@ -350,8 +352,8 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                     />
                   </div>
 
-                  <Button onClick={handleRequestLetter} className="w-full text-sm touch-manipulation active:scale-[0.97]">
-                    <FileText className="h-4 w-4 mr-2 shrink-0" />
+                  <Button onClick={handleRequestLetter} className="w-full text-base h-12 font-semibold touch-manipulation active:scale-[0.97]">
+                    <FileText className="h-5 w-5 mr-2 shrink-0" />
                     Submit Request
                   </Button>
                 </CardContent>
@@ -366,22 +368,22 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                   {mockLetterRequests.map((request) => {
                     const template = letterTemplates.find(t => t.id === request.templateId);
                     return (
-                      <div key={request.id} className="p-2.5 border rounded-lg space-y-1.5 overflow-hidden">
+                      <div key={request.id} className="p-3 border rounded-lg space-y-2 overflow-hidden">
                         {/* Row 1: Title */}
-                        <h4 className="font-semibold text-sm leading-snug break-words">{template?.title}</h4>
+                        <h4 className="font-bold text-base leading-snug break-words">{template?.title}</h4>
                         
                         {/* Row 2: Badge + Date */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className={`${getStatusColor(request.status)} text-sm shrink-0`}>
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          <Badge className={`${getStatusColor(request.status)} text-sm px-2.5 py-0.5 font-semibold shrink-0`}>
                             {request.status}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm font-medium text-muted-foreground">
                             {request.requestDate.toLocaleDateString()}
                           </span>
                         </div>
                         
                         {/* Row 3: Purpose */}
-                        <p className="text-sm text-muted-foreground line-clamp-2 break-words">
+                        <p className="text-sm text-muted-foreground line-clamp-2 break-words leading-relaxed">
                           Purpose: {request.purpose}
                         </p>
                         
