@@ -43,6 +43,10 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement, 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showReportConfirm, setShowReportConfirm] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [showComments, setShowComments] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!advertisement) return null;
@@ -342,23 +346,66 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement, 
 
                 {/* Engagement Bar */}
                 <div className="flex items-center justify-between pt-3 border-t text-muted-foreground">
-                  <button className="flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95]">
-                    <ThumbsUp className="h-4 w-4" />
-                    <span>Like</span>
+                  <button
+                    className={`flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95] transition-colors ${isLiked ? "text-primary font-medium" : ""}`}
+                    onClick={() => {
+                      setIsLiked(!isLiked);
+                      setLikeCount((c) => isLiked ? Math.max(0, c - 1) : c + 1);
+                      if (!isLiked) {
+                        toast({ title: "Liked!", description: `You liked "${ad.productTitle}"` });
+                      }
+                    }}
+                  >
+                    <ThumbsUp className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
+                    <span>{isLiked ? likeCount : likeCount > 0 ? likeCount : "Like"}</span>
                   </button>
-                  <button className="flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95]">
-                    <MessageSquare className="h-4 w-4" />
+                  <button
+                    className="flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95]"
+                    onClick={() => setShowComments(!showComments)}
+                  >
+                    <MessageSquare className={`h-4 w-4 ${showComments ? "fill-current text-primary" : ""}`} />
                     <span>{ad.feedbackCount}</span>
                   </button>
-                  <button className="flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95]">
+                  <button
+                    className="flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95]"
+                    onClick={async () => {
+                      const shareData = {
+                        title: ad.productTitle,
+                        text: `${ad.businessName} - ${ad.productTitle}: ${ad.description.slice(0, 100)}...`,
+                        url: window.location.href,
+                      };
+                      try {
+                        if (navigator.share) {
+                          await navigator.share(shareData);
+                        } else {
+                          await navigator.clipboard.writeText(`${ad.businessName} - ${ad.productTitle}\n${window.location.href}`);
+                          toast({ title: "Link Copied!", description: "Ad link copied to clipboard." });
+                        }
+                      } catch {
+                        // user cancelled share
+                      }
+                    }}
+                  >
                     <Share2 className="h-4 w-4" />
                     <span>Share</span>
                   </button>
-                  <button className="flex items-center gap-1.5 text-sm text-destructive touch-manipulation active:scale-[0.95]">
+                  <button
+                    className="flex items-center gap-1.5 text-sm text-destructive touch-manipulation active:scale-[0.95]"
+                    onClick={() => setShowReportConfirm(true)}
+                  >
                     <Flag className="h-4 w-4" />
                     <span>Report</span>
                   </button>
                 </div>
+
+                {/* Comments Section (expandable) */}
+                {showComments && (
+                  <AdCommentsSection
+                    feedbacks={ad.feedbacks}
+                    feedbackCount={ad.feedbackCount}
+                    productTitle={ad.productTitle}
+                  />
+                )}
 
                 {/* Advertiser Info */}
                 <Card className="p-3 mt-2 bg-muted/30">
@@ -408,6 +455,127 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement, 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Report Confirmation */}
+      <AlertDialog open={showReportConfirm} onOpenChange={setShowReportConfirm}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5 text-destructive" />
+              Report Advertisement?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to report{" "}
+                <strong>"{ad.productTitle}"</strong> by {ad.businessName}?
+              </p>
+              <p className="text-xs">
+                This ad will be flagged for review by community moderators. False reports may result in action against your account.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="touch-manipulation">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                toast({
+                  title: "Advertisement Reported",
+                  description: "Thank you. This ad has been flagged for review by moderators.",
+                });
+                setShowReportConfirm(false);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 touch-manipulation"
+            >
+              <Flag className="h-4 w-4 mr-1.5" />
+              Report
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
+  );
+}
+
+/* ─── Inline Comments Section ─── */
+function AdCommentsSection({
+  feedbacks,
+  feedbackCount,
+  productTitle,
+}: {
+  feedbacks: EnhancedAdvertisement["feedbacks"];
+  feedbackCount: number;
+  productTitle: string;
+}) {
+  const { toast } = useToast();
+  const [newComment, setNewComment] = useState("");
+
+  const handleSubmit = () => {
+    if (!newComment.trim()) return;
+    toast({
+      title: "Comment Posted",
+      description: `Your feedback on "${productTitle}" has been submitted.`,
+    });
+    setNewComment("");
+  };
+
+  return (
+    <div className="space-y-3 pt-2">
+      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        Comments ({feedbackCount})
+      </h4>
+
+      {/* Comment input */}
+      <div className="flex gap-2">
+        <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <MessageSquare className="h-3.5 w-3.5 text-primary" />
+        </div>
+        <div className="flex-1 space-y-2">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Write a comment..."
+            className="w-full min-h-[60px] rounded-lg border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary touch-manipulation"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <Button
+            size="sm"
+            className="h-8 text-xs touch-manipulation active:scale-[0.97]"
+            disabled={!newComment.trim()}
+            onClick={handleSubmit}
+          >
+            Post Comment
+          </Button>
+        </div>
+      </div>
+
+      {/* Existing feedbacks */}
+      {feedbacks.length > 0 ? (
+        <div className="space-y-2">
+          {feedbacks.map((fb) => (
+            <div key={fb.id} className="flex gap-2">
+              <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  {fb.anonymousId.slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium">Anonymous</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {new Date(fb.submittedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className="text-xs text-foreground/80 leading-relaxed mt-0.5">{fb.feedbackText}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground text-center py-3">
+          No comments yet. Be the first to share feedback!
+        </p>
+      )}
+    </div>
   );
 }
