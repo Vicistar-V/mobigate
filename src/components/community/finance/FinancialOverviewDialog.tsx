@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
   RefreshCw, Shield, AlertTriangle, CheckCircle, ArrowDown, ArrowUp,
-  ArrowDownLeft, Settings
+  ArrowDownLeft, Settings, ChevronRight
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -26,6 +26,7 @@ import { formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslati
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeable } from "react-swipeable";
 import { cn } from "@/lib/utils";
+import { TransactionDetailDrawer, TransactionDetail } from "./TransactionDetailDrawer";
 
 interface FinancialOverviewDialogProps {
   open: boolean;
@@ -55,6 +56,7 @@ export function FinancialOverviewDialog({
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [showQuizWalletDrawer, setShowQuizWalletDrawer] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail | null>(null);
 
   const quizWallet = communityQuizWalletData;
   const quizAvailability = getQuizWalletAvailability();
@@ -266,7 +268,19 @@ export function FinancialOverviewDialog({
         </CardHeader>
         <CardContent className="px-3 pb-3 space-y-2">
           {mockTransactions.slice(0, 5).map((transaction) => (
-            <div key={transaction.id} className="p-2.5 rounded-lg border space-y-1.5">
+            <button
+              key={transaction.id}
+              className="p-2.5 rounded-lg border space-y-1.5 w-full text-left touch-manipulation active:bg-muted/60 active:scale-[0.98] transition-all"
+              onClick={() => setSelectedTransaction({
+                id: transaction.id,
+                description: transaction.description,
+                amount: transaction.amount,
+                date: transaction.date,
+                type: transaction.type,
+                status: transaction.status,
+                category: transaction.category,
+              })}
+            >
               {/* Row 1: Icon + Description + Amount */}
               <div className="flex items-start gap-2">
                 <div className={`p-1.5 rounded-full shrink-0 mt-0.5 ${
@@ -283,7 +297,7 @@ export function FinancialOverviewDialog({
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-xs truncate">{transaction.description}</p>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-right shrink-0 flex flex-col items-end">
                   <DualCurrencyDisplay
                     mobiAmount={transaction.amount}
                     transactionType={transaction.type}
@@ -296,16 +310,19 @@ export function FinancialOverviewDialog({
                   </p>
                 </div>
               </div>
-              {/* Row 2: Date + Status Badge */}
+              {/* Row 2: Date + Status + Chevron */}
               <div className="flex items-center justify-between pl-9">
                 <p className="text-xs text-muted-foreground">
                   {transaction.date.toLocaleDateString()}
                 </p>
-                <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-xs">
-                  {transaction.status}
-                </Badge>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-xs">
+                    {transaction.status}
+                  </Badge>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
+                </div>
               </div>
-            </div>
+            </button>
           ))}
         </CardContent>
       </Card>
@@ -422,7 +439,21 @@ export function FinancialOverviewDialog({
             const Icon = config.icon;
             const isPositive = tx.type === "stake_income" || tx.type === "transfer_in";
             return (
-              <div key={tx.id} className="p-2.5 rounded-lg border space-y-1.5">
+              <button
+                key={tx.id}
+                className="p-2.5 rounded-lg border space-y-1.5 w-full text-left touch-manipulation active:bg-muted/60 active:scale-[0.98] transition-all"
+                onClick={() => setSelectedTransaction({
+                  id: tx.id,
+                  description: tx.description,
+                  amount: tx.amount,
+                  date: new Date(tx.date),
+                  quizType: tx.type,
+                  reference: tx.reference,
+                  playerName: tx.playerName,
+                  relatedQuizId: tx.relatedQuizId,
+                  status: "completed",
+                })}
+              >
                 {/* Row 1: Icon + Description + Amount */}
                 <div className="flex items-start gap-2">
                   <div className={cn("p-1.5 rounded-full shrink-0 mt-0.5", config.bg)}>
@@ -431,7 +462,7 @@ export function FinancialOverviewDialog({
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-xs truncate">{tx.description}</p>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 flex flex-col items-end">
                     <p className={cn(
                       "text-sm font-semibold",
                       isPositive ? "text-green-600" : "text-red-600"
@@ -443,18 +474,21 @@ export function FinancialOverviewDialog({
                     </p>
                   </div>
                 </div>
-                {/* Row 2: Date + Player Badge */}
-                <div className="flex items-center gap-2 pl-9 flex-wrap">
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(tx.date).toLocaleDateString()}
-                  </p>
-                  {tx.playerName && (
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                      {tx.playerName}
-                    </Badge>
-                  )}
+                {/* Row 2: Date + Player Badge + Chevron */}
+                <div className="flex items-center justify-between pl-9">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(tx.date).toLocaleDateString()}
+                    </p>
+                    {tx.playerName && (
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                        {tx.playerName}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
                 </div>
-              </div>
+              </button>
             );
           })}
         </CardContent>
@@ -495,6 +529,7 @@ export function FinancialOverviewDialog({
         <WalletTransferDialog open={showTransferDialog} onOpenChange={setShowTransferDialog} />
         <WalletWithdrawDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog} />
         <QuizWalletDrawer open={showQuizWalletDrawer} onOpenChange={setShowQuizWalletDrawer} />
+        <TransactionDetailDrawer open={!!selectedTransaction} onOpenChange={(open) => !open && setSelectedTransaction(null)} transaction={selectedTransaction} />
       </>
     );
   }
@@ -518,6 +553,7 @@ export function FinancialOverviewDialog({
       <WalletTransferDialog open={showTransferDialog} onOpenChange={setShowTransferDialog} />
       <WalletWithdrawDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog} />
       <QuizWalletDrawer open={showQuizWalletDrawer} onOpenChange={setShowQuizWalletDrawer} />
+      <TransactionDetailDrawer open={!!selectedTransaction} onOpenChange={(open) => !open && setSelectedTransaction(null)} transaction={selectedTransaction} />
     </>
   );
 }
