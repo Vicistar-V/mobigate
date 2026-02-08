@@ -47,6 +47,7 @@ export function AdvertisementsListSheet({
   const { toast } = useToast();
   const [selectedAd, setSelectedAd] = useState<EnhancedAdvertisement | null>(null);
   const [showFullView, setShowFullView] = useState(false);
+  const [isViewingOwnAd, setIsViewingOwnAd] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<EnhancedAdvertisement | null>(null);
 
   const allActiveAds = getActiveAdvertisements();
@@ -54,8 +55,9 @@ export function AdvertisementsListSheet({
   const myInactiveAds = getMyInactiveAdvertisements();
   const stats = getAdvertisementStats();
 
-  const openAdvert = (ad: EnhancedAdvertisement) => {
+  const openAdvert = (ad: EnhancedAdvertisement, isOwn = false) => {
     setSelectedAd(ad);
+    setIsViewingOwnAd(isOwn);
     setShowFullView(true);
   };
 
@@ -158,7 +160,7 @@ export function AdvertisementsListSheet({
         {/* Clickable card body */}
         <div
           className="flex gap-3 p-3 touch-manipulation active:bg-muted/30 transition-colors"
-          onClick={() => openAdvert(ad)}
+          onClick={() => openAdvert(ad, true)}
         >
           <AdThumbnail firstMedia={firstMedia} businessName={ad.businessName} />
           <div className="flex-1 min-w-0 space-y-1">
@@ -397,6 +399,7 @@ export function AdvertisementsListSheet({
         open={showFullView}
         onOpenChange={setShowFullView}
         advertisement={selectedAd}
+        isOwner={isViewingOwnAd}
       />
 
       {/* Delete Confirmation */}
