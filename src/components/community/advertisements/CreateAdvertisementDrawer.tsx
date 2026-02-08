@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Megaphone, X, Eye, Settings2, Send } from "lucide-react";
+import { Megaphone, X, Eye, Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AdvertisementPhotoUploader } from "./AdvertisementPhotoUploader";
 import { AdvertisementPreviewSheet } from "./AdvertisementPreviewSheet";
@@ -39,6 +39,8 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
   const [formData, setFormData] = useState<AdvertisementFormData>(initialFormData);
   const [showPreview, setShowPreview] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  // Track if we should reopen the drawer after child sheet closes
+  const [pendingReopen, setPendingReopen] = useState(false);
 
   const updateField = <K extends keyof AdvertisementFormData>(key: K, value: AdvertisementFormData[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -46,15 +48,35 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
 
   const isFormValid = formData.businessName.trim() && formData.productTitle.trim() && formData.description.trim() && formData.city.trim() && formData.phone1.trim();
 
-  const handleQuickSubmit = () => {
-    if (!isFormValid) {
-      toast({ title: "Missing Fields", description: "Please fill all required fields", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Advertisement Submitted!", description: "Your advert has been submitted for review (Community Only, Free)", });
-    setFormData(initialFormData);
+  // Close parent drawer, then open child sheet after delay (prevents modal stacking)
+  const handleOpenPreview = useCallback(() => {
     onOpenChange(false);
-  };
+    setPendingReopen(true);
+    setTimeout(() => setShowPreview(true), 150);
+  }, [onOpenChange]);
+
+  const handleOpenSettings = useCallback(() => {
+    onOpenChange(false);
+    setPendingReopen(true);
+    setTimeout(() => setShowSettings(true), 150);
+  }, [onOpenChange]);
+
+  // When child sheet closes, reopen parent drawer
+  const handlePreviewClose = useCallback((isOpen: boolean) => {
+    setShowPreview(isOpen);
+    if (!isOpen && pendingReopen) {
+      setPendingReopen(false);
+      setTimeout(() => onOpenChange(true), 150);
+    }
+  }, [onOpenChange, pendingReopen]);
+
+  const handleSettingsClose = useCallback((isOpen: boolean) => {
+    setShowSettings(isOpen);
+    if (!isOpen && pendingReopen) {
+      setPendingReopen(false);
+      setTimeout(() => onOpenChange(true), 150);
+    }
+  }, [onOpenChange, pendingReopen]);
 
   return (
     <>
@@ -73,7 +95,7 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
 
           {/* Scrollable Form Body */}
           <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-            <div className="p-4 space-y-4 pb-32">
+            <div className="px-3 py-4 space-y-4 pb-32">
               {/* Business Name */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">Business / Product Name *</Label>
@@ -83,6 +105,9 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   placeholder="e.g. Amara's Kitchen"
                   className="h-12 text-base touch-manipulation"
                   autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -113,6 +138,9 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   placeholder="e.g. Premium Catering Services"
                   className="h-12 text-base touch-manipulation"
                   autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -126,7 +154,9 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   placeholder="Describe your product or service..."
                   className="min-h-[100px] text-base touch-manipulation resize-none"
                   autoComplete="off"
+                  autoCorrect="off"
                   spellCheck={false}
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -140,6 +170,9 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   placeholder="e.g. Lagos, Nigeria"
                   className="h-12 text-base touch-manipulation"
                   autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -154,6 +187,7 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   type="tel"
                   className="h-12 text-base touch-manipulation"
                   autoComplete="off"
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -168,6 +202,7 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   type="tel"
                   className="h-12 text-base touch-manipulation"
                   autoComplete="off"
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -182,6 +217,7 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   type="email"
                   className="h-12 text-base touch-manipulation"
                   autoComplete="off"
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -196,6 +232,7 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
                   type="url"
                   className="h-12 text-base touch-manipulation"
                   autoComplete="off"
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -208,49 +245,43 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
             </div>
           </ScrollArea>
 
-          {/* Fixed Footer */}
+          {/* Fixed Footer - No free option, both paths lead to paid submission */}
           <div className="border-t bg-background p-3 space-y-2 flex-shrink-0">
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 className="flex-1 h-11 text-sm font-medium touch-manipulation active:scale-[0.97]"
-                onClick={() => setShowPreview(true)}
+                onClick={handleOpenPreview}
                 disabled={!isFormValid}
               >
                 <Eye className="h-4 w-4 mr-1.5" />
                 Preview
               </Button>
               <Button
-                variant="outline"
-                className="flex-1 h-11 text-sm font-medium touch-manipulation active:scale-[0.97] border-amber-300 text-amber-700 hover:bg-amber-50"
-                onClick={() => setShowSettings(true)}
+                className="flex-1 h-11 text-sm font-medium touch-manipulation active:scale-[0.97] bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={handleOpenSettings}
                 disabled={!isFormValid}
               >
                 <Settings2 className="h-4 w-4 mr-1.5" />
                 Audience & Fees
               </Button>
             </div>
-            <Button
-              className="w-full h-11 text-sm font-medium touch-manipulation active:scale-[0.97] bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleQuickSubmit}
-              disabled={!isFormValid}
-            >
-              <Send className="h-4 w-4 mr-1.5" />
-              Quick Submit (Community Only, Free)
-            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              All advertisements require payment via Mobi Wallet
+            </p>
           </div>
         </DrawerContent>
       </Drawer>
 
       <AdvertisementPreviewSheet
         open={showPreview}
-        onOpenChange={setShowPreview}
+        onOpenChange={handlePreviewClose}
         formData={formData}
       />
 
       <AdvertisementSettingsSheet
         open={showSettings}
-        onOpenChange={setShowSettings}
+        onOpenChange={handleSettingsClose}
         formData={formData}
         onFormDataChange={setFormData}
       />
