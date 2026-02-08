@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
@@ -107,37 +107,37 @@ export function OfficialLetterDisplay({
   };
 
   const LetterContent = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full box-border">
       {/* Printable Letter Area */}
-      <div ref={letterRef} className="bg-white">
-        <Card className="border-2 border-blue-600/30 bg-white overflow-hidden">
-          <CardContent className="p-6 space-y-5">
+      <div ref={letterRef} className="bg-white w-full box-border">
+        <Card className="border-2 border-blue-600/30 bg-white overflow-hidden w-full box-border">
+          <CardContent className="p-4 space-y-4">
             {/* Letterhead */}
             <div className="text-center space-y-2">
               <div className="flex justify-center">
                 <div className="p-3 rounded-full bg-blue-600/15 border border-blue-600/20">
-                  <Stamp className="h-8 w-8 text-blue-600" />
+                  <Stamp className="h-7 w-7 text-blue-600" />
                 </div>
               </div>
-              <h2 className="text-lg font-bold uppercase tracking-wide text-gray-900">
+              <h2 className="text-base font-bold uppercase tracking-wide text-gray-900 break-words">
                 {letterData.communityName}
               </h2>
-              <p className="text-xs text-gray-500 italic">
+              <p className="text-sm text-gray-500 italic">
                 Official Community Correspondence
               </p>
             </div>
 
             <Separator className="bg-blue-600/20" />
 
-            {/* Date & Reference */}
-            <div className="flex justify-between items-start text-sm">
+            {/* Date & Reference - stacked on mobile */}
+            <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-blue-600" />
-                <span className="text-gray-700">
+                <Calendar className="h-4 w-4 text-blue-600 shrink-0" />
+                <span className="text-sm text-gray-700">
                   {formatDate(letterData.issuedDate, "MMMM d, yyyy")}
                 </span>
               </div>
-              <span className="text-xs text-blue-600 font-mono font-medium">
+              <span className="text-sm text-blue-600 font-mono font-medium break-all">
                 {letterData.letterNumber}
               </span>
             </div>
@@ -152,14 +152,14 @@ export function OfficialLetterDisplay({
             {/* Subject Line */}
             <div className="bg-blue-50 border border-blue-600/20 rounded-lg p-3">
               <p className="text-xs text-gray-500 mb-1">RE:</p>
-              <p className="text-sm font-bold text-gray-900 uppercase">
+              <p className="text-sm font-bold text-gray-900 uppercase break-words">
                 {letterData.templateTitle}
               </p>
             </div>
 
             {/* Body */}
             <div className="space-y-3 text-sm text-gray-700 leading-relaxed">
-              <p>
+              <p className="break-words">
                 This is to certify that{" "}
                 <span className="font-bold text-gray-900">
                   {letterData.requestedBy}
@@ -173,12 +173,12 @@ export function OfficialLetterDisplay({
 
               <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                 <p className="text-xs text-gray-500 mb-1">Purpose:</p>
-                <p className="text-sm text-gray-800 font-medium">
+                <p className="text-sm text-gray-800 font-medium break-words">
                   {letterData.purpose}
                 </p>
               </div>
 
-              <p>
+              <p className="break-words">
                 This letter is issued upon request for the purpose stated above.
                 It carries the full authority of the community leadership.
               </p>
@@ -186,18 +186,18 @@ export function OfficialLetterDisplay({
 
             <Separator className="bg-blue-600/20" />
 
-            {/* Verification */}
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-600/10">
+            {/* Verification - stacked for mobile */}
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-600/10 space-y-2">
               <div className="flex items-center gap-2">
-                <QrCode className="h-5 w-5 text-blue-600" />
-                <div>
+                <QrCode className="h-5 w-5 text-blue-600 shrink-0" />
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-blue-600">Verification Code</p>
-                  <p className="font-mono text-sm font-medium text-gray-900">
+                  <p className="font-mono text-sm font-medium text-gray-900 break-all">
                     {letterData.verificationCode}
                   </p>
                 </div>
+                <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
               </div>
-              <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
 
             {/* Signatory */}
@@ -205,12 +205,12 @@ export function OfficialLetterDisplay({
               <Separator className="bg-blue-600/20" />
               <div className="pt-4">
                 <div className="w-32 border-b border-gray-400 mx-auto mb-1" />
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-semibold text-gray-900 break-words">
                   {letterData.signedBy}
                 </p>
                 <p className="text-xs text-gray-500">Community Secretary</p>
               </div>
-              <p className="text-[10px] text-gray-400 italic pt-2">
+              <p className="text-xs text-gray-400 italic pt-2 break-words">
                 This letter is electronically generated and verified. Scan the QR
                 code or use the verification code for authenticity.
               </p>
@@ -221,7 +221,7 @@ export function OfficialLetterDisplay({
 
       {/* Download Button */}
       <Button
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm h-11 touch-manipulation active:scale-[0.97]"
         onClick={() => setShowFormatSheet(true)}
         disabled={isDownloading}
       >
@@ -254,18 +254,16 @@ export function OfficialLetterDisplay({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader className="border-b">
-            <DrawerTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+        <DrawerContent className="p-0 max-h-[92vh]">
+          <DrawerHeader className="border-b shrink-0 px-3 py-3">
+            <DrawerTitle className="flex items-center gap-2 text-base">
+              <FileText className="h-5 w-5 text-blue-600 shrink-0" />
               Official Letter
             </DrawerTitle>
           </DrawerHeader>
-          <DrawerBody>
-            <div className="py-4">
-              {LetterContent()}
-            </div>
-          </DrawerBody>
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 pb-6 pt-3">
+            {LetterContent()}
+          </div>
         </DrawerContent>
       </Drawer>
     );
