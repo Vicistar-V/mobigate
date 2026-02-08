@@ -171,46 +171,53 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement }
               {/* Description */}
               <p className="text-sm leading-relaxed">{ad.description}</p>
 
-              {/* Contact Buttons */}
-              <div className="flex flex-wrap gap-2 pt-1">
+              {/* Contact Buttons - Row 1: Call + WhatsApp */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <Button
                   size="sm"
-                  className="flex-1 min-w-[100px] h-10 text-sm font-medium touch-manipulation active:scale-[0.97] bg-emerald-600 hover:bg-emerald-700"
+                  className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97] bg-emerald-600 hover:bg-emerald-700"
                   onClick={() => handleCall(ad.phone1)}
                 >
-                  <Phone className="h-3.5 w-3.5 mr-1.5" />
+                  <Phone className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                   Call
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 min-w-[100px] h-10 text-sm font-medium touch-manipulation active:scale-[0.97] bg-green-600 hover:bg-green-700"
+                  className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97] bg-green-600 hover:bg-green-700"
                   onClick={() => handleWhatsApp(ad.phone1)}
                 >
-                  💬 WhatsApp
+                  <span className="mr-1.5 shrink-0">💬</span>
+                  WhatsApp
                 </Button>
-                {ad.email && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 min-w-[80px] h-10 text-sm font-medium touch-manipulation"
-                    onClick={() => (window.location.href = `mailto:${ad.email}`)}
-                  >
-                    <Mail className="h-3.5 w-3.5 mr-1.5" />
-                    Email
-                  </Button>
-                )}
-                {ad.website && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 min-w-[80px] h-10 text-sm font-medium touch-manipulation"
-                    onClick={() => window.open(ad.website, "_blank")}
-                  >
-                    <Globe className="h-3.5 w-3.5 mr-1.5" />
-                    Website
-                  </Button>
-                )}
               </div>
+
+              {/* Contact Buttons - Row 2: Email + Website */}
+              {(ad.email || ad.website) && (
+                <div className="grid grid-cols-2 gap-2">
+                  {ad.email && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97]"
+                      onClick={() => (window.location.href = `mailto:${ad.email}`)}
+                    >
+                      <Mail className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                      Email
+                    </Button>
+                  )}
+                  {ad.website && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97]"
+                      onClick={() => window.open(ad.website, "_blank")}
+                    >
+                      <Globe className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                      Website
+                    </Button>
+                  )}
+                </div>
+              )}
 
               {/* Phone 2 */}
               {ad.phone2 && (

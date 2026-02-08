@@ -169,32 +169,39 @@ export function AdvertisementPreviewSheet({ open, onOpenChange, formData }: Adve
                 {formData.description || "Product or service description will appear here..."}
               </p>
 
-              {/* Contact Buttons */}
-              <div className="flex flex-wrap gap-2 pt-1">
+              {/* Contact Buttons - Row 1: Call + WhatsApp */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 {formData.phone1 && (
-                  <Button size="sm" className="flex-1 min-w-[100px] h-10 text-sm font-medium touch-manipulation bg-emerald-600 hover:bg-emerald-700">
-                    <Phone className="h-3.5 w-3.5 mr-1.5" />
+                  <Button size="sm" className="h-10 text-sm font-medium touch-manipulation bg-emerald-600 hover:bg-emerald-700">
+                    <Phone className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                     Call
                   </Button>
                 )}
                 {formData.phone1 && (
-                  <Button size="sm" className="flex-1 min-w-[100px] h-10 text-sm font-medium touch-manipulation bg-green-600 hover:bg-green-700">
-                    💬 WhatsApp
-                  </Button>
-                )}
-                {formData.email && (
-                  <Button size="sm" variant="outline" className="flex-1 min-w-[80px] h-10 text-sm font-medium touch-manipulation">
-                    <Mail className="h-3.5 w-3.5 mr-1.5" />
-                    Email
-                  </Button>
-                )}
-                {formData.website && (
-                  <Button size="sm" variant="outline" className="flex-1 min-w-[80px] h-10 text-sm font-medium touch-manipulation">
-                    <Globe className="h-3.5 w-3.5 mr-1.5" />
-                    Website
+                  <Button size="sm" className="h-10 text-sm font-medium touch-manipulation bg-green-600 hover:bg-green-700">
+                    <span className="mr-1.5 shrink-0">💬</span>
+                    WhatsApp
                   </Button>
                 )}
               </div>
+
+              {/* Contact Buttons - Row 2: Email + Website */}
+              {(formData.email || formData.website) && (
+                <div className="grid grid-cols-2 gap-2">
+                  {formData.email && (
+                    <Button size="sm" variant="outline" className="h-10 text-sm font-medium touch-manipulation">
+                      <Mail className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                      Email
+                    </Button>
+                  )}
+                  {formData.website && (
+                    <Button size="sm" variant="outline" className="h-10 text-sm font-medium touch-manipulation">
+                      <Globe className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                      Website
+                    </Button>
+                  )}
+                </div>
+              )}
 
               {/* Simulated Engagement Bar */}
               <div className="flex items-center justify-between pt-3 border-t text-muted-foreground">
