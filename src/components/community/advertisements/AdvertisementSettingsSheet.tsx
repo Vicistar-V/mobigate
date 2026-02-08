@@ -112,7 +112,7 @@ export function AdvertisementSettingsSheet({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Category:</span>
-                      <Badge variant="secondary" className="text-[10px]">{getCategoryLabel(formData.category)}</Badge>
+                      <Badge variant="secondary" className="text-xs">{getCategoryLabel(formData.category)}</Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Product:</span>
@@ -196,7 +196,7 @@ export function AdvertisementSettingsSheet({
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium text-sm">{option.label}</span>
                             {option.premiumMultiplier > 1 && (
-                              <Badge variant="outline" className="text-[10px] px-1.5">
+                              <Badge variant="outline" className="text-xs px-1.5">
                                 +{Math.round((option.premiumMultiplier - 1) * 100)}%
                               </Badge>
                             )}
@@ -229,7 +229,7 @@ export function AdvertisementSettingsSheet({
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-sm">{option.label}</span>
                           {option.popular && (
-                            <Badge className="text-[9px] px-1 bg-amber-500 text-white">Popular</Badge>
+                            <Badge className="text-xs px-1 bg-amber-500 text-white">Popular</Badge>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
