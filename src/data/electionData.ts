@@ -26,6 +26,7 @@ export interface ElectionOffice {
 export interface ElectionCandidate {
   id: string;
   name: string;
+  avatar?: string;
   officeId: string;
   votes: number;
   losses: number;
@@ -132,6 +133,7 @@ export const mockCandidates: ElectionCandidate[] = [
   {
     id: "cand-1",
     name: "Paulson Chinedu Okonkwo",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     officeId: "office-1",
     votes: 527,
     losses: 473,
@@ -150,6 +152,7 @@ export const mockCandidates: ElectionCandidate[] = [
   {
     id: "cand-2",
     name: "Jerome Ifeanyi Adebayo",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
     officeId: "office-1",
     votes: 316,
     losses: 684,
@@ -168,6 +171,7 @@ export const mockCandidates: ElectionCandidate[] = [
   {
     id: "cand-3",
     name: "Jude Emeka Nwosu",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     officeId: "office-1",
     votes: 209,
     losses: 791,
@@ -207,7 +211,8 @@ export const mockVicePresidentOffice: ElectionOffice = {
     { 
       id: "vp-cand-1", 
       name: "Grace Adaeze Okafor", 
-      officeId: "office-2", 
+      avatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-2",
       votes: 412, 
       losses: 588, 
       vct: 98, 
@@ -219,7 +224,8 @@ export const mockVicePresidentOffice: ElectionOffice = {
     { 
       id: "vp-cand-2", 
       name: "Emmanuel Chukwuemeka Ibe", 
-      officeId: "office-2", 
+      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-2",
       votes: 389, 
       losses: 611, 
       vct: 87, 
@@ -231,7 +237,8 @@ export const mockVicePresidentOffice: ElectionOffice = {
     { 
       id: "vp-cand-3", 
       name: "Patricia Ngozi Udeh", 
-      officeId: "office-2", 
+      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-2",
       votes: 287, 
       losses: 713, 
       vct: 65, 
@@ -255,7 +262,8 @@ export const mockSecretaryOffice: ElectionOffice = {
     { 
       id: "sec-cand-1", 
       name: "Daniel Obiora Chibueze", 
-      officeId: "office-3", 
+      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-3",
       votes: 523, 
       losses: 477, 
       vct: 132, 
@@ -267,7 +275,8 @@ export const mockSecretaryOffice: ElectionOffice = {
     { 
       id: "sec-cand-2", 
       name: "Monica Nneka Obi", 
-      officeId: "office-3", 
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-3",
       votes: 478, 
       losses: 522, 
       vct: 118, 
@@ -291,7 +300,8 @@ export const mockTreasurerOffice: ElectionOffice = {
     { 
       id: "trs-cand-1", 
       name: "Benjamin Uchenna Okoro", 
-      officeId: "office-4", 
+      avatar: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-4",
       votes: 567, 
       losses: 433, 
       vct: 145, 
@@ -303,7 +313,8 @@ export const mockTreasurerOffice: ElectionOffice = {
     { 
       id: "trs-cand-2", 
       name: "Victoria Chiamaka Eze", 
-      officeId: "office-4", 
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-4",
       votes: 401, 
       losses: 599, 
       vct: 95, 
@@ -315,7 +326,8 @@ export const mockTreasurerOffice: ElectionOffice = {
     { 
       id: "trs-cand-3", 
       name: "Kenneth Obinna Nwachukwu", 
-      officeId: "office-4", 
+      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+      officeId: "office-4",
       votes: 298, 
       losses: 702, 
       vct: 72, 
@@ -339,6 +351,7 @@ export const mockFinSecOffice: ElectionOffice = {
     { 
       id: "fs-cand-1", 
       name: "Anthony Chijioke Oguike", 
+      avatar: "https://images.unsplash.com/photo-1618077360395-f3068be8e001?w=150&h=150&fit=crop&crop=face",
       officeId: "office-5", 
       votes: 489, 
       losses: 511, 
@@ -351,6 +364,7 @@ export const mockFinSecOffice: ElectionOffice = {
     { 
       id: "fs-cand-2", 
       name: "Rebecca Chidinma Anyanwu", 
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
       officeId: "office-5", 
       votes: 445, 
       losses: 555, 

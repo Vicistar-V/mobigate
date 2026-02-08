@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, MessageSquare, ChevronDown, FileText, Clock, RefreshCw, ChevronRight, MessageCircle, Users, Vote, TrendingUp } from "lucide-react";
 import { ElectionOffice, ElectionCandidate, defaultElectionSettings } from "@/data/electionData";
 import {
@@ -16,6 +17,8 @@ import { VoteConfirmationDialog } from "./VoteConfirmationDialog";
 import { ChangeVoteDialog } from "./ChangeVoteDialog";
 import { AdminRemarkDrawer } from "./AdminRemarkDrawer";
 import { CandidateCommentsDrawer } from "./CandidateCommentsDrawer";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 
 interface ElectionVotingCardProps {
   office: ElectionOffice;
@@ -61,6 +64,10 @@ export const ElectionVotingCard = ({
   // Manifesto state
   const [manifestoCandidate, setManifestoCandidate] = useState<ElectionCandidate | null>(null);
   const [showManifesto, setShowManifesto] = useState(false);
+
+  // Profile preview state
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
 
   const predefinedComments = [
     "Excellent choice!",
@@ -158,6 +165,22 @@ export const ElectionVotingCard = ({
       blue: type === 'bg' ? 'bg-blue-500' : 'border-blue-500',
     };
     return colorMap[color as keyof typeof colorMap] || (type === 'bg' ? 'bg-gray-500' : 'border-gray-500');
+  };
+
+  const mapCandidateToMember = (candidate: ElectionCandidate): ExecutiveMember => ({
+    id: candidate.id,
+    name: candidate.name,
+    position: office.name + " Candidate",
+    tenure: "2024-2026",
+    imageUrl: candidate.avatar || "/placeholder.svg",
+    level: "officer" as const,
+    committee: "executive" as const,
+  });
+
+  const handleNameClick = (candidate: ElectionCandidate) => {
+    setSelectedMember(mapCandidateToMember(candidate));
+    setShowMemberPreview(true);
+  };
   };
 
   const getButtonColorClasses = (color: string, isVoted: boolean) => {
@@ -276,14 +299,28 @@ export const ElectionVotingCard = ({
                   : 'border-border'
               }`}
             >
-              {/* Row 1: Full Name - Full Width */}
+              {/* Row 1: Avatar + Name - Full Width */}
               <div className="flex items-center gap-3 mb-1">
-                <span className={`w-4 h-4 rounded-full flex-shrink-0 ${getCandidateColorClass(candidate.color)}`} />
+                <button
+                  className="relative shrink-0 touch-manipulation active:scale-[0.95]"
+                  onClick={() => handleNameClick(candidate)}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={candidate.avatar} alt={candidate.name} />
+                    <AvatarFallback className="text-xs font-medium">
+                      {candidate.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background ${getCandidateColorClass(candidate.color)}`} />
+                </button>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="text-base font-semibold text-foreground">+</span>
-                  <span className="text-base font-semibold text-foreground break-words leading-tight">
+                  <button
+                    className="text-base font-semibold text-foreground break-words leading-tight text-left touch-manipulation active:text-primary transition-colors"
+                    onClick={() => handleNameClick(candidate)}
+                  >
                     {candidate.name}
-                  </span>
+                  </button>
                 </div>
               </div>
 
@@ -450,6 +487,13 @@ export const ElectionVotingCard = ({
         onOpenChange={setShowManifesto}
         candidate={manifestoCandidate}
         officeName={office.name}
+      />
+
+      {/* Member Profile Preview */}
+      <MemberPreviewDialog
+        member={selectedMember}
+        open={showMemberPreview}
+        onOpenChange={setShowMemberPreview}
       />
     </Card>
   );
