@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
@@ -102,50 +102,48 @@ export function DigitalIDCardDisplay({
   };
 
   const CardDisplayContent = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full box-border">
       {/* Printable ID Card Area */}
-      <div ref={cardRef} className="bg-white">
-        <Card className="border-2 border-blue-600/30 overflow-hidden">
+      <div ref={cardRef} className="bg-white w-full box-border">
+        <Card className="border-2 border-blue-600/30 overflow-hidden w-full box-border">
           {/* Card Header - Gradient Banner */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 pb-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                <div>
-                  <h3 className="text-sm font-bold uppercase tracking-wider">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 pb-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <Shield className="h-5 w-5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-bold uppercase tracking-wider break-words leading-tight">
                     {cardData.communityName}
                   </h3>
-                  <p className="text-[10px] opacity-80">
+                  <p className="text-xs opacity-80">
                     Official Community ID Card
                   </p>
                 </div>
               </div>
-              <Badge className="bg-white/20 text-white border-0 text-[10px]">
+              <Badge className="bg-white/20 text-white border-0 text-xs shrink-0">
                 MEMBER
               </Badge>
             </div>
           </div>
 
-          <CardContent className="p-4 space-y-4 -mt-3">
-            {/* Photo & QR Row */}
-            <div className="flex items-start gap-4">
-              <Avatar className="h-20 w-20 border-4 border-white shadow-lg rounded-lg">
+          <CardContent className="p-3 space-y-3 -mt-2">
+            {/* Photo & Info Row */}
+            <div className="flex items-start gap-3">
+              <Avatar className="h-18 w-18 border-4 border-white shadow-lg rounded-lg shrink-0">
                 <AvatarImage src={cardData.memberPhoto} alt={cardData.memberName} className="object-cover" />
                 <AvatarFallback className="rounded-lg bg-blue-100 text-blue-700 text-xl">
                   <User className="h-8 w-8" />
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0 pt-2">
-                <h4 className="text-base font-bold text-gray-900 leading-tight">
+              <div className="flex-1 min-w-0 pt-1">
+                <h4 className="text-base font-bold text-gray-900 leading-tight break-words">
                   {cardData.memberName}
                 </h4>
-                <div className="mt-2 space-y-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">
-                      Member ID
-                    </span>
-                  </div>
-                  <p className="text-xs font-mono font-semibold text-blue-600">
+                <div className="mt-1.5 space-y-0.5">
+                  <span className="text-xs text-gray-500 uppercase tracking-wider">
+                    Member ID
+                  </span>
+                  <p className="text-sm font-mono font-semibold text-blue-600 break-all">
                     {cardData.memberId}
                   </p>
                 </div>
@@ -153,67 +151,70 @@ export function DigitalIDCardDisplay({
             </div>
 
             {/* Card Details Grid */}
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-2">
               <div className="bg-gray-50 rounded-lg p-2.5">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <CreditCard className="h-3 w-3 text-blue-600" />
-                  <span className="text-[10px] text-gray-500 uppercase">
+                  <CreditCard className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                  <span className="text-xs text-gray-500 uppercase">
                     Card No
                   </span>
                 </div>
-                <p className="text-xs font-mono font-medium text-gray-900">
+                <p className="text-sm font-mono font-medium text-gray-900 break-all">
                   {cardData.cardNumber}
                 </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-2.5">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <CheckCircle className="h-3 w-3 text-green-600" />
-                  <span className="text-[10px] text-gray-500 uppercase">
+                  <CheckCircle className="h-3.5 w-3.5 text-green-600 shrink-0" />
+                  <span className="text-xs text-gray-500 uppercase">
                     Status
                   </span>
                 </div>
-                <Badge className="bg-green-500/10 text-green-700 border-green-200 text-xs h-5">
+                <Badge className="bg-green-500/10 text-green-700 border-green-200 text-sm h-6">
                   Active
                 </Badge>
               </div>
             </div>
 
-            {/* Dates Row */}
-            <div className="flex items-center justify-between bg-blue-50 rounded-lg p-3 border border-blue-600/10">
+            {/* Dates Row - vertically stacked for mobile */}
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-600/10 space-y-2">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-blue-600" />
+                <Calendar className="h-4 w-4 text-blue-600 shrink-0" />
                 <div>
-                  <p className="text-[10px] text-gray-500">Issue Date</p>
-                  <p className="text-xs font-medium text-gray-900">
+                  <p className="text-xs text-gray-500">Issue Date</p>
+                  <p className="text-sm font-medium text-gray-900">
                     {formatDate(cardData.issueDate, "dd/MM/yyyy")}
                   </p>
                 </div>
               </div>
-              <Separator orientation="vertical" className="h-8 bg-blue-600/20" />
-              <div className="text-right">
-                <p className="text-[10px] text-gray-500">Expiry Date</p>
-                <p className="text-xs font-medium text-gray-900">
-                  {formatDate(cardData.expiryDate, "dd/MM/yyyy")}
-                </p>
+              <Separator className="bg-blue-600/15" />
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-blue-600 shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">Expiry Date</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {formatDate(cardData.expiryDate, "dd/MM/yyyy")}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Verification */}
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-center gap-2">
-                <QrCode className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-[10px] text-gray-500">Verification</p>
-                  <p className="font-mono text-xs font-medium text-gray-900">
+                <QrCode className="h-5 w-5 text-blue-600 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-500">Verification Code</p>
+                  <p className="font-mono text-sm font-medium text-gray-900 break-all">
                     {cardData.verificationCode}
                   </p>
                 </div>
+                <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
               </div>
-              <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
 
             {/* Footer */}
-            <p className="text-[9px] text-gray-400 text-center italic">
+            <p className="text-xs text-gray-400 text-center italic break-words">
               This digital ID card is electronically verified. Present this card
               for community identification purposes.
             </p>
@@ -223,7 +224,7 @@ export function DigitalIDCardDisplay({
 
       {/* Download Button */}
       <Button
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm h-11 touch-manipulation active:scale-[0.97]"
         onClick={() => setShowFormatSheet(true)}
         disabled={isDownloading}
       >
@@ -256,18 +257,16 @@ export function DigitalIDCardDisplay({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader className="border-b">
-            <DrawerTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-blue-600" />
+        <DrawerContent className="p-0 max-h-[92vh]">
+          <DrawerHeader className="border-b shrink-0 px-3 py-3">
+            <DrawerTitle className="flex items-center gap-2 text-base">
+              <CreditCard className="h-5 w-5 text-blue-600 shrink-0" />
               Digital ID Card
             </DrawerTitle>
           </DrawerHeader>
-          <DrawerBody>
-            <div className="py-4">
-              {CardDisplayContent()}
-            </div>
-          </DrawerBody>
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 pb-6 pt-3">
+            {CardDisplayContent()}
+          </div>
         </DrawerContent>
       </Drawer>
     );
