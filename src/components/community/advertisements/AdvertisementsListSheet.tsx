@@ -176,17 +176,19 @@ export function AdvertisementsListSheet({
           </div>
 
           <Tabs defaultValue={initialTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="w-full justify-start px-3 pt-2 bg-transparent flex-shrink-0">
-              <TabsTrigger value="all_active" className="text-xs flex-1">
-                All Active ({allActiveAds.length})
-              </TabsTrigger>
-              <TabsTrigger value="my_active" className="text-xs flex-1">
-                My Active ({myActiveAds.length})
-              </TabsTrigger>
-              <TabsTrigger value="my_inactive" className="text-xs flex-1">
-                My Inactive ({myInactiveAds.length})
-              </TabsTrigger>
-            </TabsList>
+            <div className="px-4 pt-2 pb-1 flex-shrink-0">
+              <TabsList className="w-full grid grid-cols-3 h-10">
+                <TabsTrigger value="all_active" className="text-xs px-1 touch-manipulation">
+                  Active ({allActiveAds.length})
+                </TabsTrigger>
+                <TabsTrigger value="my_active" className="text-xs px-1 touch-manipulation">
+                  My Adverts ({myActiveAds.length})
+                </TabsTrigger>
+                <TabsTrigger value="my_inactive" className="text-xs px-1 touch-manipulation">
+                  Ended ({myInactiveAds.length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <ScrollArea className="flex-1 overflow-y-auto touch-auto">
               <TabsContent value="all_active" className="p-3 space-y-2 mt-0">
