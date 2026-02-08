@@ -23,6 +23,10 @@ export const TransactionTable = ({ transactions, filter }: TransactionTableProps
     ? transactions 
     : transactions.filter(t => t.type === filter);
 
+  // Calculate totals
+  const totalCredit = filteredTransactions.reduce((sum, t) => sum + (t.creditAmount || 0), 0);
+  const totalDebit = filteredTransactions.reduce((sum, t) => sum + (t.debitAmount || 0), 0);
+
   const handleRowClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
   };
@@ -73,6 +77,44 @@ export const TransactionTable = ({ transactions, filter }: TransactionTableProps
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              {/* Total Credit Row */}
+              <tr>
+                <td colSpan={2} className="bg-green-200 p-2.5 border border-gray-300 text-right font-bold text-sm">
+                  Total Credit (All Income)
+                </td>
+                <td className="bg-green-200 p-2.5 border border-gray-300 text-center font-bold text-sm tabular-nums text-green-800">
+                  ₦{totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+                <td className="bg-green-200 p-2.5 border border-gray-300 text-center text-xs text-muted-foreground">
+                  (M{totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                </td>
+              </tr>
+              {/* Total Debit Row */}
+              <tr>
+                <td colSpan={2} className="bg-red-200 p-2.5 border border-gray-300 text-right font-bold text-sm">
+                  Total Debit (Withdrawals)
+                </td>
+                <td className="bg-red-200 p-2.5 border border-gray-300 text-center font-bold text-sm tabular-nums text-red-800">
+                  ₦{totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+                <td className="bg-red-200 p-2.5 border border-gray-300 text-center text-xs text-muted-foreground">
+                  (M{totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                </td>
+              </tr>
+              {/* Net Balance Row */}
+              <tr>
+                <td colSpan={2} className="bg-blue-200 p-2.5 border border-gray-300 text-right font-bold text-sm">
+                  Net Balance
+                </td>
+                <td className="bg-blue-200 p-2.5 border border-gray-300 text-center font-bold text-sm tabular-nums text-blue-800">
+                  ₦{(totalCredit - totalDebit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+                <td className="bg-blue-200 p-2.5 border border-gray-300 text-center text-xs text-muted-foreground">
+                  (M{(totalCredit - totalDebit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </Card>
@@ -113,27 +155,27 @@ export const TransactionTable = ({ transactions, filter }: TransactionTableProps
               {/* Amount Details */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-medium">Credit</span>
+                  <span className="text-xs text-muted-foreground uppercase font-medium">Credit</span>
                   <p className="text-base font-bold text-green-700 tabular-nums">
                     {selectedTransaction.creditAmount 
                       ? `₦${selectedTransaction.creditAmount.toLocaleString()}` 
                       : '---'}
                   </p>
                   {selectedTransaction.creditAmount && (
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       (M{selectedTransaction.creditAmount.toLocaleString()})
                     </p>
                   )}
                 </div>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-medium">Debit</span>
+                  <span className="text-xs text-muted-foreground uppercase font-medium">Debit</span>
                   <p className="text-base font-bold text-red-700 tabular-nums">
                     {selectedTransaction.debitAmount 
                       ? `₦${selectedTransaction.debitAmount.toLocaleString()}` 
                       : '---'}
                   </p>
                   {selectedTransaction.debitAmount && (
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       (M{selectedTransaction.debitAmount.toLocaleString()})
                     </p>
                   )}
