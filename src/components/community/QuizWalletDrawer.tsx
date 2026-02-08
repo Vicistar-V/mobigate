@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
   Wallet, ArrowDownLeft, ArrowUpRight, ArrowDown, ArrowUp, 
-  Shield, AlertTriangle, CheckCircle, Send, X, Info
+  Shield, AlertTriangle, CheckCircle, Send, X, Info, ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import {
 import { formatLocalAmount, formatMobiAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { TransactionDetailDrawer, TransactionDetail } from "@/components/community/finance/TransactionDetailDrawer";
 
 interface QuizWalletDrawerProps {
   open: boolean;
@@ -36,6 +37,7 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
   const { toast } = useToast();
   const [transferMode, setTransferMode] = useState<TransferMode>(null);
   const [transferAmount, setTransferAmount] = useState("");
+  const [selectedTx, setSelectedTx] = useState<TransactionDetail | null>(null);
   const wallet = communityQuizWalletData;
   const availability = getQuizWalletAvailability();
 
@@ -61,6 +63,7 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
   const netPosition = wallet.totalStakeIncome - wallet.totalWinningPayouts;
 
   return (
+    <>
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="h-[92vh] overflow-hidden touch-auto">
         <div className="flex flex-col h-full">
@@ -245,7 +248,21 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                   const Icon = config.icon;
                   const isDebit = tx.type === "winning_payout" || tx.type === "transfer_out";
                   return (
-                    <div key={tx.id} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border">
+                    <button
+                      key={tx.id}
+                      className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border w-full text-left touch-manipulation active:bg-muted/60 active:scale-[0.98] transition-all"
+                      onClick={() => setSelectedTx({
+                        id: tx.id,
+                        description: tx.description,
+                        amount: tx.amount,
+                        date: new Date(tx.date),
+                        quizType: tx.type,
+                        reference: tx.reference,
+                        playerName: tx.playerName,
+                        relatedQuizId: tx.relatedQuizId,
+                        status: "completed",
+                      })}
+                    >
                       <div className={cn("p-2 rounded-full shrink-0", config.bg)}>
                         <Icon className={cn("h-4 w-4", config.color)} />
                       </div>
@@ -261,15 +278,16 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                           {new Date(tx.date).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })} • {tx.reference}
                         </p>
                       </div>
-                      <div className="text-right shrink-0">
+                      <div className="text-right shrink-0 flex flex-col items-end gap-1">
                         <p className={cn("font-bold text-sm", isDebit ? "text-red-600" : "text-green-600")}>
                           {isDebit ? "-" : "+"}{formatLocalAmount(tx.amount, "NGN")}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           ({isDebit ? "-" : "+"}{formatMobiAmount(tx.amount)})
                         </p>
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -278,5 +296,12 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
         </div>
       </DrawerContent>
     </Drawer>
+
+    <TransactionDetailDrawer
+      open={!!selectedTx}
+      onOpenChange={(open) => !open && setSelectedTx(null)}
+      transaction={selectedTx}
+    />
+    </>
   );
 }
