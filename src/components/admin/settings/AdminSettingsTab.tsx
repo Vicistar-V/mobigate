@@ -172,15 +172,17 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
     
     return (
       <button
-        className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-left touch-manipulation active:scale-[0.98]"
         onClick={() => handleSettingClick(setting)}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium truncate">{setting.name}</p>
+          {/* Row 1: Name */}
+          <p className="text-sm font-medium break-words leading-snug">{setting.name}</p>
+          {/* Row 2: Badges */}
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
             {setting.hasPendingChange && (
-              <Badge variant="secondary" className="text-[9px] px-1.5 bg-amber-100 text-amber-700 shrink-0">
-                <Clock className="h-2 w-2 mr-0.5" />
+              <Badge variant="secondary" className="text-xs px-1.5 bg-amber-100 text-amber-700 shrink-0">
+                <Clock className="h-2.5 w-2.5 mr-0.5" />
                 Pending
               </Badge>
             )}
@@ -188,11 +190,12 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
               <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
             )}
           </div>
+          {/* Row 3: Current value + percentage */}
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground break-words flex-1 min-w-0">
               {currentOption?.label || setting.currentValue}
             </p>
-            <span className={`text-[10px] ${isApproved ? 'text-green-600' : 'text-amber-600'}`}>
+            <span className={`text-xs shrink-0 ${isApproved ? 'text-green-600' : 'text-amber-600'}`}>
               ({setting.approvalPercentage}%)
             </span>
           </div>
@@ -203,45 +206,45 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
   };
 
   const Content = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full box-border">
       {/* Stats Overview */}
-      <div className="grid grid-cols-4 gap-2">
-        <Card className="bg-muted/30">
+      <div className="grid grid-cols-4 gap-1.5 w-full box-border">
+        <Card className="bg-muted/30 overflow-hidden">
           <CardContent className="p-2 text-center">
             <p className="text-lg font-bold">{stats.total}</p>
-            <p className="text-[9px] text-muted-foreground">Total</p>
+            <p className="text-xs text-muted-foreground">Total</p>
           </CardContent>
         </Card>
-        <Card className="bg-amber-500/10 border-amber-500/20">
+        <Card className="bg-amber-500/10 border-amber-500/20 overflow-hidden">
           <CardContent className="p-2 text-center">
             <p className="text-lg font-bold text-amber-600">{stats.pending}</p>
-            <p className="text-[9px] text-amber-600">Pending</p>
+            <p className="text-xs text-amber-600">Pending</p>
           </CardContent>
         </Card>
-        <Card className="bg-green-500/10 border-green-500/20">
+        <Card className="bg-green-500/10 border-green-500/20 overflow-hidden">
           <CardContent className="p-2 text-center">
             <p className="text-lg font-bold text-green-600">{stats.approved}</p>
-            <p className="text-[9px] text-green-600">Approved</p>
+            <p className="text-xs text-green-600">Approved</p>
           </CardContent>
         </Card>
-        <Card className="bg-red-500/10 border-red-500/20">
+        <Card className="bg-red-500/10 border-red-500/20 overflow-hidden">
           <CardContent className="p-2 text-center">
             <p className="text-lg font-bold text-red-600">{stats.needsReview}</p>
-            <p className="text-[9px] text-red-600">Review</p>
+            <p className="text-xs text-red-600">Review</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Democratic Governance Notice */}
-      <Card className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
+      <Card className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800 w-full box-border overflow-hidden">
         <CardContent className="p-3">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-2.5">
             <Vote className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
                 Democratic Governance Active
               </p>
-              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 break-words leading-relaxed">
                 All setting changes require {DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}% member approval. 
                 Members can also recommend alternative values.
               </p>
@@ -295,7 +298,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
 
       {/* Categories Accordion */}
       {!filteredSettings && (
-        <Accordion type="multiple" defaultValue={["privacy_settings"]} className="space-y-2">
+        <Accordion type="multiple" defaultValue={["privacy_settings"]} className="space-y-2 w-full box-border">
           {categories.map((category) => {
             const Icon = category.icon;
             const pendingCount = category.settings.filter(s => s.hasPendingChange).length;
@@ -307,20 +310,20 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
                 className="border rounded-lg overflow-hidden"
               >
                 <AccordionTrigger className="px-3 py-2.5 hover:no-underline">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`p-2 rounded-lg ${category.color.split(' ')[1]}`}>
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className={`p-2 rounded-lg shrink-0 ${category.color.split(' ')[1]}`}>
                       <Icon className={`h-4 w-4 ${category.color.split(' ')[0]}`} />
                     </div>
                     <div className="text-left min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-sm truncate">{category.label}</h4>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-medium text-sm break-words">{category.label}</h4>
                         {pendingCount > 0 && (
-                          <Badge variant="secondary" className="text-[9px] px-1.5 bg-amber-100 text-amber-700">
+                          <Badge variant="secondary" className="text-xs px-1.5 bg-amber-100 text-amber-700 shrink-0">
                             {pendingCount} pending
                           </Badge>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {category.settings.length} settings
                       </p>
                     </div>
@@ -378,16 +381,16 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[92vh]">
-            <DrawerHeader className="border-b pb-3">
+          <DrawerContent className="max-h-[92vh] p-0">
+            <DrawerHeader className="border-b pb-3 shrink-0 px-3 pt-4">
               <DrawerTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-primary" />
+                <Settings className="h-5 w-5 text-primary shrink-0" />
                 Community Settings
               </DrawerTitle>
             </DrawerHeader>
-            <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
+            <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 py-4 pb-8">
               {Content()}
-            </ScrollArea>
+            </div>
           </DrawerContent>
         </Drawer>
 
