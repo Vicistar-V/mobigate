@@ -159,7 +159,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                         </div>
                         <div className="text-right">
                           <span className="font-bold text-blue-700 dark:text-blue-300">{formatLocalAmount(playerWalletBalance, "NGN")}</span>
-                          <p className="text-[10px] text-blue-500">({formatMobiAmount(playerWalletBalance)})</p>
+                          <p className="text-xs text-blue-500">({formatMobiAmount(playerWalletBalance)})</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
@@ -190,7 +190,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                           </span>
                         </div>
                         <Badge variant={quizWalletUnavailable ? "destructive" : "outline"} className={cn(
-                          "text-[10px]",
+                          "text-xs",
                           !quizWalletUnavailable && "bg-green-100 text-green-600 border-green-300"
                         )}>
                           {quizWalletUnavailable ? "Insufficient" : "Active"}
@@ -198,16 +198,16 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                       </div>
                       <div className="flex items-center justify-between mt-2">
                         <div>
-                          <p className="text-[10px] text-muted-foreground">Available Balance</p>
+                          <p className="text-xs text-muted-foreground">Available Balance</p>
                           <p className={cn("font-bold text-sm", quizWalletUnavailable ? "text-amber-700" : "text-green-700")}>
                             {formatLocalAmount(communityQuizWalletData.availableBalance, "NGN")}
                           </p>
-                          <p className="text-[9px] text-muted-foreground">({formatMobiAmount(communityQuizWalletData.availableBalance)})</p>
+                          <p className="text-xs text-muted-foreground">({formatMobiAmount(communityQuizWalletData.availableBalance)})</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] text-muted-foreground">Reserved</p>
+                          <p className="text-xs text-muted-foreground">Reserved</p>
                           <p className="font-semibold text-sm text-amber-600">{formatLocalAmount(communityQuizWalletData.reservedForPayouts, "NGN")}</p>
-                          <p className="text-[9px] text-muted-foreground">({formatMobiAmount(communityQuizWalletData.reservedForPayouts)})</p>
+                          <p className="text-xs text-muted-foreground">({formatMobiAmount(communityQuizWalletData.reservedForPayouts)})</p>
                         </div>
                       </div>
                       {(isAdmin || isOwner) && (
@@ -253,7 +253,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                                   <div className="flex items-center gap-2 flex-wrap mb-1">
                                     <span className="text-lg">{quiz.badge}</span>
                                     <h3 className="font-semibold text-sm">{quiz.title}</h3>
-                                    <Badge className="text-[10px] bg-blue-600">Members Only</Badge>
+                                    <Badge className="text-xs bg-blue-600">Members Only</Badge>
                                   </div>
                                   <p className="text-xs text-muted-foreground line-clamp-2">{quiz.description}</p>
                                 </div>
@@ -262,28 +262,28 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
 
                               <div className="flex items-center gap-2 flex-wrap">
                                 <Badge variant="outline" className={cn(
-                                  "text-[10px]",
+                                  "text-xs",
                                   quiz.difficulty === "Easy" && "bg-green-50 text-green-600 border-green-300",
                                   quiz.difficulty === "Medium" && "bg-blue-50 text-blue-600 border-blue-300",
                                   quiz.difficulty === "Hard" && "bg-orange-50 text-orange-600 border-orange-300"
                                 )}>
                                   {quiz.difficulty}
                                 </Badge>
-                                <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-600 border-blue-300">
+                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-300">
                                   {quiz.category}
                                 </Badge>
                               </div>
 
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200 dark:border-red-800">
-                                  <p className="text-[10px] text-muted-foreground">Stake</p>
+                                  <p className="text-xs text-muted-foreground">Stake</p>
                                   <p className="font-bold text-sm text-red-600">{formatLocalAmount(quiz.stakeAmount, "NGN")}</p>
-                                  <p className="text-[9px] text-muted-foreground">({formatMobiAmount(quiz.stakeAmount)})</p>
+                                  <p className="text-xs text-muted-foreground">({formatMobiAmount(quiz.stakeAmount)})</p>
                                 </div>
                                 <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center border border-blue-200 dark:border-blue-800">
-                                  <p className="text-[10px] text-muted-foreground">Win Up To</p>
+                                  <p className="text-xs text-muted-foreground">Win Up To</p>
                                   <p className="font-bold text-sm text-blue-600">{formatLocalAmount(quiz.winningAmount, "NGN")}</p>
-                                  <p className="text-[9px] text-muted-foreground">({formatMobiAmount(quiz.winningAmount)})</p>
+                                  <p className="text-xs text-muted-foreground">({formatMobiAmount(quiz.winningAmount)})</p>
                                 </div>
                               </div>
 
@@ -335,7 +335,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                                 <div className="flex items-center gap-2">
                                   <span className="text-lg">{quiz.badge}</span>
                                   <h3 className="font-semibold text-sm">{quiz.title}</h3>
-                                  <Badge variant="secondary" className="text-[10px]">Upcoming</Badge>
+                                  <Badge variant="secondary" className="text-xs">Upcoming</Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground">{quiz.description}</p>
                                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -421,17 +421,17 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                         <BarChart3 className="h-4 w-4" />Your Community Quiz Stats
                       </h3>
                       <div className="grid grid-cols-3 gap-2 text-center">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
-                          <p className="font-bold text-lg text-blue-700">{communityQuizPlayerStats.gamesPlayed}</p>
-                          <p className="text-[10px] text-muted-foreground">Played</p>
+                        <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
+                          <p className="font-bold text-xl text-blue-700">{communityQuizPlayerStats.gamesPlayed}</p>
+                          <p className="text-xs font-medium text-muted-foreground mt-0.5">Played</p>
                         </div>
-                        <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200">
-                          <p className="font-bold text-lg text-green-600">{communityQuizPlayerStats.gamesWon}</p>
-                          <p className="text-[10px] text-muted-foreground">Won</p>
+                        <div className="p-2.5 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200">
+                          <p className="font-bold text-xl text-green-600">{communityQuizPlayerStats.gamesWon}</p>
+                          <p className="text-xs font-medium text-muted-foreground mt-0.5">Won</p>
                         </div>
-                        <div className="p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200">
-                          <p className="font-bold text-lg text-amber-600">{communityQuizPlayerStats.partialWins}</p>
-                          <p className="text-[10px] text-muted-foreground">Partial</p>
+                        <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200">
+                          <p className="font-bold text-xl text-amber-600">{communityQuizPlayerStats.partialWins}</p>
+                          <p className="text-xs font-medium text-muted-foreground mt-0.5">Partial</p>
                         </div>
                       </div>
                       
@@ -491,7 +491,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                       <ul className="space-y-2">
                         {communityQuizRules.map((rule, idx) => (
                           <li key={idx} className="flex items-start gap-2 text-xs">
-                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-semibold text-[10px] shrink-0">
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs shrink-0">
                               {idx + 1}
                             </span>
                             <span className="text-muted-foreground pt-0.5">{rule}</span>
