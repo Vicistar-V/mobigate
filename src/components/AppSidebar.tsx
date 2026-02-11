@@ -14,82 +14,82 @@ const superadminMenuItems = [
     title: "App Settings",
     icon: Settings,
     items: [
-      { title: "All Settings", url: "/application/all_settings.php" }
+      { title: "All Settings", url: "/all_settings.php" }
     ]
   },
   {
     title: "Manage Quiz",
     icon: Gamepad2,
     items: [
-      { title: "Set Categories", url: "/application/manage_categories.php" },
-      { title: "Set Quiz Levels", url: "/application/manage_levels.php" },
-      { title: "Set Questions", url: "/application/quiz_questions.php" },
-      { title: "Manage Questions", url: "/application/manage_all_questions.php" },
-      { title: "Monitor All Quiz", url: "/application/monitor_quiz.php" }
+      { title: "Set Categories", url: "/manage_categories.php" },
+      { title: "Set Quiz Levels", url: "/manage_levels.php" },
+      { title: "Set Questions", url: "/quiz_questions.php" },
+      { title: "Manage Questions", url: "/manage_all_questions.php" },
+      { title: "Monitor All Quiz", url: "/monitor_quiz.php" }
     ]
   },
   {
     title: "Manage e-Library",
     icon: Library,
     items: [
-      { title: "Set e-Library Access Fee", url: "/application/all_settings.php#elibrary" },
-      { title: "Set e-Library Content Fee", url: "/application/all_settings.php#contentfee" },
-      { title: "Set e-Library Income Sharing", url: "/application/all_settings.php#elibrary_income_sharing" },
-      { title: "Set Content \"Like\" Fee", url: "/application/all_settings.php#content_like_fee" },
-      { title: "Set \"Like\" Fee Sharing", url: "/application/all_settings.php#content_like_fee_sharing" },
-      { title: "Set Content Disclaimer", url: "/application/set_content_disclaimer.php" },
-      { title: "Set Personalized Content Duration", url: "/application/all_settings.php#personalized_elibrary_content_duration" },
-      { title: "View Personalized Contents", url: "/application/personalized_elibrary_contents.php" },
-      { title: "Create e-Library Categories", url: "/application/elibrary_categories.php" },
-      { title: "Post/Manage e-Library Contents", url: "/application/post_manage_elibrary_articles.php" }
+      { title: "Set e-Library Access Fee", url: "/all_settings.php#elibrary" },
+      { title: "Set e-Library Content Fee", url: "/all_settings.php#contentfee" },
+      { title: "Set e-Library Income Sharing", url: "/all_settings.php#elibrary_income_sharing" },
+      { title: "Set Content \"Like\" Fee", url: "/all_settings.php#content_like_fee" },
+      { title: "Set \"Like\" Fee Sharing", url: "/all_settings.php#content_like_fee_sharing" },
+      { title: "Set Content Disclaimer", url: "/set_content_disclaimer.php" },
+      { title: "Set Personalized Content Duration", url: "/all_settings.php#personalized_elibrary_content_duration" },
+      { title: "View Personalized Contents", url: "/personalized_elibrary_contents.php" },
+      { title: "Create e-Library Categories", url: "/elibrary_categories.php" },
+      { title: "Post/Manage e-Library Contents", url: "/post_manage_elibrary_articles.php" }
     ]
   },
   {
     title: "Manage Users",
     icon: UserCog,
     items: [
-      { title: "View/Manage Users", url: "/application/manage_users.php" },
-      { title: "Password Reset Codes", url: "/application/prc.php" },
-      { title: "Verify Pending Users", url: "/application/manage_kyc.php" },
-      { title: "View Users Wallet", url: "/application/view_users_wallet.php" },
+      { title: "View/Manage Users", url: "/manage_users.php" },
+      { title: "Password Reset Codes", url: "/prc.php" },
+      { title: "Verify Pending Users", url: "/manage_kyc.php" },
+      { title: "View Users Wallet", url: "/view_users_wallet.php" },
       { title: "Users' Disciplinary System", url: "#" },
-      { title: "Moderate e-Library Comments", url: "/application/moderate_elibrary_comments.php" }
+      { title: "Moderate e-Library Comments", url: "/moderate_elibrary_comments.php" }
     ]
   },
   {
     title: "Search Engine Activities",
     icon: Search,
     items: [
-      { title: "elibrary_search_engine_activities", url: "/application/elibrary_search_engine_activities.php" },
-      { title: "Site Visitors Record", url: "/application/site_visitors_record.php" },
-      { title: "View 3 Pending Tickets", url: "/application/all_support_tickets.php" }
+      { title: "elibrary_search_engine_activities", url: "/elibrary_search_engine_activities.php" },
+      { title: "Site Visitors Record", url: "/site_visitors_record.php" },
+      { title: "View 3 Pending Tickets", url: "/all_support_tickets.php" }
     ]
   },
   {
     title: "Manage Finances",
     icon: DollarIcon,
     items: [
-      { title: "Withdrawal Requests", url: "/application/manage_withdrawal_requests.php" },
-      { title: "Gifts Account", url: "/application/gift_account.php" },
-      { title: "Gifts Liquidations", url: "/application/gift_liquidations.php" },
-      { title: "Like Accounts", url: "/application/like_account.php" },
-      { title: "Penalty Debits Accounts", url: "/application/penalty_debit_account.php" },
-      { title: "Follow Accounts", url: "/application/follow_account.php" },
-      { title: "Quiz Game Accounts", url: "/application/account.php" },
-      { title: "Transfer Fee Accounts", url: "/application/transfer_fee_account.php" },
-      { title: "e-Library Access Accounts", url: "/application/elibrary_account.php" },
-      { title: "Debit or Credit User", url: "/application/debit_credit_user.php" },
-      { title: "View Users' Fundings", url: "/application/fundings.php" },
-      { title: "View All Pay-Out", url: "/application/withdrawals.php" }
+      { title: "Withdrawal Requests", url: "/manage_withdrawal_requests.php" },
+      { title: "Gifts Account", url: "/gift_account.php" },
+      { title: "Gifts Liquidations", url: "/gift_liquidations.php" },
+      { title: "Like Accounts", url: "/like_account.php" },
+      { title: "Penalty Debits Accounts", url: "/penalty_debit_account.php" },
+      { title: "Follow Accounts", url: "/follow_account.php" },
+      { title: "Quiz Game Accounts", url: "/account.php" },
+      { title: "Transfer Fee Accounts", url: "/transfer_fee_account.php" },
+      { title: "e-Library Access Accounts", url: "/elibrary_account.php" },
+      { title: "Debit or Credit User", url: "/debit_credit_user.php" },
+      { title: "View Users' Fundings", url: "/fundings.php" },
+      { title: "View All Pay-Out", url: "/withdrawals.php" }
     ]
   },
   {
     title: "Manage Adverts",
     icon: Megaphone,
     items: [
-      { title: "Set Ad Slot Rate", url: "/application/all_settings.php#advert_slot_fee" },
+      { title: "Set Ad Slot Rate", url: "/all_settings.php#advert_slot_fee" },
       { title: "View/Manage All Adverts", url: "/admin/manage-adverts" },
-      { title: "Upload/Manage Promotional Ads", url: "/application/upload_manage_promotional_ad.php" }
+      { title: "Upload/Manage Promotional Ads", url: "/upload_manage_promotional_ad.php" }
     ]
   }
 ];
@@ -106,32 +106,32 @@ const menuItems: MenuItem[] = [{
   title: "Wallet Menu",
   icon: Wallet,
   items: [
-    { title: "Fund Your Wallet", url: "/application/buy_coins.php" },
-    { title: "Wallet Funding History", url: "/application/coins_purchase_history.php" },
+    { title: "Fund Your Wallet", url: "/buy_coins.php" },
+    { title: "Wallet Funding History", url: "/coins_purchase_history.php" },
     { title: "My Financial Summary", url: "#" }
   ]
 }, {
   title: "Quiz Game",
   icon: Gamepad2,
   items: [
-    { title: "Play Quiz Game", url: "/application/take_quiz.php" },
-    { title: "My Quiz History", url: "/application/my_quiz_account.php" }
+    { title: "Play Quiz Game", url: "/take_quiz.php" },
+    { title: "My Quiz History", url: "/my_quiz_account.php" }
   ]
 }, {
   title: "Earnings Reports",
   icon: TrendingUp,
   items: [
-    { title: "Content Access Earnings", url: "/application/my_content_account.php" },
-    { title: "Content \"Likes\" Earnings", url: "/application/likes_income.php" },
-    { title: "\"Follow\" Earnings", url: "/application/follow_income.php" },
-    { title: "Gifts Income and Expenditure", url: "/application/gifts_income.php" }
+    { title: "Content Access Earnings", url: "/my_content_account.php" },
+    { title: "Content \"Likes\" Earnings", url: "/likes_income.php" },
+    { title: "\"Follow\" Earnings", url: "/follow_income.php" },
+    { title: "Gifts Income and Expenditure", url: "/gifts_income.php" }
   ]
 }, {
   title: "e-Library Menu",
   icon: BookOpen,
   items: [
-    { title: "Visit e-Library", url: "/application/articles.php" },
-    { title: "Submit/Manage My e-Library Content", url: "/application/submit_manage_my_elibrary_content.php" }
+    { title: "Visit e-Library", url: "/articles.php" },
+    { title: "Submit/Manage My e-Library Content", url: "/submit_manage_my_elibrary_content.php" }
   ]
 }, {
   title: "Merchants Menu",
@@ -170,10 +170,10 @@ const menuItems: MenuItem[] = [{
   title: "Friendship Menu",
   icon: Users,
   items: [
-    { title: "Find Friends", url: "/application/find_friends.php" },
+    { title: "Find Friends", url: "/find_friends.php" },
     { title: "Invite Friends", url: "#" },
-    { title: "Sent Requests", url: "/application/manage_sent_friends_requests.php" },
-    { title: "View My Friends", url: "/application/my_friends.php" }
+    { title: "Sent Requests", url: "/manage_sent_friends_requests.php" },
+    { title: "View My Friends", url: "/my_friends.php" }
   ]
 }, {
   title: "My Social Communities",
@@ -191,16 +191,16 @@ const menuItems: MenuItem[] = [{
   title: "Followers/Following",
   icon: UserPlus,
   items: [
-    { title: "My Followers", url: "/application/my_followers.php" },
-    { title: "My Followings", url: "/application/my_followings.php" }
+    { title: "My Followers", url: "/my_followers.php" },
+    { title: "My Followings", url: "/my_followings.php" }
   ]
 }, {
   title: "Messages/Chats",
   icon: MessageSquare,
   items: [
-    { title: "Chat Friends", url: "/application/my_friends.php" },
-    { title: "Chat Followers", url: "/application/my_followers.php" },
-    { title: "Chat My Followings", url: "/application/my_followings.php" },
+    { title: "Chat Friends", url: "/my_friends.php" },
+    { title: "Chat Followers", url: "/my_followers.php" },
+    { title: "Chat My Followings", url: "/my_followings.php" },
     { title: "View All Chats", url: "#" }
   ]
 }, {
@@ -241,20 +241,20 @@ const menuItems: MenuItem[] = [{
   title: "Funds Management",
   icon: Download,
   items: [
-    { title: "Withdraw Gift", url: "/application/withdraw_my_gift.php" },
-    { title: "Withdraw Credit", url: "/application/withdraw_grants.php" },
-    { title: "My Withdrawal Requests", url: "/application/my_withdrawal_requests.php" },
-    { title: "My Withdrawal History", url: "/application/withdrawal_history.php" },
-    { title: "Funds Transfer", url: "/application/transfer.php" },
-    { title: "My Transfer History", url: "/application/transfer_history.php" },
-    { title: "Transfer Charges", url: "/application/transfer_charges.php" },
-    { title: "Exchange Rates", url: "/application/exchange_rates.php" },
-    { title: "Account Statement", url: "/application/wallet_activities.php" }
+    { title: "Withdraw Gift", url: "/withdraw_my_gift.php" },
+    { title: "Withdraw Credit", url: "/withdraw_grants.php" },
+    { title: "My Withdrawal Requests", url: "/my_withdrawal_requests.php" },
+    { title: "My Withdrawal History", url: "/withdrawal_history.php" },
+    { title: "Funds Transfer", url: "/transfer.php" },
+    { title: "My Transfer History", url: "/transfer_history.php" },
+    { title: "Transfer Charges", url: "/transfer_charges.php" },
+    { title: "Exchange Rates", url: "/exchange_rates.php" },
+    { title: "Account Statement", url: "/wallet_activities.php" }
   ]
 }, {
   title: "Account Verification",
   icon: ShieldCheck,
-  url: "/application/user_kyc.php"
+  url: "/user_kyc.php"
 }];
 export function AppSidebar() {
   const {
@@ -341,7 +341,7 @@ export function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Dashboard" className="group relative overflow-hidden transition-all duration-200 hover:bg-accent/50">
-                <a href="/application/index.php" onClick={handleLinkClick}>
+                <a href="/index.php" onClick={handleLinkClick}>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
                     <LayoutDashboard className="h-4 w-4" />
                   </div>
@@ -456,7 +456,7 @@ export function AppSidebar() {
         <SidebarMenu className="space-y-1">
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Reload" className="group hover:bg-accent/50 transition-all duration-200">
-              <a href="/application/all_notifications.php" onClick={handleLinkClick}>
+              <a href="/all_notifications.php" onClick={handleLinkClick}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted-foreground/10 text-muted-foreground group-hover:bg-muted-foreground/20">
                   <RefreshCw className="h-4 w-4" />
                 </div>
@@ -466,7 +466,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Sign Out" className="group hover:bg-destructive/10 text-destructive transition-all duration-200">
-              <a href="/application/logout.php" onClick={handleLinkClick}>
+              <a href="/logout.php" onClick={handleLinkClick}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive group-hover:bg-destructive/20">
                   <LogOut className="h-4 w-4" />
                 </div>
