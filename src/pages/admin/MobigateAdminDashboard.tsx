@@ -18,12 +18,14 @@ import {
   ChevronRight,
   Coins,
   Shield,
+  Trophy,
 } from "lucide-react";
 import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
+import { MobigateQuizManagement } from "@/components/mobigate/MobigateQuizManagement";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
@@ -69,24 +71,30 @@ export default function MobigateAdminDashboard() {
 
       <div className="p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-4 h-auto mb-4">
-            <TabsTrigger value="overview" className="text-xs py-2">
-              <LayoutDashboard className="h-4 w-4 mr-1" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="elections" className="text-xs py-2">
-              <Vote className="h-4 w-4 mr-1" />
-              Elections
-            </TabsTrigger>
-            <TabsTrigger value="revenue" className="text-xs py-2">
-              <Wallet className="h-4 w-4 mr-1" />
-              Revenue
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs py-2">
-              <Settings className="h-4 w-4 mr-1" />
-              Settings
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 mb-4">
+            <TabsList className="inline-flex w-auto min-w-full h-auto whitespace-nowrap touch-pan-x">
+              <TabsTrigger value="overview" className="text-xs py-2 px-3">
+                <LayoutDashboard className="h-4 w-4 mr-1" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="elections" className="text-xs py-2 px-3">
+                <Vote className="h-4 w-4 mr-1" />
+                Elections
+              </TabsTrigger>
+              <TabsTrigger value="revenue" className="text-xs py-2 px-3">
+                <Wallet className="h-4 w-4 mr-1" />
+                Revenue
+              </TabsTrigger>
+              <TabsTrigger value="quiz" className="text-xs py-2 px-3">
+                <Trophy className="h-4 w-4 mr-1" />
+                Quiz
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs py-2 px-3">
+                <Settings className="h-4 w-4 mr-1" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="mt-0">
@@ -422,6 +430,11 @@ export default function MobigateAdminDashboard() {
                 <MobiCurrencyInfoBanner currencyCode="NGN" />
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          {/* Quiz Tab */}
+          <TabsContent value="quiz" className="mt-0">
+            <MobigateQuizManagement />
           </TabsContent>
 
           {/* Settings Tab */}
