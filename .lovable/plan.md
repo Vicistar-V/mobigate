@@ -1,82 +1,165 @@
 
 
-# Mobigate Admin Quiz Level Management System
+# Mobigate Quiz Games - Full User-Facing System
 
 ## Overview
-Add a dedicated "Quiz" tab to the Mobigate Admin Dashboard for creating and managing Mobigate Quiz Levels. All 23 categories and 13 level tiers from the PDF will be pre-populated and immediately available, with the ability for admins to add custom categories and levels.
+Transform the existing basic Mobigate Quiz Dialog into a comprehensive quiz games hub featuring all 5 game types from the blueprint. The current "Play Mobigate Quiz" button in the Community Menu will open a redesigned landing page showcasing all quiz game modes.
+
+## What Currently Exists
+- A simple `MobigateQuizDialog` showing a flat list of quizzes with tabs (Quizzes, Global, My Stats, Rules)
+- A `MobigateQuizPlayDialog` with 10-question gameplay, timer, A-H options
+- Mock data in `mobigateQuizData.ts` with basic quiz entries
+- Admin quiz level management (categories + tiers) already built
 
 ## What Gets Built
 
-### 1. New "Quiz" Tab on Mobigate Admin Dashboard
-- Replace the 4-tab layout (Overview, Elections, Revenue, Settings) with a 5-tab horizontally scrollable layout
-- New "Quiz" tab with a trophy/gamepad icon
+### 1. Mobigate Quiz Hub (Replaces current MobigateQuizDialog)
+A redesigned landing dialog showing 5 quiz game modes as tappable cards:
 
-### 2. Quiz Level Data File (`src/data/mobigateQuizLevelsData.ts`)
-A data file containing all pre-set quiz levels extracted from the PDF:
+| Game Mode | Card Color | Description |
+|-----------|-----------|-------------|
+| Group Quiz | Purple gradient | Invite 3-10 friends, consensus stake, winner takes multiplied prizes |
+| Standard Quiz | Amber gradient | Select category and level, play 10 questions, continue for multiplied prizes |
+| Interactive Quiz | Blue gradient | Merchant-based seasons with selection levels and live shows |
+| Food for Home Quiz | Green gradient | Select grocery items, play to win them |
+| Scholarship Quiz | Indigo gradient | Play to win annual scholarship funding |
 
-**23 Pre-set Categories:**
-- Current Affairs, Politics and Leadership, Science and Technology, Morals and Religion, Literature and Reading, Agriculture and Farming, Healthcare and Medicare, Transportation and Vacation, Basic and General Education, Sports and Physical Fitness, Skills and Crafts, Business and Entrepreneurship, Entertainment and Leisure, Environment and Society, Basic Law, Family and Home, Civic Education and Responsibilities, Mentorship and Individual Development, Discoveries and Inventions, Culture and Tradition, Real Estate and Physical Development, Information Technology, General and Basic Knowledge
+Each card shows: game name, short description, min stake, and a "Play" button.
+Below the game mode cards: wallet balance bar, global stats summary, and a "View Leaderboard" link.
 
-**13 Pre-set Level Tiers (with default stake/winning values):**
+### 2. Group Quiz Game Flow (Section A of Blueprint)
+**New components:**
+- `GroupQuizInviteSheet.tsx` - Drawer to invite 3-10 friends from contacts
+- `GroupQuizLobbySheet.tsx` - Waiting room showing participants, stake negotiation, "Play Now" countdown
+- `GroupQuizPlayDialog.tsx` - Shared gameplay with simultaneous questions, live scores, draw-game resolution
 
-| Level | Stake (Mobi) | Winning (Mobi) |
-|-------|-------------|----------------|
-| Beginner Level | 200 | 1,000 |
-| Starter Level | 500 | 1,500 |
-| Standard Level | 1,000 | 3,000 |
-| Business Level | 2,000 | 6,000 |
-| Professional Level | 3,000 | 9,000 |
-| Enterprise Level | 5,000 | 15,000 |
-| Entrepreneur Level | 10,000 | 30,000 |
-| Deluxe Package | 20,000 | 60,000 |
-| Deluxe Gold Package | 30,000 | 150,000 |
-| Deluxe Super | 50,000 | 200,000 |
-| Deluxe Super Plus | 100,000 | 500,000 |
-| Millionaire Suite | 200,000 | 1,000,000 |
-| Millionaire Suite Plus | 500,000 | 5,000,000 |
+**Key rules from blueprint:**
+- Min 3, max 10 participants
+- Min stake: 5,000 Mobi (admin-configurable threshold)
+- Host sets stake, others accept/approve or negotiate consensus
+- Wallets debited on acceptance
+- 30-60 second countdown after first 3 click "Play Now"
+- Latecomers cut off, no refund
+- Winning prizes: 200% (3-4 players), 300% (5-6), 400% (7-9), 500% (10)
+- Draw resolution: extra questions for tied players until one winner
 
-All entries pre-set with status ACTIVE. Category-specific variations in winning amounts (as per PDF) will be reflected.
+### 3. Standard Solo Quiz (Section C - "2nd Quiz Process")
+**Enhances existing `MobigateQuizPlayDialog.tsx`:**
+- Step 1: Select Category (from admin-set 23 categories)
+- Step 2: Select Level (from admin-set 13 tiers with stake/winning)
+- Step 3: Play 10 questions (existing gameplay)
+- 100% correct = full prize; 80%+ = bonus game at 50% stake
+- Winner can "Exit with Prize" or continue to 2nd session for 3x prize
+- Each successive session charges original fee again
+- Up to 10 sessions, each doubling the last prize
+- Fail at any point = lose everything unredeemed
 
-### 3. Quiz Tab Content - Two Sections
+**New component:** `StandardQuizCategorySelectSheet.tsx` - category + level selector using admin data
 
-**Section A: Create New Quiz Level (Top of Tab)**
-A mobile-optimized form with:
-- **Select Category**: Dropdown with all 23 pre-set categories + "Custom (Specify)" option at the bottom. When "Custom" is selected, a text input appears below for typing a custom category name
-- **Select Level**: Dropdown with all 13 pre-set level tiers + "Custom (Specify)" option. When "Custom" is selected, a text input appears for typing a custom level name. Note displayed: "Avoid special characters and symbols like &, use 'and' instead. This feature is not editable in future."
-- **Minimum Stake Amount**: Numeric input (Mobi), placeholder "e.g. 500 (Do not put comma)"
-- **Winning Amount**: Numeric input (Mobi), placeholder "e.g. 1000 (Do not put comma)"
-- **Status Toggle**: Switch defaulting to ACTIVE
-- **Create Button**: Full-width, mobile-friendly (h-12)
+### 4. Interactive Quiz Game (Section B)
+**New components:**
+- `InteractiveQuizMerchantSheet.tsx` - Browse merchants offering quiz seasons
+- `InteractiveQuizSeasonSheet.tsx` - Select season type (Short/Medium/Complete) with selection levels
+- `InteractiveQuizPlayDialog.tsx` - 15 questions (10 objective + 5 non-objective with text input)
 
-**Section B: Quiz Levels Details (Below Form)**
-- Summary stats card showing total levels, active count, inactive count
-- Filter bar: filter by category (dropdown) and search by level name
-- Scrollable list of all quiz level cards, each showing:
-  - Level name (bold) + Category (badge)
-  - Stake amount and Winning amount in Mobi
-  - Active/Inactive status toggle (switch)
-  - Delete button (with confirmation)
-- Cards grouped or sortable by category
+**Key rules:**
+- 15 questions per session (10 multiple-choice, 5 typed answers)
+- 100% pass qualifies for Interactive Session or take 500% of stake
+- Seasons with 5-7 selection levels, progressive fees
+- Final 3 levels are "Live Shows"
+- Winners crowned "Mobi-Celebrity"
 
-### 4. Component Structure
+### 5. Food for Home Quiz (Section D)
+**New components:**
+- `FoodQuizItemSelectSheet.tsx` - Grid of grocery items with checkboxes and market prices
+- `FoodQuizPlayDialog.tsx` - 15-20 questions (10 objective with A-H options + 5 typed non-objective)
 
-**New files:**
-- `src/data/mobigateQuizLevelsData.ts` -- All pre-populated data (categories, levels, quiz entries)
-- `src/components/mobigate/MobigateQuizManagement.tsx` -- Main quiz tab content component
-- `src/components/mobigate/CreateQuizLevelForm.tsx` -- The creation form
-- `src/components/mobigate/QuizLevelCard.tsx` -- Individual quiz level display card
-- `src/components/mobigate/QuizLevelFilters.tsx` -- Filter/search bar
+**Key rules:**
+- Select grocery items, stake = 20% of total item value (admin-configurable)
+- 100% correct wins items
+- 70-80% correct can request "Bonus Questions" (3-4 extra) at 50% extra stake
+- 30-second timeout on bonus accept/reject
+- Bonus database is separate
+- Redemption: collect at Mobi-Store or credit wallet equivalent
 
-**Modified files:**
-- `src/pages/admin/MobigateAdminDashboard.tsx` -- Add 5th "Quiz" tab, make tabs horizontally scrollable for mobile
+### 6. Scholarship Quiz (Section E)
+**New components:**
+- `ScholarshipQuizSetupSheet.tsx` - Input annual scholarship budget, see Mobi conversion and stake (20%)
+- `ScholarshipQuizPlayDialog.tsx` - 15 questions (10 objective + 5 non-objective)
+
+**Key rules:**
+- User inputs scholarship budget in local currency, system converts to Mobi
+- Stake = 20% of budget
+- 100% correct wins; 70-99% can get bonus questions
+- One game = one year of funding
+- Winners get free Mobi-School access
+- Prize credited 21 days after winning
+
+### 7. Shared Components
+- `QuizBonusQuestionsDialog.tsx` - Reusable bonus questions flow (50% extra stake, 3-4 questions, 30s timeout, accept/reject)
+- `NonObjectiveQuestionCard.tsx` - Text input question card with multi-answer matching
+- `QuizPrizeRedemptionSheet.tsx` - Prize collection options (Mobi-Store pickup, wallet credit, delivery)
+
+### 8. Mock Data Files
+- `src/data/mobigateGroupQuizData.ts` - Mock friends list, lobby data, group game history
+- `src/data/mobigateInteractiveQuizData.ts` - Mock merchants, seasons, selection levels
+- `src/data/mobigateFoodQuizData.ts` - Mock grocery items with prices
+- `src/data/mobigateScholarshipQuizData.ts` - Mock scholarship setup data
+- `src/data/mobigateBonusQuestionsData.ts` - Separate bonus questions pool
 
 ## Technical Details
 
-- All data is mock/static (UI template only, no backend)
-- State managed with useState for CRUD operations on the quiz levels array
-- Toast notifications for create, toggle status, and delete actions
-- Mobile-first: all inputs h-12, text-base, touch-manipulation; cards full-width with proper padding
-- Uses existing Mobi formatting utilities (`formatMobi`, `formatLocalAmount`)
-- Tab bar switches to horizontal scroll (`overflow-x-auto`) to accommodate 5 tabs on mobile
-- Custom category/level inputs use the same pattern as the advertisement "Other (Specify)" feature
+### File Structure
+```text
+src/components/community/mobigate-quiz/
+  MobigateQuizHub.tsx              -- Main hub replacing current dialog
+  GroupQuizInviteSheet.tsx          -- Friend invitation
+  GroupQuizLobbySheet.tsx          -- Waiting/stake negotiation
+  GroupQuizPlayDialog.tsx          -- Multiplayer gameplay
+  StandardQuizCategorySelect.tsx   -- Category + level picker
+  StandardQuizContinueSheet.tsx    -- Continue/exit with prize flow
+  InteractiveQuizMerchantSheet.tsx -- Merchant browser
+  InteractiveQuizSeasonSheet.tsx   -- Season/level selector
+  FoodQuizItemSelectSheet.tsx      -- Grocery item picker
+  ScholarshipQuizSetupSheet.tsx    -- Budget input + conversion
+  QuizBonusQuestionsDialog.tsx     -- Shared bonus flow
+  NonObjectiveQuestionCard.tsx     -- Text-input question
+  QuizPrizeRedemptionSheet.tsx     -- Prize collection options
+
+src/data/
+  mobigateGroupQuizData.ts
+  mobigateInteractiveQuizData.ts
+  mobigateFoodQuizData.ts
+  mobigateScholarshipQuizData.ts
+  mobigateBonusQuestionsData.ts
+```
+
+### Modified Files
+- `src/components/community/CommunityMainMenu.tsx` - Update to open new hub
+- `src/components/community/MobigateQuizDialog.tsx` - Replace with hub component
+- `src/data/mobigateQuizData.ts` - Extend with standard quiz category/level integration
+
+### Mobile-First Design
+- All sheets use Drawer (vaul) for mobile-native feel
+- Touch targets minimum 44px (h-11/h-12)
+- Vertical stacking throughout, no horizontal cramming
+- ScrollArea for long content
+- Cards with rounded corners, gradient backgrounds per game type
+- Currency always shows local first with Mobi in parentheses
+
+### State Management
+- All UI-template mock data, no backend
+- useState for game flow state machines
+- Toast notifications for wallet debits, game results, and errors
+
+### Navigation Flow
+```text
+Community Menu > Play Mobigate Quiz
+  > Quiz Hub (5 game mode cards)
+    > Group Quiz > Invite > Lobby > Play > Results
+    > Standard Quiz > Select Category > Select Level > Play > Continue/Exit
+    > Interactive Quiz > Choose Merchant > Choose Season > Play Sessions
+    > Food for Home > Select Items > Play > Win/Lose > Redeem
+    > Scholarship Quiz > Set Budget > Play > Win/Lose > Redemption
+```
 
