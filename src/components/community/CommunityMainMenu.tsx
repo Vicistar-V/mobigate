@@ -35,7 +35,7 @@ import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
 import { CommunityQuizDialog } from "./CommunityQuizDialog";
-import { MobigateQuizDialog } from "./MobigateQuizDialog";
+import { MobigateQuizHub as MobigateQuizDialog } from "./mobigate-quiz/MobigateQuizHub";
 import { MemberPrivacyVotingSheet } from "./settings/MemberPrivacyVotingSheet";
 import { CommunitySettingsSheet } from "./settings/CommunitySettingsSheet";
 import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestSheet";
