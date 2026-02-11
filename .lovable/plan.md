@@ -1,165 +1,93 @@
 
+# Fix Sidebar Routing and Add Admin Quiz Question Creation
 
-# Mobigate Quiz Games - Full User-Facing System
+## Part 1: Fix Sidebar Routing
 
-## Overview
-Transform the existing basic Mobigate Quiz Dialog into a comprehensive quiz games hub featuring all 5 game types from the blueprint. The current "Play Mobigate Quiz" button in the Community Menu will open a redesigned landing page showcasing all quiz game modes.
+### Problem
+The sidebar menu (`AppSidebar.tsx`) routes all items through `/application/*.php` paths. Routes that have been built as React pages should navigate internally, and unbuilt routes should drop the `/application` prefix (just `/*.php`).
 
-## What Currently Exists
-- A simple `MobigateQuizDialog` showing a flat list of quizzes with tabs (Quizzes, Global, My Stats, Rules)
-- A `MobigateQuizPlayDialog` with 10-question gameplay, timer, A-H options
-- Mock data in `mobigateQuizData.ts` with basic quiz entries
-- Admin quiz level management (categories + tiers) already built
+### Built Routes to Fix
+These sidebar items will be updated from `/application/*.php` to their actual React routes:
 
-## What Gets Built
+| Sidebar Item | Current URL | Corrected URL |
+|---|---|---|
+| My Social Communities | `/community` | `/community` (already correct) |
+| Submit Adverts | `/submit-advert` | `/submit-advert` (already correct) |
+| View/Manage Adverts (user) | `/my-adverts` | `/my-adverts` (already correct) |
+| View/Manage All Adverts (admin) | `/admin/manage-adverts` | `/admin/manage-adverts` (already correct) |
 
-### 1. Mobigate Quiz Hub (Replaces current MobigateQuizDialog)
-A redesigned landing dialog showing 5 quiz game modes as tappable cards:
+These are already correctly set. The remaining `/application/*.php` URLs will have the `/application` prefix removed, becoming just `/*.php` (e.g., `/application/buy_coins.php` becomes `/buy_coins.php`).
 
-| Game Mode | Card Color | Description |
-|-----------|-----------|-------------|
-| Group Quiz | Purple gradient | Invite 3-10 friends, consensus stake, winner takes multiplied prizes |
-| Standard Quiz | Amber gradient | Select category and level, play 10 questions, continue for multiplied prizes |
-| Interactive Quiz | Blue gradient | Merchant-based seasons with selection levels and live shows |
-| Food for Home Quiz | Green gradient | Select grocery items, play to win them |
-| Scholarship Quiz | Indigo gradient | Play to win annual scholarship funding |
+### Files Modified
+- `src/components/AppSidebar.tsx` -- Remove `/application` prefix from all `.php` URLs
 
-Each card shows: game name, short description, min stake, and a "Play" button.
-Below the game mode cards: wallet balance bar, global stats summary, and a "View Leaderboard" link.
+---
 
-### 2. Group Quiz Game Flow (Section A of Blueprint)
-**New components:**
-- `GroupQuizInviteSheet.tsx` - Drawer to invite 3-10 friends from contacts
-- `GroupQuizLobbySheet.tsx` - Waiting room showing participants, stake negotiation, "Play Now" countdown
-- `GroupQuizPlayDialog.tsx` - Shared gameplay with simultaneous questions, live scores, draw-game resolution
+## Part 2: Admin Quiz Question Creation and Management
 
-**Key rules from blueprint:**
-- Min 3, max 10 participants
-- Min stake: 5,000 Mobi (admin-configurable threshold)
-- Host sets stake, others accept/approve or negotiate consensus
-- Wallets debited on acceptance
-- 30-60 second countdown after first 3 click "Play Now"
-- Latecomers cut off, no refund
-- Winning prizes: 200% (3-4 players), 300% (5-6), 400% (7-9), 500% (10)
-- Draw resolution: extra questions for tied players until one winner
+### Problem
+The admin "Quiz" tab only manages quiz levels (category + tier + stake). There is no way for admins to create the actual quiz questions (question text, 8 answer options, correct answer, category assignment).
 
-### 3. Standard Solo Quiz (Section C - "2nd Quiz Process")
-**Enhances existing `MobigateQuizPlayDialog.tsx`:**
-- Step 1: Select Category (from admin-set 23 categories)
-- Step 2: Select Level (from admin-set 13 tiers with stake/winning)
-- Step 3: Play 10 questions (existing gameplay)
-- 100% correct = full prize; 80%+ = bonus game at 50% stake
-- Winner can "Exit with Prize" or continue to 2nd session for 3x prize
-- Each successive session charges original fee again
-- Up to 10 sessions, each doubling the last prize
-- Fail at any point = lose everything unredeemed
+### Solution
+Add two new sections to the existing Mobigate Admin Quiz tab:
 
-**New component:** `StandardQuizCategorySelectSheet.tsx` - category + level selector using admin data
+**A. "Create Questions" sub-tab** -- A form for admins to create individual quiz questions:
+- Select Category (from the same 23 preset categories)
+- Select Difficulty (Easy, Medium, Hard, Expert)
+- Question Text (textarea)
+- 8 Answer Options (A through H, text inputs)
+- Select Correct Answer (dropdown A-H)
+- Time Limit (seconds, default 10)
+- Points (default 10)
+- "Create Question" button
 
-### 4. Interactive Quiz Game (Section B)
-**New components:**
-- `InteractiveQuizMerchantSheet.tsx` - Browse merchants offering quiz seasons
-- `InteractiveQuizSeasonSheet.tsx` - Select season type (Short/Medium/Complete) with selection levels
-- `InteractiveQuizPlayDialog.tsx` - 15 questions (10 objective + 5 non-objective with text input)
+**B. "Manage Questions" sub-tab** -- A list view of all created questions:
+- Filter by category
+- Search by question text
+- Each question card shows: question text (truncated), category badge, difficulty badge, correct answer highlighted
+- Edit and Delete actions per question
+- Stats: total questions, questions per category
 
-**Key rules:**
-- 15 questions per session (10 multiple-choice, 5 typed answers)
-- 100% pass qualifies for Interactive Session or take 500% of stake
-- Seasons with 5-7 selection levels, progressive fees
-- Final 3 levels are "Live Shows"
-- Winners crowned "Mobi-Celebrity"
+### Data Structure
+A new data file `src/data/mobigateQuizQuestionsData.ts` with:
+- Interface `AdminQuizQuestion` (id, question, options[8], correctAnswerIndex, category, difficulty, timeLimit, points, createdAt)
+- Pre-populated with the existing ~20 questions from `mobigateQuizData.ts` so the system starts with content
+- Export functions for filtering and searching
 
-### 5. Food for Home Quiz (Section D)
-**New components:**
-- `FoodQuizItemSelectSheet.tsx` - Grid of grocery items with checkboxes and market prices
-- `FoodQuizPlayDialog.tsx` - 15-20 questions (10 objective with A-H options + 5 typed non-objective)
+### Component Structure
 
-**Key rules:**
-- Select grocery items, stake = 20% of total item value (admin-configurable)
-- 100% correct wins items
-- 70-80% correct can request "Bonus Questions" (3-4 extra) at 50% extra stake
-- 30-second timeout on bonus accept/reject
-- Bonus database is separate
-- Redemption: collect at Mobi-Store or credit wallet equivalent
+**New files:**
+- `src/data/mobigateQuizQuestionsData.ts` -- Question data store with pre-populated questions
+- `src/components/mobigate/CreateQuizQuestionForm.tsx` -- Question creation form
+- `src/components/mobigate/QuizQuestionCard.tsx` -- Individual question display card
+- `src/components/mobigate/QuizQuestionFilters.tsx` -- Filter/search for questions
+- `src/components/mobigate/AdminQuizQuestionsManager.tsx` -- Orchestrator for question CRUD
 
-### 6. Scholarship Quiz (Section E)
-**New components:**
-- `ScholarshipQuizSetupSheet.tsx` - Input annual scholarship budget, see Mobi conversion and stake (20%)
-- `ScholarshipQuizPlayDialog.tsx` - 15 questions (10 objective + 5 non-objective)
+**Modified files:**
+- `src/components/AppSidebar.tsx` -- Fix routing (remove `/application` prefix)
+- `src/components/mobigate/MobigateQuizManagement.tsx` -- Add inner tabs: "Levels" (existing) and "Questions" (new)
 
-**Key rules:**
-- User inputs scholarship budget in local currency, system converts to Mobi
-- Stake = 20% of budget
-- 100% correct wins; 70-99% can get bonus questions
-- One game = one year of funding
-- Winners get free Mobi-School access
-- Prize credited 21 days after winning
-
-### 7. Shared Components
-- `QuizBonusQuestionsDialog.tsx` - Reusable bonus questions flow (50% extra stake, 3-4 questions, 30s timeout, accept/reject)
-- `NonObjectiveQuestionCard.tsx` - Text input question card with multi-answer matching
-- `QuizPrizeRedemptionSheet.tsx` - Prize collection options (Mobi-Store pickup, wallet credit, delivery)
-
-### 8. Mock Data Files
-- `src/data/mobigateGroupQuizData.ts` - Mock friends list, lobby data, group game history
-- `src/data/mobigateInteractiveQuizData.ts` - Mock merchants, seasons, selection levels
-- `src/data/mobigateFoodQuizData.ts` - Mock grocery items with prices
-- `src/data/mobigateScholarshipQuizData.ts` - Mock scholarship setup data
-- `src/data/mobigateBonusQuestionsData.ts` - Separate bonus questions pool
-
-## Technical Details
-
-### File Structure
+### Admin Quiz Tab Layout (after changes)
 ```text
-src/components/community/mobigate-quiz/
-  MobigateQuizHub.tsx              -- Main hub replacing current dialog
-  GroupQuizInviteSheet.tsx          -- Friend invitation
-  GroupQuizLobbySheet.tsx          -- Waiting/stake negotiation
-  GroupQuizPlayDialog.tsx          -- Multiplayer gameplay
-  StandardQuizCategorySelect.tsx   -- Category + level picker
-  StandardQuizContinueSheet.tsx    -- Continue/exit with prize flow
-  InteractiveQuizMerchantSheet.tsx -- Merchant browser
-  InteractiveQuizSeasonSheet.tsx   -- Season/level selector
-  FoodQuizItemSelectSheet.tsx      -- Grocery item picker
-  ScholarshipQuizSetupSheet.tsx    -- Budget input + conversion
-  QuizBonusQuestionsDialog.tsx     -- Shared bonus flow
-  NonObjectiveQuestionCard.tsx     -- Text-input question
-  QuizPrizeRedemptionSheet.tsx     -- Prize collection options
-
-src/data/
-  mobigateGroupQuizData.ts
-  mobigateInteractiveQuizData.ts
-  mobigateFoodQuizData.ts
-  mobigateScholarshipQuizData.ts
-  mobigateBonusQuestionsData.ts
+Quiz Tab
+  |-- Sub-tab: Levels (existing content - create/manage levels)
+  |-- Sub-tab: Questions (new)
+        |-- Create Question Form
+        |-- Stats Summary (total, by category)
+        |-- Filters (category, search)
+        |-- Question Cards List (with edit/delete)
 ```
-
-### Modified Files
-- `src/components/community/CommunityMainMenu.tsx` - Update to open new hub
-- `src/components/community/MobigateQuizDialog.tsx` - Replace with hub component
-- `src/data/mobigateQuizData.ts` - Extend with standard quiz category/level integration
 
 ### Mobile-First Design
-- All sheets use Drawer (vaul) for mobile-native feel
-- Touch targets minimum 44px (h-11/h-12)
-- Vertical stacking throughout, no horizontal cramming
-- ScrollArea for long content
-- Cards with rounded corners, gradient backgrounds per game type
-- Currency always shows local first with Mobi in parentheses
+- All inputs use h-12 and text-base for touch-friendliness
+- Sub-tabs use a simple toggle button group (Levels | Questions)
+- Question cards show truncated question text with "View Full" expand
+- Answer options displayed in a 2-column grid (A-D, E-H) on the creation form
+- ScrollArea for the questions list
 
-### State Management
-- All UI-template mock data, no backend
-- useState for game flow state machines
-- Toast notifications for wallet debits, game results, and errors
-
-### Navigation Flow
-```text
-Community Menu > Play Mobigate Quiz
-  > Quiz Hub (5 game mode cards)
-    > Group Quiz > Invite > Lobby > Play > Results
-    > Standard Quiz > Select Category > Select Level > Play > Continue/Exit
-    > Interactive Quiz > Choose Merchant > Choose Season > Play Sessions
-    > Food for Home > Select Items > Play > Win/Lose > Redeem
-    > Scholarship Quiz > Set Budget > Play > Win/Lose > Redemption
-```
-
+## Technical Notes
+- All data is mock/static (UI template, no backend)
+- State managed with useState for CRUD operations
+- Toast notifications for create, edit, and delete actions
+- Pre-populated questions sourced from existing `mobigateQuizData.ts` question arrays
+- The sidebar routing fix applies globally to all `.php` links (about 40+ URLs)
