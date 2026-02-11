@@ -1,92 +1,82 @@
 
 
-# Fix: All Inactive Buttons on Financial Summary Page
+# Mobigate Admin Quiz Level Management System
 
-## Problem
+## Overview
+Add a dedicated "Quiz" tab to the Mobigate Admin Dashboard for creating and managing Mobigate Quiz Levels. All 23 categories and 13 level tiers from the PDF will be pre-populated and immediately available, with the ability for admins to add custom categories and levels.
 
-Every button on the Financial Summary page (navigated from Main Menu "Financial Summary") is completely non-functional:
+## What Gets Built
 
-1. **"DOWNLOAD SUMMARIES" button** -- calls `onDownload?.()` but no prop is passed from parent
-2. **"Close" button** -- calls `onClose?.()` but no prop is passed from parent
-3. **"View Now" button** -- works (scrolls to list) but needs better touch feedback
-4. **"Friends" / "Profile" / "View Report" links** -- handlers exist but lack `active:scale` visual feedback, making them feel dead on mobile
-5. **"Pay Now" button in Financial Status Dialog** -- works but dialog uses desktop `Dialog` instead of mobile `Drawer`
-6. **Member avatar taps** -- handler exists but lacks visual feedback
+### 1. New "Quiz" Tab on Mobigate Admin Dashboard
+- Replace the 4-tab layout (Overview, Elections, Revenue, Settings) with a 5-tab horizontally scrollable layout
+- New "Quiz" tab with a trophy/gamepad icon
 
-## Root Cause
+### 2. Quiz Level Data File (`src/data/mobigateQuizLevelsData.ts`)
+A data file containing all pre-set quiz levels extracted from the PDF:
 
-`FinancialSummaryTab.tsx` renders `FinancialSummaryTable` without passing `onDownload` or `onClose` props. And `CommunityProfile.tsx` renders `FinancialSummaryTab` without passing any navigation callback for "Close" to navigate back.
+**23 Pre-set Categories:**
+- Current Affairs, Politics and Leadership, Science and Technology, Morals and Religion, Literature and Reading, Agriculture and Farming, Healthcare and Medicare, Transportation and Vacation, Basic and General Education, Sports and Physical Fitness, Skills and Crafts, Business and Entrepreneurship, Entertainment and Leisure, Environment and Society, Basic Law, Family and Home, Civic Education and Responsibilities, Mentorship and Individual Development, Discoveries and Inventions, Culture and Tradition, Real Estate and Physical Development, Information Technology, General and Basic Knowledge
 
-Working reference found in `CommunityAccountsTab.tsx` which correctly passes both props:
-```
-onDownload={() => setShowSummaryDownloadSheet(true)}
-onClose={() => setIsTableCollapsed(true)}
-```
+**13 Pre-set Level Tiers (with default stake/winning values):**
 
-## Files to Modify
+| Level | Stake (Mobi) | Winning (Mobi) |
+|-------|-------------|----------------|
+| Beginner Level | 200 | 1,000 |
+| Starter Level | 500 | 1,500 |
+| Standard Level | 1,000 | 3,000 |
+| Business Level | 2,000 | 6,000 |
+| Professional Level | 3,000 | 9,000 |
+| Enterprise Level | 5,000 | 15,000 |
+| Entrepreneur Level | 10,000 | 30,000 |
+| Deluxe Package | 20,000 | 60,000 |
+| Deluxe Gold Package | 30,000 | 150,000 |
+| Deluxe Super | 50,000 | 200,000 |
+| Deluxe Super Plus | 100,000 | 500,000 |
+| Millionaire Suite | 200,000 | 1,000,000 |
+| Millionaire Suite Plus | 500,000 | 5,000,000 |
 
-| File | Changes |
-|------|---------|
-| `src/components/community/finance/FinancialSummaryTab.tsx` | Add onClose prop, wire onDownload to DownloadFormatSheet, pass both to table |
-| `src/pages/CommunityProfile.tsx` | Pass onClose callback to FinancialSummaryTab that navigates back to status |
-| `src/components/community/finance/FinancialStatusDialog.tsx` | Convert to mobile Drawer pattern (isMobile ? Drawer : Dialog) |
-| `src/components/community/finance/OtherMembersFinancialSection.tsx` | Add active:scale feedback to all link buttons |
-| `src/components/community/finance/FinancialSummaryTable.tsx` | Add touch-manipulation to Select trigger |
+All entries pre-set with status ACTIVE. Category-specific variations in winning amounts (as per PDF) will be reflected.
 
-## Detailed Changes
+### 3. Quiz Tab Content - Two Sections
 
-### 1. FinancialSummaryTab.tsx -- Wire up Download + Close
+**Section A: Create New Quiz Level (Top of Tab)**
+A mobile-optimized form with:
+- **Select Category**: Dropdown with all 23 pre-set categories + "Custom (Specify)" option at the bottom. When "Custom" is selected, a text input appears below for typing a custom category name
+- **Select Level**: Dropdown with all 13 pre-set level tiers + "Custom (Specify)" option. When "Custom" is selected, a text input appears for typing a custom level name. Note displayed: "Avoid special characters and symbols like &, use 'and' instead. This feature is not editable in future."
+- **Minimum Stake Amount**: Numeric input (Mobi), placeholder "e.g. 500 (Do not put comma)"
+- **Winning Amount**: Numeric input (Mobi), placeholder "e.g. 1000 (Do not put comma)"
+- **Status Toggle**: Switch defaulting to ACTIVE
+- **Create Button**: Full-width, mobile-friendly (h-12)
 
-- Accept new prop: `onClose?: () => void`
-- Add state: `showDownloadSheet` (boolean), `isDownloading` (boolean)
-- Import `DownloadFormatSheet` and `DownloadFormat` from `@/components/common/DownloadFormatSheet`
-- Import `useToast`
-- Pass `onDownload={() => setShowDownloadSheet(true)}` to `FinancialSummaryTable`
-- Pass `onClose={onClose}` to `FinancialSummaryTable`
-- Add `handleDownload(format)` function that simulates download with toast
-- Render `DownloadFormatSheet` component with `documentName="Financial Summary"` and `availableFormats={["pdf", "docx", "csv"]}`
+**Section B: Quiz Levels Details (Below Form)**
+- Summary stats card showing total levels, active count, inactive count
+- Filter bar: filter by category (dropdown) and search by level name
+- Scrollable list of all quiz level cards, each showing:
+  - Level name (bold) + Category (badge)
+  - Stake amount and Winning amount in Mobi
+  - Active/Inactive status toggle (switch)
+  - Delete button (with confirmation)
+- Cards grouped or sortable by category
 
-### 2. CommunityProfile.tsx -- Pass navigation callback
+### 4. Component Structure
 
-- Find where `FinancialSummaryTab` is rendered (around line 1072-1076)
-- Change from `<FinancialSummaryTab />` to `<FinancialSummaryTab onClose={() => handleTabChange("status")} />`
-- This makes "Close" navigate back to the community status page
+**New files:**
+- `src/data/mobigateQuizLevelsData.ts` -- All pre-populated data (categories, levels, quiz entries)
+- `src/components/mobigate/MobigateQuizManagement.tsx` -- Main quiz tab content component
+- `src/components/mobigate/CreateQuizLevelForm.tsx` -- The creation form
+- `src/components/mobigate/QuizLevelCard.tsx` -- Individual quiz level display card
+- `src/components/mobigate/QuizLevelFilters.tsx` -- Filter/search bar
 
-### 3. FinancialStatusDialog.tsx -- Convert to mobile Drawer
+**Modified files:**
+- `src/pages/admin/MobigateAdminDashboard.tsx` -- Add 5th "Quiz" tab, make tabs horizontally scrollable for mobile
 
-- Import `Drawer`, `DrawerContent`, `DrawerHeader`, `DrawerTitle` from `@/components/ui/drawer`
-- Import `useIsMobile` from `@/hooks/use-mobile`
-- Extract shared content into a `StatusContent` component
-- On mobile: render as `Drawer` bottom sheet with `max-h-[92vh]`
-- On desktop: keep existing `Dialog`
-- Add `touch-manipulation` to "Pay Now" button
-- Reduce padding from `p-4 sm:p-6` to `px-2 py-4` for mobile content area
+## Technical Details
 
-### 4. OtherMembersFinancialSection.tsx -- Add visual feedback
+- All data is mock/static (UI template only, no backend)
+- State managed with useState for CRUD operations on the quiz levels array
+- Toast notifications for create, toggle status, and delete actions
+- Mobile-first: all inputs h-12, text-base, touch-manipulation; cards full-width with proper padding
+- Uses existing Mobi formatting utilities (`formatMobi`, `formatLocalAmount`)
+- Tab bar switches to horizontal scroll (`overflow-x-auto`) to accommodate 5 tabs on mobile
+- Custom category/level inputs use the same pattern as the advertisement "Other (Specify)" feature
 
-- Add `active:scale-[0.97]` to all three Button links ("Friends", "Profile", "View Report") -- they already have `touch-manipulation` but lack the scale feedback that confirms a tap registered
-- Add `active:scale-[0.97]` to the "View Now" button (already has `active:scale-[0.97]` -- confirmed working)
-
-### 5. FinancialSummaryTable.tsx -- Touch optimization
-
-- Add `touch-manipulation` to the `SelectTrigger` for the sort filter dropdown
-- Ensure the dropdown `SelectContent` has `bg-card z-50` (already present -- confirmed)
-
-## What Gets Fixed
-
-| Button | Before | After |
-|--------|--------|-------|
-| DOWNLOAD SUMMARIES | Does nothing (no prop) | Opens DownloadFormatSheet with PDF/DOCX/CSV |
-| Close | Does nothing (no prop) | Navigates back to community status page |
-| View Now | Scrolls to list + toast | Same (already working) |
-| Friends | Sends request + toast | Same + visual scale feedback |
-| Profile | Opens MemberPreviewDialog | Same + visual scale feedback |
-| View Report | Opens FinancialStatusDialog | Same + visual feedback + dialog now renders as Drawer on mobile |
-| Pay Now (in report) | Processes payment | Same + now inside mobile Drawer |
-
-## Technical Notes
-
-- The `DownloadFormatSheet` component already exists at `src/components/common/DownloadFormatSheet.tsx` with full mobile optimization
-- The Drawer conversion follows the exact `isMobile ? Drawer : Dialog` pattern used in `WalletWithdrawDialog`, `WalletTransferDialog`, and `WalletTopUpDialog`
-- No backend changes needed -- this is a UI template
-- All touch targets maintain minimum 44px height with `h-12` on buttons
