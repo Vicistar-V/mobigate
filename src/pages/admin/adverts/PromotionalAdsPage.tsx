@@ -6,9 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Trash2, Edit2, Eye, MousePointer, Image as ImageIcon, Plus } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Upload, Trash2, Edit2, Eye, MousePointer, Image as ImageIcon, Plus, X } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from "@/components/ui/drawer";
 
 interface PromoAd {
   id: string;
@@ -41,6 +49,12 @@ export default function PromotionalAdsPage() {
   const [newLink, setNewLink] = useState("");
   const [newPosition, setNewPosition] = useState<string>("top-banner");
   const [showUpload, setShowUpload] = useState(false);
+
+  // Edit state
+  const [editingAd, setEditingAd] = useState<PromoAd | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editLink, setEditLink] = useState("");
+  const [editPosition, setEditPosition] = useState<string>("top-banner");
 
   const handleToggle = (id: string) => {
     setAds(prev => prev.map(ad => ad.id === id ? { ...ad, active: !ad.active } : ad));
@@ -77,6 +91,25 @@ export default function PromotionalAdsPage() {
     toast({ title: "Ad Created", description: `"${newTitle}" has been uploaded and activated.` });
   };
 
+  const openEdit = (ad: PromoAd) => {
+    setEditingAd(ad);
+    setEditTitle(ad.title);
+    setEditLink(ad.linkUrl);
+    setEditPosition(ad.position);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingAd || !editTitle.trim()) return;
+    setAds(prev => prev.map(ad => ad.id === editingAd.id ? {
+      ...ad,
+      title: editTitle,
+      linkUrl: editLink || "#",
+      position: editPosition as PromoAd["position"],
+    } : ad));
+    toast({ title: "Ad Updated", description: `"${editTitle}" has been saved.` });
+    setEditingAd(null);
+  };
+
   const totalImpressions = ads.reduce((sum, a) => sum + a.impressions, 0);
   const totalClicks = ads.reduce((sum, a) => sum + a.clicks, 0);
   const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : "0";
@@ -90,23 +123,25 @@ export default function PromotionalAdsPage() {
           <h1 className="text-lg font-bold mb-3">Promotional Ads</h1>
         </div>
         <div className="p-4 space-y-4">
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <Card>
+          {/* Stats - 2 col + 1 full width */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Card className="bg-muted/50 border-border/40">
+                <CardContent className="p-3 text-center">
+                  <p className="text-xs text-muted-foreground">Active Ads</p>
+                  <p className="text-xl font-bold text-primary">{ads.filter(a => a.active).length}</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-muted/50 border-border/40">
+                <CardContent className="p-3 text-center">
+                  <p className="text-xs text-muted-foreground">Impressions</p>
+                  <p className="text-xl font-bold">{(totalImpressions / 1000).toFixed(1)}K</p>
+                </CardContent>
+              </Card>
+            </div>
+            <Card className="bg-muted/50 border-border/40">
               <CardContent className="p-3 text-center">
-                <p className="text-xs text-muted-foreground">Active</p>
-                <p className="text-xl font-bold text-primary">{ads.filter(a => a.active).length}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3 text-center">
-                <p className="text-xs text-muted-foreground">Impressions</p>
-                <p className="text-xl font-bold">{(totalImpressions / 1000).toFixed(1)}K</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3 text-center">
-                <p className="text-xs text-muted-foreground">CTR</p>
+                <p className="text-xs text-muted-foreground">Click-Through Rate</p>
                 <p className="text-xl font-bold text-emerald-600">{ctr}%</p>
               </CardContent>
             </Card>
@@ -127,7 +162,6 @@ export default function PromotionalAdsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {/* Mock upload area */}
                 <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center">
                   <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
                   <p className="text-sm text-muted-foreground">Tap to upload banner image</p>
@@ -166,43 +200,51 @@ export default function PromotionalAdsPage() {
             </Card>
           )}
 
-          {/* Active Promotional Ads */}
+          {/* All Promotional Ads */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">All Promotional Ads</h3>
             {ads.map(ad => (
-              <Card key={ad.id} className={!ad.active ? "opacity-60" : ""}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center text-2xl shrink-0">
+              <Card key={ad.id} className={`bg-muted/50 border-border/40 ${!ad.active ? "opacity-60" : ""}`}>
+                <CardContent className="p-3 space-y-2">
+                  {/* Row 1: Emoji + Title + Toggle */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center text-xl shrink-0">
                       {ad.thumbnail}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-semibold text-sm truncate">{ad.title}</p>
-                        <Switch checked={ad.active} onCheckedChange={() => handleToggle(ad.id)} />
-                      </div>
-                      <Badge variant="secondary" className="text-xs mt-1">{positionLabels[ad.position]}</Badge>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {ad.impressions.toLocaleString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MousePointer className="h-3 w-3" />
-                          {ad.clicks.toLocaleString()}
-                        </span>
-                        <span className="font-medium text-primary">
-                          {ad.impressions > 0 ? ((ad.clicks / ad.impressions) * 100).toFixed(1) : 0}% CTR
-                        </span>
-                      </div>
+                      <p className="font-semibold text-sm break-words">{ad.title}</p>
                     </div>
+                    <Switch checked={ad.active} onCheckedChange={() => handleToggle(ad.id)} className="shrink-0" />
                   </div>
-                  <div className="flex gap-2 mt-3 pt-3 border-t">
-                    <Button variant="outline" size="sm" className="flex-1 h-10">
+
+                  {/* Row 2: Position badge + Link */}
+                  <div className="space-y-1">
+                    <Badge variant="secondary" className="text-xs">{positionLabels[ad.position]}</Badge>
+                    <p className="text-xs text-muted-foreground break-all">{ad.linkUrl}</p>
+                  </div>
+
+                  {/* Row 3: Stats */}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Eye className="h-3 w-3" />
+                      {ad.impressions.toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MousePointer className="h-3 w-3" />
+                      {ad.clicks.toLocaleString()}
+                    </span>
+                    <span className="font-medium text-primary">
+                      {ad.impressions > 0 ? ((ad.clicks / ad.impressions) * 100).toFixed(1) : 0}% CTR
+                    </span>
+                  </div>
+
+                  {/* Row 4: Actions */}
+                  <div className="flex gap-2 pt-1 border-t border-border/30">
+                    <Button variant="outline" size="sm" className="flex-1 h-10" onClick={() => openEdit(ad)}>
                       <Edit2 className="h-3.5 w-3.5 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="destructive" size="sm" className="h-10" onClick={() => handleDelete(ad.id)}>
+                    <Button variant="destructive" size="sm" className="h-10 px-3" onClick={() => handleDelete(ad.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -212,6 +254,85 @@ export default function PromotionalAdsPage() {
           </div>
         </div>
       </ScrollArea>
+
+      {/* Edit Drawer */}
+      <Drawer open={!!editingAd} onOpenChange={(open) => !open && setEditingAd(null)}>
+        <DrawerContent className="p-0">
+          <DrawerHeader className="px-4 pt-4 pb-2 flex items-center justify-between">
+            <DrawerTitle className="text-base">Edit Promotional Ad</DrawerTitle>
+            <DrawerClose asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <X className="h-4 w-4" />
+              </Button>
+            </DrawerClose>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-4 overflow-y-auto touch-auto max-h-[75vh]">
+            {/* Banner preview */}
+            <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center">
+              <div className="text-3xl mb-1">{editingAd?.thumbnail}</div>
+              <p className="text-xs text-muted-foreground">Tap to change banner image</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm">Ad Title</Label>
+              <Input
+                value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+                className="h-12"
+                placeholder="Ad Title *"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm">Link URL</Label>
+              <Input
+                value={editLink}
+                onChange={e => setEditLink(e.target.value)}
+                className="h-12"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm">Display Position</Label>
+              <Select value={editPosition} onValueChange={setEditPosition}>
+                <SelectTrigger className="h-12">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top-banner">Top Banner</SelectItem>
+                  <SelectItem value="feed-insert">Feed Insert</SelectItem>
+                  <SelectItem value="sidebar">Sidebar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {editingAd && (
+              <div className="space-y-2 p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">Performance</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Impressions</span>
+                  <span className="font-medium">{editingAd.impressions.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Clicks</span>
+                  <span className="font-medium">{editingAd.clicks.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">CTR</span>
+                  <span className="font-medium text-primary">
+                    {editingAd.impressions > 0 ? ((editingAd.clicks / editingAd.impressions) * 100).toFixed(1) : 0}%
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <Button onClick={handleSaveEdit} className="w-full h-12">
+              Save Changes
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
