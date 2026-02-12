@@ -14,7 +14,7 @@ interface QuizLevelCardProps {
 
 export function QuizLevelCard({ entry, onToggleStatus, onDelete }: QuizLevelCardProps) {
   return (
-    <Card>
+    <Card className={!entry.isActive ? "opacity-60" : ""}>
       <CardContent className="p-3 space-y-2">
         {/* Row 1: Switch + Level Name + Delete */}
         <div className="flex items-center gap-2">
@@ -40,8 +40,8 @@ export function QuizLevelCard({ entry, onToggleStatus, onDelete }: QuizLevelCard
             {entry.category}
           </Badge>
           <Badge
-            variant={entry.isActive ? "default" : "secondary"}
-            className={entry.isActive ? "bg-success hover:bg-success/90 text-xs" : "text-xs"}
+            variant={entry.isActive ? "default" : "destructive"}
+            className={entry.isActive ? "bg-emerald-500 hover:bg-emerald-600 text-white text-xs" : "bg-red-500 hover:bg-red-600 text-white text-xs"}
           >
             {entry.isActive ? "Active" : "Inactive"}
           </Badge>
