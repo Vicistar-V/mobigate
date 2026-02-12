@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFe
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
-import { MobigateQuizManagement } from "@/components/mobigate/MobigateQuizManagement";
+// MobigateQuizManagement moved to /mobigate-admin/quiz
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
@@ -60,6 +61,7 @@ const topCommunities = [
 
 export default function MobigateAdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -434,7 +436,28 @@ export default function MobigateAdminDashboard() {
 
           {/* Quiz Tab */}
           <TabsContent value="quiz" className="mt-0">
-            <MobigateQuizManagement />
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-4 pb-6">
+                <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
+                  <CardContent className="p-6 text-center space-y-4">
+                    <Trophy className="h-12 w-12 text-amber-500 mx-auto" />
+                    <div>
+                      <p className="font-bold text-lg">Quiz Management</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Create questions, manage levels, and configure quiz content
+                      </p>
+                    </div>
+                    <Button 
+                      className="w-full h-12 text-base"
+                      onClick={() => navigate("/mobigate-admin/quiz")}
+                    >
+                      Open Quiz Management
+                      <ChevronRight className="h-5 w-5 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </ScrollArea>
           </TabsContent>
 
           {/* Settings Tab */}
