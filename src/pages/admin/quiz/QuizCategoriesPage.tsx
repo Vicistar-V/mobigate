@@ -98,14 +98,14 @@ export default function QuizCategoriesPage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header />
-      <div className="p-4">
-        <h1 className="text-lg font-bold mb-3">Quiz Categories</h1>
+      <div className="px-2">
+        <h1 className="text-lg font-bold mb-3 px-1">Quiz Categories</h1>
         <ScrollArea className="h-[calc(100vh-140px)]">
-          <div className="space-y-4 pb-6">
+          <div className="space-y-3 pb-6">
             {/* Add Custom Category */}
             <Card>
-              <CardContent className="p-4">
-                <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <CardContent className="p-2.5">
+                <p className="text-sm font-semibold mb-2 flex items-center gap-2">
                   <PlusCircle className="h-4 w-4 text-primary" />
                   Add Custom Category
                 </p>
@@ -114,10 +114,10 @@ export default function QuizCategoriesPage() {
                     value={newCategoryName}
                     onChange={e => setNewCategoryName(e.target.value)}
                     placeholder="Enter category name..."
-                    className="h-12 text-base flex-1"
+                    className="h-12 text-base flex-1 min-w-0"
                     onKeyDown={e => e.key === "Enter" && handleAddCategory()}
                   />
-                  <Button onClick={handleAddCategory} className="h-12 px-6" disabled={!newCategoryName.trim()}>
+                  <Button onClick={handleAddCategory} className="h-12 px-4 shrink-0" disabled={!newCategoryName.trim()}>
                     Add
                   </Button>
                 </div>
@@ -125,23 +125,23 @@ export default function QuizCategoriesPage() {
             </Card>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <Card>
-                <CardContent className="p-3 text-center">
+                <CardContent className="p-2 text-center">
                   <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
                   <p className="text-lg font-bold">{categories.length}</p>
                   <p className="text-[10px] text-muted-foreground uppercase">Total</p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-3 text-center">
+                <CardContent className="p-2 text-center">
                   <CheckCircle className="h-4 w-4 mx-auto mb-1 text-emerald-500" />
                   <p className="text-lg font-bold text-emerald-600">{activeCount}</p>
                   <p className="text-[10px] text-muted-foreground uppercase">Active</p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-3 text-center">
+                <CardContent className="p-2 text-center">
                   <FolderOpen className="h-4 w-4 mx-auto mb-1 text-primary" />
                   <p className="text-lg font-bold">{totalQuestions}</p>
                   <p className="text-[10px] text-muted-foreground uppercase">Questions</p>
@@ -152,9 +152,9 @@ export default function QuizCategoriesPage() {
             {/* Category List */}
             <div className="space-y-2">
               {categories.map(cat => (
-                <Card key={cat.id} className={!cat.isActive ? "opacity-60" : ""}>
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-3">
+              <Card key={cat.id} className={!cat.isActive ? "opacity-60" : ""}>
+                  <CardContent className="p-2.5">
+                    <div className="flex items-center gap-2">
                       <Switch
                         checked={cat.isActive}
                         onCheckedChange={() => handleToggle(cat.id)}
