@@ -14,7 +14,7 @@ interface QuizLevelCardProps {
 
 export function QuizLevelCard({ entry, onToggleStatus, onDelete }: QuizLevelCardProps) {
   return (
-    <Card className={!entry.isActive ? "opacity-60" : ""}>
+    <Card>
       <CardContent className="p-3 space-y-2">
         {/* Row 1: Switch + Level Name + Delete */}
         <div className="flex items-center gap-2">
