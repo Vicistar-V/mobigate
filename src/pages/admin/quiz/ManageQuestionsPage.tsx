@@ -12,7 +12,7 @@ import { HelpCircle, Layers, FileQuestion, PlusCircle } from "lucide-react";
 import { INITIAL_ADMIN_QUESTIONS, type AdminQuizQuestion } from "@/data/mobigateQuizQuestionsData";
 import { QuizQuestionCard } from "@/components/mobigate/QuizQuestionCard";
 import { QuizQuestionFilters } from "@/components/mobigate/QuizQuestionFilters";
-import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
+import { Header } from "@/components/Header";
 
 export default function ManageQuestionsPage() {
   const navigate = useNavigate();
@@ -48,8 +48,9 @@ export default function ManageQuestionsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <MobigateAdminHeader title="Manage Questions" subtitle="Browse & Edit Quiz Questions" />
+      <Header />
       <div className="p-4">
+        <h1 className="text-lg font-bold mb-3">Manage Questions</h1>
         <ScrollArea className="h-[calc(100vh-140px)]">
           <div className="space-y-4 pb-6">
             {/* Create New Button */}

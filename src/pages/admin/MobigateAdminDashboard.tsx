@@ -22,7 +22,7 @@ import {
   Trophy,
   Megaphone,
 } from "lucide-react";
-import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
+import { Header } from "@/components/Header";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
@@ -66,11 +66,7 @@ export default function MobigateAdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <MobigateAdminHeader 
-        title="Mobigate Admin"
-        subtitle="Platform Administration"
-        pendingActions={platformStats.pendingApprovals}
-      />
+      <Header />
 
       <div className="p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

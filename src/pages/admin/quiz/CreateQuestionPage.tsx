@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
+import { Header } from "@/components/Header";
 import { CreateQuizQuestionForm } from "@/components/mobigate/CreateQuizQuestionForm";
 import { type AdminQuizQuestion } from "@/data/mobigateQuizQuestionsData";
 import { PlusCircle, ListChecks } from "lucide-react";
@@ -20,7 +20,8 @@ export default function CreateQuestionPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <MobigateAdminHeader title="Create Question" subtitle="Add New Quiz Question" />
+      <Header />
+      <h1 className="text-lg font-bold px-4 pt-4">Create Question</h1>
       <div className="p-4 space-y-4">
         <CreateQuizQuestionForm onCreateQuestion={handleCreate} />
 
