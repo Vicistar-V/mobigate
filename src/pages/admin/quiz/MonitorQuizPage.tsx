@@ -7,7 +7,7 @@ import {
   Activity, Users, Wallet, Gamepad2, Trophy,
   Users2, Zap, UtensilsCrossed, GraduationCap, Radio,
 } from "lucide-react";
-import { GameModeDetailDrawer } from "@/components/mobigate/GameModeDetailDrawer";
+import { MonitorDetailDrawer, type DrawerData } from "@/components/mobigate/MonitorDetailDrawer";
 
 const liveStats = {
   activeSessions: 127,
@@ -15,7 +15,7 @@ const liveStats = {
   totalStakesInPlay: 8750000,
 };
 
-const modeBreakdown = [
+export const modeBreakdown = [
   { mode: "Group Quiz", icon: Users2, sessions: 34, players: 198, stakes: 3200000, color: "text-blue-500", avgScore: "7.2/10", topPlayer: "Group: Lagos Stars", winRate: "68%" },
   { mode: "Standard Solo", icon: Zap, sessions: 52, players: 52, stakes: 1850000, color: "text-amber-500", avgScore: "6.8/10", topPlayer: "Chukwuma Adesanya", winRate: "42%" },
   { mode: "Interactive", icon: Radio, sessions: 8, players: 120, stakes: 1500000, color: "text-purple-500", avgScore: "Season 3", topPlayer: "Ngozi Emenike", winRate: "55%" },
@@ -23,23 +23,24 @@ const modeBreakdown = [
   { mode: "Scholarship", icon: GraduationCap, sessions: 12, players: 98, stakes: 1250000, color: "text-rose-500", avgScore: "11.2/15", topPlayer: "Blessing Uzoma", winRate: "38%" },
 ];
 
-const recentResults = [
-  { id: 1, player: "Chukwuma Adesanya", mode: "Solo", score: "10/10", prize: 25000, time: "2 minutes ago", won: true },
-  { id: 2, player: "Group: Lagos Stars", mode: "Group", score: "8/10", prize: 150000, time: "5 minutes ago", won: true },
-  { id: 3, player: "Adaeze Nwosu", mode: "Solo", score: "6/10", prize: 0, time: "8 minutes ago", won: false },
-  { id: 4, player: "Emeka Okonkwo", mode: "Food for Home", score: "15/15", prize: 0, time: "12 minutes ago", won: true },
-  { id: 5, player: "Group: Abuja Professionals", mode: "Group", score: "9/10", prize: 200000, time: "15 minutes ago", won: true },
-  { id: 6, player: "Blessing Uzoma", mode: "Scholarship", score: "12/15", prize: 500000, time: "18 minutes ago", won: true },
-  { id: 7, player: "Tunde Kolawole", mode: "Solo", score: "5/10", prize: 0, time: "22 minutes ago", won: false },
-  { id: 8, player: "Ngozi Emenike", mode: "Interactive", score: "Season 3", prize: 0, time: "30 minutes ago", won: true },
-  { id: 9, player: "Group: Delta United", mode: "Group", score: "7/10", prize: 75000, time: "35 minutes ago", won: true },
-  { id: 10, player: "Amaka Chukwu", mode: "Solo", score: "10/10", prize: 50000, time: "40 minutes ago", won: true },
+export const recentResults = [
+  { id: 1, player: "Chukwuma Adesanya", mode: "Solo", score: "10/10", prize: 25000, time: "2 minutes ago", won: true, category: "Sports and Physical Fitness", difficulty: "Medium", questionsAnswered: 10 },
+  { id: 2, player: "Group: Lagos Stars", mode: "Group", score: "8/10", prize: 150000, time: "5 minutes ago", won: true, category: "General Knowledge", difficulty: "Hard", questionsAnswered: 10 },
+  { id: 3, player: "Adaeze Nwosu", mode: "Solo", score: "6/10", prize: 0, time: "8 minutes ago", won: false, category: "Science and Technology", difficulty: "Medium", questionsAnswered: 10 },
+  { id: 4, player: "Emeka Okonkwo", mode: "Food for Home", score: "15/15", prize: 0, time: "12 minutes ago", won: true, category: "General Knowledge", difficulty: "Easy", questionsAnswered: 15 },
+  { id: 5, player: "Group: Abuja Professionals", mode: "Group", score: "9/10", prize: 200000, time: "15 minutes ago", won: true, category: "Current Affairs", difficulty: "Hard", questionsAnswered: 10 },
+  { id: 6, player: "Blessing Uzoma", mode: "Scholarship", score: "12/15", prize: 500000, time: "18 minutes ago", won: true, category: "Science and Technology", difficulty: "Expert", questionsAnswered: 15 },
+  { id: 7, player: "Tunde Kolawole", mode: "Solo", score: "5/10", prize: 0, time: "22 minutes ago", won: false, category: "Entertainment", difficulty: "Medium", questionsAnswered: 10 },
+  { id: 8, player: "Ngozi Emenike", mode: "Interactive", score: "Season 3", prize: 0, time: "30 minutes ago", won: true, category: "General Knowledge", difficulty: "Medium", questionsAnswered: 15 },
+  { id: 9, player: "Group: Delta United", mode: "Group", score: "7/10", prize: 75000, time: "35 minutes ago", won: true, category: "Sports and Physical Fitness", difficulty: "Medium", questionsAnswered: 10 },
+  { id: 10, player: "Amaka Chukwu", mode: "Solo", score: "10/10", prize: 50000, time: "40 minutes ago", won: true, category: "Current Affairs", difficulty: "Easy", questionsAnswered: 10 },
 ];
 
 export type GameModeData = typeof modeBreakdown[number];
+export type RecentResultData = typeof recentResults[number];
 
 export default function MonitorQuizPage() {
-  const [selectedMode, setSelectedMode] = useState<GameModeData | null>(null);
+  const [drawerData, setDrawerData] = useState<DrawerData | null>(null);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -47,7 +48,7 @@ export default function MonitorQuizPage() {
       <div className="p-4 space-y-4">
         <h1 className="text-lg font-bold">Monitor Quiz</h1>
 
-        {/* Live Stats - 2 cols top, 1 col bottom */}
+        {/* Live Stats */}
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <Card>
@@ -86,8 +87,8 @@ export default function MonitorQuizPage() {
             {modeBreakdown.map(m => (
               <button
                 key={m.mode}
-                className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg w-full text-left active:bg-muted/60 transition-colors"
-                onClick={() => setSelectedMode(m)}
+                className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg w-full text-left active:bg-muted/80 transition-colors border border-border/40"
+                onClick={() => setDrawerData({ type: "mode", data: m })}
               >
                 <m.icon className={`h-5 w-5 shrink-0 ${m.color}`} />
                 <div className="flex-1 min-w-0">
@@ -112,7 +113,11 @@ export default function MonitorQuizPage() {
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-2">
             {recentResults.map(r => (
-              <div key={r.id} className="p-3 bg-muted/20 rounded-lg space-y-2">
+              <button
+                key={r.id}
+                className="p-3 bg-muted/50 rounded-lg space-y-2 w-full text-left active:bg-muted/80 transition-colors border border-border/40"
+                onClick={() => setDrawerData({ type: "result", data: r })}
+              >
                 {/* Row 1: Player name + Won/Lost badge */}
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-semibold break-words flex-1 min-w-0">{r.player}</p>
@@ -130,16 +135,16 @@ export default function MonitorQuizPage() {
                   <span className="text-xs font-medium">{r.score}</span>
                   <span className="text-xs text-muted-foreground">{r.time}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </CardContent>
         </Card>
       </div>
 
-      {/* Game Mode Detail Drawer */}
-      <GameModeDetailDrawer
-        mode={selectedMode}
-        onClose={() => setSelectedMode(null)}
+      {/* Unified Detail Drawer */}
+      <MonitorDetailDrawer
+        data={drawerData}
+        onClose={() => setDrawerData(null)}
       />
     </div>
   );
