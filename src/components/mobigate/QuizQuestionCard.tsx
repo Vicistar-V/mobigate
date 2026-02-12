@@ -41,9 +41,6 @@ export function QuizQuestionCard({ question, onEdit, onDelete }: Props) {
           <Badge className={cn("text-xs px-2 py-0.5 border-0", difficultyColors[question.difficulty])}>
             {question.difficulty}
           </Badge>
-          <Badge variant="secondary" className="text-xs px-2 py-0.5">
-            ✓ {ANSWER_LABELS[question.correctAnswerIndex]}
-          </Badge>
         </div>
 
         {/* Expanded: show all options */}

@@ -12,6 +12,7 @@ import { HelpCircle, Layers, FileQuestion, PlusCircle } from "lucide-react";
 import { INITIAL_ADMIN_QUESTIONS, type AdminQuizQuestion } from "@/data/mobigateQuizQuestionsData";
 import { QuizQuestionCard } from "@/components/mobigate/QuizQuestionCard";
 import { QuizQuestionFilters } from "@/components/mobigate/QuizQuestionFilters";
+import { EditQuizQuestionForm } from "@/components/mobigate/EditQuizQuestionForm";
 import { Header } from "@/components/Header";
 
 export default function ManageQuestionsPage() {
@@ -21,6 +22,7 @@ export default function ManageQuestionsPage() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const allCategories = useMemo(() => [...new Set(questions.map(q => q.category))].sort(), [questions]);
   const totalQuestions = questions.length;
@@ -35,7 +37,13 @@ export default function ManageQuestionsPage() {
   }, [questions, filterCategory, searchQuery]);
 
   const handleEdit = (id: string) => {
-    toast({ title: "Edit Question", description: "Edit mode would open here (UI template)" });
+    setEditingId(id);
+  };
+
+  const handleSaveEdit = (updated: AdminQuizQuestion) => {
+    setQuestions(prev => prev.map(q => q.id === updated.id ? updated : q));
+    setEditingId(null);
+    toast({ title: "Question Updated", description: "Changes saved successfully." });
   };
 
   const confirmDelete = () => {
@@ -69,12 +77,12 @@ export default function ManageQuestionsPage() {
                   <div className="p-2 rounded-lg bg-muted/30">
                     <FileQuestion className="h-4 w-4 mx-auto mb-1 text-primary" />
                     <p className="text-lg font-bold">{totalQuestions}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase">Total Questions</p>
+                    <p className="text-xs text-muted-foreground uppercase">Total Questions</p>
                   </div>
                   <div className="p-2 rounded-lg bg-muted/30">
                     <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
                     <p className="text-lg font-bold">{categoryCount}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase">Categories Used</p>
+                    <p className="text-xs text-muted-foreground uppercase">Categories Used</p>
                   </div>
                 </div>
               </CardContent>
@@ -100,12 +108,21 @@ export default function ManageQuestionsPage() {
                 </Card>
               ) : (
                 filtered.map(q => (
-                  <QuizQuestionCard
-                    key={q.id}
-                    question={q}
-                    onEdit={handleEdit}
-                    onDelete={id => setDeleteTarget(id)}
-                  />
+                  editingId === q.id ? (
+                    <EditQuizQuestionForm
+                      key={q.id}
+                      question={q}
+                      onSave={handleSaveEdit}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  ) : (
+                    <QuizQuestionCard
+                      key={q.id}
+                      question={q}
+                      onEdit={handleEdit}
+                      onDelete={id => setDeleteTarget(id)}
+                    />
+                  )
                 ))
               )}
             </div>
