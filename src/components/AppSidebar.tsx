@@ -21,10 +21,10 @@ const superadminMenuItems = [
     title: "Manage Quiz",
     icon: Gamepad2,
     items: [
-      { title: "Set Categories", url: "/manage_categories.php" },
-      { title: "Set Quiz Levels", url: "/manage_levels.php" },
-      { title: "Set Questions", url: "/quiz_questions.php" },
-      { title: "Manage Questions", url: "/manage_all_questions.php" },
+      { title: "Set Categories", url: "/mobigate-admin" },
+      { title: "Set Quiz Levels", url: "/mobigate-admin" },
+      { title: "Set Questions", url: "/mobigate-admin" },
+      { title: "Manage Questions", url: "/mobigate-admin" },
       { title: "Monitor All Quiz", url: "/monitor_quiz.php" }
     ]
   },
