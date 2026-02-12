@@ -1,89 +1,62 @@
 
+# Restructure: Advert Management System
 
-# Full Restructure: Quiz Management System
+## Current State
+The sidebar "Manage Adverts" section has 3 items:
+- **Set Ad Slot Rate** -- points to `/all_settings.php#advert_slot_fee` (not built)
+- **View/Manage All Adverts** -- points to `/admin/manage-adverts` (already built as a full React page)
+- **Upload/Manage Promotional Ads** -- points to `/upload_manage_promotional_ad.php` (not built)
 
-## Current Problem
-All 5 sidebar items under "Manage Quiz" point to the same single page (`/mobigate-admin/quiz`), which bundles everything into one monolithic view with sub-tabs. This defeats the purpose of having distinct sidebar menu items. Each menu item should lead to its own dedicated page.
+## Plan
+Build the two missing pages as dedicated React routes under `/mobigate-admin/adverts/`, and move the existing manage page to align with the new route structure. Update the sidebar and admin dashboard to match -- same pattern as the quiz restructure.
 
-## New Route Structure
+### New Route Structure
 
-| Sidebar Item | Route | Page | Content |
-|---|---|---|---|
-| Set Categories | `/mobigate-admin/quiz/categories` | Dedicated category management | Create, enable/disable, delete quiz categories |
-| Set Quiz Levels | `/mobigate-admin/quiz/levels` | Dedicated level management | Existing `MobigateQuizLevelsManagement` component (create levels, set stakes, toggle active) |
-| Set Questions | `/mobigate-admin/quiz/questions/create` | Question creation page | The `CreateQuizQuestionForm` as the hero of its own page |
-| Manage Questions | `/mobigate-admin/quiz/questions` | Question list + management | Existing `AdminQuizQuestionsManager` (filters, cards, edit, delete) |
-| Monitor All Quiz | `/mobigate-admin/quiz/monitor` | Live quiz monitoring dashboard | Active sessions, player counts, stakes in play, recent results |
+| Sidebar Item | New Route | Content |
+|---|---|---|
+| Set Ad Slot Rate | `/mobigate-admin/adverts/slot-rates` | Configure pricing per ad slot type, duration rates, slot pack discounts |
+| View/Manage All Adverts | `/mobigate-admin/adverts/manage` | Existing `AdminManageAdverts` page (moved route) |
+| Upload/Manage Promotional Ads | `/mobigate-admin/adverts/promotional` | Upload, preview, enable/disable platform promotional banners |
 
-## New Pages to Create
+### New Pages
 
-### 1. Quiz Categories Page (`/mobigate-admin/quiz/categories`)
-- Full-screen mobile page with `MobigateAdminHeader`
-- List all 23 preset categories with toggle switches (active/inactive)
-- "Add Custom Category" form at top (text input + create button)
-- Stats: total categories, active count
-- Each card shows category name, question count in that category, and a delete action for custom ones
+**1. Ad Slot Rate Page (`/mobigate-admin/adverts/slot-rates`)**
+- Mobile-first admin page with `MobigateAdminHeader`
+- Display current slot packs (Entry, Basic, Standard, Business, Enterprise) as editable cards
+- Each card shows: pack name, slot range, discount %, and editable base rate input
+- Duration pricing section: rate multipliers for 7-day, 14-day, 30-day, 60-day, 90-day durations
+- DPD (Display Per Day) pricing tiers
+- All values are mock/editable with state + toast confirmations
 
-### 2. Quiz Levels Page (`/mobigate-admin/quiz/levels`)
-- Wraps existing `MobigateQuizLevelsManagement` in its own page with header
-- Already fully functional -- just needs its own route
+**2. Promotional Ads Page (`/mobigate-admin/adverts/promotional`)**
+- Mobile-first admin page with `MobigateAdminHeader`
+- Upload section: image upload area (mock) with title, link URL, and display position (Top Banner, Feed Insert, Sidebar)
+- Active promotional ads list: cards showing thumbnail, title, status toggle, impressions count, click count
+- Pre-populated with 3-4 mock promotional ads
+- Enable/disable toggles, delete action, edit capability
 
-### 3. Create Questions Page (`/mobigate-admin/quiz/questions/create`)
-- Dedicated page for the `CreateQuizQuestionForm`
-- After successful creation, shows a toast with option to "Create Another" or "View All Questions"
-- Clean, focused single-purpose page
+### Modified Files
 
-### 4. Manage Questions Page (`/mobigate-admin/quiz/questions`)
-- The existing `AdminQuizQuestionsManager` minus the create form (moved to its own page)
-- Filters, search, question cards with edit/delete
-- A prominent "Create New Question" button at top linking to the create page
+**`src/components/AppSidebar.tsx`**
+- Update "Manage Adverts" sub-items to new routes
 
-### 5. Monitor Quiz Page (`/mobigate-admin/quiz/monitor`)
-- New dashboard showing mock live quiz data:
-  - Active quiz sessions count
-  - Total players currently in games
-  - Total stakes in play
-  - Recent completed quizzes (last 10) with results
-  - Breakdown by game mode (Group, Solo, Interactive, Food, Scholarship)
+**`src/App.tsx`**
+- Add 2 new routes, update existing `/admin/manage-adverts` to `/mobigate-admin/adverts/manage`
+- Keep old route as redirect for compatibility
 
-## Changes to Existing Files
+**`src/pages/admin/MobigateAdminDashboard.tsx`**
+- Add an "Adverts" tab (or add advert quick-link cards to existing dashboard) with 3 navigation cards linking to each sub-page, same pattern as the Quiz tab
 
-### Sidebar (`AppSidebar.tsx`)
-- Update each "Manage Quiz" sub-item URL to its dedicated route
+### New Files
+- `src/pages/admin/adverts/AdSlotRatesPage.tsx`
+- `src/pages/admin/adverts/ManageAdvertsPage.tsx` (wrapper that renders existing `AdminManageAdverts` with admin header)
+- `src/pages/admin/adverts/PromotionalAdsPage.tsx`
 
-### Admin Dashboard (`MobigateAdminDashboard.tsx`)
-- Update the Quiz tab's "Open Quiz Management" to show quick-link cards to all 5 sub-pages instead of one button
+### Admin Dashboard Update
+Add advert management cards to the Quiz tab's sibling -- either a new "Adverts" tab or integrate into the existing dashboard. Since the quiz already uses quick-link cards, the adverts section will follow the same card-based navigation pattern with 3 items.
 
-### Routes (`App.tsx`)
-- Replace single `/mobigate-admin/quiz` route with 5 new routes
-- Remove old `MobigateQuizManagementPage`
-
-### `AdminQuizQuestionsManager.tsx`
-- Remove embedded `CreateQuizQuestionForm` (it gets its own page)
-- Add a "Create New Question" navigation button at top
-
-### `MobigateQuizManagement.tsx`
-- Remove (no longer needed -- replaced by individual pages)
-
-### `MobigateQuizManagementPage.tsx`
-- Remove (replaced by individual pages)
-
-## Files Summary
-
-**New files (5 pages):**
-- `src/pages/admin/quiz/QuizCategoriesPage.tsx`
-- `src/pages/admin/quiz/QuizLevelsPage.tsx`
-- `src/pages/admin/quiz/CreateQuestionPage.tsx`
-- `src/pages/admin/quiz/ManageQuestionsPage.tsx`
-- `src/pages/admin/quiz/MonitorQuizPage.tsx`
-
-**Modified files:**
-- `src/components/AppSidebar.tsx` -- 5 unique routes
-- `src/App.tsx` -- register 5 new routes, remove old one
-- `src/pages/admin/MobigateAdminDashboard.tsx` -- Quiz tab shows 5 quick-link cards
-- `src/components/mobigate/AdminQuizQuestionsManager.tsx` -- remove embedded create form, add nav button
-
-**Removed files:**
-- `src/components/mobigate/MobigateQuizManagement.tsx` (no longer needed)
-- `src/pages/admin/MobigateQuizManagementPage.tsx` (replaced by individual pages)
-
+## Technical Notes
+- All data is mock/static (UI template only, no backend)
+- Reuses existing slot pack data from `src/data/slotPacks.ts` for the rate configuration page
+- Mobile-first: h-12 inputs, touch-friendly toggles, full-width cards
+- Toast notifications for all save/update/delete actions
