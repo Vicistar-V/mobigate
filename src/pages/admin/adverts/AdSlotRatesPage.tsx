@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DollarSign, Clock, Save, TrendingUp, Percent } from "lucide-react";
-import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
+import { Header } from "@/components/Header";
 import { SLOT_PACKS } from "@/data/slotPacks";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,9 +44,12 @@ export default function AdSlotRatesPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <MobigateAdminHeader title="Ad Slot Rates" subtitle="Configure pricing & discounts" />
+      <Header />
 
       <ScrollArea className="h-[calc(100vh-80px)]">
+        <div className="px-4 pt-4">
+          <h1 className="text-lg font-bold mb-3">Ad Slot Rates</h1>
+        </div>
         <div className="p-4 space-y-4">
           {/* Base Rate */}
           <Card>

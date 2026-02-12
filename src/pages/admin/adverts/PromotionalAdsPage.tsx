@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Trash2, Edit2, Eye, MousePointer, Image as ImageIcon, Plus } from "lucide-react";
-import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
+import { Header } from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
 
 interface PromoAd {
@@ -83,9 +83,12 @@ export default function PromotionalAdsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <MobigateAdminHeader title="Promotional Ads" subtitle="Upload & manage platform banners" />
+      <Header />
 
       <ScrollArea className="h-[calc(100vh-80px)]">
+        <div className="px-4 pt-4">
+          <h1 className="text-lg font-bold mb-3">Promotional Ads</h1>
+        </div>
         <div className="p-4 space-y-4">
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">

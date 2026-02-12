@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
+import { Header } from "@/components/Header";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import {
   Activity, Users, Wallet, Gamepad2, Trophy,
@@ -38,8 +38,9 @@ const recentResults = [
 export default function MonitorQuizPage() {
   return (
     <div className="min-h-screen bg-background pb-20">
-      <MobigateAdminHeader title="Monitor Quiz" subtitle="Live Quiz Activity" />
+      <Header />
       <div className="p-4">
+        <h1 className="text-lg font-bold mb-3">Monitor Quiz</h1>
         <ScrollArea className="h-[calc(100vh-140px)]">
           <div className="space-y-4 pb-6">
             {/* Live Stats */}
