@@ -19,6 +19,7 @@ import CommunityAdminDashboard from "./pages/CommunityAdminDashboard";
 import ElectionManagementPage from "./pages/admin/ElectionManagementPage";
 import ContentModerationPage from "./pages/admin/ContentModerationPage";
 import MobigateAdminDashboard from "./pages/admin/MobigateAdminDashboard";
+import MobigateQuizManagementPage from "./pages/admin/MobigateQuizManagementPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -62,6 +63,7 @@ const App = () => {
                   <Route path="/community/:communityId/admin/elections" element={<ElectionManagementPage />} />
                   <Route path="/community/:communityId/admin/content" element={<ContentModerationPage />} />
                   <Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
+                  <Route path="/mobigate-admin/quiz" element={<MobigateQuizManagementPage />} />
                   <Route path="/create-community" element={<CreateCommunity />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
