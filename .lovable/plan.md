@@ -1,93 +1,89 @@
 
-# Fix Sidebar Routing and Add Admin Quiz Question Creation
 
-## Part 1: Fix Sidebar Routing
+# Full Restructure: Quiz Management System
 
-### Problem
-The sidebar menu (`AppSidebar.tsx`) routes all items through `/application/*.php` paths. Routes that have been built as React pages should navigate internally, and unbuilt routes should drop the `/application` prefix (just `/*.php`).
+## Current Problem
+All 5 sidebar items under "Manage Quiz" point to the same single page (`/mobigate-admin/quiz`), which bundles everything into one monolithic view with sub-tabs. This defeats the purpose of having distinct sidebar menu items. Each menu item should lead to its own dedicated page.
 
-### Built Routes to Fix
-These sidebar items will be updated from `/application/*.php` to their actual React routes:
+## New Route Structure
 
-| Sidebar Item | Current URL | Corrected URL |
-|---|---|---|
-| My Social Communities | `/community` | `/community` (already correct) |
-| Submit Adverts | `/submit-advert` | `/submit-advert` (already correct) |
-| View/Manage Adverts (user) | `/my-adverts` | `/my-adverts` (already correct) |
-| View/Manage All Adverts (admin) | `/admin/manage-adverts` | `/admin/manage-adverts` (already correct) |
+| Sidebar Item | Route | Page | Content |
+|---|---|---|---|
+| Set Categories | `/mobigate-admin/quiz/categories` | Dedicated category management | Create, enable/disable, delete quiz categories |
+| Set Quiz Levels | `/mobigate-admin/quiz/levels` | Dedicated level management | Existing `MobigateQuizLevelsManagement` component (create levels, set stakes, toggle active) |
+| Set Questions | `/mobigate-admin/quiz/questions/create` | Question creation page | The `CreateQuizQuestionForm` as the hero of its own page |
+| Manage Questions | `/mobigate-admin/quiz/questions` | Question list + management | Existing `AdminQuizQuestionsManager` (filters, cards, edit, delete) |
+| Monitor All Quiz | `/mobigate-admin/quiz/monitor` | Live quiz monitoring dashboard | Active sessions, player counts, stakes in play, recent results |
 
-These are already correctly set. The remaining `/application/*.php` URLs will have the `/application` prefix removed, becoming just `/*.php` (e.g., `/application/buy_coins.php` becomes `/buy_coins.php`).
+## New Pages to Create
 
-### Files Modified
-- `src/components/AppSidebar.tsx` -- Remove `/application` prefix from all `.php` URLs
+### 1. Quiz Categories Page (`/mobigate-admin/quiz/categories`)
+- Full-screen mobile page with `MobigateAdminHeader`
+- List all 23 preset categories with toggle switches (active/inactive)
+- "Add Custom Category" form at top (text input + create button)
+- Stats: total categories, active count
+- Each card shows category name, question count in that category, and a delete action for custom ones
 
----
+### 2. Quiz Levels Page (`/mobigate-admin/quiz/levels`)
+- Wraps existing `MobigateQuizLevelsManagement` in its own page with header
+- Already fully functional -- just needs its own route
 
-## Part 2: Admin Quiz Question Creation and Management
+### 3. Create Questions Page (`/mobigate-admin/quiz/questions/create`)
+- Dedicated page for the `CreateQuizQuestionForm`
+- After successful creation, shows a toast with option to "Create Another" or "View All Questions"
+- Clean, focused single-purpose page
 
-### Problem
-The admin "Quiz" tab only manages quiz levels (category + tier + stake). There is no way for admins to create the actual quiz questions (question text, 8 answer options, correct answer, category assignment).
+### 4. Manage Questions Page (`/mobigate-admin/quiz/questions`)
+- The existing `AdminQuizQuestionsManager` minus the create form (moved to its own page)
+- Filters, search, question cards with edit/delete
+- A prominent "Create New Question" button at top linking to the create page
 
-### Solution
-Add two new sections to the existing Mobigate Admin Quiz tab:
+### 5. Monitor Quiz Page (`/mobigate-admin/quiz/monitor`)
+- New dashboard showing mock live quiz data:
+  - Active quiz sessions count
+  - Total players currently in games
+  - Total stakes in play
+  - Recent completed quizzes (last 10) with results
+  - Breakdown by game mode (Group, Solo, Interactive, Food, Scholarship)
 
-**A. "Create Questions" sub-tab** -- A form for admins to create individual quiz questions:
-- Select Category (from the same 23 preset categories)
-- Select Difficulty (Easy, Medium, Hard, Expert)
-- Question Text (textarea)
-- 8 Answer Options (A through H, text inputs)
-- Select Correct Answer (dropdown A-H)
-- Time Limit (seconds, default 10)
-- Points (default 10)
-- "Create Question" button
+## Changes to Existing Files
 
-**B. "Manage Questions" sub-tab** -- A list view of all created questions:
-- Filter by category
-- Search by question text
-- Each question card shows: question text (truncated), category badge, difficulty badge, correct answer highlighted
-- Edit and Delete actions per question
-- Stats: total questions, questions per category
+### Sidebar (`AppSidebar.tsx`)
+- Update each "Manage Quiz" sub-item URL to its dedicated route
 
-### Data Structure
-A new data file `src/data/mobigateQuizQuestionsData.ts` with:
-- Interface `AdminQuizQuestion` (id, question, options[8], correctAnswerIndex, category, difficulty, timeLimit, points, createdAt)
-- Pre-populated with the existing ~20 questions from `mobigateQuizData.ts` so the system starts with content
-- Export functions for filtering and searching
+### Admin Dashboard (`MobigateAdminDashboard.tsx`)
+- Update the Quiz tab's "Open Quiz Management" to show quick-link cards to all 5 sub-pages instead of one button
 
-### Component Structure
+### Routes (`App.tsx`)
+- Replace single `/mobigate-admin/quiz` route with 5 new routes
+- Remove old `MobigateQuizManagementPage`
 
-**New files:**
-- `src/data/mobigateQuizQuestionsData.ts` -- Question data store with pre-populated questions
-- `src/components/mobigate/CreateQuizQuestionForm.tsx` -- Question creation form
-- `src/components/mobigate/QuizQuestionCard.tsx` -- Individual question display card
-- `src/components/mobigate/QuizQuestionFilters.tsx` -- Filter/search for questions
-- `src/components/mobigate/AdminQuizQuestionsManager.tsx` -- Orchestrator for question CRUD
+### `AdminQuizQuestionsManager.tsx`
+- Remove embedded `CreateQuizQuestionForm` (it gets its own page)
+- Add a "Create New Question" navigation button at top
+
+### `MobigateQuizManagement.tsx`
+- Remove (no longer needed -- replaced by individual pages)
+
+### `MobigateQuizManagementPage.tsx`
+- Remove (replaced by individual pages)
+
+## Files Summary
+
+**New files (5 pages):**
+- `src/pages/admin/quiz/QuizCategoriesPage.tsx`
+- `src/pages/admin/quiz/QuizLevelsPage.tsx`
+- `src/pages/admin/quiz/CreateQuestionPage.tsx`
+- `src/pages/admin/quiz/ManageQuestionsPage.tsx`
+- `src/pages/admin/quiz/MonitorQuizPage.tsx`
 
 **Modified files:**
-- `src/components/AppSidebar.tsx` -- Fix routing (remove `/application` prefix)
-- `src/components/mobigate/MobigateQuizManagement.tsx` -- Add inner tabs: "Levels" (existing) and "Questions" (new)
+- `src/components/AppSidebar.tsx` -- 5 unique routes
+- `src/App.tsx` -- register 5 new routes, remove old one
+- `src/pages/admin/MobigateAdminDashboard.tsx` -- Quiz tab shows 5 quick-link cards
+- `src/components/mobigate/AdminQuizQuestionsManager.tsx` -- remove embedded create form, add nav button
 
-### Admin Quiz Tab Layout (after changes)
-```text
-Quiz Tab
-  |-- Sub-tab: Levels (existing content - create/manage levels)
-  |-- Sub-tab: Questions (new)
-        |-- Create Question Form
-        |-- Stats Summary (total, by category)
-        |-- Filters (category, search)
-        |-- Question Cards List (with edit/delete)
-```
+**Removed files:**
+- `src/components/mobigate/MobigateQuizManagement.tsx` (no longer needed)
+- `src/pages/admin/MobigateQuizManagementPage.tsx` (replaced by individual pages)
 
-### Mobile-First Design
-- All inputs use h-12 and text-base for touch-friendliness
-- Sub-tabs use a simple toggle button group (Levels | Questions)
-- Question cards show truncated question text with "View Full" expand
-- Answer options displayed in a 2-column grid (A-D, E-H) on the creation form
-- ScrollArea for the questions list
-
-## Technical Notes
-- All data is mock/static (UI template, no backend)
-- State managed with useState for CRUD operations
-- Toast notifications for create, edit, and delete actions
-- Pre-populated questions sourced from existing `mobigateQuizData.ts` question arrays
-- The sidebar routing fix applies globally to all `.php` links (about 40+ URLs)
