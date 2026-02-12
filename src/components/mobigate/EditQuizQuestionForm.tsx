@@ -150,7 +150,7 @@ export function EditQuizQuestionForm({ question, onSave, onCancel }: Props) {
           </Button>
           <Button onClick={handleSave} disabled={!isValid} className="h-12 text-base font-semibold">
             <Save className="h-4 w-4 mr-2" />
-            Save Changes
+            Save
           </Button>
         </div>
       </CardContent>
