@@ -117,8 +117,8 @@ export function CreateQuizQuestionForm({ onCreateQuestion }: Props) {
           </div>
         </div>
 
-        {/* Correct Answer - full width */}
-        <div className="space-y-1.5">
+        {/* Correct Answer - full width, centered */}
+        <div className="space-y-1.5 text-center">
           <Label className="text-xs">Correct Answer</Label>
           <Select value={String(correctIndex)} onValueChange={v => setCorrectIndex(Number(v))}>
             <SelectTrigger className="h-12 text-base">
