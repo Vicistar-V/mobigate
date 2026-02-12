@@ -1,62 +1,41 @@
 
-# Restructure: Advert Management System
+# Remove Custom Admin Headers -- Use Main Navigation
 
-## Current State
-The sidebar "Manage Adverts" section has 3 items:
-- **Set Ad Slot Rate** -- points to `/all_settings.php#advert_slot_fee` (not built)
-- **View/Manage All Adverts** -- points to `/admin/manage-adverts` (already built as a full React page)
-- **Upload/Manage Promotional Ads** -- points to `/upload_manage_promotional_ad.php` (not built)
+## Problem
+The quiz management pages and advert management pages each render their own `MobigateAdminHeader` component (a separate purple gradient header with its own back button, bell icon, etc). This creates a disconnected navigation experience -- users lose access to the main sidebar, notifications, messages, and profile dropdown. Every other page in the app uses the standard `Header` + `AppSidebar` combo.
 
-## Plan
-Build the two missing pages as dedicated React routes under `/mobigate-admin/adverts/`, and move the existing manage page to align with the new route structure. Update the sidebar and admin dashboard to match -- same pattern as the quiz restructure.
+## Solution
+Remove `MobigateAdminHeader` from all 8 affected pages and replace with the standard `Header` component, matching how every other page (Index, Community, Profile, etc.) works. The sidebar already has all the admin links, so navigation is handled.
 
-### New Route Structure
+## Pages to Update (8 files)
 
-| Sidebar Item | New Route | Content |
-|---|---|---|
-| Set Ad Slot Rate | `/mobigate-admin/adverts/slot-rates` | Configure pricing per ad slot type, duration rates, slot pack discounts |
-| View/Manage All Adverts | `/mobigate-admin/adverts/manage` | Existing `AdminManageAdverts` page (moved route) |
-| Upload/Manage Promotional Ads | `/mobigate-admin/adverts/promotional` | Upload, preview, enable/disable platform promotional banners |
+### Quiz Pages (5)
+1. `src/pages/admin/quiz/QuizCategoriesPage.tsx` -- remove MobigateAdminHeader, add Header
+2. `src/pages/admin/quiz/QuizLevelsPage.tsx` -- remove MobigateAdminHeader, add Header
+3. `src/pages/admin/quiz/CreateQuestionPage.tsx` -- remove MobigateAdminHeader, add Header
+4. `src/pages/admin/quiz/ManageQuestionsPage.tsx` -- remove MobigateAdminHeader, add Header
+5. `src/pages/admin/quiz/MonitorQuizPage.tsx` -- remove MobigateAdminHeader, add Header
 
-### New Pages
+### Advert Pages (3)
+6. `src/pages/admin/adverts/AdSlotRatesPage.tsx` -- remove MobigateAdminHeader, add Header
+7. `src/pages/admin/adverts/ManageAdvertsPage.tsx` -- already just renders AdminManageAdverts (which has its own Header), no change needed
+8. `src/pages/admin/adverts/PromotionalAdsPage.tsx` -- remove MobigateAdminHeader, add Header
 
-**1. Ad Slot Rate Page (`/mobigate-admin/adverts/slot-rates`)**
-- Mobile-first admin page with `MobigateAdminHeader`
-- Display current slot packs (Entry, Basic, Standard, Business, Enterprise) as editable cards
-- Each card shows: pack name, slot range, discount %, and editable base rate input
-- Duration pricing section: rate multipliers for 7-day, 14-day, 30-day, 60-day, 90-day durations
-- DPD (Display Per Day) pricing tiers
-- All values are mock/editable with state + toast confirmations
+### Admin Dashboard
+9. `src/pages/admin/MobigateAdminDashboard.tsx` -- remove MobigateAdminHeader, add Header
 
-**2. Promotional Ads Page (`/mobigate-admin/adverts/promotional`)**
-- Mobile-first admin page with `MobigateAdminHeader`
-- Upload section: image upload area (mock) with title, link URL, and display position (Top Banner, Feed Insert, Sidebar)
-- Active promotional ads list: cards showing thumbnail, title, status toggle, impressions count, click count
-- Pre-populated with 3-4 mock promotional ads
-- Enable/disable toggles, delete action, edit capability
+## What Changes Per Page
+For each page, the pattern is:
+- Remove `import { MobigateAdminHeader }` line
+- Add `import { Header } from "@/components/Header"`
+- Replace `<MobigateAdminHeader title="..." subtitle="..." />` with `<Header />`
+- Add a simple page title section below the Header (a small heading with the page name so users know where they are)
+- Adjust `ScrollArea` height calc from `100vh-140px` to `100vh-80px` since the Header is a standard 64px
 
-### Modified Files
+## What Stays the Same
+- All page content, forms, cards, and functionality remain untouched
+- The sidebar already contains all admin navigation links
+- Mobile-first layout is preserved
 
-**`src/components/AppSidebar.tsx`**
-- Update "Manage Adverts" sub-items to new routes
-
-**`src/App.tsx`**
-- Add 2 new routes, update existing `/admin/manage-adverts` to `/mobigate-admin/adverts/manage`
-- Keep old route as redirect for compatibility
-
-**`src/pages/admin/MobigateAdminDashboard.tsx`**
-- Add an "Adverts" tab (or add advert quick-link cards to existing dashboard) with 3 navigation cards linking to each sub-page, same pattern as the Quiz tab
-
-### New Files
-- `src/pages/admin/adverts/AdSlotRatesPage.tsx`
-- `src/pages/admin/adverts/ManageAdvertsPage.tsx` (wrapper that renders existing `AdminManageAdverts` with admin header)
-- `src/pages/admin/adverts/PromotionalAdsPage.tsx`
-
-### Admin Dashboard Update
-Add advert management cards to the Quiz tab's sibling -- either a new "Adverts" tab or integrate into the existing dashboard. Since the quiz already uses quick-link cards, the adverts section will follow the same card-based navigation pattern with 3 items.
-
-## Technical Notes
-- All data is mock/static (UI template only, no backend)
-- Reuses existing slot pack data from `src/data/slotPacks.ts` for the rate configuration page
-- Mobile-first: h-12 inputs, touch-friendly toggles, full-width cards
-- Toast notifications for all save/update/delete actions
+## Result
+Every admin page will have the same hamburger menu, logo, notifications, messages, and profile dropdown as the rest of the app. Users can navigate freely between any section using the sidebar without losing context.
