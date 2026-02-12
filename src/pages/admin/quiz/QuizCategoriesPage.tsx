@@ -160,7 +160,7 @@ export default function QuizCategoriesPage() {
                         onCheckedChange={() => handleToggle(cat.id)}
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{cat.name}</p>
+                        <p className="text-sm font-medium break-words">{cat.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-xs text-muted-foreground">{cat.questionCount} questions</span>
                           {cat.isPreset ? (
