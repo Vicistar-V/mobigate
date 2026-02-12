@@ -20,6 +20,7 @@ import {
   Coins,
   Shield,
   Trophy,
+  Megaphone,
 } from "lucide-react";
 import { MobigateAdminHeader } from "@/components/mobigate/MobigateAdminHeader";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
@@ -90,6 +91,10 @@ export default function MobigateAdminDashboard() {
               <TabsTrigger value="quiz" className="text-xs py-2 px-3">
                 <Trophy className="h-4 w-4 mr-1" />
                 Quiz
+              </TabsTrigger>
+              <TabsTrigger value="adverts" className="text-xs py-2 px-3">
+                <Megaphone className="h-4 w-4 mr-1" />
+                Adverts
               </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2 px-3">
                 <Settings className="h-4 w-4 mr-1" />
@@ -444,6 +449,34 @@ export default function MobigateAdminDashboard() {
                   { label: "Create Questions", desc: "Add new quiz questions", icon: "✏️", route: "/mobigate-admin/quiz/questions/create" },
                   { label: "Manage Questions", desc: "Browse & edit questions", icon: "📋", route: "/mobigate-admin/quiz/questions" },
                   { label: "Monitor Quiz", desc: "Live sessions & results", icon: "📡", route: "/mobigate-admin/quiz/monitor" },
+                ].map(item => (
+                  <Card
+                    key={item.route}
+                    className="cursor-pointer hover:bg-accent/30 transition-colors active:scale-[0.98]"
+                    onClick={() => navigate(item.route)}
+                  >
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <span className="text-2xl">{item.icon}</span>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{item.label}</p>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Adverts Tab */}
+          <TabsContent value="adverts" className="mt-0">
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-3 pb-6">
+                {[
+                  { label: "Set Ad Slot Rate", desc: "Configure pricing & discounts", icon: "💰", route: "/mobigate-admin/adverts/slot-rates" },
+                  { label: "Manage All Adverts", desc: "View & manage advertisements", icon: "📋", route: "/mobigate-admin/adverts/manage" },
+                  { label: "Promotional Ads", desc: "Upload & manage banners", icon: "📣", route: "/mobigate-admin/adverts/promotional" },
                 ].map(item => (
                   <Card
                     key={item.route}

@@ -11,6 +11,9 @@ import Profile from "./pages/Profile";
 import SubmitAdvert from "./pages/SubmitAdvert";
 import MyAdverts from "./pages/MyAdverts";
 import AdminManageAdverts from "./pages/AdminManageAdverts";
+import AdSlotRatesPage from "./pages/admin/adverts/AdSlotRatesPage";
+import ManageAdvertsPage from "./pages/admin/adverts/ManageAdvertsPage";
+import PromotionalAdsPage from "./pages/admin/adverts/PromotionalAdsPage";
 import Community from "./pages/Community";
 import CreateCommunity from "./pages/CreateCommunity";
 import CommunityProfile from "./pages/CommunityProfile";
@@ -56,7 +59,10 @@ const App = () => {
                   <Route path="/profile/:userId" element={<Profile />} />
                   <Route path="/submit-advert" element={<SubmitAdvert />} />
                   <Route path="/my-adverts" element={<MyAdverts />} />
-                  <Route path="/admin/manage-adverts" element={<AdminManageAdverts />} />
+                  <Route path="/admin/manage-adverts" element={<Navigate to="/mobigate-admin/adverts/manage" replace />} />
+                  <Route path="/mobigate-admin/adverts/slot-rates" element={<AdSlotRatesPage />} />
+                  <Route path="/mobigate-admin/adverts/manage" element={<ManageAdvertsPage />} />
+                  <Route path="/mobigate-admin/adverts/promotional" element={<PromotionalAdsPage />} />
                   <Route path="/mobi-shop" element={<ServiceUnavailable />} />
                   <Route path="/mobi-circle" element={<ServiceUnavailable />} />
                   <Route path="/biz-catalogue" element={<ServiceUnavailable />} />
