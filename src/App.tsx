@@ -19,7 +19,11 @@ import CommunityAdminDashboard from "./pages/CommunityAdminDashboard";
 import ElectionManagementPage from "./pages/admin/ElectionManagementPage";
 import ContentModerationPage from "./pages/admin/ContentModerationPage";
 import MobigateAdminDashboard from "./pages/admin/MobigateAdminDashboard";
-import MobigateQuizManagementPage from "./pages/admin/MobigateQuizManagementPage";
+import QuizCategoriesPage from "./pages/admin/quiz/QuizCategoriesPage";
+import QuizLevelsPage from "./pages/admin/quiz/QuizLevelsPage";
+import CreateQuestionPage from "./pages/admin/quiz/CreateQuestionPage";
+import ManageQuestionsPage from "./pages/admin/quiz/ManageQuestionsPage";
+import MonitorQuizPage from "./pages/admin/quiz/MonitorQuizPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -63,7 +67,11 @@ const App = () => {
                   <Route path="/community/:communityId/admin/elections" element={<ElectionManagementPage />} />
                   <Route path="/community/:communityId/admin/content" element={<ContentModerationPage />} />
                   <Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
-                  <Route path="/mobigate-admin/quiz" element={<MobigateQuizManagementPage />} />
+                  <Route path="/mobigate-admin/quiz/categories" element={<QuizCategoriesPage />} />
+                  <Route path="/mobigate-admin/quiz/levels" element={<QuizLevelsPage />} />
+                  <Route path="/mobigate-admin/quiz/questions/create" element={<CreateQuestionPage />} />
+                  <Route path="/mobigate-admin/quiz/questions" element={<ManageQuestionsPage />} />
+                  <Route path="/mobigate-admin/quiz/monitor" element={<MonitorQuizPage />} />
                   <Route path="/create-community" element={<CreateCommunity />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />

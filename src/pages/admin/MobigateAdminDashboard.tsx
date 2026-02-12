@@ -437,25 +437,29 @@ export default function MobigateAdminDashboard() {
           {/* Quiz Tab */}
           <TabsContent value="quiz" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="space-y-4 pb-6">
-                <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
-                  <CardContent className="p-6 text-center space-y-4">
-                    <Trophy className="h-12 w-12 text-amber-500 mx-auto" />
-                    <div>
-                      <p className="font-bold text-lg">Quiz Management</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Create questions, manage levels, and configure quiz content
-                      </p>
-                    </div>
-                    <Button 
-                      className="w-full h-12 text-base"
-                      onClick={() => navigate("/mobigate-admin/quiz")}
-                    >
-                      Open Quiz Management
-                      <ChevronRight className="h-5 w-5 ml-2" />
-                    </Button>
-                  </CardContent>
-                </Card>
+              <div className="space-y-3 pb-6">
+                {[
+                  { label: "Set Categories", desc: "Manage quiz categories", icon: "📂", route: "/mobigate-admin/quiz/categories" },
+                  { label: "Set Quiz Levels", desc: "Configure stakes & tiers", icon: "🏆", route: "/mobigate-admin/quiz/levels" },
+                  { label: "Create Questions", desc: "Add new quiz questions", icon: "✏️", route: "/mobigate-admin/quiz/questions/create" },
+                  { label: "Manage Questions", desc: "Browse & edit questions", icon: "📋", route: "/mobigate-admin/quiz/questions" },
+                  { label: "Monitor Quiz", desc: "Live sessions & results", icon: "📡", route: "/mobigate-admin/quiz/monitor" },
+                ].map(item => (
+                  <Card
+                    key={item.route}
+                    className="cursor-pointer hover:bg-accent/30 transition-colors active:scale-[0.98]"
+                    onClick={() => navigate(item.route)}
+                  >
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <span className="text-2xl">{item.icon}</span>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{item.label}</p>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </ScrollArea>
           </TabsContent>
