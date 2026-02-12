@@ -96,29 +96,29 @@ export default function QuizCategoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 overflow-x-hidden">
+    <div className="min-h-screen bg-background pb-20">
       <Header />
-      <div className="px-3 overflow-hidden">
+      <div className="px-3">
         <h1 className="text-lg font-bold mb-3">Quiz Categories</h1>
         <ScrollArea className="h-[calc(100vh-130px)]">
-          <div className="space-y-3 pb-6 pr-1">
+          <div className="space-y-3 pb-6">
             {/* Add Custom Category */}
-            <Card className="overflow-hidden">
+            <Card>
               <CardContent className="p-3">
                 <p className="text-sm font-semibold mb-2 flex items-center gap-2">
                   <PlusCircle className="h-4 w-4 text-primary shrink-0" />
                   Add Custom Category
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2">
                   <Input
                     value={newCategoryName}
                     onChange={e => setNewCategoryName(e.target.value)}
                     placeholder="Enter category name..."
-                    className="h-11 text-sm flex-1 min-w-0"
+                    className="h-11 text-sm w-full"
                     onKeyDown={e => e.key === "Enter" && handleAddCategory()}
                   />
-                  <Button onClick={handleAddCategory} className="h-11 px-3 shrink-0 text-sm" disabled={!newCategoryName.trim()}>
-                    Add
+                  <Button onClick={handleAddCategory} className="h-11 w-full text-sm" disabled={!newCategoryName.trim()}>
+                    Add Category
                   </Button>
                 </div>
               </CardContent>
@@ -126,21 +126,21 @@ export default function QuizCategoriesPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-2">
-              <Card className="overflow-hidden">
+              <Card>
                 <CardContent className="p-2 text-center">
                   <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
                   <p className="text-base font-bold">{categories.length}</p>
                   <p className="text-[10px] text-muted-foreground uppercase">Total</p>
                 </CardContent>
               </Card>
-              <Card className="overflow-hidden">
+              <Card>
                 <CardContent className="p-2 text-center">
-                  <CheckCircle className="h-4 w-4 mx-auto mb-1 text-emerald-500" />
-                  <p className="text-base font-bold text-emerald-600">{activeCount}</p>
+                  <CheckCircle className="h-4 w-4 mx-auto mb-1 text-success" />
+                  <p className="text-base font-bold text-success">{activeCount}</p>
                   <p className="text-[10px] text-muted-foreground uppercase">Active</p>
                 </CardContent>
               </Card>
-              <Card className="overflow-hidden">
+              <Card>
                 <CardContent className="p-2 text-center">
                   <FolderOpen className="h-4 w-4 mx-auto mb-1 text-primary" />
                   <p className="text-base font-bold">{totalQuestions}</p>
