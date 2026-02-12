@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ interface PromoAd {
   impressions: number;
   clicks: number;
   thumbnail: string;
+  bannerUrl?: string;
 }
 
 const initialAds: PromoAd[] = [
@@ -42,12 +43,90 @@ const positionLabels: Record<string, string> = {
   "sidebar": "Sidebar",
 };
 
+function BannerUploadZone({
+  imageUrl,
+  onImageSelect,
+  onRemove,
+}: {
+  imageUrl?: string;
+  onImageSelect: (url: string) => void;
+  onRemove: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    onImageSelect(url);
+  };
+
+  if (imageUrl) {
+    return (
+      <div className="relative w-full rounded-lg overflow-hidden border border-border/40">
+        <img
+          src={imageUrl}
+          alt="Banner preview"
+          className="w-full aspect-[4/1] object-cover"
+        />
+        <div className="absolute top-2 right-2 flex gap-1">
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="h-7 w-7 bg-background/80 backdrop-blur-sm"
+            onClick={() => inputRef.current?.click()}
+          >
+            <Edit2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon"
+            className="h-7 w-7"
+            onClick={onRemove}
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFile}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => inputRef.current?.click()}
+      className="w-full border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center active:bg-muted/30 transition-colors"
+    >
+      <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+      <p className="text-sm text-muted-foreground">Tap to upload banner image</p>
+      <p className="text-xs text-muted-foreground/60 mt-1">1200×300 recommended</p>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+      />
+    </button>
+  );
+}
+
 export default function PromotionalAdsPage() {
   const { toast } = useToast();
   const [ads, setAds] = useState<PromoAd[]>(initialAds);
   const [newTitle, setNewTitle] = useState("");
   const [newLink, setNewLink] = useState("");
   const [newPosition, setNewPosition] = useState<string>("top-banner");
+  const [newBanner, setNewBanner] = useState<string | undefined>();
   const [showUpload, setShowUpload] = useState(false);
 
   // Edit state
@@ -55,6 +134,7 @@ export default function PromotionalAdsPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editLink, setEditLink] = useState("");
   const [editPosition, setEditPosition] = useState<string>("top-banner");
+  const [editBanner, setEditBanner] = useState<string | undefined>();
 
   const handleToggle = (id: string) => {
     setAds(prev => prev.map(ad => ad.id === id ? { ...ad, active: !ad.active } : ad));
@@ -82,11 +162,13 @@ export default function PromotionalAdsPage() {
       impressions: 0,
       clicks: 0,
       thumbnail: "📢",
+      bannerUrl: newBanner,
     };
     setAds(prev => [newAd, ...prev]);
     setNewTitle("");
     setNewLink("");
     setNewPosition("top-banner");
+    setNewBanner(undefined);
     setShowUpload(false);
     toast({ title: "Ad Created", description: `"${newTitle}" has been uploaded and activated.` });
   };
@@ -96,6 +178,7 @@ export default function PromotionalAdsPage() {
     setEditTitle(ad.title);
     setEditLink(ad.linkUrl);
     setEditPosition(ad.position);
+    setEditBanner(ad.bannerUrl);
   };
 
   const handleSaveEdit = () => {
@@ -105,6 +188,7 @@ export default function PromotionalAdsPage() {
       title: editTitle,
       linkUrl: editLink || "#",
       position: editPosition as PromoAd["position"],
+      bannerUrl: editBanner,
     } : ad));
     toast({ title: "Ad Updated", description: `"${editTitle}" has been saved.` });
     setEditingAd(null);
@@ -162,11 +246,11 @@ export default function PromotionalAdsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center">
-                  <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-                  <p className="text-sm text-muted-foreground">Tap to upload banner image</p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">1200×300 recommended</p>
-                </div>
+                <BannerUploadZone
+                  imageUrl={newBanner}
+                  onImageSelect={setNewBanner}
+                  onRemove={() => setNewBanner(undefined)}
+                />
                 <Input
                   placeholder="Ad Title *"
                   value={newTitle}
@@ -190,7 +274,7 @@ export default function PromotionalAdsPage() {
                   </SelectContent>
                 </Select>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setShowUpload(false)} className="flex-1 h-12">Cancel</Button>
+                  <Button variant="outline" onClick={() => { setShowUpload(false); setNewBanner(undefined); }} className="flex-1 h-12">Cancel</Button>
                   <Button onClick={handleUpload} className="flex-1 h-12">
                     <Upload className="h-4 w-4 mr-2" />
                     Upload
@@ -206,11 +290,24 @@ export default function PromotionalAdsPage() {
             {ads.map(ad => (
               <Card key={ad.id} className={`bg-muted/50 border-border/40 ${!ad.active ? "opacity-60" : ""}`}>
                 <CardContent className="p-3 space-y-2">
+                  {/* Banner preview if exists */}
+                  {ad.bannerUrl && (
+                    <div className="w-full rounded-lg overflow-hidden">
+                      <img
+                        src={ad.bannerUrl}
+                        alt={ad.title}
+                        className="w-full aspect-[4/1] object-cover"
+                      />
+                    </div>
+                  )}
+
                   {/* Row 1: Emoji + Title + Toggle */}
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center text-xl shrink-0">
-                      {ad.thumbnail}
-                    </div>
+                    {!ad.bannerUrl && (
+                      <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center text-xl shrink-0">
+                        {ad.thumbnail}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm break-words">{ad.title}</p>
                     </div>
@@ -267,11 +364,11 @@ export default function PromotionalAdsPage() {
             </DrawerClose>
           </DrawerHeader>
           <div className="px-4 pb-6 space-y-4 overflow-y-auto touch-auto max-h-[75vh]">
-            {/* Banner preview */}
-            <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center">
-              <div className="text-3xl mb-1">{editingAd?.thumbnail}</div>
-              <p className="text-xs text-muted-foreground">Tap to change banner image</p>
-            </div>
+            <BannerUploadZone
+              imageUrl={editBanner}
+              onImageSelect={setEditBanner}
+              onRemove={() => setEditBanner(undefined)}
+            />
 
             <div className="space-y-1.5">
               <Label className="text-sm">Ad Title</Label>
