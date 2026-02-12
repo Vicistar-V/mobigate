@@ -87,9 +87,9 @@ const superadminMenuItems = [
     title: "Manage Adverts",
     icon: Megaphone,
     items: [
-      { title: "Set Ad Slot Rate", url: "/all_settings.php#advert_slot_fee" },
-      { title: "View/Manage All Adverts", url: "/admin/manage-adverts" },
-      { title: "Upload/Manage Promotional Ads", url: "/upload_manage_promotional_ad.php" }
+      { title: "Set Ad Slot Rate", url: "/mobigate-admin/adverts/slot-rates" },
+      { title: "View/Manage All Adverts", url: "/mobigate-admin/adverts/manage" },
+      { title: "Upload/Manage Promotional Ads", url: "/mobigate-admin/adverts/promotional" }
     ]
   }
 ];
