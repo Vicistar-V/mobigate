@@ -37,11 +37,11 @@ export function QuizQuestionCard({ question, onEdit, onDelete }: Props) {
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5">
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">{question.category}</Badge>
-          <Badge className={cn("text-[10px] px-1.5 py-0 border-0", difficultyColors[question.difficulty])}>
+          <Badge variant="outline" className="text-xs px-2 py-0.5">{question.category}</Badge>
+          <Badge className={cn("text-xs px-2 py-0.5 border-0", difficultyColors[question.difficulty])}>
             {question.difficulty}
           </Badge>
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+          <Badge variant="secondary" className="text-xs px-2 py-0.5">
             ✓ {ANSWER_LABELS[question.correctAnswerIndex]}
           </Badge>
         </div>

@@ -12,7 +12,7 @@ interface Props {
 
 export function QuizQuestionFilters({ categories, selectedCategory, onCategoryChange, searchQuery, onSearchChange }: Props) {
   return (
-    <div className="flex gap-2">
+    <div className="space-y-2">
       <Select value={selectedCategory} onValueChange={onCategoryChange}>
         <SelectTrigger className="h-12 text-base flex-1">
           <SelectValue placeholder="All Categories" />
