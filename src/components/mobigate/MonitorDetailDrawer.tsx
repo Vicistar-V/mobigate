@@ -1,10 +1,12 @@
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 import type { GameModeData, RecentResultData } from "@/pages/admin/quiz/MonitorQuizPage";
-import { Trophy, Gamepad2 } from "lucide-react";
+import { Trophy, Gamepad2, ExternalLink } from "lucide-react";
 
 export type DrawerData =
   | { type: "mode"; data: GameModeData }
@@ -15,7 +17,8 @@ interface Props {
   onClose: () => void;
 }
 
-function ModeContent({ mode }: { mode: GameModeData }) {
+function ModeContent({ mode, onClose }: { mode: GameModeData; onClose: () => void }) {
+  const navigate = useNavigate();
   const Icon = mode.icon;
   return (
     <div className="space-y-4 px-4 pb-6">
@@ -43,6 +46,16 @@ function ModeContent({ mode }: { mode: GameModeData }) {
           </div>
         ))}
       </div>
+      <Button
+        className="w-full mt-2"
+        onClick={() => {
+          onClose();
+          navigate(`/mobigate-admin/quiz/games-played?mode=${encodeURIComponent(mode.mode)}`);
+        }}
+      >
+        <ExternalLink className="h-4 w-4 mr-2" />
+        View All Games Played
+      </Button>
     </div>
   );
 }
@@ -94,7 +107,7 @@ export function MonitorDetailDrawer({ data, onClose }: Props) {
 
   const title = data.type === "mode" ? "Game Mode Details" : "Result Details";
   const content = data.type === "mode"
-    ? <ModeContent mode={data.data} />
+    ? <ModeContent mode={data.data} onClose={onClose} />
     : <ResultContent result={data.data} />;
 
   if (isMobile) {

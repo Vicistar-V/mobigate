@@ -8,6 +8,8 @@ import { Header } from "@/components/Header";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import { quizGamesPlayedData, type QuizGameRecord } from "@/data/quizGamesPlayedData";
 import { QuizGameDetailDrawer } from "@/components/mobigate/QuizGameDetailDrawer";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { ArrowLeft, Search, Gamepad2, Users, Wallet, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 
@@ -22,6 +24,22 @@ export default function QuizGamesPlayedPage() {
   const [dayFilter, setDayFilter] = useState("");
   const [searchText, setSearchText] = useState("");
   const [selectedGame, setSelectedGame] = useState<QuizGameRecord | null>(null);
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+
+  const openPlayerProfile = (game: QuizGameRecord, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedMember({
+      id: game.id.toString(),
+      name: game.playerName,
+      position: `${game.state}, ${game.country}`,
+      imageUrl: "",
+      tenure: "Player",
+      level: "staff" as const,
+      committee: "staff" as const,
+    });
+    setShowMemberPreview(true);
+  };
 
   const modeGames = useMemo(() => quizGamesPlayedData.filter(g => g.gameMode === mode), [mode]);
 
@@ -145,7 +163,12 @@ export default function QuizGamesPlayedPage() {
             >
               {/* Row 1: Player + Result */}
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-semibold break-words flex-1 min-w-0">{game.playerName}</p>
+                <button
+                  onClick={(e) => openPlayerProfile(game, e)}
+                  className="text-sm font-semibold break-words flex-1 min-w-0 text-left text-primary underline underline-offset-2"
+                >
+                  {game.playerName}
+                </button>
                 {game.result === "Won"
                   ? <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs shrink-0">Won</Badge>
                   : <Badge variant="secondary" className="text-xs shrink-0 text-red-500">Lost</Badge>
@@ -176,6 +199,7 @@ export default function QuizGamesPlayedPage() {
       </div>
 
       <QuizGameDetailDrawer game={selectedGame} onClose={() => setSelectedGame(null)} />
+      <MemberPreviewDialog member={selectedMember} open={showMemberPreview} onOpenChange={setShowMemberPreview} />
     </div>
   );
 }
