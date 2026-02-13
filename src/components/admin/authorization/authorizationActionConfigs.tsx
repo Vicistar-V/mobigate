@@ -307,6 +307,20 @@ export const MODULE_ACTION_CONFIGS: Record<AuthorizationModule, Record<string, A
       iconComponent: Settings,
       iconColorClass: "text-red-600",
     },
+    approve_setting: {
+      title: "Approve Setting Change",
+      description: "Multi-signature authorization to approve a proposed setting change",
+      icon: <Settings className="h-5 w-5 text-green-600" />,
+      iconComponent: Settings,
+      iconColorClass: "text-green-600",
+    },
+    disapprove_setting: {
+      title: "Disapprove Setting Change",
+      description: "Multi-signature authorization to disapprove a proposed setting change",
+      icon: <Settings className="h-5 w-5 text-red-600" />,
+      iconComponent: Settings,
+      iconColorClass: "text-red-600",
+    },
   },
 };
 
