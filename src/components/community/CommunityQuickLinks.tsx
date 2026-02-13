@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Gift, Store, GamepadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobiStoreDialog } from "./MobiStoreDialog";
-import { MobiQuizGameDialog } from "./MobiQuizGameDialog";
+import { QuizSelectionSheet } from "./QuizSelectionSheet";
 
 interface CommunityQuickLinksProps {
   fundRaiserEnabled?: boolean;
@@ -16,10 +16,9 @@ export function CommunityQuickLinks({
   quizGameEnabled = false,
 }: CommunityQuickLinksProps) {
   const [storeOpen, setStoreOpen] = useState(false);
-  const [quizOpen, setQuizOpen] = useState(false);
+  const [quizSelectionOpen, setQuizSelectionOpen] = useState(false);
 
   const handleFundRaiser = () => {
-    // Navigate to fundraiser tab - this will be handled by parent component
     const fundraiserTab = document.querySelector('[data-value="fundraiser-campaigns"]');
     if (fundraiserTab instanceof HTMLElement) {
       fundraiserTab.click();
@@ -31,7 +30,7 @@ export function CommunityQuickLinks({
   };
 
   const handleQuiz = () => {
-    setQuizOpen(true);
+    setQuizSelectionOpen(true);
   };
 
   const links = [
@@ -61,7 +60,7 @@ export function CommunityQuickLinks({
       </div>
 
       <MobiStoreDialog open={storeOpen} onOpenChange={setStoreOpen} />
-      <MobiQuizGameDialog open={quizOpen} onOpenChange={setQuizOpen} />
+      <QuizSelectionSheet open={quizSelectionOpen} onOpenChange={setQuizSelectionOpen} />
     </>
   );
 }
