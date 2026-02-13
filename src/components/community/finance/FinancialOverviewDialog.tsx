@@ -497,7 +497,7 @@ export function FinancialOverviewDialog({
   );
 
   // Shared content component
-  const Content = () => (
+  const content = (
     <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
       <div className="px-2 pb-6 space-y-4">
         {/* Swipeable Wallet Carousel */}
@@ -521,7 +521,7 @@ export function FinancialOverviewDialog({
                 Financial Overview
               </DrawerTitle>
             </DrawerHeader>
-            <Content />
+            {content}
           </DrawerContent>
         </Drawer>
 
@@ -545,7 +545,7 @@ export function FinancialOverviewDialog({
               Financial Overview
             </DialogTitle>
           </DialogHeader>
-          <Content />
+          {content}
         </DialogContent>
       </Dialog>
 

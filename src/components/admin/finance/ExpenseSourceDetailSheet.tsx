@@ -481,7 +481,7 @@ export const ExpenseSourceDetailSheet = ({
     });
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Summary Header - LOCAL CURRENCY PRIMARY */}
       <Card className={`p-4 ${sourceColor} border`}>
@@ -624,7 +624,7 @@ export const ExpenseSourceDetailSheet = ({
             <DrawerTitle>{sourceLabel} Details</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            {Content()}
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -638,7 +638,7 @@ export const ExpenseSourceDetailSheet = ({
           <DialogTitle>{sourceLabel} Details</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          {Content()}
+          {content}
         </ScrollArea>
       </DialogContent>
     </Dialog>

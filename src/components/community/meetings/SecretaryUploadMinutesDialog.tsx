@@ -157,7 +157,7 @@ export const SecretaryUploadMinutesDialog = ({
     onOpenChange(false);
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-6">
       {uploadComplete ? (
         /* Success State */
@@ -358,7 +358,7 @@ export const SecretaryUploadMinutesDialog = ({
             <DrawerTitle>Upload Meeting Minutes</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -372,7 +372,7 @@ export const SecretaryUploadMinutesDialog = ({
           <DialogTitle>Upload Meeting Minutes</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <Content />
+          {content}
         </ScrollArea>
       </DialogContent>
     </Dialog>

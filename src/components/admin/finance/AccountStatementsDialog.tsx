@@ -495,7 +495,7 @@ ${index + 1}. ${txn.description}
               <DialogTitle>Account Statements</DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto p-4">
-              {Content()}
+              {content}
             </div>
           </DialogContent>
         </Dialog>

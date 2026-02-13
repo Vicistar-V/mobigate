@@ -87,7 +87,7 @@ export function RecommendAlternativeDialog({
     onOpenChange(openState);
   };
 
-  const Content = () => (
+  const content = (
     <ScrollArea className="max-h-[70vh] overflow-y-auto touch-auto">
       <div className="space-y-4 p-4">
         {/* Context Card */}
@@ -234,7 +234,7 @@ export function RecommendAlternativeDialog({
               Suggest a different value for this setting
             </DrawerDescription>
           </DrawerHeader>
-          <Content />
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -252,7 +252,7 @@ export function RecommendAlternativeDialog({
             Suggest a different value for this setting
           </DialogDescription>
         </DialogHeader>
-        <Content />
+        {content}
       </DialogContent>
     </Dialog>
   );

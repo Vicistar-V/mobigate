@@ -298,7 +298,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
     />
   );
 
-  const Content = () => (
+  const content = (
     <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-4">
       {step === "select" && renderSelectStep()}
       {step === "details" && selectedMember && renderDetailsStep()}
@@ -318,7 +318,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
               Transfer Funds
             </DrawerTitle>
           </DrawerHeader>
-          <Content />
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -334,7 +334,7 @@ export function WalletTransferDialog({ open, onOpenChange }: WalletTransferDialo
             Transfer Funds
           </DialogTitle>
         </DialogHeader>
-        <Content />
+        {content}
       </DialogContent>
     </Dialog>
   );

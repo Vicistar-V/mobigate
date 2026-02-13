@@ -163,7 +163,7 @@ export function CandidateVotersListSheet({
   // Count remarks
   const remarksCount = voters.filter(v => v.remarks).length;
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Candidate Summary */}
       <Card className={isWinner ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200" : "bg-muted/30"}>
@@ -365,7 +365,7 @@ export function CandidateVotersListSheet({
               </DrawerTitle>
             </DrawerHeader>
             <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto" style={{ maxHeight: 'calc(92vh - 80px)' }}>
-              {Content()}
+              {content}
             </ScrollArea>
           </DrawerContent>
         </Drawer>
@@ -389,7 +389,7 @@ export function CandidateVotersListSheet({
             </SheetTitle>
           </SheetHeader>
           <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-            {Content()}
+            {content}
           </ScrollArea>
         </SheetContent>
       </Sheet>

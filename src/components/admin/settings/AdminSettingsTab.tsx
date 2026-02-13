@@ -205,7 +205,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
     );
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4 w-full box-border">
       {/* Stats Overview */}
       <div className="grid grid-cols-4 gap-1.5 w-full box-border">
@@ -389,7 +389,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
               </DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 overflow-y-auto overflow-x-hidden touch-auto overscroll-contain px-4 py-4 pb-8">
-              {Content()}
+              {content}
             </div>
           </DrawerContent>
         </Drawer>
@@ -420,7 +420,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4">
-            {Content()}
+            {content}
           </ScrollArea>
         </DialogContent>
       </Dialog>

@@ -206,7 +206,7 @@ export function AdminPrimaryManagementSheet({
     }
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4 pb-4">
       {/* Stats - Horizontal inline on mobile */}
       <div className="flex items-center gap-3">
@@ -518,7 +518,7 @@ export function AdminPrimaryManagementSheet({
     );
   };
 
-  const MainContent = selectedOffice ? CandidateDetailContent : Content;
+  const MainContent = selectedOffice ? CandidateDetailContent : () => content;
 
   if (isMobile) {
     return (

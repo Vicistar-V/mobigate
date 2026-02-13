@@ -67,7 +67,7 @@ export function FeeDistributionConfigDialog({
     onOpenChange(false);
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Current Config */}
       <Card className="bg-primary/5 border-primary/20">
@@ -228,7 +228,7 @@ export function FeeDistributionConfigDialog({
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            {Content()}
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -245,7 +245,7 @@ export function FeeDistributionConfigDialog({
           </DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          {Content()}
+          {content}
         </ScrollArea>
       </DialogContent>
     </Dialog>

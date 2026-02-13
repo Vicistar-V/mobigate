@@ -137,7 +137,7 @@ export const MembersFinancialReportsDialog = ({
       (statusFilter === "all" || o.status === statusFilter)
   );
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Search and Filter */}
       <Card className="p-2.5">
@@ -382,7 +382,7 @@ export const MembersFinancialReportsDialog = ({
             <DrawerTitle>Members Financial Reports</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 px-2 py-3 overflow-y-auto touch-auto">
-            {Content()}
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -396,7 +396,7 @@ export const MembersFinancialReportsDialog = ({
           <DialogTitle>Members Financial Reports</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          {Content()}
+          {content}
         </ScrollArea>
       </DialogContent>
     </Dialog>

@@ -55,7 +55,7 @@ export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialo
     }
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {reports.map((report) => (
         <Card key={report.id}>
@@ -175,7 +175,7 @@ export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialo
               <DrawerTitle>Financial Audit Reports</DrawerTitle>
             </DrawerHeader>
             <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-              <Content />
+              {content}
             </ScrollArea>
           </DrawerContent>
         </Drawer>
@@ -211,7 +211,7 @@ export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialo
           </DialogHeader>
 
           <ScrollArea className="flex-1 p-4 sm:p-6">
-            <Content />
+            {content}
           </ScrollArea>
         </DialogContent>
       </Dialog>
