@@ -608,9 +608,9 @@ export function CommunityMainMenu({
               </AccordionContent>
             </AccordionItem>
 
-            {/* Quiz Game - Positioned above FundRaiser */}
+            {/* Quiz Games - Positioned above FundRaiser */}
             <AccordionItem value="quiz-game" className="border rounded-lg px-3 data-[state=open]:bg-muted/30">
-              <AccordionTrigger className="text-base">Quiz Game</AccordionTrigger>
+              <AccordionTrigger className="text-base">Quiz Games</AccordionTrigger>
               <AccordionContent className="space-y-2">
                 <Button
                   variant="ghost"

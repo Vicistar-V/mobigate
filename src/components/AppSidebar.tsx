@@ -75,7 +75,7 @@ const superadminMenuItems = [
       { title: "Like Accounts", url: "/like_account.php" },
       { title: "Penalty Debits Accounts", url: "/penalty_debit_account.php" },
       { title: "Follow Accounts", url: "/follow_account.php" },
-      { title: "Quiz Game Accounts", url: "/account.php" },
+      { title: "Quiz Games Accounts", url: "/account.php" },
       { title: "Transfer Fee Accounts", url: "/transfer_fee_account.php" },
       { title: "e-Library Access Accounts", url: "/elibrary_account.php" },
       { title: "Debit or Credit User", url: "/debit_credit_user.php" },
@@ -111,10 +111,10 @@ const menuItems: MenuItem[] = [{
     { title: "My Financial Summary", url: "#" }
   ]
 }, {
-  title: "Quiz Game",
+  title: "Quiz Games",
   icon: Gamepad2,
   items: [
-    { title: "Play Quiz Game", url: "/take_quiz.php" },
+    { title: "Play Quiz Games", url: "/take_quiz.php" },
     { title: "My Quiz History", url: "/my_quiz_account.php" }
   ]
 }, {
