@@ -1,56 +1,55 @@
 
-# Connect "Play Mobi-Quiz" Button to Actual Quiz Games
 
-## Problem
-The "Play Mobi-Quiz" button on the community profile (via the RotatingCtaButton) only shows a toast message -- it doesn't actually open any quiz. The same issue affects the CommunityQuickLinks "Play Mobi-Quiz Game" link.
+# Fix Missing Features: Raise Campaign Button + All Categories Option
 
-## Solution
-Create a **Quiz Selection Sheet** that appears when the quiz button is tapped, letting the player choose between:
-- **Community Quiz** (blue-themed) -- community-specific questions
-- **Mobi Quiz** (amber/orange-themed) -- platform-wide Mobigate quiz
+## Issue 1: Add "Raise Campaign" Button to FundRaiser Campaigns Tab
 
-In a community context, both options appear. On the Mobigate central environment, only Mobi Quiz would be available.
+**File: `src/components/community/fundraiser/FundRaiserViewCampaignsTab.tsx`**
+- Accept an optional `onRaiseCampaign` prop
+- Add a prominent full-width "Raise Campaign" button between the `FundRaiserHeader` and the "Active Campaigns" section
+- Styled in rose/primary color with a `PlusCircle` icon
+- On tap, calls `onRaiseCampaign` if provided, otherwise uses DOM method to click the "fundraiser-raise" tab trigger
 
-## Changes
+**File: `src/pages/CommunityProfile.tsx`**
+- Pass `onRaiseCampaign` callback to `FundRaiserViewCampaignsTab` that calls `handleTabChange("fundraiser-raise")` to switch to the campaign creation form
 
-### 1. New Component: `src/components/community/QuizSelectionSheet.tsx`
-A mobile-optimized bottom sheet (using Drawer from vaul) with:
-- Two large tappable cards side by side:
-  - **Community Quiz** card (blue accent, community icon) -- opens `CommunityQuizDialog`
-  - **Mobi Quiz** card (amber accent, globe icon) -- opens `MobiQuizGameDialog`  
-- Each card shows a brief description of the quiz type
-- Optional `showCommunityQuiz` prop (defaults to true) -- when false, only Mobi Quiz shows (for Mobigate central use)
+---
 
-### 2. Update: `src/pages/CommunityProfile.tsx`
-- Replace `handleQuizGame` toast with opening the new `QuizSelectionSheet`
-- Add state for the sheet and both quiz dialogs
-- Wire the selection to open the appropriate quiz dialog
+## Issue 2: Add "All Categories" Option to Quiz Levels Create Form
 
-### 3. Update: `src/components/community/CommunityQuickLinks.tsx`
-- Replace the direct `MobiQuizGameDialog` open with the new `QuizSelectionSheet`
-- Player taps "Play Mobi-Quiz Game" link, gets the selection sheet, then picks which quiz type
+**File: `src/components/mobigate/CreateQuizLevelForm.tsx`**
+- Add an "All Categories" option at the top of the category `Select` dropdown
+- When "All Categories" is selected, the form creates a quiz level entry for every preset category (all 23) at once using the specified level, stake, and winning values
+- Update `handleSubmit` to loop through all `PRESET_QUIZ_CATEGORIES` when "All Categories" is chosen, calling `onCreateLevel` for each
+- Show a helper note when "All Categories" is selected: "This will create the level for all 23 categories"
+
+**File: `src/components/mobigate/MobigateQuizLevelsManagement.tsx`**
+- Update `handleCreate` to also accept batch creation (or the form will call it multiple times -- no changes needed if so)
+
+---
 
 ## Technical Details
 
-**QuizSelectionSheet layout (mobile):**
+### Raise Campaign button layout:
 ```text
-+-------------------------------------------+
-|        Choose Your Quiz Game              |
-|                                           |
-|  +----------------+  +----------------+  |
-|  |   Community    |  |    Mobi        |  |
-|  |   Quiz         |  |    Quiz        |  |
-|  |                |  |                |  |
-|  | Community-     |  | Platform-wide  |  |
-|  | specific       |  | Mobigate quiz  |  |
-|  | knowledge      |  | challenges     |  |
-|  +----------------+  +----------------+  |
-+-------------------------------------------+
+[ FundRaiser Header banner        ]
+[ + Raise Campaign                ]  <-- NEW button
+[ Active Campaigns       | Sort v ]
+[ Campaign cards...               ]
 ```
 
-**Files to create:**
-1. `src/components/community/QuizSelectionSheet.tsx`
+### Quiz Levels "All Categories" in dropdown:
+```text
+[ All Categories          ]  <-- NEW, at top
+[ Current Affairs         ]
+[ Politics and Leadership ]
+[ ...                     ]
+[ Custom (Specify)        ]
+```
 
-**Files to edit:**
-1. `src/pages/CommunityProfile.tsx` -- wire handleQuizGame to open the selection sheet
-2. `src/components/community/CommunityQuickLinks.tsx` -- use selection sheet instead of direct MobiQuizGameDialog
+When "All Categories" is selected and submitted, the form creates 1 level entry per category (23 entries total) with the same level tier, stake, and winning amount.
+
+### Files to edit:
+1. `src/components/community/fundraiser/FundRaiserViewCampaignsTab.tsx` -- add Raise Campaign button
+2. `src/pages/CommunityProfile.tsx` -- pass onRaiseCampaign handler
+3. `src/components/mobigate/CreateQuizLevelForm.tsx` -- add "All Categories" option + batch creation logic
