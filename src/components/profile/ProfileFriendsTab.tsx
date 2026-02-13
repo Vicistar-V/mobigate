@@ -19,6 +19,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { AddFriendsDialog } from "@/components/community/AddFriendsDialog";
+import { InviteMembersDialog } from "@/components/community/InviteMembersDialog";
 
 interface ProfileFriendsTabProps {
   userName: string;
@@ -48,6 +50,8 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   const [interactions, setInteractions] = useState<FriendInteractions>({});
   const [giftDialogOpen, setGiftDialogOpen] = useState(false);
   const [selectedUserForGift, setSelectedUserForGift] = useState<{ name: string } | null>(null);
+  const [showAddFriends, setShowAddFriends] = useState(false);
+  const [showInviteMembers, setShowInviteMembers] = useState(false);
 
   const handleAddFriend = (friendId: string, friendName: string) => {
     setFriendStatuses(prev => ({ ...prev, [friendId]: 'pending' }));
@@ -144,10 +148,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
   };
 
   const handleFindFriends = () => {
-    toast({
-      title: "Find Friends",
-      description: "Friend discovery feature coming soon!",
-    });
+    setShowAddFriends(true);
   };
 
   const getFriendButtonConfig = (status: FriendStatus = 'none') => {
@@ -187,7 +188,7 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
           <span className="ml-1.5 sm:ml-2">Find Friend</span>
         </Button>
         <Button
-          onClick={() => toast({ title: "Invite Friend", description: "Invite feature coming soon!" })}
+          onClick={() => setShowInviteMembers(true)}
           className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 px-2 sm:px-4 text-xs sm:text-sm md:text-base shadow-md hover:shadow-lg transition-all"
           size="lg"
         >
@@ -424,6 +425,16 @@ export const ProfileFriendsTab = ({ userName }: ProfileFriendsTabProps) => {
         }}
         recipientName={selectedUserForGift?.name || ""}
         onSendGift={handleGiftSent}
+      />
+
+      <AddFriendsDialog
+        open={showAddFriends}
+        onOpenChange={setShowAddFriends}
+      />
+
+      <InviteMembersDialog
+        open={showInviteMembers}
+        onOpenChange={setShowInviteMembers}
       />
     </div>
   );
