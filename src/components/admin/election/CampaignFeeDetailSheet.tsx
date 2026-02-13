@@ -98,7 +98,7 @@ export function CampaignFeeDetailSheet({
   // Calculate totals
   const totalAmount = filteredCampaigns.reduce((sum, c) => sum + getAmountForType(c, viewType), 0);
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Summary Card */}
       <Card className={`${config.bgColor} ${config.borderColor}`}>
@@ -261,7 +261,7 @@ export function CampaignFeeDetailSheet({
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto" style={{ maxHeight: 'calc(92vh - 80px)' }}>
-            {Content()}
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -278,7 +278,7 @@ export function CampaignFeeDetailSheet({
           </SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-          {Content()}
+          {content}
         </ScrollArea>
       </SheetContent>
     </Sheet>

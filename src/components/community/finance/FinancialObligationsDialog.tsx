@@ -175,7 +175,7 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
     );
   };
 
-  const Content = () => (
+  const content = (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="shrink-0 p-4 border-b">
@@ -320,7 +320,7 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[92vh] h-[92vh] flex flex-col touch-auto overflow-hidden">
-          <Content />
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -329,7 +329,7 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] h-[85vh] p-0 flex flex-col overflow-hidden">
-        <Content />
+        {content}
       </DialogContent>
     </Dialog>
   );

@@ -177,7 +177,7 @@ export function NominateCandidateSheet({
     setSelectedOffice("");
   };
 
-  const Content = () => (
+  const content = (
     <div className="flex flex-col h-full overflow-hidden">
       <ScrollArea className="flex-1 overflow-y-auto touch-auto px-4 pb-6">
         <div className="space-y-5">
@@ -472,7 +472,7 @@ export function NominateCandidateSheet({
               Nominate yourself or another member for an election office
             </DrawerDescription>
           </DrawerHeader>
-          <Content />
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -490,7 +490,7 @@ export function NominateCandidateSheet({
             Nominate yourself or another member for an election office
           </DialogDescription>
         </DialogHeader>
-        <Content />
+        {content}
       </DialogContent>
     </Dialog>
   );

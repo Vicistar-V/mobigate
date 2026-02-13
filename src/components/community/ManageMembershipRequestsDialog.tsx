@@ -832,7 +832,7 @@ export function ManageMembershipRequestsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] h-[85vh] p-0 flex flex-col overflow-hidden">
-        <Content />
+        {content}
       </DialogContent>
     </Dialog>
   );

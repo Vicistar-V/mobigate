@@ -64,7 +64,7 @@ export function RecommendNewSettingDialog({
     onOpenChange(openState);
   };
 
-  const Content = () => (
+  const content = (
     <ScrollArea className="max-h-[70vh] overflow-y-auto touch-auto overscroll-contain">
       <div className="space-y-4 p-4" onClick={(e) => e.stopPropagation()}>
         {/* Current Setting Context */}
@@ -230,7 +230,7 @@ export function RecommendNewSettingDialog({
               Suggest a different value for this setting
             </DrawerDescription>
           </DrawerHeader>
-          <Content />
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -248,7 +248,7 @@ export function RecommendNewSettingDialog({
             Suggest a different value for this setting
           </DialogDescription>
         </DialogHeader>
-        <Content />
+        {content}
       </DialogContent>
     </Dialog>
   );

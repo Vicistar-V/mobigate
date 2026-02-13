@@ -100,7 +100,7 @@ export function SettingsDetailSheet({
     onOpenChange(false);
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4 w-full box-border">
       {/* Current Status Card */}
       <Card className={`w-full box-border overflow-hidden ${isApproved ? 'border-green-500/30 bg-green-500/5' : 'border-amber-500/30 bg-amber-500/5'}`}>
@@ -375,7 +375,7 @@ export function SettingsDetailSheet({
             <DrawerTitle className="text-left break-words pr-6 leading-snug">{setting.name}</DrawerTitle>
           </DrawerHeader>
           <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 py-4 pb-8">
-            <Content />
+            {content}
           </div>
         </DrawerContent>
       </Drawer>
@@ -389,7 +389,7 @@ export function SettingsDetailSheet({
           <DialogTitle className="truncate pr-4">{setting.name}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto pr-4">
-          <Content />
+          {content}
         </div>
       </DialogContent>
     </Dialog>

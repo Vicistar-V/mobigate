@@ -108,7 +108,7 @@ export function NominationDetailsSheet({
     onOpenChange(false);
   };
 
-  const Content = () => (
+  const content = (
     <ScrollArea className="flex-1 overflow-y-auto touch-auto px-4 pb-6">
       <div className="space-y-4">
         {/* Nominee Info Card */}
@@ -311,7 +311,7 @@ export function NominationDetailsSheet({
               Nomination Details
             </DrawerTitle>
           </DrawerHeader>
-          <Content />
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -326,7 +326,7 @@ export function NominationDetailsSheet({
             Nomination Details
           </DialogTitle>
         </DialogHeader>
-        <Content />
+        {content}
       </DialogContent>
     </Dialog>
   );

@@ -167,7 +167,7 @@ export const ManageDuesLeviesDialog = ({
     }
   };
 
-  const Content = () => (
+  const content = (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2 mb-4">
         <TabsTrigger value="list">View All</TabsTrigger>
@@ -465,7 +465,7 @@ export const ManageDuesLeviesDialog = ({
               <DrawerTitle>Manage Dues & Levies</DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 overflow-y-auto overflow-x-hidden touch-auto overscroll-contain px-4 py-4 pb-8">
-              {Content()}
+              {content}
             </div>
           </DrawerContent>
         </Drawer>
@@ -498,7 +498,7 @@ export const ManageDuesLeviesDialog = ({
             <DialogTitle>Manage Dues & Levies</DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4">
-            {Content()}
+            {content}
           </ScrollArea>
         </DialogContent>
       </Dialog>

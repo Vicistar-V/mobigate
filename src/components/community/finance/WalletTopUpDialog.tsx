@@ -408,7 +408,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
     }
   };
 
-  const Content = () => (
+  const content = (
     <>
       {step === "vouchers" && renderVouchersStep()}
       {step === "merchants" && renderMerchantsStep()}
@@ -431,7 +431,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
             </DrawerDescription>
           </DrawerHeader>
           <div className="flex-1 flex flex-col min-h-0">
-            <Content />
+            {content}
           </div>
         </DrawerContent>
       </Drawer>
@@ -451,7 +451,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
           </DialogDescription>
         </DialogHeader>
         <div className="flex-1 flex flex-col min-h-0">
-          <Content />
+          {content}
         </div>
       </DialogContent>
     </Dialog>

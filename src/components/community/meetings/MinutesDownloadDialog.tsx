@@ -152,7 +152,7 @@ export const MinutesDownloadDialog = ({
     }, 1000);
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-6">
       {/* Minutes Info Card */}
       <Card className="p-4 bg-muted/30">
@@ -324,7 +324,7 @@ export const MinutesDownloadDialog = ({
               <DrawerTitle>Download Minutes</DrawerTitle>
             </DrawerHeader>
             <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-              <Content />
+              {content}
             </ScrollArea>
           </DrawerContent>
         </Drawer>
@@ -373,7 +373,7 @@ export const MinutesDownloadDialog = ({
             <DialogTitle>Download Minutes</DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4">
-            <Content />
+            {content}
           </ScrollArea>
         </DialogContent>
       </Dialog>

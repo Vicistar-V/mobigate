@@ -38,7 +38,7 @@ export function CampaignRoyaltyDetailSheet({
     opt => campaign.audienceTargets.includes(opt.value)
   );
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Candidate Info */}
       <Card className="bg-primary/5 border-primary/20">
@@ -176,7 +176,7 @@ export function CampaignRoyaltyDetailSheet({
             </DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            {Content()}
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -193,7 +193,7 @@ export function CampaignRoyaltyDetailSheet({
           </SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-100px)] pr-4">
-          {Content()}
+          {content}
         </ScrollArea>
       </SheetContent>
     </Sheet>

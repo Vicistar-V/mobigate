@@ -297,7 +297,7 @@ export const FloatingFundsDetailSheet = ({
     });
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Summary Header */}
       <Card className={`p-4 ${sourceColor} border`}>
@@ -442,7 +442,7 @@ export const FloatingFundsDetailSheet = ({
             <DrawerTitle>{sourceLabel} Details</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            {Content()}
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -456,7 +456,7 @@ export const FloatingFundsDetailSheet = ({
           <DialogTitle>{sourceLabel} Details</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          {Content()}
+          {content}
         </ScrollArea>
       </DialogContent>
     </Dialog>
