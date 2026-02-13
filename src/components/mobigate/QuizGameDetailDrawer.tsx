@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import type { QuizGameRecord } from "@/data/quizGamesPlayedData";
+import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { format } from "date-fns";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +15,9 @@ interface Props {
 }
 
 export function QuizGameDetailDrawer({ game, onClose }: Props) {
+  const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
+
   if (!game) return null;
 
   const netPosition = game.prizeWon - game.stakePaid;
@@ -20,6 +26,19 @@ export function QuizGameDetailDrawer({ game, onClose }: Props) {
   const copyGameId = () => {
     navigator.clipboard.writeText(game.gameId);
     toast.success("Game ID copied");
+  };
+
+  const openPlayerProfile = () => {
+    setSelectedMember({
+      id: game.id.toString(),
+      name: game.playerName,
+      position: `${game.state}, ${game.country}`,
+      imageUrl: "",
+      tenure: "Player",
+      level: "staff" as const,
+      committee: "staff" as const,
+    });
+    setShowMemberPreview(true);
   };
 
   const rows: { label: string; value: React.ReactNode }[] = [
@@ -32,7 +51,7 @@ export function QuizGameDetailDrawer({ game, onClose }: Props) {
         </button>
       ),
     },
-    { label: "Player Name", value: game.playerName },
+    { label: "Player Name", value: <button onClick={openPlayerProfile} className="text-primary underline underline-offset-2 font-medium">{game.playerName}</button> },
     { label: "State", value: game.state },
     { label: "Country", value: game.country },
     { label: "Game Mode", value: game.gameMode },
@@ -60,6 +79,7 @@ export function QuizGameDetailDrawer({ game, onClose }: Props) {
   ];
 
   return (
+    <>
     <Drawer open={!!game} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent className="max-h-[92vh]">
         <div className="overflow-y-auto touch-auto px-4 pb-6">
@@ -77,5 +97,7 @@ export function QuizGameDetailDrawer({ game, onClose }: Props) {
         </div>
       </DrawerContent>
     </Drawer>
+    <MemberPreviewDialog member={selectedMember} open={showMemberPreview} onOpenChange={setShowMemberPreview} />
+    </>
   );
 }

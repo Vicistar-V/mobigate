@@ -90,7 +90,7 @@ export default function MonitorQuizPage() {
               <button
                 key={m.mode}
                 className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg w-full text-left active:bg-muted/80 transition-colors border border-border/40"
-                onClick={() => navigate(`/mobigate-admin/quiz/games-played?mode=${encodeURIComponent(m.mode)}`)}
+                onClick={() => setDrawerData({ type: "mode", data: m })}
               >
                 <m.icon className={`h-5 w-5 shrink-0 ${m.color}`} />
                 <div className="flex-1 min-w-0">
