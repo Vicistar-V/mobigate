@@ -639,7 +639,7 @@ export function ManageMembershipRequestsDialog({
     </Dialog>
   );
 
-  const Content = () => (
+  const content = (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="shrink-0 p-4 border-b space-y-4">
@@ -823,7 +823,7 @@ export function ManageMembershipRequestsDialog({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[92vh] h-[92vh] flex flex-col touch-auto overflow-hidden">
-          <Content />
+          {content}
         </DrawerContent>
       </Drawer>
     );
