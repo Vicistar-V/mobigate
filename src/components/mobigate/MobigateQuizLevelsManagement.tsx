@@ -11,6 +11,7 @@ import { DEFAULT_QUIZ_LEVELS, type QuizLevelEntry } from "@/data/mobigateQuizLev
 import { CreateQuizLevelForm } from "./CreateQuizLevelForm";
 import { QuizLevelCard } from "./QuizLevelCard";
 import { QuizLevelFilters } from "./QuizLevelFilters";
+import { EditQuizLevelDrawer } from "./EditQuizLevelDrawer";
 
 export function MobigateQuizLevelsManagement() {
   const { toast } = useToast();
@@ -18,6 +19,7 @@ export function MobigateQuizLevelsManagement() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [editTarget, setEditTarget] = useState<string | null>(null);
 
   const allCategories = useMemo(() => [...new Set(levels.map(l => l.category))].sort(), [levels]);
 
@@ -45,6 +47,16 @@ export function MobigateQuizLevelsManagement() {
     toast({ title: entry?.isActive ? "Level Deactivated" : "Level Activated", description: entry?.levelName });
   };
 
+  const handleEdit = (id: string, data: { category: string; stakeAmount: number; winningAmount: number; isActive: boolean }) => {
+    setLevels(prev => prev.map(l => (l.id === id ? { ...l, ...data } : l)));
+    const entry = levels.find(l => l.id === id);
+    toast({ title: "Quiz Level Updated", description: entry?.levelName });
+  };
+
+  const handleDeleteFromDrawer = (id: string) => {
+    setDeleteTarget(id);
+  };
+
   const confirmDelete = () => {
     if (!deleteTarget) return;
     const entry = levels.find(l => l.id === deleteTarget);
@@ -52,6 +64,8 @@ export function MobigateQuizLevelsManagement() {
     setDeleteTarget(null);
     toast({ title: "Quiz Level Deleted", description: entry?.levelName, variant: "destructive" });
   };
+
+  const editEntry = levels.find(l => l.id === editTarget) || null;
 
   return (
     <ScrollArea className="h-[calc(100vh-260px)]">
@@ -98,10 +112,18 @@ export function MobigateQuizLevelsManagement() {
             </Card>
           ) : (
             filteredLevels.map(entry => (
-              <QuizLevelCard key={entry.id} entry={entry} onToggleStatus={handleToggleStatus} onDelete={id => setDeleteTarget(id)} />
+              <QuizLevelCard key={entry.id} entry={entry} onToggleStatus={handleToggleStatus} onEdit={id => setEditTarget(id)} />
             ))
           )}
         </div>
+
+        <EditQuizLevelDrawer
+          open={!!editTarget}
+          onOpenChange={(open) => !open && setEditTarget(null)}
+          entry={editEntry}
+          onSave={handleEdit}
+          onDelete={handleDeleteFromDrawer}
+        />
 
         <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
           <AlertDialogContent>
