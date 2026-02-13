@@ -241,7 +241,7 @@ ${index + 1}. ${txn.description}
     }
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
@@ -484,7 +484,7 @@ ${index + 1}. ${txn.description}
               <DrawerTitle>Account Statements</DrawerTitle>
             </DrawerHeader>
             <div className="flex-1 overflow-y-auto touch-auto overscroll-contain p-4">
-              {Content()}
+              {content}
             </div>
           </DrawerContent>
         </Drawer>

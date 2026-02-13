@@ -97,7 +97,7 @@ export const AdminFinancialAuditDialog = ({
     return display.combined;
   };
 
-  const Content = () => {
+  const content = (() => {
     if (!currentAudit) {
       return (
         <Card className="p-8 text-center">
@@ -440,7 +440,7 @@ export const AdminFinancialAuditDialog = ({
         </Card>
       </div>
     );
-  };
+  })();
 
   if (isMobile) {
     return (
@@ -452,7 +452,7 @@ export const AdminFinancialAuditDialog = ({
             </DrawerHeader>
             <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
               <div className="px-2 pb-6">
-                {Content()}
+                {content}
               </div>
             </div>
           </DrawerContent>
@@ -505,7 +505,7 @@ export const AdminFinancialAuditDialog = ({
             <DialogTitle>Financial Audit</DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4">
-            {Content()}
+            {content}
           </ScrollArea>
         </DialogContent>
       </Dialog>

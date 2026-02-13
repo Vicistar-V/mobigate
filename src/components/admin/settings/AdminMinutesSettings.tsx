@@ -67,7 +67,7 @@ export const AdminMinutesSettings = ({
     onOpenChange(false);
   };
 
-  const Content = () => (
+  const content = (
     <div className="space-y-6">
       {/* Current Settings Overview */}
       <Card className="p-4 bg-muted/30">
@@ -238,7 +238,7 @@ export const AdminMinutesSettings = ({
             <DrawerTitle>Minutes Settings</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-auto">
-            <Content />
+            {content}
           </ScrollArea>
         </DrawerContent>
       </Drawer>
@@ -252,7 +252,7 @@ export const AdminMinutesSettings = ({
           <DialogTitle>Minutes Settings</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-1 pr-4">
-          <Content />
+          {content}
         </ScrollArea>
       </DialogContent>
     </Dialog>
