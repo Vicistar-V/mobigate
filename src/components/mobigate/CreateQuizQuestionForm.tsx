@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle } from "lucide-react";
-import { PRESET_QUIZ_CATEGORIES } from "@/data/mobigateQuizLevelsData";
+import { PRESET_QUIZ_CATEGORIES, PRESET_LEVEL_TIERS } from "@/data/mobigateQuizLevelsData";
 import { ANSWER_LABELS, type QuizDifficulty, type AdminQuizQuestion } from "@/data/mobigateQuizQuestionsData";
 
 interface Props {
@@ -21,6 +22,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion }: Props) {
   const [questionText, setQuestionText] = useState("");
   const [options, setOptions] = useState<string[]>(Array(8).fill(""));
   const [correctIndex, setCorrectIndex] = useState<number>(0);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>(["All Levels"]);
   const [timeLimit, setTimeLimit] = useState(10);
   const [points, setPoints] = useState(10);
 
@@ -86,6 +88,50 @@ export function CreateQuizQuestionForm({ onCreateQuestion }: Props) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Apply to Level - multi-select checkboxes */}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Apply to Level</Label>
+          <div className="border border-border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto touch-auto">
+            {/* All Levels option */}
+            <label className="flex items-center gap-2.5 py-1 cursor-pointer">
+              <Checkbox
+                checked={selectedLevels.includes("All Levels")}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setSelectedLevels(["All Levels"]);
+                  } else {
+                    setSelectedLevels([]);
+                  }
+                }}
+              />
+              <span className="text-sm font-medium">All Levels</span>
+            </label>
+            <div className="border-t border-border/40" />
+            {PRESET_LEVEL_TIERS.map((tier) => (
+              <label key={tier.name} className="flex items-center gap-2.5 py-1 cursor-pointer">
+                <Checkbox
+                  checked={selectedLevels.includes(tier.name)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedLevels(prev => prev.filter(l => l !== "All Levels").concat(tier.name));
+                    } else {
+                      setSelectedLevels(prev => prev.filter(l => l !== tier.name));
+                    }
+                  }}
+                />
+                <span className="text-sm">{tier.name}</span>
+              </label>
+            ))}
+          </div>
+          <p className="text-[10px] text-muted-foreground">
+            {selectedLevels.includes("All Levels")
+              ? "Universal — this question will feature in all Quiz Levels."
+              : selectedLevels.length > 0
+                ? `Applies to ${selectedLevels.length} level${selectedLevels.length > 1 ? "s" : ""} only.`
+                : "Select at least one level."}
+          </p>
         </div>
 
         {/* Question */}
