@@ -2,21 +2,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Trash2, Coins } from "lucide-react";
+import { Edit2, Coins } from "lucide-react";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import type { QuizLevelEntry } from "@/data/mobigateQuizLevelsData";
 
 interface QuizLevelCardProps {
   entry: QuizLevelEntry;
   onToggleStatus: (id: string) => void;
-  onDelete: (id: string) => void;
+  onEdit: (id: string) => void;
 }
 
-export function QuizLevelCard({ entry, onToggleStatus, onDelete }: QuizLevelCardProps) {
+export function QuizLevelCard({ entry, onToggleStatus, onEdit }: QuizLevelCardProps) {
   return (
     <Card className={!entry.isActive ? "opacity-60" : ""}>
       <CardContent className="p-3 space-y-2">
-        {/* Row 1: Switch + Level Name + Delete */}
+        {/* Row 1: Switch + Level Name + Edit */}
         <div className="flex items-center gap-2">
           <Switch
             checked={entry.isActive}
@@ -27,10 +27,10 @@ export function QuizLevelCard({ entry, onToggleStatus, onDelete }: QuizLevelCard
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => onDelete(entry.id)}
+            className="h-8 w-8 shrink-0 text-primary hover:text-primary hover:bg-primary/10"
+            onClick={() => onEdit(entry.id)}
           >
-            <Trash2 className="h-4 w-4" />
+            <Edit2 className="h-4 w-4" />
           </Button>
         </div>
 
