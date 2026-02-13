@@ -27,6 +27,7 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
   const [winningAmount, setWinningAmount] = useState("");
   const [isActive, setIsActive] = useState(true);
 
+  const isAllCategories = selectedCategory === "__all__";
   const isCustomCategory = selectedCategory === "__custom__";
   const isCustomLevel = selectedLevel === "__custom__";
 
@@ -48,9 +49,16 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
     const stake = parseInt(stakeAmount);
     const winning = parseInt(winningAmount);
 
-    if (!category || !levelName || isNaN(stake) || isNaN(winning) || stake <= 0 || winning <= 0) return;
+    if ((!category && !isAllCategories) || !levelName || isNaN(stake) || isNaN(winning) || stake <= 0 || winning <= 0) return;
 
-    onCreateLevel({ category, levelName, stakeAmount: stake, winningAmount: winning, isActive });
+    if (isAllCategories) {
+      // Batch create for all preset categories
+      PRESET_QUIZ_CATEGORIES.forEach((cat) => {
+        onCreateLevel({ category: cat, levelName, stakeAmount: stake, winningAmount: winning, isActive });
+      });
+    } else {
+      onCreateLevel({ category, levelName, stakeAmount: stake, winningAmount: winning, isActive });
+    }
 
     // Reset
     setSelectedCategory("");
@@ -63,7 +71,7 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
   };
 
   const canSubmit = () => {
-    const category = isCustomCategory ? customCategory.trim() : selectedCategory;
+    const category = isAllCategories ? "__all__" : (isCustomCategory ? customCategory.trim() : selectedCategory);
     const levelName = isCustomLevel ? customLevel.trim() : selectedLevel;
     const stake = parseInt(stakeAmount);
     const winning = parseInt(winningAmount);
@@ -87,6 +95,9 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
               <SelectValue placeholder="Choose a category" />
             </SelectTrigger>
             <SelectContent className="max-h-60">
+              <SelectItem value="__all__" className="text-sm font-bold text-emerald-600">
+                ✅ All Categories (23)
+              </SelectItem>
               {PRESET_QUIZ_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat} className="text-sm">
                   {cat}
@@ -97,6 +108,11 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
               </SelectItem>
             </SelectContent>
           </Select>
+          {isAllCategories && (
+            <div className="flex items-start gap-1.5 text-xs text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 p-2 rounded-md">
+              <span>This will create the selected level for all 23 preset categories at once.</span>
+            </div>
+          )}
           {isCustomCategory && (
             <Input
               placeholder="Type custom category name"
