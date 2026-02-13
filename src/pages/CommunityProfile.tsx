@@ -862,7 +862,7 @@ const CommunityProfile = () => {
 
           {activeTab === "fundraiser-campaigns" && (
             <div className="mt-6">
-              <FundRaiserViewCampaignsTab />
+              <FundRaiserViewCampaignsTab onRaiseCampaign={() => handleTabChange("fundraiser-raise")} />
             </div>
           )}
 
