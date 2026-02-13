@@ -1,55 +1,48 @@
 
 
-# Fix Missing Features: Raise Campaign Button + All Categories Option
+# Integrate Multi-Signature Authorization into Community Settings Approve/Disapprove
 
-## Issue 1: Add "Raise Campaign" Button to FundRaiser Campaigns Tab
+## Problem
+The Approve and Disapprove buttons on pending admin setting proposals (in `CommunitySettingsSheet`) currently work as simple one-click votes. Per the governance rules, these actions should require **multi-signature authorization** (3 signatures: President + Secretary + Legal Adviser) before a vote is officially recorded.
 
-**File: `src/components/community/fundraiser/FundRaiserViewCampaignsTab.tsx`**
-- Accept an optional `onRaiseCampaign` prop
-- Add a prominent full-width "Raise Campaign" button between the `FundRaiserHeader` and the "Active Campaigns" section
-- Styled in rose/primary color with a `PlusCircle` icon
-- On tap, calls `onRaiseCampaign` if provided, otherwise uses DOM method to click the "fundraiser-raise" tab trigger
+The "Settings Pending Approval" banner on the Community page is already connected and opens the settings sheet correctly.
 
-**File: `src/pages/CommunityProfile.tsx`**
-- Pass `onRaiseCampaign` callback to `FundRaiserViewCampaignsTab` that calls `handleTabChange("fundraiser-raise")` to switch to the campaign creation form
+## Solution
+Wire the Approve/Disapprove buttons in `AdminSettingProposalCard` to trigger the `ModuleAuthorizationDrawer` with the `settings` module before the vote is recorded. This uses the existing multi-sig infrastructure that's already configured for the settings module.
 
----
+## Changes
 
-## Issue 2: Add "All Categories" Option to Quiz Levels Create Form
+### 1. Update `src/components/community/settings/AdminSettingProposalCard.tsx`
+- Import `ModuleAuthorizationDrawer` and `getActionConfig`, `renderActionDetails`
+- Add state for `authDrawerOpen` and `pendingVote` (to track whether user tapped approve or disapprove)
+- When user taps Approve or Disapprove, store the vote type and open the `ModuleAuthorizationDrawer` instead of directly voting
+- Add a new action config entry: use `settings` module with a contextual action key (e.g., `"change_privacy"` or a new `"approve_setting"` / `"disapprove_setting"`)
+- On successful multi-sig authorization callback, execute the actual `onVote()` with the pending vote
+- Pass `actionDetails` showing the setting name, current value, proposed value, and the vote direction
 
-**File: `src/components/mobigate/CreateQuizLevelForm.tsx`**
-- Add an "All Categories" option at the top of the category `Select` dropdown
-- When "All Categories" is selected, the form creates a quiz level entry for every preset category (all 23) at once using the specified level, stake, and winning values
-- Update `handleSubmit` to loop through all `PRESET_QUIZ_CATEGORIES` when "All Categories" is chosen, calling `onCreateLevel` for each
-- Show a helper note when "All Categories" is selected: "This will create the level for all 23 categories"
-
-**File: `src/components/mobigate/MobigateQuizLevelsManagement.tsx`**
-- Update `handleCreate` to also accept batch creation (or the form will call it multiple times -- no changes needed if so)
-
----
+### 2. Add action configs in `src/components/admin/authorization/authorizationActionConfigs.tsx`
+- Add two new entries under the `settings` module:
+  - `approve_setting`: "Approve Setting Change" -- for approving a proposed setting
+  - `disapprove_setting`: "Disapprove Setting Change" -- for disapproving a proposed setting
 
 ## Technical Details
 
-### Raise Campaign button layout:
+**Flow:**
 ```text
-[ FundRaiser Header banner        ]
-[ + Raise Campaign                ]  <-- NEW button
-[ Active Campaigns       | Sort v ]
-[ Campaign cards...               ]
+User taps [Approve] or [Disapprove]
+  --> Store vote type in state
+  --> Open ModuleAuthorizationDrawer (module="settings", action="approve_setting" or "disapprove_setting")
+  --> Admin signatories enter their passwords (3 required: President + Secretary + Legal Adviser)
+  --> On authorization success --> call onVote(proposalId, voteType)
+  --> Show confirmation toast
 ```
 
-### Quiz Levels "All Categories" in dropdown:
-```text
-[ All Categories          ]  <-- NEW, at top
-[ Current Affairs         ]
-[ Politics and Leadership ]
-[ ...                     ]
-[ Custom (Specify)        ]
-```
+**Action details rendered in the drawer will show:**
+- Setting name (e.g., "Community Finances Visibility")
+- Current value vs Proposed value
+- Vote direction (Approve or Disapprove)
 
-When "All Categories" is selected and submitted, the form creates 1 level entry per category (23 entries total) with the same level tier, stake, and winning amount.
+**Files to edit:**
+1. `src/components/admin/authorization/authorizationActionConfigs.tsx` -- add `approve_setting` and `disapprove_setting` configs
+2. `src/components/community/settings/AdminSettingProposalCard.tsx` -- wire buttons to open `ModuleAuthorizationDrawer`, execute vote on authorization success
 
-### Files to edit:
-1. `src/components/community/fundraiser/FundRaiserViewCampaignsTab.tsx` -- add Raise Campaign button
-2. `src/pages/CommunityProfile.tsx` -- pass onRaiseCampaign handler
-3. `src/components/mobigate/CreateQuizLevelForm.tsx` -- add "All Categories" option + batch creation logic
