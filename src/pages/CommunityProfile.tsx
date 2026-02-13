@@ -84,6 +84,7 @@ import { ArticleEditorDialog } from "@/components/community/ArticleEditorDialog"
 import { MediaUploadDialog } from "@/components/community/MediaUploadDialog";
 import { CommunityGallerySection } from "@/components/community/CommunityGallerySection";
 import { CommunityNotificationsSheet } from "@/components/community/CommunityNotificationsSheet";
+import { QuizSelectionSheet } from "@/components/community/QuizSelectionSheet";
 import { communityNotifications } from "@/data/communityNotificationsData";
 import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
 
@@ -126,6 +127,7 @@ const CommunityProfile = () => {
   const [showMembershipApplication, setShowMembershipApplication] = useState(false);
   const [showExitCommunity, setShowExitCommunity] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showQuizSelection, setShowQuizSelection] = useState(false);
   const { toast } = useToast();
   
   // Calculate unread notifications count
@@ -440,11 +442,9 @@ const CommunityProfile = () => {
     handleTabChange("fundraiser-campaigns");
   };
 
+
   const handleQuizGame = () => {
-    toast({
-      title: "Mobi-Quiz Game",
-      description: "Opening community quiz game...",
-    });
+    setShowQuizSelection(true);
   };
 
   const handleMobiCircle = () => {
@@ -1166,6 +1166,12 @@ const CommunityProfile = () => {
         open={showNotifications}
         onOpenChange={setShowNotifications}
         communityId={communityId || "1"}
+      />
+
+      {/* Quiz Selection Sheet */}
+      <QuizSelectionSheet
+        open={showQuizSelection}
+        onOpenChange={setShowQuizSelection}
       />
     </div>
   );
