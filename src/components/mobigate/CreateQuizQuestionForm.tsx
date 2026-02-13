@@ -40,6 +40,9 @@ export function CreateQuizQuestionForm({ onCreateQuestion }: Props) {
       difficulty,
       timeLimit,
       points,
+      status: "active",
+      timesAsked: 0,
+      freezeCount: 0,
     });
     // Reset
     setQuestionText("");

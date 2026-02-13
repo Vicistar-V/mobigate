@@ -1,6 +1,7 @@
 import { PRESET_QUIZ_CATEGORIES } from "./mobigateQuizLevelsData";
 
 export type QuizDifficulty = "Easy" | "Medium" | "Hard" | "Expert";
+export type QuizQuestionStatus = "active" | "frozen" | "suspended";
 
 export interface AdminQuizQuestion {
   id: string;
@@ -12,6 +13,10 @@ export interface AdminQuizQuestion {
   timeLimit: number;
   points: number;
   createdAt: string;
+  status: QuizQuestionStatus;
+  timesAsked: number;
+  freezeCount: number;
+  suspendedUntil?: string;
 }
 
 export const ANSWER_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
@@ -28,6 +33,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:00:00Z",
+    status: "active",
+    timesAsked: 1,
+    freezeCount: 0,
   },
   {
     id: "aq-2",
@@ -39,6 +47,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:01:00Z",
+    status: "frozen",
+    timesAsked: 3,
+    freezeCount: 1,
   },
   {
     id: "aq-3",
@@ -50,6 +61,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:02:00Z",
+    status: "active",
+    timesAsked: 2,
+    freezeCount: 0,
   },
   {
     id: "aq-4",
@@ -61,6 +75,10 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:03:00Z",
+    status: "suspended",
+    timesAsked: 2,
+    freezeCount: 0,
+    suspendedUntil: "2026-03-01T00:00:00Z",
   },
   {
     id: "aq-5",
@@ -72,6 +90,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:04:00Z",
+    status: "active",
+    timesAsked: 0,
+    freezeCount: 0,
   },
   {
     id: "aq-6",
@@ -83,6 +104,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:05:00Z",
+    status: "active",
+    timesAsked: 1,
+    freezeCount: 0,
   },
   {
     id: "aq-7",
@@ -94,6 +118,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:06:00Z",
+    status: "frozen",
+    timesAsked: 3,
+    freezeCount: 2,
   },
   {
     id: "aq-8",
@@ -105,6 +132,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:07:00Z",
+    status: "active",
+    timesAsked: 2,
+    freezeCount: 1,
   },
   {
     id: "aq-9",
@@ -116,6 +146,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:08:00Z",
+    status: "active",
+    timesAsked: 0,
+    freezeCount: 0,
   },
   {
     id: "aq-10",
@@ -127,6 +160,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:09:00Z",
+    status: "active",
+    timesAsked: 1,
+    freezeCount: 0,
   },
   {
     id: "aq-11",
@@ -138,6 +174,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:10:00Z",
+    status: "active",
+    timesAsked: 0,
+    freezeCount: 0,
   },
   {
     id: "aq-12",
@@ -149,6 +188,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:11:00Z",
+    status: "active",
+    timesAsked: 2,
+    freezeCount: 0,
   },
   {
     id: "aq-13",
@@ -160,6 +202,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:12:00Z",
+    status: "suspended",
+    timesAsked: 1,
+    freezeCount: 0,
   },
   {
     id: "aq-14",
@@ -171,6 +216,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:13:00Z",
+    status: "active",
+    timesAsked: 1,
+    freezeCount: 0,
   },
   {
     id: "aq-15",
@@ -182,6 +230,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:14:00Z",
+    status: "active",
+    timesAsked: 0,
+    freezeCount: 0,
   },
   {
     id: "aq-16",
@@ -193,6 +244,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:15:00Z",
+    status: "active",
+    timesAsked: 2,
+    freezeCount: 0,
   },
   {
     id: "aq-17",
@@ -204,6 +258,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:16:00Z",
+    status: "frozen",
+    timesAsked: 3,
+    freezeCount: 1,
   },
   {
     id: "aq-18",
@@ -215,6 +272,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:17:00Z",
+    status: "active",
+    timesAsked: 1,
+    freezeCount: 0,
   },
   {
     id: "aq-19",
@@ -226,6 +286,9 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:18:00Z",
+    status: "active",
+    timesAsked: 0,
+    freezeCount: 0,
   },
   {
     id: "aq-20",
@@ -237,5 +300,8 @@ export const INITIAL_ADMIN_QUESTIONS: AdminQuizQuestion[] = [
     timeLimit: 10,
     points: 10,
     createdAt: "2025-12-01T10:19:00Z",
+    status: "active",
+    timesAsked: 1,
+    freezeCount: 0,
   },
 ];
