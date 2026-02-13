@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/Header";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import {
   Activity, Users, Wallet, Gamepad2, Trophy,
-  Users2, Zap, UtensilsCrossed, GraduationCap, Radio,
+  Users2, Zap, UtensilsCrossed, GraduationCap, Radio, ChevronRight,
 } from "lucide-react";
 import { MonitorDetailDrawer, type DrawerData } from "@/components/mobigate/MonitorDetailDrawer";
 
@@ -41,6 +42,7 @@ export type RecentResultData = typeof recentResults[number];
 
 export default function MonitorQuizPage() {
   const [drawerData, setDrawerData] = useState<DrawerData | null>(null);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -88,7 +90,7 @@ export default function MonitorQuizPage() {
               <button
                 key={m.mode}
                 className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg w-full text-left active:bg-muted/80 transition-colors border border-border/40"
-                onClick={() => setDrawerData({ type: "mode", data: m })}
+                onClick={() => navigate(`/mobigate-admin/quiz/games-played?mode=${encodeURIComponent(m.mode)}`)}
               >
                 <m.icon className={`h-5 w-5 shrink-0 ${m.color}`} />
                 <div className="flex-1 min-w-0">
@@ -97,7 +99,10 @@ export default function MonitorQuizPage() {
                     {m.sessions} sessions · {m.players} players
                   </p>
                 </div>
-                <p className="text-sm font-bold text-primary shrink-0">{formatMobi(m.stakes)}</p>
+                <div className="flex items-center gap-1 shrink-0">
+                  <p className="text-sm font-bold text-primary">{formatMobi(m.stakes)}</p>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
               </button>
             ))}
           </CardContent>
