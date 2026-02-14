@@ -1,54 +1,40 @@
 
-# Add Per-Question Timer to Interactive Quiz Non-Objective Questions
+# Fix Quiz Games Sidebar Links
 
 ## Problem
-The 5 non-objective (written) questions in the Interactive Quiz all appear simultaneously with a single "Submit All Answers" button and no timer. They should appear **one at a time**, each with a **15-second countdown timer**, advancing automatically when the user submits an answer or when time runs out.
+The "Play Quiz Games" and "My Quiz History" links in the sidebar navigate to dead PHP URLs (`/take_quiz.php` and `/my_quiz_account.php`) that don't exist in the React app. They need to be connected to actual quiz functionality.
 
 ## Changes
 
-### File: `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx`
+### 1. `src/components/AppSidebar.tsx`
 
-**New state variables:**
-- `currentNonObjQ` (number, default 0) -- tracks which non-objective question is currently shown (0-4)
-- `nonObjTimeRemaining` (number, default 15) -- countdown timer for the current non-objective question
-- `nonObjShowResult` (boolean) -- briefly shows correct/incorrect before advancing
+**Add `onClick` handler support to menu items:**
+- Extend the `MenuItem` interface to include an optional `onClick?: () => void` property.
+- Update the `renderMenuItem` function: when an item has an `onClick`, render a `<button>` instead of an `<a>` or `<Link>`, calling `onClick` (and `handleLinkClick` to close the mobile sidebar).
 
-**New timer effect (for non-objective phase):**
-- Runs when `phase === "non_objective"` and the current question hasn't been answered yet
-- Counts down from 15 to 0
-- At 0, auto-locks the current answer (empty string if nothing typed), shows result briefly, then advances to the next question
-- When all 5 are done, tallies correct answers and moves to the "result" phase
+**Convert "Play Quiz Games" to use `onClick`:**
+- Instead of `url: "/take_quiz.php"`, set an `onClick` that opens the `QuizSelectionSheet`.
+- Add `QuizSelectionSheet` state (`quizSelectionOpen`) inside `AppSidebar`.
+- Render `<QuizSelectionSheet>` at the bottom of the sidebar component.
 
-**New answer submission logic:**
-- When user types an answer and presses "Confirm Answer" (or timer expires), the current answer is locked
-- A brief 1.5s result display shows correct/incorrect
-- Then advances `currentNonObjQ` to the next question, resets `nonObjTimeRemaining` to 15
-- After question 5 (index 4), calculates `nonObjectiveCorrect` and transitions to "result" phase
+**Convert "My Quiz History" to an internal route:**
+- Change `url` from `/my_quiz_account.php` to an internal route `/my-quiz-history`.
 
-**Updated non-objective UI:**
-- Replace the `.map()` that renders all 5 questions with a single-question view showing only `interactiveNonObjectiveQuestions[currentNonObjQ]`
-- Add timer display (same clock style as objective phase) above the question
-- Show progress indicator: "Q11/15", "Q12/15", etc.
-- Show a "Confirm Answer" button instead of "Submit All Answers"
-- The `NonObjectiveQuestionCard` renders for only the current question, with `disabled` when result is showing
+### 2. New Page: `src/pages/MyQuizHistory.tsx`
 
-**Updated header subtitle:**
-- Change from static "Q11-15 (Type Your Answer)" to dynamic `Q${11 + currentNonObjQ}/15 (Type Your Answer)`
+Create a mobile-optimized "My Quiz History" page displaying the player's quiz game history with:
+- Summary stats cards (Total Games, Wins, Losses, Win Rate)
+- A list of past game results with game mode, date, score, and win/loss status
+- Mock data consistent with existing quiz data patterns
+- Uses existing `Header` component and standard page layout
 
-**Updated progress bar:**
-- Reflect per-question progress in non-objective phase: `((10 + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100`
+### 3. `src/App.tsx`
 
-**Reset logic:**
-- Add `currentNonObjQ`, `nonObjTimeRemaining`, `nonObjShowResult` to the reset effect when dialog closes
-
-**Timer value (15s):**
-- Use a constant `NON_OBJECTIVE_TIME_PER_QUESTION = 15` at the top of the file for easy editing
-
-### No changes to `NonObjectiveQuestionCard.tsx`
-The existing component already supports all needed props (`disabled`, `showResult`, `isCorrect`, `onAnswer`). It will be reused as-is, just rendered one at a time instead of in a loop.
+- Add route: `/my-quiz-history` mapped to the new `MyQuizHistory` page.
 
 ## Technical Details
-- The per-question timer uses the same `setInterval` pattern already used for objective questions
-- Answer locking works by saving into the `nonObjectiveAnswers` array at index `currentNonObjQ`
-- The `NonObjectiveQuestionCard` needs a `key={currentNonObjQ}` to force remount (fresh input) for each new question
-- Scoring logic remains identical -- just runs after the 5th question instead of on a "Submit All" button press
+
+- The `MenuItem` interface gains `onClick?: () => void`.
+- In `renderMenuItem`, items with `onClick` and no sub-items render as a clickable `<button>` element styled with `SidebarMenuSubButton`.
+- The `QuizSelectionSheet` is imported with `showCommunityQuiz={false}` since this is outside a community context (only Mobi Quiz available from global sidebar). Or `showCommunityQuiz={true}` to allow both -- will use `true` since the user may belong to a community.
+- The history page uses mock data and follows the same card-based layout patterns used throughout the app.
