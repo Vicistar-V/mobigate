@@ -1,40 +1,45 @@
 
-# Fix Quiz Games Sidebar Links
 
-## Problem
-The "Play Quiz Games" and "My Quiz History" links in the sidebar navigate to dead PHP URLs (`/take_quiz.php` and `/my_quiz_account.php`) that don't exist in the React app. They need to be connected to actual quiz functionality.
+# Direct Mobi Quiz Access and Quiz Games Page
 
-## Changes
+## What's Changing
 
-### 1. `src/components/AppSidebar.tsx`
+Two issues need fixing:
 
-**Add `onClick` handler support to menu items:**
-- Extend the `MenuItem` interface to include an optional `onClick?: () => void` property.
-- Update the `renderMenuItem` function: when an item has an `onClick`, render a `<button>` instead of an `<a>` or `<Link>`, calling `onClick` (and `handleLinkClick` to close the mobile sidebar).
+1. **Sidebar "Play Quiz Games"** currently opens a selection sheet with both Community Quiz and Mobi Quiz options. Since Community Quiz is only for community members within that community's interface, the sidebar should go directly to Mobi Quiz -- no selection sheet needed.
 
-**Convert "Play Quiz Games" to use `onClick`:**
-- Instead of `url: "/take_quiz.php"`, set an `onClick` that opens the `QuizSelectionSheet`.
-- Add `QuizSelectionSheet` state (`quizSelectionOpen`) inside `AppSidebar`.
-- Render `<QuizSelectionSheet>` at the bottom of the sidebar component.
+2. **Dashboard "..." menu** has a "Mobi Quiz Games" link pointing to `/mobi-quiz-game`, but that route doesn't exist -- tapping it leads to a blank page.
 
-**Convert "My Quiz History" to an internal route:**
-- Change `url` from `/my_quiz_account.php` to an internal route `/my-quiz-history`.
+## Plan
 
-### 2. New Page: `src/pages/MyQuizHistory.tsx`
+### 1. Create a new Mobi Quiz Games page (`src/pages/MobiQuizGames.tsx`)
 
-Create a mobile-optimized "My Quiz History" page displaying the player's quiz game history with:
-- Summary stats cards (Total Games, Wins, Losses, Win Rate)
-- A list of past game results with game mode, date, score, and win/loss status
-- Mock data consistent with existing quiz data patterns
-- Uses existing `Header` component and standard page layout
+A dedicated mobile-optimized page at `/mobi-quiz-games` that serves as the hub for Mobigate Quiz Games. It will feature:
 
-### 3. `src/App.tsx`
+- A header with back navigation and page title
+- The `MobiQuizGameDialog` content embedded directly (or launched via a prominent "Start Playing" button)
+- Quick stats section (games played, win rate, etc.)
+- Links to Quiz History
+- The five game mode cards (Group, Standard Solo, Interactive, Food for Home, Scholarship) for browsing
 
-- Add route: `/my-quiz-history` mapped to the new `MyQuizHistory` page.
+### 2. Update Sidebar (`src/components/AppSidebar.tsx`)
+
+- Remove `QuizSelectionSheet` import and state
+- Instead, change "Play Quiz Games" from an `onClick` handler to a simple link pointing to `/mobi-quiz-games`
+- This eliminates the unnecessary selection step
+
+### 3. Update Dashboard More Menu (`src/components/GreetingCard.tsx`)
+
+- Change the "Mobi Quiz Games" href from `/mobi-quiz-game` to `/mobi-quiz-games` (matching the new route)
+
+### 4. Register Route (`src/App.tsx`)
+
+- Add `/mobi-quiz-games` route mapped to the new `MobiQuizGames` page
 
 ## Technical Details
 
-- The `MenuItem` interface gains `onClick?: () => void`.
-- In `renderMenuItem`, items with `onClick` and no sub-items render as a clickable `<button>` element styled with `SidebarMenuSubButton`.
-- The `QuizSelectionSheet` is imported with `showCommunityQuiz={false}` since this is outside a community context (only Mobi Quiz available from global sidebar). Or `showCommunityQuiz={true}` to allow both -- will use `true` since the user may belong to a community.
-- The history page uses mock data and follows the same card-based layout patterns used throughout the app.
+- The new page will import `MobiQuizGameDialog` and open it when the user taps "Start Playing" or a game mode card
+- The page uses the existing `Header` component and follows the same card-based layout as other pages
+- Game mode cards will be styled with the established amber/orange theme for Mobi Quiz
+- Stats section uses mock data consistent with the quiz history page
+- Mobile-first layout with proper touch targets and scroll behavior
