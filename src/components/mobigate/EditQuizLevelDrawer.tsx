@@ -60,12 +60,12 @@ export function EditQuizLevelDrawer({ open, onOpenChange, entry, onSave, onDelet
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="pb-2">
+      <DrawerContent className="max-h-[92vh] p-0 flex flex-col">
+        <DrawerHeader className="shrink-0 pb-2 px-4">
           <DrawerTitle className="text-base">Edit: {entry.levelName}</DrawerTitle>
         </DrawerHeader>
 
-        <div className="px-4 space-y-4 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 space-y-4">
           {/* Category */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Category</Label>

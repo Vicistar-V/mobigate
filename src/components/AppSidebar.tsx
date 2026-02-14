@@ -8,6 +8,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { QuizAdminDrawer } from "@/components/mobigate/QuizAdminDrawer";
 
 // Superadmin Menu Items
 const superadminMenuItems = [
@@ -19,60 +20,9 @@ const superadminMenuItems = [
     ]
   },
   {
-    title: "Group Quiz",
+    title: "Manage Quiz",
     icon: Gamepad2,
-    items: [
-      { title: "Categories", url: "/mobigate-admin/quiz/group/categories" },
-      { title: "Levels", url: "/mobigate-admin/quiz/group/levels" },
-      { title: "Create Questions", url: "/mobigate-admin/quiz/group/questions/create" },
-      { title: "Manage Questions", url: "/mobigate-admin/quiz/group/questions" },
-      { title: "Monitor", url: "/mobigate-admin/quiz/group/monitor" },
-    ]
-  },
-  {
-    title: "Standard Solo Quiz",
-    icon: Gamepad2,
-    items: [
-      { title: "Categories", url: "/mobigate-admin/quiz/standard/categories" },
-      { title: "Levels", url: "/mobigate-admin/quiz/standard/levels" },
-      { title: "Create Questions", url: "/mobigate-admin/quiz/standard/questions/create" },
-      { title: "Manage Questions", url: "/mobigate-admin/quiz/standard/questions" },
-      { title: "Monitor", url: "/mobigate-admin/quiz/standard/monitor" },
-    ]
-  },
-  {
-    title: "Interactive Quiz",
-    icon: Gamepad2,
-    items: [
-      { title: "Merchant Management", url: "/mobigate-admin/quiz/interactive/merchants" },
-      { title: "Categories", url: "/mobigate-admin/quiz/interactive/categories" },
-      { title: "Levels", url: "/mobigate-admin/quiz/interactive/levels" },
-      { title: "Create Questions", url: "/mobigate-admin/quiz/interactive/questions/create" },
-      { title: "Manage Questions", url: "/mobigate-admin/quiz/interactive/questions" },
-      { title: "Monitor", url: "/mobigate-admin/quiz/interactive/monitor" },
-    ]
-  },
-  {
-    title: "Food for Home Quiz",
-    icon: Gamepad2,
-    items: [
-      { title: "Categories", url: "/mobigate-admin/quiz/food/categories" },
-      { title: "Levels", url: "/mobigate-admin/quiz/food/levels" },
-      { title: "Create Questions", url: "/mobigate-admin/quiz/food/questions/create" },
-      { title: "Manage Questions", url: "/mobigate-admin/quiz/food/questions" },
-      { title: "Monitor", url: "/mobigate-admin/quiz/food/monitor" },
-    ]
-  },
-  {
-    title: "Scholarship Quiz",
-    icon: Gamepad2,
-    items: [
-      { title: "Categories", url: "/mobigate-admin/quiz/scholarship/categories" },
-      { title: "Levels", url: "/mobigate-admin/quiz/scholarship/levels" },
-      { title: "Create Questions", url: "/mobigate-admin/quiz/scholarship/questions/create" },
-      { title: "Manage Questions", url: "/mobigate-admin/quiz/scholarship/questions" },
-      { title: "Monitor", url: "/mobigate-admin/quiz/scholarship/monitor" },
-    ]
+    isDrawerTrigger: true,
   },
   {
     title: "Manage e-Library",
@@ -310,6 +260,7 @@ export function AppSidebar() {
   } = useSidebar();
   const isMobile = useIsMobile();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [showQuizDrawer, setShowQuizDrawer] = useState(false);
   
   const handleLinkClick = () => {
     if (isMobile) {
@@ -423,6 +374,24 @@ export function AppSidebar() {
               {superadminMenuItems.map(item => {
                 const isExpanded = expandedItems.includes(item.title);
 
+                // Drawer trigger item (Manage Quiz)
+                if ((item as any).isDrawerTrigger) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        tooltip={item.title}
+                        className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2.5rem] py-2"
+                        onClick={() => { setShowQuizDrawer(true); handleLinkClick(); }}
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <span className="font-medium flex-1 whitespace-normal break-words leading-tight text-left">{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+
                 return (
                   <Collapsible key={item.title} open={isExpanded} onOpenChange={() => toggleExpand(item.title)}>
                     <SidebarMenuItem>
@@ -437,7 +406,7 @@ export function AppSidebar() {
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-1">
                           <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
-                            {item.items.map(subItem => renderMenuItem(subItem, `${item.title}-${subItem.title}`))}
+                            {(item as any).items.map((subItem: any) => renderMenuItem(subItem, `${item.title}-${subItem.title}`))}
                           </SidebarMenuSub>
                       </CollapsibleContent>
                     </SidebarMenuItem>
@@ -538,5 +507,6 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+    <QuizAdminDrawer open={showQuizDrawer} onOpenChange={setShowQuizDrawer} />
   </>;
 }
