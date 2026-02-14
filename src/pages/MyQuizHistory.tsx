@@ -1,9 +1,13 @@
-import { useState } from "react";
-import { Trophy, Gamepad2, TrendingUp, XCircle, Calendar, ArrowLeft, Clock, Users, Coins, Target, ChevronRight, Hash, Award, Zap, BookOpen, Home, GraduationCap } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Trophy, Gamepad2, TrendingUp, XCircle, Calendar, ArrowLeft, Clock, Users, Coins, Target, ChevronRight, Hash, Award, Zap, BookOpen, Home, GraduationCap, Filter, ArrowUpDown, X, CalendarDays, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface GameQuestion {
   question: string;
@@ -192,11 +196,6 @@ const mockHistory: GameEntry[] = [
   },
 ];
 
-const totalGames = mockHistory.length;
-const wins = mockHistory.filter(g => g.won).length;
-const losses = totalGames - wins;
-const winRate = Math.round((wins / totalGames) * 100);
-
 const modeIcons: Record<string, typeof Gamepad2> = {
   "Standard Solo": Zap,
   "Group Quiz": Users,
@@ -213,9 +212,75 @@ const modeColors: Record<string, { bg: string; text: string; border: string }> =
   "Scholarship": { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", border: "border-emerald-500/20" },
 };
 
+const ALL_MODES: GameEntry["mode"][] = ["Standard Solo", "Group Quiz", "Interactive", "Food for Home", "Scholarship"];
+
+type SortOption = "date_desc" | "date_asc" | "stake_desc" | "stake_asc" | "score_desc" | "score_asc";
+const sortLabels: Record<SortOption, string> = {
+  date_desc: "Newest First",
+  date_asc: "Oldest First",
+  stake_desc: "Highest Stake",
+  stake_asc: "Lowest Stake",
+  score_desc: "Best Score",
+  score_asc: "Worst Score",
+};
+
 export default function MyQuizHistory() {
   const [selectedGame, setSelectedGame] = useState<GameEntry | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
+
+  // Filter state
+  const [filterMode, setFilterMode] = useState<GameEntry["mode"] | "all">("all");
+  const [filterResult, setFilterResult] = useState<"all" | "won" | "lost">("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [sortBy, setSortBy] = useState<SortOption>("date_desc");
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSortDrawer, setShowSortDrawer] = useState(false);
+
+  const hasActiveFilters = filterMode !== "all" || filterResult !== "all" || !!dateFrom || !!dateTo;
+
+  const clearFilters = () => {
+    setFilterMode("all");
+    setFilterResult("all");
+    setDateFrom(undefined);
+    setDateTo(undefined);
+  };
+
+  const filteredAndSorted = useMemo(() => {
+    let result = [...mockHistory];
+
+    // Filter by mode
+    if (filterMode !== "all") {
+      result = result.filter(g => g.mode === filterMode);
+    }
+    // Filter by result
+    if (filterResult === "won") result = result.filter(g => g.won);
+    if (filterResult === "lost") result = result.filter(g => !g.won);
+    // Filter by date range
+    if (dateFrom) result = result.filter(g => new Date(g.date) >= dateFrom);
+    if (dateTo) result = result.filter(g => new Date(g.date) <= dateTo);
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "date_desc": return new Date(b.date).getTime() - new Date(a.date).getTime();
+        case "date_asc": return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case "stake_desc": return b.stake - a.stake;
+        case "stake_asc": return a.stake - b.stake;
+        case "score_desc": return (b.scoreNum / b.scoreTotal) - (a.scoreNum / a.scoreTotal);
+        case "score_asc": return (a.scoreNum / a.scoreTotal) - (b.scoreNum / b.scoreTotal);
+        default: return 0;
+      }
+    });
+
+    return result;
+  }, [filterMode, filterResult, dateFrom, dateTo, sortBy]);
+
+  // Dynamic stats based on filtered results
+  const totalGames = filteredAndSorted.length;
+  const wins = filteredAndSorted.filter(g => g.won).length;
+  const losses = totalGames - wins;
+  const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
 
   const handleOpenDetail = (game: GameEntry) => {
     setSelectedGame(game);
@@ -230,12 +295,159 @@ export default function MyQuizHistory() {
           <Link to="/" className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors">
             <ArrowLeft className="h-5 w-5 text-muted-foreground" />
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1">
             <Gamepad2 className="h-5 w-5 text-primary" />
             <h1 className="text-lg font-bold">My Quiz History</h1>
           </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "relative p-2 rounded-lg transition-colors",
+              showFilters ? "bg-primary/10 text-primary" : "hover:bg-accent/50 text-muted-foreground"
+            )}
+          >
+            <Filter className="h-5 w-5" />
+            {hasActiveFilters && (
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary" />
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Filter & Sort Bar */}
+      {showFilters && (
+        <div className="px-4 py-3 bg-muted/30 border-b border-border/50 space-y-3">
+          {/* Mode Filter */}
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Game Mode</p>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setFilterMode("all")}
+                className={cn(
+                  "px-2.5 py-1 rounded-full text-[11px] font-medium transition-all border",
+                  filterMode === "all"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card border-border/50 text-muted-foreground"
+                )}
+              >
+                All
+              </button>
+              {ALL_MODES.map(mode => {
+                const MIcon = modeIcons[mode];
+                const colors = modeColors[mode];
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setFilterMode(filterMode === mode ? "all" : mode)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-full text-[11px] font-medium transition-all border flex items-center gap-1",
+                      filterMode === mode
+                        ? `${colors.bg} ${colors.text} ${colors.border}`
+                        : "bg-card border-border/50 text-muted-foreground"
+                    )}
+                  >
+                    <MIcon className="h-3 w-3" />
+                    {mode}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Result Filter */}
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Result</p>
+            <div className="flex gap-1.5">
+              {([["all", "All"], ["won", "Won"], ["lost", "Lost"]] as const).map(([val, label]) => (
+                <button
+                  key={val}
+                  onClick={() => setFilterResult(val)}
+                  className={cn(
+                    "px-3 py-1 rounded-full text-[11px] font-medium transition-all border",
+                    filterResult === val
+                      ? val === "won" ? "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
+                        : val === "lost" ? "bg-red-500/10 text-destructive border-red-500/30"
+                        : "bg-primary text-primary-foreground border-primary"
+                      : "bg-card border-border/50 text-muted-foreground"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date Range */}
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Date Range</p>
+            <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors",
+                    dateFrom ? "border-primary/30 bg-primary/5 text-foreground" : "border-border/50 bg-card text-muted-foreground"
+                  )}>
+                    <CalendarDays className="h-3 w-3 shrink-0" />
+                    {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
+                  <CalendarPicker
+                    mode="single"
+                    selected={dateFrom}
+                    onSelect={(d) => setDateFrom(d)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] transition-colors",
+                    dateTo ? "border-primary/30 bg-primary/5 text-foreground" : "border-border/50 bg-card text-muted-foreground"
+                  )}>
+                    <CalendarDays className="h-3 w-3 shrink-0" />
+                    {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50 bg-popover" align="end">
+                  <CalendarPicker
+                    mode="single"
+                    selected={dateTo}
+                    onSelect={(d) => setDateTo(d)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Sort + Clear Row */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowSortDrawer(true)}
+              className="flex-1 flex items-center justify-between px-3 py-1.5 rounded-lg border border-border/50 bg-card text-[11px]"
+            >
+              <div className="flex items-center gap-1.5">
+                <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
+                <span className="font-medium">{sortLabels[sortBy]}</span>
+              </div>
+              <ChevronDown className="h-3 w-3 text-muted-foreground" />
+            </button>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-destructive/30 bg-destructive/5 text-destructive text-[11px] font-medium"
+              >
+                <X className="h-3 w-3" />
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2 px-4 py-4">
@@ -255,52 +467,103 @@ export default function MyQuizHistory() {
 
       {/* Game List */}
       <div className="px-4 space-y-2">
-        <h2 className="text-sm font-semibold text-muted-foreground mb-2">Recent Games</h2>
-        {mockHistory.map(game => {
-          const ModeIcon = modeIcons[game.mode] || Gamepad2;
-          const colors = modeColors[game.mode] || modeColors["Standard Solo"];
-          return (
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-semibold text-muted-foreground">
+            {hasActiveFilters ? `Filtered Results (${filteredAndSorted.length})` : "Recent Games"}
+          </h2>
+          {!showFilters && (
             <button
-              key={game.id}
-              onClick={() => handleOpenDetail(game)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 w-full text-left active:scale-[0.98] transition-all"
+              onClick={() => setShowSortDrawer(true)}
+              className="flex items-center gap-1 text-[11px] text-muted-foreground"
             >
-              <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
-                game.won ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"
-              }`}>
-                {game.won ? (
-                  <Trophy className="h-5 w-5 text-green-600 dark:text-green-400" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-destructive" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <ModeIcon className={`h-3 w-3 ${colors.text}`} />
-                  <p className="font-semibold text-sm">{game.mode}</p>
-                </div>
-                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  <span>{game.date}</span>
-                  <span className="mx-0.5">•</span>
-                  <span>{game.score}</span>
-                </div>
-              </div>
-              <div className="text-right shrink-0 flex items-center gap-1.5">
-                <div>
-                  <p className={`text-sm font-bold ${game.won ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>
-                    {game.won ? `+M${game.prize.toLocaleString()}` : `-M${game.stake.toLocaleString()}`}
-                  </p>
-                  <p className={`text-[10px] font-medium ${game.won ? "text-green-600/70 dark:text-green-400/70" : "text-destructive/70"}`}>
-                    {game.won ? "Won" : "Lost"}
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-              </div>
+              <ArrowUpDown className="h-3 w-3" />
+              {sortLabels[sortBy]}
             </button>
-          );
-        })}
+          )}
+        </div>
+
+        {filteredAndSorted.length === 0 ? (
+          <div className="py-12 text-center">
+            <Gamepad2 className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" />
+            <p className="text-sm font-medium text-muted-foreground">No games match your filters</p>
+            <button onClick={clearFilters} className="mt-2 text-xs text-primary font-medium">Clear all filters</button>
+          </div>
+        ) : (
+          filteredAndSorted.map(game => {
+            const ModeIcon = modeIcons[game.mode] || Gamepad2;
+            const colors = modeColors[game.mode] || modeColors["Standard Solo"];
+            return (
+              <button
+                key={game.id}
+                onClick={() => handleOpenDetail(game)}
+                className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 w-full text-left active:scale-[0.98] transition-all"
+              >
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
+                  game.won ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"
+                }`}>
+                  {game.won ? (
+                    <Trophy className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-destructive" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <ModeIcon className={`h-3 w-3 ${colors.text}`} />
+                    <p className="font-semibold text-sm">{game.mode}</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    <span>{game.date}</span>
+                    <span className="mx-0.5">•</span>
+                    <span>{game.score}</span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0 flex items-center gap-1.5">
+                  <div>
+                    <p className={`text-sm font-bold ${game.won ? "text-green-600 dark:text-green-400" : "text-destructive"}`}>
+                      {game.won ? `+M${game.prize.toLocaleString()}` : `-M${game.stake.toLocaleString()}`}
+                    </p>
+                    <p className={`text-[10px] font-medium ${game.won ? "text-green-600/70 dark:text-green-400/70" : "text-destructive/70"}`}>
+                      {game.won ? "Won" : "Lost"}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                </div>
+              </button>
+            );
+          })
+        )}
       </div>
+
+      {/* Sort Drawer */}
+      <Drawer open={showSortDrawer} onOpenChange={setShowSortDrawer}>
+        <DrawerContent className="pb-6">
+          <DrawerHeader className="text-center pb-2">
+            <div className="flex items-center justify-center gap-2">
+              <ArrowUpDown className="h-5 w-5 text-primary" />
+              <DrawerTitle className="text-lg font-bold">Sort Games</DrawerTitle>
+            </div>
+          </DrawerHeader>
+          <div className="px-4 space-y-1">
+            {(Object.entries(sortLabels) as [SortOption, string][]).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => { setSortBy(key); setShowSortDrawer(false); }}
+                className={cn(
+                  "w-full flex items-center justify-between p-3 rounded-xl transition-all text-sm",
+                  sortBy === key
+                    ? "bg-primary/10 text-primary font-semibold border border-primary/20"
+                    : "bg-card border border-border/50 text-foreground hover:bg-accent/30"
+                )}
+              >
+                <span>{label}</span>
+                {sortBy === key && <span className="text-xs">✓</span>}
+              </button>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* Game Detail Drawer */}
       <Drawer open={!!selectedGame} onOpenChange={(open) => { if (!open) setSelectedGame(null); }}>
