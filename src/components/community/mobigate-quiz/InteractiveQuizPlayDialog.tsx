@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, Clock, Star, Radio, Trophy } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
 import { QuizPrizeRedemptionSheet } from "./QuizPrizeRedemptionSheet";
+
+/** Editable: seconds per non-objective question */
+const NON_OBJECTIVE_TIME_PER_QUESTION = 15;
 
 const interactiveObjectiveQuestions = [
   { question: "What is the most spoken language in the world?", options: ["Spanish", "Hindi", "English", "Arabic", "French", "Portuguese", "Bengali", "Russian"], correctAnswer: 2 },
@@ -51,32 +54,52 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const [objectiveCorrect, setObjectiveCorrect] = useState(0);
   const [phase, setPhase] = useState<Phase>("objective");
   const [nonObjectiveAnswers, setNonObjectiveAnswers] = useState<string[]>(Array(5).fill(""));
-  const [nonObjectiveSubmitted, setNonObjectiveSubmitted] = useState(false);
   const [nonObjectiveCorrect, setNonObjectiveCorrect] = useState(0);
   const [showRedemption, setShowRedemption] = useState(false);
+
+  // Non-objective per-question state
+  const [currentNonObjQ, setCurrentNonObjQ] = useState(0);
+  const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(NON_OBJECTIVE_TIME_PER_QUESTION);
+  const [nonObjShowResult, setNonObjShowResult] = useState(false);
+  const [nonObjLocked, setNonObjLocked] = useState(false);
 
   const totalQuestions = INTERACTIVE_QUESTIONS_PER_SESSION;
   const question = interactiveObjectiveQuestions[currentQ];
   const totalCorrect = objectiveCorrect + nonObjectiveCorrect;
   const percentage = Math.round((totalCorrect / totalQuestions) * 100);
   const passed = percentage === 100;
-  const prizeAmount = season.prizePerLevel;
   const cashAlternative = season.entryFee * 5;
 
+  // Reset all state when dialog closes
   useEffect(() => {
     if (!open) {
       setCurrentQ(0); setTimeRemaining(15); setSelectedAnswer(null); setShowResult(false);
       setObjectiveCorrect(0); setPhase("objective"); setNonObjectiveAnswers(Array(5).fill(""));
-      setNonObjectiveSubmitted(false); setNonObjectiveCorrect(0); setShowRedemption(false);
+      setNonObjectiveCorrect(0); setShowRedemption(false);
+      setCurrentNonObjQ(0); setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
+      setNonObjShowResult(false); setNonObjLocked(false);
     }
   }, [open]);
 
+  // Objective timer
   useEffect(() => {
     if (phase !== "objective" || showResult || !open) return;
     if (timeRemaining <= 0) { setShowResult(true); setTimeout(() => nextObjective(), 1500); return; }
     const timer = setInterval(() => setTimeRemaining(p => p - 1), 1000);
     return () => clearInterval(timer);
   }, [timeRemaining, phase, showResult, open]);
+
+  // Non-objective per-question timer
+  useEffect(() => {
+    if (phase !== "non_objective" || nonObjShowResult || nonObjLocked || !open) return;
+    if (nonObjTimeRemaining <= 0) {
+      // Time's up — lock current answer (whatever they typed, or empty)
+      lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "");
+      return;
+    }
+    const timer = setInterval(() => setNonObjTimeRemaining(p => p - 1), 1000);
+    return () => clearInterval(timer);
+  }, [nonObjTimeRemaining, phase, nonObjShowResult, nonObjLocked, open, currentNonObjQ]);
 
   const handleConfirm = () => {
     if (selectedAnswer === null) return;
@@ -90,23 +113,51 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     else { setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(15); }
   };
 
-  const handleSubmitNonObjective = () => {
-    let correct = 0;
-    nonObjectiveAnswers.forEach((ans, i) => {
-      if (interactiveNonObjectiveQuestions[i].acceptedAnswers.some(a => ans.toLowerCase().includes(a.toLowerCase()))) correct++;
+  // Lock the current non-objective answer and show result briefly
+  const lockNonObjAnswer = useCallback((answer: string) => {
+    setNonObjLocked(true);
+    // Save answer
+    setNonObjectiveAnswers(prev => {
+      const updated = [...prev];
+      updated[currentNonObjQ] = answer;
+      return updated;
     });
-    setNonObjectiveCorrect(correct);
-    setNonObjectiveSubmitted(true);
-    setTimeout(() => setPhase("result"), 2000);
-  };
+    setNonObjShowResult(true);
+
+    // Check correctness for this question
+    const q = interactiveNonObjectiveQuestions[currentNonObjQ];
+    const isCorrect = q.acceptedAnswers.some(a => answer.toLowerCase().includes(a.toLowerCase()));
+    if (isCorrect) setNonObjectiveCorrect(p => p + 1);
+
+    // After brief display, advance
+    setTimeout(() => {
+      if (currentNonObjQ >= 4) {
+        // All 5 done — go to result
+        setPhase("result");
+      } else {
+        setCurrentNonObjQ(p => p + 1);
+        setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
+        setNonObjShowResult(false);
+        setNonObjLocked(false);
+      }
+    }, 1500);
+  }, [currentNonObjQ]);
 
   const handleClaim = () => {
     if (passed) setShowRedemption(true);
     else onOpenChange(false);
   };
 
-  const progressValue = phase === "objective" ? ((currentQ + (showResult ? 1 : 0)) / totalQuestions) * 100
-    : phase === "non_objective" ? ((10 + (nonObjectiveSubmitted ? 5 : 0)) / totalQuestions) * 100 : 100;
+  const progressValue = phase === "objective"
+    ? ((currentQ + (showResult ? 1 : 0)) / totalQuestions) * 100
+    : phase === "non_objective"
+      ? ((10 + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100
+      : 100;
+
+  const currentNonObjQuestion = interactiveNonObjectiveQuestions[currentNonObjQ];
+  const currentNonObjIsCorrect = currentNonObjQuestion?.acceptedAnswers.some(
+    a => (nonObjectiveAnswers[currentNonObjQ] || "").toLowerCase().includes(a.toLowerCase())
+  );
 
   return (
     <>
@@ -120,7 +171,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                   <h2 className="font-semibold text-sm">{season.name}</h2>
                   <p className="text-xs text-blue-200">
                     {phase === "objective" && `Q${currentQ + 1}/10 (Objective)`}
-                    {phase === "non_objective" && "Q11-15 (Type Your Answer)"}
+                    {phase === "non_objective" && `Q${11 + currentNonObjQ}/15 (Type Your Answer)`}
                     {phase === "result" && "Results"}
                   </p>
                 </div>
@@ -166,21 +217,40 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
               </div>
             )}
 
-            {phase === "non_objective" && (
+            {phase === "non_objective" && currentNonObjQuestion && (
               <div className="space-y-4">
+                {/* Timer */}
+                <div className="flex items-center justify-center gap-2">
+                  <Clock className={cn("h-5 w-5", nonObjTimeRemaining <= 5 ? "text-red-500 animate-pulse" : "text-blue-600")} />
+                  <span className={cn("text-2xl font-bold tabular-nums", nonObjTimeRemaining <= 5 && "text-red-500")}>
+                    {nonObjTimeRemaining}s
+                  </span>
+                </div>
+
+                {/* Objective score summary */}
                 <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200">
                   <CardContent className="p-3 text-center">
                     <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/10</p>
-                    <p className="text-xs text-muted-foreground mt-1">Now answer 5 typed questions</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Written question {currentNonObjQ + 1} of 5
+                    </p>
                   </CardContent>
                 </Card>
-                {interactiveNonObjectiveQuestions.map((q, i) => (
-                  <NonObjectiveQuestionCard key={i} questionNumber={11 + i} question={q.question}
-                    onAnswer={(ans) => { const a = [...nonObjectiveAnswers]; a[i] = ans; setNonObjectiveAnswers(a); }}
-                    disabled={nonObjectiveSubmitted} showResult={nonObjectiveSubmitted}
-                    isCorrect={nonObjectiveSubmitted && q.acceptedAnswers.some(a => nonObjectiveAnswers[i].toLowerCase().includes(a.toLowerCase()))}
-                  />
-                ))}
+
+                {/* Single question card */}
+                <NonObjectiveQuestionCard
+                  key={currentNonObjQ}
+                  questionNumber={11 + currentNonObjQ}
+                  question={currentNonObjQuestion.question}
+                  onAnswer={(ans) => {
+                    const a = [...nonObjectiveAnswers];
+                    a[currentNonObjQ] = ans;
+                    setNonObjectiveAnswers(a);
+                  }}
+                  disabled={nonObjLocked}
+                  showResult={nonObjShowResult}
+                  isCorrect={nonObjShowResult && currentNonObjIsCorrect}
+                />
               </div>
             )}
 
@@ -232,8 +302,14 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 {selectedAnswer === null ? "Select Answer" : showResult ? "Loading..." : `Confirm ${MOBIGATE_ANSWER_LABELS[selectedAnswer]}`}
               </Button>
             )}
-            {phase === "non_objective" && !nonObjectiveSubmitted && (
-              <Button className="w-full h-12 bg-blue-500 hover:bg-blue-600" onClick={handleSubmitNonObjective}>Submit All Answers</Button>
+            {phase === "non_objective" && (
+              <Button
+                className="w-full h-12 bg-blue-500 hover:bg-blue-600"
+                onClick={() => lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "")}
+                disabled={nonObjLocked || !nonObjectiveAnswers[currentNonObjQ]?.trim()}
+              >
+                {nonObjShowResult ? "Next question..." : "Confirm Answer"}
+              </Button>
             )}
             {phase === "result" && (
               <Button className="w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 text-white" onClick={handleClaim}>
