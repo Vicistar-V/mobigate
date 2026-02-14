@@ -54,7 +54,7 @@ export const GreetingSection = () => {
     action: "openChat"
   }, {
     label: "Mobi Quiz Games",
-    href: "/mobi-quiz-game"
+    href: "/mobi-quiz-games"
   }, {
     label: "Mobi-Store",
     href: "/mobi-shop"

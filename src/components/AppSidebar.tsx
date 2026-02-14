@@ -1,7 +1,7 @@
 import { LayoutDashboard, Settings, Wallet, Gamepad2, TrendingUp, BookOpen, Store, Users, UserPlus, MessageSquare, Megaphone, Download, FolderOpen, ShieldCheck, RefreshCw, LogOut, ChevronRight, Image, CreditCard, DollarSign, Globe, Library, Heart, Gift, Ticket, ArrowLeftRight, Building2, FileText, UserCheck, Lock, ToggleLeft, MessageCircle, Search, Eye, Ban, AlertTriangle, DollarSign as DollarIcon, Repeat, UserCog, ListChecks } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { QuizSelectionSheet } from "@/components/community/QuizSelectionSheet";
+
 import mobigateIcon from "@/assets/mobigate-icon.svg";
 import mobigateLogo from "@/assets/mobigate-logo.svg";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
@@ -116,7 +116,7 @@ const menuItems: MenuItem[] = [{
   title: "Quiz Games",
   icon: Gamepad2,
   items: [
-    { title: "Play Quiz Games", url: "#", onClick: undefined as any },
+    { title: "Play Quiz Games", url: "/mobi-quiz-games" },
     { title: "My Quiz History", url: "/my-quiz-history" }
   ]
 }, {
@@ -265,22 +265,6 @@ export function AppSidebar() {
   } = useSidebar();
   const isMobile = useIsMobile();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const [quizSelectionOpen, setQuizSelectionOpen] = useState(false);
-
-  // Patch the Play Quiz Games onClick at runtime
-  const patchedMenuItems = menuItems.map(group => {
-    if (group.title === "Quiz Games" && group.items) {
-      return {
-        ...group,
-        items: group.items.map(item =>
-          item.title === "Play Quiz Games"
-            ? { ...item, onClick: () => setQuizSelectionOpen(true) }
-            : item
-        )
-      };
-    }
-    return group;
-  });
   
   const handleLinkClick = () => {
     if (isMobile) {
@@ -426,7 +410,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {patchedMenuItems.map(item => {
+              {menuItems.map(item => {
                 const isExpanded = expandedItems.includes(item.title);
 
                 // Items with sub-menu
@@ -509,6 +493,5 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-    <QuizSelectionSheet open={quizSelectionOpen} onOpenChange={setQuizSelectionOpen} />
   </>;
 }
