@@ -1,6 +1,7 @@
 import { LayoutDashboard, Settings, Wallet, Gamepad2, TrendingUp, BookOpen, Store, Users, UserPlus, MessageSquare, Megaphone, Download, FolderOpen, ShieldCheck, RefreshCw, LogOut, ChevronRight, Image, CreditCard, DollarSign, Globe, Library, Heart, Gift, Ticket, ArrowLeftRight, Building2, FileText, UserCheck, Lock, ToggleLeft, MessageCircle, Search, Eye, Ban, AlertTriangle, DollarSign as DollarIcon, Repeat, UserCog, ListChecks } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { QuizSelectionSheet } from "@/components/community/QuizSelectionSheet";
 import mobigateIcon from "@/assets/mobigate-icon.svg";
 import mobigateLogo from "@/assets/mobigate-logo.svg";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
@@ -100,6 +101,7 @@ interface MenuItem {
   icon?: any;
   url?: string;
   items?: MenuItem[];
+  onClick?: () => void;
 }
 
 const menuItems: MenuItem[] = [{
@@ -114,8 +116,8 @@ const menuItems: MenuItem[] = [{
   title: "Quiz Games",
   icon: Gamepad2,
   items: [
-    { title: "Play Quiz Games", url: "/take_quiz.php" },
-    { title: "My Quiz History", url: "/my_quiz_account.php" }
+    { title: "Play Quiz Games", url: "#", onClick: undefined as any },
+    { title: "My Quiz History", url: "/my-quiz-history" }
   ]
 }, {
   title: "Earnings Reports",
@@ -263,6 +265,22 @@ export function AppSidebar() {
   } = useSidebar();
   const isMobile = useIsMobile();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [quizSelectionOpen, setQuizSelectionOpen] = useState(false);
+
+  // Patch the Play Quiz Games onClick at runtime
+  const patchedMenuItems = menuItems.map(group => {
+    if (group.title === "Quiz Games" && group.items) {
+      return {
+        ...group,
+        items: group.items.map(item =>
+          item.title === "Play Quiz Games"
+            ? { ...item, onClick: () => setQuizSelectionOpen(true) }
+            : item
+        )
+      };
+    }
+    return group;
+  });
   
   const handleLinkClick = () => {
     if (isMobile) {
@@ -308,6 +326,20 @@ export function AppSidebar() {
       );
     }
     
+    // If has onClick handler, render as button
+    if (subItem.onClick) {
+      return (
+        <SidebarMenuSubItem key={subItem.title}>
+          <SidebarMenuSubButton
+            className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 hover:bg-accent/30 cursor-pointer w-full"
+            onClick={() => { subItem.onClick!(); handleLinkClick(); }}
+          >
+            <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+          </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+      );
+    }
+
     // Otherwise, render as regular link
     return (
       <SidebarMenuSubItem key={subItem.title}>
@@ -325,7 +357,7 @@ export function AppSidebar() {
       </SidebarMenuSubItem>
     );
   };
-  return <Sidebar collapsible="icon" className="border-r border-border/50 bg-gradient-to-b from-card to-muted/30">
+  return <><Sidebar collapsible="icon" className="border-r border-border/50 bg-gradient-to-b from-card to-muted/30">
       <SidebarHeader className="border-b border-border/50 px-4 py-4">
         <div className="flex items-center gap-3">
           {open ? <>
@@ -394,7 +426,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {menuItems.map(item => {
+              {patchedMenuItems.map(item => {
                 const isExpanded = expandedItems.includes(item.title);
 
                 // Items with sub-menu
@@ -476,5 +508,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-    </Sidebar>;
+    </Sidebar>
+    <QuizSelectionSheet open={quizSelectionOpen} onOpenChange={setQuizSelectionOpen} />
+  </>;
 }
