@@ -13,7 +13,7 @@ export default function QuizLevelsPage() {
       <div className="p-4">
         <h1 className="text-lg font-bold mb-1">{typeLabel} — Levels</h1>
         <p className="text-xs text-muted-foreground mb-3">Configure stakes & tiers for {typeLabel}</p>
-        <MobigateQuizLevelsManagement />
+        <MobigateQuizLevelsManagement quizType={(quizType as QuizType) || "group"} />
       </div>
     </div>
   );
