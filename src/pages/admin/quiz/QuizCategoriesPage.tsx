@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import {
 import { Header } from "@/components/Header";
 import { PRESET_QUIZ_CATEGORIES } from "@/data/mobigateQuizLevelsData";
 import { Layers, PlusCircle, Trash2, CheckCircle, XCircle, FolderOpen } from "lucide-react";
+import { QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
 
 interface Category {
   id: string;
@@ -23,40 +25,25 @@ interface Category {
 }
 
 const MOCK_QUESTION_COUNTS: Record<string, number> = {
-  "Current Affairs": 45,
-  "Politics and Leadership": 32,
-  "Science and Technology": 58,
-  "Morals and Religion": 21,
-  "Literature and Reading": 27,
-  "Agriculture and Farming": 14,
-  "Healthcare and Medicare": 36,
-  "Transportation and Vacation": 11,
-  "Basic and General Education": 42,
-  "Sports and Physical Fitness": 53,
-  "Skills and Crafts": 18,
-  "Business and Entrepreneurship": 39,
-  "Entertainment and Leisure": 47,
-  "Environment and Society": 22,
-  "Basic Law": 16,
-  "Family and Home": 19,
-  "Civic Education and Responsibilities": 25,
-  "Mentorship and Individual Development": 13,
-  "Discoveries and Inventions": 31,
-  "Culture and Tradition": 28,
-  "Real Estate and Physical Development": 9,
-  "Information Technology": 44,
-  "General and Basic Knowledge": 61,
+  "Current Affairs": 45, "Politics and Leadership": 32, "Science and Technology": 58,
+  "Morals and Religion": 21, "Literature and Reading": 27, "Agriculture and Farming": 14,
+  "Healthcare and Medicare": 36, "Transportation and Vacation": 11, "Basic and General Education": 42,
+  "Sports and Physical Fitness": 53, "Skills and Crafts": 18, "Business and Entrepreneurship": 39,
+  "Entertainment and Leisure": 47, "Environment and Society": 22, "Basic Law": 16,
+  "Family and Home": 19, "Civic Education and Responsibilities": 25,
+  "Mentorship and Individual Development": 13, "Discoveries and Inventions": 31,
+  "Culture and Tradition": 28, "Real Estate and Physical Development": 9,
+  "Information Technology": 44, "General and Basic Knowledge": 61,
 };
 
 const initialCategories: Category[] = PRESET_QUIZ_CATEGORIES.map((name, i) => ({
-  id: `preset-${i}`,
-  name,
-  isActive: true,
-  isPreset: true,
+  id: `preset-${i}`, name, isActive: true, isPreset: true,
   questionCount: MOCK_QUESTION_COUNTS[name] || 0,
 }));
 
 export default function QuizCategoriesPage() {
+  const { quizType } = useParams<{ quizType: string }>();
+  const typeLabel = QUIZ_TYPE_LABELS[(quizType as QuizType) || "group"] || "Quiz";
   const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -72,13 +59,7 @@ export default function QuizCategoriesPage() {
       toast({ title: "Duplicate", description: "Category already exists", variant: "destructive" });
       return;
     }
-    setCategories(prev => [{
-      id: `custom-${Date.now()}`,
-      name,
-      isActive: true,
-      isPreset: false,
-      questionCount: 0,
-    }, ...prev]);
+    setCategories(prev => [{ id: `custom-${Date.now()}`, name, isActive: true, isPreset: false, questionCount: 0 }, ...prev]);
     setNewCategoryName("");
     toast({ title: "Category Added", description: name });
   };
@@ -99,8 +80,9 @@ export default function QuizCategoriesPage() {
     <div className="min-h-screen bg-background pb-20">
       <Header />
       <div className="px-3">
-        <h1 className="text-lg font-bold mb-3">Quiz Categories</h1>
-        <ScrollArea className="h-[calc(100vh-130px)]">
+        <h1 className="text-lg font-bold mb-1">{typeLabel} — Categories</h1>
+        <p className="text-xs text-muted-foreground mb-3">Manage categories for {typeLabel}</p>
+        <ScrollArea className="h-[calc(100vh-150px)]">
           <div className="space-y-3 pb-6">
             {/* Add Custom Category */}
             <Card>
@@ -110,13 +92,9 @@ export default function QuizCategoriesPage() {
                   Add Custom Category
                 </p>
                 <div className="flex flex-col gap-2">
-                  <Input
-                    value={newCategoryName}
-                    onChange={e => setNewCategoryName(e.target.value)}
-                    placeholder="Enter category name..."
-                    className="h-11 text-sm w-full"
-                    onKeyDown={e => e.key === "Enter" && handleAddCategory()}
-                  />
+                  <Input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)}
+                    placeholder="Enter category name..." className="h-11 text-sm w-full"
+                    onKeyDown={e => e.key === "Enter" && handleAddCategory()} />
                   <Button onClick={handleAddCategory} className="h-11 w-full text-sm" disabled={!newCategoryName.trim()}>
                     Add Category
                   </Button>
@@ -126,39 +104,30 @@ export default function QuizCategoriesPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-2">
-              <Card>
-                <CardContent className="p-2 text-center">
-                  <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
-                  <p className="text-base font-bold">{categories.length}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Total</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-2 text-center">
-                  <CheckCircle className="h-4 w-4 mx-auto mb-1 text-success" />
-                  <p className="text-base font-bold text-success">{activeCount}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Active</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-2 text-center">
-                  <FolderOpen className="h-4 w-4 mx-auto mb-1 text-primary" />
-                  <p className="text-base font-bold">{totalQuestions}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Questions</p>
-                </CardContent>
-              </Card>
+              <Card><CardContent className="p-2 text-center">
+                <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
+                <p className="text-base font-bold">{categories.length}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Total</p>
+              </CardContent></Card>
+              <Card><CardContent className="p-2 text-center">
+                <CheckCircle className="h-4 w-4 mx-auto mb-1 text-emerald-500" />
+                <p className="text-base font-bold text-emerald-600">{activeCount}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Active</p>
+              </CardContent></Card>
+              <Card><CardContent className="p-2 text-center">
+                <FolderOpen className="h-4 w-4 mx-auto mb-1 text-primary" />
+                <p className="text-base font-bold">{totalQuestions}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Questions</p>
+              </CardContent></Card>
             </div>
 
             {/* Category List */}
             <div className="space-y-2">
               {categories.map(cat => (
-              <Card key={cat.id} className={!cat.isActive ? "opacity-60" : ""}>
+                <Card key={cat.id} className={!cat.isActive ? "opacity-60" : ""}>
                   <CardContent className="p-2.5">
                     <div className="flex items-center gap-2">
-                      <Switch
-                        checked={cat.isActive}
-                        onCheckedChange={() => handleToggle(cat.id)}
-                      />
+                      <Switch checked={cat.isActive} onCheckedChange={() => handleToggle(cat.id)} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium break-words">{cat.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
@@ -171,12 +140,8 @@ export default function QuizCategoriesPage() {
                         </div>
                       </div>
                       {!cat.isPreset && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => setDeleteTarget(cat.id)}
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteTarget(cat.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -189,7 +154,6 @@ export default function QuizCategoriesPage() {
         </ScrollArea>
       </div>
 
-      {/* Delete Dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

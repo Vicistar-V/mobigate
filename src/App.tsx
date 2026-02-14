@@ -28,6 +28,7 @@ import CreateQuestionPage from "./pages/admin/quiz/CreateQuestionPage";
 import ManageQuestionsPage from "./pages/admin/quiz/ManageQuestionsPage";
 import MonitorQuizPage from "./pages/admin/quiz/MonitorQuizPage";
 import QuizGamesPlayedPage from "./pages/admin/quiz/QuizGamesPlayedPage";
+import InteractiveMerchantsPage from "./pages/admin/quiz/InteractiveMerchantsPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
@@ -39,7 +40,6 @@ import { startAdvertSimulator } from "./lib/advertSimulator";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Initialize mock data on app load
   useEffect(() => {
     initializeMockData();
     startAdvertSimulator();
@@ -76,11 +76,22 @@ const App = () => {
                   <Route path="/community/:communityId/admin/elections" element={<ElectionManagementPage />} />
                   <Route path="/community/:communityId/admin/content" element={<ContentModerationPage />} />
                   <Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
-                  <Route path="/mobigate-admin/quiz/categories" element={<QuizCategoriesPage />} />
-                  <Route path="/mobigate-admin/quiz/levels" element={<QuizLevelsPage />} />
-                  <Route path="/mobigate-admin/quiz/questions/create" element={<CreateQuestionPage />} />
-                  <Route path="/mobigate-admin/quiz/questions" element={<ManageQuestionsPage />} />
-                  <Route path="/mobigate-admin/quiz/monitor" element={<MonitorQuizPage />} />
+
+                  {/* Quiz type-scoped routes */}
+                  <Route path="/mobigate-admin/quiz/:quizType/categories" element={<QuizCategoriesPage />} />
+                  <Route path="/mobigate-admin/quiz/:quizType/levels" element={<QuizLevelsPage />} />
+                  <Route path="/mobigate-admin/quiz/:quizType/questions/create" element={<CreateQuestionPage />} />
+                  <Route path="/mobigate-admin/quiz/:quizType/questions" element={<ManageQuestionsPage />} />
+                  <Route path="/mobigate-admin/quiz/:quizType/monitor" element={<MonitorQuizPage />} />
+                  <Route path="/mobigate-admin/quiz/interactive/merchants" element={<InteractiveMerchantsPage />} />
+
+                  {/* Legacy routes redirect to group */}
+                  <Route path="/mobigate-admin/quiz/categories" element={<Navigate to="/mobigate-admin/quiz/group/categories" replace />} />
+                  <Route path="/mobigate-admin/quiz/levels" element={<Navigate to="/mobigate-admin/quiz/group/levels" replace />} />
+                  <Route path="/mobigate-admin/quiz/questions/create" element={<Navigate to="/mobigate-admin/quiz/group/questions/create" replace />} />
+                  <Route path="/mobigate-admin/quiz/questions" element={<Navigate to="/mobigate-admin/quiz/group/questions" replace />} />
+                  <Route path="/mobigate-admin/quiz/monitor" element={<Navigate to="/mobigate-admin/quiz/group/monitor" replace />} />
+
                   <Route path="/mobigate-admin/quiz/games-played" element={<QuizGamesPlayedPage />} />
                   <Route path="/create-community" element={<CreateCommunity />} />
                   <Route path="/my-quiz-history" element={<MyQuizHistory />} />

@@ -9,14 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PlusCircle } from "lucide-react";
 import { PRESET_QUIZ_CATEGORIES, PRESET_LEVEL_TIERS } from "@/data/mobigateQuizLevelsData";
 import { ANSWER_LABELS, type QuizDifficulty, type AdminQuizQuestion } from "@/data/mobigateQuizQuestionsData";
+import { QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
+import { mockMerchants } from "@/data/mobigateInteractiveQuizData";
 
 interface Props {
   onCreateQuestion: (q: Omit<AdminQuizQuestion, "id" | "createdAt">) => void;
+  quizType?: QuizType;
 }
 
 const DIFFICULTIES: QuizDifficulty[] = ["Easy", "Medium", "Hard", "Expert"];
 
-export function CreateQuizQuestionForm({ onCreateQuestion }: Props) {
+export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState<QuizDifficulty>("Medium");
   const [questionText, setQuestionText] = useState("");
@@ -59,7 +62,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion }: Props) {
       <CardHeader className="py-3 px-4">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <PlusCircle className="h-4 w-4 text-primary" />
-          Create New Question
+          {quizType ? `New ${QUIZ_TYPE_LABELS[quizType]} Question` : "Create New Question"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0 px-4 pb-4">
@@ -92,6 +95,25 @@ export function CreateQuizQuestionForm({ onCreateQuestion }: Props) {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Interactive Quiz: Merchant selector */}
+        {quizType === "interactive" && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Merchant (Optional)</Label>
+            <Select defaultValue="">
+              <SelectTrigger className="h-12 text-base">
+                <SelectValue placeholder="Global Pool (no merchant)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Global Pool</SelectItem>
+                {mockMerchants.map(m => (
+                  <SelectItem key={m.id} value={m.id} className="text-sm">{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground">Leave empty for Global Pool questions</p>
+          </div>
+        )}
 
         {/* Apply to Level - multi-select checkboxes */}
         <div className="space-y-1.5">
