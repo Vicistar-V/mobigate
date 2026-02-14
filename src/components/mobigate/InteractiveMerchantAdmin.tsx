@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { useToast } from "@/hooks/use-toast";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -115,7 +115,7 @@ export function InteractiveMerchantAdmin() {
   // Merchant detail view
   if (selectedMerchant) {
     return (
-      <ScrollArea className="h-[calc(100vh-140px)]">
+      <div className="h-[calc(100vh-140px)] overflow-y-auto touch-auto overscroll-contain">
         <div className="space-y-4 pb-6">
           {/* Back button */}
           <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSelectedMerchant(null)}>
@@ -230,11 +230,11 @@ export function InteractiveMerchantAdmin() {
 
         {/* Add Season Drawer */}
         <Drawer open={showAddSeason} onOpenChange={setShowAddSeason}>
-          <DrawerContent>
-            <DrawerHeader>
+          <DrawerContent className="max-h-[92vh] p-0 flex flex-col">
+            <DrawerHeader className="shrink-0 px-4">
               <DrawerTitle>Add Season for {selectedMerchant.name}</DrawerTitle>
             </DrawerHeader>
-            <div className="px-4 space-y-4">
+            <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs">Season Name</Label>
                 <Input value={seasonName} onChange={e => setSeasonName(e.target.value)} placeholder="e.g. Tech Genius Season 2" className="h-11" />
@@ -274,12 +274,12 @@ export function InteractiveMerchantAdmin() {
 
         {/* Edit Merchant Drawer */}
         <Drawer open={!!editMerchant} onOpenChange={open => !open && setEditMerchant(null)}>
-          <DrawerContent>
-            <DrawerHeader>
+          <DrawerContent className="max-h-[92vh] p-0 flex flex-col">
+            <DrawerHeader className="shrink-0 px-4">
               <DrawerTitle>Edit Merchant</DrawerTitle>
             </DrawerHeader>
             {editMerchant && (
-              <div className="px-4 space-y-4">
+              <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 space-y-4">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Name</Label>
                   <Input value={editMerchant.name} onChange={e => setEditMerchant({ ...editMerchant, name: e.target.value })} className="h-11" />
@@ -305,13 +305,13 @@ export function InteractiveMerchantAdmin() {
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
-      </ScrollArea>
+        </div>
     );
   }
 
   // Merchant list view
   return (
-    <ScrollArea className="h-[calc(100vh-140px)]">
+    <div className="h-[calc(100vh-140px)] overflow-y-auto touch-auto overscroll-contain">
       <div className="space-y-4 pb-6">
         <Button className="w-full h-12 text-base font-semibold" onClick={() => setShowAddMerchant(true)}>
           <PlusCircle className="h-5 w-5 mr-2" />
@@ -392,11 +392,11 @@ export function InteractiveMerchantAdmin() {
 
       {/* Add Merchant Drawer */}
       <Drawer open={showAddMerchant} onOpenChange={setShowAddMerchant}>
-        <DrawerContent>
-          <DrawerHeader>
+        <DrawerContent className="max-h-[92vh] p-0 flex flex-col">
+          <DrawerHeader className="shrink-0 px-4">
             <DrawerTitle>Add New Merchant</DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 space-y-4">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 space-y-4">
             <div className="space-y-1.5">
               <Label className="text-xs">Merchant Name</Label>
               <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. TechVentures Nigeria" className="h-11" />
@@ -435,6 +435,6 @@ export function InteractiveMerchantAdmin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </ScrollArea>
+    </div>
   );
 }
