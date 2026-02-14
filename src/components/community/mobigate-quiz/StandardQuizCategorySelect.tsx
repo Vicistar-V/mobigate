@@ -4,7 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { PRESET_QUIZ_CATEGORIES, PRESET_LEVEL_TIERS } from "@/data/mobigateQuizLevelsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -60,7 +60,7 @@ export function StandardQuizCategorySelect({ open, onOpenChange }: StandardQuizC
             )}
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 max-h-[70vh] px-4 pb-4">
+          <div className="flex-1 overflow-y-auto touch-auto px-4 pb-4" style={{ maxHeight: "calc(92vh - 140px)" }}>
             {step === "category" && (
               <div className="space-y-2">
                 {PRESET_QUIZ_CATEGORIES.map((cat) => (
@@ -106,7 +106,7 @@ export function StandardQuizCategorySelect({ open, onOpenChange }: StandardQuizC
                 ))}
               </div>
             )}
-          </ScrollArea>
+          </div>
 
           {step === "level" && (
             <div className="px-4 pb-4 pt-2 border-t">
