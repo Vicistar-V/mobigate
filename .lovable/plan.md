@@ -1,72 +1,54 @@
 
-# Fix Input Flickering Across All Dialogs/Drawers
+# Add Per-Question Timer to Interactive Quiz Non-Objective Questions
 
-## Root Cause
-**29 files** define their shared content as `const Content = () => (...)` -- an inline arrow function component. On every keystroke in an input field, React state updates, the parent re-renders, and React treats `Content` as a **new component** (because the function reference changes). This causes React to unmount and remount the entire content tree, destroying input focus and cursor position. The result: flickering text, lost cursor, and garbled input.
+## Problem
+The 5 non-objective (written) questions in the Interactive Quiz all appear simultaneously with a single "Submit All Answers" button and no timer. They should appear **one at a time**, each with a **15-second countdown timer**, advancing automatically when the user submits an answer or when time runs out.
 
-## Fix
-Convert every `const Content = () => (...)` to `const content = (...)` (a JSX variable), and replace `<Content />` with `{content}`. This preserves element identity across re-renders.
+## Changes
 
-## Files to Update (all 29 affected files)
+### File: `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx`
 
-**High priority (contain Input/Textarea -- visible flickering):**
-1. `src/components/community/settings/RecommendAlternativeDialog.tsx`
-2. `src/components/community/settings/RecommendNewSettingDialog.tsx`
-3. `src/components/community/finance/WalletTransferDialog.tsx`
-4. `src/components/community/finance/WalletTopUpDialog.tsx`
-5. `src/components/community/elections/NominateCandidateSheet.tsx`
-6. `src/components/community/ManageMembershipRequestsDialog.tsx`
-7. `src/components/community/ManageCommunityGalleryDialog.tsx`
-8. `src/components/community/meetings/SecretaryUploadMinutesDialog.tsx`
-9. `src/components/admin/finance/ManageDuesLeviesDialog.tsx`
-10. `src/components/admin/finance/MembersFinancialReportsDialog.tsx`
-11. `src/components/admin/settings/AdminSettingsTab.tsx`
-12. `src/components/admin/settings/SettingsDetailSheet.tsx`
-13. `src/components/admin/election/FeeDistributionConfigDialog.tsx`
+**New state variables:**
+- `currentNonObjQ` (number, default 0) -- tracks which non-objective question is currently shown (0-4)
+- `nonObjTimeRemaining` (number, default 15) -- countdown timer for the current non-objective question
+- `nonObjShowResult` (boolean) -- briefly shows correct/incorrect before advancing
 
-**Lower priority (display-only, no inputs but still best to fix):**
-14. `src/components/community/finance/FinancialOverviewDialog.tsx`
-15. `src/components/community/finance/FinancialObligationsDialog.tsx`
-16. `src/components/community/finance/FinancialAuditDialog.tsx`
-17. `src/components/community/meetings/MinutesDownloadDialog.tsx`
-18. `src/components/community/meetings/MinutesAdoptionDialog.tsx`
-19. `src/components/community/elections/NominationDetailsSheet.tsx`
-20. `src/components/admin/finance/IncomeSourceDetailSheet.tsx`
-21. `src/components/admin/finance/FloatingFundsDetailSheet.tsx`
-22. `src/components/admin/finance/ExpenseSourceDetailSheet.tsx`
-23. `src/components/admin/finance/DeficitsDetailSheet.tsx`
-24. `src/components/admin/finance/AccountStatementsDialog.tsx`
-25. `src/components/admin/election/CandidateVotersListSheet.tsx`
-26. `src/components/admin/election/CampaignRoyaltyDetailSheet.tsx`
-27. `src/components/admin/election/CampaignFeeDetailSheet.tsx`
-28. `src/components/admin/election/AdminPrimaryManagementSheet.tsx`
-29. `src/components/admin/election/CertificateOfReturnGenerator.tsx`
-30. `src/components/admin/finance/LevyDetailSheet.tsx`
+**New timer effect (for non-objective phase):**
+- Runs when `phase === "non_objective"` and the current question hasn't been answered yet
+- Counts down from 15 to 0
+- At 0, auto-locks the current answer (empty string if nothing typed), shows result briefly, then advances to the next question
+- When all 5 are done, tallies correct answers and moves to the "result" phase
 
-## Change Pattern (same for every file)
+**New answer submission logic:**
+- When user types an answer and presses "Confirm Answer" (or timer expires), the current answer is locked
+- A brief 1.5s result display shows correct/incorrect
+- Then advances `currentNonObjQ` to the next question, resets `nonObjTimeRemaining` to 15
+- After question 5 (index 4), calculates `nonObjectiveCorrect` and transitions to "result" phase
 
-Before:
-```typescript
-const Content = () => (
-  <div>...</div>
-);
+**Updated non-objective UI:**
+- Replace the `.map()` that renders all 5 questions with a single-question view showing only `interactiveNonObjectiveQuestions[currentNonObjQ]`
+- Add timer display (same clock style as objective phase) above the question
+- Show progress indicator: "Q11/15", "Q12/15", etc.
+- Show a "Confirm Answer" button instead of "Submit All Answers"
+- The `NonObjectiveQuestionCard` renders for only the current question, with `disabled` when result is showing
 
-// Usage:
-<Content />
-```
+**Updated header subtitle:**
+- Change from static "Q11-15 (Type Your Answer)" to dynamic `Q${11 + currentNonObjQ}/15 (Type Your Answer)`
 
-After:
-```typescript
-const content = (
-  <div>...</div>
-);
+**Updated progress bar:**
+- Reflect per-question progress in non-objective phase: `((10 + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100`
 
-// Usage:
-{content}
-```
+**Reset logic:**
+- Add `currentNonObjQ`, `nonObjTimeRemaining`, `nonObjShowResult` to the reset effect when dialog closes
+
+**Timer value (15s):**
+- Use a constant `NON_OBJECTIVE_TIME_PER_QUESTION = 15` at the top of the file for easy editing
+
+### No changes to `NonObjectiveQuestionCard.tsx`
+The existing component already supports all needed props (`disabled`, `showResult`, `isCorrect`, `onAnswer`). It will be reused as-is, just rendered one at a time instead of in a loop.
 
 ## Technical Details
-- Each file needs exactly 2-3 line changes: rename the variable, and replace 1-2 usages of `<Content />` with `{content}`
-- No logic changes, no new dependencies, no behavioral changes
-- This is a mechanical refactor with zero risk of breaking functionality
-- Fixes the flickering for ALL input fields across the entire app, not just the Recommend Alternative dialog
+- The per-question timer uses the same `setInterval` pattern already used for objective questions
+- Answer locking works by saving into the `nonObjectiveAnswers` array at index `currentNonObjQ`
+- The `NonObjectiveQuestionCard` needs a `key={currentNonObjQ}` to force remount (fresh input) for each new question
+- Scoring logic remains identical -- just runs after the 5th question instead of on a "Submit All" button press
