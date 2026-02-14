@@ -8,12 +8,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trophy, CheckCircle, XCircle, Layers } from "lucide-react";
 import { DEFAULT_QUIZ_LEVELS, type QuizLevelEntry } from "@/data/mobigateQuizLevelsData";
+import { type QuizType, QUIZ_TYPE_LABELS } from "@/data/quizTypeQuestionsData";
 import { CreateQuizLevelForm } from "./CreateQuizLevelForm";
 import { QuizLevelCard } from "./QuizLevelCard";
 import { QuizLevelFilters } from "./QuizLevelFilters";
 import { EditQuizLevelDrawer } from "./EditQuizLevelDrawer";
 
-export function MobigateQuizLevelsManagement() {
+interface Props {
+  quizType?: QuizType;
+}
+
+export function MobigateQuizLevelsManagement({ quizType }: Props) {
   const { toast } = useToast();
   const [levels, setLevels] = useState<QuizLevelEntry[]>(DEFAULT_QUIZ_LEVELS);
   const [filterCategory, setFilterCategory] = useState("all");
