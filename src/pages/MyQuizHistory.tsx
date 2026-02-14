@@ -567,7 +567,7 @@ export default function MyQuizHistory() {
 
       {/* Game Detail Drawer */}
       <Drawer open={!!selectedGame} onOpenChange={(open) => { if (!open) setSelectedGame(null); }}>
-        <DrawerContent className="max-h-[90vh]">
+        <DrawerContent className="max-h-[92vh] p-0">
           {selectedGame && (() => {
             const game = selectedGame;
             const ModeIcon = modeIcons[game.mode] || Gamepad2;
@@ -577,7 +577,7 @@ export default function MyQuizHistory() {
             const wrongCount = game.questions.length - correctCount;
 
             return (
-              <div className="overflow-y-auto pb-6">
+              <div className="flex-1 overflow-y-auto overscroll-contain pb-8" style={{ touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}>
                 <DrawerHeader className="text-center pb-3 pt-2">
                   <div className={`h-14 w-14 rounded-full mx-auto mb-2 flex items-center justify-center ${colors.bg}`}>
                     <ModeIcon className={`h-7 w-7 ${colors.text}`} />
