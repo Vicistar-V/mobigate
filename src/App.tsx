@@ -30,6 +30,7 @@ import MonitorQuizPage from "./pages/admin/quiz/MonitorQuizPage";
 import QuizGamesPlayedPage from "./pages/admin/quiz/QuizGamesPlayedPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import MyQuizHistory from "./pages/MyQuizHistory";
+import MobiQuizGames from "./pages/MobiQuizGames";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 import { initializeMockData } from "./data/mockAdvertData";
@@ -83,6 +84,7 @@ const App = () => {
                   <Route path="/mobigate-admin/quiz/games-played" element={<QuizGamesPlayedPage />} />
                   <Route path="/create-community" element={<CreateCommunity />} />
                   <Route path="/my-quiz-history" element={<MyQuizHistory />} />
+                  <Route path="/mobi-quiz-games" element={<MobiQuizGames />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
