@@ -19,14 +19,59 @@ const superadminMenuItems = [
     ]
   },
   {
-    title: "Manage Quiz",
+    title: "Group Quiz",
     icon: Gamepad2,
     items: [
-      { title: "Set Categories", url: "/mobigate-admin/quiz/categories" },
-      { title: "Set Quiz Levels", url: "/mobigate-admin/quiz/levels" },
-      { title: "Set Questions", url: "/mobigate-admin/quiz/questions/create" },
-      { title: "Manage Questions", url: "/mobigate-admin/quiz/questions" },
-      { title: "Monitor All Quiz", url: "/mobigate-admin/quiz/monitor" }
+      { title: "Categories", url: "/mobigate-admin/quiz/group/categories" },
+      { title: "Levels", url: "/mobigate-admin/quiz/group/levels" },
+      { title: "Create Questions", url: "/mobigate-admin/quiz/group/questions/create" },
+      { title: "Manage Questions", url: "/mobigate-admin/quiz/group/questions" },
+      { title: "Monitor", url: "/mobigate-admin/quiz/group/monitor" },
+    ]
+  },
+  {
+    title: "Standard Solo Quiz",
+    icon: Gamepad2,
+    items: [
+      { title: "Categories", url: "/mobigate-admin/quiz/standard/categories" },
+      { title: "Levels", url: "/mobigate-admin/quiz/standard/levels" },
+      { title: "Create Questions", url: "/mobigate-admin/quiz/standard/questions/create" },
+      { title: "Manage Questions", url: "/mobigate-admin/quiz/standard/questions" },
+      { title: "Monitor", url: "/mobigate-admin/quiz/standard/monitor" },
+    ]
+  },
+  {
+    title: "Interactive Quiz",
+    icon: Gamepad2,
+    items: [
+      { title: "Merchant Management", url: "/mobigate-admin/quiz/interactive/merchants" },
+      { title: "Categories", url: "/mobigate-admin/quiz/interactive/categories" },
+      { title: "Levels", url: "/mobigate-admin/quiz/interactive/levels" },
+      { title: "Create Questions", url: "/mobigate-admin/quiz/interactive/questions/create" },
+      { title: "Manage Questions", url: "/mobigate-admin/quiz/interactive/questions" },
+      { title: "Monitor", url: "/mobigate-admin/quiz/interactive/monitor" },
+    ]
+  },
+  {
+    title: "Food for Home Quiz",
+    icon: Gamepad2,
+    items: [
+      { title: "Categories", url: "/mobigate-admin/quiz/food/categories" },
+      { title: "Levels", url: "/mobigate-admin/quiz/food/levels" },
+      { title: "Create Questions", url: "/mobigate-admin/quiz/food/questions/create" },
+      { title: "Manage Questions", url: "/mobigate-admin/quiz/food/questions" },
+      { title: "Monitor", url: "/mobigate-admin/quiz/food/monitor" },
+    ]
+  },
+  {
+    title: "Scholarship Quiz",
+    icon: Gamepad2,
+    items: [
+      { title: "Categories", url: "/mobigate-admin/quiz/scholarship/categories" },
+      { title: "Levels", url: "/mobigate-admin/quiz/scholarship/levels" },
+      { title: "Create Questions", url: "/mobigate-admin/quiz/scholarship/questions/create" },
+      { title: "Manage Questions", url: "/mobigate-admin/quiz/scholarship/questions" },
+      { title: "Monitor", url: "/mobigate-admin/quiz/scholarship/monitor" },
     ]
   },
   {

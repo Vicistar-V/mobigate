@@ -438,26 +438,56 @@ export default function MobigateAdminDashboard() {
           {/* Quiz Tab */}
           <TabsContent value="quiz" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="space-y-3 pb-6">
+              <div className="space-y-4 pb-6">
+                {/* Quiz type cards */}
                 {[
-                  { label: "Set Categories", desc: "Manage quiz categories", icon: "📂", route: "/mobigate-admin/quiz/categories" },
-                  { label: "Set Quiz Levels", desc: "Configure stakes & tiers", icon: "🏆", route: "/mobigate-admin/quiz/levels" },
-                  { label: "Create Questions", desc: "Add new quiz questions", icon: "✏️", route: "/mobigate-admin/quiz/questions/create" },
-                  { label: "Manage Questions", desc: "Browse & edit questions", icon: "📋", route: "/mobigate-admin/quiz/questions" },
-                  { label: "Monitor Quiz", desc: "Live sessions & results", icon: "📡", route: "/mobigate-admin/quiz/monitor" },
-                ].map(item => (
-                  <Card
-                    key={item.route}
-                    className="cursor-pointer hover:bg-accent/30 transition-colors active:scale-[0.98]"
-                    onClick={() => navigate(item.route)}
-                  >
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <span className="text-2xl">{item.icon}</span>
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm">{item.label}</p>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                  { type: "group", label: "Group Quiz", icon: "👥", desc: "Team-based quiz competitions", color: "from-blue-500/10 to-blue-500/5" },
+                  { type: "standard", label: "Standard Solo", icon: "⚡", desc: "Individual quiz challenges", color: "from-amber-500/10 to-amber-500/5" },
+                  { type: "interactive", label: "Interactive Quiz", icon: "📡", desc: "Merchant-powered quiz platforms", color: "from-purple-500/10 to-purple-500/5" },
+                  { type: "food", label: "Food for Home", icon: "🍽️", desc: "Win food prizes through quizzes", color: "from-emerald-500/10 to-emerald-500/5" },
+                  { type: "scholarship", label: "Scholarship Quiz", icon: "🎓", desc: "Academic scholarship competitions", color: "from-rose-500/10 to-rose-500/5" },
+                ].map(qt => (
+                  <Card key={qt.type} className={`bg-gradient-to-br ${qt.color}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-2xl">{qt.icon}</span>
+                        <div>
+                          <p className="font-bold text-sm">{qt.label}</p>
+                          <p className="text-xs text-muted-foreground">{qt.desc}</p>
+                        </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      <div className="grid grid-cols-2 gap-2">
+                        {qt.type === "interactive" && (
+                          <Card className="cursor-pointer hover:bg-accent/30 transition-colors active:scale-[0.98]"
+                            onClick={() => navigate(`/mobigate-admin/quiz/interactive/merchants`)}>
+                            <CardContent className="p-2.5 flex items-center gap-2">
+                              <span className="text-base">🏪</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold">Merchants</p>
+                              </div>
+                              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                            </CardContent>
+                          </Card>
+                        )}
+                        {[
+                          { label: "Categories", icon: "📂", route: `categories` },
+                          { label: "Levels", icon: "🏆", route: `levels` },
+                          { label: "Questions", icon: "✏️", route: `questions` },
+                          { label: "Monitor", icon: "📡", route: `monitor` },
+                        ].map(item => (
+                          <Card key={item.route}
+                            className="cursor-pointer hover:bg-accent/30 transition-colors active:scale-[0.98]"
+                            onClick={() => navigate(`/mobigate-admin/quiz/${qt.type}/${item.route}`)}>
+                            <CardContent className="p-2.5 flex items-center gap-2">
+                              <span className="text-base">{item.icon}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold">{item.label}</p>
+                              </div>
+                              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
