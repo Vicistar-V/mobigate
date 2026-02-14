@@ -86,6 +86,11 @@ export function EditQuizLevelDrawer({ open, onOpenChange, entry, onSave, onDelet
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
                 className="h-12 text-base touch-manipulation"
+                style={{ touchAction: "manipulation" }}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                onPointerDown={(e) => e.stopPropagation()}
               />
             )}
           </div>
@@ -94,10 +99,16 @@ export function EditQuizLevelDrawer({ open, onOpenChange, entry, onSave, onDelet
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Minimum Stake Amount (Mobi)</Label>
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={stakeAmount}
-              onChange={(e) => setStakeAmount(e.target.value)}
+              onChange={(e) => setStakeAmount(e.target.value.replace(/[^0-9]/g, ""))}
               className="h-12 text-base touch-manipulation"
+              style={{ touchAction: "manipulation" }}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onPointerDown={(e) => e.stopPropagation()}
             />
           </div>
 
@@ -105,10 +116,16 @@ export function EditQuizLevelDrawer({ open, onOpenChange, entry, onSave, onDelet
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Winning Amount (Mobi)</Label>
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={winningAmount}
-              onChange={(e) => setWinningAmount(e.target.value)}
+              onChange={(e) => setWinningAmount(e.target.value.replace(/[^0-9]/g, ""))}
               className="h-12 text-base touch-manipulation"
+              style={{ touchAction: "manipulation" }}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onPointerDown={(e) => e.stopPropagation()}
             />
           </div>
 
