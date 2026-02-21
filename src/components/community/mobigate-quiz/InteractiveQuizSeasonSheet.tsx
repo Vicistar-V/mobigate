@@ -9,6 +9,7 @@ import { QuizMerchant, QuizSeason, GAME_SHOW_ENTRY_POINTS } from "@/data/mobigat
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { InteractiveQuizPlayDialog } from "./InteractiveQuizPlayDialog";
+import { LiveScoreboardDrawer } from "./LiveScoreboardDrawer";
 
 interface InteractiveQuizSeasonSheetProps {
   open: boolean;
@@ -21,6 +22,7 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
   const { toast } = useToast();
   const [selectedSeason, setSelectedSeason] = useState<QuizSeason | null>(null);
   const [showPlay, setShowPlay] = useState(false);
+  const [showScoreboard, setShowScoreboard] = useState(false);
 
   const handleJoin = () => {
     if (!selectedSeason) return;
@@ -49,6 +51,17 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
               <Trophy className="h-5 w-5 text-blue-500" /> {merchant.name}
             </DrawerTitle>
             <p className="text-xs text-muted-foreground">Select a season to compete in</p>
+            <button
+              onClick={() => setShowScoreboard(true)}
+              className="flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-200/30 active:scale-95 transition-all touch-manipulation"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              </span>
+              <Radio className="h-3 w-3 text-red-500" />
+              <span className="text-[10px] font-bold text-red-600 dark:text-red-400">View Live Scoreboard</span>
+            </button>
           </DrawerHeader>
 
           <ScrollArea className="flex-1 max-h-[60vh] px-4">
@@ -191,6 +204,7 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
           season={selectedSeason}
         />
       )}
+      <LiveScoreboardDrawer open={showScoreboard} onOpenChange={setShowScoreboard} />
     </>
   );
 }
