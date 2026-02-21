@@ -11,10 +11,18 @@ export const INSTANT_PRIZE_100 = 5.0; // 500% of stake
 export const INSTANT_PRIZE_90 = 0.5;  // 50% of stake
 export const INSTANT_PRIZE_80 = 0.2;  // 20% of stake
 
+// Objectives-only mode constants
+export const OBJECTIVES_ONLY_PRIZE_MULTIPLIER = 3.5; // 350% of stake
+export const OBJECTIVES_ONLY_CONSOLATION_MULTIPLIER = 0.2; // 20% of stake for 12-14 correct
+export const INTERACTIVE_FULL_OBJECTIVE_QUESTIONS = 15; // total objectives in bank
+export const INTERACTIVE_DEFAULT_OBJECTIVE_PICK = 10; // randomly picked for mixed mode
+
+export type PlayMode = "mixed" | "objectives_only";
+
 export interface QuizTierResult {
   points: number;
   prizeMultiplier: number;
-  tier: "perfect" | "excellent" | "good" | "pass" | "disqualified";
+  tier: "perfect" | "excellent" | "good" | "pass" | "consolation" | "disqualified";
   resetAll?: boolean;
 }
 
@@ -26,10 +34,23 @@ export function calculateQuizTier(percentage: number): QuizTierResult {
   return { points: 0, prizeMultiplier: 0, tier: "disqualified", resetAll: true };
 }
 
+export function calculateObjectivesOnlyTier(percentage: number, correctCount: number): QuizTierResult {
+  if (percentage === 100) return { points: 3, prizeMultiplier: OBJECTIVES_ONLY_PRIZE_MULTIPLIER, tier: "perfect" };
+  if (correctCount >= 12) return { points: 1, prizeMultiplier: OBJECTIVES_ONLY_CONSOLATION_MULTIPLIER, tier: "consolation" };
+  if (percentage >= 60) return { points: 0, prizeMultiplier: 0, tier: "pass" };
+  return { points: 0, prizeMultiplier: 0, tier: "disqualified", resetAll: true };
+}
+
+export function pickRandomObjectives<T>(allObjectives: T[], count: number): T[] {
+  const shuffled = [...allObjectives].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
 export const TIER_LABELS: Record<string, { emoji: string; label: string; color: string }> = {
   perfect: { emoji: "🌟", label: "Perfect Score! +3 Points", color: "text-green-600" },
   excellent: { emoji: "🔥", label: "Excellent! +2 Points", color: "text-blue-600" },
   good: { emoji: "👍", label: "Good! +1 Point", color: "text-amber-600" },
+  consolation: { emoji: "🎁", label: "Consolation Prize! +1 Point", color: "text-purple-600" },
   pass: { emoji: "😐", label: "No Points Earned", color: "text-muted-foreground" },
   disqualified: { emoji: "💀", label: "DISQUALIFIED!", color: "text-red-600" },
 };
@@ -119,7 +140,7 @@ export interface MerchantQuestion {
 // Default merchant config
 export const DEFAULT_MERCHANT_CONFIG: Omit<QuizMerchant, "id" | "name" | "logo" | "category" | "seasonsAvailable" | "totalPrizePool" | "isVerified" | "applicationStatus"> = {
   questionsPerPack: 15,
-  objectivePerPack: 10,
+  objectivePerPack: 15,
   nonObjectivePerPack: 5,
   objectiveOptions: 8,
   costPerQuestion: 200,
@@ -259,7 +280,7 @@ export const mockQuestions: MerchantQuestion[] = [
 ];
 
 export const INTERACTIVE_QUESTIONS_PER_SESSION = 15;
-export const INTERACTIVE_OBJECTIVE_QUESTIONS = 10;
+export const INTERACTIVE_OBJECTIVE_QUESTIONS = 10; // picked randomly from 15 in mixed mode
 export const INTERACTIVE_NON_OBJECTIVE_QUESTIONS = 5;
 
 export const INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION = 50;

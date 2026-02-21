@@ -13,6 +13,7 @@ export interface QuizPlayResult {
   percentage: number;
   objectiveCorrect: number;
   nonObjectiveCorrect: number;
+  playMode?: "mixed" | "objectives_only";
 }
 
 interface ObjectiveQuestion {
@@ -32,6 +33,7 @@ interface QuizPlayEngineProps {
   onComplete: (result: QuizPlayResult) => void;
   seasonName: string;
   headerGradient?: string;
+  playMode?: "mixed" | "objectives_only";
 }
 
 type Phase = "objective" | "non_objective";
@@ -42,6 +44,7 @@ export function QuizPlayEngine({
   onComplete,
   seasonName,
   headerGradient = "from-blue-500 to-cyan-500",
+  playMode = "mixed",
 }: QuizPlayEngineProps) {
   const hasNonObjective = nonObjectiveQuestions.length > 0;
   const totalQuestions = objectiveQuestions.length + nonObjectiveQuestions.length;
@@ -108,6 +111,7 @@ export function QuizPlayEngine({
             percentage: pct,
             objectiveCorrect: objC,
             nonObjectiveCorrect: 0,
+            playMode,
           });
           return objC;
         });
@@ -148,6 +152,7 @@ export function QuizPlayEngine({
                 percentage: pct,
                 objectiveCorrect: objC,
                 nonObjectiveCorrect: finalNonObj,
+                playMode,
               });
               return finalNonObj;
             });

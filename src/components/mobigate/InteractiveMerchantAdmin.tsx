@@ -224,7 +224,7 @@ export function InteractiveMerchantAdmin() {
               <h3 className="text-xs font-bold text-muted-foreground uppercase">Current Configuration</h3>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                 <span className="text-muted-foreground">Pack Size</span>
-                <span className="font-medium">{selectedMerchant.questionsPerPack} ({selectedMerchant.objectivePerPack}O + {selectedMerchant.nonObjectivePerPack}NO)</span>
+                <span className="font-medium">{selectedMerchant.questionsPerPack} ({selectedMerchant.objectivePerPack}O + {selectedMerchant.nonObjectivePerPack}NO){selectedMerchant.objectivePerPack === 15 ? " • 10 randomly picked for mixed play" : ""}</span>
                 <span className="text-muted-foreground">Options</span>
                 <span className="font-medium">{selectedMerchant.objectiveOptions} per question</span>
                 <span className="text-muted-foreground">Cost/Question</span>

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { X, Clock, Star, Radio, Trophy, Zap, AlertTriangle, Shield, RotateCcw, Gift } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { X, Clock, Star, Radio, Trophy, Zap, AlertTriangle, Shield, RotateCcw, Gift, BookOpen, Pencil } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +11,11 @@ import {
   INTERACTIVE_QUESTIONS_PER_SESSION,
   GAME_SHOW_ENTRY_POINTS,
   calculateQuizTier,
+  calculateObjectivesOnlyTier,
+  pickRandomObjectives,
   TIER_LABELS,
+  PlayMode,
+  INTERACTIVE_DEFAULT_OBJECTIVE_PICK,
 } from "@/data/mobigateInteractiveQuizData";
 import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
@@ -21,7 +25,8 @@ import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
 import { QuizPrizeRedemptionSheet } from "./QuizPrizeRedemptionSheet";
 import { InteractiveSessionDialog } from "./InteractiveSessionDialog";
 
-const interactiveObjectiveQuestions = [
+// 15 objective questions in the bank
+const allInteractiveObjectiveQuestions = [
   { question: "What is the most spoken language in the world?", options: ["Spanish", "Hindi", "English", "Arabic", "French", "Portuguese", "Bengali", "Russian"], correctAnswer: 2 },
   { question: "Which company created the iPhone?", options: ["Samsung", "Microsoft", "Apple", "Google", "Nokia", "Sony", "LG", "Huawei"], correctAnswer: 2 },
   { question: "What is the largest continent by area?", options: ["Africa", "North America", "Asia", "Europe", "South America", "Antarctica", "Australia", "Oceania"], correctAnswer: 2 },
@@ -32,6 +37,12 @@ const interactiveObjectiveQuestions = [
   { question: "What is the currency of the United Kingdom?", options: ["Euro", "Dollar", "Pound Sterling", "Franc", "Mark", "Shilling", "Crown", "Guilder"], correctAnswer: 2 },
   { question: "Who painted the Mona Lisa?", options: ["Michelangelo", "Raphael", "Leonardo da Vinci", "Donatello", "Picasso", "Van Gogh", "Rembrandt", "Monet"], correctAnswer: 2 },
   { question: "What is the hardest natural substance?", options: ["Gold", "Iron", "Diamond", "Platinum", "Titanium", "Quartz", "Ruby", "Sapphire"], correctAnswer: 2 },
+  // 5 additional objectives (total = 15)
+  { question: "What planet is known as the Red Planet?", options: ["Venus", "Jupiter", "Mars", "Saturn", "Mercury", "Uranus", "Neptune", "Pluto"], correctAnswer: 2 },
+  { question: "Which ocean is the largest?", options: ["Atlantic", "Indian", "Pacific", "Arctic", "Southern", "Caribbean", "Mediterranean", "Baltic"], correctAnswer: 2 },
+  { question: "What is the smallest country in the world?", options: ["Monaco", "Malta", "Vatican City", "San Marino", "Liechtenstein", "Nauru", "Tuvalu", "Andorra"], correctAnswer: 2 },
+  { question: "Who wrote 'Romeo and Juliet'?", options: ["Dickens", "Austen", "Shakespeare", "Hemingway", "Twain", "Tolstoy", "Orwell", "Wilde"], correctAnswer: 2 },
+  { question: "What is the chemical symbol for water?", options: ["HO", "O2", "H2O", "CO2", "NaCl", "H2", "OH", "H3O"], correctAnswer: 2 },
 ];
 
 const interactiveNonObjectiveQuestions = [
@@ -48,16 +59,18 @@ interface InteractiveQuizPlayDialogProps {
   season: QuizSeason;
 }
 
-type Phase = "objective" | "non_objective" | "result";
+type Phase = "mode_select" | "objective" | "non_objective" | "result";
 
 export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: InteractiveQuizPlayDialogProps) {
   const { toast } = useToast();
+  const [playMode, setPlayMode] = useState<PlayMode>("mixed");
+  const [activeObjectives, setActiveObjectives] = useState(allInteractiveObjectiveQuestions.slice(0, INTERACTIVE_DEFAULT_OBJECTIVE_PICK));
   const [currentQ, setCurrentQ] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(getObjectiveTimePerQuestion());
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [objectiveCorrect, setObjectiveCorrect] = useState(0);
-  const [phase, setPhase] = useState<Phase>("objective");
+  const [phase, setPhase] = useState<Phase>("mode_select");
   const [nonObjectiveAnswers, setNonObjectiveAnswers] = useState<string[]>(Array(5).fill(""));
   const [nonObjectiveCorrect, setNonObjectiveCorrect] = useState(0);
   const [showRedemption, setShowRedemption] = useState(false);
@@ -74,20 +87,23 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const [accumulatedWinnings, setAccumulatedWinnings] = useState(0);
   const [totalPlays, setTotalPlays] = useState(0);
 
-  const totalQuestions = interactiveObjectiveQuestions.length + (interactiveNonObjectiveQuestions.length > 0 ? interactiveNonObjectiveQuestions.length : 0);
-  const question = interactiveObjectiveQuestions[currentQ];
+  const activeNonObjectives = playMode === "objectives_only" ? [] : interactiveNonObjectiveQuestions;
+  const totalQuestions = activeObjectives.length + activeNonObjectives.length;
+  const question = activeObjectives[currentQ];
   const totalCorrect = objectiveCorrect + nonObjectiveCorrect;
-  const percentage = Math.round((totalCorrect / totalQuestions) * 100);
+  const percentage = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
-  // Tier calculation
-  const tierResult = calculateQuizTier(percentage);
+  // Tier calculation based on play mode
+  const tierResult = playMode === "objectives_only"
+    ? calculateObjectivesOnlyTier(percentage, totalCorrect)
+    : calculateQuizTier(percentage);
   const tierInfo = TIER_LABELS[tierResult.tier];
   const instantPrize = Math.round(season.entryFee * tierResult.prizeMultiplier);
   const hasReachedGameShow = accumulatedPoints >= GAME_SHOW_ENTRY_POINTS;
 
   const resetAllState = useCallback(() => {
     setCurrentQ(0); setTimeRemaining(getObjectiveTimePerQuestion()); setSelectedAnswer(null); setShowResult(false);
-    setObjectiveCorrect(0); setPhase("objective"); setNonObjectiveAnswers(Array(5).fill(""));
+    setObjectiveCorrect(0); setPhase("mode_select"); setNonObjectiveAnswers(Array(5).fill(""));
     setNonObjectiveCorrect(0); setShowRedemption(false);
     setCurrentNonObjQ(0); setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
     setNonObjShowResult(false); setNonObjLocked(false);
@@ -100,8 +116,19 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
       setAccumulatedPoints(0);
       setAccumulatedWinnings(0);
       setTotalPlays(0);
+      setPlayMode("mixed");
     }
   }, [open, resetAllState]);
+
+  const handleSelectMode = (mode: PlayMode) => {
+    setPlayMode(mode);
+    if (mode === "objectives_only") {
+      setActiveObjectives([...allInteractiveObjectiveQuestions]); // all 15
+    } else {
+      setActiveObjectives(pickRandomObjectives(allInteractiveObjectiveQuestions, INTERACTIVE_DEFAULT_OBJECTIVE_PICK)); // random 10
+    }
+    setPhase("objective");
+  };
 
   // Objective timer
   useEffect(() => {
@@ -129,10 +156,10 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     setTimeout(() => nextObjective(), 1500);
   };
 
-  const hasNonObjective = interactiveNonObjectiveQuestions.length > 0;
+  const hasNonObjective = activeNonObjectives.length > 0;
 
   const nextObjective = () => {
-    if (currentQ >= interactiveObjectiveQuestions.length - 1) {
+    if (currentQ >= activeObjectives.length - 1) {
       if (hasNonObjective) {
         setPhase("non_objective");
       } else {
@@ -147,11 +174,11 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     setNonObjLocked(true);
     setNonObjectiveAnswers(prev => { const updated = [...prev]; updated[currentNonObjQ] = answer; return updated; });
     setNonObjShowResult(true);
-    const q = interactiveNonObjectiveQuestions[currentNonObjQ];
+    const q = activeNonObjectives[currentNonObjQ];
     const isCorrect = q.acceptedAnswers.some(a => answer.toLowerCase().includes(a.toLowerCase()));
     if (isCorrect) setNonObjectiveCorrect(p => p + 1);
     setTimeout(() => {
-      if (currentNonObjQ >= interactiveNonObjectiveQuestions.length - 1) {
+      if (currentNonObjQ >= activeNonObjectives.length - 1) {
         finalizeResult();
       } else {
         setCurrentNonObjQ(p => p + 1);
@@ -159,22 +186,23 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
         setNonObjShowResult(false); setNonObjLocked(false);
       }
     }, 1500);
-  }, [currentNonObjQ]);
+  }, [currentNonObjQ, activeNonObjectives]);
 
   const finalizeResult = () => {
     setTotalPlays(p => p + 1);
     setPhase("result");
   };
 
-  // Apply tier points after result is shown (use effect to read final correct counts)
+  // Apply tier points after result is shown
   useEffect(() => {
     if (phase !== "result") return;
     const tc = objectiveCorrect + nonObjectiveCorrect;
-    const pct = Math.round((tc / totalQuestions) * 100);
-    const tier = calculateQuizTier(pct);
+    const pct = totalQuestions > 0 ? Math.round((tc / totalQuestions) * 100) : 0;
+    const tier = playMode === "objectives_only"
+      ? calculateObjectivesOnlyTier(pct, tc)
+      : calculateQuizTier(pct);
 
     if (tier.resetAll) {
-      // DISQUALIFIED — reset everything
       setAccumulatedPoints(0);
       setAccumulatedWinnings(0);
       toast({ title: "💀 DISQUALIFIED!", description: "All points and prizes reset to zero!", variant: "destructive" });
@@ -192,7 +220,6 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   };
 
   const handleRedeemInstantPrize = (action: "exit" | "play_again") => {
-    // Taking instant prize dissolves all accumulated points and disqualifies from Game Show
     setAccumulatedPoints(0);
     setRedemptionAction(action);
     setShowRedemption(true);
@@ -200,12 +227,10 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   };
 
   const handleSkipPrizeContinuePlaying = () => {
-    // Keep points, skip instant prize
     resetAllState();
   };
 
   const handlePlayAgainFresh = () => {
-    // After disqualification — fresh start
     setAccumulatedPoints(0);
     setAccumulatedWinnings(0);
     resetAllState();
@@ -219,13 +244,14 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     }
   };
 
-  const progressValue = phase === "objective"
+  const progressValue = phase === "mode_select" ? 0
+    : phase === "objective"
     ? ((currentQ + (showResult ? 1 : 0)) / totalQuestions) * 100
     : phase === "non_objective"
-      ? ((interactiveObjectiveQuestions.length + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100
+      ? ((activeObjectives.length + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100
       : 100;
 
-  const currentNonObjQuestion = interactiveNonObjectiveQuestions[currentNonObjQ];
+  const currentNonObjQuestion = activeNonObjectives[currentNonObjQ];
   const currentNonObjIsCorrect = currentNonObjQuestion?.acceptedAnswers.some(
     a => (nonObjectiveAnswers[currentNonObjQ] || "").toLowerCase().includes(a.toLowerCase())
   );
@@ -244,8 +270,9 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 <div>
                   <h2 className="font-semibold text-sm">{season.name}</h2>
                   <p className="text-xs text-blue-200">
-                    {phase === "objective" && `Q${currentQ + 1}/${interactiveObjectiveQuestions.length} (Objective)`}
-                    {phase === "non_objective" && `Q${interactiveObjectiveQuestions.length + 1 + currentNonObjQ}/${totalQuestions} (Written)`}
+                    {phase === "mode_select" && "Choose Play Mode"}
+                    {phase === "objective" && `Q${currentQ + 1}/${activeObjectives.length} (Objective)`}
+                    {phase === "non_objective" && `Q${activeObjectives.length + 1 + currentNonObjQ}/${totalQuestions} (Written)`}
                     {phase === "result" && "Results"}
                   </p>
                 </div>
@@ -254,6 +281,11 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 <Badge className="bg-white/20 text-white border-0 text-[10px]">
                   <Star className="h-3 w-3 mr-0.5" />{accumulatedPoints} pts
                 </Badge>
+                {phase !== "mode_select" && (
+                  <Badge className="bg-white/10 text-white border-0 text-[9px]">
+                    {playMode === "objectives_only" ? "Obj Only" : "Mixed"}
+                  </Badge>
+                )}
                 <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-white hover:bg-white/20">
                   <X className="h-4 w-4" />
                 </Button>
@@ -264,6 +296,65 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto px-3 py-3 touch-auto overscroll-contain">
+            {/* Mode Selection */}
+            {phase === "mode_select" && (
+              <div className="space-y-4">
+                <div className="text-center space-y-2 pt-2">
+                  <p className="text-3xl">🎯</p>
+                  <h3 className="font-bold text-base">Choose Your Play Mode</h3>
+                  <p className="text-xs text-muted-foreground">Select how you want to play this quiz session</p>
+                </div>
+
+                {/* Mixed mode option */}
+                <Card className="border-2 border-blue-200 hover:border-blue-400 transition-all cursor-pointer active:scale-[0.98]" onClick={() => handleSelectMode("mixed")}>
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <BookOpen className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm">Objectives + Written</h4>
+                        <p className="text-xs text-muted-foreground">15 Questions (10 Objectives + 5 Written)</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-2.5 space-y-1">
+                      <p className="text-[10px] font-medium text-blue-700">Full Prize Tiers:</p>
+                      <p className="text-[10px] text-muted-foreground">🌟 100% = 500% • 🔥 90% = 50% • 👍 80% = 20%</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Objectives only option */}
+                <Card className="border-2 border-amber-200 hover:border-amber-400 transition-all cursor-pointer active:scale-[0.98]" onClick={() => handleSelectMode("objectives_only")}>
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+                        <Pencil className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm">Play Only Objectives</h4>
+                        <p className="text-xs text-muted-foreground">15 Objective Questions Only</p>
+                      </div>
+                    </div>
+                    <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30">
+                      <CardContent className="p-2.5 space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                          <p className="text-[10px] font-medium text-amber-700">Reduced Winning Prize</p>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">
+                          This option reduces your Winning Prize from <strong>500% to 350%</strong> of Stake.
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Getting 12-14 correct earns <strong>20% consolation prize</strong>.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {phase === "objective" && question && (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-2">
@@ -305,13 +396,13 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 </div>
                 <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200">
                   <CardContent className="p-3 text-center">
-                    <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/{interactiveObjectiveQuestions.length}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Written question {currentNonObjQ + 1} of {interactiveNonObjectiveQuestions.length}</p>
+                    <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/{activeObjectives.length}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Written question {currentNonObjQ + 1} of {activeNonObjectives.length}</p>
                   </CardContent>
                 </Card>
                 <NonObjectiveQuestionCard
                   key={currentNonObjQ}
-                  questionNumber={interactiveObjectiveQuestions.length + 1 + currentNonObjQ}
+                  questionNumber={activeObjectives.length + 1 + currentNonObjQ}
                   question={currentNonObjQuestion.question}
                   onAnswer={(ans) => { const a = [...nonObjectiveAnswers]; a[currentNonObjQ] = ans; setNonObjectiveAnswers(a); }}
                   disabled={nonObjLocked}
@@ -328,6 +419,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                   "border-green-500 bg-green-50 dark:bg-green-950/30": tierResult.tier === "perfect",
                   "border-blue-400 bg-blue-50 dark:bg-blue-950/30": tierResult.tier === "excellent",
                   "border-amber-400 bg-amber-50 dark:bg-amber-950/30": tierResult.tier === "good",
+                  "border-purple-400 bg-purple-50 dark:bg-purple-950/30": tierResult.tier === "consolation",
                   "border-border bg-muted/30": tierResult.tier === "pass",
                   "border-red-500 bg-red-50 dark:bg-red-950/30": tierResult.tier === "disqualified",
                 })}>
@@ -335,15 +427,20 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                     <p className="text-4xl">{tierInfo.emoji}</p>
                     <h3 className={cn("font-bold text-lg", tierInfo.color)}>{tierInfo.label}</h3>
                     <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
+                    <Badge className="bg-muted text-foreground border-0 text-[10px]">
+                      {playMode === "objectives_only" ? "Objectives Only Mode" : "Mixed Mode"}
+                    </Badge>
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
                         <p className="text-[10px] text-muted-foreground">Objective</p>
-                        <p className="font-bold text-sm">{objectiveCorrect}/{interactiveObjectiveQuestions.length}</p>
+                        <p className="font-bold text-sm">{objectiveCorrect}/{activeObjectives.length}</p>
                       </div>
-                      <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">
-                        <p className="text-[10px] text-muted-foreground">Written</p>
-                        <p className="font-bold text-sm">{nonObjectiveCorrect}/{interactiveNonObjectiveQuestions.length || 0}</p>
-                      </div>
+                      {playMode === "mixed" && (
+                        <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">
+                          <p className="text-[10px] text-muted-foreground">Written</p>
+                          <p className="font-bold text-sm">{nonObjectiveCorrect}/{activeNonObjectives.length}</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

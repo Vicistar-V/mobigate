@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X, Zap, Trophy, AlertTriangle, Shield, Star, TrendingUp, RotateCcw, Gift } from "lucide-react";
+import { X, Zap, Trophy, AlertTriangle, Shield, Star, TrendingUp, RotateCcw, Gift, BookOpen, Pencil } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,11 @@ import {
   INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION,
   GAME_SHOW_ENTRY_POINTS,
   calculateQuizTier,
+  calculateObjectivesOnlyTier,
+  pickRandomObjectives,
   TIER_LABELS,
+  PlayMode,
+  INTERACTIVE_DEFAULT_OBJECTIVE_PICK,
 } from "@/data/mobigateInteractiveQuizData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -18,7 +22,8 @@ import { cn } from "@/lib/utils";
 import { QuizPlayEngine, QuizPlayResult } from "./QuizPlayEngine";
 import { QuizPrizeRedemptionSheet } from "./QuizPrizeRedemptionSheet";
 
-const sessionObjectiveQuestions = [
+// 15 objective questions in the bank for sessions
+const allSessionObjectiveQuestions = [
   { question: "What is the most spoken language in the world?", options: ["Spanish", "Hindi", "English", "Arabic", "French", "Portuguese", "Bengali", "Russian"], correctAnswer: 2 },
   { question: "Which company created the iPhone?", options: ["Samsung", "Microsoft", "Apple", "Google", "Nokia", "Sony", "LG", "Huawei"], correctAnswer: 2 },
   { question: "What is the largest continent by area?", options: ["Africa", "North America", "Asia", "Europe", "South America", "Antarctica", "Australia", "Oceania"], correctAnswer: 2 },
@@ -29,6 +34,12 @@ const sessionObjectiveQuestions = [
   { question: "What is the currency of the United Kingdom?", options: ["Euro", "Dollar", "Pound Sterling", "Franc", "Mark", "Shilling", "Crown", "Guilder"], correctAnswer: 2 },
   { question: "Who painted the Mona Lisa?", options: ["Michelangelo", "Raphael", "Leonardo da Vinci", "Donatello", "Picasso", "Van Gogh", "Rembrandt", "Monet"], correctAnswer: 2 },
   { question: "What is the hardest natural substance?", options: ["Gold", "Iron", "Diamond", "Platinum", "Titanium", "Quartz", "Ruby", "Sapphire"], correctAnswer: 2 },
+  // 5 additional objectives (total = 15)
+  { question: "What planet is known as the Red Planet?", options: ["Venus", "Jupiter", "Mars", "Saturn", "Mercury", "Uranus", "Neptune", "Pluto"], correctAnswer: 2 },
+  { question: "Which ocean is the largest?", options: ["Atlantic", "Indian", "Pacific", "Arctic", "Southern", "Caribbean", "Mediterranean", "Baltic"], correctAnswer: 2 },
+  { question: "What is the smallest country in the world?", options: ["Monaco", "Malta", "Vatican City", "San Marino", "Liechtenstein", "Nauru", "Tuvalu", "Andorra"], correctAnswer: 2 },
+  { question: "Who wrote 'Romeo and Juliet'?", options: ["Dickens", "Austen", "Shakespeare", "Hemingway", "Twain", "Tolstoy", "Orwell", "Wilde"], correctAnswer: 2 },
+  { question: "What is the chemical symbol for water?", options: ["HO", "O2", "H2O", "CO2", "NaCl", "H2", "OH", "H3O"], correctAnswer: 2 },
 ];
 
 const sessionNonObjectiveQuestions = [
@@ -45,12 +56,13 @@ interface InteractiveSessionDialogProps {
   season: QuizSeason;
 }
 
-type SessionPhase = "lobby" | "playing" | "session_result";
+type SessionPhase = "lobby" | "mode_select" | "playing" | "session_result";
 
 export function InteractiveSessionDialog({ open, onOpenChange, season }: InteractiveSessionDialogProps) {
   const { toast } = useToast();
 
   const [sessionPhase, setSessionPhase] = useState<SessionPhase>("lobby");
+  const [playMode, setPlayMode] = useState<PlayMode>("mixed");
   const [sessionPoints, setSessionPoints] = useState(0);
   const [sessionsPlayed, setSessionsPlayed] = useState(0);
   const [sessionsWon, setSessionsWon] = useState(0);
@@ -62,20 +74,37 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   const [lastTier, setLastTier] = useState<ReturnType<typeof calculateQuizTier> | null>(null);
   const [showRedemption, setShowRedemption] = useState(false);
   const [playKey, setPlayKey] = useState(0);
+  const [activeObjectives, setActiveObjectives] = useState(allSessionObjectiveQuestions.slice(0, INTERACTIVE_DEFAULT_OBJECTIVE_PICK));
 
   const sessionFee = season.selectionProcesses?.[1]?.entryFee || season.entryFee * 2;
   const hasReachedGameShow = sessionPoints >= GAME_SHOW_ENTRY_POINTS;
   const pointsProgress = Math.min((sessionPoints / GAME_SHOW_ENTRY_POINTS) * 100, 100);
 
+  const activeNonObjectives = playMode === "objectives_only" ? [] : sessionNonObjectiveQuestions;
+
+  const handleSelectMode = (mode: PlayMode) => {
+    setPlayMode(mode);
+    if (mode === "objectives_only") {
+      setActiveObjectives([...allSessionObjectiveQuestions]); // all 15
+    } else {
+      setActiveObjectives(pickRandomObjectives(allSessionObjectiveQuestions, INTERACTIVE_DEFAULT_OBJECTIVE_PICK)); // random 10
+    }
+    setPlayKey(p => p + 1);
+    setLastResult(null);
+    setLastTier(null);
+    setSessionPhase("playing");
+  };
+
   const handleSessionComplete = useCallback((result: QuizPlayResult) => {
     setSessionsPlayed(p => p + 1);
     setLastResult(result);
 
-    const tier = calculateQuizTier(result.percentage);
+    const tier = playMode === "objectives_only"
+      ? calculateObjectivesOnlyTier(result.percentage, result.totalCorrect)
+      : calculateQuizTier(result.percentage);
     setLastTier(tier);
 
     if (tier.resetAll) {
-      // DISQUALIFIED — reset ALL points and winnings
       setSessionPoints(0);
       setCurrentWinnings(0);
       setAccumulatedWinnings(0);
@@ -103,19 +132,15 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
       }
     }
     setSessionPhase("session_result");
-  }, [sessionsLost, sessionFee, toast]);
+  }, [sessionsLost, sessionFee, toast, playMode]);
 
   const handleContinueToNext = () => {
     setCurrentWinnings(0);
-    setPlayKey(p => p + 1);
-    setLastResult(null);
-    setLastTier(null);
-    setSessionPhase("playing");
-    toast({ title: "💨 Instant Prize Dissolved", description: "Points kept. New session started." });
+    setSessionPhase("mode_select");
+    toast({ title: "💨 Instant Prize Dissolved", description: "Points kept. Choose mode for next session." });
   };
 
   const handleTakeInstantPrize = () => {
-    // Taking instant prize blocks Game Show entry — dissolves all points
     setSessionPoints(0);
     setShowRedemption(true);
     toast({ title: "⚠️ Points Dissolved", description: "Taking prize removes Game Show eligibility." });
@@ -130,10 +155,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   };
 
   const handleStartSession = () => {
-    setPlayKey(p => p + 1);
-    setLastResult(null);
-    setLastTier(null);
-    setSessionPhase("playing");
+    setSessionPhase("mode_select");
   };
 
   const handlePlayAgainFresh = () => {
@@ -144,10 +166,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
     setSessionsWon(0);
     setSessionsLost(0);
     setIsEvicted(false);
-    setPlayKey(p => p + 1);
-    setLastResult(null);
-    setLastTier(null);
-    setSessionPhase("playing");
+    setSessionPhase("mode_select");
   };
 
   return (
@@ -163,6 +182,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                   <h2 className="font-semibold text-sm">{season.name}</h2>
                   <p className="text-xs text-amber-200">
                     {sessionPhase === "lobby" && "Interactive Session"}
+                    {sessionPhase === "mode_select" && "Choose Play Mode"}
                     {sessionPhase === "playing" && "Session In Progress"}
                     {sessionPhase === "session_result" && "Session Complete"}
                   </p>
@@ -261,6 +281,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                           <Shield className="h-3.5 w-3.5" /> Scoring & Rules
                         </p>
                         <div className="space-y-1.5 text-[10px] text-muted-foreground">
+                          <p className="font-medium text-foreground text-[11px]">Mixed Mode (10 Obj + 5 Written):</p>
                           <p className="flex items-start gap-1.5">
                             <span className="shrink-0 text-green-500">🌟</span>
                             100% correct = +3 Points, 500% prize
@@ -273,6 +294,17 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                             <span className="shrink-0 text-amber-500">👍</span>
                             80%+ correct = +1 Point, 20% prize
                           </p>
+                          <hr className="my-1.5 border-border" />
+                          <p className="font-medium text-foreground text-[11px]">Objectives Only (15 Obj):</p>
+                          <p className="flex items-start gap-1.5">
+                            <span className="shrink-0 text-green-500">🌟</span>
+                            15/15 correct = +3 Points, 350% prize
+                          </p>
+                          <p className="flex items-start gap-1.5">
+                            <span className="shrink-0 text-purple-500">🎁</span>
+                            12-14 correct = +1 Point, 20% consolation
+                          </p>
+                          <hr className="my-1.5 border-border" />
                           <p className="flex items-start gap-1.5">
                             <span className="shrink-0">😐</span>
                             60-79% = No points, continue playing
@@ -302,14 +334,66 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
               </div>
             )}
 
+            {/* Mode Selection */}
+            {sessionPhase === "mode_select" && (
+              <div className="px-3 py-3 space-y-4">
+                <div className="text-center space-y-2 pt-2">
+                  <p className="text-3xl">🎯</p>
+                  <h3 className="font-bold text-base">Choose Play Mode</h3>
+                  <p className="text-xs text-muted-foreground">Select how you want to play this session</p>
+                </div>
+
+                <Card className="border-2 border-amber-200 hover:border-amber-400 transition-all cursor-pointer active:scale-[0.98]" onClick={() => handleSelectMode("mixed")}>
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+                        <BookOpen className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm">Objectives + Written</h4>
+                        <p className="text-xs text-muted-foreground">15 Questions (10 Obj + 5 Written)</p>
+                      </div>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
+                      <p className="text-[10px] text-muted-foreground">🌟 100% = 500% • 🔥 90% = 50% • 👍 80% = 20%</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-2 border-purple-200 hover:border-purple-400 transition-all cursor-pointer active:scale-[0.98]" onClick={() => handleSelectMode("objectives_only")}>
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                        <Pencil className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm">Play Only Objectives</h4>
+                        <p className="text-xs text-muted-foreground">15 Objective Questions Only</p>
+                      </div>
+                    </div>
+                    <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30">
+                      <CardContent className="p-2.5 space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                          <p className="text-[10px] font-medium text-amber-700">Reduced Prize: 500% → 350%</p>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">12-14 correct = 20% consolation prize</p>
+                      </CardContent>
+                    </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {sessionPhase === "playing" && (
               <QuizPlayEngine
                 key={playKey}
-                objectiveQuestions={sessionObjectiveQuestions}
-                nonObjectiveQuestions={sessionNonObjectiveQuestions}
+                objectiveQuestions={activeObjectives}
+                nonObjectiveQuestions={activeNonObjectives}
                 onComplete={handleSessionComplete}
                 seasonName={season.name}
                 headerGradient="from-amber-500 to-orange-600"
+                playMode={playMode}
               />
             )}
 
@@ -320,6 +404,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                   "border-green-500 bg-green-50 dark:bg-green-950/30": lastTier.tier === "perfect",
                   "border-blue-400 bg-blue-50 dark:bg-blue-950/30": lastTier.tier === "excellent",
                   "border-amber-400 bg-amber-50 dark:bg-amber-950/30": lastTier.tier === "good",
+                  "border-purple-400 bg-purple-50 dark:bg-purple-950/30": lastTier.tier === "consolation",
                   "border-border bg-muted/30": lastTier.tier === "pass",
                   "border-red-500 bg-red-50 dark:bg-red-950/30": lastTier.tier === "disqualified",
                 })}>
@@ -329,8 +414,11 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                       {TIER_LABELS[lastTier.tier].label}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {lastResult.totalCorrect}/15 correct ({lastResult.percentage}%)
+                      {lastResult.totalCorrect}/{lastResult.objectiveCorrect + lastResult.nonObjectiveCorrect} correct ({lastResult.percentage}%)
                     </p>
+                    <Badge className="bg-muted text-foreground border-0 text-[10px]">
+                      {playMode === "objectives_only" ? "Objectives Only" : "Mixed Mode"}
+                    </Badge>
                     {lastTier.points > 0 && (
                       <Badge className="bg-primary text-primary-foreground border-0">
                         <TrendingUp className="h-3 w-3 mr-1" /> Total: {sessionPoints} Points
