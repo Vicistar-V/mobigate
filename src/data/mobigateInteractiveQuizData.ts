@@ -55,7 +55,17 @@ export const TIER_LABELS: Record<string, { emoji: string; label: string; color: 
   disqualified: { emoji: "💀", label: "DISQUALIFIED!", color: "text-red-600" },
 };
 
+// ── Wallet & Waiver Constants ────────────────────────────────────────────
+export const MERCHANT_MIN_WALLET_PERCENT = 0.7; // 70% of total prizes required
+export const WAIVER_REQUEST_FEE = 50000; // non-refundable fee to apply for waiver
+
 // ── Interfaces ───────────────────────────────────────────────────────────
+
+export interface WalletTransaction {
+  date: string;
+  amount: number;
+  description: string;
+}
 
 export interface SelectionProcess {
   round: number;
@@ -94,6 +104,11 @@ export interface QuizMerchant {
   bonusGamesCountMax: number;
   bonusDiscountMin: number;
   bonusDiscountMax: number;
+  // Wallet & Waiver fields
+  walletBalance: number;
+  walletFundingHistory: WalletTransaction[];
+  pendingWaiverRequest: boolean;
+  waiverApproved: boolean;
 }
 
 export interface QuizSeason {
@@ -121,6 +136,14 @@ export interface QuizSeason {
   // Consolation prizes
   consolationPrizesEnabled: boolean;
   consolationPrizePool: number;
+  // Game Show Winning Prizes
+  firstPrize: number;
+  secondPrize: number;
+  thirdPrize: number;
+  consolationPrizePerPlayer: number;
+  consolationPrizeCount: number;
+  totalWinningPrizes: number;
+  quizStatus: "draft" | "active" | "suspended";
 }
 
 export interface MerchantQuestion {
@@ -154,33 +177,66 @@ export const DEFAULT_MERCHANT_CONFIG: Omit<QuizMerchant, "id" | "name" | "logo" 
   bonusGamesCountMax: 10,
   bonusDiscountMin: 25,
   bonusDiscountMax: 50,
+  walletBalance: 0,
+  walletFundingHistory: [],
+  pendingWaiverRequest: false,
+  waiverApproved: false,
 };
 
 export const mockMerchants: QuizMerchant[] = [
   {
     id: "m1", name: "TechVentures Nigeria", logo: "/placeholder.svg", category: "Technology",
-    seasonsAvailable: 3, totalPrizePool: 5000000, isVerified: true, applicationStatus: "approved",
+    seasonsAvailable: 3, totalPrizePool: 16500000, isVerified: true, applicationStatus: "approved",
     ...DEFAULT_MERCHANT_CONFIG, winPercentageThreshold: 35, costPerQuestion: 250,
+    walletBalance: 15000000,
+    walletFundingHistory: [
+      { date: "2025-06-01", amount: 5000000, description: "Initial deposit" },
+      { date: "2025-06-15", amount: 5000000, description: "Top-up" },
+      { date: "2025-07-01", amount: 5000000, description: "Season funding" },
+    ],
+    pendingWaiverRequest: false, waiverApproved: false,
   },
   {
     id: "m2", name: "FoodCo Supermarket", logo: "/placeholder.svg", category: "Retail",
-    seasonsAvailable: 2, totalPrizePool: 3000000, isVerified: true, applicationStatus: "approved",
+    seasonsAvailable: 2, totalPrizePool: 10500000, isVerified: true, applicationStatus: "approved",
     ...DEFAULT_MERCHANT_CONFIG, winPercentageThreshold: 40, objectiveOptions: 10,
+    walletBalance: 4000000,
+    walletFundingHistory: [
+      { date: "2025-05-10", amount: 2000000, description: "Initial deposit" },
+      { date: "2025-06-20", amount: 2000000, description: "Top-up" },
+    ],
+    pendingWaiverRequest: true, waiverApproved: false,
   },
   {
     id: "m3", name: "EduFirst Academy", logo: "/placeholder.svg", category: "Education",
-    seasonsAvailable: 4, totalPrizePool: 8000000, isVerified: true, applicationStatus: "approved",
+    seasonsAvailable: 4, totalPrizePool: 22000000, isVerified: true, applicationStatus: "approved",
     ...DEFAULT_MERCHANT_CONFIG, qualifyingPoints: 300, bonusGamesAfter: 40,
+    walletBalance: 20000000,
+    walletFundingHistory: [
+      { date: "2025-04-01", amount: 10000000, description: "Initial deposit" },
+      { date: "2025-05-15", amount: 10000000, description: "Season funding" },
+    ],
+    pendingWaiverRequest: false, waiverApproved: false,
   },
   {
     id: "m4", name: "HealthPlus Pharmacy", logo: "/placeholder.svg", category: "Healthcare",
     seasonsAvailable: 0, totalPrizePool: 0, isVerified: false, applicationStatus: "pending",
     ...DEFAULT_MERCHANT_CONFIG,
+    walletBalance: 500000,
+    walletFundingHistory: [
+      { date: "2025-07-01", amount: 500000, description: "Initial deposit" },
+    ],
+    pendingWaiverRequest: false, waiverApproved: false,
   },
   {
     id: "m5", name: "AutoKing Motors", logo: "/placeholder.svg", category: "Automotive",
     seasonsAvailable: 2, totalPrizePool: 10000000, isVerified: true, applicationStatus: "suspended",
     ...DEFAULT_MERCHANT_CONFIG, winPercentageThreshold: 50, costPerQuestion: 500,
+    walletBalance: 8000000,
+    walletFundingHistory: [
+      { date: "2025-03-01", amount: 8000000, description: "Initial deposit" },
+    ],
+    pendingWaiverRequest: false, waiverApproved: false,
   },
 ];
 
@@ -191,7 +247,10 @@ export const mockSeasons: QuizSeason[] = [
     prizePerLevel: 50000, isLive: false, status: "open",
     startDate: "2025-03-01", endDate: "2025-06-30", originalEndDate: "2025-06-30",
     isExtended: false, extensionWeeks: 0, extensionReason: "", minimumTargetParticipants: 15000,
-    consolationPrizesEnabled: true, consolationPrizePool: 500000,
+    consolationPrizesEnabled: true, consolationPrizePool: 6000000,
+    firstPrize: 6000000, secondPrize: 3000000, thirdPrize: 1500000,
+    consolationPrizePerPlayer: 500000, consolationPrizeCount: 12,
+    totalWinningPrizes: 16500000, quizStatus: "active",
     selectionProcesses: [
       { round: 1, entriesSelected: 10000, entryFee: 200 },
       { round: 2, entriesSelected: 5000, entryFee: 500 },
@@ -209,7 +268,10 @@ export const mockSeasons: QuizSeason[] = [
     prizePerLevel: 100000, isLive: true, status: "in_progress",
     startDate: "2025-01-15", endDate: "2026-01-14", originalEndDate: "2026-01-14",
     isExtended: false, extensionWeeks: 0, extensionReason: "", minimumTargetParticipants: 30000,
-    consolationPrizesEnabled: false, consolationPrizePool: 0,
+    consolationPrizesEnabled: true, consolationPrizePool: 6000000,
+    firstPrize: 8000000, secondPrize: 4000000, thirdPrize: 2000000,
+    consolationPrizePerPlayer: 500000, consolationPrizeCount: 12,
+    totalWinningPrizes: 20000000, quizStatus: "active",
     selectionProcesses: [
       { round: 1, entriesSelected: 25000, entryFee: 500 },
       { round: 2, entriesSelected: 12000, entryFee: 750 },
@@ -231,7 +293,10 @@ export const mockSeasons: QuizSeason[] = [
     prizePerLevel: 75000, isLive: false, status: "open",
     startDate: "2025-04-01", endDate: "2025-09-30", originalEndDate: "2025-09-30",
     isExtended: false, extensionWeeks: 0, extensionReason: "", minimumTargetParticipants: 12000,
-    consolationPrizesEnabled: true, consolationPrizePool: 300000,
+    consolationPrizesEnabled: true, consolationPrizePool: 3600000,
+    firstPrize: 4000000, secondPrize: 2000000, thirdPrize: 1000000,
+    consolationPrizePerPlayer: 300000, consolationPrizeCount: 12,
+    totalWinningPrizes: 10600000, quizStatus: "draft",
     selectionProcesses: [
       { round: 1, entriesSelected: 8000, entryFee: 300 },
       { round: 2, entriesSelected: 4000, entryFee: 500 },
@@ -251,7 +316,10 @@ export const mockSeasons: QuizSeason[] = [
     prizePerLevel: 150000, isLive: true, status: "in_progress",
     startDate: "2024-09-01", endDate: "2025-09-30", originalEndDate: "2025-08-31",
     isExtended: true, extensionWeeks: 4, extensionReason: "Low subscription turnout", minimumTargetParticipants: 25000,
-    consolationPrizesEnabled: true, consolationPrizePool: 1000000,
+    consolationPrizesEnabled: true, consolationPrizePool: 6000000,
+    firstPrize: 10000000, secondPrize: 5000000, thirdPrize: 2500000,
+    consolationPrizePerPlayer: 500000, consolationPrizeCount: 12,
+    totalWinningPrizes: 23500000, quizStatus: "active",
     selectionProcesses: [
       { round: 1, entriesSelected: 20000, entryFee: 400 },
       { round: 2, entriesSelected: 10000, entryFee: 750 },

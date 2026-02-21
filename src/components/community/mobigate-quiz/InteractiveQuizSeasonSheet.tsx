@@ -82,6 +82,31 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                       <Badge variant="outline" className="text-[9px]">{season.status}</Badge>
                     </div>
 
+                    {/* Winning Prizes Breakdown */}
+                    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg p-2 border border-amber-200/50 dark:border-amber-800/30">
+                      <p className="text-[9px] font-bold text-amber-700 dark:text-amber-400 uppercase mb-1 flex items-center gap-1">
+                        <Trophy className="h-2.5 w-2.5" /> Game Show Prizes
+                      </p>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
+                        <span className="text-muted-foreground">🥇 1st:</span>
+                        <span className="font-semibold">{formatLocalAmount(season.firstPrize, "NGN")}</span>
+                        <span className="text-muted-foreground">🥈 2nd:</span>
+                        <span className="font-semibold">{formatLocalAmount(season.secondPrize, "NGN")}</span>
+                        <span className="text-muted-foreground">🥉 3rd:</span>
+                        <span className="font-semibold">{formatLocalAmount(season.thirdPrize, "NGN")}</span>
+                        {season.consolationPrizesEnabled && (
+                          <>
+                            <span className="text-muted-foreground">🎁 Consolation:</span>
+                            <span className="font-semibold">{formatLocalAmount(season.consolationPrizePerPlayer, "NGN")} × {season.consolationPrizeCount}</span>
+                          </>
+                        )}
+                      </div>
+                      <p className="text-[9px] text-muted-foreground mt-1">
+                        {season.consolationPrizesEnabled && `Consolation for ${season.consolationPrizeCount} Semi-Final contestants • `}
+                        Total: <span className="font-bold text-green-600">{formatLocalAmount(season.totalWinningPrizes, "NGN")}</span>
+                      </p>
+                    </div>
+
                     <div className="grid grid-cols-3 gap-2">
                       <div className="p-1.5 bg-muted/50 rounded text-center">
                         <p className="text-[9px] text-muted-foreground">Levels</p>

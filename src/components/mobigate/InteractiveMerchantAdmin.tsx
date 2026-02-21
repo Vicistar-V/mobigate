@@ -15,17 +15,22 @@ import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose, DrawerBody,
 } from "@/components/ui/drawer";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Building2, ChevronRight, Users, Trophy, Wallet,
   CheckCircle, Edit2, Radio, Calendar as CalendarIcon, Settings2,
   BookOpen, Filter, PlusCircle, ShieldCheck, ShieldOff, Clock,
-  CalendarDays, CalendarPlus, AlertTriangle,
+  CalendarDays, CalendarPlus, AlertTriangle, Ban, FileText,
 } from "lucide-react";
 import {
   mockMerchants, mockSeasons, mockQuestions,
   type QuizMerchant, type QuizSeason, type MerchantQuestion,
   SEASON_TYPE_CONFIG, DEFAULT_MERCHANT_CONFIG, GAME_SHOW_ENTRY_POINTS,
+  MERCHANT_MIN_WALLET_PERCENT, WAIVER_REQUEST_FEE,
 } from "@/data/mobigateInteractiveQuizData";
-import { formatMobi } from "@/lib/mobiCurrencyTranslation";
+import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format, addMonths, differenceInDays, addWeeks, parseISO } from "date-fns";
 import { MerchantPlatformSettingsDrawer } from "./MerchantPlatformSettingsDrawer";
 import { MerchantSelectionProcessDrawer } from "./MerchantSelectionProcessDrawer";
@@ -34,6 +39,12 @@ import { MerchantQuestionBankDrawer } from "./MerchantQuestionBankDrawer";
 const statusColors: Record<string, string> = {
   approved: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   pending: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  suspended: "bg-destructive/10 text-destructive border-destructive/20",
+};
+
+const quizStatusColors: Record<string, string> = {
+  draft: "bg-gray-500/10 text-gray-600 border-gray-500/20",
+  active: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   suspended: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
@@ -58,15 +69,34 @@ export function InteractiveMerchantAdmin() {
   const [seasonMinTarget, setSeasonMinTarget] = useState(10000);
   const [startDateOpen, setStartDateOpen] = useState(false);
 
+  // Prize config state for Add Season
+  const [firstPrize, setFirstPrize] = useState(6000000);
+  const [secondPrize, setSecondPrize] = useState(3000000);
+  const [thirdPrize, setThirdPrize] = useState(1500000);
+  const [consolationPerPlayer, setConsolationPerPlayer] = useState(500000);
+  const [consolationCount, setConsolationCount] = useState(12);
+  const [consolationEnabled, setConsolationEnabled] = useState(true);
+
   // Extension drawer state
   const [showExtendSeason, setShowExtendSeason] = useState<QuizSeason | null>(null);
   const [extensionWeeks, setExtensionWeeks] = useState(2);
   const [extensionReason, setExtensionReason] = useState("");
 
+  // Waiver drawer state
+  const [showWaiverDrawer, setShowWaiverDrawer] = useState<QuizSeason | null>(null);
+
+  // Insufficient fund alert
+  const [showInsufficientAlert, setShowInsufficientAlert] = useState<QuizSeason | null>(null);
+
   const computedEndDate = useMemo(() => {
     if (!seasonStartDate) return null;
     return addMonths(seasonStartDate, SEASON_TYPE_CONFIG[seasonType].duration);
   }, [seasonStartDate, seasonType]);
+
+  const computedTotalPrizes = useMemo(() => {
+    const consolation = consolationEnabled ? consolationPerPlayer * consolationCount : 0;
+    return firstPrize + secondPrize + thirdPrize + consolation;
+  }, [firstPrize, secondPrize, thirdPrize, consolationPerPlayer, consolationCount, consolationEnabled]);
 
   const handleToggleStatus = (merchantId: string, newStatus: "approved" | "suspended") => {
     setMerchants(prev => prev.map(m => m.id === merchantId ? { ...m, applicationStatus: newStatus } : m));
@@ -78,6 +108,7 @@ export function InteractiveMerchantAdmin() {
     const cfg = SEASON_TYPE_CONFIG[seasonType];
     const startStr = format(seasonStartDate, "yyyy-MM-dd");
     const endStr = format(computedEndDate, "yyyy-MM-dd");
+    const consolationTotal = consolationEnabled ? consolationPerPlayer * consolationCount : 0;
     const season: QuizSeason = {
       id: `s-${Date.now()}`,
       merchantId: selectedMerchant.id,
@@ -98,8 +129,15 @@ export function InteractiveMerchantAdmin() {
       extensionWeeks: 0,
       extensionReason: "",
       minimumTargetParticipants: seasonMinTarget,
-      consolationPrizesEnabled: false,
-      consolationPrizePool: 0,
+      consolationPrizesEnabled: consolationEnabled,
+      consolationPrizePool: consolationTotal,
+      firstPrize,
+      secondPrize,
+      thirdPrize,
+      consolationPrizePerPlayer: consolationPerPlayer,
+      consolationPrizeCount: consolationCount,
+      totalWinningPrizes: computedTotalPrizes,
+      quizStatus: "draft",
       selectionProcesses: [{ round: 1, entriesSelected: 10000, entryFee: seasonEntryFee }],
       tvShowRounds: [
         { round: 1, entriesSelected: 50, entryFee: 2000, label: "1st TV Show" },
@@ -112,11 +150,70 @@ export function InteractiveMerchantAdmin() {
     setSeasonStartDate(undefined);
     setSeasonMinTarget(10000);
     setShowAddSeason(false);
-    toast({ title: "Season Created", description: `${season.name} — ${format(seasonStartDate, "MMM d")} to ${format(computedEndDate, "MMM d, yyyy")}` });
+    toast({ title: "Season Created (Draft)", description: `${season.name} — Total Prizes: ${formatLocalAmount(computedTotalPrizes, "NGN")}` });
   };
 
-  const handleToggleSeasonLive = (seasonId: string) => {
-    setSeasons(prev => prev.map(s => s.id === seasonId ? { ...s, isLive: !s.isLive } : s));
+  const handleToggleSeasonLive = (season: QuizSeason) => {
+    if (!selectedMerchant) return;
+    
+    if (season.quizStatus === "active") {
+      // Deactivate
+      setSeasons(prev => prev.map(s => s.id === season.id ? { ...s, isLive: false, quizStatus: "draft" as const } : s));
+      toast({ title: "Season deactivated" });
+      return;
+    }
+
+    // Check wallet balance
+    const requiredBalance = season.totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT;
+    if (selectedMerchant.walletBalance >= requiredBalance) {
+      // Sufficient - launch
+      setSeasons(prev => prev.map(s => s.id === season.id ? { ...s, isLive: true, quizStatus: "active" as const } : s));
+      toast({ title: "🚀 Quiz Launched!", description: `${season.name} is now active` });
+    } else {
+      // Insufficient - show alert
+      setShowInsufficientAlert(season);
+    }
+  };
+
+  const handleSubmitWaiver = () => {
+    if (!selectedMerchant || !showWaiverDrawer) return;
+    // Deduct waiver fee from wallet
+    setMerchants(prev => prev.map(m => m.id === selectedMerchant.id ? {
+      ...m,
+      walletBalance: m.walletBalance - WAIVER_REQUEST_FEE,
+      pendingWaiverRequest: true,
+      walletFundingHistory: [
+        { date: format(new Date(), "yyyy-MM-dd"), amount: -WAIVER_REQUEST_FEE, description: "Exclusive Waiver Request Fee (Non-Refundable)" },
+        ...m.walletFundingHistory,
+      ],
+    } : m));
+    if (selectedMerchant.id === selectedMerchant.id) {
+      setSelectedMerchant(prev => prev ? {
+        ...prev,
+        walletBalance: prev.walletBalance - WAIVER_REQUEST_FEE,
+        pendingWaiverRequest: true,
+      } : prev);
+    }
+    setShowWaiverDrawer(null);
+    toast({ title: "📨 Waiver Request Submitted", description: `Fee of ${formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")} has been charged. Awaiting Admin approval.` });
+  };
+
+  const handleApproveWaiver = (merchantId: string) => {
+    setMerchants(prev => prev.map(m => m.id === merchantId ? { ...m, pendingWaiverRequest: false, waiverApproved: true } : m));
+    // Activate all draft seasons for this merchant
+    setSeasons(prev => prev.map(s => s.merchantId === merchantId && s.quizStatus === "draft" ? { ...s, quizStatus: "active" as const, isLive: true } : s));
+    if (selectedMerchant?.id === merchantId) {
+      setSelectedMerchant(prev => prev ? { ...prev, pendingWaiverRequest: false, waiverApproved: true } : prev);
+    }
+    toast({ title: "✅ Waiver Approved", description: "Merchant's quiz seasons have been activated" });
+  };
+
+  const handleRejectWaiver = (merchantId: string) => {
+    setMerchants(prev => prev.map(m => m.id === merchantId ? { ...m, pendingWaiverRequest: false, waiverApproved: false } : m));
+    if (selectedMerchant?.id === merchantId) {
+      setSelectedMerchant(prev => prev ? { ...prev, pendingWaiverRequest: false, waiverApproved: false } : prev);
+    }
+    toast({ title: "❌ Waiver Rejected", description: "Season remains as Draft" });
   };
 
   const handleSaveSettings = (updated: QuizMerchant) => {
@@ -155,6 +252,10 @@ export function InteractiveMerchantAdmin() {
     const objQs = questions.filter(q => q.merchantId === selectedMerchant.id && q.type === "objective").length;
     const nonObjQs = questions.filter(q => q.merchantId === selectedMerchant.id && q.type === "non_objective").length;
     const bonusQs = questions.filter(q => q.merchantId === selectedMerchant.id && q.type === "bonus_objective").length;
+    const requiredForBestSeason = merchantSeasons.length > 0
+      ? Math.max(...merchantSeasons.map(s => s.totalWinningPrizes)) * MERCHANT_MIN_WALLET_PERCENT
+      : 0;
+    const walletSufficient = selectedMerchant.walletBalance >= requiredForBestSeason;
 
     return (
       <div className="h-[calc(100vh-140px)] overflow-y-auto touch-auto overscroll-contain">
@@ -185,6 +286,60 @@ export function InteractiveMerchantAdmin() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Wallet Balance Card */}
+          <Card className={`border ${walletSufficient ? "border-emerald-200 bg-emerald-50/30 dark:bg-emerald-950/10" : "border-amber-200 bg-amber-50/30 dark:bg-amber-950/10"}`}>
+            <CardContent className="p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-primary" />
+                  <h3 className="text-xs font-bold uppercase">Merchant Wallet</h3>
+                </div>
+                {selectedMerchant.pendingWaiverRequest && (
+                  <Badge className="text-[9px] bg-amber-500/10 text-amber-600 border-amber-500/20">⏳ Waiver Pending</Badge>
+                )}
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-bold">{formatLocalAmount(selectedMerchant.walletBalance, "NGN")}</span>
+                <span className={`text-[10px] ${walletSufficient ? "text-emerald-600" : "text-amber-600"}`}>
+                  {walletSufficient ? "✓ Sufficient" : "⚠ Below 70% threshold"}
+                </span>
+              </div>
+              {requiredForBestSeason > 0 && (
+                <p className="text-[10px] text-muted-foreground">
+                  Required: {formatLocalAmount(requiredForBestSeason, "NGN")} (70% of highest prize pool)
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pending Waiver Management (Admin) */}
+          {selectedMerchant.pendingWaiverRequest && (
+            <Card className="border-amber-300 bg-amber-50/50 dark:bg-amber-950/20">
+              <CardContent className="p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-amber-600" />
+                  <h3 className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase">Pending Waiver Request</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                  <span className="text-muted-foreground">Current Balance:</span>
+                  <span className="font-medium">{formatLocalAmount(selectedMerchant.walletBalance, "NGN")}</span>
+                  <span className="text-muted-foreground">Required (70%):</span>
+                  <span className="font-medium">{formatLocalAmount(requiredForBestSeason, "NGN")}</span>
+                  <span className="text-muted-foreground">Shortfall:</span>
+                  <span className="font-medium text-destructive">{formatLocalAmount(Math.max(0, requiredForBestSeason - selectedMerchant.walletBalance), "NGN")}</span>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" className="flex-1 h-9 text-xs bg-emerald-600 hover:bg-emerald-700" onClick={() => handleApproveWaiver(selectedMerchant.id)}>
+                    <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
+                  </Button>
+                  <Button size="sm" variant="destructive" className="flex-1 h-9 text-xs" onClick={() => handleRejectWaiver(selectedMerchant.id)}>
+                    <Ban className="h-3.5 w-3.5 mr-1" /> Reject
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-2">
@@ -253,6 +408,7 @@ export function InteractiveMerchantAdmin() {
             merchantSeasons.map(s => {
               const daysLeft = differenceInDays(parseISO(s.endDate), new Date());
               const belowTarget = s.totalParticipants < s.minimumTargetParticipants;
+              const requiredBal = s.totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT;
               return (
               <Card key={s.id} className="border border-border/40 active:scale-[0.98] transition-transform">
                 <CardContent className="p-3 space-y-2">
@@ -261,6 +417,9 @@ export function InteractiveMerchantAdmin() {
                       <p className="text-sm font-semibold truncate">{s.name}</p>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <Badge variant="outline" className="text-[10px]">{s.type}</Badge>
+                        <Badge className={`text-[10px] ${quizStatusColors[s.quizStatus]}`}>
+                          {s.quizStatus}
+                        </Badge>
                         <Badge variant={s.status === "open" ? "default" : s.status === "in_progress" ? "secondary" : "outline"} className="text-[10px]">
                           {s.status.replace("_", " ")}
                         </Badge>
@@ -272,9 +431,34 @@ export function InteractiveMerchantAdmin() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] text-muted-foreground">Live</span>
-                      <Switch checked={s.isLive} onCheckedChange={() => handleToggleSeasonLive(s.id)} />
+                      <span className="text-[10px] text-muted-foreground">{s.quizStatus === "active" ? "Active" : "Draft"}</span>
+                      <Switch checked={s.quizStatus === "active"} onCheckedChange={() => handleToggleSeasonLive(s)} />
                     </div>
+                  </div>
+
+                  {/* Winning Prizes Summary */}
+                  <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg p-2 border border-amber-200/50 dark:border-amber-800/30">
+                    <div className="grid grid-cols-4 gap-1 text-center text-[9px]">
+                      <div>
+                        <p className="text-muted-foreground">🥇 1st</p>
+                        <p className="font-bold">{formatLocalAmount(s.firstPrize, "NGN")}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">🥈 2nd</p>
+                        <p className="font-bold">{formatLocalAmount(s.secondPrize, "NGN")}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">🥉 3rd</p>
+                        <p className="font-bold">{formatLocalAmount(s.thirdPrize, "NGN")}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Total</p>
+                        <p className="font-bold text-green-600">{formatLocalAmount(s.totalWinningPrizes, "NGN")}</p>
+                      </div>
+                    </div>
+                    <p className="text-[8px] text-muted-foreground mt-1 text-center">
+                      Min. Wallet: {formatLocalAmount(requiredBal, "NGN")} (70%)
+                    </p>
                   </div>
 
                   {/* Calendar dates */}
@@ -421,9 +605,189 @@ export function InteractiveMerchantAdmin() {
                 <input type="text" inputMode="numeric" value={seasonMinTarget} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setSeasonMinTarget(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
                 <p className="text-[10px] text-muted-foreground">Season can be extended if turnout is below this target.</p>
               </div>
+
+              {/* Game Show Winning Prizes Configuration */}
+              <Card className="border-amber-200 bg-amber-50/30 dark:bg-amber-950/10">
+                <CardContent className="p-3 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-amber-500" />
+                    <h3 className="text-xs font-bold uppercase">Game Show Winning Prizes</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">🥇 1st Prize (₦)</Label>
+                      <input type="text" inputMode="numeric" value={firstPrize} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setFirstPrize(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">🥈 2nd Prize (₦)</Label>
+                      <input type="text" inputMode="numeric" value={secondPrize} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setSecondPrize(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">🥉 3rd Prize (₦)</Label>
+                      <input type="text" inputMode="numeric" value={thirdPrize} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setThirdPrize(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-medium">🎁 Consolation Prizes</span>
+                    </div>
+                    <Switch checked={consolationEnabled} onCheckedChange={setConsolationEnabled} />
+                  </div>
+
+                  {consolationEnabled && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground">Per Player (₦)</Label>
+                        <input type="text" inputMode="numeric" value={consolationPerPlayer} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setConsolationPerPlayer(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground">No. of Players</Label>
+                        <input type="text" inputMode="numeric" value={consolationCount} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setConsolationCount(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Total computation */}
+                  <Card className="bg-green-50/50 dark:bg-green-950/20 border-green-200/50">
+                    <CardContent className="p-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-green-700 dark:text-green-400">Total Winning Prizes:</span>
+                        <span className="font-bold text-green-700 dark:text-green-400">{formatLocalAmount(computedTotalPrizes, "NGN")}</span>
+                      </div>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">
+                        Min. Wallet Required: {formatLocalAmount(computedTotalPrizes * MERCHANT_MIN_WALLET_PERCENT, "NGN")} (70%)
+                      </p>
+                      {selectedMerchant && (
+                        <p className={`text-[9px] mt-0.5 font-medium ${selectedMerchant.walletBalance >= computedTotalPrizes * MERCHANT_MIN_WALLET_PERCENT ? "text-emerald-600" : "text-amber-600"}`}>
+                          Your Wallet: {formatLocalAmount(selectedMerchant.walletBalance, "NGN")} — {selectedMerchant.walletBalance >= computedTotalPrizes * MERCHANT_MIN_WALLET_PERCENT ? "✓ Sufficient" : "⚠ Insufficient"}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
             </DrawerBody>
             <DrawerFooter>
-              <Button onClick={handleAddSeason} disabled={!seasonName.trim() || !seasonStartDate} className="h-12">Create Season</Button>
+              <Button onClick={handleAddSeason} disabled={!seasonName.trim() || !seasonStartDate} className="h-12">Create Season (Draft)</Button>
+              <DrawerClose asChild><Button variant="outline" className="h-12">Cancel</Button></DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+
+        {/* Insufficient Fund Alert */}
+        <AlertDialog open={!!showInsufficientAlert} onOpenChange={(v) => !v && setShowInsufficientAlert(null)}>
+          <AlertDialogContent className="max-w-[90vw] rounded-xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertTriangle className="h-5 w-5" /> Insufficient Fund
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3">
+                  <p className="text-sm">Your wallet balance is insufficient to launch this quiz season.</p>
+                  {showInsufficientAlert && (
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] bg-muted/50 rounded-lg p-2">
+                      <span className="text-muted-foreground">Total Prizes:</span>
+                      <span className="font-medium">{formatLocalAmount(showInsufficientAlert.totalWinningPrizes, "NGN")}</span>
+                      <span className="text-muted-foreground">Required (70%):</span>
+                      <span className="font-medium">{formatLocalAmount(showInsufficientAlert.totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT, "NGN")}</span>
+                      <span className="text-muted-foreground">Your Balance:</span>
+                      <span className="font-medium">{formatLocalAmount(selectedMerchant.walletBalance, "NGN")}</span>
+                      <span className="text-muted-foreground">Shortfall:</span>
+                      <span className="font-medium text-destructive">{formatLocalAmount(Math.max(0, (showInsufficientAlert.totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT) - selectedMerchant.walletBalance), "NGN")}</span>
+                    </div>
+                  )}
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-col gap-2">
+              <AlertDialogAction
+                className="bg-amber-600 hover:bg-amber-700 w-full"
+                onClick={() => {
+                  setShowWaiverDrawer(showInsufficientAlert);
+                  setShowInsufficientAlert(null);
+                }}
+              >
+                Click Here to Apply for Exclusive Waiver
+              </AlertDialogAction>
+              <AlertDialogCancel className="w-full">Close</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Waiver Request Drawer */}
+        <Drawer open={!!showWaiverDrawer} onOpenChange={(v) => !v && setShowWaiverDrawer(null)}>
+          <DrawerContent className="max-h-[92vh]">
+            <DrawerHeader className="px-4">
+              <DrawerTitle className="text-base">Apply for Exclusive Waiver</DrawerTitle>
+              <p className="text-xs text-muted-foreground mt-1">Request to launch quiz despite insufficient wallet balance</p>
+            </DrawerHeader>
+            <DrawerBody className="space-y-4">
+              {showWaiverDrawer && (
+                <>
+                  <Card className="bg-muted/30">
+                    <CardContent className="p-3 space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Season</span>
+                        <span className="font-medium">{showWaiverDrawer.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Total Prizes</span>
+                        <span className="font-medium">{formatLocalAmount(showWaiverDrawer.totalWinningPrizes, "NGN")}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Required (70%)</span>
+                        <span className="font-medium">{formatLocalAmount(showWaiverDrawer.totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT, "NGN")}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Your Balance</span>
+                        <span className="font-medium">{formatLocalAmount(selectedMerchant.walletBalance, "NGN")}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-1">
+                        <span className="text-muted-foreground font-semibold">Shortfall</span>
+                        <span className="font-bold text-destructive">{formatLocalAmount(Math.max(0, (showWaiverDrawer.totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT) - selectedMerchant.walletBalance), "NGN")}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Funding History */}
+                  <div>
+                    <h4 className="text-xs font-bold mb-2">Recent Funding History</h4>
+                    {selectedMerchant.walletFundingHistory.slice(0, 5).map((tx, idx) => (
+                      <div key={idx} className="flex justify-between text-[11px] py-1 border-b border-border/30">
+                        <span className="text-muted-foreground">{tx.date}</span>
+                        <span className="text-muted-foreground truncate mx-2 flex-1">{tx.description}</span>
+                        <span className={`font-medium ${tx.amount >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+                          {tx.amount >= 0 ? "+" : ""}{formatLocalAmount(tx.amount, "NGN")}
+                        </span>
+                      </div>
+                    ))}
+                    {selectedMerchant.walletFundingHistory.length === 0 && (
+                      <p className="text-[11px] text-muted-foreground">No funding history</p>
+                    )}
+                  </div>
+
+                  {/* Waiver Fee Disclosure */}
+                  <Card className="border-destructive/30 bg-destructive/5">
+                    <CardContent className="p-3">
+                      <p className="text-xs font-bold text-destructive mb-1">⚠ Non-Refundable Fee</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        This request will charge a <span className="font-bold text-foreground">non-refundable fee of {formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")}</span> from your wallet.
+                        The fee is charged immediately upon submission. Admin will review and may approve or reject your request.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </DrawerBody>
+            <DrawerFooter>
+              <Button
+                className="h-12 bg-amber-600 hover:bg-amber-700"
+                onClick={handleSubmitWaiver}
+                disabled={!selectedMerchant || selectedMerchant.walletBalance < WAIVER_REQUEST_FEE}
+              >
+                Submit Waiver Request — Pay {formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")}
+              </Button>
               <DrawerClose asChild><Button variant="outline" className="h-12">Cancel</Button></DrawerClose>
             </DrawerFooter>
           </DrawerContent>
@@ -564,8 +928,8 @@ export function InteractiveMerchantAdmin() {
           </CardContent></Card>
           <Card><CardContent className="p-2 text-center">
             <Trophy className="h-4 w-4 mx-auto mb-1 text-amber-500" />
-            <p className="text-lg font-bold">{seasons.filter(s => s.isLive).length}</p>
-            <p className="text-[10px] text-muted-foreground uppercase">Live Seasons</p>
+            <p className="text-lg font-bold">{seasons.filter(s => s.quizStatus === "active").length}</p>
+            <p className="text-[10px] text-muted-foreground uppercase">Active Seasons</p>
           </CardContent></Card>
         </div>
 
@@ -590,7 +954,7 @@ export function InteractiveMerchantAdmin() {
         {/* Merchant List */}
         {filteredMerchants.map(m => {
           const mSeasons = seasons.filter(s => s.merchantId === m.id);
-          const liveSeasons = mSeasons.filter(s => s.isLive).length;
+          const activeSeasons = mSeasons.filter(s => s.quizStatus === "active").length;
           return (
             <Card
               key={m.id}
@@ -615,10 +979,13 @@ export function InteractiveMerchantAdmin() {
                         {m.applicationStatus === "suspended" && <ShieldOff className="h-2.5 w-2.5 mr-0.5" />}
                         {m.applicationStatus}
                       </Badge>
-                      {liveSeasons > 0 && (
+                      {m.pendingWaiverRequest && (
+                        <Badge className="text-[9px] bg-amber-500/10 text-amber-600 border-amber-500/20">⏳ Waiver</Badge>
+                      )}
+                      {activeSeasons > 0 && (
                         <Badge className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                           <Radio className="h-2.5 w-2.5 mr-0.5" />
-                          {liveSeasons} live
+                          {activeSeasons} active
                         </Badge>
                       )}
                     </div>
