@@ -49,7 +49,8 @@ type Phase = "objective" | "non_objective" | "result" | "bonus_offer" | "bonus_p
 
 export function FoodQuizPlayDialog({ open, onOpenChange, selectedItems, stakeAmount, totalValue }: FoodQuizPlayDialogProps) {
   const { toast } = useToast();
-  const totalQuestions = 15;
+  const hasNonObjective = foodNonObjectiveQuestions.length > 0;
+  const totalQuestions = foodObjectiveQuestions.length + foodNonObjectiveQuestions.length;
 
   // Objective state
   const [currentQ, setCurrentQ] = useState(0);
@@ -113,8 +114,16 @@ export function FoodQuizPlayDialog({ open, onOpenChange, selectedItems, stakeAmo
   };
 
   const nextObjective = (_correct: boolean) => {
-    if (currentQ >= 9) {
-      setPhase("non_objective");
+    if (currentQ >= foodObjectiveQuestions.length - 1) {
+      if (hasNonObjective) {
+        setPhase("non_objective");
+      } else {
+        // Evaluate directly with only objective results
+        const pct = Math.round((objectiveCorrect / totalQuestions) * 100);
+        if (pct === 100) { setFinalWon(true); setPhase("final"); }
+        else if (pct >= 70) { setPhase("bonus_offer"); }
+        else { setFinalWon(false); setPhase("final"); }
+      }
     } else {
       setCurrentQ(p => p + 1);
       setSelectedAnswer(null);
@@ -189,8 +198,8 @@ export function FoodQuizPlayDialog({ open, onOpenChange, selectedItems, stakeAmo
                 <div>
                   <h2 className="font-semibold text-sm">Food for Home Quiz</h2>
                   <p className="text-xs text-green-200">
-                    {phase === "objective" && `Q${currentQ + 1}/10 (Objective)`}
-                    {phase === "non_objective" && `Q${11 + currentNonObjQ}/15 (Written)`}
+                    {phase === "objective" && `Q${currentQ + 1}/${foodObjectiveQuestions.length} (Objective)`}
+                    {phase === "non_objective" && `Q${foodObjectiveQuestions.length + 1 + currentNonObjQ}/${totalQuestions} (Written)`}
                     {phase === "bonus_offer" && "Bonus Questions Available"}
                     {phase === "final" && "Results"}
                   </p>

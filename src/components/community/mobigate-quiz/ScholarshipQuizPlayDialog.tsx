@@ -46,7 +46,8 @@ type Phase = "objective" | "non_objective" | "result" | "bonus_offer" | "final";
 
 export function ScholarshipQuizPlayDialog({ open, onOpenChange, budget, stakeAmount }: ScholarshipQuizPlayDialogProps) {
   const { toast } = useToast();
-  const totalQuestions = 15;
+  const hasNonObjective = scholarshipNonObjectiveQuestions.length > 0;
+  const totalQuestions = scholarshipObjectiveQuestions.length + scholarshipNonObjectiveQuestions.length;
 
   // Objective state
   const [currentQ, setCurrentQ] = useState(0);
@@ -111,8 +112,18 @@ export function ScholarshipQuizPlayDialog({ open, onOpenChange, budget, stakeAmo
   };
 
   const nextObjective = () => {
-    if (currentQ >= 9) { setPhase("non_objective"); }
-    else { setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(getObjectiveTimePerQuestion()); }
+    if (currentQ >= scholarshipObjectiveQuestions.length - 1) {
+      if (hasNonObjective) {
+        setPhase("non_objective");
+      } else {
+        const pct = Math.round((objectiveCorrect / totalQuestions) * 100);
+        if (pct === 100) { setFinalWon(true); setPhase("final"); }
+        else if (pct >= 70) { setPhase("bonus_offer"); }
+        else { setFinalWon(false); setPhase("final"); }
+      }
+    } else {
+      setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(getObjectiveTimePerQuestion());
+    }
   };
 
   const lockNonObjAnswer = useCallback((answer: string) => {
@@ -178,8 +189,8 @@ export function ScholarshipQuizPlayDialog({ open, onOpenChange, budget, stakeAmo
                 <div>
                   <h2 className="font-semibold text-sm">Scholarship Quiz</h2>
                   <p className="text-xs text-indigo-200">
-                    {phase === "objective" && `Q${currentQ + 1}/10 (Objective)`}
-                    {phase === "non_objective" && `Q${11 + currentNonObjQ}/15 (Written)`}
+                    {phase === "objective" && `Q${currentQ + 1}/${scholarshipObjectiveQuestions.length} (Objective)`}
+                    {phase === "non_objective" && `Q${scholarshipObjectiveQuestions.length + 1 + currentNonObjQ}/${totalQuestions} (Written)`}
                     {phase === "bonus_offer" && "Bonus Available"}
                     {phase === "final" && "Results"}
                   </p>

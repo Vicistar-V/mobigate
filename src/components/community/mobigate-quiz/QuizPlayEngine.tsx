@@ -43,6 +43,7 @@ export function QuizPlayEngine({
   seasonName,
   headerGradient = "from-blue-500 to-cyan-500",
 }: QuizPlayEngineProps) {
+  const hasNonObjective = nonObjectiveQuestions.length > 0;
   const totalQuestions = objectiveQuestions.length + nonObjectiveQuestions.length;
 
   const [phase, setPhase] = useState<Phase>("objective");
@@ -96,7 +97,21 @@ export function QuizPlayEngine({
 
   const nextObjective = () => {
     if (currentQ >= objectiveQuestions.length - 1) {
-      setPhase("non_objective");
+      if (hasNonObjective) {
+        setPhase("non_objective");
+      } else {
+        // No non-objective questions — complete immediately
+        setObjectiveCorrect((objC) => {
+          const pct = Math.round((objC / totalQuestions) * 100);
+          onComplete({
+            totalCorrect: objC,
+            percentage: pct,
+            objectiveCorrect: objC,
+            nonObjectiveCorrect: 0,
+          });
+          return objC;
+        });
+      }
     } else {
       setCurrentQ((p) => p + 1);
       setSelectedAnswer(null);
