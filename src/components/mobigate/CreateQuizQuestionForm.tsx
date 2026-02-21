@@ -117,15 +117,26 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
 
         {/* Apply to Level - multi-select checkboxes */}
         <div className="space-y-1.5">
-          <Label className="text-xs">Apply to Level</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Apply to Level</Label>
+            {selectedLevels.length > 0 && (
+              <button
+                type="button"
+                className="text-[11px] text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
+                onClick={() => setSelectedLevels([])}
+              >
+                Deselect All
+              </button>
+            )}
+          </div>
           <div className="border border-border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto touch-auto">
             {/* All Levels option */}
-            <label className="flex items-center gap-2.5 py-1 cursor-pointer">
+            <label className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation">
               <Checkbox
                 checked={selectedLevels.includes("All Levels")}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    setSelectedLevels(["All Levels"]);
+                    setSelectedLevels(["All Levels", ...PRESET_LEVEL_TIERS.map(t => t.name)]);
                   } else {
                     setSelectedLevels([]);
                   }
@@ -135,14 +146,19 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
             </label>
             <div className="border-t border-border/40" />
             {PRESET_LEVEL_TIERS.map((tier) => (
-              <label key={tier.name} className="flex items-center gap-2.5 py-1 cursor-pointer">
+              <label key={tier.name} className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation">
                 <Checkbox
                   checked={selectedLevels.includes(tier.name)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedLevels(prev => prev.filter(l => l !== "All Levels").concat(tier.name));
+                      const next = [...selectedLevels.filter(l => l !== "All Levels"), tier.name];
+                      if (next.length === PRESET_LEVEL_TIERS.length) {
+                        setSelectedLevels(["All Levels", ...PRESET_LEVEL_TIERS.map(t => t.name)]);
+                      } else {
+                        setSelectedLevels(next);
+                      }
                     } else {
-                      setSelectedLevels(prev => prev.filter(l => l !== tier.name));
+                      setSelectedLevels(prev => prev.filter(l => l !== tier.name && l !== "All Levels"));
                     }
                   }}
                 />
