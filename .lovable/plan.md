@@ -1,189 +1,146 @@
-# Interactive Quiz Game-Over Buttons and Session Rollover Flow
+
+# Paid "View All Questions" Feature in Quiz History
 
 ## Overview
 
-Redesign the game-over screen in the Interactive Quiz Play Dialog to show different action buttons based on whether the player scored 100% or not. Add a new "Interactive Session" rollover flow where players compete across multiple sessions to earn points and advance through selection/elimination processes.
+Add a paywall to the "View All Questions" button in the My Quiz History detail drawer. When a player taps it, a payment confirmation dialog appears first. The player's main Mobi wallet is charged an admin-configurable fee (e.g., M2,000). If the wallet has insufficient funds, access is denied with a clear message.
 
 ---
 
 ## Changes
 
-### 1. Modify Game-Over Result Screen Buttons
+### 1. Add Question View Fee to Platform Settings
 
-**File:** `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx`
+**File:** `src/data/platformSettingsData.ts`
 
-Replace the single "Take Cash Prize / Exit" button in the `phase === "result"` footer with conditional button sets:
+Add a new setting block for the question viewing charge:
 
-**If player scored 100% (all 15/15 correct):**
+- `questionViewFee`: number (default M2,000)
+- `questionViewFeeMin`: number (M500)
+- `questionViewFeeMax`: number (M10,000)
+- Getter: `getQuestionViewFee()`
+- Setter: `setQuestionViewFee(newFee)`
 
-- "Rollover Winning to Interactive Session" (amber/orange gradient) -- enters the Interactive Session flow
-- "Redeem Prize and Exit" (green gradient) -- opens the existing QuizPrizeRedemptionSheet then closes
-- "Redeem Prize and Play Again" (blue outline) -- opens redemption, then resets the quiz for a new game
+### 2. Add Admin UI for Managing the Fee
 
-**If player did NOT score 100%:**
+**File:** `src/components/mobigate/QuizSettingsCard.tsx`
 
-- "Play Again" (blue gradient) -- resets all state and starts a fresh quiz
-- "Exit Now" (outline/secondary) -- closes the dialog
+Add a third settings section (below the existing "Time Per Question" and "Partial Win" sections) for "Question View Fee":
 
-The result card content also changes:
+- Slider from M500 to M10,000 (step M500)
+- Large display showing current fee in Mobi
+- Info note: "Players will be charged this amount from their main wallet to view played quiz questions in their history"
+- Included in the existing Save button logic
 
-- 100%: Show the congratulations card with prize amount, plus an info card explaining what "Rollover" means (you lose current winnings but enter the Interactive Session)
-- Below 100%: Show "Better luck next time" with score breakdown only
+### 3. Add Payment Confirmation Dialog to Quiz History
 
-### 2. New Component: InteractiveSessionDialog
+**File:** `src/pages/MyQuizHistory.tsx`
 
-**File:** `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` (new)
+Replace the current direct toggle behavior of the "View All Questions" button with a paywall flow:
 
-A full mobile-first dialog that manages the Interactive Session flow after a player rolls over. This is the "Game Show" proper.
+- **New state:** `showPaymentConfirm` (boolean), `paymentProcessing` (boolean), `questionAccessGranted` (Record of game IDs that have been paid for)
+- **On tap "View All Questions":**
+  - If already paid for this game (in `questionAccessGranted`), toggle questions directly
+  - Otherwise, open a payment confirmation AlertDialog
+- **Payment Confirmation AlertDialog** (mobile drawer-style):
+  - Header: "View Quiz Questions" with an Eye icon
+  - Body shows:
+    - Fee amount in Mobi (e.g., M2,000) and local equivalent
+    - Current wallet balance
+    - Sufficient/Insufficient badge
+  - Two buttons:
+    - "Pay and View" (disabled if insufficient funds) -- deducts from wallet mock, grants access, shows questions
+    - "Cancel" -- closes dialog
+  - If insufficient funds: shows a warning card with "Top up your wallet to access this feature"
+- **After payment:** the questions toggle opens automatically, and future taps on the same game don't re-charge
 
-**State tracked:**
+### 4. Import and Wire Dependencies
 
-- `sessionPoints`: number -- earned 1 point per 100% session win
-- `sessionsPlayed`: number
-- `sessionsWon`: number
-- `sessionsLost`: number
-- `currentWinnings`: number -- dissolves when continuing to next session
-- `sessionPhase`: "lobby" | "playing" | "session_result"
-- `isEvicted`: boolean
-- `isQualified`: boolean -- reached merchant's qualifying points threshold
-
-**Lobby screen shows:**
-
-- Player's current points (e.g., "7/15 Points")
-- Sessions played, won, lost
-- Current winnings (with warning: "Continuing dissolves winnings")
-- Session fee (from merchant's selection process)
-- Three buttons:
-  - "Play Next Session" -- starts a new 15-question quiz pack
-  - "Quit and Take Winnings" -- exits with current winnings (opens redemption)
-  - "Quit Without Winnings" -- exits cleanly
-
-**Session result screen (after each 15-question pack):**
-
-- If 100%: "+1 Point earned!" celebration, updated points tally
-- If not 100%: "No point earned" -- still can continue
-- Buttons: "Continue to Next Session" (dissolves winnings) or "Quit"
-
-**Eviction rules (shown as info cards):**
-
-- 50+ losses = automatic eviction
-- When merchant's entry threshold is reached, bottom 90% of players by points are evicted (top 10% qualify for the Show proper)
-
-**Playing phase:** Reuses the same objective + non-objective quiz flow already built in InteractiveQuizPlayDialog (extracted into a shared sub-component or duplicated with same logic)
-
-### 3. Extract Quiz Play Engine into Shared Component
-
-**File:** `src/components/community/mobigate-quiz/QuizPlayEngine.tsx` (new)
-
-Extract the core quiz gameplay (objective questions -> non-objective questions -> result) from InteractiveQuizPlayDialog into a reusable component so both the initial quiz and session replays can use it.
-
-**Props:**
-
-- `objectiveQuestions`: array
-- `nonObjectiveQuestions`: array
-- `onComplete`: (result: { totalCorrect: number, percentage: number, objectiveCorrect: number, nonObjectiveCorrect: number }) => void
-- `seasonName`: string
-- `headerColor`: string (gradient class)
-
-This component handles:
-
-- Timer logic for both objective and non-objective phases
-- Answer selection and confirmation
-- Progress bar
-- Calls `onComplete` when all 15 questions are done
-
-### 4. Wire the Rollover Flow
-
-**File:** `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` (modify)
-
-- Add state: `showInteractiveSession` (boolean)
-- When "Rollover Winning to Interactive Session" is tapped:
-  - Close the current dialog
-  - Open InteractiveSessionDialog
-- When "Redeem Prize and Play Again" is tapped:
-  - Open redemption sheet
-  - On redemption close, reset quiz state and restart
-- Add `handlePlayAgain()` function that resets all state variables and restarts from objective phase
-
-### 5. Update Data Constants
-
-**File:** `src/data/mobigateInteractiveQuizData.ts` (minor addition)
-
-Add constants:
-
-```
-INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION = 50
-INTERACTIVE_QUALIFYING_TOP_PERCENT = 10  // top 10% qualify
-```
+- Import `useWalletBalance` from `@/hooks/useWindowData` into `MyQuizHistory.tsx`
+- Import `getQuestionViewFee` from `@/data/platformSettingsData`
+- Import `formatMobiAmount`, `formatLocalAmount` from `@/lib/mobiCurrencyTranslation`
+- Use `AlertDialog` from `@/components/ui/alert-dialog` for the payment confirmation
 
 ---
 
 ## Technical Details
 
-### Button layout in result footer (mobile-optimized)
-
-For 100% score -- 3 vertically stacked buttons:
+### Platform Settings Addition (platformSettingsData.ts)
 
 ```text
-div (space-y-2 p-4)
-  Button "Rollover Winning to Interactive Session"
-    (w-full h-12, amber/orange gradient, bold)
-  Button "Redeem Prize & Exit"
-    (w-full h-11, green gradient)
-  Button "Redeem Prize & Play Again"
-    (w-full h-11, outline variant, blue text)
+interface: PlatformQuestionViewSettings
+  questionViewFee: 2000        (M2,000 default)
+  questionViewFeeMin: 500      (M500)
+  questionViewFeeMax: 10000    (M10,000)
+  lastUpdatedAt: Date
+
+getQuestionViewFee() -> number
+setQuestionViewFee(fee: number) -> void
 ```
 
-For below 100% -- 2 buttons side by side:
+### Payment Flow in MyQuizHistory.tsx
 
 ```text
-div (flex gap-3 p-4)
-  Button "Play Again" (flex-1 h-12, blue)
-  Button "Exit Now" (flex-1 h-12, outline)
+State:
+  questionAccessGranted: Set<number>   -- game IDs already paid for
+  paymentGameId: number | null         -- which game's payment dialog is open
+  paymentProcessing: boolean
+
+On "View All Questions" tap:
+  if gameId in questionAccessGranted:
+    toggle showQuestions (free)
+  else:
+    set paymentGameId = gameId (opens AlertDialog)
+
+On "Pay & View" tap:
+  if walletBalance >= fee:
+    set paymentProcessing = true
+    simulate 1.5s delay
+    add gameId to questionAccessGranted
+    set showQuestions = true
+    show success toast with amount charged
+    close dialog
+  else:
+    show insufficient funds toast
 ```
 
-### InteractiveSessionDialog structure
+### Payment Confirmation UI (mobile-optimized)
 
 ```text
-Dialog (max-h-[95vh], p-0)
-  Header (sticky, gradient bg)
-    Season name, Points tally, Session count
-  Body (overflow-y-auto touch-auto)
-    if lobby:
-      Points progress card
-      Stats row (played/won/lost)
-      Current winnings card (with dissolve warning)
-      Session fee card
-      Eviction rules info
-    if playing:
-      QuizPlayEngine component
-    if session_result:
-      Result card (+1 point or no point)
-      Updated points
-  Footer (sticky)
-    Action buttons per phase
+AlertDialog (rounded-xl on mobile)
+  AlertDialogHeader
+    Icon: Eye (amber)
+    Title: "View Quiz Questions"
+    Description: "This is a premium feature"
+
+  Body:
+    Fee card: "M2,000 (approx N2,000.00)"
+    Wallet card: current balance + Sufficient/Insufficient badge
+    [if insufficient]: Warning card with top-up message
+
+  AlertDialogFooter (stacked vertically)
+    Button "Pay M2,000 & View Questions"
+      (w-full, min-h-[44px], green gradient, disabled if insufficient)
+    Button "Cancel"
+      (w-full, outline)
 ```
 
-### QuizPlayEngine component
+### Admin Settings UI Addition (QuizSettingsCard.tsx)
 
-Extracts lines 84-255 from InteractiveQuizPlayDialog into a self-contained component. The parent dialog only needs to handle:
-
-- Rendering the engine
-- Receiving the onComplete callback
-- Managing what happens after completion (buttons, navigation)
-
-### Files Created
-
-- `src/components/community/mobigate-quiz/QuizPlayEngine.tsx`
-- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx`
+```text
+New section after "Partial Win Percentage":
+  Separator
+  Header: "Question View Fee" with Eye icon
+  Large display: M{fee} centered
+  Slider: M500 - M10,000, step M500
+  Info note: "Charged to player's main wallet when viewing played quiz questions"
+  (Included in existing hasChanges/Save logic)
+```
 
 ### Files Modified
+- `src/data/platformSettingsData.ts` -- add question view fee settings and helpers
+- `src/components/mobigate/QuizSettingsCard.tsx` -- add fee management slider section
+- `src/pages/MyQuizHistory.tsx` -- add payment gate on "View All Questions" button
 
-- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- new result buttons, play again logic, rollover trigger
-- `src/data/mobigateInteractiveQuizData.ts` -- add eviction/qualification constants
-
-&nbsp;
-
-Forget desktop entirely focus solely and completely on mobile  ln this design
-
-Implement the plan completely take your time and carefully implement every single thing and integrate all completely no need to rush and report to me just take your loooong time and make everything perfectly
+### Files Created
+- None (all changes are additions to existing files)
