@@ -193,11 +193,17 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
                   {isFinale && r.entriesSelected <= 3 && (
                     <div className="space-y-1.5">
                       <div className="flex gap-1 flex-wrap">
-                        <Badge className="text-[9px] bg-amber-500/20 text-amber-600 border-amber-500/30">🥇 1st Prize</Badge>
-                        <Badge className="text-[9px] bg-gray-400/20 text-gray-600 border-gray-400/30">🥈 2nd Prize</Badge>
-                        <Badge className="text-[9px] bg-orange-500/20 text-orange-600 border-orange-500/30">🥉 3rd Prize</Badge>
+                        <Badge className="text-[9px] bg-amber-500/20 text-amber-600 border-amber-500/30">🥇 1st: {formatLocalAmount(season.firstPrize, "NGN")}</Badge>
+                        <Badge className="text-[9px] bg-gray-400/20 text-gray-600 border-gray-400/30">🥈 2nd: {formatLocalAmount(season.secondPrize, "NGN")}</Badge>
+                        <Badge className="text-[9px] bg-orange-500/20 text-orange-600 border-orange-500/30">🥉 3rd: {formatLocalAmount(season.thirdPrize, "NGN")}</Badge>
                       </div>
+                      {season.consolationPrizesEnabled && (
+                        <p className="text-[9px] text-purple-600">
+                          🎁 Consolation: {formatLocalAmount(season.consolationPrizePerPlayer, "NGN")} × {season.consolationPrizeCount} players
+                        </p>
+                      )}
                       <p className="text-[9px] text-muted-foreground">Grand Finale produces 1st, 2nd and 3rd Prize Winners. Entry is FREE.</p>
+                      <p className="text-[9px] font-medium text-green-600">Total Prizes: {formatLocalAmount(season.totalWinningPrizes, "NGN")}</p>
                     </div>
                   )}
                 </CardContent>
