@@ -1,146 +1,181 @@
 
-# Paid "View All Questions" Feature in Quiz History
+
+# Quiz Timing and Question Structure -- Full Audit and Fix
 
 ## Overview
 
-Add a paywall to the "View All Questions" button in the My Quiz History detail drawer. When a player taps it, a payment confirmation dialog appears first. The player's main Mobi wallet is charged an admin-configurable fee (e.g., M2,000). If the wallet has insufficient funds, access is denied with a clear message.
+A thorough inspection reveals that **every quiz dialog** has incorrect hardcoded timers (all set to 15s for objectives instead of 10s), none read from the admin-configurable settings, and two quiz types (Group and Standard Solo) are missing their 5 non-objective questions entirely. This plan corrects all of these issues across all files.
+
+---
+
+## Problems Found
+
+1. **Objective timer is wrong everywhere** -- hardcoded to 15s in all 6 quiz dialogs, should be 10s by default
+2. **No quiz dialog reads admin settings** -- the admin can set time per question in QuizSettingsCard, but no play dialog actually uses `getDefaultTimePerQuestion()`
+3. **Only one timer setting exists** -- the spec requires separate timers: 10s for Objective, 15s for Non-Objective, both admin-editable
+4. **Group Quiz has only 10 objective questions** -- missing 5 non-objective questions
+5. **Standard Solo Quiz has only 10 objective questions** -- missing 5 non-objective questions
+6. **QuizPlayEngine** (shared component) also hardcodes 15s for objectives
 
 ---
 
 ## Changes
 
-### 1. Add Question View Fee to Platform Settings
+### 1. Split Platform Timer Settings into Two
 
 **File:** `src/data/platformSettingsData.ts`
 
-Add a new setting block for the question viewing charge:
+Replace the single `defaultTimePerQuestion` with two separate settings:
 
-- `questionViewFee`: number (default M2,000)
-- `questionViewFeeMin`: number (M500)
-- `questionViewFeeMax`: number (M10,000)
-- Getter: `getQuestionViewFee()`
-- Setter: `setQuestionViewFee(newFee)`
+- `objectiveTimePerQuestion`: default 10s (range 5-30s)
+- `nonObjectiveTimePerQuestion`: default 15s (range 10-60s)
 
-### 2. Add Admin UI for Managing the Fee
+Add corresponding getter/setter functions:
+- `getObjectiveTimePerQuestion()`
+- `setObjectiveTimePerQuestion()`
+- `getNonObjectiveTimePerQuestion()`
+- `setNonObjectiveTimePerQuestion()`
+
+Keep backward compatibility by keeping `getDefaultTimePerQuestion()` as an alias for `getObjectiveTimePerQuestion()`.
+
+### 2. Update Admin QuizSettingsCard with Two Timer Sliders
 
 **File:** `src/components/mobigate/QuizSettingsCard.tsx`
 
-Add a third settings section (below the existing "Time Per Question" and "Partial Win" sections) for "Question View Fee":
+Replace the single "Time Per Question" slider with two:
 
-- Slider from M500 to M10,000 (step M500)
-- Large display showing current fee in Mobi
-- Info note: "Players will be charged this amount from their main wallet to view played quiz questions in their history"
-- Included in the existing Save button logic
+- "Objective Time" slider (5-30s, step 1s, default 10s)
+- "Non-Objective Time" slider (10-60s, step 5s, default 15s)
 
-### 3. Add Payment Confirmation Dialog to Quiz History
+Both display their current values prominently and save independently.
 
-**File:** `src/pages/MyQuizHistory.tsx`
+### 3. Fix All Quiz Play Dialogs to Use Admin Settings
 
-Replace the current direct toggle behavior of the "View All Questions" button with a paywall flow:
+Update every quiz dialog to import and use the admin-configurable timers instead of hardcoded values.
 
-- **New state:** `showPaymentConfirm` (boolean), `paymentProcessing` (boolean), `questionAccessGranted` (Record of game IDs that have been paid for)
-- **On tap "View All Questions":**
-  - If already paid for this game (in `questionAccessGranted`), toggle questions directly
-  - Otherwise, open a payment confirmation AlertDialog
-- **Payment Confirmation AlertDialog** (mobile drawer-style):
-  - Header: "View Quiz Questions" with an Eye icon
-  - Body shows:
-    - Fee amount in Mobi (e.g., M2,000) and local equivalent
-    - Current wallet balance
-    - Sufficient/Insufficient badge
-  - Two buttons:
-    - "Pay and View" (disabled if insufficient funds) -- deducts from wallet mock, grants access, shows questions
-    - "Cancel" -- closes dialog
-  - If insufficient funds: shows a warning card with "Top up your wallet to access this feature"
-- **After payment:** the questions toggle opens automatically, and future taps on the same game don't re-charge
+**Files affected:**
 
-### 4. Import and Wire Dependencies
+**a) `InteractiveQuizPlayDialog.tsx`**
+- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (4 occurrences)
+- Replace `NON_OBJECTIVE_TIME_PER_QUESTION = 15` with `getNonObjectiveTimePerQuestion()`
 
-- Import `useWalletBalance` from `@/hooks/useWindowData` into `MyQuizHistory.tsx`
-- Import `getQuestionViewFee` from `@/data/platformSettingsData`
-- Import `formatMobiAmount`, `formatLocalAmount` from `@/lib/mobiCurrencyTranslation`
-- Use `AlertDialog` from `@/components/ui/alert-dialog` for the payment confirmation
+**b) `QuizPlayEngine.tsx`**
+- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())`
+- Replace `NON_OBJECTIVE_TIME_PER_QUESTION = 15` with `getNonObjectiveTimePerQuestion()`
+
+**c) `GroupQuizPlayDialog.tsx`**
+- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (3 occurrences)
+- Add 5 non-objective questions with their own 15s (admin-editable) timer phase
+- Add non-objective UI section (timer, NonObjectiveQuestionCard, sequential flow)
+- Update total question count from 10 to 15
+
+**d) `StandardQuizContinueSheet.tsx`**
+- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (4 occurrences)
+- Add 5 non-objective questions with sequential timed flow
+- Update total question count from 10 to 15
+
+**e) `ScholarshipQuizPlayDialog.tsx`**
+- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (2 occurrences)
+- Add per-question timed non-objective flow (currently does bulk submission)
+
+**f) `FoodQuizPlayDialog.tsx`**
+- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (2 occurrences)
+- Non-objective already has 15s timer -- update to use `getNonObjectiveTimePerQuestion()`
+
+### 4. Add Non-Objective Questions to Group Quiz
+
+**File:** `GroupQuizPlayDialog.tsx`
+
+Add:
+- 5 mock non-objective questions
+- Phase management ("objective" -> "non_objective" -> "game_over")
+- Per-question sequential timer (15s default, from admin settings)
+- NonObjectiveQuestionCard rendering
+- Updated score breakdown showing objective and written scores separately
+
+### 5. Add Non-Objective Questions to Standard Solo Quiz
+
+**File:** `StandardQuizContinueSheet.tsx`
+
+Add:
+- 5 mock non-objective questions
+- Phase management with non-objective phase between objective and session result
+- Per-question sequential timer
+- NonObjectiveQuestionCard rendering
+- Updated scoring to include both objective and written scores
 
 ---
 
 ## Technical Details
 
-### Platform Settings Addition (platformSettingsData.ts)
+### Platform Settings (platformSettingsData.ts)
 
 ```text
-interface: PlatformQuestionViewSettings
-  questionViewFee: 2000        (M2,000 default)
-  questionViewFeeMin: 500      (M500)
-  questionViewFeeMax: 10000    (M10,000)
-  lastUpdatedAt: Date
+Remove:
+  defaultTimePerQuestion: 10
+  timePerQuestionMin: 5
+  timePerQuestionMax: 60
 
-getQuestionViewFee() -> number
-setQuestionViewFee(fee: number) -> void
+Add:
+  objectiveTimePerQuestion: 10     (default)
+  objectiveTimeMin: 5
+  objectiveTimeMax: 30
+  nonObjectiveTimePerQuestion: 15  (default)
+  nonObjectiveTimeMin: 10
+  nonObjectiveTimeMax: 60
+
+Functions:
+  getObjectiveTimePerQuestion() -> number
+  setObjectiveTimePerQuestion(time) -> void
+  getNonObjectiveTimePerQuestion() -> number
+  setNonObjectiveTimePerQuestion(time) -> void
+  getDefaultTimePerQuestion() -> number  (alias, backward compat)
 ```
 
-### Payment Flow in MyQuizHistory.tsx
+### Timer Usage Pattern (all dialogs)
 
 ```text
-State:
-  questionAccessGranted: Set<number>   -- game IDs already paid for
-  paymentGameId: number | null         -- which game's payment dialog is open
-  paymentProcessing: boolean
+import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
 
-On "View All Questions" tap:
-  if gameId in questionAccessGranted:
-    toggle showQuestions (free)
-  else:
-    set paymentGameId = gameId (opens AlertDialog)
+// In state init:
+const [timeRemaining, setTimeRemaining] = useState(getObjectiveTimePerQuestion());
 
-On "Pay & View" tap:
-  if walletBalance >= fee:
-    set paymentProcessing = true
-    simulate 1.5s delay
-    add gameId to questionAccessGranted
-    set showQuestions = true
-    show success toast with amount charged
-    close dialog
-  else:
-    show insufficient funds toast
+// In nextObjective():
+setTimeRemaining(getObjectiveTimePerQuestion());
+
+// For non-objective:
+const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(getNonObjectiveTimePerQuestion());
+setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
 ```
 
-### Payment Confirmation UI (mobile-optimized)
+### Group Quiz Non-Objective Questions (mock)
 
 ```text
-AlertDialog (rounded-xl on mobile)
-  AlertDialogHeader
-    Icon: Eye (amber)
-    Title: "View Quiz Questions"
-    Description: "This is a premium feature"
-
-  Body:
-    Fee card: "M2,000 (approx N2,000.00)"
-    Wallet card: current balance + Sufficient/Insufficient badge
-    [if insufficient]: Warning card with top-up message
-
-  AlertDialogFooter (stacked vertically)
-    Button "Pay M2,000 & View Questions"
-      (w-full, min-h-[44px], green gradient, disabled if insufficient)
-    Button "Cancel"
-      (w-full, outline)
+5 questions like:
+- "Name the largest country in Africa by land area" -> ["algeria"]
+- "What does DNA stand for?" -> ["deoxyribonucleic acid", "deoxyribonucleic"]
+- etc.
 ```
 
-### Admin Settings UI Addition (QuizSettingsCard.tsx)
+### Standard Solo Quiz Non-Objective Questions (mock)
 
 ```text
-New section after "Partial Win Percentage":
-  Separator
-  Header: "Question View Fee" with Eye icon
-  Large display: M{fee} centered
-  Slider: M500 - M10,000, step M500
-  Info note: "Charged to player's main wallet when viewing played quiz questions"
-  (Included in existing hasChanges/Save logic)
+5 questions like:
+- "Name the first President of Nigeria" -> ["nnamdi azikiwe", "azikiwe"]
+- "What does CPU stand for?" -> ["central processing unit"]
+- etc.
 ```
 
 ### Files Modified
-- `src/data/platformSettingsData.ts` -- add question view fee settings and helpers
-- `src/components/mobigate/QuizSettingsCard.tsx` -- add fee management slider section
-- `src/pages/MyQuizHistory.tsx` -- add payment gate on "View All Questions" button
+- `src/data/platformSettingsData.ts` -- split timer into objective/non-objective
+- `src/components/mobigate/QuizSettingsCard.tsx` -- two timer sliders
+- `src/components/community/mobigate-quiz/QuizPlayEngine.tsx` -- use admin timers
+- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- use admin timers
+- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- inherits via QuizPlayEngine
+- `src/components/community/mobigate-quiz/GroupQuizPlayDialog.tsx` -- add non-objective phase + admin timers
+- `src/components/community/mobigate-quiz/StandardQuizContinueSheet.tsx` -- add non-objective phase + admin timers
+- `src/components/community/mobigate-quiz/ScholarshipQuizPlayDialog.tsx` -- use admin timers
+- `src/components/community/mobigate-quiz/FoodQuizPlayDialog.tsx` -- use admin timers
 
 ### Files Created
-- None (all changes are additions to existing files)
+- None
