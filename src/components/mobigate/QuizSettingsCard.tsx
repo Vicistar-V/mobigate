@@ -11,22 +11,28 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
+  Eye,
 } from "lucide-react";
 import {
   platformQuizSettings,
+  platformQuestionViewSettings,
   setDefaultTimePerQuestion,
   setPartialWinPercentage,
+  setQuestionViewFee,
 } from "@/data/platformSettingsData";
+import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 
 export function QuizSettingsCard() {
   const { toast } = useToast();
   const [timePerQuestion, setTimePerQuestion] = useState(platformQuizSettings.defaultTimePerQuestion);
   const [winPercentage, setWinPercentage] = useState(platformQuizSettings.partialWinPercentage);
+  const [viewFee, setViewFee] = useState(platformQuestionViewSettings.questionViewFee);
   const [isSaving, setIsSaving] = useState(false);
 
   const hasChanges =
     timePerQuestion !== platformQuizSettings.defaultTimePerQuestion ||
-    winPercentage !== platformQuizSettings.partialWinPercentage;
+    winPercentage !== platformQuizSettings.partialWinPercentage ||
+    viewFee !== platformQuestionViewSettings.questionViewFee;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -34,10 +40,11 @@ export function QuizSettingsCard() {
 
     setDefaultTimePerQuestion(timePerQuestion);
     setPartialWinPercentage(winPercentage);
+    setQuestionViewFee(viewFee);
 
     toast({
       title: "Quiz Settings Updated",
-      description: `Time: ${timePerQuestion}s per question, Partial Win: ${winPercentage}%. Changes apply platform-wide.`,
+      description: `Time: ${timePerQuestion}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}. Changes apply platform-wide.`,
     });
     setIsSaving(false);
   };
@@ -138,7 +145,50 @@ export function QuizSettingsCard() {
 
         <Separator />
 
-        {/* Winning Structure Preview */}
+        {/* Question View Fee */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Eye className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Question View Fee</span>
+            </div>
+            <Badge variant="secondary" className="text-sm font-bold px-3 py-1">
+              {formatMobiAmount(viewFee)}
+            </Badge>
+          </div>
+
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <p className="text-3xl font-bold text-amber-600">{formatMobiAmount(viewFee)}</p>
+            <p className="text-sm text-muted-foreground">charged per quiz view</p>
+          </div>
+
+          <div className="px-1">
+            <Slider
+              value={[viewFee]}
+              onValueChange={(values) => setViewFee(values[0])}
+              min={platformQuestionViewSettings.questionViewFeeMin}
+              max={platformQuestionViewSettings.questionViewFeeMax}
+              step={500}
+              className="w-full touch-manipulation"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{formatMobiAmount(platformQuestionViewSettings.questionViewFeeMin)}</span>
+              <span className="font-medium text-foreground">{formatMobiAmount(viewFee)}</span>
+              <span>{formatMobiAmount(platformQuestionViewSettings.questionViewFeeMax)}</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg">
+            <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-[11px] text-muted-foreground">
+              Players will be charged this amount from their main wallet to view played quiz questions in their history.
+            </p>
+          </div>
+        </div>
+
+        <Separator />
+
+
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground">Current Winning Structure</p>
           <div className="grid grid-cols-3 gap-2 text-center">

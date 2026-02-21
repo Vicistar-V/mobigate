@@ -1,13 +1,20 @@
 import { useState, useMemo } from "react";
-import { Trophy, Gamepad2, TrendingUp, XCircle, Calendar, ArrowLeft, Clock, Users, Coins, Target, ChevronRight, Hash, Award, Zap, BookOpen, Home, GraduationCap, Filter, ArrowUpDown, X, CalendarDays, ChevronDown } from "lucide-react";
+import { Trophy, Gamepad2, TrendingUp, XCircle, Calendar, ArrowLeft, Clock, Users, Coins, Target, ChevronRight, Hash, Award, Zap, BookOpen, Home, GraduationCap, Filter, ArrowUpDown, X, CalendarDays, ChevronDown, Eye, Wallet, AlertTriangle, Loader2, CheckCircle2, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useWalletBalance } from "@/hooks/useWindowData";
+import { getQuestionViewFee } from "@/data/platformSettingsData";
+import { formatMobiAmount, formatLocalAmount, convertFromMobi } from "@/lib/mobiCurrencyTranslation";
 
 interface GameQuestion {
   question: string;
@@ -228,6 +235,17 @@ export default function MyQuizHistory() {
   const [selectedGame, setSelectedGame] = useState<GameEntry | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
 
+  // Payment gate state
+  const { toast } = useToast();
+  const walletBalance = useWalletBalance();
+  const [questionAccessGranted, setQuestionAccessGranted] = useState<Set<number>>(new Set());
+  const [paymentGameId, setPaymentGameId] = useState<number | null>(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+
+  const questionViewFee = getQuestionViewFee();
+  const hasSufficientFunds = walletBalance.mobi >= questionViewFee;
+  const localFee = convertFromMobi(questionViewFee, "NGN");
+
   // Filter state
   const [filterMode, setFilterMode] = useState<GameEntry["mode"] | "all">("all");
   const [filterResult, setFilterResult] = useState<"all" | "won" | "lost">("all");
@@ -285,6 +303,28 @@ export default function MyQuizHistory() {
   const handleOpenDetail = (game: GameEntry) => {
     setSelectedGame(game);
     setShowQuestions(false);
+  };
+
+  const handleViewQuestions = (gameId: number) => {
+    if (questionAccessGranted.has(gameId)) {
+      setShowQuestions(!showQuestions);
+    } else {
+      setPaymentGameId(gameId);
+    }
+  };
+
+  const handlePayAndView = async () => {
+    if (!hasSufficientFunds || paymentGameId === null) return;
+    setPaymentProcessing(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setQuestionAccessGranted(prev => new Set(prev).add(paymentGameId));
+    setShowQuestions(true);
+    setPaymentProcessing(false);
+    setPaymentGameId(null);
+    toast({
+      title: "Payment Successful",
+      description: `${formatMobiAmount(questionViewFee)} charged. Questions are now visible.`,
+    });
   };
 
   return (
@@ -706,20 +746,31 @@ export default function MyQuizHistory() {
 
                 <Separator className="mx-4 mb-3" />
 
-                {/* Questions Toggle */}
+                {/* Questions Toggle - Payment Gated */}
                 <button
-                  onClick={() => setShowQuestions(!showQuestions)}
+                  onClick={() => handleViewQuestions(game.id)}
                   className="mx-4 w-[calc(100%-2rem)] flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/50 active:scale-[0.98] transition-all"
                 >
                   <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-primary" />
+                    {questionAccessGranted.has(game.id) ? (
+                      <Target className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    )}
                     <span className="text-sm font-semibold">View All Questions ({game.questions.length})</span>
                   </div>
-                  <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showQuestions ? "rotate-90" : ""}`} />
+                  <div className="flex items-center gap-1.5">
+                    {!questionAccessGranted.has(game.id) && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20">
+                        {formatMobiAmount(questionViewFee)}
+                      </Badge>
+                    )}
+                    <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showQuestions && questionAccessGranted.has(game.id) ? "rotate-90" : ""}`} />
+                  </div>
                 </button>
 
-                {/* Questions List */}
-                {showQuestions && (
+                {/* Questions List (only if paid) */}
+                {showQuestions && questionAccessGranted.has(game.id) && (
                   <div className="mx-4 mt-3 space-y-2">
                     {game.questions.map((q, i) => (
                       <div
@@ -756,6 +807,95 @@ export default function MyQuizHistory() {
           })()}
         </DrawerContent>
       </Drawer>
+
+      {/* Payment Confirmation AlertDialog */}
+      <AlertDialog open={paymentGameId !== null} onOpenChange={(open) => { if (!open && !paymentProcessing) setPaymentGameId(null); }}>
+        <AlertDialogContent className="max-w-[92vw] rounded-xl p-0 gap-0">
+          <AlertDialogHeader className="p-4 pb-3 text-center">
+            <div className="h-12 w-12 rounded-full bg-amber-500/10 mx-auto mb-2 flex items-center justify-center">
+              <Eye className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            </div>
+            <AlertDialogTitle className="text-base font-bold">View Quiz Questions</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground">
+              This is a premium feature. A one-time fee will be charged to your Mobi Wallet.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="px-4 space-y-3 pb-3">
+            {/* Fee Card */}
+            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold mb-1">Viewing Fee</p>
+              <p className="text-2xl font-black text-amber-700 dark:text-amber-300">{formatMobiAmount(questionViewFee)}</p>
+              <p className="text-[11px] text-amber-600/70 dark:text-amber-400/70">
+                ≈ {formatLocalAmount(localFee.toAmount, "NGN")}
+              </p>
+            </div>
+
+            {/* Wallet Balance Card */}
+            <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Wallet Balance</p>
+                    <p className="text-sm font-bold">{formatMobiAmount(walletBalance.mobi)}</p>
+                  </div>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    "text-[10px] px-2 py-0.5",
+                    hasSufficientFunds
+                      ? "bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/20"
+                      : "bg-destructive/10 text-destructive border-destructive/20"
+                  )}
+                >
+                  {hasSufficientFunds ? (
+                    <><CheckCircle2 className="h-3 w-3 mr-1" />Sufficient</>
+                  ) : (
+                    <><AlertTriangle className="h-3 w-3 mr-1" />Insufficient</>
+                  )}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Insufficient Funds Warning */}
+            {!hasSufficientFunds && (
+              <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/20">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-semibold text-destructive">Insufficient Funds</p>
+                    <p className="text-[11px] text-destructive/80 mt-0.5">
+                      Top up your wallet with at least {formatMobiAmount(questionViewFee - walletBalance.mobi)} more to access this feature.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <AlertDialogFooter className="flex-col gap-2 p-4 pt-1 sm:flex-col">
+            <Button
+              onClick={handlePayAndView}
+              disabled={!hasSufficientFunds || paymentProcessing}
+              className="w-full min-h-[44px] bg-green-600 hover:bg-green-700 text-white touch-manipulation"
+            >
+              {paymentProcessing ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing Payment...</>
+              ) : (
+                <><Coins className="h-4 w-4 mr-2 shrink-0" />Pay {formatMobiAmount(questionViewFee)} & View Questions</>
+              )}
+            </Button>
+            <AlertDialogCancel
+              disabled={paymentProcessing}
+              className="w-full min-h-[44px] mt-0 touch-manipulation"
+            >
+              Cancel
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
