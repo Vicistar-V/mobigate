@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Trophy, Gamepad2, Users, Zap, Home, GraduationCap, Play, TrendingUp, Target, History, ChevronRight, Wallet } from "lucide-react";
+import { ArrowLeft, Trophy, Gamepad2, Users, Zap, Home, GraduationCap, Play, TrendingUp, Target, History, ChevronRight, Wallet, ToggleRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,6 +63,16 @@ const gameModes = [
     borderColor: "border-rose-500/30",
     players: "Solo",
     tag: "Education",
+  },
+  {
+    id: "toggle",
+    title: "Toggle Quiz",
+    description: "7 escalating sessions. Score 100% each round or lose everything. Toggle up for multipliers up to 15x!",
+    icon: ToggleRight,
+    color: "bg-orange-500/10 text-orange-600",
+    borderColor: "border-orange-500/30",
+    players: "Solo",
+    tag: "High Stakes",
   },
 ];
 
