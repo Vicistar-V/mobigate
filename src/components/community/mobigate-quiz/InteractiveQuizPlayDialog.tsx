@@ -1,12 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, Clock, Star, Radio, Trophy, Zap, AlertTriangle } from "lucide-react";
+import { X, Clock, Star, Radio, Trophy, Zap, AlertTriangle, Shield, RotateCcw, Gift } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { MOBIGATE_ANSWER_LABELS } from "@/data/mobigateQuizData";
-import { QuizSeason, INTERACTIVE_QUESTIONS_PER_SESSION } from "@/data/mobigateInteractiveQuizData";
+import {
+  QuizSeason,
+  INTERACTIVE_QUESTIONS_PER_SESSION,
+  GAME_SHOW_ENTRY_POINTS,
+  calculateQuizTier,
+  TIER_LABELS,
+} from "@/data/mobigateInteractiveQuizData";
 import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -63,12 +69,21 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const [nonObjShowResult, setNonObjShowResult] = useState(false);
   const [nonObjLocked, setNonObjLocked] = useState(false);
 
-  const totalQuestions = INTERACTIVE_QUESTIONS_PER_SESSION;
+  // Accumulated state across plays
+  const [accumulatedPoints, setAccumulatedPoints] = useState(0);
+  const [accumulatedWinnings, setAccumulatedWinnings] = useState(0);
+  const [totalPlays, setTotalPlays] = useState(0);
+
+  const totalQuestions = interactiveObjectiveQuestions.length + (interactiveNonObjectiveQuestions.length > 0 ? interactiveNonObjectiveQuestions.length : 0);
   const question = interactiveObjectiveQuestions[currentQ];
   const totalCorrect = objectiveCorrect + nonObjectiveCorrect;
   const percentage = Math.round((totalCorrect / totalQuestions) * 100);
-  const passed = percentage === 100;
-  const cashAlternative = season.entryFee * 5;
+
+  // Tier calculation
+  const tierResult = calculateQuizTier(percentage);
+  const tierInfo = TIER_LABELS[tierResult.tier];
+  const instantPrize = Math.round(season.entryFee * tierResult.prizeMultiplier);
+  const hasReachedGameShow = accumulatedPoints >= GAME_SHOW_ENTRY_POINTS;
 
   const resetAllState = useCallback(() => {
     setCurrentQ(0); setTimeRemaining(getObjectiveTimePerQuestion()); setSelectedAnswer(null); setShowResult(false);
@@ -80,7 +95,12 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   }, []);
 
   useEffect(() => {
-    if (!open) resetAllState();
+    if (!open) {
+      resetAllState();
+      setAccumulatedPoints(0);
+      setAccumulatedWinnings(0);
+      setTotalPlays(0);
+    }
   }, [open, resetAllState]);
 
   // Objective timer
@@ -116,7 +136,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
       if (hasNonObjective) {
         setPhase("non_objective");
       } else {
-        setPhase("result");
+        finalizeResult();
       }
     } else {
       setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(getObjectiveTimePerQuestion());
@@ -131,8 +151,9 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     const isCorrect = q.acceptedAnswers.some(a => answer.toLowerCase().includes(a.toLowerCase()));
     if (isCorrect) setNonObjectiveCorrect(p => p + 1);
     setTimeout(() => {
-      if (currentNonObjQ >= 4) setPhase("result");
-      else {
+      if (currentNonObjQ >= interactiveNonObjectiveQuestions.length - 1) {
+        finalizeResult();
+      } else {
         setCurrentNonObjQ(p => p + 1);
         setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
         setNonObjShowResult(false); setNonObjLocked(false);
@@ -140,15 +161,55 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     }, 1500);
   }, [currentNonObjQ]);
 
+  const finalizeResult = () => {
+    setTotalPlays(p => p + 1);
+    setPhase("result");
+  };
+
+  // Apply tier points after result is shown (use effect to read final correct counts)
+  useEffect(() => {
+    if (phase !== "result") return;
+    const tc = objectiveCorrect + nonObjectiveCorrect;
+    const pct = Math.round((tc / totalQuestions) * 100);
+    const tier = calculateQuizTier(pct);
+
+    if (tier.resetAll) {
+      // DISQUALIFIED — reset everything
+      setAccumulatedPoints(0);
+      setAccumulatedWinnings(0);
+      toast({ title: "💀 DISQUALIFIED!", description: "All points and prizes reset to zero!", variant: "destructive" });
+    } else if (tier.points > 0) {
+      setAccumulatedPoints(p => p + tier.points);
+      const prize = Math.round(season.entryFee * tier.prizeMultiplier);
+      if (prize > 0) setAccumulatedWinnings(p => p + prize);
+    }
+  }, [phase]); // intentionally only trigger on phase change
+
   const handleRollover = () => {
     onOpenChange(false);
     setTimeout(() => setShowInteractiveSession(true), 300);
     toast({ title: "⚡ Entering Interactive Session", description: "Previous winnings forfeited. Earn points now!" });
   };
 
-  const handleRedeemAndExit = () => { setRedemptionAction("exit"); setShowRedemption(true); };
-  const handleRedeemAndPlayAgain = () => { setRedemptionAction("play_again"); setShowRedemption(true); };
-  const handlePlayAgain = () => { resetAllState(); };
+  const handleRedeemInstantPrize = (action: "exit" | "play_again") => {
+    // Taking instant prize dissolves all accumulated points and disqualifies from Game Show
+    setAccumulatedPoints(0);
+    setRedemptionAction(action);
+    setShowRedemption(true);
+    toast({ title: "⚠️ Points Dissolved", description: "Taking instant prize removes Game Show eligibility." });
+  };
+
+  const handleSkipPrizeContinuePlaying = () => {
+    // Keep points, skip instant prize
+    resetAllState();
+  };
+
+  const handlePlayAgainFresh = () => {
+    // After disqualification — fresh start
+    setAccumulatedPoints(0);
+    setAccumulatedWinnings(0);
+    resetAllState();
+  };
 
   const handleRedemptionClose = (v: boolean) => {
     if (!v) {
@@ -161,7 +222,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const progressValue = phase === "objective"
     ? ((currentQ + (showResult ? 1 : 0)) / totalQuestions) * 100
     : phase === "non_objective"
-      ? ((10 + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100
+      ? ((interactiveObjectiveQuestions.length + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100
       : 100;
 
   const currentNonObjQuestion = interactiveNonObjectiveQuestions[currentNonObjQ];
@@ -184,14 +245,19 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                   <h2 className="font-semibold text-sm">{season.name}</h2>
                   <p className="text-xs text-blue-200">
                     {phase === "objective" && `Q${currentQ + 1}/${interactiveObjectiveQuestions.length} (Objective)`}
-                    {phase === "non_objective" && `Q${interactiveObjectiveQuestions.length + 1 + currentNonObjQ}/${totalQuestions} (Type Your Answer)`}
+                    {phase === "non_objective" && `Q${interactiveObjectiveQuestions.length + 1 + currentNonObjQ}/${totalQuestions} (Written)`}
                     {phase === "result" && "Results"}
                   </p>
                 </div>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-white hover:bg-white/20">
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-white/20 text-white border-0 text-[10px]">
+                  <Star className="h-3 w-3 mr-0.5" />{accumulatedPoints} pts
+                </Badge>
+                <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-white hover:bg-white/20">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <Progress value={progressValue} className="h-1.5 mt-2 bg-blue-400 [&>div]:bg-white" />
           </div>
@@ -239,13 +305,13 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 </div>
                 <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200">
                   <CardContent className="p-3 text-center">
-                    <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/10</p>
-                    <p className="text-xs text-muted-foreground mt-1">Written question {currentNonObjQ + 1} of 5</p>
+                    <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/{interactiveObjectiveQuestions.length}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Written question {currentNonObjQ + 1} of {interactiveNonObjectiveQuestions.length}</p>
                   </CardContent>
                 </Card>
                 <NonObjectiveQuestionCard
                   key={currentNonObjQ}
-                  questionNumber={11 + currentNonObjQ}
+                  questionNumber={interactiveObjectiveQuestions.length + 1 + currentNonObjQ}
                   question={currentNonObjQuestion.question}
                   onAnswer={(ans) => { const a = [...nonObjectiveAnswers]; a[currentNonObjQ] = ans; setNonObjectiveAnswers(a); }}
                   disabled={nonObjLocked}
@@ -257,61 +323,113 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
 
             {phase === "result" && (
               <div className="space-y-3">
-                {passed ? (
-                  <>
-                    <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-950/30">
-                      <CardContent className="p-5 text-center space-y-3">
-                        <p className="text-4xl">🌟</p>
-                        <h3 className="font-bold text-lg">Perfect Score!</h3>
-                        <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
-                        <div className="pt-2">
-                          <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                            <p className="text-xs text-muted-foreground">Cash Prize Available</p>
-                            <p className="font-bold text-lg text-green-600">{formatMobiAmount(cashAlternative)}</p>
-                            <p className="text-[10px] text-muted-foreground">({formatLocalAmount(cashAlternative, "NGN")})</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30">
-                      <CardContent className="p-3 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Zap className="h-4 w-4 text-amber-500" />
-                          <span className="text-xs font-semibold text-amber-700">What is "Rollover"?</span>
-                        </div>
-                        <div className="space-y-1.5 text-[10px] text-muted-foreground">
-                          <p className="flex items-start gap-1.5">
-                            <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
-                            You forfeit your current cash prize.
-                          </p>
-                          <p className="flex items-start gap-1.5">
-                            <Star className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
-                            Enter the Interactive Session to earn Points.
-                          </p>
-                          <p className="flex items-start gap-1.5">
-                            <Trophy className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
-                            Top players qualify for the Game Show & win BIG!
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </>
-                ) : (
-                  <Card className="border-2 border-red-300 bg-red-50 dark:bg-red-950/30">
-                    <CardContent className="p-5 text-center space-y-3">
-                      <p className="text-4xl">😞</p>
-                      <h3 className="font-bold text-lg">Better Luck Next Time</h3>
-                      <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
-                      <div className="grid grid-cols-2 gap-2 pt-2">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
-                          <p className="text-[10px] text-muted-foreground">Objective</p>
-                          <p className="font-bold text-sm">{objectiveCorrect}/10</p>
-                        </div>
-                        <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">
-                          <p className="text-[10px] text-muted-foreground">Written</p>
-                          <p className="font-bold text-sm">{nonObjectiveCorrect}/5</p>
-                        </div>
+                {/* Tier Result Card */}
+                <Card className={cn("border-2", {
+                  "border-green-500 bg-green-50 dark:bg-green-950/30": tierResult.tier === "perfect",
+                  "border-blue-400 bg-blue-50 dark:bg-blue-950/30": tierResult.tier === "excellent",
+                  "border-amber-400 bg-amber-50 dark:bg-amber-950/30": tierResult.tier === "good",
+                  "border-border bg-muted/30": tierResult.tier === "pass",
+                  "border-red-500 bg-red-50 dark:bg-red-950/30": tierResult.tier === "disqualified",
+                })}>
+                  <CardContent className="p-5 text-center space-y-3">
+                    <p className="text-4xl">{tierInfo.emoji}</p>
+                    <h3 className={cn("font-bold text-lg", tierInfo.color)}>{tierInfo.label}</h3>
+                    <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
+                        <p className="text-[10px] text-muted-foreground">Objective</p>
+                        <p className="font-bold text-sm">{objectiveCorrect}/{interactiveObjectiveQuestions.length}</p>
                       </div>
+                      <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">
+                        <p className="text-[10px] text-muted-foreground">Written</p>
+                        <p className="font-bold text-sm">{nonObjectiveCorrect}/{interactiveNonObjectiveQuestions.length || 0}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Instant Prize (if earned) */}
+                {instantPrize > 0 && !tierResult.resetAll && (
+                  <Card className="border-green-300 bg-green-50/50 dark:bg-green-950/20">
+                    <CardContent className="p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Gift className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-semibold text-green-700">Instant Prize Available</span>
+                      </div>
+                      <div className="text-center py-2">
+                        <p className="text-2xl font-bold text-green-600">{formatMobiAmount(instantPrize)}</p>
+                        <p className="text-[10px] text-muted-foreground">({formatLocalAmount(instantPrize, "NGN")})</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{Math.round(tierResult.prizeMultiplier * 100)}% of stake</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Warning: taking instant prize dissolves points */}
+                {instantPrize > 0 && !tierResult.resetAll && (
+                  <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30">
+                    <CardContent className="p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <span className="text-xs font-semibold text-amber-700">Instant Prize Warning</span>
+                      </div>
+                      <div className="space-y-1.5 text-[10px] text-muted-foreground">
+                        <p>• Taking the instant prize <strong>dissolves all accumulated points</strong></p>
+                        <p>• You'll be <strong>disqualified from Game Show entry</strong></p>
+                        <p>• You must restart fresh to re-enter the Game Show path</p>
+                        <p>• Alternatively, <strong>skip the prize</strong> and keep accumulating points</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Disqualification warning */}
+                {tierResult.resetAll && (
+                  <Card className="border-red-300 bg-red-50 dark:bg-red-950/30">
+                    <CardContent className="p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-red-500" />
+                        <span className="text-xs font-semibold text-red-700">Full Reset Applied</span>
+                      </div>
+                      <div className="space-y-1.5 text-[10px] text-muted-foreground">
+                        <p>• Scoring below 60% triggers <strong>DISQUALIFICATION</strong></p>
+                        <p>• All accumulated points reset to <strong>0</strong></p>
+                        <p>• All accumulated prizes reset to <strong>0</strong></p>
+                        <p>• You must start completely fresh</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Accumulated Stats */}
+                <Card className="border-border">
+                  <CardContent className="p-3">
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="text-lg font-bold text-primary">{accumulatedPoints}</p>
+                        <p className="text-[9px] text-muted-foreground">Total Points</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-green-600">{formatMobiAmount(accumulatedWinnings)}</p>
+                        <p className="text-[9px] text-muted-foreground">Accrued Wins</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold">{totalPlays}</p>
+                        <p className="text-[9px] text-muted-foreground">Sessions</p>
+                      </div>
+                    </div>
+                    <Progress value={Math.min((accumulatedPoints / GAME_SHOW_ENTRY_POINTS) * 100, 100)} className="h-2 mt-2 bg-muted [&>div]:bg-primary" />
+                    <p className="text-[9px] text-center text-muted-foreground mt-1">{accumulatedPoints}/{GAME_SHOW_ENTRY_POINTS} points to Game Show entry</p>
+                  </CardContent>
+                </Card>
+
+                {/* 300-Point Game Show Milestone */}
+                {hasReachedGameShow && !tierResult.resetAll && (
+                  <Card className="border-2 border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
+                    <CardContent className="p-4 space-y-3 text-center">
+                      <p className="text-3xl">🏆🎬</p>
+                      <h3 className="font-bold text-base text-amber-700">Game Show Entry Unlocked!</h3>
+                      <p className="text-xs text-muted-foreground">You've earned {accumulatedPoints} points — you qualify to enter the Game Show!</p>
                     </CardContent>
                   </Card>
                 )}
@@ -320,7 +438,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
           </div>
 
           {/* Footer */}
-          <div className="shrink-0 border-t px-3 py-3 bg-background">
+          <div className="shrink-0 border-t px-3 py-3 bg-background space-y-2">
             {phase === "objective" && (
               <Button className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation" onClick={handleConfirm} disabled={selectedAnswer === null || showResult}>
                 {selectedAnswer === null ? "Select Answer" : showResult ? "Loading..." : `Confirm ${MOBIGATE_ANSWER_LABELS[selectedAnswer]}`}
@@ -335,37 +453,83 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 {nonObjShowResult ? "Next question..." : "Confirm Answer"}
               </Button>
             )}
-            {phase === "result" && passed && (
-              <div className="space-y-2">
+
+            {/* Result footer — Game Show milestone reached */}
+            {phase === "result" && hasReachedGameShow && !tierResult.resetAll && (
+              <>
                 <Button
                   className="w-full min-h-[44px] py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold text-xs leading-tight touch-manipulation whitespace-normal"
                   onClick={handleRollover}
                 >
                   <Zap className="h-4 w-4 mr-1.5 shrink-0" />
-                  <span>Rollover Winning to Interactive Session</span>
+                  <span>Enter Show Now — Become a Mobi Celebrity!</span>
+                </Button>
+                {accumulatedWinnings > 0 && (
+                  <Button
+                    className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
+                    onClick={() => handleRedeemInstantPrize("exit")}
+                  >
+                    <Trophy className="h-4 w-4 mr-1.5 shrink-0" />
+                    <span>Redeem Accrued Won Prize ({formatMobiAmount(accumulatedWinnings)})</span>
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full min-h-[38px] py-2 px-3 text-xs touch-manipulation"
+                  onClick={handleSkipPrizeContinuePlaying}
+                >
+                  Continue Playing More Quiz
+                </Button>
+              </>
+            )}
+
+            {/* Result footer — has instant prize but no Game Show yet */}
+            {phase === "result" && !hasReachedGameShow && instantPrize > 0 && !tierResult.resetAll && (
+              <>
+                <Button
+                  className="w-full min-h-[44px] py-2.5 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-xs leading-tight touch-manipulation whitespace-normal"
+                  onClick={() => handleRedeemInstantPrize("exit")}
+                >
+                  <Gift className="h-4 w-4 mr-1.5 shrink-0" />
+                  <span>Redeem Instant Prize & Exit ({formatMobiAmount(instantPrize)})</span>
                 </Button>
                 <Button
-                  className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
-                  onClick={handleRedeemAndExit}
+                  className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs leading-tight touch-manipulation whitespace-normal"
+                  onClick={() => handleRedeemInstantPrize("play_again")}
                 >
-                  <Trophy className="h-4 w-4 mr-1.5 shrink-0" />
-                  <span>Redeem Prize & Exit</span>
+                  Redeem Instant Prize & Play Again
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full min-h-[40px] py-2 px-3 text-blue-600 border-blue-300 text-xs leading-tight touch-manipulation whitespace-normal"
-                  onClick={handleRedeemAndPlayAgain}
+                  className="w-full min-h-[38px] py-2 px-3 text-blue-600 border-blue-300 text-xs touch-manipulation"
+                  onClick={handleSkipPrizeContinuePlaying}
                 >
-                  Redeem Prize & Play Again
+                  <Star className="h-3.5 w-3.5 mr-1.5" />
+                  Skip Prize, Continue Playing (+{tierResult.points} pts kept)
                 </Button>
-              </div>
+              </>
             )}
-            {phase === "result" && !passed && (
+
+            {/* Result footer — pass tier (60-79%), no prize */}
+            {phase === "result" && tierResult.tier === "pass" && (
               <div className="flex gap-2.5">
-                <Button className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation" onClick={handlePlayAgain}>
+                <Button className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation" onClick={handleSkipPrizeContinuePlaying}>
                   Play Again
                 </Button>
                 <Button variant="outline" className="flex-1 h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
+                  Exit
+                </Button>
+              </div>
+            )}
+
+            {/* Result footer — disqualified (<60%) */}
+            {phase === "result" && tierResult.resetAll && (
+              <div className="space-y-2">
+                <Button className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation" onClick={handlePlayAgainFresh}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Play Again (Fresh Start)
+                </Button>
+                <Button variant="outline" className="w-full h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
                   Exit Now
                 </Button>
               </div>
@@ -374,7 +538,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
         </DialogContent>
       </Dialog>
 
-      <QuizPrizeRedemptionSheet open={showRedemption} onOpenChange={handleRedemptionClose} prizeAmount={cashAlternative} prizeType="cash" />
+      <QuizPrizeRedemptionSheet open={showRedemption} onOpenChange={handleRedemptionClose} prizeAmount={instantPrize > 0 ? instantPrize : accumulatedWinnings} prizeType="cash" />
       <InteractiveSessionDialog open={showInteractiveSession} onOpenChange={(v) => setShowInteractiveSession(v)} season={season} />
     </>
   );

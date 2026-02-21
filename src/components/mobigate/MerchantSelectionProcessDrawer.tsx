@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Trash2, Tv, Trophy, ArrowDown, Users } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { PlusCircle, Trash2, Tv, Trophy, ArrowDown, Users, Gift } from "lucide-react";
 import type { QuizSeason, SelectionProcess, TVShowRound } from "@/data/mobigateInteractiveQuizData";
+import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface Props {
   open: boolean;
@@ -34,10 +36,14 @@ function NumField({ value, onChange, placeholder }: { value: number; onChange: (
 export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onSave }: Props) {
   const [processes, setProcesses] = useState<SelectionProcess[]>(season.selectionProcesses);
   const [tvRounds, setTvRounds] = useState<TVShowRound[]>(season.tvShowRounds);
+  const [consolationEnabled, setConsolationEnabled] = useState(season.consolationPrizesEnabled);
+  const [consolationPool, setConsolationPool] = useState(season.consolationPrizePool);
 
   useEffect(() => {
     setProcesses(season.selectionProcesses);
     setTvRounds(season.tvShowRounds);
+    setConsolationEnabled(season.consolationPrizesEnabled);
+    setConsolationPool(season.consolationPrizePool);
   }, [season]);
 
   const addProcess = () => {
@@ -73,7 +79,13 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
   };
 
   const handleSave = () => {
-    onSave({ ...season, selectionProcesses: processes, tvShowRounds: tvRounds });
+    onSave({
+      ...season,
+      selectionProcesses: processes,
+      tvShowRounds: tvRounds,
+      consolationPrizesEnabled: consolationEnabled,
+      consolationPrizePool: consolationPool,
+    });
     onOpenChange(false);
   };
 
@@ -172,21 +184,51 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
                       <NumField value={r.entriesSelected} onChange={v => updateTvRound(idx, { entriesSelected: v })} />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[10px] text-muted-foreground">Entry Fee (₦)</Label>
+                      <Label className="text-[10px] text-muted-foreground">
+                        {isFinale ? "Entry Fee (FREE)" : "Entry Fee (₦)"}
+                      </Label>
                       <NumField value={r.entryFee} onChange={v => updateTvRound(idx, { entryFee: v })} />
                     </div>
                   </div>
                   {isFinale && r.entriesSelected <= 3 && (
-                    <div className="flex gap-1 flex-wrap mt-1">
-                      <Badge className="text-[9px] bg-amber-500/20 text-amber-600 border-amber-500/30">🥇 1st Prize</Badge>
-                      <Badge className="text-[9px] bg-gray-400/20 text-gray-600 border-gray-400/30">🥈 2nd Prize</Badge>
-                      <Badge className="text-[9px] bg-orange-500/20 text-orange-600 border-orange-500/30">🥉 3rd Prize</Badge>
+                    <div className="space-y-1.5">
+                      <div className="flex gap-1 flex-wrap">
+                        <Badge className="text-[9px] bg-amber-500/20 text-amber-600 border-amber-500/30">🥇 1st Prize</Badge>
+                        <Badge className="text-[9px] bg-gray-400/20 text-gray-600 border-gray-400/30">🥈 2nd Prize</Badge>
+                        <Badge className="text-[9px] bg-orange-500/20 text-orange-600 border-orange-500/30">🥉 3rd Prize</Badge>
+                      </div>
+                      <p className="text-[9px] text-muted-foreground">Grand Finale produces 1st, 2nd and 3rd Prize Winners. Entry is FREE.</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
             );
           })}
+
+          {/* Consolation Prizes */}
+          <Card className="border-purple-200 bg-purple-50/30 dark:bg-purple-950/10">
+            <CardContent className="p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gift className="h-4 w-4 text-purple-500" />
+                  <h3 className="text-sm font-bold">Consolation Prizes</h3>
+                </div>
+                <Switch checked={consolationEnabled} onCheckedChange={setConsolationEnabled} />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Optional. Consolation prizes go to the 12 players evicted at the 1st TV Show round, based on their respective points scored. Enabling this can inspire more people to play.
+              </p>
+              {consolationEnabled && (
+                <div className="space-y-1">
+                  <Label className="text-[10px] text-muted-foreground">Consolation Prize Pool (₦)</Label>
+                  <NumField value={consolationPool} onChange={setConsolationPool} placeholder="e.g. 500000" />
+                  <p className="text-[9px] text-muted-foreground">
+                    Total: {formatLocalAmount(consolationPool, "NGN")} shared among evicted players
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </DrawerBody>
         <DrawerFooter className="shrink-0">
           <Button className="h-12 w-full" onClick={handleSave}>Save Selection Process</Button>

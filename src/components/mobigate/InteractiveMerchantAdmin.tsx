@@ -23,7 +23,7 @@ import {
 import {
   mockMerchants, mockSeasons, mockQuestions,
   type QuizMerchant, type QuizSeason, type MerchantQuestion,
-  SEASON_TYPE_CONFIG, DEFAULT_MERCHANT_CONFIG,
+  SEASON_TYPE_CONFIG, DEFAULT_MERCHANT_CONFIG, GAME_SHOW_ENTRY_POINTS,
 } from "@/data/mobigateInteractiveQuizData";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import { format, addMonths, differenceInDays, addWeeks, parseISO } from "date-fns";
@@ -98,6 +98,8 @@ export function InteractiveMerchantAdmin() {
       extensionWeeks: 0,
       extensionReason: "",
       minimumTargetParticipants: seasonMinTarget,
+      consolationPrizesEnabled: false,
+      consolationPrizePool: 0,
       selectionProcesses: [{ round: 1, entriesSelected: 10000, entryFee: seasonEntryFee }],
       tvShowRounds: [
         { round: 1, entriesSelected: 50, entryFee: 2000, label: "1st TV Show" },
