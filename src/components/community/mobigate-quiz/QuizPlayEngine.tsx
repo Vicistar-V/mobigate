@@ -163,7 +163,7 @@ export function QuizPlayEngine({
   return (
     <div className="flex flex-col h-full">
       {/* Progress */}
-      <div className="px-4 pt-3 pb-2">
+      <div className="px-3 pt-3 pb-2">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
           <span>
             {phase === "objective"
@@ -176,7 +176,7 @@ export function QuizPlayEngine({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 touch-auto space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 py-3 touch-auto space-y-3">
         {phase === "objective" && question && (
           <>
             <div className="flex items-center justify-center gap-2">
@@ -190,14 +190,14 @@ export function QuizPlayEngine({
                 <p className="text-base font-medium">{question.question}</p>
               </CardContent>
             </Card>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {question.options.map((opt, idx) => (
                 <button
                   key={idx}
                   onClick={() => !showResult && setSelectedAnswer(idx)}
                   disabled={showResult}
                   className={cn(
-                    "p-3 rounded-lg border-2 text-left transition-all touch-manipulation",
+                    "p-2.5 rounded-lg border-2 text-left transition-all touch-manipulation",
                     selectedAnswer === idx && !showResult && "border-blue-500 bg-blue-50",
                     showResult && idx === question.correctAnswer && "border-green-500 bg-green-50",
                     showResult && selectedAnswer === idx && idx !== question.correctAnswer && "border-red-500 bg-red-50",
@@ -258,7 +258,7 @@ export function QuizPlayEngine({
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 border-t p-4 bg-background">
+      <div className="shrink-0 border-t px-3 py-3 bg-background">
         {phase === "objective" && (
           <Button
             className="w-full h-12 bg-blue-500 hover:bg-blue-600"
