@@ -60,6 +60,14 @@ export interface QuizSeason {
   status: "open" | "in_progress" | "completed";
   selectionProcesses: SelectionProcess[];
   tvShowRounds: TVShowRound[];
+  // Calendar fields
+  startDate: string; // ISO date string e.g. "2025-03-01"
+  endDate: string;   // ISO date string e.g. "2025-06-30"
+  isExtended: boolean;
+  extensionWeeks: number; // 0 = no extension, otherwise weeks extended
+  extensionReason: string; // e.g. "Low subscription turnout"
+  originalEndDate: string; // original end date before extension
+  minimumTargetParticipants: number; // minimum subscription target
 }
 
 export interface MerchantQuestion {
@@ -128,6 +136,8 @@ export const mockSeasons: QuizSeason[] = [
     id: "s1", merchantId: "m1", name: "Tech Genius Season 1", type: "Short", duration: 4,
     selectionLevels: 3, entryFee: 200, currentLevel: 1, totalParticipants: 10000,
     prizePerLevel: 50000, isLive: false, status: "open",
+    startDate: "2025-03-01", endDate: "2025-06-30", originalEndDate: "2025-06-30",
+    isExtended: false, extensionWeeks: 0, extensionReason: "", minimumTargetParticipants: 15000,
     selectionProcesses: [
       { round: 1, entriesSelected: 10000, entryFee: 200 },
       { round: 2, entriesSelected: 5000, entryFee: 500 },
@@ -143,6 +153,8 @@ export const mockSeasons: QuizSeason[] = [
     id: "s2", merchantId: "m1", name: "Code Master Championship", type: "Complete", duration: 12,
     selectionLevels: 7, entryFee: 500, currentLevel: 3, totalParticipants: 25000,
     prizePerLevel: 100000, isLive: true, status: "in_progress",
+    startDate: "2025-01-15", endDate: "2026-01-14", originalEndDate: "2026-01-14",
+    isExtended: false, extensionWeeks: 0, extensionReason: "", minimumTargetParticipants: 30000,
     selectionProcesses: [
       { round: 1, entriesSelected: 25000, entryFee: 500 },
       { round: 2, entriesSelected: 12000, entryFee: 750 },
@@ -162,6 +174,8 @@ export const mockSeasons: QuizSeason[] = [
     id: "s3", merchantId: "m2", name: "Shopping Spree Quiz", type: "Medium", duration: 6,
     selectionLevels: 5, entryFee: 300, currentLevel: 1, totalParticipants: 8000,
     prizePerLevel: 75000, isLive: false, status: "open",
+    startDate: "2025-04-01", endDate: "2025-09-30", originalEndDate: "2025-09-30",
+    isExtended: false, extensionWeeks: 0, extensionReason: "", minimumTargetParticipants: 12000,
     selectionProcesses: [
       { round: 1, entriesSelected: 8000, entryFee: 300 },
       { round: 2, entriesSelected: 4000, entryFee: 500 },
@@ -179,6 +193,8 @@ export const mockSeasons: QuizSeason[] = [
     id: "s4", merchantId: "m3", name: "Brain Academy Challenge", type: "Complete", duration: 12,
     selectionLevels: 7, entryFee: 400, currentLevel: 5, totalParticipants: 20000,
     prizePerLevel: 150000, isLive: true, status: "in_progress",
+    startDate: "2024-09-01", endDate: "2025-09-30", originalEndDate: "2025-08-31",
+    isExtended: true, extensionWeeks: 4, extensionReason: "Low subscription turnout", minimumTargetParticipants: 25000,
     selectionProcesses: [
       { round: 1, entriesSelected: 20000, entryFee: 400 },
       { round: 2, entriesSelected: 10000, entryFee: 750 },
