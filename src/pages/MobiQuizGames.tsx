@@ -6,6 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MobigateQuizHub } from "@/components/community/mobigate-quiz/MobigateQuizHub";
+import { GroupQuizInviteSheet } from "@/components/community/mobigate-quiz/GroupQuizInviteSheet";
+import { StandardQuizCategorySelect } from "@/components/community/mobigate-quiz/StandardQuizCategorySelect";
+import { InteractiveQuizMerchantSheet } from "@/components/community/mobigate-quiz/InteractiveQuizMerchantSheet";
+import { FoodQuizItemSelectSheet } from "@/components/community/mobigate-quiz/FoodQuizItemSelectSheet";
+import { ScholarshipQuizSetupSheet } from "@/components/community/mobigate-quiz/ScholarshipQuizSetupSheet";
+import { ToggleQuizPlayDialog } from "@/components/community/mobigate-quiz/ToggleQuizPlayDialog";
 
 const gameModes = [
   {
@@ -71,6 +77,7 @@ const quizStats = {
 
 export default function MobiQuizGames() {
   const [showQuizHub, setShowQuizHub] = useState(false);
+  const [activeFlow, setActiveFlow] = useState<string | null>(null);
   const navigate = useNavigate();
 
   return (
@@ -192,7 +199,7 @@ export default function MobiQuizGames() {
               <Card
                 key={mode.id}
                 className={`border ${mode.borderColor} hover:shadow-md transition-all cursor-pointer active:scale-[0.98]`}
-                onClick={() => setShowQuizHub(true)}
+                onClick={() => setActiveFlow(mode.id)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
@@ -222,6 +229,14 @@ export default function MobiQuizGames() {
 
       {/* Mobi Quiz Game Dialog */}
       <MobigateQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} />
+
+      {/* Direct game mode flows */}
+      <GroupQuizInviteSheet open={activeFlow === "group"} onOpenChange={(v) => !v && setActiveFlow(null)} />
+      <StandardQuizCategorySelect open={activeFlow === "standard"} onOpenChange={(v) => !v && setActiveFlow(null)} />
+      <InteractiveQuizMerchantSheet open={activeFlow === "interactive"} onOpenChange={(v) => !v && setActiveFlow(null)} />
+      <FoodQuizItemSelectSheet open={activeFlow === "food"} onOpenChange={(v) => !v && setActiveFlow(null)} />
+      <ScholarshipQuizSetupSheet open={activeFlow === "scholarship"} onOpenChange={(v) => !v && setActiveFlow(null)} />
+      <ToggleQuizPlayDialog open={activeFlow === "toggle"} onOpenChange={(v) => !v && setActiveFlow(null)} />
     </div>
   );
 }
