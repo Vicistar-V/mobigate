@@ -1,121 +1,137 @@
 
-# Interactive Quiz: 15 Objectives + "Play Only Objectives" Mode
+# Interactive Quiz: Merchant-Centric Player Flow, Winning Prizes Display, Wallet Requirements, and Waiver System
 
 ## What This Plan Does
 
-Currently the Interactive Quiz has 10 objective questions and 5 non-objective questions (15 total). This plan increases the **objective question bank to 15**, adds a **"Play Only Objectives" mode** with adjusted prize tiers, and implements the random 10-from-15 selection logic for the default (mixed) mode.
+Currently, the player-facing Interactive Quiz Merchant Sheet is a basic list showing merchant names, categories, and prize pools. This plan transforms it into a full merchant-centric experience where:
+
+1. **Players see each merchant's actual winning prize offers** (1st, 2nd, 3rd prizes + consolation) prominently on merchant cards
+2. **Merchants configure their Game Show winning prizes** (1st/2nd/3rd + consolation) from their admin panel
+3. **A wallet balance validation system** ensures merchants have at least 70% of total prizes before launching
+4. **An Exclusive Waiver request flow** lets under-funded merchants apply (with a non-refundable fee) for admin approval
+5. **Draft/Active quiz status** reflects whether a merchant's quiz is launchable or pending funding
 
 ---
 
-## The Two Play Modes
+## Detailed Changes
 
-**Default Mode (Objectives + Non-Objectives):**
-- 10 objectives randomly selected from the 15 in the bank + 5 non-objectives = 15 total
-- Prize tiers remain unchanged (100% = 500%, 90% = 50%, 80% = 20%)
+### 1. Data Model Updates (`mobigateInteractiveQuizData.ts`)
 
-**"Play Only Objectives" Mode:**
-- All 15 objective questions, no non-objectives
-- Reduced winning prize: 100% correct = **350%** of stake (down from 500%)
-- 12-14 correct answers (80-93%) = **20% of stake** consolation prize
-- Below 60% still triggers full disqualification and reset
+Add to the `QuizSeason` interface:
+- `firstPrize: number` -- e.g., 6,000,000
+- `secondPrize: number` -- e.g., 3,000,000
+- `thirdPrize: number` -- e.g., 1,500,000
+- `consolationPrizePerPlayer: number` -- e.g., 500,000 (for 12 semi-final evictees)
+- `consolationPrizeCount: number` -- e.g., 12
+- `totalWinningPrizes: number` -- computed: 1st + 2nd + 3rd + (consolation x count) = 16,500,000
+- `quizStatus: "draft" | "active" | "suspended"` -- replaces simple isLive for launch control
 
----
+Add to the `QuizMerchant` interface:
+- `walletBalance: number` -- current wallet balance
+- `walletFundingHistory: { date: string; amount: number; description: string }[]`
+- `pendingWaiverRequest: boolean`
+- `waiverApproved: boolean`
 
-## Files and Changes
+Add new constants:
+- `MERCHANT_MIN_WALLET_PERCENT = 0.7` (70% of total prizes required)
+- `WAIVER_REQUEST_FEE = 50000` (admin-editable, non-refundable)
 
-### 1. Data Constants (`mobigateInteractiveQuizData.ts`)
+Update all mock seasons to include realistic 1st/2nd/3rd/consolation prize values.
+Update mock merchants to include wallet balances (some sufficient, some insufficient for testing).
 
-- Add new constants for "objectives-only" mode:
-  - `OBJECTIVES_ONLY_PRIZE_MULTIPLIER = 3.5` (350% of stake)
-  - `OBJECTIVES_ONLY_CONSOLATION_MULTIPLIER = 0.2` (20% of stake for 12-14 correct)
-  - `INTERACTIVE_FULL_OBJECTIVE_QUESTIONS = 15` (total objectives in bank)
-  - `INTERACTIVE_DEFAULT_OBJECTIVE_PICK = 10` (randomly picked for mixed mode)
-- Add a new `calculateObjectivesOnlyTier()` function with the adjusted tiers:
-  - 15/15 correct (100%) = 3 points, 350% prize
-  - 14/15 or 13/15 or 12/15 (80-93%) = 1 point, 20% consolation
-  - Below 60% = disqualified, full reset
-- Update `INTERACTIVE_OBJECTIVE_QUESTIONS` comment to clarify it means "per session in mixed mode"
+### 2. Player-Facing Merchant Sheet (`InteractiveQuizMerchantSheet.tsx`)
 
-### 2. InteractiveQuizPlayDialog (`InteractiveQuizPlayDialog.tsx`)
+Transform merchant cards to show:
+- Merchant name, category, verified badge (existing)
+- **Winning Prizes section** on each card showing:
+  - "1st: N6,000,000 (M6,000,000)"
+  - "2nd: N3,000,000"
+  - "3rd: N1,500,000"
+  - "Consolation: N500,000 x 12 players"
+  - "Total Prize Pool: N16,500,000"
+- Number of active seasons and participant count
+- Only show merchants with `applicationStatus === "approved"` and at least one active season
 
-- Add 5 more objective questions to the hardcoded pool (bringing total to 15)
-- Add `playMode` state: `"mixed" | "objectives_only"` (default: `"mixed"`)
-- Add a **pre-game phase** (`"mode_select"`) before objectives begin, showing:
-  - "Play Objectives + Written" button (default, full prize tiers)
-  - "Play Only Objectives" button with attached note: "This option will reduce your Winning Prize from 500% to 350% of Stake"
-- When `playMode === "mixed"`: randomly pick 10 from the 15 objectives, then proceed to 5 non-objectives
-- When `playMode === "objectives_only"`: use all 15 objectives, skip non-objectives entirely
-- Update tier calculation to use `calculateObjectivesOnlyTier()` when in objectives-only mode
-- Update result screen to reflect the correct tier labels for objectives-only mode
+Filter out pending/suspended merchants from the player view (those are admin-only).
 
-### 3. InteractiveSessionDialog (`InteractiveSessionDialog.tsx`)
+### 3. Player-Facing Season Sheet (`InteractiveQuizSeasonSheet.tsx`)
 
-- Add 5 more objective questions to the session pool (15 total)
-- Pass a `playMode` prop through to `QuizPlayEngine`
-- Add mode selection in the lobby before starting a session
-- Update `handleSessionComplete` to use the correct tier function based on play mode
-- Update the scoring rules card to mention the "Objectives Only" reduced prize
+Update season cards to prominently display:
+- The full prize breakdown (1st, 2nd, 3rd, consolation) in a dedicated prize section
+- Dual currency display (NGN + Mobi) for all prize amounts
+- Selection stages with entry fees (already present, keep as-is)
+- A note: "Consolation Prizes for 12 Semi-Final contestants" when enabled
 
-### 4. QuizPlayEngine (`QuizPlayEngine.tsx`)
+### 4. Merchant Admin -- Season Configuration (`InteractiveMerchantAdmin.tsx`)
 
-- Accept a new optional prop `playMode?: "mixed" | "objectives_only"`
-- When `playMode === "objectives_only"`, the engine receives all 15 objectives and 0 non-objectives (handled by parent passing empty array)
-- No changes needed to internal logic since it already handles empty non-objective arrays
-- Update the `QuizPlayResult` interface to include `playMode` so parent can determine which tier function to use
+**Add Season Drawer updates:**
+- Add input fields for 1st Prize, 2nd Prize, 3rd Prize amounts
+- Add consolation toggle + per-player amount + player count
+- Auto-compute total winning prizes and display it
+- Show the 70% wallet requirement: "Minimum wallet balance required: N11,550,000"
+- Show merchant's current wallet balance
 
-### 5. InteractiveQuizSeasonSheet (`InteractiveQuizSeasonSheet.tsx`)
+**Season card updates:**
+- Show `quizStatus` badge (Draft/Active/Suspended)
+- Show total winning prizes on each season card
 
-- Pass `playMode` selection down to `InteractiveQuizPlayDialog`
-- The mode selection happens inside the play dialog itself, so no major changes here beyond ensuring props flow correctly
+**Launch validation (replacing simple "Live" toggle):**
+- When toggling a season to "Active/Live":
+  - Check: `merchant.walletBalance >= 0.7 * season.totalWinningPrizes`
+  - If sufficient: activate with "Launch Quiz Now" confirmation
+  - If insufficient: show "Insufficient Fund" alert with:
+    - Current balance vs required balance
+    - "Click Here to Apply for Exclusive Waiver" button
+    - Waiver fee disclosure: "This request will charge a non-refundable fee of N50,000"
 
-### 6. Merchant Admin Questions Config (`InteractiveMerchantAdmin.tsx`)
+**Waiver Request Drawer (new):**
+- Shows merchant's current wallet balance
+- Shows required minimum balance
+- Shows funding history (last 5 transactions)
+- Shows the non-refundable waiver fee
+- "Submit Waiver Request" button with fee confirmation
+- After submission: toast confirmation, season stays as "Draft" pending admin approval
 
-- Update the questions settings display to show "15 Objectives" instead of "10 Objectives"
-- Update `DEFAULT_MERCHANT_CONFIG.objectivePerPack` reference to show 15
-- Update any UI text referencing "10 Objectives" to "15 Objectives (10 randomly selected for mixed play)"
+**Admin Waiver Management (within merchant detail view):**
+- A "Pending Waivers" section (visible to admin only)
+- Each waiver request shows: season name, required balance, current balance, shortfall
+- "Approve" button: activates the quiz season
+- "Reject" button: keeps season as Draft, notifies merchant
+
+### 5. Merchant Selection Process Drawer (`MerchantSelectionProcessDrawer.tsx`)
+
+- Update Grand Finale section to show the configured 1st/2nd/3rd prize amounts
+- Show consolation prize details for TV Show evictees
+- All amounts in dual currency (NGN + Mobi)
 
 ---
 
 ## Technical Details
 
-### Random Selection Logic (Mixed Mode)
+### Wallet Validation Logic
 
-```typescript
-function pickRandomObjectives(allObjectives: ObjectiveQuestion[], count: number) {
-  const shuffled = [...allObjectives].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
-}
-
-// Usage in InteractiveQuizPlayDialog:
-const activeObjectives = playMode === "objectives_only"
-  ? allObjectiveQuestions           // all 15
-  : pickRandomObjectives(allObjectiveQuestions, 10);  // random 10
+```text
+totalWinningPrizes = firstPrize + secondPrize + thirdPrize + (consolationPrizePerPlayer * consolationPrizeCount)
+requiredBalance = totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT
+canLaunch = merchant.walletBalance >= requiredBalance
 ```
 
-### Objectives-Only Tier Calculation
+### Quiz Status State Machine
 
-```typescript
-function calculateObjectivesOnlyTier(percentage: number, correctCount: number, totalCount: number) {
-  if (percentage === 100)  return { points: 3, prizeMultiplier: 3.5, tier: "perfect" };      // 350%
-  if (correctCount >= 12)  return { points: 1, prizeMultiplier: 0.2, tier: "consolation" };   // 20%
-  if (percentage >= 60)    return { points: 0, prizeMultiplier: 0,   tier: "pass" };
-  return { points: 0, prizeMultiplier: 0, tier: "disqualified", resetAll: true };
-}
+```text
+Draft --> (sufficient wallet) --> Active
+Draft --> (insufficient wallet) --> show "Apply for Waiver"
+Draft --> (waiver approved) --> Active
+Active --> (admin suspends) --> Suspended
+Suspended --> (admin reactivates) --> Active
 ```
 
-### Mode Selection UI (Pre-Game)
-
-Before the quiz starts, a card will show two options:
-- Primary button: "Play Objectives + Written (15 Questions)" -- full prize tiers
-- Secondary button: "Play Only Objectives (15 Questions)" -- with a small amber note card below explaining: "This option reduces your Winning Prize from 500% to 350% of Stake. Getting 12-14 correct earns 20% consolation prize."
-
-### Files Modified (6 total)
-- `src/data/mobigateInteractiveQuizData.ts` -- New constants, new tier function
-- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- 15 objectives, mode select, adjusted scoring
-- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- 15 objectives, mode select in lobby
-- `src/components/community/mobigate-quiz/QuizPlayEngine.tsx` -- playMode in result interface
-- `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx` -- Props flow
-- `src/components/mobigate/InteractiveMerchantAdmin.tsx` -- Updated question count display
+### Files Modified (5 total)
+- `src/data/mobigateInteractiveQuizData.ts` -- New prize fields, wallet fields, waiver constants, updated mocks
+- `src/components/community/mobigate-quiz/InteractiveQuizMerchantSheet.tsx` -- Prize display on merchant cards, filter non-approved
+- `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx` -- Prize breakdown display on season cards
+- `src/components/mobigate/InteractiveMerchantAdmin.tsx` -- Prize config in Add Season, wallet validation, waiver request drawer, waiver admin section
+- `src/components/mobigate/MerchantSelectionProcessDrawer.tsx` -- Prize amounts in Grand Finale section
 
 ### Files Created
 - None
