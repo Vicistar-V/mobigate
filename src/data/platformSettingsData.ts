@@ -94,3 +94,34 @@ export function setPartialWinPercentage(newPercentage: number): void {
     platformQuizSettings.lastUpdatedAt = new Date();
   }
 }
+
+// Platform Question View Fee Settings - Managed by Mobigate Admin
+export interface PlatformQuestionViewSettings {
+  questionViewFee: number;           // Current fee in Mobi
+  questionViewFeeMin: number;        // Slider minimum
+  questionViewFeeMax: number;        // Slider maximum
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformQuestionViewSettings: PlatformQuestionViewSettings = {
+  questionViewFee: 2000,             // M2,000 default
+  questionViewFeeMin: 500,           // M500
+  questionViewFeeMax: 10000,         // M10,000
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+// Function to get current question view fee
+export function getQuestionViewFee(): number {
+  return platformQuestionViewSettings.questionViewFee;
+}
+
+// Function to update question view fee
+export function setQuestionViewFee(newFee: number): void {
+  if (newFee >= platformQuestionViewSettings.questionViewFeeMin && 
+      newFee <= platformQuestionViewSettings.questionViewFeeMax) {
+    platformQuestionViewSettings.questionViewFee = newFee;
+    platformQuestionViewSettings.lastUpdatedAt = new Date();
+  }
+}
