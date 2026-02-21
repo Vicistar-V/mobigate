@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -14,8 +16,9 @@ import {
 } from "@/components/ui/drawer";
 import {
   Building2, ChevronRight, Users, Trophy, Wallet,
-  CheckCircle, Edit2, Radio, Calendar, Settings2,
+  CheckCircle, Edit2, Radio, Calendar as CalendarIcon, Settings2,
   BookOpen, Filter, PlusCircle, ShieldCheck, ShieldOff, Clock,
+  CalendarDays, CalendarPlus, AlertTriangle,
 } from "lucide-react";
 import {
   mockMerchants, mockSeasons, mockQuestions,
@@ -23,6 +26,7 @@ import {
   SEASON_TYPE_CONFIG, DEFAULT_MERCHANT_CONFIG,
 } from "@/data/mobigateInteractiveQuizData";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
+import { format, addMonths, differenceInDays, addWeeks, parseISO } from "date-fns";
 import { MerchantPlatformSettingsDrawer } from "./MerchantPlatformSettingsDrawer";
 import { MerchantSelectionProcessDrawer } from "./MerchantSelectionProcessDrawer";
 import { MerchantQuestionBankDrawer } from "./MerchantQuestionBankDrawer";
@@ -50,6 +54,19 @@ export function InteractiveMerchantAdmin() {
   const [seasonType, setSeasonType] = useState<"Short" | "Medium" | "Complete">("Short");
   const [seasonEntryFee, setSeasonEntryFee] = useState(200);
   const [seasonPrize, setSeasonPrize] = useState(50000);
+  const [seasonStartDate, setSeasonStartDate] = useState<Date | undefined>(undefined);
+  const [seasonMinTarget, setSeasonMinTarget] = useState(10000);
+  const [startDateOpen, setStartDateOpen] = useState(false);
+
+  // Extension drawer state
+  const [showExtendSeason, setShowExtendSeason] = useState<QuizSeason | null>(null);
+  const [extensionWeeks, setExtensionWeeks] = useState(2);
+  const [extensionReason, setExtensionReason] = useState("");
+
+  const computedEndDate = useMemo(() => {
+    if (!seasonStartDate) return null;
+    return addMonths(seasonStartDate, SEASON_TYPE_CONFIG[seasonType].duration);
+  }, [seasonStartDate, seasonType]);
 
   const handleToggleStatus = (merchantId: string, newStatus: "approved" | "suspended") => {
     setMerchants(prev => prev.map(m => m.id === merchantId ? { ...m, applicationStatus: newStatus } : m));
@@ -57,8 +74,10 @@ export function InteractiveMerchantAdmin() {
   };
 
   const handleAddSeason = () => {
-    if (!selectedMerchant || !seasonName.trim()) return;
+    if (!selectedMerchant || !seasonName.trim() || !seasonStartDate || !computedEndDate) return;
     const cfg = SEASON_TYPE_CONFIG[seasonType];
+    const startStr = format(seasonStartDate, "yyyy-MM-dd");
+    const endStr = format(computedEndDate, "yyyy-MM-dd");
     const season: QuizSeason = {
       id: `s-${Date.now()}`,
       merchantId: selectedMerchant.id,
@@ -72,6 +91,13 @@ export function InteractiveMerchantAdmin() {
       prizePerLevel: seasonPrize,
       isLive: false,
       status: "open",
+      startDate: startStr,
+      endDate: endStr,
+      originalEndDate: endStr,
+      isExtended: false,
+      extensionWeeks: 0,
+      extensionReason: "",
+      minimumTargetParticipants: seasonMinTarget,
       selectionProcesses: [{ round: 1, entriesSelected: 10000, entryFee: seasonEntryFee }],
       tvShowRounds: [
         { round: 1, entriesSelected: 50, entryFee: 2000, label: "1st TV Show" },
@@ -81,8 +107,10 @@ export function InteractiveMerchantAdmin() {
     };
     setSeasons(prev => [season, ...prev]);
     setSeasonName("");
+    setSeasonStartDate(undefined);
+    setSeasonMinTarget(10000);
     setShowAddSeason(false);
-    toast({ title: "Season Created", description: season.name });
+    toast({ title: "Season Created", description: `${season.name} — ${format(seasonStartDate, "MMM d")} to ${format(computedEndDate, "MMM d, yyyy")}` });
   };
 
   const handleToggleSeasonLive = (seasonId: string) => {
@@ -98,6 +126,22 @@ export function InteractiveMerchantAdmin() {
   const handleSaveSeason = (updated: QuizSeason) => {
     setSeasons(prev => prev.map(s => s.id === updated.id ? updated : s));
     toast({ title: "Selection Process Saved" });
+  };
+
+  const handleExtendSeason = () => {
+    if (!showExtendSeason || extensionWeeks < 1) return;
+    const newEndDate = addWeeks(parseISO(showExtendSeason.endDate), extensionWeeks);
+    setSeasons(prev => prev.map(s => s.id === showExtendSeason.id ? {
+      ...s,
+      isExtended: true,
+      extensionWeeks: (s.extensionWeeks || 0) + extensionWeeks,
+      extensionReason: extensionReason || "Low subscription turnout",
+      endDate: format(newEndDate, "yyyy-MM-dd"),
+    } : s));
+    toast({ title: "Season Extended", description: `+${extensionWeeks} weeks added` });
+    setShowExtendSeason(null);
+    setExtensionWeeks(2);
+    setExtensionReason("");
   };
 
   const filteredMerchants = filter === "all" ? merchants : merchants.filter(m => m.applicationStatus === filter);
@@ -204,17 +248,25 @@ export function InteractiveMerchantAdmin() {
           {merchantSeasons.length === 0 ? (
             <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No seasons yet.</CardContent></Card>
           ) : (
-            merchantSeasons.map(s => (
+            merchantSeasons.map(s => {
+              const daysLeft = differenceInDays(parseISO(s.endDate), new Date());
+              const belowTarget = s.totalParticipants < s.minimumTargetParticipants;
+              return (
               <Card key={s.id} className="border border-border/40 active:scale-[0.98] transition-transform">
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate">{s.name}</p>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <Badge variant="outline" className="text-[10px]">{s.type} ({s.duration}mo)</Badge>
+                        <Badge variant="outline" className="text-[10px]">{s.type}</Badge>
                         <Badge variant={s.status === "open" ? "default" : s.status === "in_progress" ? "secondary" : "outline"} className="text-[10px]">
                           {s.status.replace("_", " ")}
                         </Badge>
+                        {s.isExtended && (
+                          <Badge className="text-[9px] bg-amber-500/10 text-amber-600 border-amber-500/20">
+                            +{s.extensionWeeks}w extended
+                          </Badge>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -222,35 +274,71 @@ export function InteractiveMerchantAdmin() {
                       <Switch checked={s.isLive} onCheckedChange={() => handleToggleSeasonLive(s.id)} />
                     </div>
                   </div>
+
+                  {/* Calendar dates */}
+                  <div className="flex items-center gap-2 px-2 py-1.5 bg-primary/5 rounded-lg">
+                    <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-medium">
+                        {format(parseISO(s.startDate), "MMM d, yyyy")} — {format(parseISO(s.endDate), "MMM d, yyyy")}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground">
+                        {s.duration}mo season • {daysLeft > 0 ? `${daysLeft} days remaining` : "Ended"}
+                        {s.isExtended && ` • Originally: ${format(parseISO(s.originalEndDate), "MMM d")}`}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-muted/30 rounded p-1.5">
                       <p className="text-xs font-bold">{s.selectionProcesses.length}</p>
                       <p className="text-[9px] text-muted-foreground">Selections</p>
                     </div>
                     <div className="bg-muted/30 rounded p-1.5">
-                      <p className="text-xs font-bold">{s.tvShowRounds.length}</p>
-                      <p className="text-[9px] text-muted-foreground">TV Rounds</p>
-                    </div>
-                    <div className="bg-muted/30 rounded p-1.5">
                       <p className="text-xs font-bold">{formatMobi(s.entryFee)}</p>
                       <p className="text-[9px] text-muted-foreground">Entry Fee</p>
                     </div>
+                    <div className="bg-muted/30 rounded p-1.5">
+                      <p className="text-xs font-bold">{formatMobi(s.prizePerLevel)}</p>
+                      <p className="text-[9px] text-muted-foreground">Prize/Level</p>
+                    </div>
                   </div>
+
+                  {/* Participants & target */}
+                  {belowTarget && s.status !== "completed" && (
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded text-[10px] text-amber-700 dark:text-amber-400">
+                      <AlertTriangle className="h-3 w-3 shrink-0" />
+                      <span>Below target: {s.totalParticipants.toLocaleString()}/{s.minimumTargetParticipants.toLocaleString()}</span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-muted-foreground">{s.totalParticipants.toLocaleString()} participants</span>
-                    <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1" onClick={() => setSelectedSeason(s)}>
-                      <Filter className="h-3 w-3" /> Selection Process
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                      {s.status !== "completed" && (
+                        <Button
+                          variant="outline" size="sm"
+                          className="h-7 text-[10px] gap-1"
+                          onClick={() => { setShowExtendSeason(s); setExtensionWeeks(2); setExtensionReason(""); }}
+                        >
+                          <CalendarPlus className="h-3 w-3" /> Extend
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1" onClick={() => setSelectedSeason(s)}>
+                        <Filter className="h-3 w-3" /> Process
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            ))
+              );
+            })
           )}
         </div>
 
         {/* Add Season Drawer */}
         <Drawer open={showAddSeason} onOpenChange={setShowAddSeason}>
-          <DrawerContent>
+          <DrawerContent className="max-h-[92vh]">
             <DrawerHeader className="px-4"><DrawerTitle>Add Season</DrawerTitle></DrawerHeader>
             <DrawerBody className="space-y-4">
               <div className="space-y-1.5">
@@ -268,9 +356,56 @@ export function InteractiveMerchantAdmin() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Start Date Picker */}
+              <div className="space-y-1.5">
+                <Label className="text-xs">Start Date</Label>
+                <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full h-11 justify-start text-left font-normal touch-manipulation">
+                      <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
+                      {seasonStartDate ? format(seasonStartDate, "MMM d, yyyy") : "Select start date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={seasonStartDate}
+                      onSelect={(d) => { setSeasonStartDate(d); setStartDateOpen(false); }}
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Auto-computed end date */}
+              {seasonStartDate && computedEndDate && (
+                <Card className="bg-primary/5 border-primary/20">
+                  <CardContent className="p-3 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-semibold">Season Calendar</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">Starts</p>
+                        <p className="font-medium">{format(seasonStartDate, "MMM d, yyyy")}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">Ends</p>
+                        <p className="font-medium">{format(computedEndDate, "MMM d, yyyy")}</p>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      {SEASON_TYPE_CONFIG[seasonType].duration} months • {SEASON_TYPE_CONFIG[seasonType].processes} selection processes
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Initial Entry Fee (₦)</Label>
+                  <Label className="text-xs">Entry Fee (₦)</Label>
                   <input type="text" inputMode="numeric" value={seasonEntryFee} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setSeasonEntryFee(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
                 </div>
                 <div className="space-y-1.5">
@@ -278,16 +413,102 @@ export function InteractiveMerchantAdmin() {
                   <input type="text" inputMode="numeric" value={seasonPrize} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setSeasonPrize(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
                 </div>
               </div>
-              <Card className="bg-muted/30">
-                <CardContent className="p-3 text-xs text-muted-foreground space-y-1">
-                  <p><strong>Duration:</strong> {SEASON_TYPE_CONFIG[seasonType].duration} months</p>
-                  <p><strong>Selection Processes:</strong> {SEASON_TYPE_CONFIG[seasonType].processes}</p>
-                  <p className="text-[10px]">You can configure the Selection Process details after creating the season.</p>
-                </CardContent>
-              </Card>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs">Min. Target Participants</Label>
+                <input type="text" inputMode="numeric" value={seasonMinTarget} onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); setSeasonMinTarget(isNaN(n) ? 0 : n); }} onPointerDown={e => e.stopPropagation()} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm touch-manipulation" />
+                <p className="text-[10px] text-muted-foreground">Season can be extended if turnout is below this target.</p>
+              </div>
             </DrawerBody>
             <DrawerFooter>
-              <Button onClick={handleAddSeason} disabled={!seasonName.trim()} className="h-12">Create Season</Button>
+              <Button onClick={handleAddSeason} disabled={!seasonName.trim() || !seasonStartDate} className="h-12">Create Season</Button>
+              <DrawerClose asChild><Button variant="outline" className="h-12">Cancel</Button></DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+
+        {/* Extend Season Drawer */}
+        <Drawer open={!!showExtendSeason} onOpenChange={open => !open && setShowExtendSeason(null)}>
+          <DrawerContent>
+            <DrawerHeader className="px-4">
+              <DrawerTitle className="text-base">Extend Season</DrawerTitle>
+              {showExtendSeason && (
+                <p className="text-xs text-muted-foreground mt-1">{showExtendSeason.name}</p>
+              )}
+            </DrawerHeader>
+            <DrawerBody className="space-y-4">
+              {showExtendSeason && (
+                <>
+                  <Card className="bg-muted/30">
+                    <CardContent className="p-3 text-xs space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Current End Date</span>
+                        <span className="font-medium">{format(parseISO(showExtendSeason.endDate), "MMM d, yyyy")}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Original End Date</span>
+                        <span className="font-medium">{format(parseISO(showExtendSeason.originalEndDate), "MMM d, yyyy")}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Participants</span>
+                        <span className="font-medium">{showExtendSeason.totalParticipants.toLocaleString()} / {showExtendSeason.minimumTargetParticipants.toLocaleString()}</span>
+                      </div>
+                      {showExtendSeason.isExtended && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Already Extended</span>
+                          <span className="font-medium text-amber-600">+{showExtendSeason.extensionWeeks}w</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Extension Duration (weeks)</Label>
+                    <Select value={String(extensionWeeks)} onValueChange={v => setExtensionWeeks(Number(v))}>
+                      <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 6, 8].map(w => (
+                          <SelectItem key={w} value={String(w)}>{w} week{w > 1 ? "s" : ""}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Reason for Extension</Label>
+                    <Select value={extensionReason} onValueChange={setExtensionReason}>
+                      <SelectTrigger className="h-11"><SelectValue placeholder="Select reason" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Low subscription turnout">Low subscription turnout</SelectItem>
+                        <SelectItem value="Below minimum target">Below minimum target</SelectItem>
+                        <SelectItem value="Merchant request">Merchant request</SelectItem>
+                        <SelectItem value="Technical delay">Technical delay</SelectItem>
+                        <SelectItem value="Seasonal adjustment">Seasonal adjustment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Card className="bg-primary/5 border-primary/20">
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CalendarPlus className="h-4 w-4 text-primary" />
+                        <span className="text-xs font-semibold">New End Date</span>
+                      </div>
+                      <p className="text-sm font-bold">
+                        {format(addWeeks(parseISO(showExtendSeason.endDate), extensionWeeks), "MMM d, yyyy")}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        +{extensionWeeks} week{extensionWeeks > 1 ? "s" : ""} from current end date
+                      </p>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </DrawerBody>
+            <DrawerFooter>
+              <Button onClick={handleExtendSeason} disabled={!extensionReason} className="h-12 bg-amber-500 hover:bg-amber-600">
+                <CalendarPlus className="h-4 w-4 mr-2" /> Extend Season
+              </Button>
               <DrawerClose asChild><Button variant="outline" className="h-12">Cancel</Button></DrawerClose>
             </DrawerFooter>
           </DrawerContent>
