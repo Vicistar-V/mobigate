@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Users, Trophy, Gamepad2, ShoppingCart, GraduationCap, Zap, Wallet, Globe, Flame, ChevronRight, Star } from "lucide-react";
+import { X, Users, Trophy, Gamepad2, ShoppingCart, GraduationCap, Zap, Wallet, Globe, Flame, ChevronRight, Star, Repeat } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { StandardQuizCategorySelect } from "./StandardQuizCategorySelect";
 import { InteractiveQuizMerchantSheet } from "./InteractiveQuizMerchantSheet";
 import { FoodQuizItemSelectSheet } from "./FoodQuizItemSelectSheet";
 import { ScholarshipQuizSetupSheet } from "./ScholarshipQuizSetupSheet";
+import { ToggleQuizPlayDialog } from "./ToggleQuizPlayDialog";
 
 interface MobigateQuizHubProps {
   open: boolean;
@@ -73,6 +74,17 @@ const GAME_MODES = [
     borderColor: "border-indigo-300 dark:border-indigo-700",
     minStake: 30000,
     badge: "🎓 Education",
+  },
+  {
+    id: "toggle",
+    title: "Toggle Quiz",
+    description: "Win 500% or risk it all for up to 1500%! Toggle through 7 sessions — each one higher stakes. Complete all to earn Mobi Celebrity!",
+    icon: Repeat,
+    gradient: "from-teal-500 to-cyan-600",
+    bgLight: "bg-teal-50 dark:bg-teal-950/30",
+    borderColor: "border-teal-300 dark:border-teal-700",
+    minStake: 500,
+    badge: "🔄 Toggle Risk",
   },
 ];
 
@@ -219,6 +231,7 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
       <InteractiveQuizMerchantSheet open={activeFlow === "interactive"} onOpenChange={(v) => !v && setActiveFlow(null)} />
       <FoodQuizItemSelectSheet open={activeFlow === "food"} onOpenChange={(v) => !v && setActiveFlow(null)} />
       <ScholarshipQuizSetupSheet open={activeFlow === "scholarship"} onOpenChange={(v) => !v && setActiveFlow(null)} />
+      <ToggleQuizPlayDialog open={activeFlow === "toggle"} onOpenChange={(v) => !v && setActiveFlow(null)} />
     </>
   );
 }
