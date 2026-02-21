@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X, Zap, Trophy, AlertTriangle, Shield, Star, TrendingUp } from "lucide-react";
+import { X, Zap, Trophy, AlertTriangle, Shield, Star, TrendingUp, RotateCcw, Gift } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   QuizSeason,
   INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION,
-  INTERACTIVE_QUALIFYING_TOP_PERCENT,
+  GAME_SHOW_ENTRY_POINTS,
+  calculateQuizTier,
+  TIER_LABELS,
 } from "@/data/mobigateInteractiveQuizData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +18,6 @@ import { cn } from "@/lib/utils";
 import { QuizPlayEngine, QuizPlayResult } from "./QuizPlayEngine";
 import { QuizPrizeRedemptionSheet } from "./QuizPrizeRedemptionSheet";
 
-// Same questions used in the initial quiz — in production these would come from merchant's bank
 const sessionObjectiveQuestions = [
   { question: "What is the most spoken language in the world?", options: ["Spanish", "Hindi", "English", "Arabic", "French", "Portuguese", "Bengali", "Russian"], correctAnswer: 2 },
   { question: "Which company created the iPhone?", options: ["Samsung", "Microsoft", "Apple", "Google", "Nokia", "Sony", "LG", "Huawei"], correctAnswer: 2 },
@@ -55,48 +56,73 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   const [sessionsWon, setSessionsWon] = useState(0);
   const [sessionsLost, setSessionsLost] = useState(0);
   const [currentWinnings, setCurrentWinnings] = useState(0);
+  const [accumulatedWinnings, setAccumulatedWinnings] = useState(0);
   const [isEvicted, setIsEvicted] = useState(false);
   const [lastResult, setLastResult] = useState<QuizPlayResult | null>(null);
+  const [lastTier, setLastTier] = useState<ReturnType<typeof calculateQuizTier> | null>(null);
   const [showRedemption, setShowRedemption] = useState(false);
-  const [playKey, setPlayKey] = useState(0); // force re-mount of engine
+  const [playKey, setPlayKey] = useState(0);
 
-  const qualifyingPoints = season.selectionProcesses?.[0]?.entriesSelected
-    ? Math.ceil(season.selectionProcesses[0].entriesSelected * (INTERACTIVE_QUALIFYING_TOP_PERCENT / 100))
-    : 15;
   const sessionFee = season.selectionProcesses?.[1]?.entryFee || season.entryFee * 2;
-  const sessionWinAmount = sessionFee * 3;
+  const hasReachedGameShow = sessionPoints >= GAME_SHOW_ENTRY_POINTS;
+  const pointsProgress = Math.min((sessionPoints / GAME_SHOW_ENTRY_POINTS) * 100, 100);
 
   const handleSessionComplete = useCallback((result: QuizPlayResult) => {
-    setSessionsPlayed((p) => p + 1);
+    setSessionsPlayed(p => p + 1);
     setLastResult(result);
 
-    if (result.percentage === 100) {
-      setSessionPoints((p) => p + 1);
-      setSessionsWon((p) => p + 1);
-      setCurrentWinnings(sessionWinAmount);
-      toast({ title: "🌟 Perfect Session!", description: "+1 Point earned!" });
+    const tier = calculateQuizTier(result.percentage);
+    setLastTier(tier);
+
+    if (tier.resetAll) {
+      // DISQUALIFIED — reset ALL points and winnings
+      setSessionPoints(0);
+      setCurrentWinnings(0);
+      setAccumulatedWinnings(0);
+      toast({ title: "💀 DISQUALIFIED!", description: "Below 60% — all points and winnings reset!", variant: "destructive" });
     } else {
-      const newLosses = sessionsLost + 1;
-      setSessionsLost(newLosses + 1);
-      if (newLosses + 1 >= INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION) {
-        setIsEvicted(true);
-        toast({ title: "⚠️ Evicted", description: `You've reached ${INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION} losses.`, variant: "destructive" });
+      if (tier.points > 0) {
+        setSessionPoints(p => p + tier.points);
+        setSessionsWon(p => p + 1);
+      }
+      const instantPrize = Math.round(sessionFee * tier.prizeMultiplier);
+      if (instantPrize > 0) {
+        setCurrentWinnings(instantPrize);
+        setAccumulatedWinnings(p => p + instantPrize);
+      } else {
+        setCurrentWinnings(0);
+      }
+
+      if (tier.points === 0 && !tier.resetAll) {
+        const newLosses = sessionsLost + 1;
+        setSessionsLost(newLosses);
+        if (newLosses >= INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION) {
+          setIsEvicted(true);
+          toast({ title: "⚠️ Evicted", description: `${INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION}+ losses reached.`, variant: "destructive" });
+        }
       }
     }
     setSessionPhase("session_result");
-  }, [sessionsLost, sessionWinAmount, toast]);
+  }, [sessionsLost, sessionFee, toast]);
 
   const handleContinueToNext = () => {
-    // Dissolve current winnings
     setCurrentWinnings(0);
-    setPlayKey((p) => p + 1);
+    setPlayKey(p => p + 1);
     setLastResult(null);
+    setLastTier(null);
     setSessionPhase("playing");
-    toast({ title: "💨 Winnings Dissolved", description: "Previous winnings absorbed. New session started." });
+    toast({ title: "💨 Instant Prize Dissolved", description: "Points kept. New session started." });
+  };
+
+  const handleTakeInstantPrize = () => {
+    // Taking instant prize blocks Game Show entry — dissolves all points
+    setSessionPoints(0);
+    setShowRedemption(true);
+    toast({ title: "⚠️ Points Dissolved", description: "Taking prize removes Game Show eligibility." });
   };
 
   const handleQuitWithWinnings = () => {
-    if (currentWinnings > 0) {
+    if (accumulatedWinnings > 0) {
       setShowRedemption(true);
     } else {
       onOpenChange(false);
@@ -104,12 +130,25 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   };
 
   const handleStartSession = () => {
-    setPlayKey((p) => p + 1);
+    setPlayKey(p => p + 1);
     setLastResult(null);
+    setLastTier(null);
     setSessionPhase("playing");
   };
 
-  const pointsProgress = Math.min((sessionPoints / 15) * 100, 100);
+  const handlePlayAgainFresh = () => {
+    setSessionPoints(0);
+    setCurrentWinnings(0);
+    setAccumulatedWinnings(0);
+    setSessionsPlayed(0);
+    setSessionsWon(0);
+    setSessionsLost(0);
+    setIsEvicted(false);
+    setPlayKey(p => p + 1);
+    setLastResult(null);
+    setLastTier(null);
+    setSessionPhase("playing");
+  };
 
   return (
     <>
@@ -151,25 +190,25 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                       <p className="text-3xl">🚫</p>
                       <h3 className="font-bold text-red-700">You've Been Evicted</h3>
                       <p className="text-sm text-muted-foreground">
-                        You accumulated {INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION}+ losses and have been removed from this Interactive Session.
+                        You accumulated {INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION}+ losses and have been removed.
                       </p>
                     </CardContent>
                   </Card>
                 ) : (
                   <>
-                    {/* Points progress */}
+                    {/* Points progress — target 300 */}
                     <Card className="border-amber-200">
                       <CardContent className="p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium flex items-center gap-1">
                             <Trophy className="h-4 w-4 text-amber-500" /> Session Points
                           </span>
-                          <span className="font-bold text-amber-600">{sessionPoints}/15</span>
+                          <span className="font-bold text-amber-600">{sessionPoints}/{GAME_SHOW_ENTRY_POINTS}</span>
                         </div>
                         <Progress value={pointsProgress} className="h-2 bg-amber-100 [&>div]:bg-amber-500" />
-                        <p className="text-[10px] text-muted-foreground">
-                          Score 100% in each session to earn 1 point. Top {INTERACTIVE_QUALIFYING_TOP_PERCENT}% qualify for the Show!
-                        </p>
+                        {hasReachedGameShow && (
+                          <Badge className="bg-amber-500 text-white border-0 text-[10px]">🏆 Game Show Entry Unlocked!</Badge>
+                        )}
                       </CardContent>
                     </Card>
 
@@ -190,19 +229,14 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                     </div>
 
                     {/* Current winnings */}
-                    {currentWinnings > 0 && (
+                    {accumulatedWinnings > 0 && (
                       <Card className="border-green-300 bg-green-50 dark:bg-green-950/30">
                         <CardContent className="p-3 space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-green-700">Current Winnings</span>
-                            <span className="font-bold text-green-600">{formatMobiAmount(currentWinnings)}</span>
+                            <span className="text-sm font-medium text-green-700">Accrued Winnings</span>
+                            <span className="font-bold text-green-600">{formatMobiAmount(accumulatedWinnings)}</span>
                           </div>
-                          <div className="flex items-start gap-1.5 p-2 bg-amber-50 dark:bg-amber-950/30 rounded border border-amber-200">
-                            <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                            <p className="text-[10px] text-amber-700">
-                              Continuing to next session will <strong>dissolve</strong> these winnings!
-                            </p>
-                          </div>
+                          <p className="text-[10px] text-muted-foreground">({formatLocalAmount(accumulatedWinnings, "NGN")})</p>
                         </CardContent>
                       </Card>
                     )}
@@ -220,28 +254,45 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                       </CardContent>
                     </Card>
 
-                    {/* Eviction rules */}
+                    {/* Scoring rules */}
                     <Card className="border-border bg-muted/30">
                       <CardContent className="p-3 space-y-2">
                         <p className="text-xs font-semibold flex items-center gap-1">
-                          <Shield className="h-3.5 w-3.5" /> Session Rules
+                          <Shield className="h-3.5 w-3.5" /> Scoring & Rules
                         </p>
                         <div className="space-y-1.5 text-[10px] text-muted-foreground">
                           <p className="flex items-start gap-1.5">
-                            <span className="shrink-0">•</span>
-                            Score 100% = +1 Point. No 100% = No point, but you can continue.
+                            <span className="shrink-0 text-green-500">🌟</span>
+                            100% correct = +3 Points, 500% prize
                           </p>
                           <p className="flex items-start gap-1.5">
-                            <span className="shrink-0">•</span>
-                            Continuing dissolves all current winnings.
+                            <span className="shrink-0 text-blue-500">🔥</span>
+                            90%+ correct = +2 Points, 50% prize
                           </p>
                           <p className="flex items-start gap-1.5">
-                            <span className="shrink-0 text-red-500">⚠</span>
-                            {INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION}+ losses = automatic eviction.
+                            <span className="shrink-0 text-amber-500">👍</span>
+                            80%+ correct = +1 Point, 20% prize
+                          </p>
+                          <p className="flex items-start gap-1.5">
+                            <span className="shrink-0">😐</span>
+                            60-79% = No points, continue playing
+                          </p>
+                          <p className="flex items-start gap-1.5">
+                            <span className="shrink-0 text-red-500">💀</span>
+                            Below 60% = DISQUALIFIED! All points & prizes reset!
+                          </p>
+                          <hr className="my-1 border-border" />
+                          <p className="flex items-start gap-1.5">
+                            <span className="shrink-0 text-amber-500">⚠</span>
+                            Taking instant prize dissolves all points (no Game Show)
                           </p>
                           <p className="flex items-start gap-1.5">
                             <span className="shrink-0 text-amber-500">🏆</span>
-                            Top {INTERACTIVE_QUALIFYING_TOP_PERCENT}% by points qualify for the Show proper.
+                            {GAME_SHOW_ENTRY_POINTS} points = Game Show entry!
+                          </p>
+                          <p className="flex items-start gap-1.5">
+                            <span className="shrink-0 text-red-500">⚠</span>
+                            {INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION}+ losses = automatic eviction
                           </p>
                         </div>
                       </CardContent>
@@ -262,31 +313,58 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
               />
             )}
 
-            {sessionPhase === "session_result" && lastResult && (
+            {sessionPhase === "session_result" && lastResult && lastTier && (
               <div className="px-3 py-3 space-y-3">
-                <Card className={cn(
-                  "border-2",
-                  lastResult.percentage === 100
-                    ? "border-green-500 bg-green-50 dark:bg-green-950/30"
-                    : "border-orange-300 bg-orange-50 dark:bg-orange-950/30"
-                )}>
+                {/* Tier result */}
+                <Card className={cn("border-2", {
+                  "border-green-500 bg-green-50 dark:bg-green-950/30": lastTier.tier === "perfect",
+                  "border-blue-400 bg-blue-50 dark:bg-blue-950/30": lastTier.tier === "excellent",
+                  "border-amber-400 bg-amber-50 dark:bg-amber-950/30": lastTier.tier === "good",
+                  "border-border bg-muted/30": lastTier.tier === "pass",
+                  "border-red-500 bg-red-50 dark:bg-red-950/30": lastTier.tier === "disqualified",
+                })}>
                   <CardContent className="p-5 text-center space-y-3">
-                    <p className="text-4xl">{lastResult.percentage === 100 ? "🌟" : "😐"}</p>
-                    <h3 className="font-bold text-lg">
-                      {lastResult.percentage === 100 ? "+1 Point Earned!" : "No Point Earned"}
+                    <p className="text-4xl">{TIER_LABELS[lastTier.tier].emoji}</p>
+                    <h3 className={cn("font-bold text-lg", TIER_LABELS[lastTier.tier].color)}>
+                      {TIER_LABELS[lastTier.tier].label}
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       {lastResult.totalCorrect}/15 correct ({lastResult.percentage}%)
                     </p>
-                    {lastResult.percentage === 100 && (
-                      <div className="pt-2">
-                        <Badge className="bg-green-500 text-white border-0">
-                          <TrendingUp className="h-3 w-3 mr-1" /> Total: {sessionPoints} Points
-                        </Badge>
-                      </div>
+                    {lastTier.points > 0 && (
+                      <Badge className="bg-primary text-primary-foreground border-0">
+                        <TrendingUp className="h-3 w-3 mr-1" /> Total: {sessionPoints} Points
+                      </Badge>
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Instant prize */}
+                {currentWinnings > 0 && !lastTier.resetAll && (
+                  <Card className="border-green-300 bg-green-50/50 dark:bg-green-950/20">
+                    <CardContent className="p-3 text-center space-y-1">
+                      <div className="flex items-center justify-center gap-2">
+                        <Gift className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-semibold text-green-700">Instant Prize</span>
+                      </div>
+                      <p className="text-2xl font-bold text-green-600">{formatMobiAmount(currentWinnings)}</p>
+                      <p className="text-[10px] text-muted-foreground">({formatLocalAmount(currentWinnings, "NGN")})</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Disqualification notice */}
+                {lastTier.resetAll && (
+                  <Card className="border-red-300 bg-red-50 dark:bg-red-950/30">
+                    <CardContent className="p-3 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-red-500" />
+                        <span className="text-xs font-bold text-red-700">Full Reset Applied</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">All points and winnings have been reset to zero. You must start fresh.</p>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Stats summary */}
                 <div className="grid grid-cols-3 gap-2">
@@ -303,6 +381,25 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                     <p className="text-[10px] text-muted-foreground">Points</p>
                   </div>
                 </div>
+
+                {/* Points progress */}
+                <Card className="border-border">
+                  <CardContent className="p-3">
+                    <Progress value={pointsProgress} className="h-2 bg-muted [&>div]:bg-amber-500" />
+                    <p className="text-[9px] text-center text-muted-foreground mt-1">{sessionPoints}/{GAME_SHOW_ENTRY_POINTS} points to Game Show</p>
+                  </CardContent>
+                </Card>
+
+                {/* Game Show milestone */}
+                {hasReachedGameShow && !lastTier.resetAll && (
+                  <Card className="border-2 border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
+                    <CardContent className="p-4 text-center space-y-2">
+                      <p className="text-3xl">🏆🎬</p>
+                      <h3 className="font-bold text-amber-700">Game Show Entry Unlocked!</h3>
+                      <p className="text-xs text-muted-foreground">{sessionPoints} points earned — you qualify!</p>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {isEvicted && (
                   <Card className="border-red-300 bg-red-50 dark:bg-red-950/30">
@@ -327,12 +424,12 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                   <Zap className="h-4 w-4 mr-1.5 shrink-0" />
                   <span>Play Next Session ({formatMobiAmount(sessionFee)})</span>
                 </Button>
-                {currentWinnings > 0 && (
+                {accumulatedWinnings > 0 && (
                   <Button
                     className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
                     onClick={handleQuitWithWinnings}
                   >
-                    <span>Quit & Take Winnings ({formatMobiAmount(currentWinnings)})</span>
+                    <span>Quit & Take Winnings ({formatMobiAmount(accumulatedWinnings)})</span>
                   </Button>
                 )}
                 <Button
@@ -351,21 +448,33 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
               </Button>
             )}
 
-            {sessionPhase === "session_result" && !isEvicted && (
+            {sessionPhase === "session_result" && !isEvicted && !lastTier?.resetAll && (
               <>
+                {/* Game Show milestone actions */}
+                {hasReachedGameShow && (
+                  <Button
+                    className="w-full min-h-[44px] py-2.5 px-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold text-xs leading-tight touch-manipulation whitespace-normal"
+                    onClick={() => { toast({ title: "🎬 Entering Game Show!", description: "A journey to becoming a Mobi Celebrity!" }); onOpenChange(false); }}
+                  >
+                    <Trophy className="h-4 w-4 mr-1.5 shrink-0" />
+                    <span>Enter Show Now — Mobi Celebrity!</span>
+                  </Button>
+                )}
+
                 <Button
                   className="w-full min-h-[44px] py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold text-xs leading-tight touch-manipulation whitespace-normal"
                   onClick={handleContinueToNext}
                 >
                   <Zap className="h-4 w-4 mr-1.5 shrink-0" />
-                  <span>Continue to Next Session</span>
+                  <span>Continue to Next Session (prize dissolved)</span>
                 </Button>
                 {currentWinnings > 0 && (
                   <Button
                     className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
-                    onClick={handleQuitWithWinnings}
+                    onClick={handleTakeInstantPrize}
                   >
-                    <span>Quit & Take Winnings ({formatMobiAmount(currentWinnings)})</span>
+                    <Gift className="h-4 w-4 mr-1.5 shrink-0" />
+                    <span>Take Instant Prize ({formatMobiAmount(currentWinnings)})</span>
                   </Button>
                 )}
                 <Button
@@ -378,14 +487,27 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
               </>
             )}
 
+            {/* Disqualified result */}
+            {sessionPhase === "session_result" && !isEvicted && lastTier?.resetAll && (
+              <div className="space-y-2">
+                <Button className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation" onClick={handlePlayAgainFresh}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Play Again (Fresh Start)
+                </Button>
+                <Button variant="outline" className="w-full h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
+                  Exit Session
+                </Button>
+              </div>
+            )}
+
             {sessionPhase === "session_result" && isEvicted && (
               <>
-                {currentWinnings > 0 && (
+                {accumulatedWinnings > 0 && (
                   <Button
                     className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
                     onClick={handleQuitWithWinnings}
                   >
-                    <span>Take Winnings & Exit ({formatMobiAmount(currentWinnings)})</span>
+                    <span>Take Winnings & Exit ({formatMobiAmount(accumulatedWinnings)})</span>
                   </Button>
                 )}
                 <Button className="w-full h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
@@ -405,7 +527,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
             onOpenChange(false);
           }
         }}
-        prizeAmount={currentWinnings}
+        prizeAmount={accumulatedWinnings > 0 ? accumulatedWinnings : currentWinnings}
         prizeType="cash"
       />
     </>

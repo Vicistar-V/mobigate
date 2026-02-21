@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Zap, Users, Trophy, Radio } from "lucide-react";
+import { Zap, Users, Trophy, Radio, Gift, ArrowRight } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { QuizMerchant, QuizSeason } from "@/data/mobigateInteractiveQuizData";
-import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
+import { QuizMerchant, QuizSeason, GAME_SHOW_ENTRY_POINTS } from "@/data/mobigateInteractiveQuizData";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { InteractiveQuizPlayDialog } from "./InteractiveQuizPlayDialog";
 
@@ -72,6 +72,11 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                               <Radio className="h-2.5 w-2.5 mr-1" /> LIVE
                             </Badge>
                           )}
+                          {season.consolationPrizesEnabled && (
+                            <Badge variant="outline" className="text-[9px] bg-purple-50 text-purple-600 border-purple-200">
+                              <Gift className="h-2.5 w-2.5 mr-0.5" /> Consolation
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <Badge variant="outline" className="text-[9px]">{season.status}</Badge>
@@ -85,16 +90,41 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                       <div className="p-1.5 bg-muted/50 rounded text-center">
                         <p className="text-[9px] text-muted-foreground">Entry</p>
                         <p className="font-bold text-xs text-red-600">{formatMobiAmount(season.entryFee)}</p>
+                        <p className="text-[8px] text-muted-foreground">{formatLocalAmount(season.entryFee, "NGN")}</p>
                       </div>
                       <div className="p-1.5 bg-muted/50 rounded text-center">
                         <p className="text-[9px] text-muted-foreground">Prize/Lvl</p>
                         <p className="font-bold text-xs text-green-600">{formatMobiAmount(season.prizePerLevel)}</p>
+                        <p className="text-[8px] text-muted-foreground">{formatLocalAmount(season.prizePerLevel, "NGN")}</p>
+                      </div>
+                    </div>
+
+                    {/* Selection process stages */}
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-semibold text-muted-foreground uppercase">Selection Stages</p>
+                      <div className="flex gap-1 flex-wrap">
+                        {season.selectionProcesses.slice(0, 4).map((sp, idx) => (
+                          <Badge key={idx} variant="outline" className="text-[8px] py-0 px-1.5">
+                            R{sp.round}: {sp.entriesSelected.toLocaleString()} @ {formatLocalAmount(sp.entryFee, "NGN")}
+                          </Badge>
+                        ))}
+                        {season.selectionProcesses.length > 4 && (
+                          <Badge variant="outline" className="text-[8px] py-0 px-1.5">+{season.selectionProcesses.length - 4} more</Badge>
+                        )}
+                      </div>
+                      {/* TV Rounds summary */}
+                      <div className="flex gap-1 flex-wrap mt-0.5">
+                        {season.tvShowRounds.map((tv, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-[8px] py-0 px-1.5">
+                            📺 {tv.label}: {tv.entriesSelected} {tv.entryFee > 0 ? `@ ${formatLocalAmount(tv.entryFee, "NGN")}` : "(FREE)"}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                       <span className="flex items-center gap-1"><Users className="h-3 w-3" />{season.totalParticipants.toLocaleString()} participants</span>
-                      <span>Level {season.currentLevel}/{season.selectionLevels}</span>
+                      <span>{GAME_SHOW_ENTRY_POINTS} pts to enter show</span>
                     </div>
 
                     {/* Level progression */}
@@ -123,7 +153,7 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
               disabled={!selectedSeason}
             >
               <Zap className="h-4 w-4 mr-2" />
-              {selectedSeason ? `Join - Pay ${formatMobiAmount(selectedSeason.entryFee)}` : "Select a Season"}
+              {selectedSeason ? `Join - Pay ${formatMobiAmount(selectedSeason.entryFee)} (${formatLocalAmount(selectedSeason.entryFee, "NGN")})` : "Select a Season"}
             </Button>
           </div>
         </DrawerContent>
