@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MobiQuizGameDialog } from "@/components/community/MobiQuizGameDialog";
+import { MobigateQuizHub } from "@/components/community/mobigate-quiz/MobigateQuizHub";
 
 const gameModes = [
   {
@@ -70,7 +70,7 @@ const quizStats = {
 };
 
 export default function MobiQuizGames() {
-  const [showQuizDialog, setShowQuizDialog] = useState(false);
+  const [showQuizHub, setShowQuizHub] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -126,7 +126,7 @@ export default function MobiQuizGames() {
                 <p className="text-xs text-muted-foreground">Browse available quizzes and start winning prizes now!</p>
               </div>
               <Button
-                onClick={() => setShowQuizDialog(true)}
+                onClick={() => setShowQuizHub(true)}
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shrink-0"
                 size="lg"
               >
@@ -192,7 +192,7 @@ export default function MobiQuizGames() {
               <Card
                 key={mode.id}
                 className={`border ${mode.borderColor} hover:shadow-md transition-all cursor-pointer active:scale-[0.98]`}
-                onClick={() => setShowQuizDialog(true)}
+                onClick={() => setShowQuizHub(true)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
@@ -221,7 +221,7 @@ export default function MobiQuizGames() {
       </div>
 
       {/* Mobi Quiz Game Dialog */}
-      <MobiQuizGameDialog open={showQuizDialog} onOpenChange={setShowQuizDialog} />
+      <MobigateQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} />
     </div>
   );
 }
