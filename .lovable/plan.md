@@ -1,181 +1,124 @@
 
 
-# Quiz Timing and Question Structure -- Full Audit and Fix
+# Interactive Quiz Sessions -- Complete Scoring, Points, Prizes, and Game Show Entry System
 
-## Overview
+## What This Plan Does
 
-A thorough inspection reveals that **every quiz dialog** has incorrect hardcoded timers (all set to 15s for objectives instead of 10s), none read from the admin-configurable settings, and two quiz types (Group and Standard Solo) are missing their 5 non-objective questions entirely. This plan corrects all of these issues across all files.
-
----
-
-## Problems Found
-
-1. **Objective timer is wrong everywhere** -- hardcoded to 15s in all 6 quiz dialogs, should be 10s by default
-2. **No quiz dialog reads admin settings** -- the admin can set time per question in QuizSettingsCard, but no play dialog actually uses `getDefaultTimePerQuestion()`
-3. **Only one timer setting exists** -- the spec requires separate timers: 10s for Objective, 15s for Non-Objective, both admin-editable
-4. **Group Quiz has only 10 objective questions** -- missing 5 non-objective questions
-5. **Standard Solo Quiz has only 10 objective questions** -- missing 5 non-objective questions
-6. **QuizPlayEngine** (shared component) also hardcodes 15s for objectives
+This plan rewrites the Interactive Quiz scoring engine and session flow to match the full game show progression rules you described. Currently, the system only awards points for 100% correct answers and has a simple pass/fail result. The new system introduces tiered scoring, tiered instant prizes, a disqualification penalty for poor performance, a 300-point Game Show entry threshold with action choices, and proper selection/eviction process modeling.
 
 ---
 
-## Changes
+## Changes Overview
 
-### 1. Split Platform Timer Settings into Two
+### 1. Data Model Updates (`mobigateInteractiveQuizData.ts`)
 
-**File:** `src/data/platformSettingsData.ts`
+- Change `qualifyingPoints` default from `15` to `300` in `DEFAULT_MERCHANT_CONFIG`
+- Add new exported constants:
+  - `POINTS_FOR_100_PERCENT = 3`
+  - `POINTS_FOR_90_PERCENT = 2`
+  - `POINTS_FOR_80_PERCENT = 1`
+  - `DISQUALIFY_THRESHOLD = 60` (below 60% resets everything)
+  - `GAME_SHOW_ENTRY_POINTS = 300`
+  - `INSTANT_PRIZE_100 = 5.0` (500% of stake)
+  - `INSTANT_PRIZE_90 = 0.5` (50% of stake)
+  - `INSTANT_PRIZE_80 = 0.2` (20% of stake)
+- Add `consolationPrizesEnabled: boolean` and `consolationPrizePool: number` fields to `QuizSeason` interface
+- Update mock seasons with the new fields and realistic consolation prize settings
 
-Replace the single `defaultTimePerQuestion` with two separate settings:
+### 2. Interactive Quiz Play Dialog (`InteractiveQuizPlayDialog.tsx`)
 
-- `objectiveTimePerQuestion`: default 10s (range 5-30s)
-- `nonObjectiveTimePerQuestion`: default 15s (range 10-60s)
+**Scoring tier logic** -- Replace the binary pass/fail with tiered results:
+- 100% correct: 3 points earned, prize = 500% of stake
+- 90%+ correct: 2 points earned, prize = 50% of stake
+- 80%+ correct: 1 point earned, prize = 20% of stake
+- 60-79% correct: 0 points, no prize, but player continues
+- Below 60%: DISQUALIFIED -- all accrued points and prizes reset to zero, player starts fresh
 
-Add corresponding getter/setter functions:
-- `getObjectiveTimePerQuestion()`
-- `setObjectiveTimePerQuestion()`
-- `getNonObjectiveTimePerQuestion()`
-- `setNonObjectiveTimePerQuestion()`
+**Result screen redesign** (mobile-first):
+- Show the tier achieved (e.g., "3 Points Earned!" or "DISQUALIFIED!")
+- Show instant prize amount based on tier
+- Warning card explaining that taking the instant prize disqualifies from Game Show entry and dissolves all accrued points
+- Three action buttons for qualifying players:
+  - "Redeem Instant Prize and Exit" (disqualifies from show)
+  - "Redeem Instant Prize and Play Again" (disqualifies from show, restarts fresh)
+  - "Skip Prize, Continue Playing" (keeps points, no prize taken)
+- For disqualified players (<60%): Show reset warning, "Play Again (Fresh Start)" button
 
-Keep backward compatibility by keeping `getDefaultTimePerQuestion()` as an alias for `getObjectiveTimePerQuestion()`.
+**300-Point Game Show threshold** -- When accumulated points reach 300+, show a special milestone card with three options:
+- "Enter Show Now" -- A journey to becoming a Mobi Celebrity
+- "Redeem Accrued Won Prize (M258,000 won in 10 Sessions)" -- with actual accumulated amount
+- "Continue Playing More Quiz" -- keep accumulating
 
-### 2. Update Admin QuizSettingsCard with Two Timer Sliders
+### 3. Interactive Session Dialog (`InteractiveSessionDialog.tsx`)
 
-**File:** `src/components/mobigate/QuizSettingsCard.tsx`
+**Replace the current scoring logic** which only awards 1 point for 100%:
+- Apply same tiered point system (3/2/1/0/disqualify)
+- Apply same tiered instant prize system (500%/50%/20%/0)
+- Below 60% resets session points AND current winnings to zero
 
-Replace the single "Time Per Question" slider with two:
+**Update the points progress bar**:
+- Change target from 15 to 300 (or merchant's `qualifyingPoints`)
+- Show milestone markers at key thresholds
 
-- "Objective Time" slider (5-30s, step 1s, default 10s)
-- "Non-Objective Time" slider (10-60s, step 5s, default 15s)
+**Update session rules card**:
+- List the 4 scoring tiers with their point values
+- Explain the <60% disqualification and reset penalty
+- Explain instant prize trade-off (taking prize = no Game Show)
 
-Both display their current values prominently and save independently.
+**Update the result screen**:
+- Show tier achieved with appropriate styling
+- Show instant prize earned (if any)
+- If points >= 300, show the Game Show entry milestone with the 3 action buttons
+- "Continue to Next Session" dissolves instant prize but keeps points
+- "Take Instant Prize" adds to vault but blocks Game Show entry
 
-### 3. Fix All Quiz Play Dialogs to Use Admin Settings
+**Eviction update**:
+- Keep the loss-based eviction but also add the <60% reset mechanic
+- Clarify that eviction from losses is separate from <60% point reset
 
-Update every quiz dialog to import and use the admin-configurable timers instead of hardcoded values.
+### 4. Season Sheet Player View (`InteractiveQuizSeasonSheet.tsx`)
 
-**Files affected:**
+- Show selection process stages with entry fees in the season cards
+- Display consolation prize indicator if merchant has enabled it
+- Add local currency equivalents alongside Mobi amounts for entry fees and prizes
 
-**a) `InteractiveQuizPlayDialog.tsx`**
-- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (4 occurrences)
-- Replace `NON_OBJECTIVE_TIME_PER_QUESTION = 15` with `getNonObjectiveTimePerQuestion()`
+### 5. Merchant Admin -- Selection Process View (`MerchantSelectionProcessDrawer.tsx`)
 
-**b) `QuizPlayEngine.tsx`**
-- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())`
-- Replace `NON_OBJECTIVE_TIME_PER_QUESTION = 15` with `getNonObjectiveTimePerQuestion()`
-
-**c) `GroupQuizPlayDialog.tsx`**
-- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (3 occurrences)
-- Add 5 non-objective questions with their own 15s (admin-editable) timer phase
-- Add non-objective UI section (timer, NonObjectiveQuestionCard, sequential flow)
-- Update total question count from 10 to 15
-
-**d) `StandardQuizContinueSheet.tsx`**
-- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (4 occurrences)
-- Add 5 non-objective questions with sequential timed flow
-- Update total question count from 10 to 15
-
-**e) `ScholarshipQuizPlayDialog.tsx`**
-- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (2 occurrences)
-- Add per-question timed non-objective flow (currently does bulk submission)
-
-**f) `FoodQuizPlayDialog.tsx`**
-- Replace `setTimeRemaining(15)` with `setTimeRemaining(getObjectiveTimePerQuestion())` (2 occurrences)
-- Non-objective already has 15s timer -- update to use `getNonObjectiveTimePerQuestion()`
-
-### 4. Add Non-Objective Questions to Group Quiz
-
-**File:** `GroupQuizPlayDialog.tsx`
-
-Add:
-- 5 mock non-objective questions
-- Phase management ("objective" -> "non_objective" -> "game_over")
-- Per-question sequential timer (15s default, from admin settings)
-- NonObjectiveQuestionCard rendering
-- Updated score breakdown showing objective and written scores separately
-
-### 5. Add Non-Objective Questions to Standard Solo Quiz
-
-**File:** `StandardQuizContinueSheet.tsx`
-
-Add:
-- 5 mock non-objective questions
-- Phase management with non-objective phase between objective and session result
-- Per-question sequential timer
-- NonObjectiveQuestionCard rendering
-- Updated scoring to include both objective and written scores
+- Add consolation prizes toggle and pool amount field for the TV Show rounds
+- Add note that consolation prizes are optional and apply to the 12 evicted players from the first TV show
+- Show the Grand Finale as always FREE entry with 1st, 2nd, 3rd prize positions
 
 ---
 
 ## Technical Details
 
-### Platform Settings (platformSettingsData.ts)
+### Scoring Calculation Logic (shared helper)
 
-```text
-Remove:
-  defaultTimePerQuestion: 10
-  timePerQuestionMin: 5
-  timePerQuestionMax: 60
-
-Add:
-  objectiveTimePerQuestion: 10     (default)
-  objectiveTimeMin: 5
-  objectiveTimeMax: 30
-  nonObjectiveTimePerQuestion: 15  (default)
-  nonObjectiveTimeMin: 10
-  nonObjectiveTimeMax: 60
-
-Functions:
-  getObjectiveTimePerQuestion() -> number
-  setObjectiveTimePerQuestion(time) -> void
-  getNonObjectiveTimePerQuestion() -> number
-  setNonObjectiveTimePerQuestion(time) -> void
-  getDefaultTimePerQuestion() -> number  (alias, backward compat)
+```typescript
+function calculateQuizTier(percentage: number) {
+  if (percentage === 100) return { points: 3, prizeMultiplier: 5.0, tier: "perfect" };
+  if (percentage >= 90)  return { points: 2, prizeMultiplier: 0.5, tier: "excellent" };
+  if (percentage >= 80)  return { points: 1, prizeMultiplier: 0.2, tier: "good" };
+  if (percentage >= 60)  return { points: 0, prizeMultiplier: 0,   tier: "pass" };
+  return { points: 0, prizeMultiplier: 0, tier: "disqualified", resetAll: true };
+}
 ```
 
-### Timer Usage Pattern (all dialogs)
+### Game Show Entry Check
 
-```text
-import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
-
-// In state init:
-const [timeRemaining, setTimeRemaining] = useState(getObjectiveTimePerQuestion());
-
-// In nextObjective():
-setTimeRemaining(getObjectiveTimePerQuestion());
-
-// For non-objective:
-const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(getNonObjectiveTimePerQuestion());
-setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
+```typescript
+const hasReachedGameShow = accumulatedPoints >= GAME_SHOW_ENTRY_POINTS;
+const accumulatedWinnings = totalWonAcrossSessions; // tracked in state
 ```
 
-### Group Quiz Non-Objective Questions (mock)
-
-```text
-5 questions like:
-- "Name the largest country in Africa by land area" -> ["algeria"]
-- "What does DNA stand for?" -> ["deoxyribonucleic acid", "deoxyribonucleic"]
-- etc.
-```
-
-### Standard Solo Quiz Non-Objective Questions (mock)
-
-```text
-5 questions like:
-- "Name the first President of Nigeria" -> ["nnamdi azikiwe", "azikiwe"]
-- "What does CPU stand for?" -> ["central processing unit"]
-- etc.
-```
-
-### Files Modified
-- `src/data/platformSettingsData.ts` -- split timer into objective/non-objective
-- `src/components/mobigate/QuizSettingsCard.tsx` -- two timer sliders
-- `src/components/community/mobigate-quiz/QuizPlayEngine.tsx` -- use admin timers
-- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- use admin timers
-- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- inherits via QuizPlayEngine
-- `src/components/community/mobigate-quiz/GroupQuizPlayDialog.tsx` -- add non-objective phase + admin timers
-- `src/components/community/mobigate-quiz/StandardQuizContinueSheet.tsx` -- add non-objective phase + admin timers
-- `src/components/community/mobigate-quiz/ScholarshipQuizPlayDialog.tsx` -- use admin timers
-- `src/components/community/mobigate-quiz/FoodQuizPlayDialog.tsx` -- use admin timers
+### Files Modified (6 total)
+- `src/data/mobigateInteractiveQuizData.ts` -- New constants, updated defaults, consolation fields
+- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- Tiered scoring, 300-point milestone, instant prize trade-off
+- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- Tiered session scoring, <60% reset, Game Show entry threshold
+- `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx` -- Selection process display, dual currency
+- `src/components/mobigate/MerchantSelectionProcessDrawer.tsx` -- Consolation prize toggle and Grand Finale labels
+- `src/components/mobigate/InteractiveMerchantAdmin.tsx` -- Updated qualifying points display to show 300
 
 ### Files Created
 - None
+
