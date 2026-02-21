@@ -184,7 +184,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   return (
     <>
       <Dialog open={mainDialogOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0 flex flex-col">
+        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0 flex flex-col rounded-none sm:rounded-lg">
           {/* Header */}
           <div className="shrink-0 bg-gradient-to-r from-blue-500 to-cyan-500 border-b p-4 text-white">
             <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto p-4 touch-auto overscroll-contain">
+          <div className="flex-1 overflow-y-auto px-3 py-3 touch-auto overscroll-contain">
             {phase === "objective" && question && (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-2">
@@ -333,15 +333,15 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
           </div>
 
           {/* Footer */}
-          <div className="shrink-0 border-t p-4 bg-background">
+          <div className="shrink-0 border-t px-3 py-3 bg-background">
             {phase === "objective" && (
-              <Button className="w-full h-12 bg-blue-500 hover:bg-blue-600" onClick={handleConfirm} disabled={selectedAnswer === null || showResult}>
+              <Button className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation" onClick={handleConfirm} disabled={selectedAnswer === null || showResult}>
                 {selectedAnswer === null ? "Select Answer" : showResult ? "Loading..." : `Confirm ${MOBIGATE_ANSWER_LABELS[selectedAnswer]}`}
               </Button>
             )}
             {phase === "non_objective" && (
               <Button
-                className="w-full h-12 bg-blue-500 hover:bg-blue-600"
+                className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation"
                 onClick={() => lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "")}
                 disabled={nonObjLocked || !nonObjectiveAnswers[currentNonObjQ]?.trim()}
               >
@@ -351,20 +351,22 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             {phase === "result" && passed && (
               <div className="space-y-2">
                 <Button
-                  className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold touch-manipulation"
+                  className="w-full min-h-[44px] py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold text-xs leading-tight touch-manipulation whitespace-normal"
                   onClick={handleRollover}
                 >
-                  <Zap className="h-4 w-4 mr-2" /> Rollover Winning to Interactive Session
+                  <Zap className="h-4 w-4 mr-1.5 shrink-0" />
+                  <span>Rollover Winning to Interactive Session</span>
                 </Button>
                 <Button
-                  className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white touch-manipulation"
+                  className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
                   onClick={handleRedeemAndExit}
                 >
-                  <Trophy className="h-4 w-4 mr-2" /> Redeem Prize & Exit
+                  <Trophy className="h-4 w-4 mr-1.5 shrink-0" />
+                  <span>Redeem Prize & Exit</span>
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full h-11 text-blue-600 border-blue-300 touch-manipulation"
+                  className="w-full min-h-[40px] py-2 px-3 text-blue-600 border-blue-300 text-xs leading-tight touch-manipulation whitespace-normal"
                   onClick={handleRedeemAndPlayAgain}
                 >
                   Redeem Prize & Play Again
@@ -372,16 +374,16 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
               </div>
             )}
             {phase === "result" && !passed && (
-              <div className="flex gap-3">
+              <div className="flex gap-2.5">
                 <Button
-                  className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 touch-manipulation"
+                  className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation"
                   onClick={handlePlayAgain}
                 >
                   Play Again
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 h-12 touch-manipulation"
+                  className="flex-1 h-12 text-sm touch-manipulation"
                   onClick={() => onOpenChange(false)}
                 >
                   Exit Now

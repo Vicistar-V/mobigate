@@ -114,7 +114,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   return (
     <>
       <Dialog open={open && !showRedemption} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0 flex flex-col">
+        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0 flex flex-col rounded-none sm:rounded-lg">
           {/* Header */}
           <div className="shrink-0 bg-gradient-to-r from-amber-500 to-orange-600 border-b p-4 text-white">
             <div className="flex items-center justify-between">
@@ -144,7 +144,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
           {/* Body */}
           <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
             {sessionPhase === "lobby" && (
-              <div className="p-4 space-y-3">
+              <div className="px-3 py-3 space-y-3">
                 {isEvicted ? (
                   <Card className="border-red-300 bg-red-50 dark:bg-red-950/30">
                     <CardContent className="p-4 text-center space-y-2">
@@ -263,7 +263,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
             )}
 
             {sessionPhase === "session_result" && lastResult && (
-              <div className="p-4 space-y-3">
+              <div className="px-3 py-3 space-y-3">
                 <Card className={cn(
                   "border-2",
                   lastResult.percentage === 100
@@ -317,26 +317,27 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
           </div>
 
           {/* Footer */}
-          <div className="shrink-0 border-t p-4 bg-background space-y-2">
+          <div className="shrink-0 border-t px-3 py-3 bg-background space-y-2">
             {sessionPhase === "lobby" && !isEvicted && (
               <>
                 <Button
-                  className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold"
+                  className="w-full min-h-[44px] py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold text-xs leading-tight touch-manipulation whitespace-normal"
                   onClick={handleStartSession}
                 >
-                  <Zap className="h-4 w-4 mr-2" /> Play Next Session ({formatMobiAmount(sessionFee)})
+                  <Zap className="h-4 w-4 mr-1.5 shrink-0" />
+                  <span>Play Next Session ({formatMobiAmount(sessionFee)})</span>
                 </Button>
                 {currentWinnings > 0 && (
                   <Button
-                    className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                    className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
                     onClick={handleQuitWithWinnings}
                   >
-                    Quit & Take Winnings ({formatMobiAmount(currentWinnings)})
+                    <span>Quit & Take Winnings ({formatMobiAmount(currentWinnings)})</span>
                   </Button>
                 )}
                 <Button
                   variant="outline"
-                  className="w-full h-10"
+                  className="w-full min-h-[38px] py-2 px-3 text-xs touch-manipulation"
                   onClick={() => onOpenChange(false)}
                 >
                   Quit Without Winnings
@@ -345,7 +346,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
             )}
 
             {sessionPhase === "lobby" && isEvicted && (
-              <Button className="w-full h-12" onClick={() => onOpenChange(false)}>
+              <Button className="w-full h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
                 Exit Session
               </Button>
             )}
@@ -353,25 +354,24 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
             {sessionPhase === "session_result" && !isEvicted && (
               <>
                 <Button
-                  className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold"
+                  className="w-full min-h-[44px] py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold text-xs leading-tight touch-manipulation whitespace-normal"
                   onClick={handleContinueToNext}
                 >
-                  <Zap className="h-4 w-4 mr-2" /> Continue to Next Session
+                  <Zap className="h-4 w-4 mr-1.5 shrink-0" />
+                  <span>Continue to Next Session</span>
                 </Button>
                 {currentWinnings > 0 && (
                   <Button
-                    className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                    className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
                     onClick={handleQuitWithWinnings}
                   >
-                    Quit & Take Winnings ({formatMobiAmount(currentWinnings)})
+                    <span>Quit & Take Winnings ({formatMobiAmount(currentWinnings)})</span>
                   </Button>
                 )}
                 <Button
                   variant="outline"
-                  className="w-full h-10"
-                  onClick={() => {
-                    setSessionPhase("lobby");
-                  }}
+                  className="w-full min-h-[38px] py-2 px-3 text-xs touch-manipulation"
+                  onClick={() => setSessionPhase("lobby")}
                 >
                   Back to Lobby
                 </Button>
@@ -382,13 +382,13 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
               <>
                 {currentWinnings > 0 && (
                   <Button
-                    className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                    className="w-full min-h-[40px] py-2 px-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs leading-tight touch-manipulation whitespace-normal"
                     onClick={handleQuitWithWinnings}
                   >
-                    Take Winnings & Exit ({formatMobiAmount(currentWinnings)})
+                    <span>Take Winnings & Exit ({formatMobiAmount(currentWinnings)})</span>
                   </Button>
                 )}
-                <Button className="w-full h-12" onClick={() => onOpenChange(false)}>
+                <Button className="w-full h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
                   Exit Session
                 </Button>
               </>
