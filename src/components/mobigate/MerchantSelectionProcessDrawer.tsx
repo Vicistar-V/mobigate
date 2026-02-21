@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle, Trash2, Tv, Trophy, ArrowDown, Users } from "lucide-react";
 import type { QuizSeason, SelectionProcess, TVShowRound } from "@/data/mobigateInteractiveQuizData";
-import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 
 interface Props {
   open: boolean;
@@ -24,6 +23,9 @@ function NumField({ value, onChange, placeholder }: { value: number; onChange: (
       onChange={e => { const n = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); onChange(isNaN(n) ? 0 : n); }}
       onPointerDown={e => e.stopPropagation()}
       placeholder={placeholder}
+      autoComplete="off"
+      autoCorrect="off"
+      spellCheck={false}
       className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm touch-manipulation text-center"
     />
   );
@@ -77,22 +79,22 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader className="px-4">
-          <DrawerTitle className="text-base">Selection Process — {season.name}</DrawerTitle>
+      <DrawerContent className="max-h-[92vh]">
+        <DrawerHeader className="px-4 shrink-0">
+          <DrawerTitle className="text-base truncate">Selection — {season.name}</DrawerTitle>
           <div className="flex gap-2 mt-1">
             <Badge variant="outline" className="text-[10px]">{season.type}</Badge>
             <Badge variant="secondary" className="text-[10px]">{season.duration} months</Badge>
           </div>
         </DrawerHeader>
-        <DrawerBody className="space-y-4 pb-6">
+        <DrawerBody className="space-y-4 pb-8">
           {/* Selection Processes */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-blue-500" />
+              <Users className="h-4 w-4 text-blue-500 shrink-0" />
               <h3 className="text-sm font-bold">Selection Rounds</h3>
             </div>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={addProcess}>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1 shrink-0" onClick={addProcess}>
               <PlusCircle className="h-3.5 w-3.5" /> Add
             </Button>
           </div>
@@ -108,7 +110,7 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
                     </Button>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] text-muted-foreground">Entries Selected</Label>
                     <NumField value={p.entriesSelected} onChange={v => updateProcess(idx, { entriesSelected: v })} />
@@ -123,18 +125,18 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
           ))}
 
           {processes.length > 0 && (
-            <div className="flex justify-center">
+            <div className="flex justify-center py-1">
               <ArrowDown className="h-5 w-5 text-muted-foreground animate-bounce" />
             </div>
           )}
 
           {/* TV Show Rounds */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2">
-              <Tv className="h-4 w-4 text-purple-500" />
+              <Tv className="h-4 w-4 text-purple-500 shrink-0" />
               <h3 className="text-sm font-bold">TV Show Rounds</h3>
             </div>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={addTvRound}>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1 shrink-0" onClick={addTvRound}>
               <PlusCircle className="h-3.5 w-3.5" /> Add
             </Button>
           </div>
@@ -144,24 +146,27 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
             return (
               <Card key={idx} className={`border-l-4 ${isFinale ? "border-l-amber-500/60 bg-amber-500/5" : "border-l-purple-500/50"}`}>
                 <CardContent className="p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {isFinale ? <Trophy className="h-3.5 w-3.5 text-amber-500" /> : <Tv className="h-3.5 w-3.5 text-purple-500" />}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {isFinale ? <Trophy className="h-3.5 w-3.5 text-amber-500 shrink-0" /> : <Tv className="h-3.5 w-3.5 text-purple-500 shrink-0" />}
                       <input
                         type="text"
                         value={r.label}
                         onChange={e => updateTvRound(idx, { label: e.target.value })}
                         onPointerDown={e => e.stopPropagation()}
-                        className="text-sm font-semibold bg-transparent border-none outline-none w-full touch-manipulation"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        className="text-sm font-semibold bg-transparent border-b border-input/50 outline-none w-full touch-manipulation py-1"
                       />
                     </div>
                     {tvRounds.length > 1 && (
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeTvRound(idx)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive shrink-0" onClick={() => removeTvRound(idx)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] text-muted-foreground">Entries Selected</Label>
                       <NumField value={r.entriesSelected} onChange={v => updateTvRound(idx, { entriesSelected: v })} />
@@ -183,9 +188,9 @@ export function MerchantSelectionProcessDrawer({ open, onOpenChange, season, onS
             );
           })}
         </DrawerBody>
-        <DrawerFooter>
-          <Button className="h-12" onClick={handleSave}>Save Selection Process</Button>
-          <DrawerClose asChild><Button variant="outline" className="h-12">Cancel</Button></DrawerClose>
+        <DrawerFooter className="shrink-0">
+          <Button className="h-12 w-full" onClick={handleSave}>Save Selection Process</Button>
+          <DrawerClose asChild><Button variant="outline" className="h-12 w-full">Cancel</Button></DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
