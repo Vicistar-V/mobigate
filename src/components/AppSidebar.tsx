@@ -13,7 +13,13 @@ import { QuizAdminDrawer } from "@/components/mobigate/QuizAdminDrawer";
 // Superadmin Menu Items
 const superadminMenuItems = [
   {
-    title: "App Settings",
+    title: "Mobigate Admin Dashboard",
+    icon: LayoutDashboard,
+    items: [
+      { title: "Overview", url: "/mobigate-admin" }
+    ]
+  },
+  {
     icon: Settings,
     items: [
       { title: "All Settings", url: "/all_settings.php" }

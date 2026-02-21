@@ -2,13 +2,17 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, FolderOpen, Layers, PenSquare, ListChecks, Activity, Building2, Users } from "lucide-react";
+import { ChevronDown, FolderOpen, Layers, PenSquare, ListChecks, Activity, Building2, Users, History } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuizAdminDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const generalLinks = [
+  { label: "Quiz Games Played", url: "/mobigate-admin/quiz/games-played", icon: History },
+];
 
 const quizSections = [
   {
@@ -104,6 +108,21 @@ export function QuizAdminDrawer({ open, onOpenChange }: QuizAdminDrawerProps) {
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-8 space-y-3">
+          {/* General Links */}
+          <div className="space-y-0.5">
+            {generalLinks.map(link => (
+              <Link
+                key={link.url}
+                to={link.url}
+                onClick={handleNav}
+                className="flex items-center gap-2.5 py-2.5 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/40 active:bg-accent/60 transition-colors touch-manipulation"
+              >
+                <link.icon className="h-4 w-4 shrink-0" />
+                <span>{link.label}</span>
+              </Link>
+            ))}
+          </div>
+
           {quizSections.map(section => {
             const isOpen = expanded.includes(section.key);
             return (
