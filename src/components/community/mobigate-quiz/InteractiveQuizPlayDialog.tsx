@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, Clock, Star, Radio, Trophy } from "lucide-react";
+import { X, Clock, Star, Radio, Trophy, Zap, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,8 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
 import { QuizPrizeRedemptionSheet } from "./QuizPrizeRedemptionSheet";
+import { InteractiveSessionDialog } from "./InteractiveSessionDialog";
 
-/** Editable: seconds per non-objective question */
 const NON_OBJECTIVE_TIME_PER_QUESTION = 15;
 
 const interactiveObjectiveQuestions = [
@@ -56,6 +56,8 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const [nonObjectiveAnswers, setNonObjectiveAnswers] = useState<string[]>(Array(5).fill(""));
   const [nonObjectiveCorrect, setNonObjectiveCorrect] = useState(0);
   const [showRedemption, setShowRedemption] = useState(false);
+  const [showInteractiveSession, setShowInteractiveSession] = useState(false);
+  const [redemptionAction, setRedemptionAction] = useState<"exit" | "play_again">("exit");
 
   // Non-objective per-question state
   const [currentNonObjQ, setCurrentNonObjQ] = useState(0);
@@ -70,16 +72,19 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const passed = percentage === 100;
   const cashAlternative = season.entryFee * 5;
 
+  const resetAllState = useCallback(() => {
+    setCurrentQ(0); setTimeRemaining(15); setSelectedAnswer(null); setShowResult(false);
+    setObjectiveCorrect(0); setPhase("objective"); setNonObjectiveAnswers(Array(5).fill(""));
+    setNonObjectiveCorrect(0); setShowRedemption(false);
+    setCurrentNonObjQ(0); setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
+    setNonObjShowResult(false); setNonObjLocked(false);
+    setRedemptionAction("exit");
+  }, []);
+
   // Reset all state when dialog closes
   useEffect(() => {
-    if (!open) {
-      setCurrentQ(0); setTimeRemaining(15); setSelectedAnswer(null); setShowResult(false);
-      setObjectiveCorrect(0); setPhase("objective"); setNonObjectiveAnswers(Array(5).fill(""));
-      setNonObjectiveCorrect(0); setShowRedemption(false);
-      setCurrentNonObjQ(0); setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
-      setNonObjShowResult(false); setNonObjLocked(false);
-    }
-  }, [open]);
+    if (!open) resetAllState();
+  }, [open, resetAllState]);
 
   // Objective timer
   useEffect(() => {
@@ -93,7 +98,6 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   useEffect(() => {
     if (phase !== "non_objective" || nonObjShowResult || nonObjLocked || !open) return;
     if (nonObjTimeRemaining <= 0) {
-      // Time's up — lock current answer (whatever they typed, or empty)
       lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "");
       return;
     }
@@ -113,39 +117,55 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     else { setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(15); }
   };
 
-  // Lock the current non-objective answer and show result briefly
   const lockNonObjAnswer = useCallback((answer: string) => {
     setNonObjLocked(true);
-    // Save answer
-    setNonObjectiveAnswers(prev => {
-      const updated = [...prev];
-      updated[currentNonObjQ] = answer;
-      return updated;
-    });
+    setNonObjectiveAnswers(prev => { const updated = [...prev]; updated[currentNonObjQ] = answer; return updated; });
     setNonObjShowResult(true);
-
-    // Check correctness for this question
     const q = interactiveNonObjectiveQuestions[currentNonObjQ];
     const isCorrect = q.acceptedAnswers.some(a => answer.toLowerCase().includes(a.toLowerCase()));
     if (isCorrect) setNonObjectiveCorrect(p => p + 1);
-
-    // After brief display, advance
     setTimeout(() => {
-      if (currentNonObjQ >= 4) {
-        // All 5 done — go to result
-        setPhase("result");
-      } else {
+      if (currentNonObjQ >= 4) setPhase("result");
+      else {
         setCurrentNonObjQ(p => p + 1);
         setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
-        setNonObjShowResult(false);
-        setNonObjLocked(false);
+        setNonObjShowResult(false); setNonObjLocked(false);
       }
     }, 1500);
   }, [currentNonObjQ]);
 
-  const handleClaim = () => {
-    if (passed) setShowRedemption(true);
-    else onOpenChange(false);
+  // --- Result action handlers ---
+  const handleRollover = () => {
+    onOpenChange(false);
+    setTimeout(() => setShowInteractiveSession(true), 300);
+    toast({ title: "⚡ Entering Interactive Session", description: "Previous winnings forfeited. Earn points now!" });
+  };
+
+  const handleRedeemAndExit = () => {
+    setRedemptionAction("exit");
+    setShowRedemption(true);
+  };
+
+  const handleRedeemAndPlayAgain = () => {
+    setRedemptionAction("play_again");
+    setShowRedemption(true);
+  };
+
+  const handlePlayAgain = () => {
+    resetAllState();
+    // Phase is reset to "objective" by resetAllState
+  };
+
+  const handleRedemptionClose = (v: boolean) => {
+    if (!v) {
+      setShowRedemption(false);
+      if (redemptionAction === "exit") {
+        onOpenChange(false);
+      } else {
+        // play again after redemption
+        resetAllState();
+      }
+    }
   };
 
   const progressValue = phase === "objective"
@@ -159,11 +179,14 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     a => (nonObjectiveAnswers[currentNonObjQ] || "").toLowerCase().includes(a.toLowerCase())
   );
 
+  const mainDialogOpen = open && !showRedemption && !showInteractiveSession;
+
   return (
     <>
-      <Dialog open={open && !showRedemption} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0">
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-500 to-cyan-500 border-b p-4 text-white">
+      <Dialog open={mainDialogOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0 flex flex-col">
+          {/* Header */}
+          <div className="shrink-0 bg-gradient-to-r from-blue-500 to-cyan-500 border-b p-4 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Star className="h-5 w-5" />
@@ -183,7 +206,8 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             <Progress value={progressValue} className="h-1.5 mt-2 bg-blue-400 [&>div]:bg-white" />
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 touch-auto">
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-4 touch-auto overscroll-contain">
             {phase === "objective" && question && (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-2">
@@ -219,34 +243,21 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
 
             {phase === "non_objective" && currentNonObjQuestion && (
               <div className="space-y-4">
-                {/* Timer */}
                 <div className="flex items-center justify-center gap-2">
                   <Clock className={cn("h-5 w-5", nonObjTimeRemaining <= 5 ? "text-red-500 animate-pulse" : "text-blue-600")} />
-                  <span className={cn("text-2xl font-bold tabular-nums", nonObjTimeRemaining <= 5 && "text-red-500")}>
-                    {nonObjTimeRemaining}s
-                  </span>
+                  <span className={cn("text-2xl font-bold tabular-nums", nonObjTimeRemaining <= 5 && "text-red-500")}>{nonObjTimeRemaining}s</span>
                 </div>
-
-                {/* Objective score summary */}
                 <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200">
                   <CardContent className="p-3 text-center">
                     <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/10</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Written question {currentNonObjQ + 1} of 5
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">Written question {currentNonObjQ + 1} of 5</p>
                   </CardContent>
                 </Card>
-
-                {/* Single question card */}
                 <NonObjectiveQuestionCard
                   key={currentNonObjQ}
                   questionNumber={11 + currentNonObjQ}
                   question={currentNonObjQuestion.question}
-                  onAnswer={(ans) => {
-                    const a = [...nonObjectiveAnswers];
-                    a[currentNonObjQ] = ans;
-                    setNonObjectiveAnswers(a);
-                  }}
+                  onAnswer={(ans) => { const a = [...nonObjectiveAnswers]; a[currentNonObjQ] = ans; setNonObjectiveAnswers(a); }}
                   disabled={nonObjLocked}
                   showResult={nonObjShowResult}
                   isCorrect={nonObjShowResult && currentNonObjIsCorrect}
@@ -255,40 +266,65 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             )}
 
             {phase === "result" && (
-              <div className="space-y-4">
-                <Card className={cn("border-2", passed ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-300 bg-red-50 dark:bg-red-950/30")}>
-                  <CardContent className="p-6 text-center space-y-3">
-                    <p className="text-4xl">{passed ? "🌟" : "😞"}</p>
-                    <h3 className="font-bold text-lg">{passed ? "Perfect Score!" : "Not Quite"}</h3>
-                    <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
-                    {passed && (
-                      <div className="pt-2 space-y-2">
-                        <p className="text-sm font-medium">You qualified for the Interactive Session!</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
-                            <p className="text-[10px] text-muted-foreground">Advance to Next Level</p>
-                            <p className="font-bold text-xs text-blue-600">Level {season.currentLevel + 1}</p>
-                          </div>
-                          <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded-lg text-center">
-                            <p className="text-[10px] text-muted-foreground">Or Take Cash</p>
-                            <p className="font-bold text-xs text-green-600">{formatMobiAmount(cashAlternative)}</p>
+              <div className="space-y-3">
+                {passed ? (
+                  <>
+                    {/* Perfect score card */}
+                    <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-950/30">
+                      <CardContent className="p-5 text-center space-y-3">
+                        <p className="text-4xl">🌟</p>
+                        <h3 className="font-bold text-lg">Perfect Score!</h3>
+                        <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
+                        <div className="pt-2">
+                          <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <p className="text-xs text-muted-foreground">Cash Prize Available</p>
+                            <p className="font-bold text-lg text-green-600">{formatMobiAmount(cashAlternative)}</p>
+                            <p className="text-[10px] text-muted-foreground">({formatLocalAmount(cashAlternative, "NGN")})</p>
                           </div>
                         </div>
-                        {season.currentLevel >= season.selectionLevels - 3 && (
-                          <Badge className="bg-red-500 text-white border-0 animate-pulse">
-                            <Radio className="h-3 w-3 mr-1" /> Next level is a LIVE SHOW!
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
 
-                {passed && (
-                  <Card className="border-amber-200">
-                    <CardContent className="p-3 text-center">
-                      <p className="text-xs text-muted-foreground">🏆 Winners of the final Live Show are crowned</p>
-                      <p className="font-bold text-amber-600">Mobi-Celebrity!</p>
+                    {/* Rollover info card */}
+                    <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30">
+                      <CardContent className="p-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-amber-500" />
+                          <span className="text-xs font-semibold text-amber-700">What is "Rollover"?</span>
+                        </div>
+                        <div className="space-y-1.5 text-[10px] text-muted-foreground">
+                          <p className="flex items-start gap-1.5">
+                            <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
+                            You forfeit your current cash prize.
+                          </p>
+                          <p className="flex items-start gap-1.5">
+                            <Star className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
+                            Enter the Interactive Session to earn Points.
+                          </p>
+                          <p className="flex items-start gap-1.5">
+                            <Trophy className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
+                            Top players qualify for the Game Show & win BIG!
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                ) : (
+                  <Card className="border-2 border-red-300 bg-red-50 dark:bg-red-950/30">
+                    <CardContent className="p-5 text-center space-y-3">
+                      <p className="text-4xl">😞</p>
+                      <h3 className="font-bold text-lg">Better Luck Next Time</h3>
+                      <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
+                      <div className="grid grid-cols-2 gap-2 pt-2">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
+                          <p className="text-[10px] text-muted-foreground">Objective</p>
+                          <p className="font-bold text-sm">{objectiveCorrect}/10</p>
+                        </div>
+                        <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">
+                          <p className="text-[10px] text-muted-foreground">Written</p>
+                          <p className="font-bold text-sm">{nonObjectiveCorrect}/5</p>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -296,7 +332,8 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             )}
           </div>
 
-          <div className="sticky bottom-0 z-10 bg-background border-t p-4">
+          {/* Footer */}
+          <div className="shrink-0 border-t p-4 bg-background">
             {phase === "objective" && (
               <Button className="w-full h-12 bg-blue-500 hover:bg-blue-600" onClick={handleConfirm} disabled={selectedAnswer === null || showResult}>
                 {selectedAnswer === null ? "Select Answer" : showResult ? "Loading..." : `Confirm ${MOBIGATE_ANSWER_LABELS[selectedAnswer]}`}
@@ -311,18 +348,64 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 {nonObjShowResult ? "Next question..." : "Confirm Answer"}
               </Button>
             )}
-            {phase === "result" && (
-              <Button className="w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 text-white" onClick={handleClaim}>
-                {passed ? "Take Cash Prize (500%)" : "Exit"}
-              </Button>
+            {phase === "result" && passed && (
+              <div className="space-y-2">
+                <Button
+                  className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold touch-manipulation"
+                  onClick={handleRollover}
+                >
+                  <Zap className="h-4 w-4 mr-2" /> Rollover Winning to Interactive Session
+                </Button>
+                <Button
+                  className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white touch-manipulation"
+                  onClick={handleRedeemAndExit}
+                >
+                  <Trophy className="h-4 w-4 mr-2" /> Redeem Prize & Exit
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full h-11 text-blue-600 border-blue-300 touch-manipulation"
+                  onClick={handleRedeemAndPlayAgain}
+                >
+                  Redeem Prize & Play Again
+                </Button>
+              </div>
+            )}
+            {phase === "result" && !passed && (
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 touch-manipulation"
+                  onClick={handlePlayAgain}
+                >
+                  Play Again
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 h-12 touch-manipulation"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Exit Now
+                </Button>
+              </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      <QuizPrizeRedemptionSheet open={showRedemption}
-        onOpenChange={(v) => { if (!v) { setShowRedemption(false); onOpenChange(false); } }}
-        prizeAmount={cashAlternative} prizeType="cash" />
+      {/* Redemption sheet */}
+      <QuizPrizeRedemptionSheet
+        open={showRedemption}
+        onOpenChange={handleRedemptionClose}
+        prizeAmount={cashAlternative}
+        prizeType="cash"
+      />
+
+      {/* Interactive Session dialog */}
+      <InteractiveSessionDialog
+        open={showInteractiveSession}
+        onOpenChange={(v) => setShowInteractiveSession(v)}
+        season={season}
+      />
     </>
   );
 }
