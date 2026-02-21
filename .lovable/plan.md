@@ -1,124 +1,121 @@
 
-
-# Interactive Quiz Sessions -- Complete Scoring, Points, Prizes, and Game Show Entry System
+# Interactive Quiz: 15 Objectives + "Play Only Objectives" Mode
 
 ## What This Plan Does
 
-This plan rewrites the Interactive Quiz scoring engine and session flow to match the full game show progression rules you described. Currently, the system only awards points for 100% correct answers and has a simple pass/fail result. The new system introduces tiered scoring, tiered instant prizes, a disqualification penalty for poor performance, a 300-point Game Show entry threshold with action choices, and proper selection/eviction process modeling.
+Currently the Interactive Quiz has 10 objective questions and 5 non-objective questions (15 total). This plan increases the **objective question bank to 15**, adds a **"Play Only Objectives" mode** with adjusted prize tiers, and implements the random 10-from-15 selection logic for the default (mixed) mode.
 
 ---
 
-## Changes Overview
+## The Two Play Modes
 
-### 1. Data Model Updates (`mobigateInteractiveQuizData.ts`)
+**Default Mode (Objectives + Non-Objectives):**
+- 10 objectives randomly selected from the 15 in the bank + 5 non-objectives = 15 total
+- Prize tiers remain unchanged (100% = 500%, 90% = 50%, 80% = 20%)
 
-- Change `qualifyingPoints` default from `15` to `300` in `DEFAULT_MERCHANT_CONFIG`
-- Add new exported constants:
-  - `POINTS_FOR_100_PERCENT = 3`
-  - `POINTS_FOR_90_PERCENT = 2`
-  - `POINTS_FOR_80_PERCENT = 1`
-  - `DISQUALIFY_THRESHOLD = 60` (below 60% resets everything)
-  - `GAME_SHOW_ENTRY_POINTS = 300`
-  - `INSTANT_PRIZE_100 = 5.0` (500% of stake)
-  - `INSTANT_PRIZE_90 = 0.5` (50% of stake)
-  - `INSTANT_PRIZE_80 = 0.2` (20% of stake)
-- Add `consolationPrizesEnabled: boolean` and `consolationPrizePool: number` fields to `QuizSeason` interface
-- Update mock seasons with the new fields and realistic consolation prize settings
+**"Play Only Objectives" Mode:**
+- All 15 objective questions, no non-objectives
+- Reduced winning prize: 100% correct = **350%** of stake (down from 500%)
+- 12-14 correct answers (80-93%) = **20% of stake** consolation prize
+- Below 60% still triggers full disqualification and reset
 
-### 2. Interactive Quiz Play Dialog (`InteractiveQuizPlayDialog.tsx`)
+---
 
-**Scoring tier logic** -- Replace the binary pass/fail with tiered results:
-- 100% correct: 3 points earned, prize = 500% of stake
-- 90%+ correct: 2 points earned, prize = 50% of stake
-- 80%+ correct: 1 point earned, prize = 20% of stake
-- 60-79% correct: 0 points, no prize, but player continues
-- Below 60%: DISQUALIFIED -- all accrued points and prizes reset to zero, player starts fresh
+## Files and Changes
 
-**Result screen redesign** (mobile-first):
-- Show the tier achieved (e.g., "3 Points Earned!" or "DISQUALIFIED!")
-- Show instant prize amount based on tier
-- Warning card explaining that taking the instant prize disqualifies from Game Show entry and dissolves all accrued points
-- Three action buttons for qualifying players:
-  - "Redeem Instant Prize and Exit" (disqualifies from show)
-  - "Redeem Instant Prize and Play Again" (disqualifies from show, restarts fresh)
-  - "Skip Prize, Continue Playing" (keeps points, no prize taken)
-- For disqualified players (<60%): Show reset warning, "Play Again (Fresh Start)" button
+### 1. Data Constants (`mobigateInteractiveQuizData.ts`)
 
-**300-Point Game Show threshold** -- When accumulated points reach 300+, show a special milestone card with three options:
-- "Enter Show Now" -- A journey to becoming a Mobi Celebrity
-- "Redeem Accrued Won Prize (M258,000 won in 10 Sessions)" -- with actual accumulated amount
-- "Continue Playing More Quiz" -- keep accumulating
+- Add new constants for "objectives-only" mode:
+  - `OBJECTIVES_ONLY_PRIZE_MULTIPLIER = 3.5` (350% of stake)
+  - `OBJECTIVES_ONLY_CONSOLATION_MULTIPLIER = 0.2` (20% of stake for 12-14 correct)
+  - `INTERACTIVE_FULL_OBJECTIVE_QUESTIONS = 15` (total objectives in bank)
+  - `INTERACTIVE_DEFAULT_OBJECTIVE_PICK = 10` (randomly picked for mixed mode)
+- Add a new `calculateObjectivesOnlyTier()` function with the adjusted tiers:
+  - 15/15 correct (100%) = 3 points, 350% prize
+  - 14/15 or 13/15 or 12/15 (80-93%) = 1 point, 20% consolation
+  - Below 60% = disqualified, full reset
+- Update `INTERACTIVE_OBJECTIVE_QUESTIONS` comment to clarify it means "per session in mixed mode"
 
-### 3. Interactive Session Dialog (`InteractiveSessionDialog.tsx`)
+### 2. InteractiveQuizPlayDialog (`InteractiveQuizPlayDialog.tsx`)
 
-**Replace the current scoring logic** which only awards 1 point for 100%:
-- Apply same tiered point system (3/2/1/0/disqualify)
-- Apply same tiered instant prize system (500%/50%/20%/0)
-- Below 60% resets session points AND current winnings to zero
+- Add 5 more objective questions to the hardcoded pool (bringing total to 15)
+- Add `playMode` state: `"mixed" | "objectives_only"` (default: `"mixed"`)
+- Add a **pre-game phase** (`"mode_select"`) before objectives begin, showing:
+  - "Play Objectives + Written" button (default, full prize tiers)
+  - "Play Only Objectives" button with attached note: "This option will reduce your Winning Prize from 500% to 350% of Stake"
+- When `playMode === "mixed"`: randomly pick 10 from the 15 objectives, then proceed to 5 non-objectives
+- When `playMode === "objectives_only"`: use all 15 objectives, skip non-objectives entirely
+- Update tier calculation to use `calculateObjectivesOnlyTier()` when in objectives-only mode
+- Update result screen to reflect the correct tier labels for objectives-only mode
 
-**Update the points progress bar**:
-- Change target from 15 to 300 (or merchant's `qualifyingPoints`)
-- Show milestone markers at key thresholds
+### 3. InteractiveSessionDialog (`InteractiveSessionDialog.tsx`)
 
-**Update session rules card**:
-- List the 4 scoring tiers with their point values
-- Explain the <60% disqualification and reset penalty
-- Explain instant prize trade-off (taking prize = no Game Show)
+- Add 5 more objective questions to the session pool (15 total)
+- Pass a `playMode` prop through to `QuizPlayEngine`
+- Add mode selection in the lobby before starting a session
+- Update `handleSessionComplete` to use the correct tier function based on play mode
+- Update the scoring rules card to mention the "Objectives Only" reduced prize
 
-**Update the result screen**:
-- Show tier achieved with appropriate styling
-- Show instant prize earned (if any)
-- If points >= 300, show the Game Show entry milestone with the 3 action buttons
-- "Continue to Next Session" dissolves instant prize but keeps points
-- "Take Instant Prize" adds to vault but blocks Game Show entry
+### 4. QuizPlayEngine (`QuizPlayEngine.tsx`)
 
-**Eviction update**:
-- Keep the loss-based eviction but also add the <60% reset mechanic
-- Clarify that eviction from losses is separate from <60% point reset
+- Accept a new optional prop `playMode?: "mixed" | "objectives_only"`
+- When `playMode === "objectives_only"`, the engine receives all 15 objectives and 0 non-objectives (handled by parent passing empty array)
+- No changes needed to internal logic since it already handles empty non-objective arrays
+- Update the `QuizPlayResult` interface to include `playMode` so parent can determine which tier function to use
 
-### 4. Season Sheet Player View (`InteractiveQuizSeasonSheet.tsx`)
+### 5. InteractiveQuizSeasonSheet (`InteractiveQuizSeasonSheet.tsx`)
 
-- Show selection process stages with entry fees in the season cards
-- Display consolation prize indicator if merchant has enabled it
-- Add local currency equivalents alongside Mobi amounts for entry fees and prizes
+- Pass `playMode` selection down to `InteractiveQuizPlayDialog`
+- The mode selection happens inside the play dialog itself, so no major changes here beyond ensuring props flow correctly
 
-### 5. Merchant Admin -- Selection Process View (`MerchantSelectionProcessDrawer.tsx`)
+### 6. Merchant Admin Questions Config (`InteractiveMerchantAdmin.tsx`)
 
-- Add consolation prizes toggle and pool amount field for the TV Show rounds
-- Add note that consolation prizes are optional and apply to the 12 evicted players from the first TV show
-- Show the Grand Finale as always FREE entry with 1st, 2nd, 3rd prize positions
+- Update the questions settings display to show "15 Objectives" instead of "10 Objectives"
+- Update `DEFAULT_MERCHANT_CONFIG.objectivePerPack` reference to show 15
+- Update any UI text referencing "10 Objectives" to "15 Objectives (10 randomly selected for mixed play)"
 
 ---
 
 ## Technical Details
 
-### Scoring Calculation Logic (shared helper)
+### Random Selection Logic (Mixed Mode)
 
 ```typescript
-function calculateQuizTier(percentage: number) {
-  if (percentage === 100) return { points: 3, prizeMultiplier: 5.0, tier: "perfect" };
-  if (percentage >= 90)  return { points: 2, prizeMultiplier: 0.5, tier: "excellent" };
-  if (percentage >= 80)  return { points: 1, prizeMultiplier: 0.2, tier: "good" };
-  if (percentage >= 60)  return { points: 0, prizeMultiplier: 0,   tier: "pass" };
+function pickRandomObjectives(allObjectives: ObjectiveQuestion[], count: number) {
+  const shuffled = [...allObjectives].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+// Usage in InteractiveQuizPlayDialog:
+const activeObjectives = playMode === "objectives_only"
+  ? allObjectiveQuestions           // all 15
+  : pickRandomObjectives(allObjectiveQuestions, 10);  // random 10
+```
+
+### Objectives-Only Tier Calculation
+
+```typescript
+function calculateObjectivesOnlyTier(percentage: number, correctCount: number, totalCount: number) {
+  if (percentage === 100)  return { points: 3, prizeMultiplier: 3.5, tier: "perfect" };      // 350%
+  if (correctCount >= 12)  return { points: 1, prizeMultiplier: 0.2, tier: "consolation" };   // 20%
+  if (percentage >= 60)    return { points: 0, prizeMultiplier: 0,   tier: "pass" };
   return { points: 0, prizeMultiplier: 0, tier: "disqualified", resetAll: true };
 }
 ```
 
-### Game Show Entry Check
+### Mode Selection UI (Pre-Game)
 
-```typescript
-const hasReachedGameShow = accumulatedPoints >= GAME_SHOW_ENTRY_POINTS;
-const accumulatedWinnings = totalWonAcrossSessions; // tracked in state
-```
+Before the quiz starts, a card will show two options:
+- Primary button: "Play Objectives + Written (15 Questions)" -- full prize tiers
+- Secondary button: "Play Only Objectives (15 Questions)" -- with a small amber note card below explaining: "This option reduces your Winning Prize from 500% to 350% of Stake. Getting 12-14 correct earns 20% consolation prize."
 
 ### Files Modified (6 total)
-- `src/data/mobigateInteractiveQuizData.ts` -- New constants, updated defaults, consolation fields
-- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- Tiered scoring, 300-point milestone, instant prize trade-off
-- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- Tiered session scoring, <60% reset, Game Show entry threshold
-- `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx` -- Selection process display, dual currency
-- `src/components/mobigate/MerchantSelectionProcessDrawer.tsx` -- Consolation prize toggle and Grand Finale labels
-- `src/components/mobigate/InteractiveMerchantAdmin.tsx` -- Updated qualifying points display to show 300
+- `src/data/mobigateInteractiveQuizData.ts` -- New constants, new tier function
+- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- 15 objectives, mode select, adjusted scoring
+- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- 15 objectives, mode select in lobby
+- `src/components/community/mobigate-quiz/QuizPlayEngine.tsx` -- playMode in result interface
+- `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx` -- Props flow
+- `src/components/mobigate/InteractiveMerchantAdmin.tsx` -- Updated question count display
 
 ### Files Created
 - None
-
