@@ -56,9 +56,12 @@ export default function ManageQuestionsPage() {
     toast({ title: "Question Updated", description: "Changes saved successfully." });
   };
 
-  const handleSuspend = (id: string) => {
-    setQuestions(prev => prev.map(q => q.id === id ? { ...q, status: "suspended" as const } : q));
-    toast({ title: "Question Suspended" });
+  const handleSuspend = (id: string, days: number | null) => {
+    const suspendedUntil = days !== null
+      ? new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+      : undefined;
+    setQuestions(prev => prev.map(q => q.id === id ? { ...q, status: "suspended" as const, suspendedUntil } : q));
+    toast({ title: "Question Suspended", description: days !== null ? `Suspended for ${days} days` : "Suspended indefinitely" });
   };
 
   const handleReactivate = (id: string) => {
