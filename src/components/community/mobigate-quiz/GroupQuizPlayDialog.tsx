@@ -51,7 +51,8 @@ const MIN_WIN_PERCENTAGE = 40;
 
 export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, players }: GroupQuizPlayDialogProps) {
   const { toast } = useToast();
-  const totalQuestions = groupQuestions.length + groupNonObjectiveQuestions.length; // 15
+  const hasNonObjective = groupNonObjectiveQuestions.length > 0;
+  const totalQuestions = groupQuestions.length + groupNonObjectiveQuestions.length;
 
   // Objective state
   const [phase, setPhase] = useState<Phase>("objective");
@@ -130,7 +131,11 @@ export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, pl
 
   const nextObjective = () => {
     if (currentQ >= groupQuestions.length - 1) {
-      setPhase("non_objective");
+      if (hasNonObjective) {
+        setPhase("non_objective");
+      } else {
+        setPhase("game_over");
+      }
     } else {
       setCurrentQ(p => p + 1);
       setSelectedAnswer(null);
@@ -190,8 +195,8 @@ export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, pl
               <div>
                 <h2 className="font-semibold text-sm">Group Quiz</h2>
                 <p className="text-xs text-purple-200">
-                  {phase === "objective" && `Q${currentQ + 1}/10 (Objective)`}
-                  {phase === "non_objective" && `Q${11 + currentNonObjQ}/15 (Written)`}
+                  {phase === "objective" && `Q${currentQ + 1}/${groupQuestions.length} (Objective)`}
+                  {phase === "non_objective" && `Q${groupQuestions.length + 1 + currentNonObjQ}/${totalQuestions} (Written)`}
                   {phase === "game_over" && "Results"}
                   {" • "}{playerCount} players
                 </p>

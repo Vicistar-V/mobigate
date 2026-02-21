@@ -109,9 +109,18 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     setTimeout(() => nextObjective(), 1500);
   };
 
+  const hasNonObjective = interactiveNonObjectiveQuestions.length > 0;
+
   const nextObjective = () => {
-    if (currentQ >= 9) setPhase("non_objective");
-    else { setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(getObjectiveTimePerQuestion()); }
+    if (currentQ >= interactiveObjectiveQuestions.length - 1) {
+      if (hasNonObjective) {
+        setPhase("non_objective");
+      } else {
+        setPhase("result");
+      }
+    } else {
+      setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(getObjectiveTimePerQuestion());
+    }
   };
 
   const lockNonObjAnswer = useCallback((answer: string) => {
@@ -174,8 +183,8 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 <div>
                   <h2 className="font-semibold text-sm">{season.name}</h2>
                   <p className="text-xs text-blue-200">
-                    {phase === "objective" && `Q${currentQ + 1}/10 (Objective)`}
-                    {phase === "non_objective" && `Q${11 + currentNonObjQ}/15 (Type Your Answer)`}
+                    {phase === "objective" && `Q${currentQ + 1}/${interactiveObjectiveQuestions.length} (Objective)`}
+                    {phase === "non_objective" && `Q${interactiveObjectiveQuestions.length + 1 + currentNonObjQ}/${totalQuestions} (Type Your Answer)`}
                     {phase === "result" && "Results"}
                   </p>
                 </div>
