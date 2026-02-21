@@ -23,6 +23,13 @@ interface GameQuestion {
   isCorrect: boolean;
 }
 
+interface GroupPlayerResult {
+  name: string;
+  score: number;
+  total: number;
+  isYou?: boolean;
+}
+
 interface GameEntry {
   id: number;
   mode: "Standard Solo" | "Group Quiz" | "Interactive" | "Food for Home" | "Scholarship";
@@ -42,6 +49,10 @@ interface GameEntry {
   bonusResult?: string;
   itemWon?: string;
   scholarshipName?: string;
+  // Group Quiz specific
+  groupRank?: number;
+  groupPlayers?: GroupPlayerResult[];
+  groupWinReason?: string; // e.g. "Highest scorer (≥40%)" or "No winner — all lose"
   questions: GameQuestion[];
 }
 
@@ -67,6 +78,15 @@ const mockHistory: GameEntry[] = [
     id: 2, mode: "Group Quiz", date: "2026-02-12", time: "19:15", score: "8/10", scoreNum: 8, scoreTotal: 10,
     stake: 10000, prize: 0, won: false, duration: "4m 12s", category: "Science & Tech", tier: "Platinum",
     players: 5,
+    groupRank: 2,
+    groupWinReason: "Not highest scorer",
+    groupPlayers: [
+      { name: "AdekunleGold", score: 9, total: 10 },
+      { name: "You", score: 8, total: 10, isYou: true },
+      { name: "ChimaObi99", score: 7, total: 10 },
+      { name: "FunkeAdeyemi", score: 6, total: 10 },
+      { name: "TundeKings", score: 5, total: 10 },
+    ],
     questions: [
       { question: "What is DNA's full name?", yourAnswer: "Deoxyribonucleic acid", correctAnswer: "Deoxyribonucleic acid", isCorrect: true },
       { question: "Who discovered penicillin?", yourAnswer: "Fleming", correctAnswer: "Alexander Fleming", isCorrect: true },
@@ -144,6 +164,14 @@ const mockHistory: GameEntry[] = [
     id: 6, mode: "Group Quiz", date: "2026-02-08", time: "20:00", score: "7/10", scoreNum: 7, scoreTotal: 10,
     stake: 8000, prize: 16000, won: true, duration: "3m 55s", category: "Sports", tier: "Gold",
     players: 4,
+    groupRank: 1,
+    groupWinReason: "Highest scorer (≥40%)",
+    groupPlayers: [
+      { name: "You", score: 7, total: 10, isYou: true },
+      { name: "BlessedBoy", score: 6, total: 10 },
+      { name: "NaijaQuizKing", score: 5, total: 10 },
+      { name: "SportsFanatic", score: 3, total: 10 },
+    ],
     questions: [
       { question: "How many players on a soccer team?", yourAnswer: "11", correctAnswer: "11", isCorrect: true },
       { question: "Who has the most Ballon d'Or?", yourAnswer: "Messi", correctAnswer: "Lionel Messi", isCorrect: true },
@@ -740,6 +768,76 @@ export default function MyQuizHistory() {
                       <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 leading-tight">
                         {game.scholarshipName}
                       </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Group Quiz Leaderboard & Rules */}
+                {game.mode === "Group Quiz" && game.groupPlayers && (
+                  <div className="mx-4 mb-3 space-y-2">
+                    {/* Leaderboard */}
+                    <div className="p-3 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
+                      <div className="flex items-center gap-2 mb-2.5">
+                        <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-xs font-bold text-blue-700 dark:text-blue-300">Group Leaderboard</span>
+                        {game.groupRank && (
+                          <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20">
+                            #{game.groupRank} of {game.groupPlayers.length}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        {game.groupPlayers.map((p, idx) => {
+                          const pPercent = Math.round((p.score / p.total) * 100);
+                          const isWinner = idx === 0 && pPercent >= 40;
+                          return (
+                            <div
+                              key={idx}
+                              className={cn(
+                                "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs",
+                                p.isYou
+                                  ? "bg-primary/10 border border-primary/20 font-bold"
+                                  : "bg-muted/40"
+                              )}
+                            >
+                              <span className={cn(
+                                "h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0",
+                                idx === 0 && isWinner
+                                  ? "bg-amber-500 text-white"
+                                  : "bg-muted text-muted-foreground"
+                              )}>
+                                {idx + 1}
+                              </span>
+                              <span className="flex-1 truncate">
+                                {p.isYou ? "You" : p.name}
+                              </span>
+                              <span className="font-semibold">{p.score}/{p.total}</span>
+                              <span className="text-[10px] text-muted-foreground w-8 text-right">{pPercent}%</span>
+                              {idx === 0 && isWinner && (
+                                <Trophy className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Win Condition Rule */}
+                    <div className={cn(
+                      "p-2.5 rounded-lg border flex items-start gap-2",
+                      game.won
+                        ? "border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20"
+                        : "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20"
+                    )}>
+                      <AlertTriangle className={cn("h-3.5 w-3.5 shrink-0 mt-0.5", game.won ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400")} />
+                      <div>
+                        <p className={cn("text-[11px] font-semibold", game.won ? "text-green-700 dark:text-green-300" : "text-amber-700 dark:text-amber-300")}>
+                          {game.groupWinReason}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          Winner must be the highest scorer with a minimum of 40%. Otherwise, all players lose.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
