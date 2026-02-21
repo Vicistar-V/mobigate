@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Users, Globe, Gamepad2 } from "lucide-react";
 import { CommunityQuizDialog } from "./CommunityQuizDialog";
-import { MobiQuizGameDialog } from "./MobiQuizGameDialog";
+import { MobigateQuizHub } from "./mobigate-quiz/MobigateQuizHub";
 
 interface QuizSelectionSheetProps {
   open: boolean;
@@ -77,7 +77,7 @@ export function QuizSelectionSheet({
       </Drawer>
 
       <CommunityQuizDialog open={communityQuizOpen} onOpenChange={setCommunityQuizOpen} />
-      <MobiQuizGameDialog open={mobiQuizOpen} onOpenChange={setMobiQuizOpen} />
+      <MobigateQuizHub open={mobiQuizOpen} onOpenChange={setMobiQuizOpen} />
     </>
   );
 }
