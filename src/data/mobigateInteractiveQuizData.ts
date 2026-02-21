@@ -216,6 +216,9 @@ export const INTERACTIVE_QUESTIONS_PER_SESSION = 15;
 export const INTERACTIVE_OBJECTIVE_QUESTIONS = 10;
 export const INTERACTIVE_NON_OBJECTIVE_QUESTIONS = 5;
 
+export const INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION = 50;
+export const INTERACTIVE_QUALIFYING_TOP_PERCENT = 10; // top 10% qualify
+
 export const SEASON_TYPE_CONFIG = {
   Short: { duration: 4, processes: 3 },
   Medium: { duration: 6, processes: 5 },
