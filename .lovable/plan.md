@@ -1,140 +1,139 @@
 
+# Live Scoreboard with Fan Engagement for Interactive Quiz
 
-# Toggle Quiz -- High-Stakes Escalating Sessions with All-or-Nothing Gamble
+## Overview
 
-## What This Plan Does
-
-Adds a brand-new **"Toggle Quiz"** game mode to the Mobigate Quiz Hub. This is a distinct, escalating risk/reward quiz where players answer questions across up to 7 sessions. After each 100%-correct session win, the player must decide: **take the prize and leave**, or **"Toggle"** into the next session for a higher multiplier -- but risk losing everything previously won. The stake is re-charged each session. Completing all 7 sessions earns a **Mobi Celebrity** badge.
-
----
-
-## The 7 Toggle Sessions
-
-| Session | Objectives | Non-Objectives | Total Qs | Win Multiplier | Prize (on M500 stake) |
-|---------|-----------|---------------|----------|---------------|----------------------|
-| 1       | 7         | 3             | 10       | 5x (500%)     | M2,500               |
-| 2       | 10        | 4             | 14       | 7x (700%)     | M3,500               |
-| 3       | 12        | 5             | 17       | 8x (800%)     | M4,000               |
-| 4       | 14        | 6             | 20       | 9x (900%)     | M4,500               |
-| 5       | 14        | 6             | 20       | 10x (1000%)   | M5,000               |
-| 6       | 15        | 7             | 22       | 12x (1200%)   | M6,000               |
-| 7       | 20        | 10            | 30       | 15x (1500%)   | M7,500               |
-
-**Rules:**
-- Only 100% correct answers win a session
-- "Toggling" to the next session cancels ALL previous winnings -- only the new session's prize matters
-- Stake is re-charged for every Toggle session
-- If the player fails any session (less than 100%), they lose everything
-- Completing all 7 sessions awards the "Mobi Celebrity" badge
+This plan adds a **Live Scoreboard** system to the Interactive Quiz that displays the top 15 leading players during active games. Viewers (non-players and other players) can interact with contestants through **Comment**, **Share**, **Like**, and **Join Fans** actions -- each of which debits a small token fee from the viewer's wallet. Admin can configure these fan engagement charges.
 
 ---
 
-## Files Created (2)
+## What Gets Built
 
-### 1. `src/data/toggleQuizData.ts`
-New data file containing:
-- `TOGGLE_SESSIONS` array defining all 7 sessions with their objective count, non-objective count, and multiplier
-- Large question pools: 20+ objective questions and 10+ non-objective questions (the engine picks the required count per session)
-- `pickToggleQuestions(sessionIndex)` helper that randomly selects the correct number of objectives and non-objectives for the given session
-- Type exports: `ToggleSession`, `ToggleQuizState`
+### 1. Live Scoreboard Display
+- A real-time leaderboard showing the **top 15 players** currently playing any active Interactive Quiz game
+- Each player entry shows: rank, avatar, name, points earned, current session, win streak, and merchant/season name
+- Visible to both active players and spectators viewing any active game
+- Accessible from the Interactive Quiz Merchant Sheet and Season Sheet via a "Live Scoreboard" button
 
-### 2. `src/components/community/mobigate-quiz/ToggleQuizPlayDialog.tsx`
-New full-screen dialog component (mobile-first) implementing the complete Toggle Quiz flow:
+### 2. Fan Engagement Actions (with Wallet Charges)
+On each player's scoreboard entry, viewers can:
+- **Like** a contestant (heart icon) -- debits a small fee
+- **Comment** on a contestant (opens a mini comment input) -- debits a fee per comment
+- **Share** a contestant (share icon) -- debits a fee
+- **Join Fans** of a contestant (star/follow icon) -- debits a one-time fee per contestant
 
-**Phases:**
-- `"playing"` -- Objective questions with timer (reuses existing timer/answer patterns from StandardQuizContinueSheet)
-- `"non_objective"` -- Written questions with timer (reuses NonObjectiveQuestionCard)
-- `"session_win"` -- 100% correct: shows current prize, "Take Prize and Exit" vs "Toggle to Session X" choice
-- `"session_fail"` -- Less than 100%: shows "You Lost Everything", exit button
-- `"celebrity"` -- All 7 sessions completed: shows Mobi Celebrity badge award, celebration UI
+Each action shows a confirmation toast with the amount charged.
 
-**Key logic:**
-- Tracks `currentSession` (1-7), `currentPrize` (only the latest session's prize, not cumulative)
-- On Toggle: previous winnings are wiped, stake is re-charged, new questions are loaded
-- On session fail: `currentPrize = 0`, game over
-- On session 7 win: award Mobi Celebrity badge, show special celebration
-
-**UI structure (mobile-first):**
-- Sticky gradient header (teal/cyan theme to differentiate from Standard's amber)
-- Session indicator: "Toggle Session 2/7 -- 700% Prize"
-- Timer, question card, answer grid (same patterns as StandardQuizContinueSheet)
-- Session result cards with clear Toggle/Exit choice
-- Warning text: "Toggling will cancel your current M2,500 win. New prize: M3,500"
-- Celebrity badge reveal animation on final completion
+### 3. Admin-Configurable Fan Engagement Fees
+In the Mobigate Admin panel (alongside existing Quiz Settings), a new **"Fan Engagement Charges"** settings card where admin can set/modify:
+- Like Fee (default: M50, range: M10 - M500)
+- Comment Fee (default: M100, range: M20 - M1,000)
+- Share Fee (default: M75, range: M10 - M500)
+- Join Fans Fee (default: M200, range: M50 - M2,000)
 
 ---
 
-## Files Modified (2)
+## Files and Changes
 
-### 3. `src/components/community/mobigate-quiz/MobigateQuizHub.tsx`
-- Add "Toggle Quiz" to the `GAME_MODES` array with:
-  - id: `"toggle"`
-  - title: "Toggle Quiz"
-  - description: "Win 500% or risk it all for up to 1500%! Toggle through 7 sessions -- each one higher stakes. Complete all to earn Mobi Celebrity!"
-  - icon: `Repeat` (from lucide-react)
-  - gradient: `"from-teal-500 to-cyan-600"`
-  - badge: "Toggle Risk"
-  - minStake: 500
-- Add the `ToggleQuizPlayDialog` flow sheet: `<ToggleQuizPlayDialog open={activeFlow === "toggle"} onOpenChange={...} />`
-- Import `ToggleQuizPlayDialog` and `Repeat` icon
+### New Files (3)
 
-### 4. `src/components/mobigate/InteractiveMerchantAdmin.tsx` (minor)
-- No changes needed -- Toggle Quiz is a standalone mode, not merchant-dependent
+**`src/data/liveScoreboardData.ts`**
+- `LiveScoreboardPlayer` interface: id, name, avatar, merchantName, seasonName, points, currentSession, winStreak, totalCorrect, totalPlayed, fanCount, likes, comments, shares, isOnline, lastActivityTime
+- `FanEngagementSettings` interface with fees for like, comment, share, joinFans (each with value, min, max)
+- Default `fanEngagementSettings` object with initial values
+- Getter/setter functions: `getFanLikeFee()`, `setFanLikeFee()`, etc.
+- `mockLiveScoreboardPlayers`: 15 mock players with realistic data for display
+- `FanAction` type: `"like" | "comment" | "share" | "join_fans"`
+
+**`src/components/community/mobigate-quiz/LiveScoreboardDrawer.tsx`**
+- Mobile-first Drawer component showing the live scoreboard
+- Sticky header with "Live Scoreboard" title, pulsing red "LIVE" badge, and player count
+- ScrollArea listing top 15 players as cards, each showing:
+  - Rank badge (#1 gold, #2 silver, #3 bronze, rest neutral)
+  - Avatar, player name, merchant/season
+  - Points, session number, win streak
+  - Fan engagement action bar: Like (heart), Comment (message), Share (share), Join Fans (star)
+- Each action button shows the fee amount in tiny text below the icon
+- On tap: confirmation toast showing "Liked PlayerName -- M50 charged" (or similar)
+- Comment action opens a small inline input field for typing a comment before submitting
+- "Join Fans" toggles to "Joined" state after first tap (one-time charge per player)
+- Fan counts displayed next to each player
+
+**`src/components/mobigate/FanEngagementSettingsCard.tsx`**
+- Admin settings card (same pattern as QuizSettingsCard) with sliders for:
+  - Like Fee (M10 - M500, step M10)
+  - Comment Fee (M20 - M1,000, step M10)
+  - Share Fee (M10 - M500, step M10)
+  - Join Fans Fee (M50 - M2,000, step M50)
+- Preview section showing current fee structure
+- Save button that updates `fanEngagementSettings`
+
+### Modified Files (3)
+
+**`src/components/community/mobigate-quiz/InteractiveQuizMerchantSheet.tsx`**
+- Add a "Live Scoreboard" button at the top of the merchant list (below the header)
+- Pulsing red dot + "LIVE" badge to indicate active games
+- Tapping opens `LiveScoreboardDrawer`
+- Import and render `LiveScoreboardDrawer` with open/close state
+
+**`src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx`**
+- Add a smaller "View Live Scoreboard" link/button in the season detail view
+- Opens the same `LiveScoreboardDrawer`
+
+**`src/components/mobigate/QuizAdminDrawer.tsx`** (or the page that renders QuizSettingsCard)
+- Import and render `FanEngagementSettingsCard` alongside existing admin settings
+- Add it in the Interactive Quiz admin section or general quiz settings area
 
 ---
 
 ## Technical Details
 
-### Session Configuration
+### Scoreboard Player Interface
 
-```typescript
-export const TOGGLE_SESSIONS = [
-  { session: 1, objectives: 7,  nonObjectives: 3,  total: 10, multiplier: 5,  label: "500%" },
-  { session: 2, objectives: 10, nonObjectives: 4,  total: 14, multiplier: 7,  label: "700%" },
-  { session: 3, objectives: 12, nonObjectives: 5,  total: 17, multiplier: 8,  label: "800%" },
-  { session: 4, objectives: 14, nonObjectives: 6,  total: 20, multiplier: 9,  label: "900%" },
-  { session: 5, objectives: 14, nonObjectives: 6,  total: 20, multiplier: 10, label: "1000%" },
-  { session: 6, objectives: 15, nonObjectives: 7,  total: 22, multiplier: 12, label: "1200%" },
-  { session: 7, objectives: 20, nonObjectives: 10, total: 30, multiplier: 15, label: "1500%" },
-];
-```
-
-### Toggle Decision Logic
-
-```typescript
-// After 100% correct session:
-const currentPrize = stake * TOGGLE_SESSIONS[currentSession].multiplier;
-// If player toggles:
-previousWinnings = 0; // cancelled
-stakeCharged += stake; // re-charged
-// Load new questions for next session
-```
-
-### Question Selection Per Session
-
-```typescript
-function pickToggleQuestions(sessionIndex: number) {
-  const config = TOGGLE_SESSIONS[sessionIndex];
-  const shuffledObj = [...allObjectiveQuestions].sort(() => Math.random() - 0.5);
-  const shuffledNonObj = [...allNonObjectiveQuestions].sort(() => Math.random() - 0.5);
-  return {
-    objectives: shuffledObj.slice(0, config.objectives),
-    nonObjectives: shuffledNonObj.slice(0, config.nonObjectives),
-  };
+```text
+LiveScoreboardPlayer {
+  id: string
+  name: string
+  avatar: string
+  merchantName: string
+  seasonName: string
+  points: number
+  currentSession: number
+  winStreak: number
+  totalCorrect: number
+  totalPlayed: number
+  fanCount: number
+  likes: number
+  comments: number
+  shares: number
+  isOnline: boolean
+  lastActivityTime: string
 }
 ```
 
-### Mobi Celebrity Badge Logic
+### Fan Engagement Fee Structure
 
-```typescript
-if (currentSession === 6 && isSessionPerfect) {
-  // Session 7 (index 6) completed with 100%
-  awardMobiCelebrityBadge = true;
-  // Show celebration UI with badge
-}
+```text
+Like:       M50   (range M10 - M500)
+Comment:    M100  (range M20 - M1,000)
+Share:      M75   (range M10 - M500)
+Join Fans:  M200  (range M50 - M2,000)
 ```
+
+### Fan Action Flow
+
+```text
+Viewer taps "Like" on Player X
+  --> Show fee confirmation in toast: "Like PlayerX? M50 will be charged"
+  --> Debit wallet (mock: toast confirmation)
+  --> Increment like count on player card
+  --> Toast: "Liked PlayerX! M50 charged from your wallet"
+```
+
+### Scoreboard Ranking Logic
+
+Players are sorted by `points` (descending), then by `winStreak` (descending) as tiebreaker. Only top 15 are displayed.
 
 ### Files Summary
-- **Created**: `src/data/toggleQuizData.ts`, `src/components/community/mobigate-quiz/ToggleQuizPlayDialog.tsx`
-- **Modified**: `src/components/community/mobigate-quiz/MobigateQuizHub.tsx`
-
+- **Created**: `src/data/liveScoreboardData.ts`, `src/components/community/mobigate-quiz/LiveScoreboardDrawer.tsx`, `src/components/mobigate/FanEngagementSettingsCard.tsx`
+- **Modified**: `src/components/community/mobigate-quiz/InteractiveQuizMerchantSheet.tsx`, `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx`, `src/components/mobigate/QuizAdminDrawer.tsx`
