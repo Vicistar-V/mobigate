@@ -60,11 +60,11 @@ export interface PlatformQuizSettings {
 
 export const platformQuizSettings: PlatformQuizSettings = {
   objectiveTimePerQuestion: 10,
-  objectiveTimeMin: 5,
-  objectiveTimeMax: 30,
+  objectiveTimeMin: 6,
+  objectiveTimeMax: 10,
   nonObjectiveTimePerQuestion: 15,
-  nonObjectiveTimeMin: 10,
-  nonObjectiveTimeMax: 60,
+  nonObjectiveTimeMin: 6,
+  nonObjectiveTimeMax: 15,
   partialWinPercentage: 20,
   partialWinMin: 10,
   partialWinMax: 50,
