@@ -161,6 +161,10 @@ const menuItems: MenuItem[] = [{
         { title: "Individual Merchant Account", url: "#" },
         { title: "Corporate Merchant Account", url: "#" }
       ]
+    },
+    {
+      title: "Manage Merchant Quiz",
+      url: "/mobigate-admin/quiz/interactive/merchants",
     }
   ]
 }, {
