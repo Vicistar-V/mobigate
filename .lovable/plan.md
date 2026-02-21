@@ -1,159 +1,189 @@
+# Interactive Quiz Game-Over Buttons and Session Rollover Flow
 
-# Interactive Quiz Merchant Admin -- Complete Overhaul
+## Overview
 
-## Summary
-
-Rebuild the Interactive Quiz Merchant Admin system to reflect the full Game Show specification. Merchants are approved (not added), and each merchant configures their own quiz platform with custom settings, selection processes, question databases, billing, and seasons.
+Redesign the game-over screen in the Interactive Quiz Play Dialog to show different action buttons based on whether the player scored 100% or not. Add a new "Interactive Session" rollover flow where players compete across multiple sessions to earn points and advance through selection/elimination processes.
 
 ---
 
-## 1. Expanded Data Model
+## Changes
 
-**File: `src/data/mobigateInteractiveQuizData.ts`** -- Complete rewrite
+### 1. Modify Game-Over Result Screen Buttons
 
-### QuizMerchant (enhanced)
-Add merchant-level quiz configuration fields:
-- `applicationStatus`: "pending" | "approved" | "suspended"
-- `winPercentageThreshold`: number (25-50%) -- what players earn on correct answers
-- `fairAnswerPercentage`: number (fixed 20%) -- AA match credit
-- `bonusGamesAfter`: number (default 50) -- after how many games to grant bonus
-- `bonusGamesCount`: [min, max] (5-10) -- number of bonus games granted
-- `bonusDiscountRange`: [min, max] (25-50%) -- discount on bonus game costs
-- `qualifyingPoints`: number (default 15) -- points needed to enter Game Show
-- `questionsPerPack`: number (default 15)
-- `objectivePerPack`: number (default 10)
-- `nonObjectivePerPack`: number (default 5)
-- `objectiveOptions`: number (8-10) -- min 8, max 10 selectable answers
-- `alternativeAnswersRange`: [min, max] (2-5) -- AA count for non-objective
-- `costPerQuestion`: number -- what player pays per question
+**File:** `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx`
 
-### QuizSeason (enhanced)
-Add:
-- `duration`: number (months: 4, 6, or 12)
-- `selectionProcesses`: SelectionProcess[] -- the elimination funnel
-- `tvShowRounds`: TVShowRound[] -- post-selection TV rounds
+Replace the single "Take Cash Prize / Exit" button in the `phase === "result"` footer with conditional button sets:
 
-### New types
+**If player scored 100% (all 15/15 correct):**
+
+- "Rollover Winning to Interactive Session" (amber/orange gradient) -- enters the Interactive Session flow
+- "Redeem Prize and Exit" (green gradient) -- opens the existing QuizPrizeRedemptionSheet then closes
+- "Redeem Prize and Play Again" (blue outline) -- opens redemption, then resets the quiz for a new game
+
+**If player did NOT score 100%:**
+
+- "Play Again" (blue gradient) -- resets all state and starts a fresh quiz
+- "Exit Now" (outline/secondary) -- closes the dialog
+
+The result card content also changes:
+
+- 100%: Show the congratulations card with prize amount, plus an info card explaining what "Rollover" means (you lose current winnings but enter the Interactive Session)
+- Below 100%: Show "Better luck next time" with score breakdown only
+
+### 2. New Component: InteractiveSessionDialog
+
+**File:** `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` (new)
+
+A full mobile-first dialog that manages the Interactive Session flow after a player rolls over. This is the "Game Show" proper.
+
+**State tracked:**
+
+- `sessionPoints`: number -- earned 1 point per 100% session win
+- `sessionsPlayed`: number
+- `sessionsWon`: number
+- `sessionsLost`: number
+- `currentWinnings`: number -- dissolves when continuing to next session
+- `sessionPhase`: "lobby" | "playing" | "session_result"
+- `isEvicted`: boolean
+- `isQualified`: boolean -- reached merchant's qualifying points threshold
+
+**Lobby screen shows:**
+
+- Player's current points (e.g., "7/15 Points")
+- Sessions played, won, lost
+- Current winnings (with warning: "Continuing dissolves winnings")
+- Session fee (from merchant's selection process)
+- Three buttons:
+  - "Play Next Session" -- starts a new 15-question quiz pack
+  - "Quit and Take Winnings" -- exits with current winnings (opens redemption)
+  - "Quit Without Winnings" -- exits cleanly
+
+**Session result screen (after each 15-question pack):**
+
+- If 100%: "+1 Point earned!" celebration, updated points tally
+- If not 100%: "No point earned" -- still can continue
+- Buttons: "Continue to Next Session" (dissolves winnings) or "Quit"
+
+**Eviction rules (shown as info cards):**
+
+- 50+ losses = automatic eviction
+- When merchant's entry threshold is reached, bottom 90% of players by points are evicted (top 10% qualify for the Show proper)
+
+**Playing phase:** Reuses the same objective + non-objective quiz flow already built in InteractiveQuizPlayDialog (extracted into a shared sub-component or duplicated with same logic)
+
+### 3. Extract Quiz Play Engine into Shared Component
+
+**File:** `src/components/community/mobigate-quiz/QuizPlayEngine.tsx` (new)
+
+Extract the core quiz gameplay (objective questions -> non-objective questions -> result) from InteractiveQuizPlayDialog into a reusable component so both the initial quiz and session replays can use it.
+
+**Props:**
+
+- `objectiveQuestions`: array
+- `nonObjectiveQuestions`: array
+- `onComplete`: (result: { totalCorrect: number, percentage: number, objectiveCorrect: number, nonObjectiveCorrect: number }) => void
+- `seasonName`: string
+- `headerColor`: string (gradient class)
+
+This component handles:
+
+- Timer logic for both objective and non-objective phases
+- Answer selection and confirmation
+- Progress bar
+- Calls `onComplete` when all 15 questions are done
+
+### 4. Wire the Rollover Flow
+
+**File:** `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` (modify)
+
+- Add state: `showInteractiveSession` (boolean)
+- When "Rollover Winning to Interactive Session" is tapped:
+  - Close the current dialog
+  - Open InteractiveSessionDialog
+- When "Redeem Prize and Play Again" is tapped:
+  - Open redemption sheet
+  - On redemption close, reset quiz state and restart
+- Add `handlePlayAgain()` function that resets all state variables and restarts from objective phase
+
+### 5. Update Data Constants
+
+**File:** `src/data/mobigateInteractiveQuizData.ts` (minor addition)
+
+Add constants:
+
 ```
-SelectionProcess {
-  round: number
-  entriesSelected: number
-  entryFee: number
-}
-
-TVShowRound {
-  round: number
-  entriesSelected: number
-  entryFee: number
-  label: string (e.g. "Semi-Final", "Grand Finale")
-}
-
-MerchantQuestion {
-  id, question, options[], correctAnswerIndex,
-  category, difficulty, type: "objective" | "non_objective" | "bonus_objective",
-  alternativeAnswers?: string[] (for non-objective),
-  merchantId, timeLimit, costPerQuestion
-}
+INTERACTIVE_MAX_LOSSES_BEFORE_EVICTION = 50
+INTERACTIVE_QUALIFYING_TOP_PERCENT = 10  // top 10% qualify
 ```
 
-### Mock data
-- 5 merchants with varied config values and "approved" status (1 pending, 1 suspended for variety)
-- 2 seasons with full selection process arrays
-- 3 separate question arrays per merchant concept: Main Objective, Main Non-Objective, Bonus Objective
-
 ---
 
-## 2. Merchant Admin Component Overhaul
+## Technical Details
 
-**File: `src/components/mobigate/InteractiveMerchantAdmin.tsx`** -- Major rewrite
+### Button layout in result footer (mobile-optimized)
 
-### Merchant List View (replaces current)
-- Remove "Add New Merchant" button entirely
-- Show merchant cards with `applicationStatus` badge (Approved/Pending/Suspended)
-- Admin can toggle status between Approved/Suspended (not add)
-- Stats row: Total Merchants, Approved, Active Seasons
-- Each card shows: name, category, verified badge, seasons count, status badge, tap to drill in
+For 100% score -- 3 vertically stacked buttons:
 
-### Merchant Detail View (replaces current)
-When tapping a merchant, show a tabbed/sectioned view with:
+```text
+div (space-y-2 p-4)
+  Button "Rollover Winning to Interactive Session"
+    (w-full h-12, amber/orange gradient, bold)
+  Button "Redeem Prize & Exit"
+    (w-full h-11, green gradient)
+  Button "Redeem Prize & Play Again"
+    (w-full h-11, outline variant, blue text)
+```
 
-**Section A: Platform Settings** (new Drawer)
-- Quiz Pack Config: Questions per pack, Objective count, Non-Objective count, Objective options (8-10)
-- Billing: Cost per question
-- Win Thresholds: Win percentage (25-50%), Fair Answer % (20%)
-- Alternative Answers: AA count range (2-5)
-- Qualifying Points: Min points to enter Game Show (default 15)
-- Bonus Config: Games before bonus (50), bonus games count (5-10), discount range (25-50%)
+For below 100% -- 2 buttons side by side:
 
-**Section B: Seasons** (existing, enhanced)
-- Enhanced season cards showing duration, processes count
-- "Add Season" drawer with:
-  - Season Name, Type (Short/Medium/Complete)
-  - Duration auto-set: Short=4mo, Medium=6mo, Complete=12mo
-  - Process count auto-set: Short=3, Medium=5, Complete=7
-  - Entry fee for initial registration
+```text
+div (flex gap-3 p-4)
+  Button "Play Again" (flex-1 h-12, blue)
+  Button "Exit Now" (flex-1 h-12, outline)
+```
 
-**Section C: Selection Process Builder** (new, per-season)
-- Tap a season to see/configure its selection funnel
-- Visual step-by-step card list showing each elimination round
-- Each round: Round number, entries selected, entry fee
-- "Add Round" and "Remove Round" controls
-- TV Show rounds section below (with labels like "Semi-Final", "Grand Finale")
-- Final 3 entries auto-labeled as 1st/2nd/3rd Prize Winners
+### InteractiveSessionDialog structure
 
-**Section D: Question Banks** (new)
-- 3 tabs: "Main Objective", "Main Non-Objective", "Bonus Objective"
-- Question count per bank shown as badge
-- Tap to see list, with Add Question drawer
-- Non-Objective question form includes "Alternative Answers" field (2-5 entries)
+```text
+Dialog (max-h-[95vh], p-0)
+  Header (sticky, gradient bg)
+    Season name, Points tally, Session count
+  Body (overflow-y-auto touch-auto)
+    if lobby:
+      Points progress card
+      Stats row (played/won/lost)
+      Current winnings card (with dissolve warning)
+      Session fee card
+      Eviction rules info
+    if playing:
+      QuizPlayEngine component
+    if session_result:
+      Result card (+1 point or no point)
+      Updated points
+  Footer (sticky)
+    Action buttons per phase
+```
 
----
+### QuizPlayEngine component
 
-## 3. New Components
+Extracts lines 84-255 from InteractiveQuizPlayDialog into a self-contained component. The parent dialog only needs to handle:
 
-### `MerchantPlatformSettingsDrawer.tsx`
-Mobile drawer (92vh) for editing the merchant's quiz configuration:
-- All the settings from Section A above
-- Numeric inputs with proper mobile patterns (touch-manipulation, inputMode)
-- Sliders for percentage ranges
+- Rendering the engine
+- Receiving the onComplete callback
+- Managing what happens after completion (buttons, navigation)
 
-### `MerchantSelectionProcessDrawer.tsx`
-Mobile drawer for building/viewing the elimination funnel for a season:
-- Step cards showing the funnel visually
-- Add/remove rounds
-- TV Show rounds with customizable labels
-- Grand Finale section showing 1st/2nd/3rd winners
+### Files Created
 
-### `MerchantQuestionBankDrawer.tsx`
-Mobile drawer for managing a merchant's 3 question databases:
-- Tab navigation: Main Objective | Main Non-Objective | Bonus Objective
-- Question list with status badges
-- Add Question form (adapts per question type)
-- Non-Objective form has extra "Alternative Answers" multi-input (2-5 entries)
+- `src/components/community/mobigate-quiz/QuizPlayEngine.tsx`
+- `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx`
 
----
+### Files Modified
 
-## 4. Files to Create
-- `src/components/mobigate/MerchantPlatformSettingsDrawer.tsx`
-- `src/components/mobigate/MerchantSelectionProcessDrawer.tsx`
-- `src/components/mobigate/MerchantQuestionBankDrawer.tsx`
+- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- new result buttons, play again logic, rollover trigger
+- `src/data/mobigateInteractiveQuizData.ts` -- add eviction/qualification constants
 
-## 5. Files to Modify
-- `src/data/mobigateInteractiveQuizData.ts` -- Expand types and mock data
-- `src/components/mobigate/InteractiveMerchantAdmin.tsx` -- Complete rewrite of merchant list and detail views
-- `src/pages/admin/quiz/InteractiveMerchantsPage.tsx` -- Minor: update heading text
+&nbsp;
 
-## 6. Files NOT Changed
-- `src/components/community/mobigate-quiz/InteractiveQuizMerchantSheet.tsx` -- Player-facing, not admin
-- `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- Player-facing gameplay
-- `src/components/mobigate/QuizAdminDrawer.tsx` -- Already links to merchants page correctly
-- All other quiz type admin pages -- Unaffected
+Forget desktop entirely focus solely and completely on mobile  ln this design
 
----
-
-## Mobile Patterns Applied Throughout
-- All drawers: max-h-[92vh], p-0, overflow-y-auto touch-auto overscroll-contain
-- All inputs: h-11 or h-12, touch-manipulation, onPointerDown stopPropagation
-- Numeric inputs: type="text" with inputMode="numeric" and regex filtering
-- Cards: active:scale-[0.98] for tactile feedback
-- No ScrollArea -- native overflow-y-auto only
+Implement the plan completely take your time and carefully implement every single thing and integrate all completely no need to rush and report to me just take your loooong time and make everything perfectly
