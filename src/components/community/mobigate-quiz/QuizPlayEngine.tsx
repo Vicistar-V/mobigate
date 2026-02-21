@@ -4,10 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { MOBIGATE_ANSWER_LABELS } from "@/data/mobigateQuizData";
+import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
 import { cn } from "@/lib/utils";
 import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
-
-const NON_OBJECTIVE_TIME_PER_QUESTION = 15;
 
 export interface QuizPlayResult {
   totalCorrect: number;
@@ -48,13 +47,13 @@ export function QuizPlayEngine({
 
   const [phase, setPhase] = useState<Phase>("objective");
   const [currentQ, setCurrentQ] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(15);
+  const [timeRemaining, setTimeRemaining] = useState(getObjectiveTimePerQuestion());
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [objectiveCorrect, setObjectiveCorrect] = useState(0);
 
   const [currentNonObjQ, setCurrentNonObjQ] = useState(0);
-  const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(NON_OBJECTIVE_TIME_PER_QUESTION);
+  const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(getNonObjectiveTimePerQuestion());
   const [nonObjShowResult, setNonObjShowResult] = useState(false);
   const [nonObjLocked, setNonObjLocked] = useState(false);
   const [nonObjectiveAnswers, setNonObjectiveAnswers] = useState<string[]>(
@@ -102,7 +101,7 @@ export function QuizPlayEngine({
       setCurrentQ((p) => p + 1);
       setSelectedAnswer(null);
       setShowResult(false);
-      setTimeRemaining(15);
+      setTimeRemaining(getObjectiveTimePerQuestion());
     }
   };
 
@@ -124,10 +123,9 @@ export function QuizPlayEngine({
 
       setTimeout(() => {
         if (currentNonObjQ >= nonObjectiveQuestions.length - 1) {
-          // Use functional refs to get latest values
           setObjectiveCorrect((objC) => {
             setNonObjectiveCorrect((nonObjC) => {
-              const finalNonObj = isCorrect ? nonObjC : nonObjC; // already updated
+              const finalNonObj = nonObjC;
               const total = objC + finalNonObj;
               const pct = Math.round((total / totalQuestions) * 100);
               onComplete({
@@ -142,7 +140,7 @@ export function QuizPlayEngine({
           });
         } else {
           setCurrentNonObjQ((p) => p + 1);
-          setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
+          setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
           setNonObjShowResult(false);
           setNonObjLocked(false);
         }

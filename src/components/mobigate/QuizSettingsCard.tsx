@@ -12,11 +12,13 @@ import {
   AlertCircle,
   CheckCircle2,
   Eye,
+  PenLine,
 } from "lucide-react";
 import {
   platformQuizSettings,
   platformQuestionViewSettings,
-  setDefaultTimePerQuestion,
+  setObjectiveTimePerQuestion,
+  setNonObjectiveTimePerQuestion,
   setPartialWinPercentage,
   setQuestionViewFee,
 } from "@/data/platformSettingsData";
@@ -24,13 +26,15 @@ import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 
 export function QuizSettingsCard() {
   const { toast } = useToast();
-  const [timePerQuestion, setTimePerQuestion] = useState(platformQuizSettings.defaultTimePerQuestion);
+  const [objTime, setObjTime] = useState(platformQuizSettings.objectiveTimePerQuestion);
+  const [nonObjTime, setNonObjTime] = useState(platformQuizSettings.nonObjectiveTimePerQuestion);
   const [winPercentage, setWinPercentage] = useState(platformQuizSettings.partialWinPercentage);
   const [viewFee, setViewFee] = useState(platformQuestionViewSettings.questionViewFee);
   const [isSaving, setIsSaving] = useState(false);
 
   const hasChanges =
-    timePerQuestion !== platformQuizSettings.defaultTimePerQuestion ||
+    objTime !== platformQuizSettings.objectiveTimePerQuestion ||
+    nonObjTime !== platformQuizSettings.nonObjectiveTimePerQuestion ||
     winPercentage !== platformQuizSettings.partialWinPercentage ||
     viewFee !== platformQuestionViewSettings.questionViewFee;
 
@@ -38,13 +42,14 @@ export function QuizSettingsCard() {
     setIsSaving(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    setDefaultTimePerQuestion(timePerQuestion);
+    setObjectiveTimePerQuestion(objTime);
+    setNonObjectiveTimePerQuestion(nonObjTime);
     setPartialWinPercentage(winPercentage);
     setQuestionViewFee(viewFee);
 
     toast({
       title: "Quiz Settings Updated",
-      description: `Time: ${timePerQuestion}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}. Changes apply platform-wide.`,
+      description: `Objective: ${objTime}s, Non-Objective: ${nonObjTime}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}. Changes apply platform-wide.`,
     });
     setIsSaving(false);
   };
@@ -73,36 +78,72 @@ export function QuizSettingsCard() {
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {/* Time Per Question */}
+        {/* Objective Time Per Question */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Timer className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Time Per Question</span>
+              <span className="text-sm font-medium">Objective Time</span>
             </div>
             <Badge variant="secondary" className="text-sm font-bold px-3 py-1">
-              {timePerQuestion}s
+              {objTime}s
             </Badge>
           </div>
 
           <div className="text-center p-4 bg-muted/50 rounded-lg">
-            <p className="text-3xl font-bold text-amber-600">{timePerQuestion}</p>
-            <p className="text-sm text-muted-foreground">seconds per question</p>
+            <p className="text-3xl font-bold text-amber-600">{objTime}</p>
+            <p className="text-sm text-muted-foreground">seconds per objective question</p>
           </div>
 
           <div className="px-1">
             <Slider
-              value={[timePerQuestion]}
-              onValueChange={(values) => setTimePerQuestion(values[0])}
-              min={platformQuizSettings.timePerQuestionMin}
-              max={platformQuizSettings.timePerQuestionMax}
+              value={[objTime]}
+              onValueChange={(values) => setObjTime(values[0])}
+              min={platformQuizSettings.objectiveTimeMin}
+              max={platformQuizSettings.objectiveTimeMax}
+              step={1}
+              className="w-full touch-manipulation"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{platformQuizSettings.objectiveTimeMin}s</span>
+              <span className="font-medium text-foreground">{objTime}s</span>
+              <span>{platformQuizSettings.objectiveTimeMax}s</span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Non-Objective Time Per Question */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <PenLine className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Non-Objective Time</span>
+            </div>
+            <Badge variant="secondary" className="text-sm font-bold px-3 py-1">
+              {nonObjTime}s
+            </Badge>
+          </div>
+
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <p className="text-3xl font-bold text-amber-600">{nonObjTime}</p>
+            <p className="text-sm text-muted-foreground">seconds per written question</p>
+          </div>
+
+          <div className="px-1">
+            <Slider
+              value={[nonObjTime]}
+              onValueChange={(values) => setNonObjTime(values[0])}
+              min={platformQuizSettings.nonObjectiveTimeMin}
+              max={platformQuizSettings.nonObjectiveTimeMax}
               step={5}
               className="w-full touch-manipulation"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>{platformQuizSettings.timePerQuestionMin}s</span>
-              <span className="font-medium text-foreground">{timePerQuestion}s</span>
-              <span>{platformQuizSettings.timePerQuestionMax}s</span>
+              <span>{platformQuizSettings.nonObjectiveTimeMin}s</span>
+              <span className="font-medium text-foreground">{nonObjTime}s</span>
+              <span>{platformQuizSettings.nonObjectiveTimeMax}s</span>
             </div>
           </div>
         </div>
@@ -187,7 +228,6 @@ export function QuizSettingsCard() {
         </div>
 
         <Separator />
-
 
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground">Current Winning Structure</p>

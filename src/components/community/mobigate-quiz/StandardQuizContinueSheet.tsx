@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, Clock, Trophy, CheckCircle, XCircle, Zap, ArrowRight, LogOut } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { MOBIGATE_ANSWER_LABELS } from "@/data/mobigateQuizData";
+import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
 import { QuizPrizeRedemptionSheet } from "./QuizPrizeRedemptionSheet";
 
-// Mock questions
+// 10 objective questions
 const standardQuestions = [
   { question: "What is the capital of Nigeria?", options: ["Lagos", "Kano", "Abuja", "Port Harcourt", "Ibadan", "Benin City", "Kaduna", "Jos"], correctAnswer: 2 },
   { question: "Which river is the longest in Africa?", options: ["Congo", "Niger", "Nile", "Zambezi", "Orange", "Limpopo", "Volta", "Senegal"], correctAnswer: 2 },
@@ -25,6 +27,15 @@ const standardQuestions = [
   { question: "What year did Nigeria become a republic?", options: ["1960", "1962", "1963", "1966", "1970", "1975", "1979", "1999"], correctAnswer: 2 },
 ];
 
+// 5 non-objective questions
+const standardNonObjectiveQuestions = [
+  { question: "Name the first President of Nigeria", acceptedAnswers: ["nnamdi azikiwe", "azikiwe"] },
+  { question: "What does CPU stand for?", acceptedAnswers: ["central processing unit"] },
+  { question: "Name the largest lake in Africa", acceptedAnswers: ["victoria", "lake victoria"] },
+  { question: "What is the square root of 144?", acceptedAnswers: ["12"] },
+  { question: "Name the currency used in South Africa", acceptedAnswers: ["rand", "south african rand"] },
+];
+
 interface StandardQuizContinueSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,15 +45,27 @@ interface StandardQuizContinueSheetProps {
   baseWinning: number;
 }
 
-type GamePhase = "playing" | "session_result" | "continue_choice" | "game_over";
+type GamePhase = "playing" | "non_objective" | "session_result" | "continue_choice" | "game_over";
 
 export function StandardQuizContinueSheet({ open, onOpenChange, category, levelName, stake, baseWinning }: StandardQuizContinueSheetProps) {
   const { toast } = useToast();
+  const totalQuestions = standardQuestions.length + standardNonObjectiveQuestions.length; // 15
+
+  // Objective state
   const [currentQ, setCurrentQ] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(15);
+  const [timeRemaining, setTimeRemaining] = useState(getObjectiveTimePerQuestion());
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [objectiveCorrect, setObjectiveCorrect] = useState(0);
+
+  // Non-objective state
+  const [currentNonObjQ, setCurrentNonObjQ] = useState(0);
+  const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(getNonObjectiveTimePerQuestion());
+  const [nonObjShowResult, setNonObjShowResult] = useState(false);
+  const [nonObjLocked, setNonObjLocked] = useState(false);
+  const [nonObjectiveAnswers, setNonObjectiveAnswers] = useState<string[]>(Array(5).fill(""));
+  const [nonObjectiveCorrect, setNonObjectiveCorrect] = useState(0);
+
   const [phase, setPhase] = useState<GamePhase>("playing");
   const [session, setSession] = useState(1);
   const [totalPrize, setTotalPrize] = useState(0);
@@ -50,75 +73,130 @@ export function StandardQuizContinueSheet({ open, onOpenChange, category, levelN
 
   const currentWinning = session === 1 ? baseWinning : baseWinning * Math.pow(2, session - 1);
   const question = standardQuestions[currentQ];
+  const totalCorrect = objectiveCorrect + nonObjectiveCorrect;
 
   useEffect(() => {
     if (!open) {
       setCurrentQ(0);
-      setTimeRemaining(15);
+      setTimeRemaining(getObjectiveTimePerQuestion());
       setSelectedAnswer(null);
       setShowResult(false);
-      setCorrectCount(0);
+      setObjectiveCorrect(0);
+      setCurrentNonObjQ(0);
+      setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
+      setNonObjShowResult(false);
+      setNonObjLocked(false);
+      setNonObjectiveAnswers(Array(5).fill(""));
+      setNonObjectiveCorrect(0);
       setPhase("playing");
       setSession(1);
       setTotalPrize(0);
     }
   }, [open]);
 
+  // Objective timer
   useEffect(() => {
     if (phase !== "playing" || showResult || !open) return;
     if (timeRemaining <= 0) {
       setShowResult(true);
-      setTimeout(() => nextQuestion(false), 1500);
+      setTimeout(() => nextObjective(false), 1500);
       return;
     }
     const timer = setInterval(() => setTimeRemaining(p => p - 1), 1000);
     return () => clearInterval(timer);
   }, [timeRemaining, phase, showResult, open]);
 
+  // Non-objective timer
+  useEffect(() => {
+    if (phase !== "non_objective" || nonObjShowResult || nonObjLocked || !open) return;
+    if (nonObjTimeRemaining <= 0) {
+      lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "");
+      return;
+    }
+    const timer = setInterval(() => setNonObjTimeRemaining(p => p - 1), 1000);
+    return () => clearInterval(timer);
+  }, [nonObjTimeRemaining, phase, nonObjShowResult, nonObjLocked, open, currentNonObjQ]);
+
   const handleConfirm = () => {
     if (selectedAnswer === null) return;
     const isCorrect = selectedAnswer === question.correctAnswer;
-    if (isCorrect) setCorrectCount(p => p + 1);
+    if (isCorrect) setObjectiveCorrect(p => p + 1);
     setShowResult(true);
-    setTimeout(() => nextQuestion(isCorrect), 1500);
+    setTimeout(() => nextObjective(isCorrect), 1500);
   };
 
-  const nextQuestion = (lastCorrect: boolean) => {
-    if (currentQ >= 9) {
-      // Session complete
-      const finalCorrect = correctCount + (lastCorrect ? 1 : 0);
-      if (finalCorrect === 10) {
-        setTotalPrize(p => p + currentWinning);
-        if (session >= 10) {
-          setPhase("game_over");
-        } else {
-          setPhase("continue_choice");
-        }
-      } else if (finalCorrect >= 8) {
-        // Partial - 20% win
-        setTotalPrize(p => p + Math.round(currentWinning * 0.2));
-        setPhase("session_result");
-      } else {
-        // Lost everything
-        setTotalPrize(0);
-        setPhase("game_over");
-      }
+  const nextObjective = (lastCorrect: boolean) => {
+    if (currentQ >= standardQuestions.length - 1) {
+      // Move to non-objective phase
+      setPhase("non_objective");
     } else {
       setCurrentQ(p => p + 1);
       setSelectedAnswer(null);
       setShowResult(false);
-      setTimeRemaining(15);
+      setTimeRemaining(getObjectiveTimePerQuestion());
     }
+  };
+
+  const lockNonObjAnswer = useCallback((answer: string) => {
+    setNonObjLocked(true);
+    setNonObjectiveAnswers(prev => { const updated = [...prev]; updated[currentNonObjQ] = answer; return updated; });
+    setNonObjShowResult(true);
+    const q = standardNonObjectiveQuestions[currentNonObjQ];
+    const isCorrect = q.acceptedAnswers.some(a => answer.toLowerCase().includes(a.toLowerCase()));
+    if (isCorrect) setNonObjectiveCorrect(p => p + 1);
+    setTimeout(() => {
+      if (currentNonObjQ >= standardNonObjectiveQuestions.length - 1) {
+        // Session complete - evaluate
+        evaluateSession();
+      } else {
+        setCurrentNonObjQ(p => p + 1);
+        setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
+        setNonObjShowResult(false);
+        setNonObjLocked(false);
+      }
+    }, 1500);
+  }, [currentNonObjQ, objectiveCorrect, nonObjectiveCorrect, currentWinning, session, totalPrize]);
+
+  const evaluateSession = () => {
+    // We need the latest values - use a timeout to let state settle
+    setObjectiveCorrect(objC => {
+      setNonObjectiveCorrect(nonObjC => {
+        const finalTotal = objC + nonObjC;
+        if (finalTotal === totalQuestions) {
+          setTotalPrize(p => p + currentWinning);
+          if (session >= 10) {
+            setPhase("game_over");
+          } else {
+            setPhase("continue_choice");
+          }
+        } else if (finalTotal >= Math.round(totalQuestions * 0.8)) {
+          // Partial - 20% win (80%+ correct)
+          setTotalPrize(p => p + Math.round(currentWinning * 0.2));
+          setPhase("session_result");
+        } else {
+          setTotalPrize(0);
+          setPhase("game_over");
+        }
+        return nonObjC;
+      });
+      return objC;
+    });
   };
 
   const handleContinue = () => {
     toast({ title: "Next Session!", description: `${formatMobiAmount(stake)} deducted for session ${session + 1}` });
     setSession(p => p + 1);
     setCurrentQ(0);
-    setCorrectCount(0);
+    setObjectiveCorrect(0);
+    setCurrentNonObjQ(0);
+    setNonObjectiveCorrect(0);
+    setNonObjectiveAnswers(Array(5).fill(""));
     setSelectedAnswer(null);
     setShowResult(false);
-    setTimeRemaining(15);
+    setTimeRemaining(getObjectiveTimePerQuestion());
+    setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
+    setNonObjShowResult(false);
+    setNonObjLocked(false);
     setPhase("playing");
   };
 
@@ -130,6 +208,17 @@ export function StandardQuizContinueSheet({ open, onOpenChange, category, levelN
     }
   };
 
+  const currentNonObjQuestion = standardNonObjectiveQuestions[currentNonObjQ];
+  const currentNonObjIsCorrect = currentNonObjQuestion?.acceptedAnswers.some(
+    a => (nonObjectiveAnswers[currentNonObjQ] || "").toLowerCase().includes(a.toLowerCase())
+  );
+
+  const progressValue = phase === "playing"
+    ? ((currentQ + (showResult ? 1 : 0)) / totalQuestions) * 100
+    : phase === "non_objective"
+      ? ((standardQuestions.length + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100
+      : 100;
+
   return (
     <>
       <Dialog open={open && !showRedemption} onOpenChange={onOpenChange}>
@@ -138,16 +227,24 @@ export function StandardQuizContinueSheet({ open, onOpenChange, category, levelN
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-semibold text-sm">{category}</h2>
-                <p className="text-xs text-amber-200">{levelName} • Session {session}/10 • Q{currentQ + 1}/10</p>
+                <p className="text-xs text-amber-200">
+                  {levelName} • Session {session}/10 •{" "}
+                  {phase === "playing" && `Q${currentQ + 1}/10 (Objective)`}
+                  {phase === "non_objective" && `Q${11 + currentNonObjQ}/15 (Written)`}
+                  {(phase === "session_result" || phase === "continue_choice" || phase === "game_over") && "Results"}
+                </p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-white hover:bg-white/20">
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            {phase === "playing" && <Progress value={((currentQ + (showResult ? 1 : 0)) / 10) * 100} className="h-1.5 mt-2 bg-amber-400 [&>div]:bg-white" />}
+            {(phase === "playing" || phase === "non_objective") && (
+              <Progress value={progressValue} className="h-1.5 mt-2 bg-amber-400 [&>div]:bg-white" />
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto p-4">
+            {/* Objective Phase */}
             {phase === "playing" && question && (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-2">
@@ -181,12 +278,47 @@ export function StandardQuizContinueSheet({ open, onOpenChange, category, levelN
               </div>
             )}
 
+            {/* Non-Objective Phase */}
+            {phase === "non_objective" && currentNonObjQuestion && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  <Clock className={cn("h-5 w-5", nonObjTimeRemaining <= 5 ? "text-red-500 animate-pulse" : "text-amber-600")} />
+                  <span className={cn("text-2xl font-bold tabular-nums", nonObjTimeRemaining <= 5 && "text-red-500")}>{nonObjTimeRemaining}s</span>
+                </div>
+                <Card className="bg-amber-50 dark:bg-amber-950/30 border-amber-200">
+                  <CardContent className="p-3 text-center">
+                    <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/10</p>
+                    <p className="text-xs text-muted-foreground mt-1">Written question {currentNonObjQ + 1} of 5</p>
+                  </CardContent>
+                </Card>
+                <NonObjectiveQuestionCard
+                  key={currentNonObjQ}
+                  questionNumber={11 + currentNonObjQ}
+                  question={currentNonObjQuestion.question}
+                  onAnswer={(ans) => { const a = [...nonObjectiveAnswers]; a[currentNonObjQ] = ans; setNonObjectiveAnswers(a); }}
+                  disabled={nonObjLocked}
+                  showResult={nonObjShowResult}
+                  isCorrect={nonObjShowResult && currentNonObjIsCorrect}
+                />
+              </div>
+            )}
+
             {phase === "session_result" && (
               <Card className="border-yellow-300 bg-yellow-50 dark:bg-yellow-950/30">
                 <CardContent className="p-6 text-center space-y-3">
                   <p className="text-4xl">⭐</p>
                   <h3 className="font-bold text-lg">Partial Win!</h3>
-                  <p className="text-sm text-muted-foreground">{correctCount}/10 correct (80%+)</p>
+                  <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct (80%+)</p>
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
+                      <p className="text-[10px] text-muted-foreground">Objective</p>
+                      <p className="font-bold text-sm">{objectiveCorrect}/10</p>
+                    </div>
+                    <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">
+                      <p className="text-[10px] text-muted-foreground">Written</p>
+                      <p className="font-bold text-sm">{nonObjectiveCorrect}/5</p>
+                    </div>
+                  </div>
                   <p className="text-sm">Won 20%: <span className="font-bold text-green-600">{formatMobiAmount(Math.round(currentWinning * 0.2))}</span></p>
                   <p className="text-sm font-medium">Total Prize: <span className="text-green-600">{formatMobiAmount(totalPrize)}</span></p>
                 </CardContent>
@@ -199,7 +331,17 @@ export function StandardQuizContinueSheet({ open, onOpenChange, category, levelN
                   <CardContent className="p-6 text-center space-y-3">
                     <p className="text-4xl">🔥</p>
                     <h3 className="font-bold text-lg">Perfect Score!</h3>
-                    <p className="text-sm text-muted-foreground">10/10 correct - Session {session} complete!</p>
+                    <p className="text-sm text-muted-foreground">{totalQuestions}/{totalQuestions} correct - Session {session} complete!</p>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
+                        <p className="text-[10px] text-muted-foreground">Objective</p>
+                        <p className="font-bold text-sm">{objectiveCorrect}/10</p>
+                      </div>
+                      <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg text-center">
+                        <p className="text-[10px] text-muted-foreground">Written</p>
+                        <p className="font-bold text-sm">{nonObjectiveCorrect}/5</p>
+                      </div>
+                    </div>
                     <div className="pt-2">
                       <p className="text-sm text-muted-foreground">Current Prize</p>
                       <p className="text-2xl font-bold text-green-600">{formatLocalAmount(totalPrize, "NGN")}</p>
@@ -249,6 +391,15 @@ export function StandardQuizContinueSheet({ open, onOpenChange, category, levelN
             {phase === "playing" && (
               <Button className="w-full h-12 bg-amber-500 hover:bg-amber-600" onClick={handleConfirm} disabled={selectedAnswer === null || showResult}>
                 {selectedAnswer === null ? "Select Answer" : showResult ? "Loading..." : `Confirm ${MOBIGATE_ANSWER_LABELS[selectedAnswer]}`}
+              </Button>
+            )}
+            {phase === "non_objective" && (
+              <Button
+                className="w-full h-12 bg-amber-500 hover:bg-amber-600"
+                onClick={() => lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "")}
+                disabled={nonObjLocked || !nonObjectiveAnswers[currentNonObjQ]?.trim()}
+              >
+                {nonObjShowResult ? "Next question..." : "Confirm Answer"}
               </Button>
             )}
             {phase === "session_result" && (
