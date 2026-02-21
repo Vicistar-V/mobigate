@@ -1,137 +1,140 @@
 
-# Interactive Quiz: Merchant-Centric Player Flow, Winning Prizes Display, Wallet Requirements, and Waiver System
+
+# Toggle Quiz -- High-Stakes Escalating Sessions with All-or-Nothing Gamble
 
 ## What This Plan Does
 
-Currently, the player-facing Interactive Quiz Merchant Sheet is a basic list showing merchant names, categories, and prize pools. This plan transforms it into a full merchant-centric experience where:
-
-1. **Players see each merchant's actual winning prize offers** (1st, 2nd, 3rd prizes + consolation) prominently on merchant cards
-2. **Merchants configure their Game Show winning prizes** (1st/2nd/3rd + consolation) from their admin panel
-3. **A wallet balance validation system** ensures merchants have at least 70% of total prizes before launching
-4. **An Exclusive Waiver request flow** lets under-funded merchants apply (with a non-refundable fee) for admin approval
-5. **Draft/Active quiz status** reflects whether a merchant's quiz is launchable or pending funding
+Adds a brand-new **"Toggle Quiz"** game mode to the Mobigate Quiz Hub. This is a distinct, escalating risk/reward quiz where players answer questions across up to 7 sessions. After each 100%-correct session win, the player must decide: **take the prize and leave**, or **"Toggle"** into the next session for a higher multiplier -- but risk losing everything previously won. The stake is re-charged each session. Completing all 7 sessions earns a **Mobi Celebrity** badge.
 
 ---
 
-## Detailed Changes
+## The 7 Toggle Sessions
 
-### 1. Data Model Updates (`mobigateInteractiveQuizData.ts`)
+| Session | Objectives | Non-Objectives | Total Qs | Win Multiplier | Prize (on M500 stake) |
+|---------|-----------|---------------|----------|---------------|----------------------|
+| 1       | 7         | 3             | 10       | 5x (500%)     | M2,500               |
+| 2       | 10        | 4             | 14       | 7x (700%)     | M3,500               |
+| 3       | 12        | 5             | 17       | 8x (800%)     | M4,000               |
+| 4       | 14        | 6             | 20       | 9x (900%)     | M4,500               |
+| 5       | 14        | 6             | 20       | 10x (1000%)   | M5,000               |
+| 6       | 15        | 7             | 22       | 12x (1200%)   | M6,000               |
+| 7       | 20        | 10            | 30       | 15x (1500%)   | M7,500               |
 
-Add to the `QuizSeason` interface:
-- `firstPrize: number` -- e.g., 6,000,000
-- `secondPrize: number` -- e.g., 3,000,000
-- `thirdPrize: number` -- e.g., 1,500,000
-- `consolationPrizePerPlayer: number` -- e.g., 500,000 (for 12 semi-final evictees)
-- `consolationPrizeCount: number` -- e.g., 12
-- `totalWinningPrizes: number` -- computed: 1st + 2nd + 3rd + (consolation x count) = 16,500,000
-- `quizStatus: "draft" | "active" | "suspended"` -- replaces simple isLive for launch control
+**Rules:**
+- Only 100% correct answers win a session
+- "Toggling" to the next session cancels ALL previous winnings -- only the new session's prize matters
+- Stake is re-charged for every Toggle session
+- If the player fails any session (less than 100%), they lose everything
+- Completing all 7 sessions awards the "Mobi Celebrity" badge
 
-Add to the `QuizMerchant` interface:
-- `walletBalance: number` -- current wallet balance
-- `walletFundingHistory: { date: string; amount: number; description: string }[]`
-- `pendingWaiverRequest: boolean`
-- `waiverApproved: boolean`
+---
 
-Add new constants:
-- `MERCHANT_MIN_WALLET_PERCENT = 0.7` (70% of total prizes required)
-- `WAIVER_REQUEST_FEE = 50000` (admin-editable, non-refundable)
+## Files Created (2)
 
-Update all mock seasons to include realistic 1st/2nd/3rd/consolation prize values.
-Update mock merchants to include wallet balances (some sufficient, some insufficient for testing).
+### 1. `src/data/toggleQuizData.ts`
+New data file containing:
+- `TOGGLE_SESSIONS` array defining all 7 sessions with their objective count, non-objective count, and multiplier
+- Large question pools: 20+ objective questions and 10+ non-objective questions (the engine picks the required count per session)
+- `pickToggleQuestions(sessionIndex)` helper that randomly selects the correct number of objectives and non-objectives for the given session
+- Type exports: `ToggleSession`, `ToggleQuizState`
 
-### 2. Player-Facing Merchant Sheet (`InteractiveQuizMerchantSheet.tsx`)
+### 2. `src/components/community/mobigate-quiz/ToggleQuizPlayDialog.tsx`
+New full-screen dialog component (mobile-first) implementing the complete Toggle Quiz flow:
 
-Transform merchant cards to show:
-- Merchant name, category, verified badge (existing)
-- **Winning Prizes section** on each card showing:
-  - "1st: N6,000,000 (M6,000,000)"
-  - "2nd: N3,000,000"
-  - "3rd: N1,500,000"
-  - "Consolation: N500,000 x 12 players"
-  - "Total Prize Pool: N16,500,000"
-- Number of active seasons and participant count
-- Only show merchants with `applicationStatus === "approved"` and at least one active season
+**Phases:**
+- `"playing"` -- Objective questions with timer (reuses existing timer/answer patterns from StandardQuizContinueSheet)
+- `"non_objective"` -- Written questions with timer (reuses NonObjectiveQuestionCard)
+- `"session_win"` -- 100% correct: shows current prize, "Take Prize and Exit" vs "Toggle to Session X" choice
+- `"session_fail"` -- Less than 100%: shows "You Lost Everything", exit button
+- `"celebrity"` -- All 7 sessions completed: shows Mobi Celebrity badge award, celebration UI
 
-Filter out pending/suspended merchants from the player view (those are admin-only).
+**Key logic:**
+- Tracks `currentSession` (1-7), `currentPrize` (only the latest session's prize, not cumulative)
+- On Toggle: previous winnings are wiped, stake is re-charged, new questions are loaded
+- On session fail: `currentPrize = 0`, game over
+- On session 7 win: award Mobi Celebrity badge, show special celebration
 
-### 3. Player-Facing Season Sheet (`InteractiveQuizSeasonSheet.tsx`)
+**UI structure (mobile-first):**
+- Sticky gradient header (teal/cyan theme to differentiate from Standard's amber)
+- Session indicator: "Toggle Session 2/7 -- 700% Prize"
+- Timer, question card, answer grid (same patterns as StandardQuizContinueSheet)
+- Session result cards with clear Toggle/Exit choice
+- Warning text: "Toggling will cancel your current M2,500 win. New prize: M3,500"
+- Celebrity badge reveal animation on final completion
 
-Update season cards to prominently display:
-- The full prize breakdown (1st, 2nd, 3rd, consolation) in a dedicated prize section
-- Dual currency display (NGN + Mobi) for all prize amounts
-- Selection stages with entry fees (already present, keep as-is)
-- A note: "Consolation Prizes for 12 Semi-Final contestants" when enabled
+---
 
-### 4. Merchant Admin -- Season Configuration (`InteractiveMerchantAdmin.tsx`)
+## Files Modified (2)
 
-**Add Season Drawer updates:**
-- Add input fields for 1st Prize, 2nd Prize, 3rd Prize amounts
-- Add consolation toggle + per-player amount + player count
-- Auto-compute total winning prizes and display it
-- Show the 70% wallet requirement: "Minimum wallet balance required: N11,550,000"
-- Show merchant's current wallet balance
+### 3. `src/components/community/mobigate-quiz/MobigateQuizHub.tsx`
+- Add "Toggle Quiz" to the `GAME_MODES` array with:
+  - id: `"toggle"`
+  - title: "Toggle Quiz"
+  - description: "Win 500% or risk it all for up to 1500%! Toggle through 7 sessions -- each one higher stakes. Complete all to earn Mobi Celebrity!"
+  - icon: `Repeat` (from lucide-react)
+  - gradient: `"from-teal-500 to-cyan-600"`
+  - badge: "Toggle Risk"
+  - minStake: 500
+- Add the `ToggleQuizPlayDialog` flow sheet: `<ToggleQuizPlayDialog open={activeFlow === "toggle"} onOpenChange={...} />`
+- Import `ToggleQuizPlayDialog` and `Repeat` icon
 
-**Season card updates:**
-- Show `quizStatus` badge (Draft/Active/Suspended)
-- Show total winning prizes on each season card
-
-**Launch validation (replacing simple "Live" toggle):**
-- When toggling a season to "Active/Live":
-  - Check: `merchant.walletBalance >= 0.7 * season.totalWinningPrizes`
-  - If sufficient: activate with "Launch Quiz Now" confirmation
-  - If insufficient: show "Insufficient Fund" alert with:
-    - Current balance vs required balance
-    - "Click Here to Apply for Exclusive Waiver" button
-    - Waiver fee disclosure: "This request will charge a non-refundable fee of N50,000"
-
-**Waiver Request Drawer (new):**
-- Shows merchant's current wallet balance
-- Shows required minimum balance
-- Shows funding history (last 5 transactions)
-- Shows the non-refundable waiver fee
-- "Submit Waiver Request" button with fee confirmation
-- After submission: toast confirmation, season stays as "Draft" pending admin approval
-
-**Admin Waiver Management (within merchant detail view):**
-- A "Pending Waivers" section (visible to admin only)
-- Each waiver request shows: season name, required balance, current balance, shortfall
-- "Approve" button: activates the quiz season
-- "Reject" button: keeps season as Draft, notifies merchant
-
-### 5. Merchant Selection Process Drawer (`MerchantSelectionProcessDrawer.tsx`)
-
-- Update Grand Finale section to show the configured 1st/2nd/3rd prize amounts
-- Show consolation prize details for TV Show evictees
-- All amounts in dual currency (NGN + Mobi)
+### 4. `src/components/mobigate/InteractiveMerchantAdmin.tsx` (minor)
+- No changes needed -- Toggle Quiz is a standalone mode, not merchant-dependent
 
 ---
 
 ## Technical Details
 
-### Wallet Validation Logic
+### Session Configuration
 
-```text
-totalWinningPrizes = firstPrize + secondPrize + thirdPrize + (consolationPrizePerPlayer * consolationPrizeCount)
-requiredBalance = totalWinningPrizes * MERCHANT_MIN_WALLET_PERCENT
-canLaunch = merchant.walletBalance >= requiredBalance
+```typescript
+export const TOGGLE_SESSIONS = [
+  { session: 1, objectives: 7,  nonObjectives: 3,  total: 10, multiplier: 5,  label: "500%" },
+  { session: 2, objectives: 10, nonObjectives: 4,  total: 14, multiplier: 7,  label: "700%" },
+  { session: 3, objectives: 12, nonObjectives: 5,  total: 17, multiplier: 8,  label: "800%" },
+  { session: 4, objectives: 14, nonObjectives: 6,  total: 20, multiplier: 9,  label: "900%" },
+  { session: 5, objectives: 14, nonObjectives: 6,  total: 20, multiplier: 10, label: "1000%" },
+  { session: 6, objectives: 15, nonObjectives: 7,  total: 22, multiplier: 12, label: "1200%" },
+  { session: 7, objectives: 20, nonObjectives: 10, total: 30, multiplier: 15, label: "1500%" },
+];
 ```
 
-### Quiz Status State Machine
+### Toggle Decision Logic
 
-```text
-Draft --> (sufficient wallet) --> Active
-Draft --> (insufficient wallet) --> show "Apply for Waiver"
-Draft --> (waiver approved) --> Active
-Active --> (admin suspends) --> Suspended
-Suspended --> (admin reactivates) --> Active
+```typescript
+// After 100% correct session:
+const currentPrize = stake * TOGGLE_SESSIONS[currentSession].multiplier;
+// If player toggles:
+previousWinnings = 0; // cancelled
+stakeCharged += stake; // re-charged
+// Load new questions for next session
 ```
 
-### Files Modified (5 total)
-- `src/data/mobigateInteractiveQuizData.ts` -- New prize fields, wallet fields, waiver constants, updated mocks
-- `src/components/community/mobigate-quiz/InteractiveQuizMerchantSheet.tsx` -- Prize display on merchant cards, filter non-approved
-- `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx` -- Prize breakdown display on season cards
-- `src/components/mobigate/InteractiveMerchantAdmin.tsx` -- Prize config in Add Season, wallet validation, waiver request drawer, waiver admin section
-- `src/components/mobigate/MerchantSelectionProcessDrawer.tsx` -- Prize amounts in Grand Finale section
+### Question Selection Per Session
 
-### Files Created
-- None
+```typescript
+function pickToggleQuestions(sessionIndex: number) {
+  const config = TOGGLE_SESSIONS[sessionIndex];
+  const shuffledObj = [...allObjectiveQuestions].sort(() => Math.random() - 0.5);
+  const shuffledNonObj = [...allNonObjectiveQuestions].sort(() => Math.random() - 0.5);
+  return {
+    objectives: shuffledObj.slice(0, config.objectives),
+    nonObjectives: shuffledNonObj.slice(0, config.nonObjectives),
+  };
+}
+```
+
+### Mobi Celebrity Badge Logic
+
+```typescript
+if (currentSession === 6 && isSessionPerfect) {
+  // Session 7 (index 6) completed with 100%
+  awardMobiCelebrityBadge = true;
+  // Show celebration UI with badge
+}
+```
+
+### Files Summary
+- **Created**: `src/data/toggleQuizData.ts`, `src/components/community/mobigate-quiz/ToggleQuizPlayDialog.tsx`
+- **Modified**: `src/components/community/mobigate-quiz/MobigateQuizHub.tsx`
+
