@@ -137,7 +137,7 @@ export function QuizSettingsCard() {
               onValueChange={(values) => setNonObjTime(values[0])}
               min={platformQuizSettings.nonObjectiveTimeMin}
               max={platformQuizSettings.nonObjectiveTimeMax}
-              step={5}
+              step={1}
               className="w-full touch-manipulation"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
