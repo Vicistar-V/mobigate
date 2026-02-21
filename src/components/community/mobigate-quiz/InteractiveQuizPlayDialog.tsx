@@ -7,14 +7,13 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { MOBIGATE_ANSWER_LABELS } from "@/data/mobigateQuizData";
 import { QuizSeason, INTERACTIVE_QUESTIONS_PER_SESSION } from "@/data/mobigateInteractiveQuizData";
+import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
 import { QuizPrizeRedemptionSheet } from "./QuizPrizeRedemptionSheet";
 import { InteractiveSessionDialog } from "./InteractiveSessionDialog";
-
-const NON_OBJECTIVE_TIME_PER_QUESTION = 15;
 
 const interactiveObjectiveQuestions = [
   { question: "What is the most spoken language in the world?", options: ["Spanish", "Hindi", "English", "Arabic", "French", "Portuguese", "Bengali", "Russian"], correctAnswer: 2 },
@@ -48,7 +47,7 @@ type Phase = "objective" | "non_objective" | "result";
 export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: InteractiveQuizPlayDialogProps) {
   const { toast } = useToast();
   const [currentQ, setCurrentQ] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(15);
+  const [timeRemaining, setTimeRemaining] = useState(getObjectiveTimePerQuestion());
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [objectiveCorrect, setObjectiveCorrect] = useState(0);
@@ -59,9 +58,8 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const [showInteractiveSession, setShowInteractiveSession] = useState(false);
   const [redemptionAction, setRedemptionAction] = useState<"exit" | "play_again">("exit");
 
-  // Non-objective per-question state
   const [currentNonObjQ, setCurrentNonObjQ] = useState(0);
-  const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(NON_OBJECTIVE_TIME_PER_QUESTION);
+  const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(getNonObjectiveTimePerQuestion());
   const [nonObjShowResult, setNonObjShowResult] = useState(false);
   const [nonObjLocked, setNonObjLocked] = useState(false);
 
@@ -73,15 +71,14 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const cashAlternative = season.entryFee * 5;
 
   const resetAllState = useCallback(() => {
-    setCurrentQ(0); setTimeRemaining(15); setSelectedAnswer(null); setShowResult(false);
+    setCurrentQ(0); setTimeRemaining(getObjectiveTimePerQuestion()); setSelectedAnswer(null); setShowResult(false);
     setObjectiveCorrect(0); setPhase("objective"); setNonObjectiveAnswers(Array(5).fill(""));
     setNonObjectiveCorrect(0); setShowRedemption(false);
-    setCurrentNonObjQ(0); setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
+    setCurrentNonObjQ(0); setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
     setNonObjShowResult(false); setNonObjLocked(false);
     setRedemptionAction("exit");
   }, []);
 
-  // Reset all state when dialog closes
   useEffect(() => {
     if (!open) resetAllState();
   }, [open, resetAllState]);
@@ -114,7 +111,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
 
   const nextObjective = () => {
     if (currentQ >= 9) setPhase("non_objective");
-    else { setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(15); }
+    else { setCurrentQ(p => p + 1); setSelectedAnswer(null); setShowResult(false); setTimeRemaining(getObjectiveTimePerQuestion()); }
   };
 
   const lockNonObjAnswer = useCallback((answer: string) => {
@@ -128,43 +125,27 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
       if (currentNonObjQ >= 4) setPhase("result");
       else {
         setCurrentNonObjQ(p => p + 1);
-        setNonObjTimeRemaining(NON_OBJECTIVE_TIME_PER_QUESTION);
+        setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
         setNonObjShowResult(false); setNonObjLocked(false);
       }
     }, 1500);
   }, [currentNonObjQ]);
 
-  // --- Result action handlers ---
   const handleRollover = () => {
     onOpenChange(false);
     setTimeout(() => setShowInteractiveSession(true), 300);
     toast({ title: "⚡ Entering Interactive Session", description: "Previous winnings forfeited. Earn points now!" });
   };
 
-  const handleRedeemAndExit = () => {
-    setRedemptionAction("exit");
-    setShowRedemption(true);
-  };
-
-  const handleRedeemAndPlayAgain = () => {
-    setRedemptionAction("play_again");
-    setShowRedemption(true);
-  };
-
-  const handlePlayAgain = () => {
-    resetAllState();
-    // Phase is reset to "objective" by resetAllState
-  };
+  const handleRedeemAndExit = () => { setRedemptionAction("exit"); setShowRedemption(true); };
+  const handleRedeemAndPlayAgain = () => { setRedemptionAction("play_again"); setShowRedemption(true); };
+  const handlePlayAgain = () => { resetAllState(); };
 
   const handleRedemptionClose = (v: boolean) => {
     if (!v) {
       setShowRedemption(false);
-      if (redemptionAction === "exit") {
-        onOpenChange(false);
-      } else {
-        // play again after redemption
-        resetAllState();
-      }
+      if (redemptionAction === "exit") onOpenChange(false);
+      else resetAllState();
     }
   };
 
@@ -269,7 +250,6 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
               <div className="space-y-3">
                 {passed ? (
                   <>
-                    {/* Perfect score card */}
                     <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-950/30">
                       <CardContent className="p-5 text-center space-y-3">
                         <p className="text-4xl">🌟</p>
@@ -284,8 +264,6 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                         </div>
                       </CardContent>
                     </Card>
-
-                    {/* Rollover info card */}
                     <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/30">
                       <CardContent className="p-3 space-y-2">
                         <div className="flex items-center gap-2">
@@ -375,17 +353,10 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             )}
             {phase === "result" && !passed && (
               <div className="flex gap-2.5">
-                <Button
-                  className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation"
-                  onClick={handlePlayAgain}
-                >
+                <Button className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 text-sm touch-manipulation" onClick={handlePlayAgain}>
                   Play Again
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 h-12 text-sm touch-manipulation"
-                  onClick={() => onOpenChange(false)}
-                >
+                <Button variant="outline" className="flex-1 h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
                   Exit Now
                 </Button>
               </div>
@@ -394,20 +365,8 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
         </DialogContent>
       </Dialog>
 
-      {/* Redemption sheet */}
-      <QuizPrizeRedemptionSheet
-        open={showRedemption}
-        onOpenChange={handleRedemptionClose}
-        prizeAmount={cashAlternative}
-        prizeType="cash"
-      />
-
-      {/* Interactive Session dialog */}
-      <InteractiveSessionDialog
-        open={showInteractiveSession}
-        onOpenChange={(v) => setShowInteractiveSession(v)}
-        season={season}
-      />
+      <QuizPrizeRedemptionSheet open={showRedemption} onOpenChange={handleRedemptionClose} prizeAmount={cashAlternative} prizeType="cash" />
+      <InteractiveSessionDialog open={showInteractiveSession} onOpenChange={(v) => setShowInteractiveSession(v)} season={season} />
     </>
   );
 }

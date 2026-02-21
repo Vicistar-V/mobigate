@@ -8,11 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MOBIGATE_ANSWER_LABELS } from "@/data/mobigateQuizData";
 import { getGroupPrizeMultiplier } from "@/data/mobigateGroupQuizData";
+import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
 
-// Mock group quiz questions
+// 10 objective questions
 const groupQuestions = [
   { id: "gq1", question: "Which country has the largest population in Africa?", options: ["South Africa", "Egypt", "Nigeria", "Ethiopia", "Kenya", "Ghana", "Tanzania", "Algeria"], correctAnswer: 2 },
   { id: "gq2", question: "What is the tallest building in the world?", options: ["Shanghai Tower", "Makkah Clock Tower", "Burj Khalifa", "One World Trade", "Taipei 101", "Lotte World Tower", "CN Tower", "Empire State"], correctAnswer: 2 },
@@ -26,6 +28,15 @@ const groupQuestions = [
   { id: "gq10", question: "What is the speed of light approximately?", options: ["200,000 km/s", "250,000 km/s", "300,000 km/s", "350,000 km/s", "150,000 km/s", "400,000 km/s", "500,000 km/s", "100,000 km/s"], correctAnswer: 2 },
 ];
 
+// 5 non-objective questions
+const groupNonObjectiveQuestions = [
+  { question: "Name the largest country in Africa by land area", acceptedAnswers: ["algeria"] },
+  { question: "What does DNA stand for?", acceptedAnswers: ["deoxyribonucleic acid", "deoxyribonucleic"] },
+  { question: "Name the longest river in the world", acceptedAnswers: ["nile", "amazon"] },
+  { question: "What is the chemical symbol for gold?", acceptedAnswers: ["au"] },
+  { question: "Name the first person to walk on the moon", acceptedAnswers: ["neil armstrong", "armstrong"] },
+];
+
 interface GroupQuizPlayDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,79 +45,140 @@ interface GroupQuizPlayDialogProps {
   players: Array<{ id: string; name: string; avatar: string; isHost: boolean }>;
 }
 
+type Phase = "objective" | "non_objective" | "game_over";
+
+const MIN_WIN_PERCENTAGE = 40;
+
 export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, players }: GroupQuizPlayDialogProps) {
   const { toast } = useToast();
+  const totalQuestions = groupQuestions.length + groupNonObjectiveQuestions.length; // 15
+
+  // Objective state
+  const [phase, setPhase] = useState<Phase>("objective");
   const [currentQ, setCurrentQ] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(15);
+  const [timeRemaining, setTimeRemaining] = useState(getObjectiveTimePerQuestion());
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
+  const [objectiveCorrect, setObjectiveCorrect] = useState(0);
+
+  // Non-objective state
+  const [currentNonObjQ, setCurrentNonObjQ] = useState(0);
+  const [nonObjTimeRemaining, setNonObjTimeRemaining] = useState(getNonObjectiveTimePerQuestion());
+  const [nonObjShowResult, setNonObjShowResult] = useState(false);
+  const [nonObjLocked, setNonObjLocked] = useState(false);
+  const [nonObjectiveAnswers, setNonObjectiveAnswers] = useState<string[]>(Array(5).fill(""));
+  const [nonObjectiveCorrect, setNonObjectiveCorrect] = useState(0);
+
   const [opponentScores, setOpponentScores] = useState<Record<string, number>>({});
 
   const question = groupQuestions[currentQ];
   const multiplier = getGroupPrizeMultiplier(playerCount);
   const totalPrize = stake * multiplier;
+  const totalCorrect = objectiveCorrect + nonObjectiveCorrect;
+  const yourPercentage = Math.round((totalCorrect / totalQuestions) * 100);
 
   useEffect(() => {
     if (!open) {
+      setPhase("objective");
       setCurrentQ(0);
-      setTimeRemaining(15);
+      setTimeRemaining(getObjectiveTimePerQuestion());
       setSelectedAnswer(null);
       setShowResult(false);
-      setCorrectCount(0);
-      setGameOver(false);
+      setObjectiveCorrect(0);
+      setCurrentNonObjQ(0);
+      setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
+      setNonObjShowResult(false);
+      setNonObjLocked(false);
+      setNonObjectiveAnswers(Array(5).fill(""));
+      setNonObjectiveCorrect(0);
       setOpponentScores({});
       return;
     }
-    // Simulate opponent scores
     const scores: Record<string, number> = {};
     players.filter(p => !p.isHost).forEach(p => {
-      scores[p.id] = Math.floor(Math.random() * 8) + 2;
+      scores[p.id] = Math.floor(Math.random() * 11) + 3; // 3-13 out of 15
     });
     setOpponentScores(scores);
   }, [open]);
 
+  // Objective timer
   useEffect(() => {
-    if (gameOver || showResult || !open) return;
-    if (timeRemaining <= 0) {
-      handleTimeout();
-      return;
-    }
+    if (phase !== "objective" || showResult || !open) return;
+    if (timeRemaining <= 0) { setShowResult(true); setTimeout(() => nextObjective(), 1500); return; }
     const timer = setInterval(() => setTimeRemaining(p => p - 1), 1000);
     return () => clearInterval(timer);
-  }, [timeRemaining, gameOver, showResult, open]);
+  }, [timeRemaining, phase, showResult, open]);
 
-  const handleTimeout = () => {
-    setShowResult(true);
-    setTimeout(() => nextQuestion(), 1500);
-  };
+  // Non-objective timer
+  useEffect(() => {
+    if (phase !== "non_objective" || nonObjShowResult || nonObjLocked || !open) return;
+    if (nonObjTimeRemaining <= 0) {
+      lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "");
+      return;
+    }
+    const timer = setInterval(() => setNonObjTimeRemaining(p => p - 1), 1000);
+    return () => clearInterval(timer);
+  }, [nonObjTimeRemaining, phase, nonObjShowResult, nonObjLocked, open, currentNonObjQ]);
 
   const handleConfirm = () => {
     if (selectedAnswer === null) return;
     const isCorrect = selectedAnswer === question.correctAnswer;
-    if (isCorrect) setCorrectCount(p => p + 1);
+    if (isCorrect) setObjectiveCorrect(p => p + 1);
     setShowResult(true);
-    setTimeout(() => nextQuestion(), 1500);
+    setTimeout(() => nextObjective(), 1500);
   };
 
-  const nextQuestion = () => {
+  const nextObjective = () => {
     if (currentQ >= groupQuestions.length - 1) {
-      setGameOver(true);
+      setPhase("non_objective");
     } else {
       setCurrentQ(p => p + 1);
       setSelectedAnswer(null);
       setShowResult(false);
-      setTimeRemaining(15);
+      setTimeRemaining(getObjectiveTimePerQuestion());
     }
   };
 
+  const lockNonObjAnswer = useCallback((answer: string) => {
+    setNonObjLocked(true);
+    setNonObjectiveAnswers(prev => { const updated = [...prev]; updated[currentNonObjQ] = answer; return updated; });
+    setNonObjShowResult(true);
+    const q = groupNonObjectiveQuestions[currentNonObjQ];
+    const isCorrect = q.acceptedAnswers.some(a => answer.toLowerCase().includes(a.toLowerCase()));
+    if (isCorrect) setNonObjectiveCorrect(p => p + 1);
+    setTimeout(() => {
+      if (currentNonObjQ >= groupNonObjectiveQuestions.length - 1) {
+        setPhase("game_over");
+      } else {
+        setCurrentNonObjQ(p => p + 1);
+        setNonObjTimeRemaining(getNonObjectiveTimePerQuestion());
+        setNonObjShowResult(false);
+        setNonObjLocked(false);
+      }
+    }, 1500);
+  }, [currentNonObjQ]);
+
+  const currentNonObjQuestion = groupNonObjectiveQuestions[currentNonObjQ];
+  const currentNonObjIsCorrect = currentNonObjQuestion?.acceptedAnswers.some(
+    a => (nonObjectiveAnswers[currentNonObjQ] || "").toLowerCase().includes(a.toLowerCase())
+  );
+
+  // Winner logic: highest scorer AND >= 40%
   const allScores = [
-    { name: "You", score: correctCount, isYou: true },
-    ...players.filter(p => !p.isHost).map(p => ({ name: p.name, score: opponentScores[p.id] || 0, isYou: false }))
+    { name: "You", score: totalCorrect, total: totalQuestions, isYou: true },
+    ...players.filter(p => !p.isHost).map(p => ({ name: p.name, score: opponentScores[p.id] || 0, total: totalQuestions, isYou: false }))
   ].sort((a, b) => b.score - a.score);
 
-  const youWon = allScores[0]?.isYou;
+  const highestScore = allScores[0]?.score || 0;
+  const highestPct = Math.round((highestScore / totalQuestions) * 100);
+  const hasValidWinner = highestPct >= MIN_WIN_PERCENTAGE;
+  const youWon = hasValidWinner && allScores[0]?.isYou;
+
+  const progressValue = phase === "objective"
+    ? ((currentQ + (showResult ? 1 : 0)) / totalQuestions) * 100
+    : phase === "non_objective"
+      ? ((groupQuestions.length + currentNonObjQ + (nonObjShowResult ? 1 : 0)) / totalQuestions) * 100
+      : 100;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,22 +189,28 @@ export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, pl
               <Users className="h-5 w-5" />
               <div>
                 <h2 className="font-semibold text-sm">Group Quiz</h2>
-                <p className="text-xs text-purple-200">{gameOver ? "Results" : `Question ${currentQ + 1}/10`} • {playerCount} players</p>
+                <p className="text-xs text-purple-200">
+                  {phase === "objective" && `Q${currentQ + 1}/10 (Objective)`}
+                  {phase === "non_objective" && `Q${11 + currentNonObjQ}/15 (Written)`}
+                  {phase === "game_over" && "Results"}
+                  {" • "}{playerCount} players
+                </p>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-white hover:bg-white/20">
               <X className="h-4 w-4" />
             </Button>
           </div>
-          {!gameOver && (
+          {phase !== "game_over" && (
             <div className="mt-2">
-              <Progress value={((currentQ + (showResult ? 1 : 0)) / 10) * 100} className="h-1.5 bg-purple-400 [&>div]:bg-white" />
+              <Progress value={progressValue} className="h-1.5 bg-purple-400 [&>div]:bg-white" />
             </div>
           )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
-          {!gameOver && question && (
+          {/* Objective Phase */}
+          {phase === "objective" && question && (
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-2">
                 <Clock className={cn("h-5 w-5", timeRemaining <= 5 ? "text-red-500 animate-pulse" : "text-purple-600")} />
@@ -175,13 +253,46 @@ export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, pl
             </div>
           )}
 
-          {gameOver && (
+          {/* Non-Objective Phase */}
+          {phase === "non_objective" && currentNonObjQuestion && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <Clock className={cn("h-5 w-5", nonObjTimeRemaining <= 5 ? "text-red-500 animate-pulse" : "text-purple-600")} />
+                <span className={cn("text-2xl font-bold tabular-nums", nonObjTimeRemaining <= 5 && "text-red-500")}>{nonObjTimeRemaining}s</span>
+              </div>
+              <Card className="bg-purple-50 dark:bg-purple-950/30 border-purple-200">
+                <CardContent className="p-3 text-center">
+                  <p className="text-sm font-medium">Objective Score: {objectiveCorrect}/10</p>
+                  <p className="text-xs text-muted-foreground mt-1">Written question {currentNonObjQ + 1} of 5</p>
+                </CardContent>
+              </Card>
+              <NonObjectiveQuestionCard
+                key={currentNonObjQ}
+                questionNumber={11 + currentNonObjQ}
+                question={currentNonObjQuestion.question}
+                onAnswer={(ans) => { const a = [...nonObjectiveAnswers]; a[currentNonObjQ] = ans; setNonObjectiveAnswers(a); }}
+                disabled={nonObjLocked}
+                showResult={nonObjShowResult}
+                isCorrect={nonObjShowResult && currentNonObjIsCorrect}
+              />
+            </div>
+          )}
+
+          {/* Game Over / Results */}
+          {phase === "game_over" && (
             <div className="space-y-4">
               <Card className={cn("border-2", youWon ? "border-green-500 bg-green-50 dark:bg-green-950/30" : "border-red-300 bg-red-50 dark:bg-red-950/30")}>
                 <CardContent className="p-6 text-center space-y-3">
-                  <p className="text-4xl">{youWon ? "🏆" : "😞"}</p>
-                  <h2 className="text-xl font-bold">{youWon ? "You Won!" : "Better Luck!"}</h2>
-                  <p className="text-sm text-muted-foreground">{correctCount}/10 correct</p>
+                  <p className="text-4xl">{youWon ? "🏆" : hasValidWinner ? "😞" : "🚫"}</p>
+                  <h2 className="text-xl font-bold">
+                    {youWon ? "You Won!" : hasValidWinner ? "Better Luck!" : "No Winner!"}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({yourPercentage}%)</p>
+                  {!hasValidWinner && (
+                    <p className="text-xs text-red-600 font-medium">
+                      No player scored ≥{MIN_WIN_PERCENTAGE}%. All players lose.
+                    </p>
+                  )}
                   {youWon && (
                     <div className="pt-2">
                       <p className="text-sm text-muted-foreground">Prize Won</p>
@@ -196,15 +307,23 @@ export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, pl
               <Card>
                 <CardContent className="p-3 space-y-2">
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase">Final Standings</h3>
-                  {allScores.map((p, i) => (
-                    <div key={i} className={cn("flex items-center gap-3 p-2 rounded-lg", i === 0 && "bg-amber-50 dark:bg-amber-950/30 border border-amber-200")}>
-                      <span className={cn("text-sm font-bold w-6", i === 0 && "text-amber-600")}>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}</span>
-                      <div className="flex-1">
-                        <p className={cn("text-sm font-medium", p.isYou && "text-purple-600")}>{p.name}{p.isYou ? " (You)" : ""}</p>
+                  {allScores.map((p, i) => {
+                    const pPct = Math.round((p.score / totalQuestions) * 100);
+                    const isWinner = hasValidWinner && i === 0;
+                    return (
+                      <div key={i} className={cn("flex items-center gap-3 p-2 rounded-lg", isWinner && "bg-amber-50 dark:bg-amber-950/30 border border-amber-200")}>
+                        <span className={cn("text-sm font-bold w-6", isWinner && "text-amber-600")}>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}</span>
+                        <div className="flex-1">
+                          <p className={cn("text-sm font-medium", p.isYou && "text-purple-600")}>{p.name}{p.isYou ? " (You)" : ""}</p>
+                          <p className="text-[10px] text-muted-foreground">{pPct}%</p>
+                        </div>
+                        <span className="text-sm font-bold">{p.score}/{totalQuestions}</span>
                       </div>
-                      <span className="text-sm font-bold">{p.score}/10</span>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  <div className="text-[10px] text-muted-foreground text-center pt-1 border-t">
+                    Winner must be highest scorer with ≥{MIN_WIN_PERCENTAGE}% to win
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -212,11 +331,21 @@ export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, pl
         </div>
 
         <div className="sticky bottom-0 z-10 bg-background border-t p-4">
-          {!gameOver ? (
+          {phase === "objective" && (
             <Button className="w-full h-12 bg-purple-500 hover:bg-purple-600" onClick={handleConfirm} disabled={selectedAnswer === null || showResult}>
               {selectedAnswer === null ? "Select Answer" : showResult ? "Loading..." : `Confirm ${MOBIGATE_ANSWER_LABELS[selectedAnswer]}`}
             </Button>
-          ) : (
+          )}
+          {phase === "non_objective" && (
+            <Button
+              className="w-full h-12 bg-purple-500 hover:bg-purple-600"
+              onClick={() => lockNonObjAnswer(nonObjectiveAnswers[currentNonObjQ] || "")}
+              disabled={nonObjLocked || !nonObjectiveAnswers[currentNonObjQ]?.trim()}
+            >
+              {nonObjShowResult ? "Next question..." : "Confirm Answer"}
+            </Button>
+          )}
+          {phase === "game_over" && (
             <Button className="w-full h-12 bg-gradient-to-r from-purple-500 to-violet-600" onClick={() => onOpenChange(false)}>
               Exit
             </Button>
