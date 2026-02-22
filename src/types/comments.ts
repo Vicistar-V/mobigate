@@ -13,6 +13,8 @@ export interface Comment {
   replyCount: number;
   replies?: Comment[];
   isOwner?: boolean;
+  isHidden?: boolean;
+  isEditing?: boolean;
 }
 
 export interface CommentFormData {

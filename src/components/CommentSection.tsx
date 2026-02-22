@@ -34,7 +34,9 @@ export const CommentSection = ({
     deleteComment, 
     likeComment,
     shareComment,
-    replyToComment 
+    replyToComment,
+    editComment,
+    hideComment,
   } = useComments(postId);
   const [sortBy, setSortBy] = useState<CommentSortOption>("newest");
 
@@ -139,6 +141,8 @@ export const CommentSection = ({
               onDelete={deleteComment}
               onShare={shareComment}
               onReply={replyToComment}
+              onEdit={editComment}
+              onHide={hideComment}
             />
           ))
         )}
