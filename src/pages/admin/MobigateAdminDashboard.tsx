@@ -459,7 +459,7 @@ export default function MobigateAdminDashboard() {
                       <div className="grid grid-cols-2 gap-2">
                         {qt.type === "interactive" && (
                           <Card className="cursor-pointer hover:bg-accent/30 transition-colors active:scale-[0.98]"
-                            onClick={() => navigate(`/mobigate-admin/quiz/interactive/merchants`)}>
+                            onClick={() => navigate(`/merchant-page`)}>
                             <CardContent className="p-2.5 flex items-center gap-2">
                               <span className="text-base">🏪</span>
                               <div className="flex-1 min-w-0">

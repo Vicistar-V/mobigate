@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, FolderOpen, Layers, PenSquare, ListChecks, Activity, Building2, Users, History } from "lucide-react";
+import { ChevronDown, FolderOpen, Layers, PenSquare, ListChecks, Activity, Users, History } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuizAdminDrawerProps {
@@ -50,7 +50,6 @@ const quizSections = [
     gradient: "from-purple-500/20 to-purple-600/10",
     border: "border-purple-500/30",
     links: [
-      { label: "Merchant Management", url: "/mobigate-admin/quiz/interactive/merchants", icon: Building2 },
       { label: "Categories", url: "/mobigate-admin/quiz/interactive/categories", icon: FolderOpen },
       { label: "Levels", url: "/mobigate-admin/quiz/interactive/levels", icon: Layers },
       { label: "Create Questions", url: "/mobigate-admin/quiz/interactive/questions/create", icon: PenSquare },
