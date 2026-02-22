@@ -172,17 +172,19 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           <div className="text-center space-y-2">
             <h3 className="text-xl font-bold">{winner.playerName}</h3>
             <p className="text-sm text-muted-foreground">{winner.state}, {winner.country}</p>
-            <div className="flex items-center justify-center gap-2 flex-wrap">
+            <div className="flex items-center justify-center gap-2">
               <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
                 {getPositionLabel()}
               </Badge>
+            </div>
+            <div className="flex items-center justify-center gap-2">
               <Badge className={`text-xs ${getTierColor(winner.tier)}`}>
                 <Shield className="h-3 w-3 mr-0.5" /> Tier {winner.tier}
               </Badge>
+              {winner.tier >= 6 && (
+                <span className="text-sm font-semibold text-purple-700">Celebrity</span>
+              )}
             </div>
-            {winner.tier >= 6 && (
-              <p className="text-sm font-semibold text-purple-700">Celebrity</p>
-            )}
           </div>
 
           {/* Stats row */}
