@@ -96,7 +96,15 @@ function getStatusColor(status: string) {
     case "active": return "bg-emerald-500/15 text-emerald-700";
     case "draft": return "bg-amber-500/15 text-amber-700";
     case "suspended": return "bg-red-500/15 text-red-700";
+    case "awaiting_approval": return "bg-orange-500/15 text-orange-700";
     default: return "bg-muted text-muted-foreground";
+  }
+}
+
+function getStatusLabel(status: string) {
+  switch (status) {
+    case "awaiting_approval": return "Awaiting Approval";
+    default: return status;
   }
 }
 
@@ -245,7 +253,7 @@ function PlatformSettingsTab({ merchant }: { merchant: QuizMerchant }) {
 }
 
 // ─── Seasons Tab ─────────────────────────────────────────────────────
-function SeasonsTab({ merchantId }: { merchantId: string }) {
+function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: QuizMerchant }) {
   const { toast } = useToast();
   const [seasons, setSeasons] = useState<QuizSeason[]>(
     mockSeasons.filter((s) => s.merchantId === merchantId)
@@ -273,6 +281,9 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
     { id: "f7", name: "Ifeoma Nwosu", avatar: "/placeholder.svg" },
     { id: "f8", name: "James Okoro", avatar: "/placeholder.svg" },
   ];
+  // Waiver state
+  const [waiverRequested, setWaiverRequested] = useState(false);
+  const [waiverContext, setWaiverContext] = useState("");
   // Create form state
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<"Short" | "Medium" | "Complete">("Short");
@@ -352,17 +363,20 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
       consolationPrizePerPlayer: newConsolationPerPlayer,
       consolationPrizeCount: newConsolationCount,
       totalWinningPrizes: totalPrizes,
-      quizStatus: "draft",
+      quizStatus: waiverRequested ? "awaiting_approval" : "draft",
       selectionProcesses: newSelectionRounds,
       tvShowRounds: newTvRounds,
     };
     setSeasons((p) => [newSeason, ...p]);
     setShowCreateForm(false);
     setNewName("");
-    toast({ title: "✅ Season Created", description: `"${newName}" has been created as a draft.` });
+    const statusLabel = waiverRequested ? "awaiting approval" : "draft";
+    toast({ title: "✅ Season Created", description: `"${newName}" has been created as ${statusLabel}.` });
+    setWaiverRequested(false);
+    setWaiverContext("");
   };
 
-  const toggleStatus = (seasonId: string, newStatus: "active" | "suspended" | "draft") => {
+  const toggleStatus = (seasonId: string, newStatus: "active" | "suspended" | "draft" | "awaiting_approval") => {
     setSeasons((p) => p.map((s) => (s.id === seasonId ? { ...s, quizStatus: newStatus } : s)));
     toast({ title: "✅ Status Updated", description: `Season status changed to ${newStatus}.` });
   };
@@ -668,10 +682,97 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
               ))}
             </div>
 
-            <Button className="w-full h-12 text-sm font-bold gap-2" onClick={handleCreate}>
-              <Save className="h-4 w-4" />
-              Create Season
-            </Button>
+            {/* Solvency Check & Waiver */}
+            {(() => {
+              const requiredBalance = totalPrizes * MERCHANT_MIN_WALLET_PERCENT;
+              const isSolvent = merchant.walletBalance >= requiredBalance;
+              const shortfall = requiredBalance - merchant.walletBalance;
+
+              return (
+                <>
+                  {!isSolvent && !waiverRequested && (
+                    <Card className="border-orange-500/40 bg-orange-500/5">
+                      <CardContent className="p-3 space-y-3">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
+                          <div className="space-y-1">
+                            <p className="text-xs font-bold text-orange-700">Insufficient Wallet Balance</p>
+                            <p className="text-xs text-muted-foreground">
+                              Your wallet must hold at least <span className="font-bold text-foreground">70%</span> of the total prize pool to create a season.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Your Wallet</span>
+                            <span className="font-bold">{formatLocalAmount(merchant.walletBalance, "NGN")}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Required (70% of {formatLocalAmount(totalPrizes, "NGN")})</span>
+                            <span className="font-bold text-orange-700">{formatLocalAmount(requiredBalance, "NGN")}</span>
+                          </div>
+                          <div className="flex justify-between border-t pt-1">
+                            <span className="text-muted-foreground">Shortfall</span>
+                            <span className="font-bold text-red-600">{formatLocalAmount(shortfall, "NGN")}</span>
+                          </div>
+                        </div>
+                        <div className="border-t pt-3 space-y-2">
+                          <p className="text-xs font-semibold">Request an Exclusive Waiver</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            A non-refundable fee of <span className="font-bold">{formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")}</span> applies. Your season will be created as "Awaiting Approval".
+                          </p>
+                          <Textarea
+                            placeholder="Optional: explain your situation (e.g. 'Sponsorship funds arriving next week')"
+                            value={waiverContext}
+                            onChange={(e) => setWaiverContext(e.target.value)}
+                            className="min-h-[60px] text-xs"
+                          />
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 text-xs font-bold gap-2 border-orange-500/40 text-orange-700 hover:bg-orange-500/10"
+                            onClick={() => {
+                              setWaiverRequested(true);
+                              toast({
+                                title: "📋 Waiver Request Submitted",
+                                description: `Fee of ${formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")} deducted. You can now create the season.`,
+                              });
+                            }}
+                          >
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            Request Waiver ({formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")})
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {waiverRequested && (
+                    <Card className="border-emerald-500/40 bg-emerald-500/5">
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                          <div>
+                            <p className="text-xs font-bold text-emerald-700">Waiver Submitted</p>
+                            <p className="text-xs text-muted-foreground">
+                              Season will be created as <span className="font-bold">"Awaiting Approval"</span>. An admin will review your request.
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <Button
+                    className="w-full h-12 text-sm font-bold gap-2"
+                    onClick={handleCreate}
+                    disabled={!isSolvent && !waiverRequested}
+                  >
+                    <Save className="h-4 w-4" />
+                    Create Season
+                  </Button>
+                </>
+              );
+            })()}
           </CardContent>
         </Card>
       )}
@@ -706,7 +807,7 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                       {season.type} Season
                     </Badge>
                     <Badge className={`text-xs shrink-0 ${getStatusColor(season.quizStatus)}`}>
-                      {season.quizStatus}
+                      {getStatusLabel(season.quizStatus)}
                     </Badge>
                     {season.isLive && (
                       <Badge className="bg-red-500 text-white text-xs animate-pulse shrink-0">🔴 LIVE</Badge>
@@ -895,6 +996,11 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                       <Button size="sm" variant="outline" className="h-9 text-xs gap-1 flex-1" onClick={() => toggleStatus(season.id, "active")}>
                         <Play className="h-3 w-3" /> Reactivate
                       </Button>
+                    )}
+                    {season.quizStatus === "awaiting_approval" && (
+                      <Badge className="bg-orange-500/15 text-orange-700 text-xs px-3 py-1.5 flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> Pending Admin Approval
+                      </Badge>
                     )}
                     {!isExtending && (
                       <Button size="sm" variant="outline" className="h-9 text-xs gap-1 flex-1" onClick={() => setExtendingSeason(season.id)}>
@@ -1643,7 +1749,7 @@ export default function MerchantPage() {
           </TabsContent>
 
           <TabsContent value="seasons" className="mt-4">
-            <SeasonsTab merchantId={myMerchant.id} />
+            <SeasonsTab merchantId={myMerchant.id} merchant={myMerchant} />
           </TabsContent>
 
           <TabsContent value="questions" className="mt-4">

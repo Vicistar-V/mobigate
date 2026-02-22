@@ -149,7 +149,7 @@ export interface QuizSeason {
   consolationPrizePerPlayer: number;
   consolationPrizeCount: number;
   totalWinningPrizes: number;
-  quizStatus: "draft" | "active" | "suspended";
+  quizStatus: "draft" | "active" | "suspended" | "awaiting_approval";
 }
 
 export interface MerchantQuestion {
