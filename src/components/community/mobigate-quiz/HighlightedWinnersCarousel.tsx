@@ -96,7 +96,7 @@ export function HighlightedWinnersCarousel() {
       <div className="px-4 pb-3">
         <div className="flex items-center gap-2 mb-3">
           <Star className="h-4 w-4 text-amber-500" fill="currentColor" />
-          <span className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Highlighted Winners</span>
+          <span className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Celebrated Winners</span>
         </div>
         <div
           ref={scrollRef}
