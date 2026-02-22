@@ -3,14 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users, MessageSquare } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users, MessageSquare, Send, MoreVertical, Trash2, Pencil, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import type { SeasonWinner } from "@/data/mobigateInteractiveQuizData";
 import { WinnerGallerySection } from "./WinnerGallerySection";
 import { WinnerVideoHighlightsSection } from "./WinnerVideoHighlightsSection";
-import { CommentSection } from "@/components/CommentSection";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +28,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+interface InlineComment {
+  id: string;
+  author: string;
+  avatar: string;
+  content: string;
+  timestamp: Date;
+  likes: number;
+  isLiked: boolean;
+  isOwn: boolean;
+  isHidden: boolean;
+  replies: InlineComment[];
+}
 
 function formatCompact(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -47,6 +67,12 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   const [showFanConfirm, setShowFanConfirm] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
   const commentRef = useRef<HTMLDivElement>(null);
+  const [comments, setComments] = useState<InlineComment[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => {
     if (!open) {
@@ -57,8 +83,178 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
       setCurrentPhoto(0);
       setShowFanConfirm(false);
       setShowComments(false);
+      setComments([]);
+      setCommentText("");
+      setReplyingTo(null);
+      setReplyText("");
+      setEditingId(null);
     }
   }, [open]);
+
+  const handleAddComment = () => {
+    if (!commentText.trim()) return;
+    const newComment: InlineComment = {
+      id: `c_${Date.now()}`,
+      author: "You",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=60",
+      content: commentText.trim(),
+      timestamp: new Date(),
+      likes: 0,
+      isLiked: false,
+      isOwn: true,
+      isHidden: false,
+      replies: [],
+    };
+    setComments(prev => [newComment, ...prev]);
+    setCommentText("");
+    toast({ description: "Comment added" });
+  };
+
+  const handleAddReply = (parentId: string) => {
+    if (!replyText.trim()) return;
+    const reply: InlineComment = {
+      id: `r_${Date.now()}`,
+      author: "You",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=60",
+      content: replyText.trim(),
+      timestamp: new Date(),
+      likes: 0,
+      isLiked: false,
+      isOwn: true,
+      isHidden: false,
+      replies: [],
+    };
+    setComments(prev => prev.map(c => c.id === parentId ? { ...c, replies: [...c.replies, reply] } : c));
+    setReplyText("");
+    setReplyingTo(null);
+    toast({ description: "Reply added" });
+  };
+
+  const handleLikeComment = (id: string) => {
+    setComments(prev => prev.map(c => {
+      if (c.id === id) return { ...c, isLiked: !c.isLiked, likes: c.isLiked ? c.likes - 1 : c.likes + 1 };
+      return { ...c, replies: c.replies.map(r => r.id === id ? { ...r, isLiked: !r.isLiked, likes: r.isLiked ? r.likes - 1 : r.likes + 1 } : r) };
+    }));
+  };
+
+  const handleDeleteComment = (id: string) => {
+    setComments(prev => prev.filter(c => c.id !== id).map(c => ({ ...c, replies: c.replies.filter(r => r.id !== id) })));
+    toast({ description: "Comment deleted" });
+  };
+
+  const handleEditComment = (id: string) => {
+    if (!editText.trim()) return;
+    setComments(prev => prev.map(c => {
+      if (c.id === id) return { ...c, content: editText.trim() };
+      return { ...c, replies: c.replies.map(r => r.id === id ? { ...r, content: editText.trim() } : r) };
+    }));
+    setEditingId(null);
+    setEditText("");
+    toast({ description: "Comment updated" });
+  };
+
+  const handleHideComment = (id: string) => {
+    setComments(prev => prev.map(c => {
+      if (c.id === id) return { ...c, isHidden: !c.isHidden };
+      return { ...c, replies: c.replies.map(r => r.id === id ? { ...r, isHidden: !r.isHidden } : r) };
+    }));
+    toast({ description: "Visibility updated" });
+  };
+
+  const handleShareComment = async (content: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Comment", text: content, url: window.location.href });
+      } else {
+        await navigator.clipboard.writeText(content);
+        toast({ description: "Copied to clipboard" });
+      }
+    } catch {
+      await navigator.clipboard.writeText(content);
+      toast({ description: "Copied to clipboard" });
+    }
+  };
+
+  const renderInlineComment = (c: InlineComment, isReply = false) => {
+    if (c.isHidden && !c.isOwn) return null;
+    const isEditing = editingId === c.id;
+    return (
+      <div key={c.id} className={`${isReply ? "ml-8" : ""} ${c.isHidden ? "opacity-50" : ""}`}>
+        <div className="flex gap-2 py-2">
+          <Avatar className={`${isReply ? "h-6 w-6" : "h-7 w-7"} shrink-0`}>
+            <AvatarImage src={c.avatar} alt={c.author} />
+            <AvatarFallback className="text-xs">{c.author[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-sm font-medium">{c.author}</span>
+                <span className="text-xs text-muted-foreground">{formatDistanceToNow(c.timestamp, { addSuffix: true })}</span>
+                {c.isHidden && <span className="text-xs italic text-muted-foreground">(Hidden)</span>}
+              </div>
+              {c.isOwn && !isEditing && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 touch-manipulation">
+                      <MoreVertical className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="z-[200]">
+                    <DropdownMenuItem className="text-sm touch-manipulation" onClick={() => { setEditingId(c.id); setEditText(c.content); }}>
+                      <Pencil className="h-3.5 w-3.5 mr-2" />Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm touch-manipulation" onClick={() => handleHideComment(c.id)}>
+                      <EyeOff className="h-3.5 w-3.5 mr-2" />{c.isHidden ? "Unhide" : "Hide"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-sm text-destructive touch-manipulation" onClick={() => handleDeleteComment(c.id)}>
+                      <Trash2 className="h-3.5 w-3.5 mr-2" />Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+            {isEditing ? (
+              <div className="mt-1 space-y-2">
+                <Textarea value={editText} onChange={e => setEditText(e.target.value)} className="min-h-[36px] text-sm resize-none" autoFocus />
+                <div className="flex gap-2">
+                  <Button size="sm" className="h-7 text-xs touch-manipulation" onClick={() => handleEditComment(c.id)}>Save</Button>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs touch-manipulation" onClick={() => setEditingId(null)}>Cancel</Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm mt-0.5 break-words leading-relaxed">{c.content}</p>
+            )}
+            {!isEditing && (
+              <div className="flex items-center gap-4 mt-1">
+                <button className={`flex items-center gap-1 text-xs touch-manipulation ${c.isLiked ? "text-red-500" : "text-muted-foreground"}`} onClick={() => handleLikeComment(c.id)}>
+                  <Heart className={`h-3.5 w-3.5 ${c.isLiked ? "fill-current" : ""}`} />{c.likes}
+                </button>
+                {!isReply && (
+                  <button className="flex items-center gap-1 text-xs text-muted-foreground touch-manipulation" onClick={() => { setReplyingTo(replyingTo === c.id ? null : c.id); setReplyText(""); }}>
+                    <MessageCircle className="h-3.5 w-3.5" />{c.replies.length}
+                  </button>
+                )}
+                <button className="flex items-center gap-1 text-xs text-muted-foreground touch-manipulation" onClick={() => handleShareComment(c.content)}>
+                  <Share2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Reply input */}
+        {replyingTo === c.id && (
+          <div className="ml-8 flex gap-2 items-start py-1">
+            <Textarea value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={`Reply to ${c.author}...`} className="min-h-[36px] text-sm resize-none flex-1" autoFocus />
+            <Button size="sm" className="h-8 w-8 p-0 shrink-0 touch-manipulation" onClick={() => handleAddReply(c.id)} disabled={!replyText.trim()}>
+              <Send className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+        {/* Replies */}
+        {c.replies.length > 0 && c.replies.map(r => renderInlineComment(r, true))}
+      </div>
+    );
+  };
 
   if (!winner) return null;
 
@@ -397,12 +593,42 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
 
             {/* Comments - below action buttons */}
             {showComments && (
-              <div ref={commentRef} className="space-y-2.5">
+              <div ref={commentRef} className="space-y-3 pb-4">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-semibold">Comments</span>
+                  <span className="text-sm font-semibold">Comments ({comments.length})</span>
                 </div>
-                <CommentSection postId={`winner-${winner.id}`} showHeader={false} className="rounded-xl border bg-muted/20 p-3" />
+
+                {/* Comment input */}
+                <div className="flex gap-2 items-start">
+                  <Avatar className="h-7 w-7 shrink-0">
+                    <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=60" />
+                    <AvatarFallback>Y</AvatarFallback>
+                  </Avatar>
+                  <Textarea
+                    value={commentText}
+                    onChange={e => setCommentText(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="min-h-[40px] text-sm resize-none flex-1"
+                    onKeyDown={e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); handleAddComment(); } }}
+                  />
+                  <Button size="sm" className="h-8 w-8 p-0 shrink-0 touch-manipulation" onClick={handleAddComment} disabled={!commentText.trim()}>
+                    <Send className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+
+                {/* Comments list */}
+                {comments.length === 0 ? (
+                  <div className="text-center py-6">
+                    <MessageSquare className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+                    <p className="text-sm font-medium">No comments yet</p>
+                    <p className="text-xs text-muted-foreground">Be the first to share your thoughts!</p>
+                  </div>
+                ) : (
+                  <div className="divide-y">
+                    {comments.map(c => renderInlineComment(c))}
+                  </div>
+                )}
               </div>
             )}
           </DrawerBody>
