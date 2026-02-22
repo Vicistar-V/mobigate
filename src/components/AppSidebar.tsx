@@ -165,8 +165,8 @@ const menuItems: MenuItem[] = [{
       title: "Apply for a Merchant Account",
       url: "#",
       items: [
-        { title: "Individual Merchant Account", url: "#" },
-        { title: "Corporate Merchant Account", url: "#" }
+        { title: "Individual Merchant Account", url: "/merchant-application/individual" },
+        { title: "Corporate Merchant Account", url: "/merchant-application/corporate" }
       ]
     },
     {

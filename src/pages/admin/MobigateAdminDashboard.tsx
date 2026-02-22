@@ -33,6 +33,7 @@ import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettings
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
 // MobigateQuizManagement moved to /mobigate-admin/quiz
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { MerchantApplicationsAdmin } from "@/components/mobigate/MerchantApplicationsAdmin";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -151,6 +152,11 @@ export default function MobigateAdminDashboard() {
               <TabsTrigger value="adverts" className="text-xs py-2 px-3">
                 <Megaphone className="h-4 w-4 mr-1" />
                 Adverts
+              </TabsTrigger>
+              <TabsTrigger value="merchants" className="text-xs py-2 px-3 relative">
+                <Store className="h-4 w-4 mr-1" />
+                Merchants
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-[9px] px-1">4</Badge>
               </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2 px-3">
                 <Settings className="h-4 w-4 mr-1" />
@@ -722,6 +728,15 @@ export default function MobigateAdminDashboard() {
 
                 {/* Quiz Settings */}
                 <QuizSettingsCard />
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Merchants Tab */}
+          <TabsContent value="merchants" className="mt-0">
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="pb-6">
+                <MerchantApplicationsAdmin />
               </div>
             </ScrollArea>
           </TabsContent>
