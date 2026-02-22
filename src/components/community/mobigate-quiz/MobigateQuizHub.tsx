@@ -101,7 +101,7 @@ export function MobigateQuizHub({ open, onOpenChange, hideInteractive = false }:
   return (
     <>
       <Dialog open={open && !activeFlow} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0">
+        <DialogContent className="max-w-lg max-h-[92vh] p-0 gap-0 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="p-4 pb-3 sticky top-0 bg-gradient-to-r from-amber-500 to-orange-500 z-10 border-b text-white">
             <div className="flex items-center justify-between">
