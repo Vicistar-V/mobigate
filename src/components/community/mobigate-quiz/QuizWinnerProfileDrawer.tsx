@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users } from "lucide-react";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
 import type { SeasonWinner } from "@/data/mobigateInteractiveQuizData";
 import { WinnerGallerySection } from "./WinnerGallerySection";
 import { WinnerVideoHighlightsSection } from "./WinnerVideoHighlightsSection";
+import { CommentSection } from "@/components/CommentSection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -288,6 +289,15 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
             {winner.videoHighlights && winner.videoHighlights.length > 0 && (
               <WinnerVideoHighlightsSection videoHighlights={winner.videoHighlights} />
             )}
+
+            {/* Comments Section */}
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold">Comments</span>
+              </div>
+              <CommentSection postId={`winner-${winner.id}`} showHeader={false} className="rounded-xl border bg-muted/20 p-3" />
+            </div>
 
             {/* Actions - Row 1: Profile, Add Friend, Message */}
             <div className="grid grid-cols-3 gap-2.5">
