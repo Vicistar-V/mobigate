@@ -201,8 +201,8 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
               <p className="text-xs text-muted-foreground">Fans</p>
             </div>
             <div className="bg-muted/30 rounded-xl p-3 border">
-              <p className="text-lg font-bold">T{winner.tier}</p>
-              <p className="text-xs text-muted-foreground">Tier</p>
+              <p className="text-lg font-bold">{winner.tier >= 6 ? '7 Stars' : `${winner.tier} Stars`}</p>
+              <p className="text-xs text-muted-foreground">Status</p>
             </div>
           </div>
 
