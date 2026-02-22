@@ -26,6 +26,7 @@ import { format } from "date-fns";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveScoreboardDrawer";
 import { InteractiveQuizPlayDialog } from "@/components/community/mobigate-quiz/InteractiveQuizPlayDialog";
+import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz/HighlightedWinnersCarousel";
 
 function getSeasonTypeColor(type: string) {
   switch (type) {
@@ -126,6 +127,9 @@ export default function MerchantDetailPage() {
             </Badge>
           </div>
         </div>
+
+        {/* Highlighted Winners Carousel */}
+        <HighlightedWinnersCarousel />
 
         {/* Platform Settings */}
         <div className="space-y-2">
