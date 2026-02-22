@@ -136,6 +136,20 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                       </div>
                     </div>
 
+                    {/* Selection Rounds */}
+                    {season.selectionProcesses.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase">Selection Rounds</p>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {season.selectionProcesses.map((sp, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs py-0.5 px-2">
+                              Round {sp.round}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* TV Rounds summary */}
                     {season.tvShowRounds.length > 0 && (
                       <div className="space-y-1.5">
