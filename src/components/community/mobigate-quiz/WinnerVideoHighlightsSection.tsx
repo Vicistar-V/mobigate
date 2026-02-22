@@ -98,6 +98,7 @@ export function WinnerVideoHighlightsSection({ videoHighlights }: WinnerVideoHig
         onOpenChange={setViewerOpen}
         items={mediaItems}
         initialIndex={viewerIndex}
+        galleryType="video-highlights"
       />
     </div>
   );
