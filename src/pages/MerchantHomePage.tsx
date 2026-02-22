@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { mockMerchants, mockSeasons, type QuizSeason } from "@/data/mobigateInteractiveQuizData";
 import { getMerchantHomeData, formatCount, type MerchantGalleryItem } from "@/data/merchantHomeData";
@@ -13,7 +14,8 @@ import { MediaGalleryViewer, type MediaItem } from "@/components/MediaGalleryVie
 import { CommentDialog } from "@/components/CommentDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveScoreboardDrawer";
-import { format, isAfter, isBefore } from "date-fns";
+import { shareViaNative, copyToClipboard } from "@/lib/shareUtils";
+import { format } from "date-fns";
 
 const linkIcons: Record<string, any> = {
   globe: Globe, facebook: Facebook, twitter: Twitter,
@@ -36,7 +38,6 @@ export default function MerchantHomePage() {
   const homeData = merchantId ? getMerchantHomeData(merchantId) : undefined;
   const seasons = mockSeasons.filter(s => s.merchantId === merchantId);
 
-  const now = new Date();
   const upcomingSeasons = seasons.filter(s => s.status === "open" || s.status === "in_progress" || s.isLive);
   const pastSeasons = seasons.filter(s => s.status === "completed");
 
@@ -51,6 +52,10 @@ export default function MerchantHomePage() {
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [scoreboardOpen, setScoreboardOpen] = useState(false);
+  const [showAllGallery, setShowAllGallery] = useState(false);
+  const [showAllVideos, setShowAllVideos] = useState(false);
+  const [eventDrawerOpen, setEventDrawerOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<{ date: string; label: string; type: string; seasonId?: string } | null>(null);
 
   const galleryMediaItems: MediaItem[] = useMemo(() =>
     (homeData?.gallery ?? []).map(g => ({
@@ -65,15 +70,15 @@ export default function MerchantHomePage() {
     })), [homeData, merchant]);
 
   const calendarEvents = useMemo(() => {
-    const events: { date: string; label: string; type: string }[] = [];
+    const events: { date: string; label: string; type: string; seasonId?: string }[] = [];
     seasons.forEach(s => {
-      events.push({ date: s.startDate, label: `${s.name} — Start`, type: "start" });
-      events.push({ date: s.endDate, label: `${s.name} — End`, type: "end" });
+      events.push({ date: s.startDate, label: `${s.name} — Start`, type: "start", seasonId: s.id });
+      events.push({ date: s.endDate, label: `${s.name} — End`, type: "end", seasonId: s.id });
       s.selectionProcesses.forEach((sp, i) => {
-        events.push({ date: s.startDate, label: `${s.name} — Selection Round ${i + 1}`, type: "selection" });
+        events.push({ date: s.startDate, label: `${s.name} — Selection Round ${i + 1}`, type: "selection", seasonId: s.id });
       });
       s.tvShowRounds.forEach(tv => {
-        events.push({ date: s.endDate, label: `${s.name} — ${tv.label}`, type: "tv" });
+        events.push({ date: s.endDate, label: `${s.name} — ${tv.label}`, type: "tv", seasonId: s.id });
       });
     });
     return events.sort((a, b) => a.date.localeCompare(b.date));
@@ -103,10 +108,23 @@ export default function MerchantHomePage() {
     toast({ title: "Report Submitted", description: "Thank you for your feedback." });
   };
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/merchant-home/${merchantId}`;
+    const shared = await shareViaNative(merchant.name, homeData?.about ?? `Check out ${merchant.name}!`, url);
+    if (!shared) {
+      setShareOpen(true);
+    }
+  };
+
   const openGallery = (index: number, type: "photo" | "video") => {
     setGalleryIndex(index);
     setGalleryType(type);
     setGalleryViewerOpen(true);
+  };
+
+  const handleEventClick = (ev: { date: string; label: string; type: string; seasonId?: string }) => {
+    setSelectedEvent(ev);
+    setEventDrawerOpen(true);
   };
 
   const quickActions = [
@@ -119,7 +137,7 @@ export default function MerchantHomePage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background pb-20">
+    <div className="flex flex-col min-h-screen bg-background">
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3 bg-background/95 backdrop-blur border-b border-border">
         <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => navigate(-1)}>
@@ -169,19 +187,37 @@ export default function MerchantHomePage() {
             <p className="text-xs text-muted-foreground">Shows</p>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-3 mt-4">
+
+        {/* Action Buttons Row — Like, Follow, Comment, Share, Report */}
+        <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
           <Button
             size="sm"
-            className={`h-10 min-w-[100px] ${isFollowing ? "bg-muted text-foreground hover:bg-muted/80" : "bg-primary text-primary-foreground"}`}
+            variant={isLiked ? "default" : "outline"}
+            className={`h-10 touch-manipulation active:scale-95 ${isLiked ? "bg-red-500 hover:bg-red-600 text-white border-red-500" : ""}`}
+            onClick={handleLike}
+          >
+            <Heart className={`h-4 w-4 mr-1 ${isLiked ? "fill-white" : ""}`} />
+            {isLiked ? "Liked" : "Like"}
+          </Button>
+          <Button
+            size="sm"
+            className={`h-10 touch-manipulation active:scale-95 ${isFollowing ? "bg-muted text-foreground hover:bg-muted/80" : "bg-primary text-primary-foreground"}`}
             onClick={handleFollow}
           >
-            <UserPlus className="h-4 w-4 mr-1.5" />
+            <UserPlus className="h-4 w-4 mr-1" />
             {isFollowing ? "Following" : "Follow"}
           </Button>
-          <Button size="sm" variant="outline" className="h-10" onClick={handleReport}>
-            <Flag className="h-4 w-4 mr-1.5" /> Report
+          <Button size="sm" variant="outline" className="h-10 touch-manipulation active:scale-95" onClick={() => setCommentOpen(true)}>
+            <MessageCircle className="h-4 w-4 mr-1" /> Comment
+          </Button>
+          <Button size="sm" variant="outline" className="h-10 touch-manipulation active:scale-95" onClick={handleShare}>
+            <Share2 className="h-4 w-4 mr-1" /> Share
+          </Button>
+          <Button size="sm" variant="outline" className="h-10 touch-manipulation active:scale-95" onClick={handleReport}>
+            <Flag className="h-4 w-4 mr-1" /> Report
           </Button>
         </div>
+
         {homeData?.about && (
           <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{homeData.about}</p>
         )}
@@ -193,7 +229,7 @@ export default function MerchantHomePage() {
           {quickActions.map(action => (
             <button
               key={action.label}
-              className={`flex flex-col items-center gap-1.5 min-w-[64px] shrink-0`}
+              className="flex flex-col items-center gap-1.5 min-w-[64px] shrink-0 touch-manipulation active:scale-95"
               onClick={action.onClick}
             >
               <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center shadow-md`}>
@@ -209,7 +245,7 @@ export default function MerchantHomePage() {
       {upcomingSeasons.some(s => s.isLive) && (
         <div className="px-4 pb-3">
           <Card
-            className="relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-500 text-white p-4 cursor-pointer active:scale-[0.98] transition-transform"
+            className="relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-500 text-white p-4 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation"
             onClick={() => setScoreboardOpen(true)}
           >
             <div className="flex items-center gap-3">
@@ -217,7 +253,7 @@ export default function MerchantHomePage() {
                 <Play className="h-7 w-7 text-white fill-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <Badge className="bg-white/30 text-white text-[10px] mb-1">🔴 LIVE NOW</Badge>
+                <Badge className="bg-white/30 text-white text-xs mb-1">🔴 LIVE NOW</Badge>
                 <p className="font-semibold text-sm truncate">{upcomingSeasons.find(s => s.isLive)?.name}</p>
                 <p className="text-xs text-white/80">{formatCount(upcomingSeasons.find(s => s.isLive)?.totalParticipants ?? 0)} watching</p>
               </div>
@@ -234,13 +270,13 @@ export default function MerchantHomePage() {
             <h2 className="text-base font-bold flex items-center gap-2">
               <ImageIcon className="h-4 w-4 text-pink-500" /> Gallery
             </h2>
-            <button className="text-xs text-primary font-medium" onClick={() => openGallery(0, "photo")}>View All</button>
+            <button className="text-sm text-primary font-medium touch-manipulation" onClick={() => setShowAllGallery(true)}>View All</button>
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-1" style={{ WebkitOverflowScrolling: "touch" }}>
             {homeData!.gallery.map((img, i) => (
               <div
                 key={img.id}
-                className="shrink-0 w-36 rounded-xl overflow-hidden shadow-md cursor-pointer active:scale-95 transition-transform"
+                className="shrink-0 w-36 rounded-xl overflow-hidden shadow-md cursor-pointer active:scale-95 transition-transform touch-manipulation"
                 onClick={() => openGallery(i, "photo")}
               >
                 <img src={img.url} alt={img.caption} className="h-28 w-full object-cover" loading="lazy" />
@@ -251,6 +287,31 @@ export default function MerchantHomePage() {
         </section>
       )}
 
+      {/* Gallery View All Drawer */}
+      <Drawer open={showAllGallery} onOpenChange={setShowAllGallery}>
+        <DrawerContent className="max-h-[95vh] flex flex-col">
+          <DrawerHeader className="shrink-0">
+            <DrawerTitle className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-pink-500" /> All Photos
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 pb-4">
+            <div className="grid grid-cols-2 gap-2">
+              {homeData?.gallery.map((img, i) => (
+                <div
+                  key={img.id}
+                  className="rounded-xl overflow-hidden shadow-md cursor-pointer active:scale-95 transition-transform touch-manipulation"
+                  onClick={() => { setShowAllGallery(false); openGallery(i, "photo"); }}
+                >
+                  <img src={img.url} alt={img.caption} className="h-32 w-full object-cover" loading="lazy" />
+                  <p className="text-xs p-2 truncate text-foreground">{img.caption}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       {/* Video Highlights */}
       {(homeData?.videoHighlights?.length ?? 0) > 0 && (
         <section className="py-3">
@@ -258,12 +319,13 @@ export default function MerchantHomePage() {
             <h2 className="text-base font-bold flex items-center gap-2">
               <Play className="h-4 w-4 text-cyan-500" /> Video Highlights
             </h2>
+            <button className="text-sm text-primary font-medium touch-manipulation" onClick={() => setShowAllVideos(true)}>View All</button>
           </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-1" style={{ WebkitOverflowScrolling: "touch" }}>
             {homeData!.videoHighlights.map((vid, i) => (
               <div
                 key={vid.id}
-                className="shrink-0 w-44 rounded-xl overflow-hidden shadow-md cursor-pointer active:scale-95 transition-transform relative"
+                className="shrink-0 w-44 rounded-xl overflow-hidden shadow-md cursor-pointer active:scale-95 transition-transform touch-manipulation relative"
                 onClick={() => openGallery(i, "video")}
               >
                 <img src={vid.url} alt={vid.caption} className="h-28 w-full object-cover" loading="lazy" />
@@ -279,6 +341,36 @@ export default function MerchantHomePage() {
         </section>
       )}
 
+      {/* Video View All Drawer */}
+      <Drawer open={showAllVideos} onOpenChange={setShowAllVideos}>
+        <DrawerContent className="max-h-[95vh] flex flex-col">
+          <DrawerHeader className="shrink-0">
+            <DrawerTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5 text-cyan-500" /> All Videos
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 pb-4">
+            <div className="space-y-3">
+              {homeData?.videoHighlights.map((vid, i) => (
+                <div
+                  key={vid.id}
+                  className="rounded-xl overflow-hidden shadow-md cursor-pointer active:scale-95 transition-transform touch-manipulation relative"
+                  onClick={() => { setShowAllVideos(false); openGallery(i, "video"); }}
+                >
+                  <img src={vid.url} alt={vid.caption} className="h-44 w-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div className="h-12 w-12 rounded-full bg-white/90 flex items-center justify-center">
+                      <Play className="h-6 w-6 text-foreground fill-foreground ml-0.5" />
+                    </div>
+                  </div>
+                  <p className="text-sm p-3 text-foreground font-medium">{vid.caption}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       {/* Upcoming Shows */}
       {upcomingSeasons.length > 0 && (
         <section id="shows-section" className="py-3 px-4">
@@ -289,12 +381,12 @@ export default function MerchantHomePage() {
             {upcomingSeasons.map(season => (
               <Card
                 key={season.id}
-                className="p-4 cursor-pointer active:scale-[0.98] transition-transform border-l-4 border-l-primary"
+                className="p-4 cursor-pointer active:scale-[0.98] transition-transform border-l-4 border-l-primary touch-manipulation"
                 onClick={() => navigate(`/mobi-quiz-games/merchant/${merchantId}`)}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       {getSeasonStatusBadge(season)}
                       <Badge variant="outline" className="text-xs">{season.type}</Badge>
                     </div>
@@ -319,7 +411,7 @@ export default function MerchantHomePage() {
         <section className="py-3 px-4">
           <Collapsible open={showPastShows} onOpenChange={setShowPastShows}>
             <CollapsibleTrigger asChild>
-              <button className="flex items-center gap-2 w-full text-left mb-2">
+              <button className="flex items-center gap-2 w-full text-left mb-2 touch-manipulation">
                 <h2 className="text-base font-bold flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-amber-500" /> Past Shows ({pastSeasons.length})
                 </h2>
@@ -351,24 +443,81 @@ export default function MerchantHomePage() {
           </h2>
           <div className="space-y-2">
             {calendarEvents.slice(0, 8).map((ev, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40">
-                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                  {format(new Date(ev.date), "dd")}
+              <div
+                key={i}
+                className="p-3 rounded-xl bg-muted/40 cursor-pointer active:bg-muted/60 transition-colors touch-manipulation"
+                onClick={() => handleEventClick(ev)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                    {format(new Date(ev.date), "dd")}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-snug">{ev.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{format(new Date(ev.date), "MMMM yyyy")}</p>
+                    <Badge
+                      variant="outline"
+                      className="text-xs capitalize mt-1"
+                    >
+                      {ev.type}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{ev.label}</p>
-                  <p className="text-xs text-muted-foreground">{format(new Date(ev.date), "MMM yyyy")}</p>
-                </div>
-                <Badge variant="outline" className="text-[10px] shrink-0 capitalize">{ev.type}</Badge>
               </div>
             ))}
           </div>
         </section>
       )}
 
+      {/* Event Detail Drawer */}
+      <Drawer open={eventDrawerOpen} onOpenChange={setEventDrawerOpen}>
+        <DrawerContent className="max-h-[85vh] flex flex-col">
+          <DrawerHeader className="shrink-0">
+            <DrawerTitle className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-violet-500" /> Event Details
+            </DrawerTitle>
+          </DrawerHeader>
+          {selectedEvent && (
+            <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-lg font-bold shrink-0">
+                    {format(new Date(selectedEvent.date), "dd")}
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold">{selectedEvent.label}</p>
+                    <p className="text-sm text-muted-foreground">{format(new Date(selectedEvent.date), "EEEE, MMMM d, yyyy")}</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-sm capitalize">{selectedEvent.type}</Badge>
+                <div className="p-4 rounded-xl bg-muted/40 space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {selectedEvent.type === "start" && "This marks the beginning of the quiz season. Players can register and start competing!"}
+                    {selectedEvent.type === "end" && "The season concludes on this date. Final scores and winners will be announced."}
+                    {selectedEvent.type === "selection" && "A selection round where contestants compete to qualify for the next phase."}
+                    {selectedEvent.type === "tv" && "A televised show round broadcast live. Tune in to watch the action!"}
+                  </p>
+                </div>
+                {selectedEvent.seasonId && (
+                  <Button
+                    className="w-full h-12 touch-manipulation active:scale-95"
+                    onClick={() => {
+                      setEventDrawerOpen(false);
+                      navigate(`/mobi-quiz-games/merchant/${merchantId}`);
+                    }}
+                  >
+                    <Gamepad2 className="h-4 w-4 mr-2" /> Go to Season
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DrawerContent>
+      </Drawer>
+
       {/* External Links */}
       {(homeData?.links?.length ?? 0) > 0 && (
-        <section id="links-section" className="py-3 px-4">
+        <section id="links-section" className="py-3 px-4 pb-6">
           <h2 className="text-base font-bold flex items-center gap-2 mb-3">
             <Globe className="h-4 w-4 text-emerald-500" /> Links
           </h2>
@@ -381,7 +530,7 @@ export default function MerchantHomePage() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 active:bg-muted/60 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 active:bg-muted/60 transition-colors touch-manipulation"
                 >
                   <Icon className="h-5 w-5 text-primary shrink-0" />
                   <span className="text-sm font-medium flex-1">{link.label}</span>
@@ -392,26 +541,6 @@ export default function MerchantHomePage() {
           </div>
         </section>
       )}
-
-      {/* Fixed Bottom Social Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-4 py-2 bg-background/95 backdrop-blur border-t border-border h-14">
-        <button className="flex flex-col items-center gap-0.5 min-w-[48px]" onClick={handleLike}>
-          <Heart className={`h-5 w-5 ${isLiked ? "text-red-500 fill-red-500" : "text-muted-foreground"}`} />
-          <span className="text-[10px] text-muted-foreground">{formatCount(likeCount)}</span>
-        </button>
-        <button className="flex flex-col items-center gap-0.5 min-w-[48px]" onClick={() => setCommentOpen(true)}>
-          <MessageCircle className="h-5 w-5 text-muted-foreground" />
-          <span className="text-[10px] text-muted-foreground">Comment</span>
-        </button>
-        <button className="flex flex-col items-center gap-0.5 min-w-[48px]" onClick={() => setShareOpen(true)}>
-          <Share2 className="h-5 w-5 text-muted-foreground" />
-          <span className="text-[10px] text-muted-foreground">Share</span>
-        </button>
-        <button className="flex flex-col items-center gap-0.5 min-w-[48px]" onClick={handleFollow}>
-          <UserPlus className={`h-5 w-5 ${isFollowing ? "text-primary" : "text-muted-foreground"}`} />
-          <span className="text-[10px] text-muted-foreground">{isFollowing ? "Following" : "Follow"}</span>
-        </button>
-      </div>
 
       {/* Dialogs & Drawers */}
       <MediaGalleryViewer

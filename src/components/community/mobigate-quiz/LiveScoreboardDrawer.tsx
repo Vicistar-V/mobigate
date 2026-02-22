@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, Star, Radio, Trophy, Flame, Zap } from "lucide-react";
+import { Heart, MessageCircle, Share2, Star, Radio, Trophy, Flame, Zap, User } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
+import { shareViaNative, copyToClipboard } from "@/lib/shareUtils";
 import {
   mockLiveScoreboardPlayers,
   LiveScoreboardPlayer,
@@ -22,44 +24,50 @@ interface LiveScoreboardDrawerProps {
 
 export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawerProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [players, setPlayers] = useState<LiveScoreboardPlayer[]>(
     [...mockLiveScoreboardPlayers].sort((a, b) => b.points - a.points || b.winStreak - a.winStreak)
   );
-  const [joinedFans, setJoinedFans] = useState<Set<string>>(new Set());
   const [commentingPlayer, setCommentingPlayer] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
 
-  const handleFanAction = (player: LiveScoreboardPlayer, action: FanAction) => {
-    if (action === "join_fans" && joinedFans.has(player.id)) {
-      toast({ title: "Already a fan!", description: `You're already a fan of ${player.name}.` });
-      return;
-    }
-
+  const handleFanAction = async (player: LiveScoreboardPlayer, action: FanAction) => {
     if (action === "comment") {
       setCommentingPlayer(prev => prev === player.id ? null : player.id);
       return;
     }
 
-    const fee = getFeeForAction(action);
-    const actionLabel = action === "like" ? "Liked" : action === "share" ? "Shared" : "Joined Fans of";
-
-    // Update stats
-    setPlayers(prev => prev.map(p => {
-      if (p.id !== player.id) return p;
-      return {
-        ...p,
-        likes: action === "like" ? p.likes + 1 : p.likes,
-        shares: action === "share" ? p.shares + 1 : p.shares,
-        fanCount: action === "join_fans" ? p.fanCount + 1 : p.fanCount,
-      };
-    }));
-
-    if (action === "join_fans") {
-      setJoinedFans(prev => new Set(prev).add(player.id));
+    if (action === "share") {
+      const url = `${window.location.origin}/profile/${player.id}`;
+      const shared = await shareViaNative(
+        player.name,
+        `Check out ${player.name}'s performance on MobiGate!`,
+        url
+      );
+      if (!shared) {
+        await copyToClipboard(url);
+        toast({ title: "Link Copied!", description: `${player.name}'s profile link copied to clipboard.` });
+      }
+      const fee = getFeeForAction("share");
+      setPlayers(prev => prev.map(p =>
+        p.id === player.id ? { ...p, shares: p.shares + 1 } : p
+      ));
+      toast({
+        title: `📤 Shared ${player.name}!`,
+        description: `${formatMobiAmount(fee)} charged from your wallet.`,
+      });
+      return;
     }
 
+    // Like action
+    const fee = getFeeForAction(action);
+    setPlayers(prev => prev.map(p => {
+      if (p.id !== player.id) return p;
+      return { ...p, likes: p.likes + 1 };
+    }));
+
     toast({
-      title: `${action === "like" ? "❤️" : action === "share" ? "📤" : "⭐"} ${actionLabel} ${player.name}!`,
+      title: `❤️ Liked ${player.name}!`,
       description: `${formatMobiAmount(fee)} charged from your wallet.`,
     });
   };
@@ -78,6 +86,18 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
     });
     setCommentText("");
     setCommentingPlayer(null);
+  };
+
+  const handlePlayerClick = (player: LiveScoreboardPlayer) => {
+    onOpenChange(false);
+    navigate(`/profile/${player.id}`);
+  };
+
+  const handleMerchantClick = (e: React.MouseEvent, player: LiveScoreboardPlayer) => {
+    e.stopPropagation();
+    onOpenChange(false);
+    // Navigate to the merchant's home page (use a simple lookup from the player's merchantName)
+    navigate(`/merchant-home/m1`);
   };
 
   const getRankStyle = (rank: number) => {
@@ -116,19 +136,22 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
             {players.map((player, idx) => {
               const rank = idx + 1;
               const isCommenting = commentingPlayer === player.id;
-              const isJoined = joinedFans.has(player.id);
 
               return (
                 <div
                   key={player.id}
                   className="rounded-xl border bg-card p-3 space-y-2"
                 >
-                  {/* Top row: rank + player info + points */}
-                  <div className="flex items-center gap-2.5">
+                  {/* Top row: rank + player info + points — clickable to open profile */}
+                  <div
+                    className="flex items-center gap-2.5 cursor-pointer active:bg-muted/40 rounded-lg -m-1 p-1 transition-colors touch-manipulation"
+                    onClick={() => handlePlayerClick(player)}
+                  >
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border ${getRankStyle(rank)}`}>
                       {rank}
                     </div>
                     <Avatar className="h-10 w-10">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} alt={player.name} />
                       <AvatarFallback className={`text-xs font-bold ${player.isOnline ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
                         {player.avatar}
                       </AvatarFallback>
@@ -138,9 +161,13 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                         <span className="text-sm font-bold break-words">{player.name}</span>
                         {player.isOnline && <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />}
                       </div>
-                      <p className="text-xs text-muted-foreground break-words">
-                        {player.merchantName} • {player.seasonName}
-                      </p>
+                      <button
+                        className="text-xs text-primary underline-offset-2 hover:underline touch-manipulation"
+                        onClick={(e) => handleMerchantClick(e, player)}
+                      >
+                        {player.merchantName}
+                      </button>
+                      <span className="text-xs text-muted-foreground"> • {player.seasonName}</span>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-bold text-amber-600">{player.points.toLocaleString()}</p>
@@ -162,11 +189,11 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                     </span>
                   </div>
 
-                  {/* Fan action bar */}
-                  <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                  {/* Fan action bar — Like, Comment, Share only */}
+                  <div className="flex items-center justify-around pt-1 border-t border-border/50">
                     {/* Like */}
                     <button
-                      className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg active:bg-red-50 dark:active:bg-red-950/30 transition-colors touch-manipulation"
+                      className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg active:bg-red-50 dark:active:bg-red-950/30 transition-colors touch-manipulation"
                       onClick={() => handleFanAction(player, "like")}
                     >
                       <Heart className="h-4 w-4 text-red-500" />
@@ -176,7 +203,7 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
 
                     {/* Comment */}
                     <button
-                      className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors touch-manipulation ${isCommenting ? "bg-blue-50 dark:bg-blue-950/30" : "active:bg-blue-50 dark:active:bg-blue-950/30"}`}
+                      className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors touch-manipulation ${isCommenting ? "bg-blue-50 dark:bg-blue-950/30" : "active:bg-blue-50 dark:active:bg-blue-950/30"}`}
                       onClick={() => handleFanAction(player, "comment")}
                     >
                       <MessageCircle className="h-4 w-4 text-blue-500" />
@@ -186,22 +213,12 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
 
                     {/* Share */}
                     <button
-                      className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg active:bg-green-50 dark:active:bg-green-950/30 transition-colors touch-manipulation"
+                      className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg active:bg-green-50 dark:active:bg-green-950/30 transition-colors touch-manipulation"
                       onClick={() => handleFanAction(player, "share")}
                     >
                       <Share2 className="h-4 w-4 text-green-500" />
                       <span className="text-xs text-muted-foreground">{player.shares}</span>
                       <span className="text-xs text-green-400">{formatMobiAmount(getFeeForAction("share"))}</span>
-                    </button>
-
-                    {/* Join Fans */}
-                    <button
-                      className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors touch-manipulation ${isJoined ? "bg-purple-100 dark:bg-purple-950/40" : "active:bg-purple-50 dark:active:bg-purple-950/30"}`}
-                      onClick={() => handleFanAction(player, "join_fans")}
-                    >
-                      <Star className={`h-4 w-4 ${isJoined ? "text-purple-600 fill-purple-500" : "text-purple-500"}`} />
-                      <span className="text-xs text-muted-foreground">{isJoined ? "Joined" : "Join"}</span>
-                      <span className="text-xs text-purple-400">{isJoined ? "✓" : formatMobiAmount(getFeeForAction("join_fans"))}</span>
                     </button>
                   </div>
 
@@ -212,12 +229,13 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         placeholder={`Comment on ${player.name}...`}
-                        className="h-8 text-xs"
+                        className="h-9 text-sm"
                         onKeyDown={(e) => { if (e.key === "Enter") handleSubmitComment(player); }}
+                        onTouchMove={(e) => e.stopPropagation()}
                       />
                       <Button
                         size="sm"
-                        className="h-8 text-xs px-3"
+                        className="h-9 text-xs px-3 touch-manipulation"
                         onClick={() => handleSubmitComment(player)}
                         disabled={!commentText.trim()}
                       >
