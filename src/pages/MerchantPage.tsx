@@ -45,6 +45,13 @@ import {
   Link,
   Unlink,
   Eye,
+  Megaphone,
+  Share2,
+  MessageCircle,
+  Mail,
+  Smartphone,
+  Facebook,
+  Store,
 } from "lucide-react";
 import {
   mockMerchants,
@@ -244,7 +251,7 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
   const [extendingSeason, setExtendingSeason] = useState<string | null>(null);
   const [extensionWeeks, setExtensionWeeks] = useState(2);
   const [extensionReason, setExtensionReason] = useState("");
-
+  const [boostSeasonId, setBoostSeasonId] = useState<string | null>(null);
   // Create form state
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<"Short" | "Medium" | "Complete">("Short");
@@ -848,10 +855,135 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                         <CalendarPlus className="h-3 w-3" /> Extend
                       </Button>
                     )}
-                    <Button size="sm" variant="destructive" className="h-9 text-xs gap-1" onClick={() => deleteSeason(season.id)}>
+                    <Button size="sm" variant="default" className="h-9 text-xs gap-1 flex-1 bg-gradient-to-r from-primary to-primary/80 touch-manipulation active:scale-[0.97]" onClick={() => setBoostSeasonId(season.id)}>
+                      <Megaphone className="h-3 w-3" /> Boost Show
+                    </Button>
+                    <Button size="sm" variant="destructive" className="h-9 text-xs gap-1 touch-manipulation active:scale-[0.97]" onClick={() => deleteSeason(season.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
+
+                  {/* Boost Show Drawer */}
+                  {boostSeasonId === season.id && (
+                    <div className="border-t bg-muted/10">
+                      <div className="p-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-bold flex items-center gap-2">
+                            <Megaphone className="h-4 w-4 text-primary" />
+                            Boost Show
+                          </h4>
+                          <button onClick={() => setBoostSeasonId(null)} className="text-muted-foreground touch-manipulation active:scale-[0.95]">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Promote "{season.name}" to reach more participants</p>
+
+                        <div className="space-y-2">
+                          {/* Boost on Mobigate */}
+                          <button
+                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
+                            onClick={() => {
+                              toast({ title: "🚀 Boost Activated", description: "Your season is now being boosted on Mobigate!" });
+                              setBoostSeasonId(null);
+                            }}
+                          >
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              <Megaphone className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <p className="text-sm font-semibold">Boost on Mobigate</p>
+                              <p className="text-xs text-muted-foreground">Promote to all Mobigate users</p>
+                            </div>
+                          </button>
+
+                          {/* Share with Mobigate Users */}
+                          <button
+                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
+                            onClick={() => {
+                              toast({ title: "👥 Shared!", description: "Season shared with your Mobigate friends." });
+                              setBoostSeasonId(null);
+                            }}
+                          >
+                            <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                              <Users className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <p className="text-sm font-semibold">Share with Mobigate Users</p>
+                              <p className="text-xs text-muted-foreground">Especially friends & connections</p>
+                            </div>
+                          </button>
+
+                          {/* Share on Mobi-Store */}
+                          <button
+                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
+                            onClick={() => {
+                              toast({ title: "🏪 Listed!", description: "Season promoted on Mobi-Store." });
+                              setBoostSeasonId(null);
+                            }}
+                          >
+                            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                              <Store className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <p className="text-sm font-semibold">Share on Mobi-Store</p>
+                              <p className="text-xs text-muted-foreground">Feature in the Mobi-Store marketplace</p>
+                            </div>
+                          </button>
+
+                          {/* Share on Social Media */}
+                          <button
+                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
+                            onClick={() => {
+                              toast({ title: "📱 Social Share", description: "Share links generated for Facebook, WhatsApp, Instagram & Twitter." });
+                              setBoostSeasonId(null);
+                            }}
+                          >
+                            <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
+                              <Share2 className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <p className="text-sm font-semibold">Share on Social Media</p>
+                              <p className="text-xs text-muted-foreground">Facebook, WhatsApp, Instagram, Twitter</p>
+                            </div>
+                          </button>
+
+                          {/* Share via Email */}
+                          <button
+                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
+                            onClick={() => {
+                              toast({ title: "✉️ Email Draft", description: "Invitation email prepared and ready to send." });
+                              setBoostSeasonId(null);
+                            }}
+                          >
+                            <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                              <Mail className="h-5 w-5 text-amber-600" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <p className="text-sm font-semibold">Share via Email</p>
+                              <p className="text-xs text-muted-foreground">Send invitation email to contacts</p>
+                            </div>
+                          </button>
+
+                          {/* Share via SMS */}
+                          <button
+                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
+                            onClick={() => {
+                              toast({ title: "💬 SMS Ready", description: "SMS invitation ready to send." });
+                              setBoostSeasonId(null);
+                            }}
+                          >
+                            <div className="h-10 w-10 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                              <Smartphone className="h-5 w-5 text-teal-600" />
+                            </div>
+                            <div className="text-left flex-1 min-w-0">
+                              <p className="text-sm font-semibold">Share via SMS</p>
+                              <p className="text-xs text-muted-foreground">Send text message invitations</p>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
