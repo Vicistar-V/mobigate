@@ -356,6 +356,7 @@ export interface SeasonWinner {
   seasonId: string;
   playerName: string;
   playerAvatar: string;
+  photos: string[];
   state: string;
   country: string;
   position: "1st" | "2nd" | "3rd" | "consolation";
@@ -369,21 +370,51 @@ export interface SeasonWinner {
   fans: number;
 }
 
+const samplePhotos = [
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop&crop=face",
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face",
+];
+
+const galleryPhotos = [
+  ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop", "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&h=400&fit=crop", "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop", "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=400&fit=crop", "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop"],
+  ["https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=600&fit=crop&crop=face", "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=400&fit=crop"],
+];
+
 export const mockSeasonWinners: SeasonWinner[] = [
   // Season s1 winners
-  { id: "w1", seasonId: "s1", playerName: "Chidera Okafor", playerAvatar: "", state: "Lagos", country: "Nigeria", position: "1st", prizeAmount: 6000000, score: 98, completionDate: "2025-06-28", payoutStatus: "paid", isHighlighted: true, tier: 7, followers: 4800, fans: 1920 },
-  { id: "w2", seasonId: "s1", playerName: "Amina Yusuf", playerAvatar: "", state: "Kano", country: "Nigeria", position: "2nd", prizeAmount: 3000000, score: 95, completionDate: "2025-06-28", payoutStatus: "paid", isHighlighted: true, tier: 6, followers: 3200, fans: 1450 },
-  { id: "w3", seasonId: "s1", playerName: "Tunde Adeyemi", playerAvatar: "", state: "Oyo", country: "Nigeria", position: "3rd", prizeAmount: 1500000, score: 92, completionDate: "2025-06-28", payoutStatus: "processing", isHighlighted: true, tier: 5, followers: 2100, fans: 890 },
-  { id: "w4", seasonId: "s1", playerName: "Ngozi Eze", playerAvatar: "", state: "Enugu", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 85, completionDate: "2025-06-27", payoutStatus: "paid", tier: 3, followers: 680, fans: 210 },
-  { id: "w5", seasonId: "s1", playerName: "Ibrahim Musa", playerAvatar: "", state: "Kaduna", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 84, completionDate: "2025-06-27", payoutStatus: "pending", tier: 2, followers: 420, fans: 130 },
-  { id: "w6", seasonId: "s1", playerName: "Blessing Okonkwo", playerAvatar: "", state: "Anambra", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 83, completionDate: "2025-06-26", payoutStatus: "pending", tier: 2, followers: 350, fans: 95 },
+  { id: "w1", seasonId: "s1", playerName: "Chidera Okafor", playerAvatar: samplePhotos[0], photos: galleryPhotos[0], state: "Lagos", country: "Nigeria", position: "1st", prizeAmount: 6000000, score: 98, completionDate: "2025-06-28", payoutStatus: "paid", isHighlighted: true, tier: 7, followers: 4800, fans: 1920 },
+  { id: "w2", seasonId: "s1", playerName: "Amina Yusuf", playerAvatar: samplePhotos[1], photos: galleryPhotos[1], state: "Kano", country: "Nigeria", position: "2nd", prizeAmount: 3000000, score: 95, completionDate: "2025-06-28", payoutStatus: "paid", isHighlighted: true, tier: 6, followers: 3200, fans: 1450 },
+  { id: "w3", seasonId: "s1", playerName: "Tunde Adeyemi", playerAvatar: samplePhotos[2], photos: galleryPhotos[2], state: "Oyo", country: "Nigeria", position: "3rd", prizeAmount: 1500000, score: 92, completionDate: "2025-06-28", payoutStatus: "processing", isHighlighted: true, tier: 5, followers: 2100, fans: 890 },
+  { id: "w4", seasonId: "s1", playerName: "Ngozi Eze", playerAvatar: samplePhotos[3], photos: galleryPhotos[3], state: "Enugu", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 85, completionDate: "2025-06-27", payoutStatus: "paid", tier: 3, followers: 680, fans: 210 },
+  { id: "w5", seasonId: "s1", playerName: "Ibrahim Musa", playerAvatar: samplePhotos[4], photos: galleryPhotos[4], state: "Kaduna", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 84, completionDate: "2025-06-27", payoutStatus: "pending", tier: 2, followers: 420, fans: 130 },
+  { id: "w6", seasonId: "s1", playerName: "Blessing Okonkwo", playerAvatar: samplePhotos[5], photos: galleryPhotos[5], state: "Anambra", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 83, completionDate: "2025-06-26", payoutStatus: "pending", tier: 2, followers: 350, fans: 95 },
   // Season s2 winners
-  { id: "w7", seasonId: "s2", playerName: "Oluwaseun Balogun", playerAvatar: "", state: "Lagos", country: "Nigeria", position: "1st", prizeAmount: 8000000, score: 97, completionDate: "2025-12-20", payoutStatus: "pending", isHighlighted: true, tier: 7, followers: 5200, fans: 2050 },
-  { id: "w8", seasonId: "s2", playerName: "Fatima Abdullahi", playerAvatar: "", state: "Abuja", country: "Nigeria", position: "2nd", prizeAmount: 4000000, score: 94, completionDate: "2025-12-20", payoutStatus: "pending", isHighlighted: true, tier: 5, followers: 2800, fans: 1100 },
-  { id: "w9", seasonId: "s2", playerName: "Emeka Nnamdi", playerAvatar: "", state: "Rivers", country: "Nigeria", position: "3rd", prizeAmount: 2000000, score: 91, completionDate: "2025-12-20", payoutStatus: "pending", tier: 4, followers: 1500, fans: 620 },
-  { id: "w10", seasonId: "s2", playerName: "Aisha Bello", playerAvatar: "", state: "Katsina", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 86, completionDate: "2025-12-19", payoutStatus: "pending", tier: 3, followers: 780, fans: 280 },
-  { id: "w11", seasonId: "s2", playerName: "Chukwuma Obi", playerAvatar: "", state: "Delta", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 85, completionDate: "2025-12-19", payoutStatus: "pending", tier: 2, followers: 490, fans: 150 },
-  { id: "w12", seasonId: "s2", playerName: "Halima Suleiman", playerAvatar: "", state: "Sokoto", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 84, completionDate: "2025-12-18", payoutStatus: "pending", tier: 1, followers: 180, fans: 60 },
+  { id: "w7", seasonId: "s2", playerName: "Oluwaseun Balogun", playerAvatar: samplePhotos[6], photos: galleryPhotos[6], state: "Lagos", country: "Nigeria", position: "1st", prizeAmount: 8000000, score: 97, completionDate: "2025-12-20", payoutStatus: "pending", isHighlighted: true, tier: 7, followers: 5200, fans: 2050 },
+  { id: "w8", seasonId: "s2", playerName: "Fatima Abdullahi", playerAvatar: samplePhotos[7], photos: galleryPhotos[7], state: "Abuja", country: "Nigeria", position: "2nd", prizeAmount: 4000000, score: 94, completionDate: "2025-12-20", payoutStatus: "pending", isHighlighted: true, tier: 5, followers: 2800, fans: 1100 },
+  { id: "w9", seasonId: "s2", playerName: "Emeka Nnamdi", playerAvatar: samplePhotos[8], photos: galleryPhotos[8], state: "Rivers", country: "Nigeria", position: "3rd", prizeAmount: 2000000, score: 91, completionDate: "2025-12-20", payoutStatus: "pending", tier: 4, followers: 1500, fans: 620 },
+  { id: "w10", seasonId: "s2", playerName: "Aisha Bello", playerAvatar: samplePhotos[9], photos: galleryPhotos[9], state: "Katsina", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 86, completionDate: "2025-12-19", payoutStatus: "pending", tier: 3, followers: 780, fans: 280 },
+  { id: "w11", seasonId: "s2", playerName: "Chukwuma Obi", playerAvatar: samplePhotos[10], photos: galleryPhotos[10], state: "Delta", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 85, completionDate: "2025-12-19", payoutStatus: "pending", tier: 2, followers: 490, fans: 150 },
+  { id: "w12", seasonId: "s2", playerName: "Halima Suleiman", playerAvatar: samplePhotos[11], photos: galleryPhotos[11], state: "Sokoto", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 84, completionDate: "2025-12-18", payoutStatus: "pending", tier: 1, followers: 180, fans: 60 },
 ];
 
 export const INTERACTIVE_QUESTIONS_PER_SESSION = 15;

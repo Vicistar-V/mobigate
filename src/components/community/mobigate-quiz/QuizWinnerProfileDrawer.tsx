@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Store, Users } from "lucide-react";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
@@ -27,24 +27,27 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   const { toast } = useToast();
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFan, setIsFan] = useState(false);
+  const [currentPhoto, setCurrentPhoto] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
       setFriendRequestSent(false);
       setIsFan(false);
+      setCurrentPhoto(0);
     }
   }, [open]);
 
   if (!winner) return null;
 
-  const initials = winner.playerName.split(" ").map(n => n[0]).join("");
+  const photos = winner.photos?.length ? winner.photos : [winner.playerAvatar];
 
   const getPositionIcon = () => {
     switch (winner.position) {
-      case "1st": return <Crown className="h-6 w-6 text-amber-500" />;
-      case "2nd": return <Medal className="h-6 w-6 text-slate-400" />;
-      case "3rd": return <Medal className="h-6 w-6 text-amber-700" />;
-      default: return <Trophy className="h-6 w-6 text-purple-500" />;
+      case "1st": return <Crown className="h-5 w-5 text-amber-500" />;
+      case "2nd": return <Medal className="h-5 w-5 text-slate-400" />;
+      case "3rd": return <Medal className="h-5 w-5 text-amber-700" />;
+      default: return <Trophy className="h-5 w-5 text-purple-500" />;
     }
   };
 
@@ -107,50 +110,91 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
     }
   };
 
+  const handleGalleryScroll = () => {
+    const el = galleryRef.current;
+    if (!el) return;
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    setCurrentPhoto(index);
+  };
+
+  const scrollToPhoto = (index: number) => {
+    const el = galleryRef.current;
+    if (!el) return;
+    el.scrollTo({ left: index * el.clientWidth, behavior: "smooth" });
+  };
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[92vh]" showClose>
         <DrawerHeader className="text-center pb-2">
           <DrawerTitle className="sr-only">Winner Profile</DrawerTitle>
         </DrawerHeader>
-        <DrawerBody className="px-4 pb-6 space-y-5">
-          {/* Avatar & Name */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="relative">
-              <div className="h-20 w-20 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/30 flex items-center justify-center text-2xl font-bold text-amber-700 dark:text-amber-300 border-2 border-amber-300/50">
-                {initials}
+        <DrawerBody className="px-4 pb-6 space-y-4 overflow-y-auto touch-auto overscroll-contain">
+          {/* Slidable Photo Gallery */}
+          <div className="relative">
+            <div
+              ref={galleryRef}
+              className="flex overflow-x-auto snap-x snap-mandatory touch-pan-x"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+              onScroll={handleGalleryScroll}
+            >
+              {photos.map((photo, idx) => (
+                <div key={idx} className="snap-center shrink-0 w-full">
+                  <div className="aspect-square mx-auto max-w-[280px] rounded-2xl overflow-hidden border-2 border-amber-300/30 shadow-lg">
+                    <img src={photo} alt={`${winner.playerName} photo ${idx + 1}`} className="h-full w-full object-cover" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Dots indicator */}
+            {photos.length > 1 && (
+              <div className="flex items-center justify-center gap-1.5 mt-2">
+                {photos.map((_, idx) => (
+                  <button
+                    key={idx}
+                    className={`h-2 rounded-full transition-all touch-manipulation ${
+                      idx === currentPhoto ? "w-5 bg-amber-500" : "w-2 bg-muted-foreground/30"
+                    }`}
+                    onClick={() => scrollToPhoto(idx)}
+                  />
+                ))}
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5 border">
+            )}
+            {/* Position badge overlay */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 ml-[-140px]">
+              <div className="bg-background/80 backdrop-blur-sm rounded-full p-1.5 border shadow-sm">
                 {getPositionIcon()}
               </div>
             </div>
-            <div className="text-center">
-              <h3 className="text-lg font-bold">{winner.playerName}</h3>
-              <p className="text-sm text-muted-foreground">{winner.state}, {winner.country}</p>
-              <div className="flex items-center justify-center gap-2 mt-1.5">
-                <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
-                  {getPositionLabel()}
-                </Badge>
-                <Badge className={`text-xs ${getTierColor(winner.tier)}`}>
-                  <Shield className="h-3 w-3 mr-0.5" /> Tier {winner.tier}
-                </Badge>
-              </div>
+          </div>
+
+          {/* Name & Badges */}
+          <div className="text-center space-y-2">
+            <h3 className="text-xl font-bold">{winner.playerName}</h3>
+            <p className="text-sm text-muted-foreground">{winner.state}, {winner.country}</p>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
+                {getPositionLabel()}
+              </Badge>
+              <Badge className={`text-xs ${getTierColor(winner.tier)}`}>
+                <Shield className="h-3 w-3 mr-0.5" /> Tier {winner.tier}
+              </Badge>
             </div>
           </div>
 
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-muted/30 rounded-xl p-2.5 border">
-              <p className="text-base font-bold">{formatCompact(winner.followers)}</p>
-              <p className="text-[10px] text-muted-foreground">Followers</p>
+            <div className="bg-muted/30 rounded-xl p-3 border">
+              <p className="text-lg font-bold">{formatCompact(winner.followers)}</p>
+              <p className="text-xs text-muted-foreground">Followers</p>
             </div>
-            <div className="bg-muted/30 rounded-xl p-2.5 border">
-              <p className="text-base font-bold">{formatCompact(winner.fans)}</p>
-              <p className="text-[10px] text-muted-foreground">Fans</p>
+            <div className="bg-muted/30 rounded-xl p-3 border">
+              <p className="text-lg font-bold">{formatCompact(winner.fans)}</p>
+              <p className="text-xs text-muted-foreground">Fans</p>
             </div>
-            <div className="bg-muted/30 rounded-xl p-2.5 border">
-              <p className="text-base font-bold">T{winner.tier}</p>
-              <p className="text-[10px] text-muted-foreground">Tier</p>
+            <div className="bg-muted/30 rounded-xl p-3 border">
+              <p className="text-lg font-bold">T{winner.tier}</p>
+              <p className="text-xs text-muted-foreground">Tier</p>
             </div>
           </div>
 
@@ -190,52 +234,52 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           <div className="grid grid-cols-3 gap-2.5">
             <Button
               variant="outline"
-              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
+              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
               onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-5 w-5" />
               <span>Profile</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
+              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
               disabled={friendRequestSent}
               onClick={handleAddFriend}
             >
-              <UserPlus className="h-4 w-4" />
+              <UserPlus className="h-5 w-5" />
               <span>{friendRequestSent ? "Sent" : "Add Friend"}</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
+              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
               onClick={() => toast({ title: "Message", description: `Opening chat with ${winner.playerName}...` })}
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="h-5 w-5" />
               <span>Message</span>
             </Button>
             <Button
-              className={`h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1 ${isFan ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"}`}
+              className={`h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1 ${isFan ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"}`}
               disabled={isFan}
               onClick={handleBecomeFan}
             >
-              <Star className="h-4 w-4" fill={isFan ? "currentColor" : "none"} />
+              <Star className="h-5 w-5" fill={isFan ? "currentColor" : "none"} />
               <span>{isFan ? "Fanned" : "Fan M200"}</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
+              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
               onClick={handleShare}
             >
-              <Share2 className="h-4 w-4" />
+              <Share2 className="h-5 w-5" />
               <span>Share</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
-              onClick={() => { navigate("/merchant"); onOpenChange(false); }}
+              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
+              onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
             >
-              <Store className="h-4 w-4" />
-              <span>Mobigate</span>
+              <Users className="h-5 w-5" />
+              <span>Profile</span>
             </Button>
           </div>
         </DrawerBody>
