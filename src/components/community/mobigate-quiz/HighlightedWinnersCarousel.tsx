@@ -1,8 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Crown, Medal, Trophy, Star, Shield } from "lucide-react";
+import { Crown, Medal, Trophy, Star, Shield, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { mockSeasonWinners, mockSeasons, mockMerchants, type SeasonWinner } from "@/data/mobigateInteractiveQuizData";
 import { QuizWinnerProfileDrawer } from "./QuizWinnerProfileDrawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function formatCompact(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -16,6 +26,7 @@ export function HighlightedWinnersCarousel() {
   const [selectedWinner, setSelectedWinner] = useState<SeasonWinner | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
+  const [fanConfirmWinner, setFanConfirmWinner] = useState<SeasonWinner | null>(null);
 
   const highlightedWinners = mockSeasonWinners.filter(w => w.isHighlighted);
 
@@ -37,15 +48,21 @@ export function HighlightedWinnersCarousel() {
     return () => clearInterval(interval);
   }, [highlightedWinners.length, isTouching]);
 
-  const handleFan = useCallback((e: React.MouseEvent, winner: SeasonWinner) => {
+  const handleFanClick = useCallback((e: React.MouseEvent, winner: SeasonWinner) => {
     e.stopPropagation();
     if (fannedWinners.has(winner.id)) return;
-    setFannedWinners(prev => new Set(prev).add(winner.id));
+    setFanConfirmWinner(winner);
+  }, [fannedWinners]);
+
+  const confirmFan = useCallback(() => {
+    if (!fanConfirmWinner) return;
+    setFannedWinners(prev => new Set(prev).add(fanConfirmWinner.id));
     toast({
       title: "⭐ You're now a fan!",
-      description: `M200 debited. Following ${winner.playerName}!`,
+      description: `M200 debited. Following ${fanConfirmWinner.playerName}!`,
     });
-  }, [fannedWinners, toast]);
+    setFanConfirmWinner(null);
+  }, [fanConfirmWinner, toast]);
 
   const handleCardClick = useCallback((winner: SeasonWinner) => {
     setSelectedWinner(winner);
@@ -94,43 +111,48 @@ export function HighlightedWinnersCarousel() {
             return (
               <div
                 key={winner.id}
-                className="snap-center shrink-0 w-[130px] rounded-2xl border bg-gradient-to-b from-amber-50/80 to-background dark:from-amber-950/20 dark:to-background border-amber-200/50 dark:border-amber-800/30 p-3 flex flex-col items-center gap-2 cursor-pointer active:scale-95 transition-transform touch-manipulation"
+                className="snap-center shrink-0 w-[140px] rounded-2xl border bg-gradient-to-b from-amber-50/80 to-background dark:from-amber-950/20 dark:to-background border-amber-200/50 dark:border-amber-800/30 p-3 flex flex-col items-center cursor-pointer active:scale-[0.97] transition-transform touch-manipulation"
                 onClick={() => handleCardClick(winner)}
               >
-                {/* Position icon */}
-                {getPositionIcon(winner.position)}
+                {/* Row 1: Position icon */}
+                <div className="mb-1.5">
+                  {getPositionIcon(winner.position)}
+                </div>
 
-                {/* Photo - rounded square */}
-                <div className="h-16 w-16 rounded-xl overflow-hidden border-2 border-amber-300/40 shadow-sm">
+                {/* Row 2: Photo - rounded square */}
+                <div className="h-[72px] w-[72px] rounded-2xl overflow-hidden border-2 border-amber-300/40 shadow-md mb-2">
                   <img
                     src={winner.playerAvatar}
                     alt={winner.playerName}
                     className="h-full w-full object-cover"
+                    loading="lazy"
                   />
                 </div>
 
-                {/* Name */}
-                <p className="text-sm font-bold text-center leading-tight truncate w-full">{winner.playerName.split(" ")[0]}</p>
+                {/* Row 3: Name */}
+                <p className="text-[15px] font-bold text-center leading-snug truncate w-full mb-1">
+                  {winner.playerName.split(" ")[0]}
+                </p>
 
-                {/* Tier + Fans */}
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Shield className="h-3 w-3 text-blue-500" />
+                {/* Row 4: Tier + Fans stacked for clarity */}
+                <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mb-2.5">
+                  <Shield className="h-3.5 w-3.5 text-blue-500 shrink-0" />
                   <span className="font-bold">T{winner.tier}</span>
-                  <span>·</span>
+                  <span className="text-muted-foreground/50">·</span>
                   <span>{formatCompact(winner.fans)} fans</span>
                 </div>
 
-                {/* Fan button */}
+                {/* Row 5: Fan button - full width */}
                 <button
-                  className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors touch-manipulation ${
+                  className={`w-full py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors touch-manipulation active:scale-[0.97] ${
                     isFanned
                       ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
-                      : "bg-gradient-to-r from-amber-500 to-orange-500 text-white active:from-amber-600 active:to-orange-600"
+                      : "bg-gradient-to-r from-amber-500 to-orange-500 text-white active:from-amber-600 active:to-orange-600 shadow-sm"
                   }`}
                   disabled={isFanned}
-                  onClick={(e) => handleFan(e, winner)}
+                  onClick={(e) => handleFanClick(e, winner)}
                 >
-                  <Star className="h-3.5 w-3.5" fill={isFanned ? "currentColor" : "none"} />
+                  <Star className="h-4 w-4" fill={isFanned ? "currentColor" : "none"} />
                   {isFanned ? "Fanned" : "Fan M200"}
                 </button>
               </div>
@@ -138,6 +160,43 @@ export function HighlightedWinnersCarousel() {
           })}
         </div>
       </div>
+
+      {/* Fan Confirmation Dialog */}
+      <AlertDialog open={!!fanConfirmWinner} onOpenChange={(open) => !open && setFanConfirmWinner(null)}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader className="text-center">
+            <div className="flex justify-center mb-2">
+              {fanConfirmWinner && (
+                <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-amber-300/40 shadow-md">
+                  <img
+                    src={fanConfirmWinner.playerAvatar}
+                    alt={fanConfirmWinner.playerName}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+            <AlertDialogTitle className="text-base">
+              Become a fan of {fanConfirmWinner?.playerName}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              This will debit <span className="font-bold text-foreground">M200</span> from your wallet. You'll follow their quiz journey and get updates.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2">
+            <AlertDialogCancel className="flex-1 h-12 touch-manipulation active:scale-[0.97]">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 touch-manipulation active:scale-[0.97]"
+              onClick={confirmFan}
+            >
+              <Star className="h-4 w-4 mr-1.5" />
+              Fan M200
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <QuizWinnerProfileDrawer
         winner={selectedWinner}
