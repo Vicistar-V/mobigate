@@ -28,7 +28,7 @@ import CreateQuestionPage from "./pages/admin/quiz/CreateQuestionPage";
 import ManageQuestionsPage from "./pages/admin/quiz/ManageQuestionsPage";
 import MonitorQuizPage from "./pages/admin/quiz/MonitorQuizPage";
 import QuizGamesPlayedPage from "./pages/admin/quiz/QuizGamesPlayedPage";
-import InteractiveMerchantsPage from "./pages/admin/quiz/InteractiveMerchantsPage";
+import MerchantPage from "./pages/MerchantPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
@@ -83,7 +83,7 @@ const App = () => {
                   <Route path="/mobigate-admin/quiz/:quizType/questions/create" element={<CreateQuestionPage />} />
                   <Route path="/mobigate-admin/quiz/:quizType/questions" element={<ManageQuestionsPage />} />
                   <Route path="/mobigate-admin/quiz/:quizType/monitor" element={<MonitorQuizPage />} />
-                  <Route path="/mobigate-admin/quiz/interactive/merchants" element={<InteractiveMerchantsPage />} />
+                  <Route path="/merchant-page" element={<MerchantPage />} />
 
                   {/* Legacy routes redirect to group */}
                   <Route path="/mobigate-admin/quiz/categories" element={<Navigate to="/mobigate-admin/quiz/group/categories" replace />} />
