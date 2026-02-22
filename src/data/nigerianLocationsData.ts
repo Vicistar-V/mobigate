@@ -302,12 +302,21 @@ export function getLGAsForState(stateId?: string) {
   );
 }
 
-// Helper to get cities for an LGA, or ALL cities if no LGA specified
-export function getCitiesForLGA(lgaId?: string) {
+// Helper to get cities for an LGA, or all cities within a state, or ALL cities
+export function getCitiesForLGA(lgaId?: string, stateId?: string) {
   if (lgaId) {
     for (const state of nigerianStates) {
       const lga = state.lgas.find(l => l.id === lgaId);
       if (lga) return lga.cities.map(c => ({ id: c.id, name: c.name }));
+    }
+    return [];
+  }
+  if (stateId) {
+    const state = nigerianStates.find(s => s.id === stateId);
+    if (state) {
+      return state.lgas.flatMap(l =>
+        l.cities.map(c => ({ id: c.id, name: `${c.name} (${l.name})` }))
+      );
     }
     return [];
   }

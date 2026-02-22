@@ -39,7 +39,7 @@ export default function MerchantListingPage() {
   const isNigeria = selectedCountry === "ng" || !selectedCountry;
   const states = useMemo(() => isNigeria ? getNigerianStatesForFilter() : [], [isNigeria]);
   const lgas = useMemo(() => getLGAsForState(selectedState || undefined), [selectedState]);
-  const cities = useMemo(() => getCitiesForLGA(selectedLGA || undefined), [selectedLGA]);
+  const cities = useMemo(() => getCitiesForLGA(selectedLGA || undefined, selectedState || undefined), [selectedLGA, selectedState]);
 
   // Switching tabs just changes filter depth — selections are preserved
   const setView = (mode: ViewMode) => {
