@@ -84,38 +84,6 @@ export function ProfileMobiQuizTab() {
         </div>
       </Card>
 
-      {/* Mode Breakdown */}
-      <Card className="rounded-xl p-4 space-y-3">
-        <h3 className="font-semibold text-sm flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-blue-500" /> Performance by Mode
-        </h3>
-        <div className="grid grid-cols-2 gap-2">
-          {Object.entries(modeBreakdown).map(([mode, data]) => {
-            const config = MODE_CONFIG[mode] || { icon: <Gamepad2 className="h-4 w-4" />, gradient: "from-gray-500 to-gray-600", label: mode };
-            return (
-              <button
-                key={mode}
-                onClick={() => navigate(`/my-quiz-history?mode=${encodeURIComponent(mode)}`)}
-                className="text-left bg-muted/40 rounded-xl p-3 space-y-1.5 active:scale-[0.97] transition-transform touch-manipulation"
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${config.gradient} flex items-center justify-center text-white`}>
-                    {config.icon}
-                  </div>
-                  <span className="text-xs font-semibold truncate">{config.label}</span>
-                </div>
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-green-600 font-medium">{data.wins}W</span>
-                  <span className="text-red-500 font-medium">{data.losses}L</span>
-                </div>
-                <p className={`text-xs font-bold ${data.earnings >= 0 ? "text-green-600" : "text-red-500"}`}>
-                  {data.earnings >= 0 ? "+" : ""}{formatLocalAmount(data.earnings, "NGN")}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </Card>
 
       {/* Recent Games */}
       <Card className="rounded-xl p-4 space-y-3">
