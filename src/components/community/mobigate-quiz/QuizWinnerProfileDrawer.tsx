@@ -53,9 +53,9 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
 
   const getPositionLabel = () => {
     switch (winner.position) {
-      case "1st": return "1st Place Champion";
-      case "2nd": return "2nd Place Runner-Up";
-      case "3rd": return "3rd Place Winner";
+      case "1st": return "1st Price";
+      case "2nd": return "2nd Runner-Up";
+      case "3rd": return "3rd Runner-Up";
       default: return "Consolation Winner";
     }
   };
@@ -172,19 +172,22 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           <div className="text-center space-y-2">
             <h3 className="text-xl font-bold">{winner.playerName}</h3>
             <p className="text-sm text-muted-foreground">{winner.state}, {winner.country}</p>
-            <div className="flex items-center justify-center gap-2">
-              <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
-                {getPositionLabel()}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Badge className={`text-xs ${getTierColor(winner.tier)}`}>
-                <Shield className="h-3 w-3 mr-0.5" /> Tier {winner.tier}
-              </Badge>
-              {winner.tier >= 6 && (
+            <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
+              {getPositionLabel()}
+            </Badge>
+            {winner.tier >= 6 && (
+              <div className="flex flex-col items-center gap-1">
                 <span className="text-sm font-semibold text-purple-700">Celebrity</span>
-              )}
-            </div>
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${i < 7 ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground/30'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Stats row */}
