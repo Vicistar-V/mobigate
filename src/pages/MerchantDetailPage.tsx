@@ -10,14 +10,12 @@ import {
   ArrowLeft,
   BadgeCheck,
   Trophy,
-  Users,
   Zap,
   Star,
   Crown,
   Medal,
   Gift,
   Tv,
-  Ticket,
   Target,
   Gamepad2,
   Play,
@@ -230,35 +228,8 @@ export default function MerchantDetailPage() {
                   </div>
                 </div>
 
-                {/* Entry Fee & Participants */}
-                <div className="p-3 grid grid-cols-2 gap-2">
-                  <div className="p-2 bg-muted/20 rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">Entry Fee</p>
-                    <p className="text-sm font-bold">{formatLocalAmount(season.entryFee, "NGN")}</p>
-                  </div>
-                  <div className="p-2 bg-muted/20 rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">Participants</p>
-                    <p className="text-sm font-bold">{season.totalParticipants.toLocaleString()}</p>
-                  </div>
-                </div>
 
-                {/* Selection Process */}
-                {season.selectionProcesses.length > 0 && (
-                  <div className="px-3 pb-2 space-y-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <Ticket className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-xs font-semibold">Selection Rounds</span>
-                    </div>
-                    <div className="space-y-1">
-                      {season.selectionProcesses.map((sp) => (
-                        <div key={sp.round} className="flex items-center justify-between text-xs bg-muted/10 rounded px-2 py-1.5">
-                          <span className="text-muted-foreground">Round {sp.round}</span>
-                          <span>{sp.entriesSelected.toLocaleString()} entries • {formatLocalAmount(sp.entryFee, "NGN")}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
 
                 {/* TV Show Rounds */}
                 {season.tvShowRounds.length > 0 && (

@@ -120,15 +120,10 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <div className="p-2 bg-muted/50 rounded text-center">
                         <p className="text-xs text-muted-foreground">Levels</p>
                         <p className="font-bold text-sm">{season.selectionLevels}</p>
-                      </div>
-                      <div className="p-2 bg-muted/50 rounded text-center">
-                        <p className="text-xs text-muted-foreground">Entry</p>
-                        <p className="font-bold text-sm text-red-600">{formatMobiAmount(season.entryFee)}</p>
-                        <p className="text-xs text-muted-foreground">{formatLocalAmount(season.entryFee, "NGN")}</p>
                       </div>
                       <div className="p-2 bg-muted/50 rounded text-center">
                         <p className="text-xs text-muted-foreground">Prize/Lvl</p>
@@ -137,31 +132,21 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                       </div>
                     </div>
 
-                    {/* Selection process stages */}
-                    <div className="space-y-1.5">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">Selection Stages</p>
-                      <div className="flex gap-1.5 flex-wrap">
-                        {season.selectionProcesses.slice(0, 4).map((sp, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs py-0.5 px-2">
-                            R{sp.round}: {sp.entriesSelected.toLocaleString()} @ {formatLocalAmount(sp.entryFee, "NGN")}
-                          </Badge>
-                        ))}
-                        {season.selectionProcesses.length > 4 && (
-                          <Badge variant="outline" className="text-xs py-0.5 px-2">+{season.selectionProcesses.length - 4} more</Badge>
-                        )}
+                    {/* TV Rounds summary */}
+                    {season.tvShowRounds.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase">TV Show Rounds</p>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {season.tvShowRounds.map((tv, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs py-0.5 px-2">
+                              📺 {tv.label}: {tv.entriesSelected} {tv.entryFee > 0 ? `@ ${formatLocalAmount(tv.entryFee, "NGN")}` : "(FREE)"}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                      {/* TV Rounds summary */}
-                      <div className="flex gap-1.5 flex-wrap mt-1">
-                        {season.tvShowRounds.map((tv, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs py-0.5 px-2">
-                            📺 {tv.label}: {tv.entriesSelected} {tv.entryFee > 0 ? `@ ${formatLocalAmount(tv.entryFee, "NGN")}` : "(FREE)"}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                    )}
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{season.totalParticipants.toLocaleString()} participants</span>
                       <span>{GAME_SHOW_ENTRY_POINTS} pts to enter show</span>
                     </div>
 
