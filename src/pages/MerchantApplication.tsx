@@ -190,13 +190,13 @@ export default function MerchantApplication() {
           </div>
         </div>
 
-        {/* Eligibility & Requirements */}
+        {/* Merchant Application Requirements */}
         <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
           <Card>
             <CollapsibleTrigger asChild>
               <div className="flex items-center justify-between p-3 cursor-pointer">
                 <p className="text-xs font-semibold flex items-center gap-1.5">
-                  <Shield className="h-3.5 w-3.5 text-primary" /> Eligibility & Requirements
+                  <Shield className="h-3.5 w-3.5 text-primary" /> Merchant Application Requirements
                 </p>
                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
               </div>
