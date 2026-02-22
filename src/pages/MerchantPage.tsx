@@ -1745,9 +1745,9 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
 
   const getPayoutBadge = (status: string) => {
     switch (status) {
-      case "paid": return <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-[10px] px-1.5 py-0">Paid</Badge>;
-      case "processing": return <Badge className="bg-blue-500/15 text-blue-700 border-blue-500/30 text-[10px] px-1.5 py-0">Processing</Badge>;
-      default: return <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-[10px] px-1.5 py-0">Pending</Badge>;
+      case "paid": return <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-xs px-1.5 py-0">Paid</Badge>;
+      case "processing": return <Badge className="bg-blue-500/15 text-blue-700 border-blue-500/30 text-xs px-1.5 py-0">Processing</Badge>;
+      default: return <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs px-1.5 py-0">Pending</Badge>;
     }
   };
 
@@ -1773,21 +1773,21 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
           <CardContent className="p-3 text-center">
             <Users className="h-4 w-4 mx-auto text-primary mb-1" />
             <p className="text-lg font-bold">{totalWinners}</p>
-            <p className="text-[10px] text-muted-foreground">Total Winners</p>
+            <p className="text-xs text-muted-foreground">Total Winners</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <DollarSign className="h-4 w-4 mx-auto text-emerald-600 mb-1" />
             <p className="text-sm font-bold">₦{(totalPaidOut / 1000000).toFixed(1)}M</p>
-            <p className="text-[10px] text-muted-foreground">Prizes Paid</p>
+            <p className="text-xs text-muted-foreground">Prizes Paid</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <Trophy className="h-4 w-4 mx-auto text-amber-500 mb-1" />
             <p className="text-lg font-bold">{seasonsWithWinners}</p>
-            <p className="text-[10px] text-muted-foreground">Seasons</p>
+            <p className="text-xs text-muted-foreground">Seasons</p>
           </CardContent>
         </Card>
       </div>
@@ -1828,10 +1828,10 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-bold truncate">{season.name}</h3>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${getSeasonTypeColor(season.type)}`}>
+                    <Badge variant="outline" className={`text-xs px-1.5 py-0 ${getSeasonTypeColor(season.type)}`}>
                       {season.type}
                     </Badge>
-                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${getStatusColor(season.quizStatus)}`}>
+                    <Badge variant="outline" className={`text-xs px-1.5 py-0 ${getStatusColor(season.quizStatus)}`}>
                       {getStatusLabel(season.quizStatus)}
                     </Badge>
                   </div>
@@ -1858,12 +1858,12 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                           <p className="text-sm font-bold truncate">{winner.playerName}</p>
                           {getPayoutBadge(winner.payoutStatus)}
                         </div>
-                        <p className="text-[11px] text-muted-foreground">{winner.state}, {winner.country}</p>
+                        <p className="text-xs text-muted-foreground">{winner.state}, {winner.country}</p>
                         <div className="flex items-center justify-between mt-1.5">
                           <p className="text-sm font-bold text-primary">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
-                          <p className="text-[10px] text-muted-foreground">Score: {winner.score}%</p>
+                          <p className="text-xs text-muted-foreground">Score: {winner.score}%</p>
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {format(new Date(winner.completionDate), "MMM dd, yyyy")}
                         </p>
                       </div>
@@ -1893,12 +1893,12 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                       <div className="mt-2 space-y-1.5">
                         {consolationWinners.map((winner) => (
                           <div key={winner.id} className="flex items-center gap-3 p-2.5 rounded-lg border bg-muted/20">
-                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold shrink-0">
+                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold shrink-0">
                               {winner.playerName.split(" ").map((n) => n[0]).join("")}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-semibold truncate">{winner.playerName}</p>
-                              <p className="text-[10px] text-muted-foreground">{winner.state} · Score: {winner.score}%</p>
+                              <p className="text-xs text-muted-foreground">{winner.state} · Score: {winner.score}%</p>
                             </div>
                             <div className="text-right shrink-0">
                               <p className="text-xs font-bold">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
@@ -1918,21 +1918,21 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
                     <p className="text-xs font-bold">₦{(totalPrizePool / 1000000).toFixed(1)}M</p>
-                    <p className="text-[9px] text-muted-foreground">Total Pool</p>
+                    <p className="text-xs text-muted-foreground">Total Pool</p>
                   </div>
                   <div>
                     <p className="text-xs font-bold text-emerald-600">₦{(paidAmount / 1000000).toFixed(1)}M</p>
-                    <p className="text-[9px] text-muted-foreground">Paid</p>
+                    <p className="text-xs text-muted-foreground">Paid</p>
                   </div>
                   <div>
                     <p className="text-xs font-bold text-amber-600">₦{(pendingAmount / 1000000).toFixed(1)}M</p>
-                    <p className="text-[9px] text-muted-foreground">Pending</p>
+                    <p className="text-xs text-muted-foreground">Pending</p>
                   </div>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-muted-foreground">Payout Progress</p>
-                    <p className="text-[10px] font-semibold">{payoutPercent}%</p>
+                    <p className="text-xs text-muted-foreground">Payout Progress</p>
+                    <p className="text-xs font-semibold">{payoutPercent}%</p>
                   </div>
                   <Progress value={payoutPercent} className="h-2" />
                 </div>
