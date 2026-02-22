@@ -25,17 +25,20 @@ import {
   XCircle,
   Clock,
   Store,
+  User,
+  Gamepad2,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
-// MobigateQuizManagement moved to /mobigate-admin/quiz
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter } from "@/components/ui/drawer";
+import { mockMerchantApplications, type MerchantApplication } from "@/data/merchantApplicationData";
 
 // Mock waiver requests from merchants
 const mockWaiverRequests = [
@@ -111,10 +114,18 @@ export default function MobigateAdminDashboard() {
   const [waiverStatuses, setWaiverStatuses] = useState<Record<string, "pending" | "approved" | "rejected">>(
     Object.fromEntries(mockWaiverRequests.map(w => [w.id, "pending"]))
   );
+  const [merchantApps, setMerchantApps] = useState<MerchantApplication[]>(mockMerchantApplications);
+  const [merchantFilter, setMerchantFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [selectedApp, setSelectedApp] = useState<MerchantApplication | null>(null);
+  const [showReviewDrawer, setShowReviewDrawer] = useState(false);
+  const [showRejectDrawer, setShowRejectDrawer] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const pendingCount = Object.values(waiverStatuses).filter(s => s === "pending").length;
+  const pendingMerchantCount = merchantApps.filter(a => a.status === "pending").length;
+  const filteredMerchantApps = merchantFilter === "all" ? merchantApps : merchantApps.filter(a => a.status === merchantFilter);
 
   const handleWaiverAction = (waiverId: string, action: "approved" | "rejected", merchantName: string) => {
     setWaiverStatuses(prev => ({ ...prev, [waiverId]: action }));
@@ -122,6 +133,23 @@ export default function MobigateAdminDashboard() {
       title: action === "approved" ? "Waiver Approved" : "Waiver Rejected",
       description: `${merchantName}'s waiver request has been ${action}.`,
     });
+  };
+
+  const handleMerchantApprove = (app: MerchantApplication) => {
+    setMerchantApps(prev => prev.map(a => a.id === app.id ? { ...a, status: "approved" as const } : a));
+    setShowReviewDrawer(false);
+    setSelectedApp(null);
+    toast({ title: "Application Approved", description: `${app.applicantName}'s merchant application has been approved.` });
+  };
+
+  const handleMerchantReject = () => {
+    if (!selectedApp || !rejectionReason.trim()) return;
+    setMerchantApps(prev => prev.map(a => a.id === selectedApp.id ? { ...a, status: "rejected" as const, rejectionReason: rejectionReason.trim() } : a));
+    setShowRejectDrawer(false);
+    setShowReviewDrawer(false);
+    toast({ title: "Application Rejected", description: `${selectedApp.applicantName}'s merchant application has been rejected.` });
+    setSelectedApp(null);
+    setRejectionReason("");
   };
 
   return (
@@ -151,6 +179,15 @@ export default function MobigateAdminDashboard() {
               <TabsTrigger value="adverts" className="text-xs py-2 px-3">
                 <Megaphone className="h-4 w-4 mr-1" />
                 Adverts
+              </TabsTrigger>
+              <TabsTrigger value="merchants" className="text-xs py-2 px-3 relative">
+                <Store className="h-4 w-4 mr-1" />
+                Merchants
+                {pendingMerchantCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
+                    {pendingMerchantCount}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2 px-3">
                 <Settings className="h-4 w-4 mr-1" />
@@ -702,11 +739,102 @@ export default function MobigateAdminDashboard() {
             </ScrollArea>
           </TabsContent>
 
+          {/* Merchants Tab */}
+          <TabsContent value="merchants" className="mt-0">
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-4 pb-6">
+                {/* Filter chips */}
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {(["all", "pending", "approved", "rejected"] as const).map(f => (
+                    <Button
+                      key={f}
+                      size="sm"
+                      variant={merchantFilter === f ? "default" : "outline"}
+                      className="text-xs h-8 shrink-0 capitalize"
+                      onClick={() => setMerchantFilter(f)}
+                    >
+                      {f}
+                      {f === "pending" && pendingMerchantCount > 0 && (
+                        <Badge className="ml-1.5 h-4 min-w-4 px-1 text-[10px] bg-destructive text-destructive-foreground">
+                          {pendingMerchantCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+
+                {/* Application cards */}
+                {filteredMerchantApps.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Store className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">No {merchantFilter} applications</p>
+                  </div>
+                ) : (
+                  filteredMerchantApps.map(app => (
+                    <Card
+                      key={app.id}
+                      className={`cursor-pointer active:scale-[0.98] transition-all ${
+                        app.status === "pending" ? "border-amber-200 dark:border-amber-800" : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedApp(app);
+                        setShowReviewDrawer(true);
+                      }}
+                    >
+                      <CardContent className="p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                              {app.accountType === "individual" ? (
+                                <User className="h-4 w-4 text-primary" />
+                              ) : (
+                                <Building2 className="h-4 w-4 text-primary" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm">{app.applicantName}</p>
+                              {app.businessName && app.accountType === "corporate" && (
+                                <p className="text-[10px] text-muted-foreground">{app.businessName}</p>
+                              )}
+                            </div>
+                          </div>
+                          <Badge
+                            variant={app.status === "approved" ? "default" : app.status === "rejected" ? "destructive" : "outline"}
+                            className={`text-[10px] ${app.status === "pending" ? "text-amber-600 border-amber-300" : ""}`}
+                          >
+                            {app.status === "pending" && <Clock className="h-3 w-3 mr-0.5" />}
+                            {app.status === "approved" && <CheckCircle className="h-3 w-3 mr-0.5" />}
+                            {app.status === "rejected" && <XCircle className="h-3 w-3 mr-0.5" />}
+                            {app.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline" className="text-[10px]">
+                            {app.accountType === "individual" ? "Individual" : "Corporate"}
+                          </Badge>
+                          <Badge className="bg-primary/10 text-primary text-[10px] border-0">
+                            <Gamepad2 className="h-3 w-3 mr-0.5" />
+                            Quiz
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground ml-auto">
+                            {app.applicationDate}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground font-mono">
+                          Ref: {app.referenceNumber}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
               <div className="space-y-4 pb-6">
-                {/* Mobigate-Only Notice */}
                 <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
                   <Shield className="h-5 w-5 text-primary shrink-0" />
                   <div>
@@ -716,17 +844,153 @@ export default function MobigateAdminDashboard() {
                     </p>
                   </div>
                 </div>
-
-                {/* Withdrawal Settings */}
                 <WithdrawalSettingsCard />
-
-                {/* Quiz Settings */}
                 <QuizSettingsCard />
               </div>
             </ScrollArea>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Merchant Review Drawer */}
+      <Drawer open={showReviewDrawer} onOpenChange={setShowReviewDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Application Details</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>
+            {selectedApp && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    {selectedApp.accountType === "individual" ? (
+                      <User className="h-6 w-6 text-primary" />
+                    ) : (
+                      <Building2 className="h-6 w-6 text-primary" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-bold">{selectedApp.applicantName}</p>
+                    <div className="flex gap-1.5 mt-0.5">
+                      <Badge variant="outline" className="text-[10px]">
+                        {selectedApp.accountType === "individual" ? "Individual" : "Corporate"}
+                      </Badge>
+                      <Badge className="bg-primary/10 text-primary text-[10px] border-0">Quiz</Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 p-3 bg-muted/30 rounded-lg text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Reference</span>
+                    <span className="font-mono text-xs font-semibold">{selectedApp.referenceNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="text-xs">{selectedApp.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Phone</span>
+                    <span className="text-xs">{selectedApp.phone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Applied</span>
+                    <span className="text-xs">{selectedApp.applicationDate}</span>
+                  </div>
+                  {selectedApp.businessName && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Business</span>
+                      <span className="text-xs">{selectedApp.businessName}</span>
+                    </div>
+                  )}
+                  {selectedApp.regNumber && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Reg. No.</span>
+                      <span className="text-xs font-mono">{selectedApp.regNumber}</span>
+                    </div>
+                  )}
+                  {selectedApp.businessAddress && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Address</span>
+                      <span className="text-xs text-right max-w-[60%]">{selectedApp.businessAddress}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm text-muted-foreground">Fee Paid</span>
+                  <span className="font-bold text-sm">{formatMobi(50000)}</span>
+                </div>
+
+                {selectedApp.status === "rejected" && selectedApp.rejectionReason && (
+                  <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <p className="text-xs font-semibold text-destructive mb-1">Rejection Reason</p>
+                    <p className="text-xs text-muted-foreground">{selectedApp.rejectionReason}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </DrawerBody>
+          {selectedApp?.status === "pending" && (
+            <DrawerFooter>
+              <Button
+                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => handleMerchantApprove(selectedApp)}
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Approve Application
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-full h-11"
+                onClick={() => setShowRejectDrawer(true)}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Reject Application
+              </Button>
+            </DrawerFooter>
+          )}
+        </DrawerContent>
+      </Drawer>
+
+      {/* Rejection Reason Drawer */}
+      <Drawer open={showRejectDrawer} onOpenChange={setShowRejectDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Reject Application</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Provide a reason for rejecting {selectedApp?.applicantName}'s application.
+              </p>
+              <Textarea
+                placeholder="Enter rejection reason..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </DrawerBody>
+          <DrawerFooter>
+            <Button
+              variant="destructive"
+              className="w-full h-11"
+              disabled={!rejectionReason.trim()}
+              onClick={handleMerchantReject}
+            >
+              Confirm Rejection
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => { setShowRejectDrawer(false); setRejectionReason(""); }}
+            >
+              Cancel
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
