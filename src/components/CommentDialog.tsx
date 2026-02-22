@@ -5,10 +5,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CommentSection } from "@/components/CommentSection";
+import { CommentInput } from "@/components/CommentInput";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Eye, Heart } from "lucide-react";
+import { useComments } from "@/hooks/useComments";
 
 interface CommentDialogProps {
   open: boolean;
@@ -31,6 +32,9 @@ export const CommentDialog = ({
   onOpenChange,
   post,
 }: CommentDialogProps) => {
+  const postId = post.id || "unknown";
+  const { addComment, loading } = useComments(postId);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl sm:max-w-3xl w-[calc(100vw-2rem)] sm:w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col p-0 gap-0 mx-auto">
@@ -91,12 +95,17 @@ export const CommentDialog = ({
           </div>
         </DialogHeader>
 
-        {/* Scrollable Comment Section */}
+        {/* Scrollable Comments List Only */}
         <div 
           className="flex-1 overflow-y-auto overscroll-contain px-3 sm:px-6 py-4 sm:py-6 touch-auto"
           onTouchMove={(e) => e.stopPropagation()}
         >
-          <CommentSection postId={post.id || "unknown"} />
+          <CommentSection postId={postId} showInput={false} />
+        </div>
+
+        {/* Fixed Comment Input at Bottom */}
+        <div className="flex-shrink-0 border-t px-3 sm:px-6 py-3 sm:py-4 bg-background">
+          <CommentInput onSubmit={addComment} loading={loading} />
         </div>
       </DialogContent>
     </Dialog>

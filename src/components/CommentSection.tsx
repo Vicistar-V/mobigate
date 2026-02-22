@@ -18,12 +18,14 @@ interface CommentSectionProps {
   postId: string;
   className?: string;
   showHeader?: boolean;
+  showInput?: boolean;
 }
 
 export const CommentSection = ({ 
   postId, 
   className = "",
-  showHeader = true 
+  showHeader = true,
+  showInput = true,
 }: CommentSectionProps) => {
   const { 
     comments, 
@@ -116,7 +118,7 @@ export const CommentSection = ({
       )}
 
       {/* Comment Input */}
-      <CommentInput onSubmit={addComment} loading={loading} />
+      {showInput && <CommentInput onSubmit={addComment} loading={loading} />}
 
       {/* Comments List */}
       <div className="space-y-3 sm:space-y-4">
