@@ -30,7 +30,7 @@ interface MediaGalleryViewerProps {
   items: MediaItem[];
   initialIndex?: number;
   showActions?: boolean;
-  galleryType?: "wall-status" | "profile-picture" | "banner" | "post";
+  galleryType?: "wall-status" | "profile-picture" | "banner" | "post" | "gallery" | "video-highlights";
 }
 
 export const MediaGalleryViewer = ({
@@ -208,6 +208,10 @@ export const MediaGalleryViewer = ({
         return "Wall Status";
       case "post":
         return "Post Media";
+      case "gallery":
+        return "Gallery";
+      case "video-highlights":
+        return "Video Highlights";
       default:
         return "Media Gallery";
     }

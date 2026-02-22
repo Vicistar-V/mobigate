@@ -78,6 +78,7 @@ export function WinnerGallerySection({ gallery }: WinnerGallerySectionProps) {
         onOpenChange={setViewerOpen}
         items={mediaItems}
         initialIndex={viewerIndex}
+        galleryType="gallery"
       />
     </div>
   );
