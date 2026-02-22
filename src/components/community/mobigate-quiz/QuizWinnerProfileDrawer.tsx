@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
@@ -234,7 +234,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           <div className="grid grid-cols-3 gap-2.5">
             <Button
               variant="outline"
-              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
+              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
               onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
             >
               <Eye className="h-5 w-5" />
@@ -242,7 +242,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
             </Button>
             <Button
               variant="outline"
-              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
+              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
               disabled={friendRequestSent}
               onClick={handleAddFriend}
             >
@@ -251,14 +251,25 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
             </Button>
             <Button
               variant="outline"
-              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
-              onClick={() => toast({ title: "Message", description: `Opening chat with ${winner.playerName}...` })}
+              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+              onClick={() => {
+                onOpenChange(false);
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('openChatWithUser', {
+                    detail: {
+                      odooUserId: winner.id,
+                      userName: winner.playerName,
+                      userAvatar: winner.playerAvatar
+                    }
+                  }));
+                }, 300);
+              }}
             >
               <MessageCircle className="h-5 w-5" />
               <span>Message</span>
             </Button>
             <Button
-              className={`h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1 ${isFan ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"}`}
+              className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${isFan ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"}`}
               disabled={isFan}
               onClick={handleBecomeFan}
             >
@@ -267,19 +278,11 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
             </Button>
             <Button
               variant="outline"
-              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
+              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
               onClick={handleShare}
             >
               <Share2 className="h-5 w-5" />
               <span>Share</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-14 text-xs touch-manipulation flex flex-col items-center gap-1 px-1"
-              onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
-            >
-              <Users className="h-5 w-5" />
-              <span>Profile</span>
             </Button>
           </div>
         </DrawerBody>
