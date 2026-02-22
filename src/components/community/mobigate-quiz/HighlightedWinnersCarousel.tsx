@@ -136,8 +136,8 @@ export function HighlightedWinnersCarousel() {
 
                 {/* Row 4: Tier + Fans stacked for clarity */}
                 <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mb-2.5">
-                  <Shield className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                  <span className="font-bold">T{winner.tier}</span>
+                  <span className="font-bold">{winner.tier}</span>
+                  <Star className="h-3.5 w-3.5 text-amber-500 shrink-0" fill="currentColor" />
                   <span className="text-muted-foreground/50">·</span>
                   <span>{formatCompact(winner.fans)} fans</span>
                 </div>
