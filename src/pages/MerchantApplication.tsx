@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Store, ChevronDown, Clock, Shield, ArrowLeft, CreditCard,
-  Upload, Eye, EyeOff, FileText, Users, BookOpen, UserPlus, Shuffle, CheckCircle
+  Upload, Eye, EyeOff, FileText, Users, BookOpen, UserPlus
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -91,10 +91,6 @@ export default function MerchantApplication() {
   const [bankBranch1, setBankBranch1] = useState("");
   const [bankBranch2, setBankBranch2] = useState("");
 
-  // Game Application
-  const [gameType, setGameType] = useState("single-code");
-  const [merchantCode, setMerchantCode] = useState("");
-  const [codeAvailability, setCodeAvailability] = useState<"available" | "taken" | null>(null);
 
   const handlePhotoUpload = (director: 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -105,21 +101,6 @@ export default function MerchantApplication() {
     }
   };
 
-  const checkCodeAvailability = () => {
-    if (!merchantCode.trim() || merchantCode.length < 5) {
-      toast({ title: "Invalid Code", description: "Enter a 5 or 6-digit code", variant: "destructive" });
-      return;
-    }
-    // Mock: codes starting with "1" are taken
-    setCodeAvailability(merchantCode.startsWith("1") ? "taken" : "available");
-  };
-
-  const generateCode = () => {
-    const code = String(Math.floor(10000 + Math.random() * 90000));
-    setMerchantCode(code);
-    setCodeAvailability("available");
-    toast({ title: "Code Generated", description: `Your merchant code: ${code}` });
-  };
 
   const handleSubmit = () => {
     if (!acceptedPolicies) {
@@ -132,10 +113,6 @@ export default function MerchantApplication() {
     }
     if (password !== confirmPassword || password.length < 4) {
       toast({ title: "Password Error", description: "Passwords must match and be at least 4 characters.", variant: "destructive" });
-      return;
-    }
-    if (!merchantCode || codeAvailability !== "available") {
-      toast({ title: "Merchant Code Required", description: "Please choose an available merchant code.", variant: "destructive" });
       return;
     }
     const ref = generateTransactionReference("MERCH");
@@ -196,10 +173,6 @@ export default function MerchantApplication() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Merchant Name</span>
                   <span className="font-medium">{merchantName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Merchant Code</span>
-                  <span className="font-mono font-medium">{merchantCode}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Fee Paid</span>
@@ -483,69 +456,6 @@ export default function MerchantApplication() {
               <FieldRow label="Branch Address [ii]">
                 <Input value={bankBranch2} onChange={e => setBankBranch2(e.target.value)} placeholder="Branch address" className="text-sm h-9" />
               </FieldRow>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ===== SECTION: GAME APPLICATION ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <SectionTitle>Application Data — Game</SectionTitle>
-
-            <FieldRow label="Select Game Application">
-              <div className="flex gap-1.5 flex-wrap">
-                {[
-                  { value: "single-code", label: "Single-Code" },
-                  { value: "multi-code", label: "Multi-Code" },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setGameType(opt.value)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
-                      gameType === opt.value
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card border-border text-muted-foreground hover:bg-muted/30"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </FieldRow>
-
-            <FieldRow label="Choose Your 5 or 6-Digit Code">
-              <div className="flex gap-2">
-                <Input
-                  value={merchantCode}
-                  onChange={e => {
-                    setMerchantCode(e.target.value.replace(/\D/g, "").slice(0, 6));
-                    setCodeAvailability(null);
-                  }}
-                  placeholder="e.g. 54321"
-                  className="text-sm h-9 font-mono flex-1"
-                  maxLength={6}
-                />
-                <Button size="sm" variant="outline" onClick={checkCodeAvailability} className="h-9 text-xs shrink-0">
-                  Check
-                </Button>
-              </div>
-              {codeAvailability === "available" && (
-                <div className="flex items-center gap-1 text-emerald-600 text-[11px]">
-                  <CheckCircle className="h-3 w-3" /> Available
-                </div>
-              )}
-              {codeAvailability === "taken" && (
-                <div className="flex items-center gap-1 text-destructive text-[11px]">
-                  ✕ Not Available
-                </div>
-              )}
-            </FieldRow>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Or</span>
-              <Button size="sm" variant="secondary" onClick={generateCode} className="h-8 text-xs gap-1.5">
-                <Shuffle className="h-3.5 w-3.5" /> Generate Code
-              </Button>
             </div>
           </CardContent>
         </Card>
