@@ -908,7 +908,7 @@ export default function MyQuizHistory() {
 
       {/* Payment Confirmation AlertDialog */}
       <AlertDialog open={paymentGameId !== null} onOpenChange={(open) => { if (!open && !paymentProcessing) setPaymentGameId(null); }}>
-        <AlertDialogContent className="max-w-[92vw] rounded-xl p-0 gap-0">
+        <AlertDialogContent className="max-w-[92vw] rounded-xl p-0 gap-0 z-[200]" overlayClassName="z-[199]">
           <AlertDialogHeader className="p-4 pb-3 text-center">
             <div className="h-12 w-12 rounded-full bg-amber-500/10 mx-auto mb-2 flex items-center justify-center">
               <Eye className="h-6 w-6 text-amber-600 dark:text-amber-400" />
