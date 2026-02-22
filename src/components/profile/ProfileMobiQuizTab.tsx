@@ -111,13 +111,6 @@ export function ProfileMobiQuizTab() {
             { label: "Partial Wins", value: String(stats.partialWins) },
             { label: "Games Lost", value: String(stats.gamesLost) },
           ],
-          breakdown: Object.entries(modeBreakdown).map(([mode, data]) => ({
-            mode,
-            config: MODE_CONFIG[mode],
-            count: data.count,
-            wins: data.wins,
-            losses: data.losses,
-          })),
           cta: { label: "View Full History", route: "/my-quiz-history" },
         };
       case "winRate":
@@ -130,14 +123,6 @@ export function ProfileMobiQuizTab() {
             { label: "Lost", value: String(stats.gamesLost) },
             { label: "Partial Wins", value: String(stats.partialWins) },
           ],
-          breakdown: Object.entries(modeBreakdown).map(([mode, data]) => ({
-            mode,
-            config: MODE_CONFIG[mode],
-            count: data.count,
-            wins: data.wins,
-            losses: data.losses,
-            winRate: data.count > 0 ? Math.round((data.wins / data.count) * 100) : 0,
-          })),
           cta: { label: "View Game History", route: "/my-quiz-history" },
         };
       case "netProfit":
@@ -149,14 +134,6 @@ export function ProfileMobiQuizTab() {
             { label: "Total Won", value: formatLocalAmount(stats.totalAmountWon, "NGN") },
             { label: "Total Staked", value: formatLocalAmount(stats.totalStakePaid, "NGN") },
           ],
-          breakdown: Object.entries(modeBreakdown).map(([mode, data]) => ({
-            mode,
-            config: MODE_CONFIG[mode],
-            count: data.count,
-            wins: data.wins,
-            losses: data.losses,
-            earnings: data.earnings,
-          })),
           cta: { label: "View Transaction History", route: "/my-quiz-history" },
         };
       case "streak":
@@ -168,7 +145,6 @@ export function ProfileMobiQuizTab() {
             { label: "Longest Streak", value: `${stats.longestStreak} games` },
             { label: "Favorite Category", value: stats.favoriteCategory },
           ],
-          breakdown: [],
           cta: { label: "Play Now to Extend Streak", route: "/mobi-quiz-games" },
         };
       case "globalRank":
@@ -180,7 +156,6 @@ export function ProfileMobiQuizTab() {
             { label: "Average Score", value: `${stats.averageScore}%` },
             { label: "Total Games", value: String(stats.gamesPlayed) },
           ],
-          breakdown: [],
           cta: { label: "View Global Leaderboard", route: "/mobi-quiz-games" },
         };
       case "bestScore":
@@ -192,7 +167,6 @@ export function ProfileMobiQuizTab() {
             { label: "Average Score", value: `${stats.averageScore}%` },
             { label: "Games Played", value: String(stats.gamesPlayed) },
           ],
-          breakdown: [],
           cta: { label: "Play & Beat Your Record", route: "/mobi-quiz-games" },
         };
     }
@@ -356,42 +330,6 @@ export function ProfileMobiQuizTab() {
                     </div>
                   ))}
                 </div>
-
-                {/* Mode Breakdown */}
-                {activeStatContent.breakdown.length > 0 && (
-                  <>
-                    <Separator />
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">By Mode</h4>
-                      {activeStatContent.breakdown.map((item: any) => {
-                        const conf = item.config || { icon: <Gamepad2 className="h-4 w-4" />, gradient: "from-gray-500 to-gray-600", label: item.mode };
-                        return (
-                          <div key={item.mode} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/40">
-                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${conf.gradient} flex items-center justify-center text-white shrink-0`}>
-                              {conf.icon}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-semibold">{conf.label}</p>
-                              <p className="text-[11px] text-muted-foreground">
-                                {item.wins}W · {item.losses}L · {item.count} games
-                              </p>
-                            </div>
-                            <div className="text-right shrink-0">
-                              {item.winRate !== undefined && (
-                                <span className="text-xs font-bold text-primary">{item.winRate}%</span>
-                              )}
-                              {item.earnings !== undefined && (
-                                <span className={`text-xs font-bold ${item.earnings >= 0 ? "text-green-600" : "text-destructive"}`}>
-                                  {item.earnings >= 0 ? "+" : ""}{formatLocalAmount(item.earnings, "NGN")}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
 
                 {/* CTA */}
                 {activeStatContent.cta && (
