@@ -152,8 +152,7 @@ export function HighlightedWinnersCarousel() {
                   disabled={isFanned}
                   onClick={(e) => handleFanClick(e, winner)}
                 >
-                  <Star className="h-4 w-4" fill={isFanned ? "currentColor" : "none"} />
-                  {isFanned ? "Fanned" : "Fan M200"}
+                  {isFanned ? "Joined" : "Join Fans"}
                 </button>
               </div>
             );
@@ -191,8 +190,7 @@ export function HighlightedWinnersCarousel() {
               className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 touch-manipulation active:scale-[0.97]"
               onClick={confirmFan}
             >
-              <Star className="h-4 w-4 mr-1.5" />
-              Fan M200
+              Join Fans · M200
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
