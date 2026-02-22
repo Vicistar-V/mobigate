@@ -169,7 +169,7 @@ const menuItems: MenuItem[] = [{
       ]
     },
     {
-      title: "Merchant Quiz Management",
+      title: "Merchant Quizzes Management",
       url: "/merchant-page",
     }
   ]
