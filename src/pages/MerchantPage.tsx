@@ -749,6 +749,25 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                         <span>Registration Revenue</span>
                         <span>{formatLocalAmount(season.entryFee * season.minimumTargetParticipants, "NGN")}</span>
                       </div>
+                      {(() => {
+                        const selectionRevenue = season.selectionProcesses.reduce((sum, sp) => sum + sp.entryFee * sp.entriesSelected, 0);
+                        const tvRevenue = season.tvShowRounds.reduce((sum, tv) => sum + tv.entryFee * tv.entriesSelected, 0);
+                        const allRoundsRevenue = selectionRevenue + tvRevenue;
+                        const registrationRevenue = season.entryFee * season.minimumTargetParticipants;
+                        const totalRevenue = registrationRevenue + allRoundsRevenue;
+                        return (
+                          <>
+                            <div className="flex justify-between text-xs font-bold text-primary">
+                              <span>All Rounds Revenue</span>
+                              <span>{formatLocalAmount(allRoundsRevenue, "NGN")}</span>
+                            </div>
+                            <div className="flex justify-between text-xs pt-1 border-t border-primary/20 font-extrabold text-primary">
+                              <span>Total Revenue</span>
+                              <span>{formatLocalAmount(totalRevenue, "NGN")}</span>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
