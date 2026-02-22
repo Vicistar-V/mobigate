@@ -4,7 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { QuizMerchant, QuizSeason, GAME_SHOW_ENTRY_POINTS } from "@/data/mobigateInteractiveQuizData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +64,7 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
             </button>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 max-h-[60vh] px-4">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
             <div className="space-y-3 pb-4">
               {seasons.map((season) => (
                 <Card
@@ -182,7 +182,7 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                 </Card>
               ))}
             </div>
-          </ScrollArea>
+          </div>
 
           <div className="px-4 pb-4 pt-2 border-t">
             <Button

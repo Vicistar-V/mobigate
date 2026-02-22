@@ -3,7 +3,6 @@ import { ChevronRight, Star, Trophy, Users, Radio } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { mockMerchants, mockSeasons, QuizMerchant } from "@/data/mobigateInteractiveQuizData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
@@ -53,7 +52,7 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
             </button>
           </div>
 
-          <ScrollArea className="flex-1 max-h-[65vh] px-4 pb-4">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-4">
             <div className="space-y-3">
               {visibleMerchants.map((merchant) => {
                 const activeSeasons = mockSeasons.filter(s => s.merchantId === merchant.id && s.quizStatus === "active");
@@ -132,7 +131,7 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
                 </Card>
               )}
             </div>
-          </ScrollArea>
+          </div>
         </DrawerContent>
       </Drawer>
 
