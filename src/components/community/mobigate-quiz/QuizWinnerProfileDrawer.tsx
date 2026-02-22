@@ -370,7 +370,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           <DrawerHeader className="text-center pb-2">
             <DrawerTitle className="sr-only">Winner Profile</DrawerTitle>
           </DrawerHeader>
-          <DrawerBody className="px-4 pb-6 space-y-4 overflow-y-auto touch-auto overscroll-contain">
+          <DrawerBody className="px-4 pb-6 space-y-4">
             {/* Slidable Photo Gallery */}
             <div className="relative">
               <div

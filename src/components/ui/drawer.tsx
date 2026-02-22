@@ -52,7 +52,6 @@ const DrawerContent = React.forwardRef<
         </DrawerPrimitive.Close>
       )}
       
-      {/* Content wrapper for proper flex layout */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {children}
       </div>
@@ -78,7 +77,7 @@ DrawerFooter.displayName = "DrawerFooter";
 const DrawerBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div 
     className={cn(
-      "flex-1 overflow-y-auto touch-auto overscroll-contain px-4",
+      "flex-1 overflow-y-auto touch-auto px-4",
       className
     )} 
     {...props} 
