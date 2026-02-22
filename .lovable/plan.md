@@ -1,38 +1,45 @@
 
-## Plan: Restack Winners Tab Cards for Mobile
 
-### Problems Identified
-1. Highlight button is just a star icon -- needs text "Highlight" and a confirmation dialog
-2. Winner avatar shows initials instead of actual images (data has `playerAvatar` URLs)
-3. Duplicate currency display -- "NN6,000,000" shown redundantly
-4. Card layout wastes space with side-by-side elements that could stack better on mobile
-5. Share button is tiny and easy to miss
+## Add Gallery and Video Highlights to Winner Profile Drawer
 
-### Changes (all in `src/pages/MerchantPage.tsx`, WinnersTab function)
+This plan adds two new interactive media sections to the winner profile drawer: a **Photo Gallery** and **Video Highlights** section, both organized in folders with a full-screen viewer experience.
 
-**1. Replace initials avatar with actual image**
-- Use `winner.playerAvatar` in an `<img>` tag with rounded-lg (square-rounded) styling instead of the initials circle
+---
 
-**2. Restack winner card layout for mobile (3-row pattern)**
-- Row 1: Position icon + Avatar image + Name + Payout badge
-- Row 2: Location, Prize amount (single currency, no duplication), Score
-- Row 3: Tier badge, fans, followers, date, Highlight button, Share button
+### What You'll Get
 
-**3. Add "Highlight" button with text + confirmation**
-- Replace the star-only icon button with a visible button showing star icon + "Highlight" text
-- When highlighted, show "Highlighted" with filled star
-- Add an `AlertDialog` confirmation before toggling: "Highlight Winner? This will feature them in the quiz carousel."
+1. **Gallery Section** - A thumbnail grid of the winner's photos organized in folders (e.g., "Quiz Moments", "Award Ceremony", "Behind the Scenes"). Tapping any thumbnail opens a full-screen swipeable gallery viewer with navigation dots, zoom, and close gesture.
 
-**4. Fix duplicate currency**
-- Use single format: "NN6,000,000" with the Naira symbol only once (remove redundant formatLocalAmount that adds extra symbol)
+2. **Video Highlights Section** - A horizontal scrollable list of video highlight thumbnails with play overlays, also organized in folders (e.g., "Quiz Rounds", "Victory Moments"). Tapping opens a full-screen video player.
 
-**5. Consolidate share button inline with highlight**
-- Place Share and Highlight buttons side by side in Row 3 as compact pill buttons
+3. **Folder Navigation** - Both sections have tappable folder tabs/chips at the top to filter content by category. An "All" tab shows everything.
+
+4. **Full Gallery Viewer** - Uses the existing `MediaGalleryViewer` component for a polished full-screen experience with swipe navigation, like/share actions, and smooth transitions.
+
+---
 
 ### Technical Details
 
-- Add `AlertDialog` imports (already available in the project)
-- Add state for `highlightConfirmWinner: SeasonWinner | null` to manage the confirmation dialog
-- Use `<img src={winner.playerAvatar} className="h-11 w-11 rounded-lg object-cover" />` for real photos
-- Remove the absolute-positioned star button, replace with inline "Highlight"/"Highlighted" button in the metadata row
-- Single currency format: remove the NN prefix duplication, use `formatLocalAmount(winner.prizeAmount, "NGN")` only once with proper prefix
+**1. Update `SeasonWinner` interface** (`src/data/mobigateInteractiveQuizData.ts`)
+- Add `gallery` field: array of `{ url: string; folder: string }` objects
+- Add `videoHighlights` field: array of `{ url: string; thumbnail: string; title: string; folder: string; duration: string }` objects
+- Populate mock data with realistic Unsplash images grouped into folders and sample video URLs
+
+**2. Create `WinnerGallerySection` component** (`src/components/community/mobigate-quiz/WinnerGallerySection.tsx`)
+- Folder chip tabs at top (horizontal scroll)
+- 3-column thumbnail grid below
+- Tap opens `MediaGalleryViewer` at the correct index
+- Mobile-optimized: compact thumbnails, touch-friendly chips, smooth scroll
+
+**3. Create `WinnerVideoHighlightsSection` component** (`src/components/community/mobigate-quiz/WinnerVideoHighlightsSection.tsx`)
+- Folder chip tabs at top
+- Horizontal scroll of video cards with play icon overlay and duration badge
+- Tap opens `MediaGalleryViewer` in video mode
+- Mobile-optimized: snap scrolling, compact cards
+
+**4. Update `QuizWinnerProfileDrawer`** (`src/components/community/mobigate-quiz/QuizWinnerProfileDrawer.tsx`)
+- Import and render both new sections between the Details card and the Action buttons
+- Each section has a header with icon and item count
+- Sections only render when data exists
+
+All changes are mobile-first with touch-manipulation, snap scroll, and compact sizing throughout.
