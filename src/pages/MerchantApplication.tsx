@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Store, ChevronDown, Clock, Shield, ArrowLeft, CreditCard,
-  Upload, Eye, EyeOff, FileText, Users, BookOpen, UserPlus
+  Upload, Eye, EyeOff, FileText, Users, BookOpen, UserPlus, Building2
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -30,10 +30,8 @@ const requirements = [
 ];
 
 export default function MerchantApplication() {
-  const { type } = useParams<{ type: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isIndividual = type === "individual";
 
   const [requirementsOpen, setRequirementsOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -41,15 +39,15 @@ export default function MerchantApplication() {
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
 
   // Create Account
-  const [storeName, setStoreName] = useState(isIndividual ? "AdewaleStore" : "");
-  const [accountEmail, setAccountEmail] = useState(isIndividual ? "adewale.johnson@email.com" : "");
+  const [storeName, setStoreName] = useState("");
+  const [accountEmail, setAccountEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Application Data
-  const [merchantName, setMerchantName] = useState(isIndividual ? "Adewale Johnson" : "");
+  const [merchantName, setMerchantName] = useState("");
   const [businessProfile, setBusinessProfile] = useState("");
   const [dba, setDba] = useState("");
   const [registeredOffice, setRegisteredOffice] = useState("");
@@ -78,9 +76,9 @@ export default function MerchantApplication() {
   const [affiliate2Address, setAffiliate2Address] = useState("");
 
   // Contact
-  const [emailAddress, setEmailAddress] = useState(isIndividual ? "adewale.johnson@email.com" : "");
+  const [emailAddress, setEmailAddress] = useState("");
   const [website, setWebsite] = useState("");
-  const [phone1, setPhone1] = useState(isIndividual ? "+234 812 345 6789" : "");
+  const [phone1, setPhone1] = useState("");
   const [phone2, setPhone2] = useState("");
 
   // Banking
@@ -91,7 +89,6 @@ export default function MerchantApplication() {
   const [bankBranch1, setBankBranch1] = useState("");
   const [bankBranch2, setBankBranch2] = useState("");
 
-
   const handlePhotoUpload = (director: 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -100,7 +97,6 @@ export default function MerchantApplication() {
       else setDirector2Photo(url);
     }
   };
-
 
   const handleSubmit = () => {
     if (!acceptedPolicies) {
@@ -115,7 +111,7 @@ export default function MerchantApplication() {
       toast({ title: "Password Error", description: "Passwords must match and be at least 4 characters.", variant: "destructive" });
       return;
     }
-    const ref = generateTransactionReference("MERCH");
+    const ref = generateTransactionReference("MERCH-CORP");
     setRefNumber(ref);
     setSubmitted(true);
     toast({ title: "Application Submitted!", description: `Fee: ${formatMobi(50000)}. Ref: ${ref}` });
@@ -151,7 +147,7 @@ export default function MerchantApplication() {
                   <Clock className="h-7 w-7 text-amber-600" />
                 </div>
                 <h2 className="font-bold text-base">Application Under Review</h2>
-                <p className="text-xs text-muted-foreground">Your merchant application is being reviewed</p>
+                <p className="text-xs text-muted-foreground">Your corporate merchant application is being reviewed</p>
                 <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400 text-xs">
                   Estimated: 3–5 business days
                 </Badge>
@@ -164,14 +160,14 @@ export default function MerchantApplication() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type</span>
-                  <Badge variant="secondary" className="text-[10px] h-5">{isIndividual ? "Individual" : "Corporate"}</Badge>
+                  <Badge variant="secondary" className="text-[10px] h-5">Corporate</Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Store Name</span>
                   <span className="font-medium">{storeName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Merchant Name</span>
+                  <span className="text-muted-foreground">Business Name</span>
                   <span className="font-medium">{merchantName}</span>
                 </div>
                 <div className="flex justify-between">
@@ -198,13 +194,11 @@ export default function MerchantApplication() {
         {/* Title */}
         <div className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Store className="h-5 w-5 text-primary" />
+            <Building2 className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-lg font-bold">Merchant's Application Form</h1>
-            <p className="text-[11px] text-muted-foreground">
-              {isIndividual ? "Individual" : "Corporate"} Merchant Account
-            </p>
+            <h1 className="text-lg font-bold">Corporate Merchant Application</h1>
+            <p className="text-[11px] text-muted-foreground">Apply as a corporate Mobi-Merchant</p>
           </div>
         </div>
 
@@ -232,19 +226,17 @@ export default function MerchantApplication() {
           </Card>
         </Collapsible>
 
-        {/* ===== SECTION: CREATE ACCOUNT ===== */}
+        {/* ===== CREATE ACCOUNT ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionTitle>Create Account</SectionTitle>
 
-            <FieldRow label="Username [Store Name]" hint={isIndividual ? "Auto-filled from your Mobigate account" : undefined}>
-              <Input value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Your store name"
-                disabled={isIndividual} className={`text-sm h-9 ${isIndividual ? "bg-muted/50" : ""}`} />
+            <FieldRow label="Username [Store Name]">
+              <Input value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Your store name" className="text-sm h-9" />
             </FieldRow>
 
-            <FieldRow label="E-Mail" hint={isIndividual ? "Auto-filled from your account" : undefined}>
-              <Input value={accountEmail} onChange={e => setAccountEmail(e.target.value)} placeholder="email@example.com"
-                disabled={isIndividual} className={`text-sm h-9 ${isIndividual ? "bg-muted/50" : ""}`} />
+            <FieldRow label="E-Mail">
+              <Input value={accountEmail} onChange={e => setAccountEmail(e.target.value)} placeholder="email@example.com" className="text-sm h-9" />
             </FieldRow>
 
             <FieldRow label="Password">
@@ -271,14 +263,13 @@ export default function MerchantApplication() {
           </CardContent>
         </Card>
 
-        {/* ===== SECTION: APPLICATION DATA ===== */}
+        {/* ===== APPLICATION DATA ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionTitle>Application Data</SectionTitle>
 
-            <FieldRow label="Merchant's Name [Business Name]" hint={isIndividual ? "Captured from your Mobigate account" : undefined}>
-              <Input value={merchantName} onChange={e => setMerchantName(e.target.value)} placeholder="Business name"
-                disabled={isIndividual} className={`text-sm h-9 ${isIndividual ? "bg-muted/50" : ""}`} />
+            <FieldRow label="Merchant's Name [Business Name]">
+              <Input value={merchantName} onChange={e => setMerchantName(e.target.value)} placeholder="Business name" className="text-sm h-9" />
             </FieldRow>
 
             <FieldRow label="Business Profile">
@@ -312,12 +303,11 @@ export default function MerchantApplication() {
           </CardContent>
         </Card>
 
-        {/* ===== SECTION: PRINCIPAL OFFICERS ===== */}
+        {/* ===== PRINCIPAL OFFICERS ===== */}
         <Card>
           <CardContent className="p-4 space-y-4">
             <SectionTitle>Name & Address of Principal Officers</SectionTitle>
 
-            {/* Director 1 */}
             <div className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50">
               <p className="text-xs font-semibold text-muted-foreground">[Director-1]</p>
               <Input value={director1Name} onChange={e => setDirector1Name(e.target.value)} placeholder="Full name" className="text-sm h-9" />
@@ -336,7 +326,6 @@ export default function MerchantApplication() {
               </div>
             </div>
 
-            {/* Director 2 */}
             <div className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50">
               <p className="text-xs font-semibold text-muted-foreground">[Director-2]</p>
               <Input value={director2Name} onChange={e => setDirector2Name(e.target.value)} placeholder="Full name" className="text-sm h-9" />
@@ -357,7 +346,7 @@ export default function MerchantApplication() {
           </CardContent>
         </Card>
 
-        {/* ===== SECTION: OTHER ADDRESSES ===== */}
+        {/* ===== OTHER ADDRESSES ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionTitle>Other Business Addresses</SectionTitle>
@@ -373,7 +362,7 @@ export default function MerchantApplication() {
           </CardContent>
         </Card>
 
-        {/* ===== SECTION: AFFILIATES ===== */}
+        {/* ===== AFFILIATES ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionTitle>Affiliate [or Sister-Companies] (if any)</SectionTitle>
@@ -400,14 +389,13 @@ export default function MerchantApplication() {
           </CardContent>
         </Card>
 
-        {/* ===== SECTION: CONTACT ===== */}
+        {/* ===== CONTACT ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionTitle>Contact Information</SectionTitle>
 
-            <FieldRow label="E-Mail Address" hint={isIndividual ? "Auto-filled" : undefined}>
-              <Input value={emailAddress} onChange={e => setEmailAddress(e.target.value)} placeholder="email@example.com"
-                disabled={isIndividual} className={`text-sm h-9 ${isIndividual ? "bg-muted/50" : ""}`} />
+            <FieldRow label="E-Mail Address">
+              <Input value={emailAddress} onChange={e => setEmailAddress(e.target.value)} placeholder="email@example.com" className="text-sm h-9" />
             </FieldRow>
 
             <FieldRow label="URL / Website">
@@ -416,8 +404,7 @@ export default function MerchantApplication() {
 
             <div className="grid grid-cols-2 gap-2">
               <FieldRow label="Telephone [i]">
-                <Input value={phone1} onChange={e => setPhone1(e.target.value)} placeholder="+234..."
-                  disabled={isIndividual} className={`text-sm h-9 ${isIndividual ? "bg-muted/50" : ""}`} />
+                <Input value={phone1} onChange={e => setPhone1(e.target.value)} placeholder="+234..." className="text-sm h-9" />
               </FieldRow>
               <FieldRow label="Telephone [ii]">
                 <Input value={phone2} onChange={e => setPhone2(e.target.value)} placeholder="+234..." className="text-sm h-9" />
@@ -426,7 +413,7 @@ export default function MerchantApplication() {
           </CardContent>
         </Card>
 
-        {/* ===== SECTION: BANKING ===== */}
+        {/* ===== BANKING ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionTitle>Banking Information</SectionTitle>
@@ -482,7 +469,7 @@ export default function MerchantApplication() {
 
             <Button onClick={handleSubmit} className="w-full gap-2" size="lg" disabled={!acceptedPolicies}>
               <Store className="h-4 w-4" />
-              Submit Application
+              Submit Application — {formatMobi(50000)}
             </Button>
           </CardContent>
         </Card>
