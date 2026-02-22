@@ -1,80 +1,16 @@
 import { useState } from "react";
-import { ArrowLeft, Trophy, Gamepad2, Users, Zap, Home, GraduationCap, Play, TrendingUp, Target, History, ChevronRight, Wallet, ToggleRight } from "lucide-react";
+import { ArrowLeft, Trophy, Users, Zap, Play, TrendingUp, History, ChevronRight, Wallet, BadgeCheck, Gamepad2, Target } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobigateQuizHub } from "@/components/community/mobigate-quiz/MobigateQuizHub";
-import { GroupQuizInviteSheet } from "@/components/community/mobigate-quiz/GroupQuizInviteSheet";
-import { StandardQuizCategorySelect } from "@/components/community/mobigate-quiz/StandardQuizCategorySelect";
-import { InteractiveQuizMerchantSheet } from "@/components/community/mobigate-quiz/InteractiveQuizMerchantSheet";
-import { FoodQuizItemSelectSheet } from "@/components/community/mobigate-quiz/FoodQuizItemSelectSheet";
-import { ScholarshipQuizSetupSheet } from "@/components/community/mobigate-quiz/ScholarshipQuizSetupSheet";
-import { ToggleQuizPlayDialog } from "@/components/community/mobigate-quiz/ToggleQuizPlayDialog";
+import { mockMerchants, mockSeasons } from "@/data/mobigateInteractiveQuizData";
+import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
-const gameModes = [
-  {
-    id: "group",
-    title: "Group Quiz",
-    description: "3–10 players compete. Host sets consensus stake (min 5,000 Mobi). Prize multipliers from 200% up to 500%.",
-    icon: Users,
-    color: "bg-blue-500/10 text-blue-600",
-    borderColor: "border-blue-500/30",
-    players: "3-10",
-    tag: "Multiplayer",
-  },
-  {
-    id: "standard",
-    title: "Standard Solo",
-    description: "10 objective questions. Score 100% to win the full prize. 80%+ unlocks a bonus game worth 50% extra.",
-    icon: Gamepad2,
-    color: "bg-amber-500/10 text-amber-600",
-    borderColor: "border-amber-500/30",
-    players: "Solo",
-    tag: "Most Popular",
-  },
-  {
-    id: "interactive",
-    title: "Interactive Quiz",
-    description: "Merchant-hosted seasons with 15 questions and Live Shows. Win exclusive prizes and vouchers.",
-    icon: Zap,
-    color: "bg-purple-500/10 text-purple-600",
-    borderColor: "border-purple-500/30",
-    players: "Varies",
-    tag: "Live",
-  },
-  {
-    id: "food",
-    title: "Food for Home",
-    description: "Stake 20% of an item's market value to win it via a 15-question quiz. Win groceries and household items!",
-    icon: Home,
-    color: "bg-green-500/10 text-green-600",
-    borderColor: "border-green-500/30",
-    players: "Solo",
-    tag: "Win Items",
-  },
-  {
-    id: "scholarship",
-    title: "Scholarship Quiz",
-    description: "Stake 20% of the annual budget to win full scholarship funding. 15 questions covering your chosen tier.",
-    icon: GraduationCap,
-    color: "bg-rose-500/10 text-rose-600",
-    borderColor: "border-rose-500/30",
-    players: "Solo",
-    tag: "Education",
-  },
-  {
-    id: "toggle",
-    title: "Toggle Quiz",
-    description: "7 escalating sessions. Score 100% each round or lose everything. Toggle up for multipliers up to 15x!",
-    icon: ToggleRight,
-    color: "bg-orange-500/10 text-orange-600",
-    borderColor: "border-orange-500/30",
-    players: "Solo",
-    tag: "High Stakes",
-  },
-];
+const approvedMerchants = mockMerchants.filter((m) => m.applicationStatus === "approved");
 
 // Mock stats
 const quizStats = {
@@ -87,8 +23,16 @@ const quizStats = {
 
 export default function MobiQuizGames() {
   const [showQuizHub, setShowQuizHub] = useState(false);
-  const [activeFlow, setActiveFlow] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const getMerchantActiveSeasons = (merchantId: string) =>
+    mockSeasons.filter((s) => s.merchantId === merchantId && s.quizStatus === "active");
+
+  const getBestSeason = (merchantId: string) => {
+    const seasons = getMerchantActiveSeasons(merchantId);
+    if (!seasons.length) return null;
+    return seasons.reduce((best, s) => (s.totalWinningPrizes > best.totalWinningPrizes ? s : best), seasons[0]);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -106,7 +50,7 @@ export default function MobiQuizGames() {
                 <Trophy className="h-5 w-5" />
                 Mobi Quiz Games
               </h1>
-              <p className="text-xs text-white/80 mt-0.5">Win prizes by answering questions!</p>
+              <p className="text-xs text-white/80 mt-0.5">Pick a merchant and start winning!</p>
             </div>
           </div>
 
@@ -114,19 +58,19 @@ export default function MobiQuizGames() {
           <div className="grid grid-cols-4 gap-2">
             <div className="bg-white/15 backdrop-blur-sm rounded-lg p-2 text-center">
               <p className="text-lg font-bold">{quizStats.gamesPlayed}</p>
-              <p className="text-[10px] text-white/70">Played</p>
+              <p className="text-xs text-white/70">Played</p>
             </div>
             <div className="bg-white/15 backdrop-blur-sm rounded-lg p-2 text-center">
               <p className="text-lg font-bold">{quizStats.gamesWon}</p>
-              <p className="text-[10px] text-white/70">Won</p>
+              <p className="text-xs text-white/70">Won</p>
             </div>
             <div className="bg-white/15 backdrop-blur-sm rounded-lg p-2 text-center">
               <p className="text-lg font-bold">{quizStats.winRate}%</p>
-              <p className="text-[10px] text-white/70">Win Rate</p>
+              <p className="text-xs text-white/70">Win Rate</p>
             </div>
             <div className="bg-white/15 backdrop-blur-sm rounded-lg p-2 text-center">
               <p className="text-lg font-bold">🔥{quizStats.streak}</p>
-              <p className="text-[10px] text-white/70">Streak</p>
+              <p className="text-xs text-white/70">Streak</p>
             </div>
           </div>
         </div>
@@ -140,7 +84,7 @@ export default function MobiQuizGames() {
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
                 <h2 className="font-bold text-base mb-1">Ready to Play?</h2>
-                <p className="text-xs text-muted-foreground">Browse available quizzes and start winning prizes now!</p>
+                <p className="text-xs text-muted-foreground">Browse all quiz modes in one place!</p>
               </div>
               <Button
                 onClick={() => setShowQuizHub(true)}
@@ -148,7 +92,7 @@ export default function MobiQuizGames() {
                 size="lg"
               >
                 <Play className="h-5 w-5 mr-2" />
-                Start Playing
+                All Modes
               </Button>
             </div>
           </CardContent>
@@ -198,55 +142,82 @@ export default function MobiQuizGames() {
           </Card>
         </Link>
 
-        {/* Game Modes Section */}
+        {/* Quiz Merchants Section */}
         <div>
           <h2 className="font-bold text-base mb-3 flex items-center gap-2">
             <Target className="h-4 w-4 text-amber-600" />
-            Game Modes
+            Quiz Merchants
           </h2>
+          <p className="text-xs text-muted-foreground mb-3">
+            Select a merchant to view their quiz seasons and start playing
+          </p>
           <div className="space-y-3">
-            {gameModes.map((mode) => (
-              <Card
-                key={mode.id}
-                className={`border ${mode.borderColor} hover:shadow-md transition-all cursor-pointer active:scale-[0.98]`}
-                onClick={() => setActiveFlow(mode.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className={`h-12 w-12 rounded-xl ${mode.color} flex items-center justify-center shrink-0`}>
-                      <mode.icon className="h-6 w-6" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-sm">{mode.title}</h3>
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{mode.tag}</Badge>
+            {approvedMerchants.map((merchant) => {
+              const seasons = getMerchantActiveSeasons(merchant.id);
+              const bestSeason = getBestSeason(merchant.id);
+              const totalParticipants = seasons.reduce((sum, s) => sum + s.totalParticipants, 0);
+
+              return (
+                <Card
+                  key={merchant.id}
+                  className="overflow-hidden cursor-pointer active:scale-[0.98] transition-all touch-manipulation border-border/60 hover:shadow-md"
+                  onClick={() => navigate(`/mobi-quiz-games/merchant/${merchant.id}`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-12 w-12 shrink-0 border-2 border-primary/20">
+                        <AvatarImage src={merchant.logo} alt={merchant.name} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+                          {merchant.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <h3 className="font-bold text-sm truncate">{merchant.name}</h3>
+                          {merchant.isVerified && (
+                            <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-2">{merchant.category}</p>
+
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <Gamepad2 className="h-3.5 w-3.5" />
+                            {seasons.length} season{seasons.length !== 1 ? "s" : ""}
+                          </span>
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <Users className="h-3.5 w-3.5" />
+                            {totalParticipants.toLocaleString()}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{mode.description}</p>
-                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" /> {mode.players}
-                        </span>
+
+                      <div className="text-right shrink-0">
+                        {bestSeason && (
+                          <div className="bg-gradient-to-br from-amber-500/15 to-amber-600/5 rounded-lg px-2.5 py-1.5 border border-amber-500/20">
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <Trophy className="h-3 w-3 text-amber-600" />
+                              <span className="text-xs text-amber-700 font-medium">Top Prize</span>
+                            </div>
+                            <p className="text-xs font-bold text-amber-700">
+                              {formatLocalAmount(bestSeason.totalWinningPrizes, "NGN")}
+                            </p>
+                          </div>
+                        )}
+                        <ChevronRight className="h-4 w-4 text-muted-foreground mt-2 ml-auto" />
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Mobi Quiz Game Dialog */}
+      {/* Mobi Quiz Game Hub Dialog */}
       <MobigateQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} />
-
-      {/* Direct game mode flows */}
-      <GroupQuizInviteSheet open={activeFlow === "group"} onOpenChange={(v) => !v && setActiveFlow(null)} />
-      <StandardQuizCategorySelect open={activeFlow === "standard"} onOpenChange={(v) => !v && setActiveFlow(null)} />
-      <InteractiveQuizMerchantSheet open={activeFlow === "interactive"} onOpenChange={(v) => !v && setActiveFlow(null)} />
-      <FoodQuizItemSelectSheet open={activeFlow === "food"} onOpenChange={(v) => !v && setActiveFlow(null)} />
-      <ScholarshipQuizSetupSheet open={activeFlow === "scholarship"} onOpenChange={(v) => !v && setActiveFlow(null)} />
-      <ToggleQuizPlayDialog open={activeFlow === "toggle"} onOpenChange={(v) => !v && setActiveFlow(null)} />
     </div>
   );
 }
