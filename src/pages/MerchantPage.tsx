@@ -4,40 +4,66 @@ import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerBody,
-  DrawerFooter,
-} from "@/components/ui/drawer";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ArrowLeft,
-  BadgeCheck,
+  Settings,
+  Gamepad2,
+  HelpCircle,
+  Wallet,
+  Plus,
+  Save,
+  Trash2,
+  Edit,
+  Pause,
+  Play,
+  CalendarPlus,
   Trophy,
-  Users,
-  Zap,
-  Star,
   Crown,
   Medal,
   Gift,
   Tv,
   Ticket,
-  Target,
-  Gamepad2,
-  ChevronRight,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  X,
+  DollarSign,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
-import { mockMerchants, mockSeasons, type QuizMerchant, type QuizSeason } from "@/data/mobigateInteractiveQuizData";
-import { formatLocalAmount, formatMobi } from "@/lib/mobiCurrencyTranslation";
-import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveScoreboardDrawer";
-import { InteractiveQuizPlayDialog } from "@/components/community/mobigate-quiz/InteractiveQuizPlayDialog";
+import {
+  mockMerchants,
+  mockSeasons,
+  mockQuestions,
+  MERCHANT_MIN_WALLET_PERCENT,
+  WAIVER_REQUEST_FEE,
+  SEASON_TYPE_CONFIG,
+  type QuizMerchant,
+  type QuizSeason,
+  type MerchantQuestion,
+  type SelectionProcess,
+  type TVShowRound,
+} from "@/data/mobigateInteractiveQuizData";
+import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
+import { format, addMonths, addWeeks } from "date-fns";
 
-// Only show approved merchants
-const approvedMerchants = mockMerchants.filter((m) => m.applicationStatus === "approved");
+const ANSWER_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
+
+// Simulate "my merchant" = first approved merchant
+const myMerchant = mockMerchants.find((m) => m.applicationStatus === "approved")!;
 
 function getSeasonTypeColor(type: string) {
   switch (type) {
@@ -48,31 +74,1028 @@ function getSeasonTypeColor(type: string) {
   }
 }
 
+function getStatusColor(status: string) {
+  switch (status) {
+    case "active": return "bg-emerald-500/15 text-emerald-700";
+    case "draft": return "bg-amber-500/15 text-amber-700";
+    case "suspended": return "bg-red-500/15 text-red-700";
+    default: return "bg-muted text-muted-foreground";
+  }
+}
+
+// ─── Platform Settings Tab ───────────────────────────────────────────
+function PlatformSettingsTab({ merchant }: { merchant: QuizMerchant }) {
+  const { toast } = useToast();
+  const [settings, setSettings] = useState({
+    questionsPerPack: merchant.questionsPerPack,
+    objectivePerPack: merchant.objectivePerPack,
+    nonObjectivePerPack: merchant.nonObjectivePerPack,
+    objectiveOptions: merchant.objectiveOptions,
+    costPerQuestion: merchant.costPerQuestion,
+    winPercentageThreshold: merchant.winPercentageThreshold,
+    fairAnswerPercentage: merchant.fairAnswerPercentage,
+    alternativeAnswersMin: merchant.alternativeAnswersMin,
+    alternativeAnswersMax: merchant.alternativeAnswersMax,
+    qualifyingPoints: merchant.qualifyingPoints,
+    bonusGamesAfter: merchant.bonusGamesAfter,
+    bonusGamesCountMin: merchant.bonusGamesCountMin,
+    bonusGamesCountMax: merchant.bonusGamesCountMax,
+    bonusDiscountMin: merchant.bonusDiscountMin,
+    bonusDiscountMax: merchant.bonusDiscountMax,
+  });
+
+  const update = (key: string, val: number) =>
+    setSettings((p) => ({ ...p, [key]: val }));
+
+  const handleSave = () => {
+    toast({ title: "✅ Settings Saved", description: "Platform settings updated successfully." });
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          <h3 className="text-sm font-bold flex items-center gap-2">
+            <Settings className="h-4 w-4 text-primary" />
+            Question Pack Configuration
+          </h3>
+
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Questions Per Pack</Label>
+              <Input type="number" value={settings.questionsPerPack} onChange={(e) => update("questionsPerPack", +e.target.value)} className="h-11 mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Objective Questions</Label>
+                <Input type="number" value={settings.objectivePerPack} onChange={(e) => update("objectivePerPack", +e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Non-Objective Questions</Label>
+                <Input type="number" value={settings.nonObjectivePerPack} onChange={(e) => update("nonObjectivePerPack", +e.target.value)} className="h-11 mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Number of Objective Options (8-10)</Label>
+              <Input type="number" min={8} max={10} value={settings.objectiveOptions} onChange={(e) => update("objectiveOptions", +e.target.value)} className="h-11 mt-1" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          <h3 className="text-sm font-bold flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-primary" />
+            Billing & Thresholds
+          </h3>
+
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Cost Per Question (₦)</Label>
+              <Input type="number" value={settings.costPerQuestion} onChange={(e) => update("costPerQuestion", +e.target.value)} className="h-11 mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Win Threshold (%)</Label>
+                <Input type="number" min={25} max={50} value={settings.winPercentageThreshold} onChange={(e) => update("winPercentageThreshold", +e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Fair Answer (%)</Label>
+                <Input type="number" value={settings.fairAnswerPercentage} onChange={(e) => update("fairAnswerPercentage", +e.target.value)} className="h-11 mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Alt. Answers Min</Label>
+                <Input type="number" min={2} max={5} value={settings.alternativeAnswersMin} onChange={(e) => update("alternativeAnswersMin", +e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Alt. Answers Max</Label>
+                <Input type="number" min={2} max={5} value={settings.alternativeAnswersMax} onChange={(e) => update("alternativeAnswersMax", +e.target.value)} className="h-11 mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Qualifying Points for Game Show</Label>
+              <Input type="number" value={settings.qualifyingPoints} onChange={(e) => update("qualifyingPoints", +e.target.value)} className="h-11 mt-1" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          <h3 className="text-sm font-bold flex items-center gap-2">
+            <Gift className="h-4 w-4 text-primary" />
+            Bonus Games Configuration
+          </h3>
+
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Bonus Games After X Packs</Label>
+              <Input type="number" value={settings.bonusGamesAfter} onChange={(e) => update("bonusGamesAfter", +e.target.value)} className="h-11 mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Min Bonus Games</Label>
+                <Input type="number" value={settings.bonusGamesCountMin} onChange={(e) => update("bonusGamesCountMin", +e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Max Bonus Games</Label>
+                <Input type="number" value={settings.bonusGamesCountMax} onChange={(e) => update("bonusGamesCountMax", +e.target.value)} className="h-11 mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Min Discount (%)</Label>
+                <Input type="number" value={settings.bonusDiscountMin} onChange={(e) => update("bonusDiscountMin", +e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Max Discount (%)</Label>
+                <Input type="number" value={settings.bonusDiscountMax} onChange={(e) => update("bonusDiscountMax", +e.target.value)} className="h-11 mt-1" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Button className="w-full h-12 text-sm font-bold gap-2" onClick={handleSave}>
+        <Save className="h-4 w-4" />
+        Save Platform Settings
+      </Button>
+    </div>
+  );
+}
+
+// ─── Seasons Tab ─────────────────────────────────────────────────────
+function SeasonsTab({ merchantId }: { merchantId: string }) {
+  const { toast } = useToast();
+  const [seasons, setSeasons] = useState<QuizSeason[]>(
+    mockSeasons.filter((s) => s.merchantId === merchantId)
+  );
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [expandedSeason, setExpandedSeason] = useState<string | null>(null);
+  const [extendingSeason, setExtendingSeason] = useState<string | null>(null);
+  const [extensionWeeks, setExtensionWeeks] = useState(2);
+  const [extensionReason, setExtensionReason] = useState("");
+
+  // Create form state
+  const [newName, setNewName] = useState("");
+  const [newType, setNewType] = useState<"Short" | "Medium" | "Complete">("Short");
+  const [newStartDate, setNewStartDate] = useState("");
+  const [newEntryFee, setNewEntryFee] = useState(200);
+  const [newFirstPrize, setNewFirstPrize] = useState(5000000);
+  const [newSecondPrize, setNewSecondPrize] = useState(2500000);
+  const [newThirdPrize, setNewThirdPrize] = useState(1000000);
+  const [newConsolationPerPlayer, setNewConsolationPerPlayer] = useState(300000);
+  const [newConsolationCount, setNewConsolationCount] = useState(10);
+  const [newMinParticipants, setNewMinParticipants] = useState(10000);
+  const [newSelectionRounds, setNewSelectionRounds] = useState<SelectionProcess[]>([
+    { round: 1, entriesSelected: 10000, entryFee: 200 },
+  ]);
+  const [newTvRounds, setNewTvRounds] = useState<TVShowRound[]>([
+    { round: 1, entriesSelected: 50, entryFee: 2000, label: "1st TV Show" },
+  ]);
+
+  const computedEndDate = newStartDate
+    ? format(addMonths(new Date(newStartDate), SEASON_TYPE_CONFIG[newType].duration), "yyyy-MM-dd")
+    : "";
+
+  const totalPrizes = newFirstPrize + newSecondPrize + newThirdPrize + newConsolationPerPlayer * newConsolationCount;
+
+  const addSelectionRound = () => {
+    setNewSelectionRounds((p) => [
+      ...p,
+      { round: p.length + 1, entriesSelected: 1000, entryFee: 500 },
+    ]);
+  };
+
+  const removeSelectionRound = (idx: number) => {
+    setNewSelectionRounds((p) => p.filter((_, i) => i !== idx).map((r, i) => ({ ...r, round: i + 1 })));
+  };
+
+  const addTvRound = () => {
+    setNewTvRounds((p) => [
+      ...p,
+      { round: p.length + 1, entriesSelected: 20, entryFee: 3000, label: `Round ${p.length + 1}` },
+    ]);
+  };
+
+  const removeTvRound = (idx: number) => {
+    setNewTvRounds((p) => p.filter((_, i) => i !== idx).map((r, i) => ({ ...r, round: i + 1 })));
+  };
+
+  const handleCreate = () => {
+    if (!newName || !newStartDate) {
+      toast({ title: "⚠️ Missing Fields", description: "Please fill in season name and start date.", variant: "destructive" });
+      return;
+    }
+    const newSeason: QuizSeason = {
+      id: `s-new-${Date.now()}`,
+      merchantId,
+      name: newName,
+      type: newType,
+      duration: SEASON_TYPE_CONFIG[newType].duration,
+      selectionLevels: SEASON_TYPE_CONFIG[newType].processes,
+      entryFee: newEntryFee,
+      currentLevel: 0,
+      totalParticipants: 0,
+      prizePerLevel: 0,
+      isLive: false,
+      status: "open",
+      startDate: newStartDate,
+      endDate: computedEndDate,
+      originalEndDate: computedEndDate,
+      isExtended: false,
+      extensionWeeks: 0,
+      extensionReason: "",
+      minimumTargetParticipants: newMinParticipants,
+      consolationPrizesEnabled: newConsolationCount > 0,
+      consolationPrizePool: newConsolationPerPlayer * newConsolationCount,
+      firstPrize: newFirstPrize,
+      secondPrize: newSecondPrize,
+      thirdPrize: newThirdPrize,
+      consolationPrizePerPlayer: newConsolationPerPlayer,
+      consolationPrizeCount: newConsolationCount,
+      totalWinningPrizes: totalPrizes,
+      quizStatus: "draft",
+      selectionProcesses: newSelectionRounds,
+      tvShowRounds: newTvRounds,
+    };
+    setSeasons((p) => [newSeason, ...p]);
+    setShowCreateForm(false);
+    setNewName("");
+    toast({ title: "✅ Season Created", description: `"${newName}" has been created as a draft.` });
+  };
+
+  const toggleStatus = (seasonId: string, newStatus: "active" | "suspended" | "draft") => {
+    setSeasons((p) => p.map((s) => (s.id === seasonId ? { ...s, quizStatus: newStatus } : s)));
+    toast({ title: "✅ Status Updated", description: `Season status changed to ${newStatus}.` });
+  };
+
+  const handleExtend = (seasonId: string) => {
+    if (!extensionReason.trim()) {
+      toast({ title: "⚠️ Reason Required", description: "Please provide a reason for extension.", variant: "destructive" });
+      return;
+    }
+    setSeasons((p) =>
+      p.map((s) => {
+        if (s.id !== seasonId) return s;
+        const newEnd = format(addWeeks(new Date(s.endDate), extensionWeeks), "yyyy-MM-dd");
+        return { ...s, isExtended: true, extensionWeeks, extensionReason, endDate: newEnd };
+      })
+    );
+    setExtendingSeason(null);
+    setExtensionReason("");
+    toast({ title: "✅ Season Extended", description: `Extended by ${extensionWeeks} weeks.` });
+  };
+
+  const deleteSeason = (seasonId: string) => {
+    setSeasons((p) => p.filter((s) => s.id !== seasonId));
+    toast({ title: "🗑️ Season Deleted", description: "Season has been removed." });
+  };
+
+  return (
+    <div className="space-y-4">
+      <Button
+        className="w-full h-12 gap-2 text-sm font-bold"
+        onClick={() => setShowCreateForm(!showCreateForm)}
+        variant={showCreateForm ? "outline" : "default"}
+      >
+        {showCreateForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+        {showCreateForm ? "Cancel" : "Create New Season"}
+      </Button>
+
+      {/* Create Season Form */}
+      {showCreateForm && (
+        <Card className="border-primary/30">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="text-sm font-bold text-primary">New Quiz Season</h3>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Season Name</Label>
+              <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Tech Genius Season 2" className="h-11 mt-1" />
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Season Type</Label>
+              <Select value={newType} onValueChange={(v) => setNewType(v as any)}>
+                <SelectTrigger className="h-11 mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Short">Short (4 months, 3 selection levels)</SelectItem>
+                  <SelectItem value="Medium">Medium (6 months, 5 selection levels)</SelectItem>
+                  <SelectItem value="Complete">Complete (12 months, 7 selection levels)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Start Date</Label>
+                <Input type="date" value={newStartDate} onChange={(e) => setNewStartDate(e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">End Date (auto)</Label>
+                <Input value={computedEndDate || "—"} readOnly className="h-11 mt-1 bg-muted/30" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Entry Fee (₦)</Label>
+                <Input type="number" value={newEntryFee} onChange={(e) => setNewEntryFee(+e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Min. Target Participants</Label>
+                <Input type="number" value={newMinParticipants} onChange={(e) => setNewMinParticipants(+e.target.value)} className="h-11 mt-1" />
+              </div>
+            </div>
+
+            {/* Prize Breakdown */}
+            <div className="space-y-2 pt-2 border-t">
+              <h4 className="text-xs font-bold flex items-center gap-1.5">
+                <Trophy className="h-3.5 w-3.5 text-amber-600" />
+                Prize Breakdown
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground">1st Prize (₦)</Label>
+                  <Input type="number" value={newFirstPrize} onChange={(e) => setNewFirstPrize(+e.target.value)} className="h-11 mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">2nd Prize (₦)</Label>
+                  <Input type="number" value={newSecondPrize} onChange={(e) => setNewSecondPrize(+e.target.value)} className="h-11 mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">3rd Prize (₦)</Label>
+                  <Input type="number" value={newThirdPrize} onChange={(e) => setNewThirdPrize(+e.target.value)} className="h-11 mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Consolation (₦ each)</Label>
+                  <Input type="number" value={newConsolationPerPlayer} onChange={(e) => setNewConsolationPerPlayer(+e.target.value)} className="h-11 mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Number of Consolation Winners</Label>
+                <Input type="number" value={newConsolationCount} onChange={(e) => setNewConsolationCount(+e.target.value)} className="h-11 mt-1" />
+              </div>
+              <div className="p-2 bg-amber-500/10 rounded-lg text-center">
+                <span className="text-xs text-muted-foreground">Total Prize Pool: </span>
+                <span className="text-sm font-bold text-amber-700">{formatLocalAmount(totalPrizes, "NGN")}</span>
+              </div>
+            </div>
+
+            {/* Selection Rounds */}
+            <div className="space-y-2 pt-2 border-t">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold flex items-center gap-1.5">
+                  <Ticket className="h-3.5 w-3.5 text-primary" />
+                  Selection Rounds
+                </h4>
+                <Button size="sm" variant="outline" className="h-8 text-xs gap-1" onClick={addSelectionRound}>
+                  <Plus className="h-3 w-3" /> Add
+                </Button>
+              </div>
+              {newSelectionRounds.map((sr, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground w-12 shrink-0">R{sr.round}</span>
+                  <Input type="number" placeholder="Entries" value={sr.entriesSelected}
+                    onChange={(e) => {
+                      const copy = [...newSelectionRounds];
+                      copy[idx] = { ...copy[idx], entriesSelected: +e.target.value };
+                      setNewSelectionRounds(copy);
+                    }} className="h-9 text-xs" />
+                  <Input type="number" placeholder="Fee" value={sr.entryFee}
+                    onChange={(e) => {
+                      const copy = [...newSelectionRounds];
+                      copy[idx] = { ...copy[idx], entryFee: +e.target.value };
+                      setNewSelectionRounds(copy);
+                    }} className="h-9 text-xs w-24 shrink-0" />
+                  {newSelectionRounds.length > 1 && (
+                    <button onClick={() => removeSelectionRound(idx)} className="text-red-500 shrink-0">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* TV Show Rounds */}
+            <div className="space-y-2 pt-2 border-t">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold flex items-center gap-1.5">
+                  <Tv className="h-3.5 w-3.5 text-purple-500" />
+                  TV Show Rounds
+                </h4>
+                <Button size="sm" variant="outline" className="h-8 text-xs gap-1" onClick={addTvRound}>
+                  <Plus className="h-3 w-3" /> Add
+                </Button>
+              </div>
+              {newTvRounds.map((tv, idx) => (
+                <div key={idx} className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Input value={tv.label}
+                      onChange={(e) => {
+                        const copy = [...newTvRounds];
+                        copy[idx] = { ...copy[idx], label: e.target.value };
+                        setNewTvRounds(copy);
+                      }} placeholder="Label" className="h-9 text-xs" />
+                    <Input type="number" value={tv.entriesSelected}
+                      onChange={(e) => {
+                        const copy = [...newTvRounds];
+                        copy[idx] = { ...copy[idx], entriesSelected: +e.target.value };
+                        setNewTvRounds(copy);
+                      }} placeholder="Entries" className="h-9 text-xs w-20 shrink-0" />
+                    <Input type="number" value={tv.entryFee}
+                      onChange={(e) => {
+                        const copy = [...newTvRounds];
+                        copy[idx] = { ...copy[idx], entryFee: +e.target.value };
+                        setNewTvRounds(copy);
+                      }} placeholder="Fee" className="h-9 text-xs w-20 shrink-0" />
+                    {newTvRounds.length > 1 && (
+                      <button onClick={() => removeTvRound(idx)} className="text-red-500 shrink-0">
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Button className="w-full h-12 text-sm font-bold gap-2" onClick={handleCreate}>
+              <Save className="h-4 w-4" />
+              Create Season
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Season List */}
+      {seasons.length === 0 && !showCreateForm && (
+        <div className="text-center py-10 text-muted-foreground text-sm">
+          No seasons yet. Create your first season above.
+        </div>
+      )}
+
+      {seasons.map((season) => {
+        const isExpanded = expandedSeason === season.id;
+        const isExtending = extendingSeason === season.id;
+        const daysRemaining = Math.max(0, Math.ceil((new Date(season.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+        const participantProgress = season.minimumTargetParticipants > 0
+          ? Math.min(100, (season.totalParticipants / season.minimumTargetParticipants) * 100)
+          : 0;
+
+        return (
+          <Card key={season.id} className="overflow-hidden">
+            <CardContent className="p-0">
+              {/* Season Header */}
+              <button
+                className="w-full p-3 flex items-center justify-between text-left touch-manipulation"
+                onClick={() => setExpandedSeason(isExpanded ? null : season.id)}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="font-bold text-sm truncate">{season.name}</h4>
+                    <Badge variant="outline" className={`text-xs shrink-0 ${getSeasonTypeColor(season.type)}`}>
+                      {season.type}
+                    </Badge>
+                    <Badge className={`text-xs shrink-0 ${getStatusColor(season.quizStatus)}`}>
+                      {season.quizStatus}
+                    </Badge>
+                    {season.isLive && (
+                      <Badge className="bg-red-500 text-white text-xs animate-pulse shrink-0">🔴 LIVE</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    <span>{season.startDate} → {season.endDate}</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {daysRemaining} days left
+                    </span>
+                  </div>
+                </div>
+                {isExpanded ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}
+              </button>
+
+              {isExpanded && (
+                <div className="border-t">
+                  {/* Participants Progress */}
+                  <div className="p-3 space-y-1.5">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Participants</span>
+                      <span className="font-semibold">{season.totalParticipants.toLocaleString()} / {season.minimumTargetParticipants.toLocaleString()}</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${participantProgress}%` }}
+                      />
+                    </div>
+                    {participantProgress < 100 && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        Below minimum target
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Prize Breakdown */}
+                  <div className="p-3 bg-amber-500/5 space-y-1.5 border-t">
+                    <span className="text-xs font-bold flex items-center gap-1">
+                      <Trophy className="h-3.5 w-3.5 text-amber-600" /> Prizes
+                    </span>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="flex items-center gap-1"><Crown className="h-3 w-3 text-amber-500" /> 1st</span>
+                        <span className="font-bold">{formatLocalAmount(season.firstPrize, "NGN")}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="flex items-center gap-1"><Medal className="h-3 w-3 text-gray-400" /> 2nd</span>
+                        <span className="font-bold">{formatLocalAmount(season.secondPrize, "NGN")}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="flex items-center gap-1"><Medal className="h-3 w-3 text-amber-700" /> 3rd</span>
+                        <span className="font-bold">{formatLocalAmount(season.thirdPrize, "NGN")}</span>
+                      </div>
+                      {season.consolationPrizesEnabled && (
+                        <div className="flex justify-between text-xs">
+                          <span className="flex items-center gap-1"><Gift className="h-3 w-3 text-purple-500" /> Consolation ×{season.consolationPrizeCount}</span>
+                          <span className="font-bold">{formatLocalAmount(season.consolationPrizePerPlayer, "NGN")} each</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-xs pt-1.5 border-t border-amber-500/20 font-bold text-amber-700">
+                        <span>Total Prize Pool</span>
+                        <span>{formatLocalAmount(season.totalWinningPrizes, "NGN")}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Selection Rounds */}
+                  {season.selectionProcesses.length > 0 && (
+                    <div className="p-3 space-y-1.5 border-t">
+                      <span className="text-xs font-bold flex items-center gap-1">
+                        <Ticket className="h-3.5 w-3.5 text-primary" /> Selection Rounds
+                      </span>
+                      {season.selectionProcesses.map((sp) => (
+                        <div key={sp.round} className="flex justify-between text-xs bg-muted/10 rounded px-2 py-1.5">
+                          <span className="text-muted-foreground">Round {sp.round}</span>
+                          <span>{sp.entriesSelected.toLocaleString()} entries · {formatLocalAmount(sp.entryFee, "NGN")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* TV Show Rounds */}
+                  {season.tvShowRounds.length > 0 && (
+                    <div className="p-3 space-y-1.5 border-t">
+                      <span className="text-xs font-bold flex items-center gap-1">
+                        <Tv className="h-3.5 w-3.5 text-purple-500" /> TV Show Rounds
+                      </span>
+                      {season.tvShowRounds.map((tv) => (
+                        <div key={tv.round} className="flex justify-between text-xs bg-purple-500/5 rounded px-2 py-1.5">
+                          <span className="text-muted-foreground">{tv.label}</span>
+                          <span>{tv.entriesSelected} entries · {formatLocalAmount(tv.entryFee, "NGN")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Extension Info */}
+                  {season.isExtended && (
+                    <div className="p-3 bg-blue-500/5 border-t text-xs space-y-1">
+                      <span className="font-bold text-blue-700">⏳ Extended by {season.extensionWeeks} weeks</span>
+                      <p className="text-muted-foreground">Reason: {season.extensionReason}</p>
+                    </div>
+                  )}
+
+                  {/* Extension Form */}
+                  {isExtending && (
+                    <div className="p-3 border-t space-y-3">
+                      <h4 className="text-xs font-bold">Extend Season</h4>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Weeks (1-8)</Label>
+                        <Input type="number" min={1} max={8} value={extensionWeeks} onChange={(e) => setExtensionWeeks(+e.target.value)} className="h-10 mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Reason</Label>
+                        <Input value={extensionReason} onChange={(e) => setExtensionReason(e.target.value)} placeholder="e.g. Low participation" className="h-10 mt-1" />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="flex-1 h-10" onClick={() => setExtendingSeason(null)}>Cancel</Button>
+                        <Button size="sm" className="flex-1 h-10" onClick={() => handleExtend(season.id)}>Confirm</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="p-3 border-t flex flex-wrap gap-2">
+                    {season.quizStatus === "draft" && (
+                      <Button size="sm" variant="outline" className="h-9 text-xs gap-1 flex-1" onClick={() => toggleStatus(season.id, "active")}>
+                        <Play className="h-3 w-3" /> Activate
+                      </Button>
+                    )}
+                    {season.quizStatus === "active" && (
+                      <Button size="sm" variant="outline" className="h-9 text-xs gap-1 flex-1" onClick={() => toggleStatus(season.id, "suspended")}>
+                        <Pause className="h-3 w-3" /> Suspend
+                      </Button>
+                    )}
+                    {season.quizStatus === "suspended" && (
+                      <Button size="sm" variant="outline" className="h-9 text-xs gap-1 flex-1" onClick={() => toggleStatus(season.id, "active")}>
+                        <Play className="h-3 w-3" /> Reactivate
+                      </Button>
+                    )}
+                    {!isExtending && (
+                      <Button size="sm" variant="outline" className="h-9 text-xs gap-1 flex-1" onClick={() => setExtendingSeason(season.id)}>
+                        <CalendarPlus className="h-3 w-3" /> Extend
+                      </Button>
+                    )}
+                    <Button size="sm" variant="destructive" className="h-9 text-xs gap-1" onClick={() => deleteSeason(season.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Question Bank Tab ───────────────────────────────────────────────
+function QuestionBankTab({ merchantId }: { merchantId: string }) {
+  const { toast } = useToast();
+  const [questions, setQuestions] = useState<MerchantQuestion[]>(
+    mockQuestions.filter((q) => q.merchantId === merchantId)
+  );
+  const [activeSubTab, setActiveSubTab] = useState<"objective" | "non_objective" | "bonus_objective">("objective");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Create form state
+  const [newQuestion, setNewQuestion] = useState("");
+  const [newCategory, setNewCategory] = useState("General");
+  const [newDifficulty, setNewDifficulty] = useState<"easy" | "medium" | "hard">("easy");
+  const [newOptions, setNewOptions] = useState<string[]>(Array(8).fill(""));
+  const [newCorrectIndex, setNewCorrectIndex] = useState(0);
+  const [newAltAnswers, setNewAltAnswers] = useState("");
+  const [newTimeLimit, setNewTimeLimit] = useState(30);
+  const [newCost, setNewCost] = useState(200);
+
+  const filteredQuestions = questions.filter((q) => q.type === activeSubTab);
+
+  const resetForm = () => {
+    setNewQuestion("");
+    setNewCategory("General");
+    setNewDifficulty("easy");
+    setNewOptions(Array(8).fill(""));
+    setNewCorrectIndex(0);
+    setNewAltAnswers("");
+    setNewTimeLimit(30);
+    setNewCost(200);
+    setShowCreateForm(false);
+    setEditingId(null);
+  };
+
+  const handleCreate = () => {
+    if (!newQuestion.trim()) {
+      toast({ title: "⚠️ Missing Question", description: "Please enter a question.", variant: "destructive" });
+      return;
+    }
+    const q: MerchantQuestion = {
+      id: `q-new-${Date.now()}`,
+      merchantId,
+      question: newQuestion.trim(),
+      type: activeSubTab,
+      options: activeSubTab !== "non_objective" ? newOptions.filter((o) => o.trim()) : [],
+      correctAnswerIndex: activeSubTab !== "non_objective" ? newCorrectIndex : -1,
+      alternativeAnswers: activeSubTab === "non_objective" ? newAltAnswers.split(",").map((a) => a.trim()).filter(Boolean) : [],
+      category: newCategory,
+      difficulty: newDifficulty,
+      timeLimit: newTimeLimit,
+      costPerQuestion: newCost,
+    };
+    if (editingId) {
+      setQuestions((p) => p.map((existing) => (existing.id === editingId ? { ...q, id: editingId } : existing)));
+      toast({ title: "✅ Question Updated", description: "Question has been updated." });
+    } else {
+      setQuestions((p) => [q, ...p]);
+      toast({ title: "✅ Question Created", description: "New question added to your bank." });
+    }
+    resetForm();
+  };
+
+  const startEdit = (q: MerchantQuestion) => {
+    setEditingId(q.id);
+    setNewQuestion(q.question);
+    setNewCategory(q.category);
+    setNewDifficulty(q.difficulty);
+    const opts = [...q.options];
+    while (opts.length < 8) opts.push("");
+    setNewOptions(opts);
+    setNewCorrectIndex(q.correctAnswerIndex);
+    setNewAltAnswers(q.alternativeAnswers.join(", "));
+    setNewTimeLimit(q.timeLimit);
+    setNewCost(q.costPerQuestion);
+    setShowCreateForm(true);
+  };
+
+  const deleteQuestion = (id: string) => {
+    setQuestions((p) => p.filter((q) => q.id !== id));
+    toast({ title: "🗑️ Question Deleted" });
+  };
+
+  const subTabLabels: Record<string, string> = {
+    objective: "Main Objective",
+    non_objective: "Non-Objective",
+    bonus_objective: "Bonus Objective",
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Sub-tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {(["objective", "non_objective", "bonus_objective"] as const).map((t) => (
+          <Button
+            key={t}
+            size="sm"
+            variant={activeSubTab === t ? "default" : "outline"}
+            className="h-9 text-xs shrink-0"
+            onClick={() => { setActiveSubTab(t); resetForm(); }}
+          >
+            {subTabLabels[t]} ({questions.filter((q) => q.type === t).length})
+          </Button>
+        ))}
+      </div>
+
+      <Button
+        className="w-full h-11 gap-2 text-sm font-bold"
+        onClick={() => { if (showCreateForm && !editingId) resetForm(); else { resetForm(); setShowCreateForm(true); } }}
+        variant={showCreateForm ? "outline" : "default"}
+      >
+        {showCreateForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+        {showCreateForm ? "Cancel" : `Add ${subTabLabels[activeSubTab]} Question`}
+      </Button>
+
+      {/* Create/Edit Form */}
+      {showCreateForm && (
+        <Card className="border-primary/30">
+          <CardContent className="p-4 space-y-3">
+            <h3 className="text-sm font-bold text-primary">
+              {editingId ? "Edit Question" : `New ${subTabLabels[activeSubTab]} Question`}
+            </h3>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Question</Label>
+              <textarea
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                rows={3}
+                className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Enter question text..."
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Category</Label>
+                <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-10 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Difficulty</Label>
+                <Select value={newDifficulty} onValueChange={(v) => setNewDifficulty(v as any)}>
+                  <SelectTrigger className="h-10 mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="easy">Easy</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Objective Options */}
+            {activeSubTab !== "non_objective" && (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Answer Options (A-H)</Label>
+                {newOptions.map((opt, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <span className="text-xs font-bold w-5 shrink-0 text-muted-foreground">{ANSWER_LABELS[idx]}</span>
+                    <Input
+                      value={opt}
+                      onChange={(e) => {
+                        const copy = [...newOptions];
+                        copy[idx] = e.target.value;
+                        setNewOptions(copy);
+                      }}
+                      placeholder={`Option ${ANSWER_LABELS[idx]}`}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                ))}
+                <div>
+                  <Label className="text-xs text-muted-foreground">Correct Answer</Label>
+                  <Select value={String(newCorrectIndex)} onValueChange={(v) => setNewCorrectIndex(+v)}>
+                    <SelectTrigger className="h-10 mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {newOptions.map((opt, idx) => opt.trim() && (
+                        <SelectItem key={idx} value={String(idx)}>{ANSWER_LABELS[idx]}: {opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {/* Non-Objective Alternative Answers */}
+            {activeSubTab === "non_objective" && (
+              <div>
+                <Label className="text-xs text-muted-foreground">Alternative Answers (comma-separated, 2-5)</Label>
+                <Input value={newAltAnswers} onChange={(e) => setNewAltAnswers(e.target.value)} placeholder="answer1, answer2, answer3" className="h-10 mt-1" />
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Time Limit (sec)</Label>
+                <Input type="number" value={newTimeLimit} onChange={(e) => setNewTimeLimit(+e.target.value)} className="h-10 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Cost Per Question (₦)</Label>
+                <Input type="number" value={newCost} onChange={(e) => setNewCost(+e.target.value)} className="h-10 mt-1" />
+              </div>
+            </div>
+
+            <Button className="w-full h-11 text-sm font-bold gap-2" onClick={handleCreate}>
+              <Save className="h-4 w-4" />
+              {editingId ? "Update Question" : "Add Question"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Question List */}
+      {filteredQuestions.length === 0 && !showCreateForm && (
+        <div className="text-center py-10 text-muted-foreground text-sm">
+          No {subTabLabels[activeSubTab].toLowerCase()} questions yet.
+        </div>
+      )}
+
+      {filteredQuestions.map((q) => (
+        <Card key={q.id} className="overflow-hidden">
+          <CardContent className="p-3 space-y-2">
+            <p className="text-sm font-medium leading-snug">{q.question}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="outline" className="text-xs">{q.category}</Badge>
+              <Badge variant="outline" className="text-xs capitalize">{q.difficulty}</Badge>
+              <span className="text-xs text-muted-foreground">{q.timeLimit}s · {formatLocalAmount(q.costPerQuestion, "NGN")}</span>
+            </div>
+
+            {q.type !== "non_objective" && q.options.length > 0 && (
+              <div className="grid grid-cols-2 gap-1 mt-1">
+                {q.options.map((opt, idx) => (
+                  <div key={idx} className={`text-xs px-2 py-1 rounded ${idx === q.correctAnswerIndex ? "bg-emerald-500/15 text-emerald-700 font-bold" : "bg-muted/30 text-muted-foreground"}`}>
+                    {ANSWER_LABELS[idx]}: {opt}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {q.type === "non_objective" && q.alternativeAnswers.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {q.alternativeAnswers.map((alt, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs">{alt}</Badge>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" variant="outline" className="h-8 text-xs gap-1 flex-1" onClick={() => startEdit(q)}>
+                <Edit className="h-3 w-3" /> Edit
+              </Button>
+              <Button size="sm" variant="destructive" className="h-8 text-xs gap-1" onClick={() => deleteQuestion(q.id)}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── Wallet Tab ──────────────────────────────────────────────────────
+function WalletTab({ merchant }: { merchant: QuizMerchant }) {
+  const { toast } = useToast();
+  const totalPrizePool = mockSeasons
+    .filter((s) => s.merchantId === merchant.id)
+    .reduce((sum, s) => sum + s.totalWinningPrizes, 0);
+  const requiredBalance = totalPrizePool * MERCHANT_MIN_WALLET_PERCENT;
+  const isFunded = merchant.walletBalance >= requiredBalance;
+  const fundingPercentage = requiredBalance > 0 ? Math.min(100, (merchant.walletBalance / requiredBalance) * 100) : 100;
+
+  return (
+    <div className="space-y-4">
+      {/* Balance Card */}
+      <Card className="border-primary/30">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-primary" />
+              Wallet Balance
+            </h3>
+            {isFunded ? (
+              <Badge className="bg-emerald-500/15 text-emerald-700 text-xs gap-1">
+                <CheckCircle className="h-3 w-3" /> Funded
+              </Badge>
+            ) : (
+              <Badge className="bg-red-500/15 text-red-700 text-xs gap-1">
+                <AlertTriangle className="h-3 w-3" /> Underfunded
+              </Badge>
+            )}
+          </div>
+          <p className="text-2xl font-extrabold">{formatLocalAmount(merchant.walletBalance, "NGN")}</p>
+          
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">Required (70% of prizes)</span>
+              <span className="font-semibold">{formatLocalAmount(requiredBalance, "NGN")}</span>
+            </div>
+            <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${isFunded ? "bg-emerald-500" : "bg-amber-500"}`}
+                style={{ width: `${fundingPercentage}%` }}
+              />
+            </div>
+          </div>
+
+          <Button className="w-full h-11 text-sm font-bold gap-2" onClick={() => toast({ title: "💰 Fund Wallet", description: "Wallet funding initiated. Processing..." })}>
+            <DollarSign className="h-4 w-4" />
+            Add Funds
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Waiver Section */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="text-sm font-bold">Waiver Request</h3>
+          <p className="text-xs text-muted-foreground">
+            If you cannot meet the 70% funding requirement, you can request a waiver. A non-refundable fee of {formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")} applies.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Status:</span>
+            {merchant.waiverApproved ? (
+              <Badge className="bg-emerald-500/15 text-emerald-700 text-xs">Approved</Badge>
+            ) : merchant.pendingWaiverRequest ? (
+              <Badge className="bg-amber-500/15 text-amber-700 text-xs">Pending Review</Badge>
+            ) : (
+              <Badge className="bg-muted text-muted-foreground text-xs">Not Requested</Badge>
+            )}
+          </div>
+          {!merchant.waiverApproved && !merchant.pendingWaiverRequest && (
+            <Button
+              variant="outline"
+              className="w-full h-11 text-sm gap-2"
+              onClick={() => toast({ title: "📝 Waiver Requested", description: `Fee of ${formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")} has been debited on your Mobi Wallet.` })}
+            >
+              Request Waiver ({formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")})
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Funding History */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="text-sm font-bold">Funding History</h3>
+          {merchant.walletFundingHistory.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">No funding history yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {merchant.walletFundingHistory.map((tx, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2.5 bg-muted/20 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">{tx.description}</p>
+                    <p className="text-xs text-muted-foreground">{tx.date}</p>
+                  </div>
+                  <span className="text-sm font-bold text-emerald-700">+{formatLocalAmount(tx.amount, "NGN")}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────────────────
 export default function MerchantPage() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [selectedMerchant, setSelectedMerchant] = useState<QuizMerchant | null>(null);
-  const [showScoreboard, setShowScoreboard] = useState(false);
-  const [selectedSeason, setSelectedSeason] = useState<QuizSeason | null>(null);
-  const [showPlay, setShowPlay] = useState(false);
-
-  const getMerchantSeasons = (merchantId: string) =>
-    mockSeasons.filter((s) => s.merchantId === merchantId && s.quizStatus === "active");
-
-  const getBestSeason = (merchantId: string) => {
-    const seasons = getMerchantSeasons(merchantId);
-    if (!seasons.length) return null;
-    return seasons.reduce((best, s) => (s.totalWinningPrizes > best.totalWinningPrizes ? s : best), seasons[0]);
-  };
-
-  const handleJoinSeason = (season: QuizSeason) => {
-    setSelectedSeason(season);
-    toast({
-      title: "🎮 Joining Season",
-      description: `Entering ${season.name}...`,
-    });
-    setShowPlay(true);
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -88,322 +1111,51 @@ export default function MerchantPage() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-bold">Merchant Quiz Management</h1>
-            <p className="text-xs text-muted-foreground">{approvedMerchants.length} verified merchants</p>
+            <h1 className="text-lg font-bold">Merchant Quizzes Management</h1>
+            <p className="text-xs text-muted-foreground">{myMerchant.name} · {myMerchant.category}</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 h-10 touch-manipulation"
-            onClick={() => setShowScoreboard(true)}
-          >
-            <Zap className="h-4 w-4 text-amber-500" />
-            <span className="text-xs font-semibold">Live Scores</span>
-          </Button>
         </div>
       </div>
 
-      {/* Merchant List */}
-      <div className="p-4 space-y-3">
-        {approvedMerchants.map((merchant) => {
-          const seasons = getMerchantSeasons(merchant.id);
-          const bestSeason = getBestSeason(merchant.id);
-          const totalParticipants = seasons.reduce((sum, s) => sum + s.totalParticipants, 0);
+      {/* Tabs */}
+      <div className="px-4 pt-3">
+        <Tabs defaultValue="settings" className="w-full">
+          <TabsList className="w-full grid grid-cols-4 h-11">
+            <TabsTrigger value="settings" className="text-xs px-1">
+              <Settings className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              Settings
+            </TabsTrigger>
+            <TabsTrigger value="seasons" className="text-xs px-1">
+              <Gamepad2 className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              Seasons
+            </TabsTrigger>
+            <TabsTrigger value="questions" className="text-xs px-1">
+              <HelpCircle className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              Questions
+            </TabsTrigger>
+            <TabsTrigger value="wallet" className="text-xs px-1">
+              <Wallet className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              Wallet
+            </TabsTrigger>
+          </TabsList>
 
-          return (
-            <Card
-              key={merchant.id}
-              className="overflow-hidden cursor-pointer active:scale-[0.98] transition-all touch-manipulation border-border/60"
-              onClick={() => setSelectedMerchant(merchant)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12 shrink-0 border-2 border-primary/20">
-                    <AvatarImage src={merchant.logo} alt={merchant.name} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
-                      {merchant.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+          <TabsContent value="settings" className="mt-4">
+            <PlatformSettingsTab merchant={myMerchant} />
+          </TabsContent>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <h3 className="font-bold text-sm truncate">{merchant.name}</h3>
-                      {merchant.isVerified && (
-                        <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" />
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-2">{merchant.category}</p>
+          <TabsContent value="seasons" className="mt-4">
+            <SeasonsTab merchantId={myMerchant.id} />
+          </TabsContent>
 
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Gamepad2 className="h-3.5 w-3.5" />
-                        {seasons.length} season{seasons.length !== 1 ? "s" : ""}
-                      </span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="h-3.5 w-3.5" />
-                        {totalParticipants.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
+          <TabsContent value="questions" className="mt-4">
+            <QuestionBankTab merchantId={myMerchant.id} />
+          </TabsContent>
 
-                  <div className="text-right shrink-0">
-                    {bestSeason && (
-                      <div className="bg-gradient-to-br from-amber-500/15 to-amber-600/5 rounded-lg px-2.5 py-1.5 border border-amber-500/20">
-                        <div className="flex items-center gap-1 mb-0.5">
-                          <Trophy className="h-3 w-3 text-amber-600" />
-                          <span className="text-[10px] text-amber-700 font-medium">Top Prize</span>
-                        </div>
-                        <p className="text-xs font-bold text-amber-700">
-                          {formatLocalAmount(bestSeason.totalWinningPrizes, "NGN")}
-                        </p>
-                      </div>
-                    )}
-                    <ChevronRight className="h-4 w-4 text-muted-foreground mt-2 ml-auto" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+          <TabsContent value="wallet" className="mt-4">
+            <WalletTab merchant={myMerchant} />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Merchant Detail Drawer */}
-      <Drawer open={!!selectedMerchant} onOpenChange={(o) => !o && setSelectedMerchant(null)}>
-        <DrawerContent className="max-h-[92vh] flex flex-col">
-          <DrawerHeader className="shrink-0 px-4 pt-2 pb-3 border-b">
-            <DrawerTitle className="text-base font-bold">
-              {selectedMerchant?.name || "Merchant Details"}
-            </DrawerTitle>
-          </DrawerHeader>
-
-          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 py-4 space-y-4">
-            {selectedMerchant && (
-              <>
-                {/* Merchant Info Card */}
-                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <Avatar className="h-14 w-14 border-2 border-primary/20">
-                    <AvatarImage src={selectedMerchant.logo} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                      {selectedMerchant.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <h2 className="font-bold text-base">{selectedMerchant.name}</h2>
-                      {selectedMerchant.isVerified && (
-                        <BadgeCheck className="h-4.5 w-4.5 text-blue-500" />
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{selectedMerchant.category}</p>
-                    <Badge variant="secondary" className="mt-1 text-xs">
-                      Verified Merchant
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Platform Settings Summary */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
-                    <Target className="h-4 w-4 text-primary" />
-                    Quiz Platform Settings
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-3 bg-muted/20 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Questions/Pack</p>
-                      <p className="text-sm font-bold">{selectedMerchant.questionsPerPack}</p>
-                    </div>
-                    <div className="p-3 bg-muted/20 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Cost/Question</p>
-                      <p className="text-sm font-bold">{formatLocalAmount(selectedMerchant.costPerQuestion, "NGN")}</p>
-                    </div>
-                    <div className="p-3 bg-muted/20 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Win Threshold</p>
-                      <p className="text-sm font-bold">{selectedMerchant.winPercentageThreshold}%</p>
-                    </div>
-                    <div className="p-3 bg-muted/20 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Qualifying Pts</p>
-                      <p className="text-sm font-bold">{selectedMerchant.qualifyingPoints}</p>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-muted/20 rounded-lg">
-                    <p className="text-xs text-muted-foreground mb-1">Bonus Games</p>
-                    <p className="text-sm">
-                      After every <span className="font-bold">{selectedMerchant.bonusGamesAfter}</span> packs,
-                      get <span className="font-bold">{selectedMerchant.bonusGamesCountMin}–{selectedMerchant.bonusGamesCountMax}</span> free games
-                      at <span className="font-bold">{selectedMerchant.bonusDiscountMin}–{selectedMerchant.bonusDiscountMax}%</span> discount
-                    </p>
-                  </div>
-                </div>
-
-                {/* Seasons */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
-                    <Gamepad2 className="h-4 w-4 text-primary" />
-                    Quiz Seasons
-                  </h3>
-
-                  {getMerchantSeasons(selectedMerchant.id).length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-6">No active seasons</p>
-                  )}
-
-                  {getMerchantSeasons(selectedMerchant.id).map((season) => (
-                    <Card
-                      key={season.id}
-                      className={`overflow-hidden border ${
-                        selectedSeason?.id === season.id ? "ring-2 ring-primary" : ""
-                      }`}
-                      onClick={() => setSelectedSeason(season)}
-                    >
-                      <CardContent className="p-0">
-                        {/* Season Header */}
-                        <div className="p-3 flex items-center justify-between border-b bg-muted/10">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <h4 className="font-bold text-sm truncate">{season.name}</h4>
-                            <Badge variant="outline" className={`text-[10px] shrink-0 ${getSeasonTypeColor(season.type)}`}>
-                              {season.type}
-                            </Badge>
-                          </div>
-                          {season.isLive && (
-                            <Badge className="bg-red-500 text-white text-[10px] animate-pulse shrink-0 ml-2">
-                              🔴 LIVE
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Prize Breakdown */}
-                        <div className="p-3 bg-gradient-to-br from-amber-500/10 to-amber-600/5 space-y-2">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Trophy className="h-3.5 w-3.5 text-amber-600" />
-                            <span className="text-xs font-semibold text-amber-700">Prize Breakdown</span>
-                          </div>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs flex items-center gap-1">
-                                <Crown className="h-3 w-3 text-amber-500" /> 1st Prize
-                              </span>
-                              <span className="text-xs font-bold">{formatLocalAmount(season.firstPrize, "NGN")}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs flex items-center gap-1">
-                                <Medal className="h-3 w-3 text-gray-400" /> 2nd Prize
-                              </span>
-                              <span className="text-xs font-bold">{formatLocalAmount(season.secondPrize, "NGN")}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs flex items-center gap-1">
-                                <Medal className="h-3 w-3 text-amber-700" /> 3rd Prize
-                              </span>
-                              <span className="text-xs font-bold">{formatLocalAmount(season.thirdPrize, "NGN")}</span>
-                            </div>
-                            {season.consolationPrizesEnabled && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs flex items-center gap-1">
-                                  <Gift className="h-3 w-3 text-purple-500" /> Consolation ×{season.consolationPrizeCount}
-                                </span>
-                                <span className="text-xs font-bold">{formatLocalAmount(season.consolationPrizePerPlayer, "NGN")} each</span>
-                              </div>
-                            )}
-                            <div className="pt-1.5 border-t border-amber-500/20 flex items-center justify-between">
-                              <span className="text-xs font-semibold text-amber-700">Total Prize Pool</span>
-                              <span className="text-sm font-extrabold text-amber-700">{formatLocalAmount(season.totalWinningPrizes, "NGN")}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Entry Fee & Participants */}
-                        <div className="p-3 grid grid-cols-2 gap-2">
-                          <div className="p-2 bg-muted/20 rounded-lg text-center">
-                            <p className="text-[10px] text-muted-foreground">Entry Fee</p>
-                            <p className="text-sm font-bold">{formatLocalAmount(season.entryFee, "NGN")}</p>
-                          </div>
-                          <div className="p-2 bg-muted/20 rounded-lg text-center">
-                            <p className="text-[10px] text-muted-foreground">Participants</p>
-                            <p className="text-sm font-bold">{season.totalParticipants.toLocaleString()}</p>
-                          </div>
-                        </div>
-
-                        {/* Selection Process */}
-                        {season.selectionProcesses.length > 0 && (
-                          <div className="px-3 pb-2 space-y-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <Ticket className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-xs font-semibold">Selection Rounds</span>
-                            </div>
-                            <div className="space-y-1">
-                              {season.selectionProcesses.map((sp) => (
-                                <div key={sp.round} className="flex items-center justify-between text-xs bg-muted/10 rounded px-2 py-1.5">
-                                  <span className="text-muted-foreground">Round {sp.round}</span>
-                                  <span>{sp.entriesSelected.toLocaleString()} entries • {formatLocalAmount(sp.entryFee, "NGN")}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* TV Show Rounds */}
-                        {season.tvShowRounds.length > 0 && (
-                          <div className="px-3 pb-2 space-y-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <Tv className="h-3.5 w-3.5 text-purple-500" />
-                              <span className="text-xs font-semibold">TV Show Rounds</span>
-                            </div>
-                            <div className="space-y-1">
-                              {season.tvShowRounds.map((tv) => (
-                                <div key={tv.round} className="flex items-center justify-between text-xs bg-purple-500/5 rounded px-2 py-1.5">
-                                  <span className="font-medium">{tv.label}</span>
-                                  <span className="text-muted-foreground">
-                                    {tv.entriesSelected} entries
-                                    {tv.entryFee > 0 ? ` • ${formatLocalAmount(tv.entryFee, "NGN")}` : " • Free"}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Level Progress */}
-                        <div className="px-3 pb-3">
-                          <div className="flex items-center justify-between text-xs mb-1">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span className="font-medium">Level {season.currentLevel}/{season.selectionLevels}</span>
-                          </div>
-                          <Progress value={(season.currentLevel / season.selectionLevels) * 100} className="h-2" />
-                        </div>
-
-                        {/* Join Button */}
-                        <div className="px-3 pb-3">
-                          <Button
-                            className="w-full h-11 text-sm font-bold gap-2 touch-manipulation"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleJoinSeason(season);
-                            }}
-                          >
-                            <Star className="h-4 w-4" />
-                            Join Season — {formatLocalAmount(season.entryFee, "NGN")}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
-
-      {/* Live Scoreboard */}
-      <LiveScoreboardDrawer open={showScoreboard} onOpenChange={setShowScoreboard} />
-
-      {/* Play Dialog */}
-      {selectedSeason && (
-        <InteractiveQuizPlayDialog
-          open={showPlay}
-          onOpenChange={setShowPlay}
-          season={selectedSeason}
-        />
-      )}
     </div>
   );
 }
