@@ -221,8 +221,8 @@ export const CommentItem = ({
         </div>
       )}
 
-      {/* Nested Replies */}
-      {comment.replies && comment.replies.length > 0 && (
+      {/* Nested Replies - only 1 level deep */}
+      {!isReply && comment.replies && comment.replies.length > 0 && (
         <div className="space-y-2">
           {comment.replies.map((reply) => (
             <CommentItem
