@@ -397,7 +397,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
 
             {/* Comments - below action buttons */}
             {showComments && (
-              <div ref={commentRef} className="space-y-2.5" onTouchMove={(e) => e.stopPropagation()}>
+              <div ref={commentRef} className="space-y-2.5">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-semibold">Comments</span>
