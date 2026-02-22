@@ -128,7 +128,7 @@ function PlatformSettingsTab({ merchant }: { merchant: QuizMerchant }) {
 
           <div className="space-y-3">
             <div>
-              <Label className="text-xs text-muted-foreground">Questions Per Pack</Label>
+              <Label className="text-xs text-muted-foreground">Questions Per Session</Label>
               <Input type="number" value={settings.questionsPerPack} onChange={(e) => update("questionsPerPack", +e.target.value)} className="h-11 mt-1" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -158,7 +158,7 @@ function PlatformSettingsTab({ merchant }: { merchant: QuizMerchant }) {
 
           <div className="space-y-3">
             <div>
-              <Label className="text-xs text-muted-foreground">Cost Per Question (₦)</Label>
+              <Label className="text-xs text-muted-foreground">Cost Per Session (₦)</Label>
               <Input type="number" value={settings.costPerQuestion} onChange={(e) => update("costPerQuestion", +e.target.value)} className="h-11 mt-1" />
             </div>
             <div className="grid grid-cols-2 gap-3">
