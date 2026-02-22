@@ -16,6 +16,7 @@ import {
   Medal,
   Gift,
   Tv,
+  Ticket,
   Target,
   Gamepad2,
   Play,
@@ -232,8 +233,22 @@ export default function MerchantDetailPage() {
                   </div>
                 </div>
 
-
-
+                {/* Selection Rounds */}
+                {season.selectionProcesses.length > 0 && (
+                  <div className="px-3 pb-2 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <Ticket className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-xs font-semibold">Selection Rounds</span>
+                    </div>
+                    <div className="space-y-1">
+                      {season.selectionProcesses.map((sp) => (
+                        <div key={sp.round} className="flex items-center text-xs bg-muted/10 rounded px-2 py-1.5">
+                          <span className="text-muted-foreground">Round {sp.round}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* TV Show Rounds */}
                 {season.tvShowRounds.length > 0 && (
