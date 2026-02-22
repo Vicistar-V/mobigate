@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Store, ChevronDown, Clock, Shield, ArrowLeft, CreditCard,
-  User, MapPin, Globe, Landmark, BadgeCheck, Plus, Minus
+  User, MapPin, Globe, Landmark, BadgeCheck, Plus, Minus, Save, RotateCcw, Trash2
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -144,7 +144,67 @@ export default function IndividualMerchantApplication() {
     setRefNumber(ref);
     setSubmitted(true);
     toast({ title: "Application Submitted!", description: `Fee: ${formatMobi(50000)}. Ref: ${ref}` });
+    localStorage.removeItem("mobigate-ind-merchant-draft");
   };
+
+  const IND_STORAGE_KEY = "mobigate-ind-merchant-draft";
+
+  const saveDraft = useCallback(() => {
+    const draft = {
+      firstName, middleName, lastName, gender, dobDay, dobMonth, dobYear,
+      birthTown, birthLGA, birthState, maritalStatus, profession,
+      hometownAddress, nearestTown, lgaOfOrigin, stateOfOrigin, nationality,
+      currentAddress, townOfResidence, lgaOfResidence, stateOfResidence, countryOfResidence,
+      phone1, phone2, email, bankEntries, preferredCurrency, verifications,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(IND_STORAGE_KEY, JSON.stringify(draft));
+    toast({ title: "Draft Saved", description: "Your progress has been saved. You can resume later." });
+  }, [firstName, middleName, lastName, gender, dobDay, dobMonth, dobYear, birthTown, birthLGA, birthState, maritalStatus, profession, hometownAddress, nearestTown, lgaOfOrigin, stateOfOrigin, nationality, currentAddress, townOfResidence, lgaOfResidence, stateOfResidence, countryOfResidence, phone1, phone2, email, bankEntries, preferredCurrency, verifications, toast]);
+
+  const clearDraft = useCallback(() => {
+    localStorage.removeItem(IND_STORAGE_KEY);
+    setFirstName(""); setMiddleName(""); setLastName(""); setGender(""); 
+    setDobDay(""); setDobMonth(""); setDobYear("");
+    setBirthTown(""); setBirthLGA(""); setBirthState(""); setMaritalStatus(""); setProfession("");
+    setHometownAddress(""); setNearestTown(""); setLgaOfOrigin(""); setStateOfOrigin(""); setNationality("");
+    setCurrentAddress(""); setTownOfResidence(""); setLgaOfResidence(""); setStateOfResidence(""); setCountryOfResidence("");
+    setPhone1(""); setPhone2(""); setEmail("");
+    setBankEntries([{ bankName: "", accountName: "", accountNumber: "" }]);
+    setPreferredCurrency("NGN");
+    setVerifications([{ type: "", number: "", customType: "" }]);
+    setAcceptedPolicies(false);
+    toast({ title: "Draft Cleared", description: "All form data has been cleared." });
+  }, [toast]);
+
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftDate, setDraftDate] = useState("");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(IND_STORAGE_KEY);
+      if (saved) {
+        const d = JSON.parse(saved);
+        setFirstName(d.firstName || ""); setMiddleName(d.middleName || ""); setLastName(d.lastName || "");
+        setGender(d.gender || ""); setDobDay(d.dobDay || ""); setDobMonth(d.dobMonth || ""); setDobYear(d.dobYear || "");
+        setBirthTown(d.birthTown || ""); setBirthLGA(d.birthLGA || ""); setBirthState(d.birthState || "");
+        setMaritalStatus(d.maritalStatus || ""); setProfession(d.profession || "");
+        setHometownAddress(d.hometownAddress || ""); setNearestTown(d.nearestTown || "");
+        setLgaOfOrigin(d.lgaOfOrigin || ""); setStateOfOrigin(d.stateOfOrigin || "");
+        setNationality(d.nationality || ""); setCurrentAddress(d.currentAddress || "");
+        setTownOfResidence(d.townOfResidence || ""); setLgaOfResidence(d.lgaOfResidence || "");
+        setStateOfResidence(d.stateOfResidence || ""); setCountryOfResidence(d.countryOfResidence || "");
+        setPhone1(d.phone1 || ""); setPhone2(d.phone2 || ""); setEmail(d.email || "");
+        if (d.bankEntries?.length) setBankEntries(d.bankEntries);
+        if (d.preferredCurrency) setPreferredCurrency(d.preferredCurrency);
+        if (d.verifications?.length) setVerifications(d.verifications);
+        setHasDraft(true);
+        if (d.savedAt) {
+          setDraftDate(new Date(d.savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }));
+        }
+      }
+    } catch {}
+  }, []);
 
   if (submitted) {
     return (
@@ -201,6 +261,22 @@ export default function IndividualMerchantApplication() {
             <p className="text-[11px] text-muted-foreground">Apply as an individual Mobi-Merchant</p>
           </div>
         </div>
+
+        {/* Draft Resume Banner */}
+        {hasDraft && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="p-3 flex items-center gap-3">
+              <RotateCcw className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold">Draft Restored</p>
+                {draftDate && <p className="text-xs text-muted-foreground">Last saved: {draftDate}</p>}
+              </div>
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => { clearDraft(); setHasDraft(false); }}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Merchant Application Requirements */}
         <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
@@ -446,6 +522,16 @@ export default function IndividualMerchantApplication() {
                 of MOBIGATE Application usage and management policy. By submitting, you agree to the application fee of{" "}
                 <span className="font-bold text-primary">{formatMobi(50000)}</span> being charged from your Mobi Wallet.
               </Label>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={saveDraft} className="flex-1 gap-2" size="lg">
+                <Save className="h-4 w-4" />
+                Save Draft
+              </Button>
+              <Button variant="outline" onClick={clearDraft} className="gap-2 text-destructive hover:text-destructive" size="lg">
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
 
             <Button onClick={handleSubmit} className="w-full gap-2" size="lg" disabled={!acceptedPolicies}>

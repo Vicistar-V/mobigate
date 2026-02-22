@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Store, ChevronDown, Clock, Shield, ArrowLeft, CreditCard,
-  Upload, Eye, EyeOff, Building2, Plus, Trash2
+  Upload, Eye, EyeOff, Building2, Plus, Trash2, Save, RotateCcw
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -117,7 +117,73 @@ export default function MerchantApplication() {
     setRefNumber(ref);
     setSubmitted(true);
     toast({ title: "Application Submitted!", description: `Fee: ${formatMobi(50000)}. Ref: ${ref}` });
+    localStorage.removeItem("mobigate-corp-merchant-draft");
   };
+
+  const STORAGE_KEY = "mobigate-corp-merchant-draft";
+
+  const saveDraft = useCallback(() => {
+    const draft = {
+      storeName, accountEmail, password, confirmPassword,
+      merchantName, businessProfile, dba, registeredOffice,
+      companyRegNumber, regAuthority, countryOfReg, tin,
+      directors: directors.map(d => ({ name: d.name, address: d.address })),
+      address1, address2, address3,
+      affiliate1Name, affiliate1Address, affiliate2Name, affiliate2Address,
+      emailAddress, website, phone1, phone2,
+      bankAcct1, bankAcct2, bankName1, bankName2, bankBranch1, bankBranch2,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    toast({ title: "Draft Saved", description: "Your progress has been saved. You can resume later." });
+  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, address1, address2, address3, affiliate1Name, affiliate1Address, affiliate2Name, affiliate2Address, emailAddress, website, phone1, phone2, bankAcct1, bankAcct2, bankName1, bankName2, bankBranch1, bankBranch2, toast]);
+
+  const clearDraft = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setStoreName(""); setAccountEmail(""); setPassword(""); setConfirmPassword("");
+    setMerchantName(""); setBusinessProfile(""); setDba(""); setRegisteredOffice("");
+    setCompanyRegNumber(""); setRegAuthority(""); setCountryOfReg(""); setTin("");
+    setDirectors([{ name: "", address: "", photo: null }, { name: "", address: "", photo: null }]);
+    setAddress1(""); setAddress2(""); setAddress3("");
+    setAffiliate1Name(""); setAffiliate1Address(""); setAffiliate2Name(""); setAffiliate2Address("");
+    setEmailAddress(""); setWebsite(""); setPhone1(""); setPhone2("");
+    setBankAcct1(""); setBankAcct2(""); setBankName1(""); setBankName2(""); setBankBranch1(""); setBankBranch2("");
+    setAcceptedPolicies(false);
+    toast({ title: "Draft Cleared", description: "All form data has been cleared." });
+  }, [toast]);
+
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftDate, setDraftDate] = useState("");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        setStoreName(draft.storeName || ""); setAccountEmail(draft.accountEmail || "");
+        setPassword(draft.password || ""); setConfirmPassword(draft.confirmPassword || "");
+        setMerchantName(draft.merchantName || ""); setBusinessProfile(draft.businessProfile || "");
+        setDba(draft.dba || ""); setRegisteredOffice(draft.registeredOffice || "");
+        setCompanyRegNumber(draft.companyRegNumber || ""); setRegAuthority(draft.regAuthority || "");
+        setCountryOfReg(draft.countryOfReg || ""); setTin(draft.tin || "");
+        if (draft.directors?.length) {
+          setDirectors(draft.directors.map((d: any) => ({ name: d.name || "", address: d.address || "", photo: null })));
+        }
+        setAddress1(draft.address1 || ""); setAddress2(draft.address2 || ""); setAddress3(draft.address3 || "");
+        setAffiliate1Name(draft.affiliate1Name || ""); setAffiliate1Address(draft.affiliate1Address || "");
+        setAffiliate2Name(draft.affiliate2Name || ""); setAffiliate2Address(draft.affiliate2Address || "");
+        setEmailAddress(draft.emailAddress || ""); setWebsite(draft.website || "");
+        setPhone1(draft.phone1 || ""); setPhone2(draft.phone2 || "");
+        setBankAcct1(draft.bankAcct1 || ""); setBankAcct2(draft.bankAcct2 || "");
+        setBankName1(draft.bankName1 || ""); setBankName2(draft.bankName2 || "");
+        setBankBranch1(draft.bankBranch1 || ""); setBankBranch2(draft.bankBranch2 || "");
+        setHasDraft(true);
+        if (draft.savedAt) {
+          setDraftDate(new Date(draft.savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }));
+        }
+      }
+    } catch {}
+  }, []);
 
   const SectionTitle = ({ children }: { children: React.ReactNode }) => (
     <div className="border-b border-border pb-1 mb-3">
@@ -203,6 +269,22 @@ export default function MerchantApplication() {
             <p className="text-[11px] text-muted-foreground">Apply as a corporate Mobi-Merchant</p>
           </div>
         </div>
+
+        {/* Draft Resume Banner */}
+        {hasDraft && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="p-3 flex items-center gap-3">
+              <RotateCcw className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold">Draft Restored</p>
+                {draftDate && <p className="text-xs text-muted-foreground">Last saved: {draftDate}</p>}
+              </div>
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => { clearDraft(); setHasDraft(false); }}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Merchant Application Requirements */}
         <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
@@ -470,6 +552,16 @@ export default function MerchantApplication() {
                 <span className="font-bold text-primary">{formatMobi(50000)}</span>{" "}
                 <span className="text-muted-foreground">(≈ {formatLocalAmount(50000, "NGN")})</span>
               </Label>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={saveDraft} className="flex-1 gap-2" size="lg">
+                <Save className="h-4 w-4" />
+                Save Draft
+              </Button>
+              <Button variant="outline" onClick={clearDraft} className="gap-2 text-destructive hover:text-destructive" size="lg">
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
 
             <Button onClick={handleSubmit} className="w-full gap-2" size="lg" disabled={!acceptedPolicies}>
