@@ -3,14 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users, Image, Video, ChevronRight, FolderOpen, Play } from "lucide-react";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
 import type { SeasonWinner } from "@/data/mobigateInteractiveQuizData";
-import { getWinnerGalleryFolders, getWinnerVideoFolders } from "@/data/winnerMediaData";
-import { WinnerGalleryViewer } from "./WinnerGalleryViewer";
-import { WinnerVideoViewer } from "./WinnerVideoViewer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,8 +41,6 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   const [isFollowing, setIsFollowing] = useState(false);
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [showFanConfirm, setShowFanConfirm] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
-  const [showVideos, setShowVideos] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,18 +51,13 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
       setIsFollowing(false);
       setCurrentPhoto(0);
       setShowFanConfirm(false);
-      setShowGallery(false);
-      setShowVideos(false);
     }
   }, [open]);
 
   if (!winner) return null;
 
   const photos = winner.photos?.length ? winner.photos : [winner.playerAvatar];
-  const galleryFolders = getWinnerGalleryFolders(winner.id);
-  const videoFolders = getWinnerVideoFolders(winner.id);
-  const totalGalleryPhotos = galleryFolders.reduce((sum, f) => sum + f.items.length, 0);
-  const totalVideos = videoFolders.reduce((sum, f) => sum + f.items.length, 0);
+
   const getPositionIcon = () => {
     switch (winner.position) {
       case "1st": return <Crown className="h-5 w-5 text-amber-500" />;
@@ -287,45 +277,6 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
               </div>
             </div>
 
-            {/* Gallery & Video Highlights */}
-            <div className="space-y-3">
-              {/* Gallery Section */}
-              <button
-                className="w-full flex items-center gap-3 p-3 rounded-xl border bg-card touch-manipulation active:scale-[0.98] transition-transform"
-                onClick={() => setShowGallery(true)}
-              >
-                <div className="relative h-14 w-14 rounded-xl overflow-hidden shrink-0 border">
-                  <img src={galleryFolders[0]?.coverUrl || winner.playerAvatar} alt="" className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <Image className="h-5 w-5 text-white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="font-semibold text-sm">Gallery</p>
-                  <p className="text-xs text-muted-foreground">{galleryFolders.length} folders · {totalGalleryPhotos} photos</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              </button>
-
-              {/* Video Highlights Section */}
-              <button
-                className="w-full flex items-center gap-3 p-3 rounded-xl border bg-card touch-manipulation active:scale-[0.98] transition-transform"
-                onClick={() => setShowVideos(true)}
-              >
-                <div className="relative h-14 w-14 rounded-xl overflow-hidden shrink-0 border">
-                  <img src={videoFolders[0]?.coverUrl || winner.playerAvatar} alt="" className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <Play className="h-5 w-5 text-white" fill="white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="font-semibold text-sm">Video Highlights</p>
-                  <p className="text-xs text-muted-foreground">{videoFolders.length} folders · {totalVideos} videos</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              </button>
-            </div>
-
             {/* Actions - Row 1: Profile, Add Friend, Message */}
             <div className="grid grid-cols-3 gap-2.5">
               <Button
@@ -446,22 +397,6 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Gallery Viewer */}
-      <WinnerGalleryViewer
-        open={showGallery}
-        onOpenChange={setShowGallery}
-        folders={galleryFolders}
-        playerName={winner.playerName}
-      />
-
-      {/* Video Viewer */}
-      <WinnerVideoViewer
-        open={showVideos}
-        onOpenChange={setShowVideos}
-        folders={videoFolders}
-        playerName={winner.playerName}
-      />
     </>
   );
 }
