@@ -30,6 +30,7 @@ import { ProfileGiftsTab } from "@/components/profile/ProfileGiftsTab";
 import { ProfileFollowersTab } from "@/components/profile/ProfileFollowersTab";
 import { ProfileFollowingTab } from "@/components/profile/ProfileFollowingTab";
 import { ProfileCommunityTab } from "@/components/profile/ProfileCommunityTab";
+import { ProfileMobiQuizTab } from "@/components/profile/ProfileMobiQuizTab";
 import { ProfileContentsTab } from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { useProfileData, useUserPosts, useCurrentUserId } from "@/hooks/useWindowData";
@@ -782,6 +783,7 @@ const Profile = () => {
               <TabsTrigger value="followers">Followers</TabsTrigger>
               <TabsTrigger value="following">Following</TabsTrigger>
               <TabsTrigger value="community">Community</TabsTrigger>
+              <TabsTrigger value="mobi-quiz">Mobi-Quiz</TabsTrigger>
               <TabsTrigger value="mobi-circle">Mobi-Circle</TabsTrigger>
               <TabsTrigger value="mobi-shop">Mobi-Shop</TabsTrigger>
               <TabsTrigger value="biz-catalogue">Biz-Catalogue</TabsTrigger>
@@ -908,6 +910,10 @@ const Profile = () => {
 
           <TabsContent value="community">
             <ProfileCommunityTab userName={userProfile.name} />
+          </TabsContent>
+
+          <TabsContent value="mobi-quiz">
+            <ProfileMobiQuizTab />
           </TabsContent>
 
           <TabsContent value="mobi-circle">
