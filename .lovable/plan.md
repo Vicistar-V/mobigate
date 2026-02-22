@@ -1,87 +1,66 @@
 
+## Owner Edit Controls for QuizWinnerProfileDrawer
 
-## Merchant Application System -- Quiz Merchant
+Add owner-only management UI to the winner profile drawer, allowing the profile owner to edit their slides, gallery photos, and video highlights. All controls are UI-only (mock) for now, with an `isOwner` prop for future backend gating.
 
-Build a complete merchant application flow for Individual and Corporate Quiz Merchant accounts, plus an admin review section in the MobiGate Admin Dashboard.
+### Changes Overview
 
-### User-Facing Flow
+**1. QuizWinnerProfileDrawer -- Add `isOwner` prop and edit buttons**
 
-**New Page: `/merchant-apply/:type`** (type = "individual" or "corporate")
+- Add an `isOwner` prop (default `false`, hardcoded `true` for demo)
+- **Profile Slides (photo gallery at top):**
+  - When `isOwner`, show a small "Edit" pencil button overlaid on the bottom-right of the photo slider
+  - Tapping opens a drawer/bottom-sheet to manage slides: reorder, delete, or add new photos (mock upload using `ImageUploader`)
+  - Show thumbnails of current slides with delete (X) buttons and an "Add Photo" card
+  - Toast on save confirmation
+- **Gallery Section:**
+  - Pass `isOwner` down to `WinnerGallerySection`
+  - When `isOwner`, show an "Edit" icon button next to the "Gallery" header
+  - Tapping opens a management drawer with:
+    - List of photos grouped by folder with delete buttons per photo
+    - "Add Photo" button per folder (mock upload)
+    - "Add Folder" input to create a new folder name
+    - Toast feedback on actions
+- **Video Highlights Section:**
+  - Pass `isOwner` down to `WinnerVideoHighlightsSection`
+  - When `isOwner`, show an "Edit" icon button next to the "Video Highlights" header
+  - Tapping opens a management drawer with:
+    - List of videos with thumbnail, title, folder, and delete button
+    - "Add Video" button (mock upload with title/folder input)
+    - Toast feedback on actions
 
-When users click "Individual Merchant Account" or "Corporate Merchant Account" from the sidebar, they navigate to this page showing a step-by-step application flow:
+**2. WinnerGallerySection -- Add owner editing**
 
-**Step 1 -- Merchant Type Selection**
-- Two cards: "Quiz Merchant" and "Voucher Merchant" (disabled/greyed out with "Coming Soon" badge)
-- Tapping "Quiz Merchant" proceeds to Step 2
+- Accept `isOwner` and `onGalleryChange` props
+- Show edit button in header when `isOwner`
+- Inner drawer for managing photos: grid of thumbnails with delete overlay, "Add Photo" button (simulated via file input), folder selector/creator
+- All changes call `onGalleryChange` with updated gallery array
 
-**Step 2 -- Application Form**
-- **Individual**: Name field is auto-filled and read-only (mock: "Chukwuemeka Okafor" from their MobiGate account)
-- **Corporate**: Editable input field for business/company name
-- Both show:
-  - Account type badge (Individual/Corporate)
-  - Merchant type badge (Quiz)
-  - Phone number (auto-filled, read-only mock)
-  - Email (auto-filled, read-only mock)
-  - Corporate only: Business registration number input, business address input
-  - Terms and policies checkbox (scrollable terms text)
-  - Application fee notice: "M50,000.00 (approximately N50,000.00) will be charged from your Mobi Wallet"
-  - "Submit Application" button (disabled until policies accepted)
+**3. WinnerVideoHighlightsSection -- Add owner editing**
 
-**Step 3 -- Payment Confirmation**
-- Confirmation drawer showing fee breakdown
-- Wallet balance check (mock: M125,000 balance)
-- "Confirm and Pay M50,000" button
-- On confirm: brief loading, toast success, advance to Step 4
+- Accept `isOwner` and `onVideoHighlightsChange` props
+- Show edit button in header when `isOwner`
+- Inner drawer for managing videos: list with delete, "Add Video" form (title, folder, mock thumbnail/URL)
+- All changes call `onVideoHighlightsChange` with updated array
 
-**Step 4 -- Under Review Screen**
-- Full-screen status card with a clock/hourglass icon
-- "Application Under Review" title
-- Application reference number (auto-generated mock)
-- Submitted date
-- Estimated review time: "3-5 business days"
-- "Your application is being reviewed by the MobiGate team"
-- "Back to Home" button
+**4. Wire it up in QuizWinnerProfileDrawer**
 
-### Admin Side -- New "Merchants" Tab in MobiGate Admin Dashboard
+- Maintain local mutable copies of `winner.photos`, `winner.gallery`, `winner.videoHighlights` in state
+- Pass `isOwner={true}` for demo, with change handlers that update local state and show toast
+- Profile slides edit drawer built directly inside QuizWinnerProfileDrawer
 
-Add a new "Merchants" tab to the existing `MobigateAdminDashboard`:
+### Technical Details
 
-- Tab icon: Store
-- Shows pending merchant applications count badge
-- Content:
-  - Filter chips: All / Pending / Approved / Rejected
-  - Application cards showing:
-    - Applicant name, account type (Individual/Corporate), merchant type (Quiz)
-    - Application date, reference number
-    - Business name (corporate only)
-    - Status badge
-  - Tapping a pending application opens a review drawer:
-    - Full application details
-    - "Approve" button (green) and "Reject" button (red)
-    - Rejection requires selecting a reason (reuses `RejectionReasonDialog` pattern)
-    - On action: toast feedback, card updates status
+- All editing is local state only (no backend), using `useState` with copies of winner data
+- File "uploads" use `<input type="file" accept="image/*">` or `accept="video/*"`, converting to `URL.createObjectURL()` for preview
+- All new drawers use the existing `Drawer`/`DrawerContent`/`DrawerBody` components from vaul
+- Mobile-first: all controls use `touch-manipulation`, `active:scale-[0.97]`, compact sizing
+- New icons needed: `Pencil`, `Plus`, `Trash2`, `FolderPlus`, `Upload`, `ImagePlus`, `VideoIcon` from lucide-react (most already imported)
 
-### Mock Data
+### Files Modified
 
-New file `src/data/merchantApplicationData.ts`:
-- `MerchantApplication` interface with fields: id, applicantName, accountType (individual/corporate), merchantType (quiz/voucher), businessName, regNumber, email, phone, status (pending/approved/rejected), applicationDate, referenceNumber, rejectionReason
-- 5-6 mock applications in various states (3 pending, 1 approved, 1 rejected)
-
-### Files to Create/Modify
-
-| File | Action |
+| File | Change |
 |------|--------|
-| `src/data/merchantApplicationData.ts` | **Create** -- Mock data and interfaces |
-| `src/pages/MerchantApplyPage.tsx` | **Create** -- Application flow page with 4 steps |
-| `src/components/AppSidebar.tsx` | **Modify** -- Update sidebar links to point to `/merchant-apply/individual` and `/merchant-apply/corporate` |
-| `src/App.tsx` | **Modify** -- Add route for `/merchant-apply/:type` |
-| `src/pages/admin/MobigateAdminDashboard.tsx` | **Modify** -- Add "Merchants" tab with application review UI |
-
-### Technical Notes
-
-- Mobile-first design throughout, using Drawer components for review actions
-- Application fee formatted using `formatMobi` and `formatLocalAmount` utilities
-- Status badges use consistent color coding: amber/pending, green/approved, red/rejected
-- All state is local (useState) -- no backend, pure UI template
-- The "Under Review" screen persists as a static UI (no actual status checking)
-
+| `QuizWinnerProfileDrawer.tsx` | Add `isOwner` prop, local state for editable data, profile slides edit drawer, pass props down |
+| `WinnerGallerySection.tsx` | Add `isOwner`/`onGalleryChange` props, edit drawer with add/delete/folder management |
+| `WinnerVideoHighlightsSection.tsx` | Add `isOwner`/`onVideoHighlightsChange` props, edit drawer with add/delete management |
