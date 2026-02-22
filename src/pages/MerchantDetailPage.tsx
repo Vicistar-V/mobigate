@@ -70,11 +70,11 @@ export default function MerchantDetailPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <Header />
 
       {/* Sticky Header */}
-      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b px-4 py-3">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b px-4 py-3">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/mobi-quiz-games")}
@@ -104,7 +104,7 @@ export default function MerchantDetailPage() {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 py-4 space-y-4 pb-24">
+      <div className="px-4 py-4 space-y-4 pb-24">
         {/* Merchant Info Card */}
         <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl">
           <Avatar className="h-14 w-14 border-2 border-primary/20 shrink-0">
