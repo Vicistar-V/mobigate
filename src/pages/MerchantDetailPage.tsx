@@ -135,11 +135,11 @@ export default function MerchantDetailPage() {
           </h3>
           <div className="grid grid-cols-2 gap-2">
             <div className="p-3 bg-muted/20 rounded-lg">
-              <p className="text-xs text-muted-foreground">Questions Per Pack</p>
+              <p className="text-xs text-muted-foreground">Questions Per Session</p>
               <p className="text-sm font-bold">{merchant.questionsPerPack}</p>
             </div>
             <div className="p-3 bg-muted/20 rounded-lg">
-              <p className="text-xs text-muted-foreground">Cost Per Question</p>
+              <p className="text-xs text-muted-foreground">Cost Per Session</p>
               <p className="text-sm font-bold">{formatLocalAmount(merchant.costPerQuestion, "NGN")}</p>
             </div>
             <div className="p-3 bg-muted/20 rounded-lg">
