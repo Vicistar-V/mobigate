@@ -491,7 +491,7 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
               </div>
               {newSelectionRounds.map((sr, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <div className="flex-1 overflow-x-auto min-w-0">
+                  <div className="flex-1 overflow-x-auto min-w-0 touch-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                     <div className="flex items-center gap-2 min-w-max pb-1">
                       <span className="text-xs text-muted-foreground w-8 shrink-0 font-bold">R{sr.round}</span>
                       <div className="shrink-0 w-20">
@@ -568,7 +568,7 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
               </div>
               {newTvRounds.map((tv, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <div className="flex-1 overflow-x-auto min-w-0">
+                  <div className="flex-1 overflow-x-auto min-w-0 touch-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                     <div className="flex items-center gap-2 min-w-max pb-1">
                       <div className="shrink-0 w-28">
                         <Label className="text-[10px] text-muted-foreground">Label</Label>
