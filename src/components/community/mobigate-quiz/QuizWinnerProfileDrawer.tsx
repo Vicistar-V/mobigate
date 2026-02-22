@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users, MessageSquare, Send, MoreVertical, Trash2, Pencil, EyeOff } from "lucide-react";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users, MessageSquare, Send, MoreVertical, Trash2, Pencil, EyeOff, Plus, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format, formatDistanceToNow } from "date-fns";
-import type { SeasonWinner } from "@/data/mobigateInteractiveQuizData";
+import type { SeasonWinner, GalleryPhoto, VideoHighlight } from "@/data/mobigateInteractiveQuizData";
 import { WinnerGallerySection } from "./WinnerGallerySection";
 import { WinnerVideoHighlightsSection } from "./WinnerVideoHighlightsSection";
 import {
@@ -67,12 +67,20 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   const [showFanConfirm, setShowFanConfirm] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
   const commentRef = useRef<HTMLDivElement>(null);
+  const slideFileInputRef = useRef<HTMLInputElement>(null);
   const [comments, setComments] = useState<InlineComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+
+  // Owner edit state
+  const isOwner = true; // Hardcoded for demo — gate with backend later
+  const [editablePhotos, setEditablePhotos] = useState<string[]>([]);
+  const [editableGallery, setEditableGallery] = useState<GalleryPhoto[]>([]);
+  const [editableVideoHighlights, setEditableVideoHighlights] = useState<VideoHighlight[]>([]);
+  const [slidesEditOpen, setSlidesEditOpen] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -88,8 +96,18 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
       setReplyingTo(null);
       setReplyText("");
       setEditingId(null);
+      setSlidesEditOpen(false);
     }
   }, [open]);
+
+  // Initialize editable data when winner changes
+  useEffect(() => {
+    if (winner) {
+      setEditablePhotos(winner.photos?.length ? [...winner.photos] : [winner.playerAvatar]);
+      setEditableGallery(winner.gallery ? [...winner.gallery] : []);
+      setEditableVideoHighlights(winner.videoHighlights ? [...winner.videoHighlights] : []);
+    }
+  }, [winner]);
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
@@ -258,7 +276,34 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
 
   if (!winner) return null;
 
-  const photos = winner.photos?.length ? winner.photos : [winner.playerAvatar];
+  const photos = editablePhotos.length ? editablePhotos : (winner.photos?.length ? winner.photos : [winner.playerAvatar]);
+
+  // Slide management handlers
+  const handleDeleteSlide = (index: number) => {
+    if (editablePhotos.length <= 1) {
+      toast({ description: "Must keep at least one photo", variant: "destructive" });
+      return;
+    }
+    setEditablePhotos(prev => prev.filter((_, i) => i !== index));
+    toast({ description: "Slide removed" });
+  };
+
+  const handleAddSlide = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ description: "Please select an image", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ description: "Image must be under 5MB", variant: "destructive" });
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setEditablePhotos(prev => [...prev, url]);
+    toast({ description: "Slide added" });
+    e.target.value = "";
+  };
 
   const getPositionIcon = () => {
     switch (winner.position) {
@@ -407,6 +452,15 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                   {getPositionIcon()}
                 </div>
               </div>
+              {/* Owner edit slides button */}
+              {isOwner && (
+                <button
+                  className="absolute bottom-3 right-[calc(50%-130px)] p-2 rounded-full bg-background/80 backdrop-blur-sm border shadow-sm touch-manipulation active:scale-[0.9] transition-transform"
+                  onClick={() => setSlidesEditOpen(true)}
+                >
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </button>
+              )}
             </div>
 
             {/* Name & Badges */}
@@ -480,13 +534,21 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
             </div>
 
             {/* Gallery Section */}
-            {winner.gallery && winner.gallery.length > 0 && (
-              <WinnerGallerySection gallery={winner.gallery} />
+            {editableGallery.length > 0 && (
+              <WinnerGallerySection
+                gallery={editableGallery}
+                isOwner={isOwner}
+                onGalleryChange={setEditableGallery}
+              />
             )}
 
             {/* Video Highlights Section */}
-            {winner.videoHighlights && winner.videoHighlights.length > 0 && (
-              <WinnerVideoHighlightsSection videoHighlights={winner.videoHighlights} />
+            {editableVideoHighlights.length > 0 && (
+              <WinnerVideoHighlightsSection
+                videoHighlights={editableVideoHighlights}
+                isOwner={isOwner}
+                onVideoHighlightsChange={setEditableVideoHighlights}
+              />
             )}
 
             {/* Comments moved below action buttons */}
@@ -666,6 +728,55 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Profile Slides Edit Drawer */}
+      <Drawer open={slidesEditOpen} onOpenChange={setSlidesEditOpen}>
+        <DrawerContent className="max-h-[80vh]" showClose>
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-base font-semibold">Manage Profile Slides</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody className="px-4 pb-6 space-y-4">
+            {/* Hidden file input */}
+            <input
+              ref={slideFileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAddSlide}
+            />
+
+            <div className="grid grid-cols-3 gap-2">
+              {editablePhotos.map((photo, idx) => (
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-border">
+                  <img src={photo} alt={`Slide ${idx + 1}`} className="h-full w-full object-cover" />
+                  <button
+                    className="absolute top-1 right-1 p-1 rounded-full bg-black/60 touch-manipulation active:scale-[0.9] transition-transform"
+                    onClick={() => handleDeleteSlide(idx)}
+                  >
+                    <Trash2 className="h-3 w-3 text-white" />
+                  </button>
+                  <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                    {idx + 1}
+                  </div>
+                </div>
+              ))}
+
+              {/* Add slide card */}
+              <button
+                className="aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-1.5 bg-muted/30 touch-manipulation active:scale-[0.95] transition-transform"
+                onClick={() => slideFileInputRef.current?.click()}
+              >
+                <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground font-medium">Add</span>
+              </button>
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center">
+              Tap the ✕ to remove a slide. Must keep at least one.
+            </p>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
