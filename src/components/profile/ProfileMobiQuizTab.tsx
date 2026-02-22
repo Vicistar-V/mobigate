@@ -11,10 +11,9 @@ import {
 } from "lucide-react";
 import { mobigatePlayerStats, mobigateWalletData } from "@/data/mobigateQuizData";
 import { quizGamesPlayedData, type QuizGameRecord } from "@/data/quizGamesPlayedData";
-import { mockMerchants } from "@/data/mobigateInteractiveQuizData";
+import { mockMerchants, mockSeasonWinners } from "@/data/mobigateInteractiveQuizData";
 import { QuizGameDetailDrawer } from "@/components/mobigate/QuizGameDetailDrawer";
 import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
-import { type SeasonWinner } from "@/data/mobigateInteractiveQuizData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 const IS_CELEBRITY = true; // mock flag for demo
@@ -221,26 +220,7 @@ export function ProfileMobiQuizTab() {
 
       {/* Celebrity Winner Profile Drawer */}
       <QuizWinnerProfileDrawer
-        winner={selectedCelebrityMerchant ? {
-          id: "celebrity-self",
-          seasonId: "s1",
-          playerName: "You",
-          playerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-          photos: [
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-          ],
-          state: "Lagos",
-          country: "Nigeria",
-          position: "1st",
-          prizeAmount: 500000,
-          score: 95,
-          completionDate: "2025-01-15",
-          payoutStatus: "paid",
-          isHighlighted: true,
-          tier: 8,
-          followers: 1200,
-          fans: 340,
-        } as SeasonWinner : null}
+        winner={selectedCelebrityMerchant ? mockSeasonWinners[0] : null}
         open={!!selectedCelebrityMerchant}
         onOpenChange={(open) => { if (!open) setSelectedCelebrityMerchant(null); }}
         merchantName={selectedCelebrityMerchant?.name}
