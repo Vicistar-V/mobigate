@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Crown, Medal, Trophy, Star, Shield, AlertCircle } from "lucide-react";
+import { Crown, Medal, Trophy, Star, Shield, AlertCircle, Calendar } from "lucide-react";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { mockSeasonWinners, mockSeasons, mockMerchants, type SeasonWinner } from "@/data/mobigateInteractiveQuizData";
 import { QuizWinnerProfileDrawer } from "./QuizWinnerProfileDrawer";
@@ -130,11 +131,16 @@ export function HighlightedWinnersCarousel() {
                 </div>
 
                 {/* Row 3: Name */}
-                <p className="text-[15px] font-bold text-center leading-snug truncate w-full mb-1">
+                <p className="text-[15px] font-bold text-center leading-snug truncate w-full mb-0.5">
                   {winner.playerName.split(" ")[0]}
                 </p>
 
-                {/* Row 4: Tier + Fans stacked for clarity */}
+                {/* Row 4: Date */}
+                <p className="text-[11px] text-muted-foreground mb-1">
+                  {format(new Date(winner.completionDate), "d MMMM, yyyy")}
+                </p>
+
+                {/* Row 5: Tier + Fans stacked for clarity */}
                 <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mb-1.5">
                   <span className="font-bold">{winner.tier}</span>
                   <Star className="h-3.5 w-3.5 text-amber-500 shrink-0" fill="currentColor" />
