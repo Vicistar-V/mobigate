@@ -88,7 +88,7 @@ export default function MerchantPage() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-bold">Quiz Merchants</h1>
+            <h1 className="text-lg font-bold">Merchant Quiz Management</h1>
             <p className="text-xs text-muted-foreground">{approvedMerchants.length} verified merchants</p>
           </div>
           <Button

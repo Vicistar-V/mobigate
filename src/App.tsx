@@ -29,6 +29,7 @@ import ManageQuestionsPage from "./pages/admin/quiz/ManageQuestionsPage";
 import MonitorQuizPage from "./pages/admin/quiz/MonitorQuizPage";
 import QuizGamesPlayedPage from "./pages/admin/quiz/QuizGamesPlayedPage";
 import MerchantPage from "./pages/MerchantPage";
+import MerchantDetailPage from "./pages/MerchantDetailPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
@@ -96,6 +97,7 @@ const App = () => {
                   <Route path="/create-community" element={<CreateCommunity />} />
                   <Route path="/my-quiz-history" element={<MyQuizHistory />} />
                   <Route path="/mobi-quiz-games" element={<MobiQuizGames />} />
+                  <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
