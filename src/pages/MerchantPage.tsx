@@ -574,9 +574,9 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-bold text-sm truncate">{season.name}</h4>
+                    <h4 className="font-bold text-sm break-words">{season.name}</h4>
                     <Badge variant="outline" className={`text-xs shrink-0 ${getSeasonTypeColor(season.type)}`}>
-                      {season.type}
+                      {season.type} Season
                     </Badge>
                     <Badge className={`text-xs shrink-0 ${getStatusColor(season.quizStatus)}`}>
                       {season.quizStatus}
@@ -585,13 +585,13 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                       <Badge className="bg-red-500 text-white text-xs animate-pulse shrink-0">🔴 LIVE</Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                    <span>{season.startDate} → {season.endDate}</span>
-                    <span className="flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
+                    <span className="ml-2 inline-flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {daysRemaining} days left
                     </span>
-                  </div>
+                  </p>
                 </div>
                 {isExpanded ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}
               </button>
