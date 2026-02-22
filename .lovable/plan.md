@@ -1,67 +1,64 @@
 
 
-## Plan: Admin Waiver Approval + Configurable Solvency Percentage
+## Plan: Add "Winners" Tab to Merchant Quizzes Management
 
-### Overview
+### What It Does
 
-Two features added to the Mobigate Admin Dashboard:
+Adds a 5th tab called "Winners" to the Merchant Quizzes Management page. This tab shows a comprehensive, mobile-first view of all winners across the merchant's completed and in-progress seasons -- including the top 3 prize winners, consolation prize recipients, season stats, and payout tracking.
 
-1. **Waiver Requests Management** -- A new section in the admin "Quiz" tab showing all pending waiver requests from merchants, with Approve/Reject actions.
-2. **Configurable Solvency Percentage** -- A new slider in the admin Settings tab (or within QuizSettingsCard) letting admins set the minimum wallet balance percentage (currently hardcoded at 70%).
+### What the Tab Contains
 
-All data is mock/local state -- no backend integration.
+**1. Summary Stats Row (3 compact cards)**
+- Total Winners (count across all seasons)
+- Total Prizes Paid Out (sum of all winner payouts)
+- Active Seasons with Winners (count)
 
----
+**2. Season Filter**
+- A Select dropdown to filter winners by season (default: "All Seasons")
 
-### Feature 1: Waiver Requests Panel (Admin Quiz Tab)
+**3. Per-Season Winner Sections**
+Each season that has winners shows a collapsible card with:
 
-A new "Merchant Waivers" card appears at the top of the Quiz tab in `MobigateAdminDashboard.tsx`. It shows:
+- **Season header**: Season name, type badge, status badge
+- **Top 3 Winners** (1st, 2nd, 3rd with Trophy/Crown/Medal icons):
+  - Player name, avatar placeholder, state/country
+  - Prize amount in NGN
+  - Score and completion date
+  - Payout status badge (Paid / Pending / Processing)
+- **Consolation Prize Winners** (collapsible sub-section):
+  - List of consolation winners with prize amounts
+  - Total consolation pool and count
+- **Season Prize Summary Card**:
+  - Total Prize Pool, Prizes Paid, Prizes Pending
+  - Progress bar showing payout completion percentage
 
-- Count badge of pending waivers
-- List of mock waiver requests, each showing:
-  - Merchant name and logo
-  - Season name and total prize pool
-  - Wallet balance vs required balance (with shortfall)
-  - Waiver context message (if provided)
-  - Date submitted
-  - **Approve** (green) and **Reject** (red) buttons
-- On Approve: toast confirmation, card changes to "Approved" badge, buttons disappear
-- On Reject: toast, card shows "Rejected" badge with strikethrough styling
+**4. Empty State**
+If the merchant has no winners yet, shows a friendly empty state with trophy icon.
 
-Mock waiver data will be defined inline in the dashboard file (3-4 waiver requests from different merchants).
+### Data Approach
 
-### Feature 2: Configurable Solvency % (Admin Settings)
-
-Added to `QuizSettingsCard.tsx` as a new section:
-
-- "Merchant Solvency Requirement" slider (range: 50% to 100%, step 5%)
-- Current value shown prominently
-- Info note explaining: "Merchants must have this % of prize pool in wallet to create a season without waiver"
-- Saved locally via state (same pattern as existing quiz settings)
-
-The `MERCHANT_MIN_WALLET_PERCENT` constant stays in the data file as the default, but the admin UI shows it's configurable.
-
-Additionally, the hardcoded "70%" text in MerchantPage solvency card will be updated to reference this configurable value dynamically (though since it's a UI template, the MerchantPage will still use the constant -- the admin settings demonstrate configurability).
+All winner data is mock/hardcoded inline in the component -- no new data files needed. The mock data references existing season IDs (s1, s2) and creates realistic winner entries with Nigerian names, states, scores, and dates.
 
 ### Technical Details
 
-**File: `src/pages/admin/MobigateAdminDashboard.tsx`**
-- Add imports: `Clock`, `CheckCircle`, `XCircle`, `AlertTriangle`, `Store`
-- Add mock waiver requests data array with fields: `id`, `merchantName`, `seasonName`, `totalPrizes`, `walletBalance`, `requiredBalance`, `waiverContext`, `submittedDate`, `waiverFee`
-- Add state: `waiverStatuses: Record<string, 'pending' | 'approved' | 'rejected'>`
-- In the Quiz tab (before the quiz type cards), render a "Merchant Waiver Requests" card with the pending count badge and individual request cards with Approve/Reject buttons
-- Each action updates local state and shows a toast
+**File: `src/data/mobigateInteractiveQuizData.ts`**
+- Add `SeasonWinner` interface: `{ id, seasonId, playerName, playerAvatar, state, country, position (1st/2nd/3rd/consolation), prizeAmount, score, completionDate, payoutStatus (paid/pending/processing) }`
+- Add `mockSeasonWinners: SeasonWinner[]` array with ~12 entries across seasons s1 and s2
 
-**File: `src/components/mobigate/QuizSettingsCard.tsx`**
-- Add a new "Merchant Solvency Requirement" section after the Question View Fee section
-- Slider from 50-100%, step 5, default 70%
-- Uses same save pattern as other settings
-- Add `Wallet` icon import from lucide-react
-- Add solvency state and include in `hasChanges` check and `handleSave`
+**File: `src/pages/MerchantPage.tsx`**
+- Import `Trophy` icon (already imported), `mockSeasonWinners`, `SeasonWinner`
+- Add new `WinnersTab` function component accepting `{ merchantId: string }`
+  - State: `seasonFilter` (string, default "all"), `expandedConsolation` (Record for toggling consolation sections)
+  - Filters `mockSeasonWinners` by `merchantId` (via season lookup) and `seasonFilter`
+  - Groups winners by seasonId
+  - Renders summary stats, season filter, per-season winner cards
+- Update `TabsList` from `grid-cols-4` to `grid-cols-5`
+- Add `Winners` TabsTrigger with Trophy icon
+- Add `Winners` TabsContent rendering `WinnersTab`
 
-**File: `src/data/platformSettingsData.ts`** (if needed)
-- Add `merchantSolvencyPercent`, `merchantSolvencyMin`, `merchantSolvencyMax` to the platform settings object
-- Add setter function for the solvency percent
-
-No changes to `MerchantPage.tsx` -- it continues reading from `MERCHANT_MIN_WALLET_PERCENT` (the admin config is a UI demonstration of configurability).
-
+**Mobile Focus:**
+- All cards use full-width vertical stacking
+- Winner entries use compact row layout with avatar + info + prize
+- Touch-friendly h-11 minimum tap targets
+- Collapsible consolation section to save vertical space
+- No horizontal scrolling anywhere
