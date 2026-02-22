@@ -80,21 +80,19 @@ export default function MobiQuizGames() {
       <div className="flex-1 container px-4 py-4 space-y-4 pb-24">
         {/* Start Playing CTA */}
         <Card className="border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex-1">
-                <h2 className="font-bold text-base mb-1">Ready to Play?</h2>
-                <p className="text-xs text-muted-foreground">Browse all quiz modes in one place!</p>
-              </div>
-              <Button
-                onClick={() => setShowQuizHub(true)}
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shrink-0"
-                size="lg"
-              >
-                <Play className="h-5 w-5 mr-2" />
-                All Modes
-              </Button>
+          <CardContent className="p-4 space-y-3">
+            <div>
+              <h2 className="font-bold text-base">Ready to Play?</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Browse all quiz modes in one place!</p>
             </div>
+            <Button
+              onClick={() => setShowQuizHub(true)}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg active:scale-[0.97] touch-manipulation"
+              size="lg"
+            >
+              <Gamepad2 className="h-5 w-5 mr-2" />
+              Regular Games
+            </Button>
           </CardContent>
         </Card>
 
