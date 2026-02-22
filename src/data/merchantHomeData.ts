@@ -95,8 +95,43 @@ export const merchantHomeDataMap: Record<string, MerchantHomeData> = {
   },
 };
 
-export function getMerchantHomeData(merchantId: string): MerchantHomeData | undefined {
-  return merchantHomeDataMap[merchantId];
+// Fallback data for merchants not in the map (e.g. location-based merchants)
+const fallbackGallery: MerchantGalleryItem[] = [
+  { id: "fg1", url: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=400&q=80", caption: "Store Front", type: "photo" },
+  { id: "fg2", url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&q=80", caption: "Products Display", type: "photo" },
+  { id: "fg3", url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&q=80", caption: "Shopping Experience", type: "photo" },
+  { id: "fg4", url: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&q=80", caption: "Grand Opening", type: "photo" },
+  { id: "fg5", url: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80", caption: "Customer Service", type: "photo" },
+  { id: "fg6", url: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80", caption: "Special Offers", type: "photo" },
+];
+
+const fallbackVideos: MerchantGalleryItem[] = [
+  { id: "fv1", url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80", caption: "Business Highlights", type: "video" },
+  { id: "fv2", url: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&q=80", caption: "Behind the Scenes", type: "video" },
+  { id: "fv3", url: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=400&q=80", caption: "Community Event Recap", type: "video" },
+];
+
+const fallbackLinks: MerchantLink[] = [
+  { id: "fl1", label: "Official Website", url: "https://example.com", icon: "globe" },
+  { id: "fl2", label: "Facebook Page", url: "https://facebook.com", icon: "facebook" },
+  { id: "fl3", label: "Instagram", url: "https://instagram.com", icon: "instagram" },
+  { id: "fl4", label: "Twitter / X", url: "https://x.com", icon: "twitter" },
+];
+
+export function getMerchantHomeData(merchantId: string): MerchantHomeData {
+  if (merchantHomeDataMap[merchantId]) return merchantHomeDataMap[merchantId];
+  
+  // Generate fallback data for any merchant
+  return {
+    merchantId,
+    followers: 2400 + Math.floor(merchantId.charCodeAt(merchantId.length - 1) * 100),
+    likes: 5600 + Math.floor(merchantId.charCodeAt(merchantId.length - 1) * 200),
+    coverImage: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=800&q=80",
+    about: "Welcome to our business! We offer the best products and services in the area. Follow us for updates, events, and exciting quiz competitions.",
+    gallery: fallbackGallery,
+    videoHighlights: fallbackVideos,
+    links: fallbackLinks,
+  };
 }
 
 export function formatCount(n: number): string {
