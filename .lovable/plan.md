@@ -1,85 +1,75 @@
 
 
-## Plan: Highlighted Winners Carousel + Fan System
+## Plan: Enhance Winner Cards with Tier, Followers, Fans, Share + Fix Profile Drawer
 
-### What It Does
+### What Changes
 
-Two interconnected features:
+**1. Add fields to `SeasonWinner` interface** (`src/data/mobigateInteractiveQuizData.ts`)
+- Add `tier: number` (1-7), `followers: number`, `fans: number` to `SeasonWinner`
+- Update all `mockSeasonWinners` entries with realistic values
 
-1. **Merchant Highlights (Winners Tab)** -- Merchants can tap a "Highlight" button on any winner card in the Winners tab to mark them as highlighted. Highlighted winners get a golden star badge on their card.
+**2. Enhance Winner Cards in MerchantPage WinnersTab** (`src/pages/MerchantPage.tsx`)
+- Each top winner card (1st/2nd/3rd) shows new inline stats row: Tier badge (T1-T7), followers count, fans count, share button
+- Tapping a winner card opens `QuizWinnerProfileDrawer` (currently only the highlight star is there, no card click opens drawer)
+- Add state for `selectedWinner` and `drawerOpen`, wire card `onClick` to open the drawer
+- Import `Share2` icon for share button
 
-2. **Highlighted Winners Carousel (InteractiveQuizMerchantSheet)** -- On the screen where users browse merchant quizzes, a horizontally auto-scrolling carousel of rounded-square cards appears at the top (after the header, before the merchant list). Each card shows the highlighted winner's avatar, rank, name, merchant name, and a "Become Fan" button costing M200. Tapping on a card opens a profile info drawer with winner details and actions.
+**3. Enhance Winner Cards in HighlightedWinnersCarousel** (`src/components/community/mobigate-quiz/HighlightedWinnersCarousel.tsx`)
+- Add tier badge and compact followers/fans count to each carousel card
+- Ensure clicking the card still opens the `QuizWinnerProfileDrawer` (already works)
 
-### Detailed UI
+**4. Enhance QuizWinnerProfileDrawer** (`src/components/community/mobigate-quiz/QuizWinnerProfileDrawer.tsx`)
+- Add Tier badge display (e.g., "Tier 5" with shield icon)
+- Add followers and fans counts in the details section
+- Add Share button to actions grid (using native share or copy link with toast)
+- Add "View on Mobigate" button that navigates to the merchant/quiz area
+- Ensure the drawer actually opens when cards are tapped (fix any missing wiring)
 
-**Winners Tab -- Highlight Toggle (MerchantPage.tsx)**
-- Each top winner card (1st, 2nd, 3rd) gets a small "Highlight" star button in the top-right corner
-- Tapping it toggles the winner as highlighted (golden star fills in, toast confirms)
-- State is tracked locally: `highlightedWinners: Set<string>`
-- Consolation winners do NOT get a highlight option
+### What Each Card Shows (Mobile Layout)
 
-**Highlighted Carousel (InteractiveQuizMerchantSheet.tsx)**
-- Appears between the Live Scoreboard button and the merchant list
-- Only shows if there are highlighted winners (from mock data -- we add an `isHighlighted` field to some `mockSeasonWinners`)
-- Auto-scrolls horizontally every 3 seconds using CSS animation
-- Each item is a rounded-square card (~80x100px) showing:
-  - Position icon (trophy/crown/medal)
-  - Player initials avatar
-  - Player name (truncated)
-  - Rank + merchant name (tiny text)
-  - "Fan" button with star icon
-- Tapping a card opens a **QuizWinnerProfileDrawer** (new component)
-- Tapping "Fan" costs M200, shows toast, button changes to "Fanned" (disabled)
+**WinnersTab card (per winner):**
+```text
+[Trophy] [Name............] [Pending]
+         Lagos, Nigeria
+         NN8,000,000  Score: 97%
+         T5 | 234 fans | 1.2K followers | [Share]
+         Dec 20, 2025
+```
 
-**QuizWinnerProfileDrawer (New Component)**
-- Similar pattern to the existing `WinnerProfileSheet` for elections
-- Shows: avatar, player name, position badge, merchant name, season name, score, prize won, payout status, completion date
-- Action buttons: View Profile, Add Friend, Message, Become Fan (M200)
-- Uses the Drawer pattern consistent with the rest of the app
+**Highlighted Carousel card (compact):**
+```text
+[Crown]
+ [OB]
+ Oluwas...
+ T5 · 234 fans
+ [Fan M200]
+```
 
-### Data Changes
-
-**`src/data/mobigateInteractiveQuizData.ts`**
-- Add `isHighlighted?: boolean` field to `SeasonWinner` interface
-- Set `isHighlighted: true` on 4-5 winners across seasons (the top 3 from s1 and s2)
+**Profile Drawer adds:**
+- Tier badge next to position badge
+- Followers / Fans row in details card
+- Share + "View on Mobigate" buttons in action grid
 
 ### Technical Details
 
-**File: `src/data/mobigateInteractiveQuizData.ts`**
-- Add `isHighlighted?: boolean` to `SeasonWinner` interface
-- Set `isHighlighted: true` on winners w1, w2, w3, w7, w8 (top winners from both seasons)
+**`src/data/mobigateInteractiveQuizData.ts`**
+- Add to `SeasonWinner`: `tier: number; followers: number; fans: number;`
+- Update all 12 mock entries with tier (1-7), followers (100-5000), fans (50-2000)
 
-**File: `src/components/community/mobigate-quiz/QuizWinnerProfileDrawer.tsx` (NEW)**
-- Props: `{ winner: SeasonWinner | null; open: boolean; onOpenChange: (open: boolean) => void; merchantName?: string; seasonName?: string }`
-- Drawer with winner info display: large avatar initials, position badge, name, state/country, prize, score, completion date, payout status
-- Action buttons: View Profile (navigates to `/profile/winner-id`), Add Friend (toast), Message (toast), Become Fan (M200 fee, toast with deduction message)
-- Follows WinnerProfileSheet pattern
+**`src/pages/MerchantPage.tsx` (WinnersTab)**
+- Add `selectedWinner` / `drawerOpen` state
+- Wrap each top winner card in a clickable container that sets `selectedWinner` and opens drawer
+- Add a stats row below the prize line: tier badge, fans, followers, share icon button
+- Render `QuizWinnerProfileDrawer` at bottom of WinnersTab
+- Import `Share2, Shield` icons
 
-**File: `src/components/community/mobigate-quiz/HighlightedWinnersCarousel.tsx` (NEW)**
-- Props: `{ onFanClick?: (winner: SeasonWinner) => void }`
-- Collects all `mockSeasonWinners` where `isHighlighted === true`
-- Renders a horizontally scrolling container with `overflow-x-auto snap-x snap-mandatory` and CSS `@keyframes` auto-scroll
-- Each item: rounded-xl card (w-20, h-24) with position icon, initials circle, name, "Fan M200" mini button
-- Tapping the card opens `QuizWinnerProfileDrawer`
-- Fan state tracked in local `Set<string>`
-- Fan action costs 200 Mobi, shows toast
-- Auto-scroll implemented with `useEffect` + `setInterval` scrolling the container by card width every 3s
+**`src/components/community/mobigate-quiz/HighlightedWinnersCarousel.tsx`**
+- Show tier + fans count below player name (replace "position + merchant" line with "T{tier} . {fans} fans")
+- Keep existing click-to-open-drawer behavior
 
-**File: `src/components/community/mobigate-quiz/InteractiveQuizMerchantSheet.tsx`**
-- Import and render `HighlightedWinnersCarousel` between the Live Scoreboard button and the merchant list
-- Only renders if highlighted winners exist
-
-**File: `src/pages/MerchantPage.tsx`**
-- In `WinnersTab`, add `highlightedWinners` state (`Set<string>`)
-- Add a star toggle button on each top winner (1st/2nd/3rd) card
-- Tapping fills the star and adds to set, toasts "Winner highlighted! They will appear in the quiz carousel"
-- Tapping again removes highlight, toasts "Highlight removed"
-
-### Mobile Focus
-- Carousel uses `touch-pan-x` for smooth swipe
-- Cards have `snap-center` for snappy scroll stops
-- All tap targets are minimum 44px
-- Auto-scroll pauses on touch interaction
-- No horizontal overflow on the page -- carousel is contained
-- Profile drawer uses `max-h-[92vh]` with native scroll
+**`src/components/community/mobigate-quiz/QuizWinnerProfileDrawer.tsx`**
+- Add tier display (Shield icon + "Tier X") as a badge next to position badge
+- Add followers/fans rows in the details card
+- Expand action grid from 2x2 to 3x2: add Share button and "View on Mobigate" button
+- Share button uses `navigator.share` or copies link with toast fallback
 
