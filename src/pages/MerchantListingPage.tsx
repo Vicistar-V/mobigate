@@ -36,21 +36,18 @@ export default function MerchantListingPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const countries = useMemo(() => getUniqueCountries(), []);
-  const states = useMemo(() => {
-    // Only show Nigerian states when Nigeria is selected
-    if (selectedCountry === "ng") return getNigerianStatesForFilter();
-    return [];
-  }, [selectedCountry]);
-  const lgas = useMemo(() => (selectedState ? getLGAsForState(selectedState) : []), [selectedState]);
-  const cities = useMemo(() => (selectedLGA ? getCitiesForLGA(selectedLGA) : []), [selectedLGA]);
+  const isNigeria = selectedCountry === "ng" || !selectedCountry;
+  const states = useMemo(() => isNigeria ? getNigerianStatesForFilter() : [], [isNigeria]);
+  const lgas = useMemo(() => getLGAsForState(selectedState || undefined), [selectedState]);
+  const cities = useMemo(() => getCitiesForLGA(selectedLGA || undefined), [selectedLGA]);
 
+  // Switching tabs just changes filter depth — selections are preserved
   const setView = (mode: ViewMode) => {
     setSearchParams({ view: mode });
-    setSelectedCountry("");
-    setSelectedState("");
-    setSelectedLGA("");
-    setSelectedCity("");
-    setSearchQuery("");
+    // Only clear filters BELOW the new view level
+    if (mode === "country") { setSelectedState(""); setSelectedLGA(""); setSelectedCity(""); }
+    else if (mode === "state") { setSelectedLGA(""); setSelectedCity(""); }
+    else if (mode === "lga") { setSelectedCity(""); }
   };
 
   const handleCountryChange = (v: string) => {
@@ -104,7 +101,6 @@ export default function MerchantListingPage() {
   const showCity = viewMode === "city";
 
   // Check if Nigeria is selected (states/LGA/city only available for Nigeria)
-  const isNigeria = selectedCountry === "ng";
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -176,7 +172,7 @@ export default function MerchantListingPage() {
               </Select>
             )}
 
-            {/* State — show when tab is state/lga/city AND Nigeria is selected */}
+            {/* State — show when tab is state/lga/city AND Nigeria is selected or no country selected */}
             {showState && isNigeria && states.length > 0 && (
               <Select value={selectedState || "all"} onValueChange={handleStateChange}>
                 <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
@@ -198,8 +194,8 @@ export default function MerchantListingPage() {
               </p>
             )}
 
-            {/* LGA — show when tab is lga/city AND a state is selected */}
-            {showLGA && selectedState && lgas.length > 0 && (
+            {/* LGA — show when tab is lga/city, always available (shows all if no state selected) */}
+            {showLGA && isNigeria && lgas.length > 0 && (
               <Select value={selectedLGA || "all"} onValueChange={handleLGAChange}>
                 <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
                   <SelectValue placeholder="All LGAs / Counties" />
@@ -213,8 +209,8 @@ export default function MerchantListingPage() {
               </Select>
             )}
 
-            {/* City — show when tab is city AND an LGA is selected */}
-            {showCity && selectedLGA && cities.length > 0 && (
+            {/* City — show when tab is city, always available (shows all if no LGA selected) */}
+            {showCity && isNigeria && cities.length > 0 && (
               <Select value={selectedCity || "all"} onValueChange={handleCityChange}>
                 <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
                   <SelectValue placeholder="All Cities / Towns" />
