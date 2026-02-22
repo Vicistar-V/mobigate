@@ -1,41 +1,65 @@
 
 
-## Fix Admin Quiz Category & Level Selection Defaults
+## Merchant Home Page
 
-### Problem
-1. **Create Level form** — The category selector is a single-select dropdown with an "All Categories" option. Admins cannot pick *specific multiple* categories (e.g., only 5 out of 23). It needs to become a multi-select checkbox list, matching the pattern already used for level selection in the question form.
+A new colorful, public-facing page for each merchant that visitors can browse, interact with, and explore. This page sits between the sidebar navigation and the quiz-focused MerchantDetailPage.
 
-2. **Create Question form** — The "Apply to Level" section defaults to `["All Levels"]` (everything pre-checked). It should start empty so admins manually select which levels apply.
+### What Gets Built
 
-Both fixes apply universally across all quiz types (Group, Standard Solo, Interactive, Food for Home, Scholarship) since they share these same components.
+**1. New Sidebar Link: "Merchant Home"**
+- Added under "Merchants Menu" in `src/components/AppSidebar.tsx`, positioned above "Merchant Quizzes Management"
+- Links to `/merchant-home/:merchantId` (defaulting to the first approved merchant for demo)
 
----
+**2. New Route**
+- `/merchant-home/:merchantId` in `src/App.tsx`
 
-### Changes
+**3. New Page: `src/pages/MerchantHomePage.tsx`**
+A vibrant, mobile-first merchant storefront with these sections:
 
-#### 1. `src/components/mobigate/CreateQuizQuestionForm.tsx`
-- Change the default value of `selectedLevels` from `["All Levels"]` to `[]` (empty array)
-- This single line change ensures no levels are pre-selected when creating a question
+- **Hero Banner** -- Full-width gradient banner with merchant logo, name, category, verified badge, follower count, and Follow/Report buttons
+- **Quick Actions Bar** -- Horizontal scroll row with colorful icon buttons: Play Quiz, Gallery, Events, Shows, Calendar, Contact
+- **Image Gallery Section** -- Horizontal scrollable photo cards from mock merchant gallery data. Tapping opens `MediaGalleryViewer`. "View All" link
+- **Video Highlights Section** -- Horizontal scrollable video thumbnail cards with play overlay. Tapping opens `MediaGalleryViewer` in video mode
+- **Upcoming Shows** -- Cards for scheduled quiz shows/TV rounds pulled from `mockSeasons` data (upcoming + live). Each card shows date, season name, status badge (LIVE/Upcoming/Past), participant count. Tapping navigates to `/mobi-quiz-games/merchant/:merchantId`
+- **Past Shows** -- Collapsed section showing completed seasons with winner highlights
+- **Events & Calendar** -- A mini calendar-style list of upcoming season dates, selection round dates, and TV show dates extracted from season data
+- **Links Section** -- Merchant external links (website, social media) rendered as tappable cards that open in new tabs
+- **Social Interaction Bar** -- Fixed bottom bar with Like, Comment, Share, Follow buttons using existing `CommentDialog` and `ShareDialog` components
+- **Live Video Placeholder** -- A card with a "LIVE" badge and play button for when merchant is streaming (links to scoreboard drawer)
 
-#### 2. `src/components/mobigate/CreateQuizLevelForm.tsx`
-- Replace the single-select `Select` dropdown for categories with a multi-select checkbox list (same UI pattern as the level checkboxes in the question form)
-- Add an "All Categories" master checkbox at the top that toggles all 23 categories
-- Add a "Deselect All" button when any are selected
-- Add a "Custom" text input option for specifying a category not in the preset list
-- Keep the existing "Custom (Specify)" functionality
-- Update `handleSubmit` to iterate over all selected categories (instead of only handling `__all__` vs single)
-- Default selection: empty (nothing pre-checked)
-- Show a helper text indicating how many categories are selected
+**4. New Mock Data: `src/data/merchantHomeData.ts`**
+- Gallery photos, external links, event descriptions, and follower/like counts for each mock merchant
+- Reuses existing `mockMerchants` and `mockSeasons` from `mobigateInteractiveQuizData.ts`
+
+### Navigation Flow
+Sidebar "Merchants Menu" -> "Merchant Home" -> Opens the colorful merchant home page -> From there, "Play Quiz" button navigates to existing `/mobi-quiz-games/merchant/:merchantId`
+
+### Existing Components Reused
+- `MediaGalleryViewer` for photo/video full-screen viewing
+- `CommentDialog` for commenting
+- `ShareDialog` for sharing
+- `LiveScoreboardDrawer` for live scoreboard access
+- `Calendar` component for date display
+- `Avatar`, `Badge`, `Button`, `Card` from UI library
+- `HighlightedWinnersCarousel` for winner showcase
 
 ### Technical Details
 
-The category multi-select will follow this structure:
-- State changes from `selectedCategory: string` to `selectedCategories: string[]`
-- Checkbox list in a scrollable container with `max-h-48 overflow-y-auto`
-- "All Categories" checkbox at top with bidirectional sync (auto-checks when all individuals are checked, unchecks when any is removed)
-- Custom category input appears when a "Custom" checkbox is toggled
-- On submit, the form loops through all selected categories and calls `onCreateLevel` for each one
-- All touch targets remain 44px+ for mobile usability
+**Files created:**
+- `src/pages/MerchantHomePage.tsx` -- Main page component (~400-500 lines)
+- `src/data/merchantHomeData.ts` -- Mock gallery, links, events data (~100 lines)
 
-No changes needed to parent components or other files — these two components are shared across all quiz types.
+**Files modified:**
+- `src/components/AppSidebar.tsx` -- Add "Merchant Home" link under Merchants Menu
+- `src/App.tsx` -- Add route for `/merchant-home/:merchantId`
+
+**Mobile-first design priorities:**
+- All touch targets 44px+ minimum
+- Horizontal scroll sections with `overflow-x-auto scrollbar-hide`
+- Sticky header with back button
+- Fixed bottom social action bar (56px height)
+- `pb-20` on main content to account for bottom bar
+- No horizontal overflow on 360px viewport
+- Colorful gradients on hero, section headers, and action buttons
+- Native scroll behavior (`touch-auto`, `overscroll-contain`)
 
