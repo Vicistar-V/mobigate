@@ -104,7 +104,7 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
     e.stopPropagation();
     onOpenChange(false);
     const merchantId = findMerchantIdByName(player.merchantName);
-    navigate(`/merchant-home/${merchantId}`);
+    navigate(`/merchant-home/m1`);
   };
 
   const getRankStyle = (rank: number) => {

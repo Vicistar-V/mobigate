@@ -212,7 +212,7 @@ export default function MerchantListingPage() {
             </div>
           ) : (
             filteredMerchants.map(merchant => (
-              <MerchantCard key={merchant.id} merchant={merchant} viewMode={viewMode} onClick={() => navigate(`/merchant-home/${merchant.id}`)} />
+              <MerchantCard key={merchant.id} merchant={merchant} viewMode={viewMode} onClick={() => navigate(`/merchant-home/m1`)} />
             ))
           )}
         </div>
