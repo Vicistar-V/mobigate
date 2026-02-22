@@ -366,7 +366,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
 
       {/* Join Fan Confirmation Dialog - same as carousel */}
       <AlertDialog open={showFanConfirm} onOpenChange={setShowFanConfirm}>
-        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+        <AlertDialogContent className="max-w-[340px] rounded-2xl z-[200]">
           <AlertDialogHeader className="text-center">
             <div className="flex justify-center mb-2">
               <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-amber-300/40 shadow-md">
