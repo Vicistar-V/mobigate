@@ -1,24 +1,38 @@
 
+## Plan: Restack Winners Tab Cards for Mobile
 
-## Highlighted Winners Carousel Adjustments
+### Problems Identified
+1. Highlight button is just a star icon -- needs text "Highlight" and a confirmation dialog
+2. Winner avatar shows initials instead of actual images (data has `playerAvatar` URLs)
+3. Duplicate currency display -- "NN6,000,000" shown redundantly
+4. Card layout wastes space with side-by-side elements that could stack better on mobile
+5. Share button is tiny and easy to miss
 
-Three changes to the carousel cards in `HighlightedWinnersCarousel.tsx`:
+### Changes (all in `src/pages/MerchantPage.tsx`, WinnersTab function)
 
-### 1. Reduce button padding
-The "Join Fans" button currently has `py-2.5` which is too generous. Change to `py-1` so the button hugs the text content without wasted space.
+**1. Replace initials avatar with actual image**
+- Use `winner.playerAvatar` in an `<img>` tag with rounded-lg (square-rounded) styling instead of the initials circle
 
-### 2. Reduce image border-radius by 50%
-The image container currently uses `rounded-2xl` (1rem / 16px). Reduce to `rounded-lg` (0.5rem / 8px) -- roughly 50% less curve.
+**2. Restack winner card layout for mobile (3-row pattern)**
+- Row 1: Position icon + Avatar image + Name + Payout badge
+- Row 2: Location, Prize amount (single currency, no duplication), Score
+- Row 3: Tier badge, fans, followers, date, Highlight button, Share button
 
-### 3. Make image slightly bigger
-Increase from `h-[72px] w-[72px]` to `h-[82px] w-[82px]`.
+**3. Add "Highlight" button with text + confirmation**
+- Replace the star-only icon button with a visible button showing star icon + "Highlight" text
+- When highlighted, show "Highlighted" with filled star
+- Add an `AlertDialog` confirmation before toggling: "Highlight Winner? This will feature them in the quiz carousel."
+
+**4. Fix duplicate currency**
+- Use single format: "NN6,000,000" with the Naira symbol only once (remove redundant formatLocalAmount that adds extra symbol)
+
+**5. Consolidate share button inline with highlight**
+- Place Share and Highlight buttons side by side in Row 3 as compact pill buttons
 
 ### Technical Details
 
-**File:** `src/components/community/mobigate-quiz/HighlightedWinnersCarousel.tsx`
-
-- **Line 123:** Change `h-[72px] w-[72px] rounded-2xl` to `h-[82px] w-[82px] rounded-lg`
-- **Line 147:** Change `py-2.5 rounded-xl` to `py-1 rounded-lg`
-
-No other text, layout, or functionality changes.
-
+- Add `AlertDialog` imports (already available in the project)
+- Add state for `highlightConfirmWinner: SeasonWinner | null` to manage the confirmation dialog
+- Use `<img src={winner.playerAvatar} className="h-11 w-11 rounded-lg object-cover" />` for real photos
+- Remove the absolute-positioned star button, replace with inline "Highlight"/"Highlighted" button in the metadata row
+- Single currency format: remove the NN prefix duplication, use `formatLocalAmount(winner.prizeAmount, "NGN")` only once with proper prefix
