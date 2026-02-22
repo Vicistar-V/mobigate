@@ -190,7 +190,7 @@ export function HighlightedWinnersCarousel() {
               className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 touch-manipulation active:scale-[0.97]"
               onClick={confirmFan}
             >
-              Join Fans · M200
+              Join Fans
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

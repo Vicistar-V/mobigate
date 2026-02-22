@@ -349,7 +349,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                 onClick={handleJoinFanClick}
               >
                 <span className="text-sm font-bold leading-tight">{isFan ? "Joined" : "Join"}</span>
-                {!isFan && <span className="text-sm font-bold leading-tight -mt-1">Fan</span>}
+                {!isFan && <span className="text-sm font-bold leading-tight -mt-1">Fans</span>}
               </Button>
               <Button
                 variant="outline"
@@ -392,7 +392,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
               className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 touch-manipulation active:scale-[0.97]"
               onClick={confirmJoinFan}
             >
-              Join Fans · M200
+              Join Fans
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
