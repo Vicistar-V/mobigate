@@ -13,14 +13,17 @@ import {
   CheckCircle2,
   Eye,
   PenLine,
+  Wallet,
 } from "lucide-react";
 import {
   platformQuizSettings,
   platformQuestionViewSettings,
+  platformSolvencySettings,
   setObjectiveTimePerQuestion,
   setNonObjectiveTimePerQuestion,
   setPartialWinPercentage,
   setQuestionViewFee,
+  setMerchantSolvencyPercent,
 } from "@/data/platformSettingsData";
 import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 
@@ -30,13 +33,15 @@ export function QuizSettingsCard() {
   const [nonObjTime, setNonObjTime] = useState(platformQuizSettings.nonObjectiveTimePerQuestion);
   const [winPercentage, setWinPercentage] = useState(platformQuizSettings.partialWinPercentage);
   const [viewFee, setViewFee] = useState(platformQuestionViewSettings.questionViewFee);
+  const [solvencyPercent, setSolvencyPercent] = useState(platformSolvencySettings.merchantSolvencyPercent);
   const [isSaving, setIsSaving] = useState(false);
 
   const hasChanges =
     objTime !== platformQuizSettings.objectiveTimePerQuestion ||
     nonObjTime !== platformQuizSettings.nonObjectiveTimePerQuestion ||
     winPercentage !== platformQuizSettings.partialWinPercentage ||
-    viewFee !== platformQuestionViewSettings.questionViewFee;
+    viewFee !== platformQuestionViewSettings.questionViewFee ||
+    solvencyPercent !== platformSolvencySettings.merchantSolvencyPercent;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -46,10 +51,11 @@ export function QuizSettingsCard() {
     setNonObjectiveTimePerQuestion(nonObjTime);
     setPartialWinPercentage(winPercentage);
     setQuestionViewFee(viewFee);
+    setMerchantSolvencyPercent(solvencyPercent);
 
     toast({
       title: "Quiz Settings Updated",
-      description: `Objective: ${objTime}s, Non-Objective: ${nonObjTime}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}. Changes apply platform-wide.`,
+      description: `Objective: ${objTime}s, Non-Objective: ${nonObjTime}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}, Solvency: ${solvencyPercent}%. Changes apply platform-wide.`,
     });
     setIsSaving(false);
   };
@@ -223,6 +229,49 @@ export function QuizSettingsCard() {
             <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-[11px] text-muted-foreground">
               Players will be charged this amount from their main wallet to view played quiz questions in their history.
+            </p>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Merchant Solvency Requirement */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Solvency Requirement</span>
+            </div>
+            <Badge variant="secondary" className="text-sm font-bold px-3 py-1">
+              {solvencyPercent}%
+            </Badge>
+          </div>
+
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <p className="text-3xl font-bold text-amber-600">{solvencyPercent}%</p>
+            <p className="text-sm text-muted-foreground">of prize pool required in wallet</p>
+          </div>
+
+          <div className="px-1">
+            <Slider
+              value={[solvencyPercent]}
+              onValueChange={(values) => setSolvencyPercent(values[0])}
+              min={platformSolvencySettings.merchantSolvencyMin}
+              max={platformSolvencySettings.merchantSolvencyMax}
+              step={5}
+              className="w-full touch-manipulation"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{platformSolvencySettings.merchantSolvencyMin}%</span>
+              <span className="font-medium text-foreground">{solvencyPercent}%</span>
+              <span>{platformSolvencySettings.merchantSolvencyMax}%</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg">
+            <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-[11px] text-muted-foreground">
+              Merchants must have at least this percentage of their total prize pool in their wallet to create a season without requesting a waiver.
             </p>
           </div>
         </div>

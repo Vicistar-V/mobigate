@@ -148,3 +148,32 @@ export function setQuestionViewFee(newFee: number): void {
     platformQuestionViewSettings.lastUpdatedAt = new Date();
   }
 }
+
+// Platform Merchant Solvency Settings
+export interface PlatformSolvencySettings {
+  merchantSolvencyPercent: number;
+  merchantSolvencyMin: number;
+  merchantSolvencyMax: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformSolvencySettings: PlatformSolvencySettings = {
+  merchantSolvencyPercent: 70,
+  merchantSolvencyMin: 50,
+  merchantSolvencyMax: 100,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getMerchantSolvencyPercent(): number {
+  return platformSolvencySettings.merchantSolvencyPercent;
+}
+
+export function setMerchantSolvencyPercent(newPercent: number): void {
+  if (newPercent >= platformSolvencySettings.merchantSolvencyMin && 
+      newPercent <= platformSolvencySettings.merchantSolvencyMax) {
+    platformSolvencySettings.merchantSolvencyPercent = newPercent;
+    platformSolvencySettings.lastUpdatedAt = new Date();
+  }
+}
