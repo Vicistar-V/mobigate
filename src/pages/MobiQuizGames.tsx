@@ -215,7 +215,7 @@ export default function MobiQuizGames() {
       </div>
 
       {/* Mobi Quiz Game Hub Dialog */}
-      <MobigateQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} />
+      <MobigateQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} hideInteractive />
     </div>
   );
 }
