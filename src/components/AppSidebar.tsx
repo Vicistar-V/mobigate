@@ -20,6 +20,7 @@ const superadminMenuItems = [
     ]
   },
   {
+    title: "Settings",
     icon: Settings,
     items: [
       { title: "All Settings", url: "/all_settings.php" }
