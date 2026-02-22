@@ -47,14 +47,14 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
             <DrawerTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5 text-green-500" /> Food for Home Quiz
             </DrawerTitle>
-            <p className="text-xs text-muted-foreground">Select grocery items you want to win</p>
+            <p className="text-sm text-muted-foreground">Select grocery items you want to win</p>
           </DrawerHeader>
 
           <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
             <div className="space-y-4 pb-4">
               {categories.map(cat => (
                 <div key={cat}>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">{cat}</h4>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase mb-2">{cat}</h4>
                   <div className="space-y-2">
                     {mockGroceryItems.filter(g => g.category === cat).map(item => {
                       const isSelected = selectedIds.includes(item.id);
@@ -73,7 +73,7 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
                           </div>
                           <div className="text-right shrink-0">
                             <p className="text-sm font-bold">{formatMobiAmount(item.marketPrice)}</p>
-                            <p className="text-[10px] text-muted-foreground">{formatLocalAmount(item.marketPrice, "NGN")}</p>
+                            <p className="text-xs text-muted-foreground">{formatLocalAmount(item.marketPrice, "NGN")}</p>
                           </div>
                           <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${isSelected ? "bg-green-500" : "border-2 border-muted"}`}>
                             {isSelected && <Check className="h-3 w-3 text-white" />}
@@ -91,21 +91,21 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
           <div className="px-4 pb-4 pt-3 border-t space-y-3">
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-2 bg-muted/50 rounded-lg">
-                <p className="text-[10px] text-muted-foreground">Items</p>
-                <p className="font-bold text-sm">{selectedIds.length}</p>
+                <p className="text-xs text-muted-foreground">Items</p>
+                <p className="font-bold text-base">{selectedIds.length}</p>
               </div>
               <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                <p className="text-[10px] text-muted-foreground">Total Value</p>
-                <p className="font-bold text-xs text-green-600">{formatMobiAmount(totalValue)}</p>
+                <p className="text-xs text-muted-foreground">Total Value</p>
+                <p className="font-bold text-sm text-green-600">{formatMobiAmount(totalValue)}</p>
               </div>
               <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-lg">
-                <p className="text-[10px] text-muted-foreground">Stake (20%)</p>
-                <p className="font-bold text-xs text-red-600">{formatMobiAmount(stakeAmount)}</p>
+                <p className="text-xs text-muted-foreground">Stake (20%)</p>
+                <p className="font-bold text-sm text-red-600">{formatMobiAmount(stakeAmount)}</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 rounded-lg text-[10px]">
-              <AlertTriangle className="h-3 w-3 text-amber-600 mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2 p-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 rounded-lg text-xs">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
               <p className="text-muted-foreground">15 questions (10 objective + 5 typed). 100% correct wins items. 70-80% correct qualifies for bonus questions.</p>
             </div>
 

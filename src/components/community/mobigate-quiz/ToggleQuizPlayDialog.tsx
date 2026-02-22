@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { X, Repeat, Trophy, AlertTriangle, Star, Timer, ArrowRight, ChevronRight, Award, Zap, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
@@ -217,10 +217,10 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                 <Repeat className="h-4 w-4" />
               </div>
               <div>
-                <h2 className="text-sm font-bold flex items-center gap-1.5">
-                  Toggle Quiz <Zap className="h-3 w-3" />
+                <h2 className="text-base font-bold flex items-center gap-1.5">
+                  Toggle Quiz <Zap className="h-3.5 w-3.5" />
                 </h2>
-                <p className="text-[10px] text-teal-100">
+                <p className="text-xs text-teal-100">
                   {phase === "setup" ? "High-Stakes Escalating Sessions" :
                     `Session ${sessionIndex + 1}/7 — ${session.label} Prize`}
                 </p>
@@ -232,7 +232,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
           </div>
           {phase !== "setup" && phase !== "session_win" && phase !== "session_fail" && phase !== "celebrity" && (
             <div className="mt-2 space-y-1">
-              <div className="flex items-center justify-between text-[10px]">
+              <div className="flex items-center justify-between text-xs">
                 <span>Q{totalAnswered + 1} of {totalQs}</span>
                 <span className="flex items-center gap-1"><Timer className="h-3 w-3" /> {timeLeft}s</span>
               </div>
@@ -241,7 +241,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
           )}
         </div>
 
-        <ScrollArea className="flex-1 max-h-[calc(95vh-80px)]">
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
           <div className="p-4 space-y-4">
             {/* SETUP PHASE */}
             {phase === "setup" && (
@@ -252,7 +252,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                       <Shield className="h-5 w-5 text-teal-600" />
                       <h3 className="font-bold text-sm">How Toggle Quiz Works</h3>
                     </div>
-                    <ul className="text-xs text-muted-foreground space-y-2 leading-relaxed">
+                    <ul className="text-sm text-muted-foreground space-y-2 leading-relaxed">
                       <li className="flex gap-2"><span className="text-teal-500 font-bold">1.</span> Answer ALL questions correctly (100%) to win a session</li>
                       <li className="flex gap-2"><span className="text-teal-500 font-bold">2.</span> After winning, choose: <strong>Take Prize</strong> or <strong>Toggle</strong> to next session</li>
                       <li className="flex gap-2"><span className="text-teal-500 font-bold">3.</span> Toggling <strong>cancels previous winnings</strong> — only the new prize matters</li>
@@ -263,17 +263,17 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                   </CardContent>
                 </Card>
 
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Session Prizes</h4>
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Session Prizes</h4>
                 <div className="space-y-2">
                   {TOGGLE_SESSIONS.map((s, i) => (
                     <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50 border">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-teal-300 text-teal-700 dark:text-teal-300">S{s.session}</Badge>
-                        <span className="text-xs">{s.objectives} Obj + {s.nonObjectives} Written</span>
+                        <Badge variant="outline" className="text-xs px-2 py-0.5 border-teal-300 text-teal-700 dark:text-teal-300">S{s.session}</Badge>
+                        <span className="text-sm">{s.objectives} Obj + {s.nonObjectives} Written</span>
                       </div>
                       <div className="text-right">
-                        <span className="font-bold text-xs text-teal-700 dark:text-teal-300">{s.label}</span>
-                        <p className="text-[10px] text-muted-foreground">{formatMobiAmount(STAKE_AMOUNT * s.multiplier)}</p>
+                        <span className="font-bold text-sm text-teal-700 dark:text-teal-300">{s.label}</span>
+                        <p className="text-xs text-muted-foreground">{formatMobiAmount(STAKE_AMOUNT * s.multiplier)}</p>
                       </div>
                     </div>
                   ))}
@@ -294,7 +294,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
               <div className="space-y-3">
                 <Card className="border-teal-200 dark:border-teal-800">
                   <CardContent className="p-3">
-                    <Badge className="mb-2 bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300 text-[10px]">Objective</Badge>
+                    <Badge className="mb-2 bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300 text-xs">Objective</Badge>
                     <p className="text-sm font-medium leading-relaxed">{currentObjQuestion.question}</p>
                   </CardContent>
                 </Card>
@@ -344,8 +344,8 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                 <Card className="border-teal-200 dark:border-teal-800">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <Badge className="bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300 text-[10px]">Written</Badge>
-                      <span className="text-xs text-muted-foreground">Q{objectives.length + nonObjIndex + 1} of {totalQs}</span>
+                      <Badge className="bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300 text-xs">Written</Badge>
+                      <span className="text-sm text-muted-foreground">Q{objectives.length + nonObjIndex + 1} of {totalQs}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -386,7 +386,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                     <p className="text-xs text-green-600 font-medium mb-1">Your Current Prize</p>
                     <p className="text-2xl font-bold text-green-700 dark:text-green-300">{formatLocalAmount(currentPrize, "NGN")}</p>
                     <p className="text-xs text-green-500">({formatMobiAmount(currentPrize)})</p>
-                    <p className="text-[10px] text-muted-foreground mt-2">Multiplier: {session.label} of {formatMobiAmount(STAKE_AMOUNT)} stake</p>
+                    <p className="text-xs text-muted-foreground mt-2">Multiplier: {session.label} of {formatMobiAmount(STAKE_AMOUNT)} stake</p>
                   </CardContent>
                 </Card>
 
@@ -410,7 +410,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                           <AlertTriangle className="h-4 w-4 text-amber-600" />
                           <p className="text-xs font-bold text-amber-700 dark:text-amber-300">Toggle Warning</p>
                         </div>
-                        <ul className="text-[11px] text-amber-600 dark:text-amber-400 space-y-1">
+                        <ul className="text-xs text-amber-600 dark:text-amber-400 space-y-1">
                           <li>• Your current <strong>{formatMobiAmount(currentPrize)}</strong> prize will be <strong>cancelled</strong></li>
                           <li>• Stake of <strong>{formatMobiAmount(STAKE_AMOUNT)}</strong> will be re-charged</li>
                           <li>• New prize if you win: <strong>{formatMobiAmount(STAKE_AMOUNT * TOGGLE_SESSIONS[sessionIndex + 1].multiplier)}</strong> ({TOGGLE_SESSIONS[sessionIndex + 1].label})</li>
@@ -500,7 +500,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
             {/* Session Progress Bar (bottom) */}
             {phase !== "setup" && (
               <div className="pt-2 border-t">
-                <p className="text-[10px] text-muted-foreground mb-1.5">Session Progress</p>
+                <p className="text-xs text-muted-foreground mb-1.5">Session Progress</p>
                 <div className="flex gap-1">
                   {TOGGLE_SESSIONS.map((s, i) => (
                     <div
@@ -517,13 +517,13 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                   ))}
                 </div>
                 <div className="flex justify-between mt-1">
-                  <span className="text-[9px] text-muted-foreground">S1 (5x)</span>
-                  <span className="text-[9px] text-muted-foreground">S7 (15x)</span>
+                  <span className="text-xs text-muted-foreground">S1 (5x)</span>
+                  <span className="text-xs text-muted-foreground">S7 (15x)</span>
                 </div>
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -97,11 +97,11 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
           <DrawerTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" />
             Live Scoreboard
-            <Badge className="bg-red-500 text-white border-0 animate-pulse text-[10px] ml-1">
-              <Radio className="h-2.5 w-2.5 mr-0.5" /> LIVE
+            <Badge className="bg-red-500 text-white border-0 animate-pulse text-xs ml-1">
+              <Radio className="h-3 w-3 mr-0.5" /> LIVE
             </Badge>
           </DrawerTitle>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               {onlinePlayers} online
@@ -128,28 +128,28 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border ${getRankStyle(rank)}`}>
                       {rank}
                     </div>
-                    <Avatar className="h-9 w-9">
+                    <Avatar className="h-10 w-10">
                       <AvatarFallback className={`text-xs font-bold ${player.isOnline ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
                         {player.avatar}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <span className="text-sm font-bold truncate">{player.name}</span>
+                        <span className="text-sm font-bold break-words">{player.name}</span>
                         {player.isOnline && <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />}
                       </div>
-                      <p className="text-[10px] text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground break-words">
                         {player.merchantName} • {player.seasonName}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-bold text-amber-600">{player.points.toLocaleString()}</p>
-                      <p className="text-[9px] text-muted-foreground">pts</p>
+                      <p className="text-xs text-muted-foreground">pts</p>
                     </div>
                   </div>
 
                   {/* Stats row */}
-                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-0.5">
                       <Zap className="h-3 w-3 text-blue-500" /> Sess {player.currentSession}
                     </span>
@@ -170,8 +170,8 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                       onClick={() => handleFanAction(player, "like")}
                     >
                       <Heart className="h-4 w-4 text-red-500" />
-                      <span className="text-[8px] text-muted-foreground">{player.likes}</span>
-                      <span className="text-[7px] text-red-400">{formatMobiAmount(getFeeForAction("like"))}</span>
+                      <span className="text-xs text-muted-foreground">{player.likes}</span>
+                      <span className="text-xs text-red-400">{formatMobiAmount(getFeeForAction("like"))}</span>
                     </button>
 
                     {/* Comment */}
@@ -180,8 +180,8 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                       onClick={() => handleFanAction(player, "comment")}
                     >
                       <MessageCircle className="h-4 w-4 text-blue-500" />
-                      <span className="text-[8px] text-muted-foreground">{player.comments}</span>
-                      <span className="text-[7px] text-blue-400">{formatMobiAmount(getFeeForAction("comment"))}</span>
+                      <span className="text-xs text-muted-foreground">{player.comments}</span>
+                      <span className="text-xs text-blue-400">{formatMobiAmount(getFeeForAction("comment"))}</span>
                     </button>
 
                     {/* Share */}
@@ -190,8 +190,8 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                       onClick={() => handleFanAction(player, "share")}
                     >
                       <Share2 className="h-4 w-4 text-green-500" />
-                      <span className="text-[8px] text-muted-foreground">{player.shares}</span>
-                      <span className="text-[7px] text-green-400">{formatMobiAmount(getFeeForAction("share"))}</span>
+                      <span className="text-xs text-muted-foreground">{player.shares}</span>
+                      <span className="text-xs text-green-400">{formatMobiAmount(getFeeForAction("share"))}</span>
                     </button>
 
                     {/* Join Fans */}
@@ -200,8 +200,8 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                       onClick={() => handleFanAction(player, "join_fans")}
                     >
                       <Star className={`h-4 w-4 ${isJoined ? "text-purple-600 fill-purple-500" : "text-purple-500"}`} />
-                      <span className="text-[8px] text-muted-foreground">{isJoined ? "Joined" : "Join"}</span>
-                      <span className="text-[7px] text-purple-400">{isJoined ? "✓" : formatMobiAmount(getFeeForAction("join_fans"))}</span>
+                      <span className="text-xs text-muted-foreground">{isJoined ? "Joined" : "Join"}</span>
+                      <span className="text-xs text-purple-400">{isJoined ? "✓" : formatMobiAmount(getFeeForAction("join_fans"))}</span>
                     </button>
                   </div>
 

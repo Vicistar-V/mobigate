@@ -60,7 +60,7 @@ export function GroupQuizInviteSheet({ open, onOpenChange }: GroupQuizInviteShee
             <DrawerTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-purple-500" /> Group Quiz - Invite Friends
             </DrawerTitle>
-            <p className="text-xs text-muted-foreground">Select {GROUP_MIN_PLAYERS - 1}-{GROUP_MAX_PLAYERS - 1} friends to play with</p>
+            <p className="text-sm text-muted-foreground">Select {GROUP_MIN_PLAYERS - 1}-{GROUP_MAX_PLAYERS - 1} friends to play with</p>
           </DrawerHeader>
 
           <div className="px-4 pb-4 space-y-3 flex-1 overflow-hidden flex flex-col">
@@ -76,7 +76,7 @@ export function GroupQuizInviteSheet({ open, onOpenChange }: GroupQuizInviteShee
                 inputMode="numeric"
                 onPointerDown={(e) => e.stopPropagation()}
               />
-              <p className="text-[10px] text-muted-foreground">Minimum: {formatMobiAmount(GROUP_MIN_STAKE)}</p>
+              <p className="text-xs text-muted-foreground">Minimum: {formatMobiAmount(GROUP_MIN_STAKE)}</p>
             </div>
 
             {/* Search */}
@@ -93,7 +93,7 @@ export function GroupQuizInviteSheet({ open, onOpenChange }: GroupQuizInviteShee
 
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">{selected.length} selected</p>
-              <Badge variant="outline" className="text-[10px]">{selected.length + 1}/{GROUP_MAX_PLAYERS} players</Badge>
+              <Badge variant="outline" className="text-xs">{selected.length + 1}/{GROUP_MAX_PLAYERS} players</Badge>
             </div>
 
             {/* Friends List */}
@@ -116,7 +116,7 @@ export function GroupQuizInviteSheet({ open, onOpenChange }: GroupQuizInviteShee
                         <p className="text-sm font-medium">{friend.name}</p>
                         <div className="flex items-center gap-2">
                           <span className={`h-2 w-2 rounded-full ${friend.isOnline ? "bg-green-500" : "bg-muted-foreground/30"}`} />
-                          <span className="text-[10px] text-muted-foreground">{friend.winRate}% win rate</span>
+                          <span className="text-xs text-muted-foreground">{friend.winRate}% win rate</span>
                         </div>
                       </div>
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isSelected ? "bg-purple-500" : "border-2 border-muted"}`}>
