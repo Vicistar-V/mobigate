@@ -1972,26 +1972,26 @@ export default function MerchantPage() {
       {/* Tabs */}
       <div className="px-4 pt-3">
         <Tabs defaultValue="settings" className="w-full">
-          <div className="overflow-x-auto -mx-1 px-1 touch-pan-x">
-            <TabsList className="w-full grid grid-cols-5 h-11 min-w-[320px]">
-              <TabsTrigger value="settings" className="text-[11px] px-1">
-                <Settings className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+          <div className="overflow-x-auto -mx-4 px-4 touch-pan-x scrollbar-none">
+            <TabsList className="inline-flex gap-1 h-11 w-auto whitespace-nowrap">
+              <TabsTrigger value="settings" className="text-xs px-3 gap-1.5">
+                <Settings className="h-3.5 w-3.5" />
                 Settings
               </TabsTrigger>
-              <TabsTrigger value="seasons" className="text-[11px] px-1">
-                <Gamepad2 className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              <TabsTrigger value="seasons" className="text-xs px-3 gap-1.5">
+                <Gamepad2 className="h-3.5 w-3.5" />
                 Seasons
               </TabsTrigger>
-              <TabsTrigger value="questions" className="text-[11px] px-1">
-                <HelpCircle className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              <TabsTrigger value="questions" className="text-xs px-3 gap-1.5">
+                <HelpCircle className="h-3.5 w-3.5" />
                 Questions
               </TabsTrigger>
-              <TabsTrigger value="wallet" className="text-[11px] px-1">
-                <Wallet className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              <TabsTrigger value="wallet" className="text-xs px-3 gap-1.5">
+                <Wallet className="h-3.5 w-3.5" />
                 Wallet
               </TabsTrigger>
-              <TabsTrigger value="winners" className="text-[11px] px-1">
-                <Trophy className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+              <TabsTrigger value="winners" className="text-xs px-3 gap-1.5">
+                <Trophy className="h-3.5 w-3.5" />
                 Winners
               </TabsTrigger>
             </TabsList>
