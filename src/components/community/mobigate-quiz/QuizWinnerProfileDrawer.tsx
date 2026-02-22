@@ -180,6 +180,9 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                 <Shield className="h-3 w-3 mr-0.5" /> Tier {winner.tier}
               </Badge>
             </div>
+            {winner.tier >= 6 && (
+              <p className="text-sm font-semibold text-purple-700">Celebrity</p>
+            )}
           </div>
 
           {/* Stats row */}
