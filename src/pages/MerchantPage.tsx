@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +42,9 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  Link,
+  Unlink,
+  Eye,
 } from "lucide-react";
 import {
   mockMerchants,
@@ -56,11 +59,14 @@ import {
   type SelectionProcess,
   type TVShowRound,
 } from "@/data/mobigateInteractiveQuizData";
+import {
+  INITIAL_ADMIN_QUESTIONS,
+  ANSWER_LABELS,
+  type AdminQuizQuestion,
+} from "@/data/mobigateQuizQuestionsData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { format, addMonths, addWeeks } from "date-fns";
-
-const ANSWER_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
 
 // Simulate "my merchant" = first approved merchant
 const myMerchant = mockMerchants.find((m) => m.applicationStatus === "approved")!;
@@ -402,15 +408,26 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-muted-foreground">Entry Fee (₦)</Label>
-                <Input type="number" value={newEntryFee} onChange={(e) => setNewEntryFee(+e.target.value)} className="h-11 mt-1" />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Min. Target Participants</Label>
-                <Input type="number" value={newMinParticipants} onChange={(e) => setNewMinParticipants(+e.target.value)} className="h-11 mt-1" />
-              </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Initialization Fee per Participant (₦)</Label>
+              <Input type="number" value={newEntryFee} onChange={(e) => setNewEntryFee(+e.target.value)} className="h-11 mt-1" />
+              <p className="text-xs text-muted-foreground mt-1">Default: ₦200.00 (M200)</p>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Maximum Initial Participants</Label>
+              <Input type="number" value={newMinParticipants} onChange={(e) => setNewMinParticipants(+e.target.value)} className="h-11 mt-1" />
+              <p className="text-xs text-muted-foreground mt-1">Capped at 10,000 participants per season</p>
+            </div>
+
+            <div className="p-3 bg-primary/5 rounded-lg space-y-1">
+              <p className="text-xs text-muted-foreground">Total Initial Registration Revenue</p>
+              <p className="text-base font-extrabold text-primary">
+                {formatLocalAmount(newEntryFee * newMinParticipants, "NGN")} (M{(newEntryFee * newMinParticipants).toLocaleString()})
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {formatLocalAmount(newEntryFee, "NGN")} × {newMinParticipants.toLocaleString()} participants
+              </p>
             </div>
 
             {/* Prize Breakdown */}
@@ -581,10 +598,31 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
 
               {isExpanded && (
                 <div className="border-t">
+                  {/* Initialization Fee & Registration Info */}
+                  <div className="p-3 bg-primary/5 space-y-1.5 border-b">
+                    <span className="text-xs font-bold flex items-center gap-1">
+                      <DollarSign className="h-3.5 w-3.5 text-primary" /> Registration Info
+                    </span>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Initialization Fee</span>
+                        <span className="font-bold">{formatLocalAmount(season.entryFee, "NGN")} (M{season.entryFee.toLocaleString()})</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Max Participants</span>
+                        <span className="font-bold">{season.minimumTargetParticipants.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-xs pt-1 border-t border-primary/10 font-bold text-primary">
+                        <span>Registration Revenue</span>
+                        <span>{formatLocalAmount(season.entryFee * season.minimumTargetParticipants, "NGN")}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Participants Progress */}
                   <div className="p-3 space-y-1.5">
                     <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Participants</span>
+                      <span className="text-muted-foreground">Current Participants</span>
                       <span className="font-semibold">{season.totalParticipants.toLocaleString()} / {season.minimumTargetParticipants.toLocaleString()}</span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -596,7 +634,7 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                     {participantProgress < 100 && (
                       <p className="text-xs text-amber-600 flex items-center gap-1">
                         <AlertTriangle className="h-3 w-3" />
-                        Below minimum target
+                        Below maximum capacity
                       </p>
                     )}
                   </div>
@@ -725,93 +763,197 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
   );
 }
 
-// ─── Question Bank Tab ───────────────────────────────────────────────
-function QuestionBankTab({ merchantId }: { merchantId: string }) {
+// ─── Question Integration Tab ────────────────────────────────────────
+interface IntegratedQuestion {
+  sourceId: string;
+  sourceType: "admin" | "merchant";
+  type: "objective" | "non_objective" | "bonus_objective";
+  alternativeAnswers?: string[];
+}
+
+function QuestionIntegrationTab({ merchantId }: { merchantId: string }) {
   const { toast } = useToast();
-  const [questions, setQuestions] = useState<MerchantQuestion[]>(
-    mockQuestions.filter((q) => q.merchantId === merchantId)
-  );
   const [activeSubTab, setActiveSubTab] = useState<"objective" | "non_objective" | "bonus_objective">("objective");
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [integratedQuestions, setIntegratedQuestions] = useState<IntegratedQuestion[]>([]);
+  const [altAnswersEdit, setAltAnswersEdit] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<"available" | "integrated">("available");
 
-  // Create form state
-  const [newQuestion, setNewQuestion] = useState("");
-  const [newCategory, setNewCategory] = useState("General");
-  const [newDifficulty, setNewDifficulty] = useState<"easy" | "medium" | "hard">("easy");
-  const [newOptions, setNewOptions] = useState<string[]>(Array(8).fill(""));
-  const [newCorrectIndex, setNewCorrectIndex] = useState(0);
-  const [newAltAnswers, setNewAltAnswers] = useState("");
-  const [newTimeLimit, setNewTimeLimit] = useState(30);
-  const [newCost, setNewCost] = useState(200);
+  // Available questions pools
+  const availableObjective = useMemo(
+    () => INITIAL_ADMIN_QUESTIONS.filter((q) => q.status === "active"),
+    []
+  );
 
-  const filteredQuestions = questions.filter((q) => q.type === activeSubTab);
+  const availableNonObjective = useMemo(
+    () => mockQuestions.filter((q) => q.type === "non_objective"),
+    []
+  );
 
-  const resetForm = () => {
-    setNewQuestion("");
-    setNewCategory("General");
-    setNewDifficulty("easy");
-    setNewOptions(Array(8).fill(""));
-    setNewCorrectIndex(0);
-    setNewAltAnswers("");
-    setNewTimeLimit(30);
-    setNewCost(200);
-    setShowCreateForm(false);
-    setEditingId(null);
+  const availableBonus = useMemo(
+    () => mockQuestions.filter((q) => q.type === "bonus_objective"),
+    []
+  );
+
+  const getPool = () => {
+    if (activeSubTab === "objective") return availableObjective;
+    if (activeSubTab === "non_objective") return availableNonObjective;
+    return availableBonus;
   };
 
-  const handleCreate = () => {
-    if (!newQuestion.trim()) {
-      toast({ title: "⚠️ Missing Question", description: "Please enter a question.", variant: "destructive" });
+  const integratedForTab = integratedQuestions.filter((iq) => iq.type === activeSubTab);
+  const pool = getPool();
+  const totalAvailable = pool.length;
+  const totalIntegrated = integratedForTab.length;
+
+  const isIntegrated = (id: string) => integratedQuestions.some((iq) => iq.sourceId === id);
+
+  const handleIntegrate = (id: string) => {
+    const altText = altAnswersEdit[id] || "";
+    const altAnswers = activeSubTab === "non_objective"
+      ? altText.split(",").map((a) => a.trim()).filter(Boolean)
+      : undefined;
+
+    setIntegratedQuestions((prev) => [
+      ...prev,
+      {
+        sourceId: id,
+        sourceType: activeSubTab === "objective" ? "admin" : "merchant",
+        type: activeSubTab,
+        alternativeAnswers: altAnswers,
+      },
+    ]);
+    toast({ title: "✅ Question Integrated", description: "Added to your quiz bank." });
+  };
+
+  const handleRemove = (id: string) => {
+    setIntegratedQuestions((prev) => prev.filter((iq) => iq.sourceId !== id));
+    toast({ title: "🗑️ Question Removed", description: "Removed from your quiz bank." });
+  };
+
+  const handleUpdateAltAnswers = (id: string) => {
+    const altText = altAnswersEdit[id] || "";
+    const altAnswers = altText.split(",").map((a) => a.trim()).filter(Boolean);
+    if (altAnswers.length < 2 || altAnswers.length > 5) {
+      toast({ title: "⚠️ Invalid", description: "Provide 2-5 alternative answers.", variant: "destructive" });
       return;
     }
-    const q: MerchantQuestion = {
-      id: `q-new-${Date.now()}`,
-      merchantId,
-      question: newQuestion.trim(),
-      type: activeSubTab,
-      options: activeSubTab !== "non_objective" ? newOptions.filter((o) => o.trim()) : [],
-      correctAnswerIndex: activeSubTab !== "non_objective" ? newCorrectIndex : -1,
-      alternativeAnswers: activeSubTab === "non_objective" ? newAltAnswers.split(",").map((a) => a.trim()).filter(Boolean) : [],
-      category: newCategory,
-      difficulty: newDifficulty,
-      timeLimit: newTimeLimit,
-      costPerQuestion: newCost,
-    };
-    if (editingId) {
-      setQuestions((p) => p.map((existing) => (existing.id === editingId ? { ...q, id: editingId } : existing)));
-      toast({ title: "✅ Question Updated", description: "Question has been updated." });
-    } else {
-      setQuestions((p) => [q, ...p]);
-      toast({ title: "✅ Question Created", description: "New question added to your bank." });
-    }
-    resetForm();
-  };
-
-  const startEdit = (q: MerchantQuestion) => {
-    setEditingId(q.id);
-    setNewQuestion(q.question);
-    setNewCategory(q.category);
-    setNewDifficulty(q.difficulty);
-    const opts = [...q.options];
-    while (opts.length < 8) opts.push("");
-    setNewOptions(opts);
-    setNewCorrectIndex(q.correctAnswerIndex);
-    setNewAltAnswers(q.alternativeAnswers.join(", "));
-    setNewTimeLimit(q.timeLimit);
-    setNewCost(q.costPerQuestion);
-    setShowCreateForm(true);
-  };
-
-  const deleteQuestion = (id: string) => {
-    setQuestions((p) => p.filter((q) => q.id !== id));
-    toast({ title: "🗑️ Question Deleted" });
+    setIntegratedQuestions((prev) =>
+      prev.map((iq) => (iq.sourceId === id ? { ...iq, alternativeAnswers: altAnswers } : iq))
+    );
+    toast({ title: "✅ Answers Updated" });
   };
 
   const subTabLabels: Record<string, string> = {
     objective: "Main Objective",
     non_objective: "Non-Objective",
     bonus_objective: "Bonus Objective",
+  };
+
+  // Render an admin question card (objective)
+  const renderAdminQuestionCard = (q: AdminQuizQuestion) => {
+    const integrated = isIntegrated(q.id);
+    return (
+      <Card key={q.id} className={`overflow-hidden ${integrated ? "border-primary/40 bg-primary/5" : ""}`}>
+        <CardContent className="p-3 space-y-2">
+          <p className="text-sm font-medium leading-snug">{q.question}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="text-xs">{q.category}</Badge>
+            <Badge variant="outline" className="text-xs">{q.difficulty}</Badge>
+            <span className="text-xs text-muted-foreground">{q.timeLimit}s · {q.points}pts</span>
+          </div>
+
+          {/* Show options read-only */}
+          <div className="grid grid-cols-2 gap-1">
+            {q.options.map((opt, idx) => (
+              <div key={idx} className={`text-xs px-2 py-1.5 rounded ${idx === q.correctAnswerIndex ? "bg-emerald-500/15 text-emerald-700 font-bold" : "bg-muted/30 text-muted-foreground"}`}>
+                {ANSWER_LABELS[idx]}: {opt}
+              </div>
+            ))}
+          </div>
+
+          {integrated ? (
+            <Button size="sm" variant="outline" className="w-full h-10 text-xs gap-1.5 border-red-300 text-red-600" onClick={() => handleRemove(q.id)}>
+              <Unlink className="h-3.5 w-3.5" /> Remove from Bank
+            </Button>
+          ) : (
+            <Button size="sm" className="w-full h-10 text-xs gap-1.5" onClick={() => handleIntegrate(q.id)}>
+              <Link className="h-3.5 w-3.5" /> Integrate Question
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Render a merchant question card (non-objective / bonus)
+  const renderMerchantQuestionCard = (q: MerchantQuestion) => {
+    const integrated = isIntegrated(q.id);
+    const integratedData = integratedQuestions.find((iq) => iq.sourceId === q.id);
+    return (
+      <Card key={q.id} className={`overflow-hidden ${integrated ? "border-primary/40 bg-primary/5" : ""}`}>
+        <CardContent className="p-3 space-y-2">
+          <p className="text-sm font-medium leading-snug">{q.question}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="text-xs">{q.category}</Badge>
+            <Badge variant="outline" className="text-xs capitalize">{q.difficulty}</Badge>
+            <span className="text-xs text-muted-foreground">{q.timeLimit}s</span>
+          </div>
+
+          {/* Show options for bonus objective */}
+          {q.type === "bonus_objective" && q.options.length > 0 && (
+            <div className="grid grid-cols-2 gap-1">
+              {q.options.map((opt, idx) => (
+                <div key={idx} className={`text-xs px-2 py-1.5 rounded ${idx === q.correctAnswerIndex ? "bg-emerald-500/15 text-emerald-700 font-bold" : "bg-muted/30 text-muted-foreground"}`}>
+                  {ANSWER_LABELS[idx] || `${idx + 1}`}: {opt}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Alt answers for non-objective */}
+          {q.type === "non_objective" && (
+            <div className="space-y-2">
+              {integrated && integratedData?.alternativeAnswers && integratedData.alternativeAnswers.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  <span className="text-xs text-muted-foreground w-full">Your Alternative Answers:</span>
+                  {integratedData.alternativeAnswers.map((alt, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-xs">{alt}</Badge>
+                  ))}
+                </div>
+              )}
+              {(integrated || !integrated) && q.type === "non_objective" && (
+                <div>
+                  <Label className="text-xs text-muted-foreground">Alternative Answers (2-5, comma-separated)</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      value={altAnswersEdit[q.id] || q.alternativeAnswers.join(", ")}
+                      onChange={(e) => setAltAnswersEdit((p) => ({ ...p, [q.id]: e.target.value }))}
+                      placeholder="answer1, answer2, answer3"
+                      className="h-10 text-xs flex-1"
+                    />
+                    {integrated && (
+                      <Button size="sm" variant="outline" className="h-10 text-xs shrink-0" onClick={() => handleUpdateAltAnswers(q.id)}>
+                        <Save className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {integrated ? (
+            <Button size="sm" variant="outline" className="w-full h-10 text-xs gap-1.5 border-red-300 text-red-600" onClick={() => handleRemove(q.id)}>
+              <Unlink className="h-3.5 w-3.5" /> Remove from Bank
+            </Button>
+          ) : (
+            <Button size="sm" className="w-full h-10 text-xs gap-1.5" onClick={() => handleIntegrate(q.id)}>
+              <Link className="h-3.5 w-3.5" /> Integrate Question
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   return (
@@ -824,165 +966,101 @@ function QuestionBankTab({ merchantId }: { merchantId: string }) {
             size="sm"
             variant={activeSubTab === t ? "default" : "outline"}
             className="h-9 text-xs shrink-0"
-            onClick={() => { setActiveSubTab(t); resetForm(); }}
+            onClick={() => setActiveSubTab(t)}
           >
-            {subTabLabels[t]} ({questions.filter((q) => q.type === t).length})
+            {subTabLabels[t]}
           </Button>
         ))}
       </div>
 
-      <Button
-        className="w-full h-11 gap-2 text-sm font-bold"
-        onClick={() => { if (showCreateForm && !editingId) resetForm(); else { resetForm(); setShowCreateForm(true); } }}
-        variant={showCreateForm ? "outline" : "default"}
-      >
-        {showCreateForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-        {showCreateForm ? "Cancel" : `Add ${subTabLabels[activeSubTab]} Question`}
-      </Button>
-
-      {/* Create/Edit Form */}
-      {showCreateForm && (
-        <Card className="border-primary/30">
-          <CardContent className="p-4 space-y-3">
-            <h3 className="text-sm font-bold text-primary">
-              {editingId ? "Edit Question" : `New ${subTabLabels[activeSubTab]} Question`}
-            </h3>
-
-            <div>
-              <Label className="text-xs text-muted-foreground">Question</Label>
-              <textarea
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                rows={3}
-                className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                placeholder="Enter question text..."
+      {/* Integration Counter */}
+      <Card className="border-primary/20">
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link className="h-4 w-4 text-primary" />
+              <span className="text-sm font-bold">{totalIntegrated} of {totalAvailable}</span>
+              <span className="text-xs text-muted-foreground">questions integrated</span>
+            </div>
+            <Badge variant={totalIntegrated > 0 ? "default" : "outline"} className="text-xs">
+              {activeSubTab === "objective" ? "Objective" : activeSubTab === "non_objective" ? "Writing" : "Bonus"}
+            </Badge>
+          </div>
+          {totalAvailable > 0 && (
+            <div className="h-2 bg-muted rounded-full overflow-hidden mt-2">
+              <div
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${(totalIntegrated / totalAvailable) * 100}%` }}
               />
             </div>
+          )}
+        </CardContent>
+      </Card>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-muted-foreground">Category</Label>
-                <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-10 mt-1" />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Difficulty</Label>
-                <Select value={newDifficulty} onValueChange={(v) => setNewDifficulty(v as any)}>
-                  <SelectTrigger className="h-10 mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Easy</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="hard">Hard</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+      {/* Toggle: Available vs Integrated */}
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant={viewMode === "available" ? "default" : "outline"}
+          className="flex-1 h-10 text-xs gap-1.5"
+          onClick={() => setViewMode("available")}
+        >
+          <Eye className="h-3.5 w-3.5" /> Available ({totalAvailable})
+        </Button>
+        <Button
+          size="sm"
+          variant={viewMode === "integrated" ? "default" : "outline"}
+          className="flex-1 h-10 text-xs gap-1.5"
+          onClick={() => setViewMode("integrated")}
+        >
+          <Link className="h-3.5 w-3.5" /> Integrated ({totalIntegrated})
+        </Button>
+      </div>
 
-            {/* Objective Options */}
-            {activeSubTab !== "non_objective" && (
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold">Answer Options (A-H)</Label>
-                {newOptions.map((opt, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <span className="text-xs font-bold w-5 shrink-0 text-muted-foreground">{ANSWER_LABELS[idx]}</span>
-                    <Input
-                      value={opt}
-                      onChange={(e) => {
-                        const copy = [...newOptions];
-                        copy[idx] = e.target.value;
-                        setNewOptions(copy);
-                      }}
-                      placeholder={`Option ${ANSWER_LABELS[idx]}`}
-                      className="h-9 text-xs"
-                    />
-                  </div>
-                ))}
-                <div>
-                  <Label className="text-xs text-muted-foreground">Correct Answer</Label>
-                  <Select value={String(newCorrectIndex)} onValueChange={(v) => setNewCorrectIndex(+v)}>
-                    <SelectTrigger className="h-10 mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {newOptions.map((opt, idx) => opt.trim() && (
-                        <SelectItem key={idx} value={String(idx)}>{ANSWER_LABELS[idx]}: {opt}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
+      {/* Question Cards */}
+      {viewMode === "available" && (
+        <>
+          {activeSubTab === "objective" && availableObjective.length === 0 && (
+            <div className="text-center py-10 text-muted-foreground text-sm">No active objective questions available.</div>
+          )}
+          {activeSubTab === "objective" && availableObjective.map((q) => renderAdminQuestionCard(q))}
 
-            {/* Non-Objective Alternative Answers */}
-            {activeSubTab === "non_objective" && (
-              <div>
-                <Label className="text-xs text-muted-foreground">Alternative Answers (comma-separated, 2-5)</Label>
-                <Input value={newAltAnswers} onChange={(e) => setNewAltAnswers(e.target.value)} placeholder="answer1, answer2, answer3" className="h-10 mt-1" />
-              </div>
-            )}
+          {activeSubTab === "non_objective" && availableNonObjective.length === 0 && (
+            <div className="text-center py-10 text-muted-foreground text-sm">No non-objective questions available.</div>
+          )}
+          {activeSubTab === "non_objective" && availableNonObjective.map((q) => renderMerchantQuestionCard(q))}
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-muted-foreground">Time Limit (sec)</Label>
-                <Input type="number" value={newTimeLimit} onChange={(e) => setNewTimeLimit(+e.target.value)} className="h-10 mt-1" />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Cost Per Question (₦)</Label>
-                <Input type="number" value={newCost} onChange={(e) => setNewCost(+e.target.value)} className="h-10 mt-1" />
-              </div>
-            </div>
-
-            <Button className="w-full h-11 text-sm font-bold gap-2" onClick={handleCreate}>
-              <Save className="h-4 w-4" />
-              {editingId ? "Update Question" : "Add Question"}
-            </Button>
-          </CardContent>
-        </Card>
+          {activeSubTab === "bonus_objective" && availableBonus.length === 0 && (
+            <div className="text-center py-10 text-muted-foreground text-sm">No bonus objective questions available.</div>
+          )}
+          {activeSubTab === "bonus_objective" && availableBonus.map((q) => renderMerchantQuestionCard(q))}
+        </>
       )}
 
-      {/* Question List */}
-      {filteredQuestions.length === 0 && !showCreateForm && (
-        <div className="text-center py-10 text-muted-foreground text-sm">
-          No {subTabLabels[activeSubTab].toLowerCase()} questions yet.
-        </div>
+      {viewMode === "integrated" && (
+        <>
+          {totalIntegrated === 0 && (
+            <div className="text-center py-10 text-muted-foreground text-sm">
+              No questions integrated yet. Switch to "Available" to browse and integrate questions.
+            </div>
+          )}
+          {activeSubTab === "objective" &&
+            integratedForTab.map((iq) => {
+              const q = availableObjective.find((aq) => aq.id === iq.sourceId);
+              return q ? renderAdminQuestionCard(q) : null;
+            })}
+          {activeSubTab === "non_objective" &&
+            integratedForTab.map((iq) => {
+              const q = availableNonObjective.find((mq) => mq.id === iq.sourceId);
+              return q ? renderMerchantQuestionCard(q) : null;
+            })}
+          {activeSubTab === "bonus_objective" &&
+            integratedForTab.map((iq) => {
+              const q = availableBonus.find((mq) => mq.id === iq.sourceId);
+              return q ? renderMerchantQuestionCard(q) : null;
+            })}
+        </>
       )}
-
-      {filteredQuestions.map((q) => (
-        <Card key={q.id} className="overflow-hidden">
-          <CardContent className="p-3 space-y-2">
-            <p className="text-sm font-medium leading-snug">{q.question}</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline" className="text-xs">{q.category}</Badge>
-              <Badge variant="outline" className="text-xs capitalize">{q.difficulty}</Badge>
-              <span className="text-xs text-muted-foreground">{q.timeLimit}s · {formatLocalAmount(q.costPerQuestion, "NGN")}</span>
-            </div>
-
-            {q.type !== "non_objective" && q.options.length > 0 && (
-              <div className="grid grid-cols-2 gap-1 mt-1">
-                {q.options.map((opt, idx) => (
-                  <div key={idx} className={`text-xs px-2 py-1 rounded ${idx === q.correctAnswerIndex ? "bg-emerald-500/15 text-emerald-700 font-bold" : "bg-muted/30 text-muted-foreground"}`}>
-                    {ANSWER_LABELS[idx]}: {opt}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {q.type === "non_objective" && q.alternativeAnswers.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {q.alternativeAnswers.map((alt, idx) => (
-                  <Badge key={idx} variant="secondary" className="text-xs">{alt}</Badge>
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-2 pt-1">
-              <Button size="sm" variant="outline" className="h-8 text-xs gap-1 flex-1" onClick={() => startEdit(q)}>
-                <Edit className="h-3 w-3" /> Edit
-              </Button>
-              <Button size="sm" variant="destructive" className="h-8 text-xs gap-1" onClick={() => deleteQuestion(q.id)}>
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
     </div>
   );
 }
@@ -1148,7 +1226,7 @@ export default function MerchantPage() {
           </TabsContent>
 
           <TabsContent value="questions" className="mt-4">
-            <QuestionBankTab merchantId={myMerchant.id} />
+            <QuestionIntegrationTab merchantId={myMerchant.id} />
           </TabsContent>
 
           <TabsContent value="wallet" className="mt-4">
