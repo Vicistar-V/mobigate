@@ -3,11 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2 } from "lucide-react";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Heart, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
 import type { SeasonWinner } from "@/data/mobigateInteractiveQuizData";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function formatCompact(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -27,14 +37,20 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   const { toast } = useToast();
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFan, setIsFan] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [currentPhoto, setCurrentPhoto] = useState(0);
+  const [showFanConfirm, setShowFanConfirm] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
       setFriendRequestSent(false);
       setIsFan(false);
+      setIsLiked(false);
+      setIsFollowing(false);
       setCurrentPhoto(0);
+      setShowFanConfirm(false);
     }
   }, [open]);
 
@@ -75,11 +91,33 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
     return "bg-muted text-muted-foreground border-border";
   };
 
-  const handleBecomeFan = () => {
+  const handleJoinFanClick = () => {
+    if (isFan) return;
+    setShowFanConfirm(true);
+  };
+
+  const confirmJoinFan = () => {
     setIsFan(true);
+    setShowFanConfirm(false);
     toast({
       title: "⭐ You're now a fan!",
       description: `M200 debited. You're now following ${winner.playerName}'s quiz journey!`,
+    });
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    toast({
+      title: isLiked ? "Like removed" : "❤️ Liked!",
+      description: isLiked ? `You unliked ${winner.playerName}` : `You liked ${winner.playerName}'s profile`,
+    });
+  };
+
+  const handleFollow = () => {
+    setIsFollowing(!isFollowing);
+    toast({
+      title: isFollowing ? "Unfollowed" : "✅ Following!",
+      description: isFollowing ? `You unfollowed ${winner.playerName}` : `You're now following ${winner.playerName}`,
     });
   };
 
@@ -124,177 +162,242 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[92vh]" showClose>
-        <DrawerHeader className="text-center pb-2">
-          <DrawerTitle className="sr-only">Winner Profile</DrawerTitle>
-        </DrawerHeader>
-        <DrawerBody className="px-4 pb-6 space-y-4 overflow-y-auto touch-auto overscroll-contain">
-          {/* Slidable Photo Gallery */}
-          <div className="relative">
-            <div
-              ref={galleryRef}
-              className="flex overflow-x-auto snap-x snap-mandatory touch-pan-x"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
-              onScroll={handleGalleryScroll}
-            >
-              {photos.map((photo, idx) => (
-                <div key={idx} className="snap-center shrink-0 w-full">
-                  <div className="aspect-square mx-auto max-w-[280px] rounded-2xl overflow-hidden border-2 border-amber-300/30 shadow-lg">
-                    <img src={photo} alt={`${winner.playerName} photo ${idx + 1}`} className="h-full w-full object-cover" />
+    <>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92vh]" showClose>
+          <DrawerHeader className="text-center pb-2">
+            <DrawerTitle className="sr-only">Winner Profile</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody className="px-4 pb-6 space-y-4 overflow-y-auto touch-auto overscroll-contain">
+            {/* Slidable Photo Gallery */}
+            <div className="relative">
+              <div
+                ref={galleryRef}
+                className="flex overflow-x-auto snap-x snap-mandatory touch-pan-x"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+                onScroll={handleGalleryScroll}
+              >
+                {photos.map((photo, idx) => (
+                  <div key={idx} className="snap-center shrink-0 w-full">
+                    <div className="aspect-square mx-auto max-w-[280px] rounded-2xl overflow-hidden border-2 border-amber-300/30 shadow-lg">
+                      <img src={photo} alt={`${winner.playerName} photo ${idx + 1}`} className="h-full w-full object-cover" />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            {/* Dots indicator */}
-            {photos.length > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-2">
-                {photos.map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={`h-2 rounded-full transition-all touch-manipulation ${
-                      idx === currentPhoto ? "w-5 bg-amber-500" : "w-2 bg-muted-foreground/30"
-                    }`}
-                    onClick={() => scrollToPhoto(idx)}
-                  />
                 ))}
               </div>
-            )}
-            {/* Position badge overlay */}
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 ml-[-140px]">
-              <div className="bg-background/80 backdrop-blur-sm rounded-full p-1.5 border shadow-sm">
-                {getPositionIcon()}
-              </div>
-            </div>
-          </div>
-
-          {/* Name & Badges */}
-          <div className="text-center space-y-2">
-            <h3 className="text-xl font-bold">{winner.playerName}</h3>
-            <p className="text-sm text-muted-foreground">{winner.state}, {winner.country}</p>
-            <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
-              {getPositionLabel()}
-            </Badge>
-            {winner.tier >= 6 && (
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-sm font-semibold text-purple-700">Celebrity</span>
-                <div className="flex items-center gap-0.5">
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${i < 7 ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground/30'}`}
+              {/* Dots indicator */}
+              {photos.length > 1 && (
+                <div className="flex items-center justify-center gap-1.5 mt-2">
+                  {photos.map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`h-2 rounded-full transition-all touch-manipulation ${
+                        idx === currentPhoto ? "w-5 bg-amber-500" : "w-2 bg-muted-foreground/30"
+                      }`}
+                      onClick={() => scrollToPhoto(idx)}
                     />
                   ))}
                 </div>
+              )}
+              {/* Position badge overlay */}
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 ml-[-140px]">
+                <div className="bg-background/80 backdrop-blur-sm rounded-full p-1.5 border shadow-sm">
+                  {getPositionIcon()}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-muted/30 rounded-xl p-3 border">
-              <p className="text-lg font-bold">{formatCompact(winner.followers)}</p>
-              <p className="text-xs text-muted-foreground">Followers</p>
+            {/* Name & Badges */}
+            <div className="text-center space-y-2">
+              <h3 className="text-xl font-bold">{winner.playerName}</h3>
+              <p className="text-sm text-muted-foreground">{winner.state}, {winner.country}</p>
+              <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
+                {getPositionLabel()}
+              </Badge>
+              {winner.tier >= 6 && (
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-sm font-semibold text-purple-700">Celebrity</span>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${i < 7 ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground/30'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="bg-muted/30 rounded-xl p-3 border">
-              <p className="text-lg font-bold">{formatCompact(winner.fans)}</p>
-              <p className="text-xs text-muted-foreground">Fans</p>
-            </div>
-            <div className="bg-muted/30 rounded-xl p-3 border">
-              <p className="text-lg font-bold">{winner.tier >= 6 ? '7 Stars' : `${winner.tier} Stars`}</p>
-              <p className="text-xs text-muted-foreground">Status</p>
-            </div>
-          </div>
 
-          {/* Details */}
-          <div className="space-y-3 bg-muted/30 rounded-xl p-4 border">
-            {merchantName && (
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-muted/30 rounded-xl p-3 border">
+                <p className="text-lg font-bold">{formatCompact(winner.followers)}</p>
+                <p className="text-xs text-muted-foreground">Followers</p>
+              </div>
+              <div className="bg-muted/30 rounded-xl p-3 border">
+                <p className="text-lg font-bold">{formatCompact(winner.fans)}</p>
+                <p className="text-xs text-muted-foreground">Fans</p>
+              </div>
+              <div className="bg-muted/30 rounded-xl p-3 border">
+                <p className="text-lg font-bold">{winner.tier >= 6 ? '7 Stars' : `${winner.tier} Stars`}</p>
+                <p className="text-xs text-muted-foreground">Status</p>
+              </div>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-3 bg-muted/30 rounded-xl p-4 border">
+              {merchantName && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Merchant</span>
+                  <span className="font-semibold">{merchantName}</span>
+                </div>
+              )}
+              {seasonName && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Season</span>
+                  <span className="font-semibold">{seasonName}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Merchant</span>
-                <span className="font-semibold">{merchantName}</span>
+                <span className="text-muted-foreground">Prize Won</span>
+                <span className="font-bold text-primary">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</span>
               </div>
-            )}
-            {seasonName && (
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Season</span>
-                <span className="font-semibold">{seasonName}</span>
+                <span className="text-muted-foreground">Score</span>
+                <span className="font-semibold">{winner.score}%</span>
               </div>
-            )}
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Prize Won</span>
-              <span className="font-bold text-primary">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</span>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Completed</span>
+                <span className="font-semibold">{format(new Date(winner.completionDate), "MMM dd, yyyy")}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Payout</span>
+                {getPayoutBadge()}
+              </div>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Score</span>
-              <span className="font-semibold">{winner.score}%</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Completed</span>
-              <span className="font-semibold">{format(new Date(winner.completionDate), "MMM dd, yyyy")}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Payout</span>
-              {getPayoutBadge()}
-            </div>
-          </div>
 
-          {/* Actions */}
-          <div className="grid grid-cols-3 gap-2.5">
-            <Button
-              variant="outline"
-              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
-              onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
+            {/* Actions - Row 1: Profile, Add Friend, Message */}
+            <div className="grid grid-cols-3 gap-2.5">
+              <Button
+                variant="outline"
+                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
+              >
+                <Eye className="h-5 w-5" />
+                <span>Profile</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                disabled={friendRequestSent}
+                onClick={handleAddFriend}
+              >
+                <UserPlus className="h-5 w-5" />
+                <span>{friendRequestSent ? "Sent" : "Add Friend"}</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                onClick={() => {
+                  onOpenChange(false);
+                  setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('openChatWithUser', {
+                      detail: {
+                        odooUserId: winner.id,
+                        userName: winner.playerName,
+                        userAvatar: winner.playerAvatar
+                      }
+                    }));
+                  }, 300);
+                }}
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Message</span>
+              </Button>
+            </div>
+
+            {/* Actions - Row 2: Like, Follow, Join Fan, Share */}
+            <div className="grid grid-cols-4 gap-2">
+              <Button
+                variant="outline"
+                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                  isLiked ? "bg-red-500/10 text-red-600 border-red-500/30" : ""
+                }`}
+                onClick={handleLike}
+              >
+                <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
+                <span>{isLiked ? "Liked" : "Like"}</span>
+              </Button>
+              <Button
+                variant="outline"
+                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                  isFollowing ? "bg-blue-500/10 text-blue-600 border-blue-500/30" : ""
+                }`}
+                onClick={handleFollow}
+              >
+                <Users className="h-5 w-5" />
+                <span>{isFollowing ? "Following" : "Follow"}</span>
+              </Button>
+              <Button
+                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                  isFan
+                    ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20"
+                    : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+                }`}
+                disabled={isFan}
+                onClick={handleJoinFanClick}
+              >
+                <Star className="h-5 w-5" fill={isFan ? "currentColor" : "none"} />
+                <span>{isFan ? "Joined" : "Join"}</span>
+                <span className="-mt-1.5 text-[10px]">{isFan ? "" : "Fan"}</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                onClick={handleShare}
+              >
+                <Share2 className="h-5 w-5" />
+                <span>Share</span>
+              </Button>
+            </div>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Join Fan Confirmation Dialog - same as carousel */}
+      <AlertDialog open={showFanConfirm} onOpenChange={setShowFanConfirm}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader className="text-center">
+            <div className="flex justify-center mb-2">
+              <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-amber-300/40 shadow-md">
+                <img
+                  src={winner.playerAvatar}
+                  alt={winner.playerName}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-base">
+              Become a fan of {winner.playerName}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              This will debit <span className="font-bold text-foreground">M200</span> from your wallet. You'll follow their quiz journey and get updates.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2">
+            <AlertDialogCancel className="flex-1 h-12 touch-manipulation active:scale-[0.97]">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 touch-manipulation active:scale-[0.97]"
+              onClick={confirmJoinFan}
             >
-              <Eye className="h-5 w-5" />
-              <span>Profile</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
-              disabled={friendRequestSent}
-              onClick={handleAddFriend}
-            >
-              <UserPlus className="h-5 w-5" />
-              <span>{friendRequestSent ? "Sent" : "Add Friend"}</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
-              onClick={() => {
-                onOpenChange(false);
-                setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent('openChatWithUser', {
-                    detail: {
-                      odooUserId: winner.id,
-                      userName: winner.playerName,
-                      userAvatar: winner.playerAvatar
-                    }
-                  }));
-                }, 300);
-              }}
-            >
-              <MessageCircle className="h-5 w-5" />
-              <span>Message</span>
-            </Button>
-            <Button
-              className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${isFan ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"}`}
-              disabled={isFan}
-              onClick={handleBecomeFan}
-            >
-              <Star className="h-5 w-5" fill={isFan ? "currentColor" : "none"} />
-              <span>{isFan ? "Fanned" : "Fan M200"}</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
-              onClick={handleShare}
-            >
-              <Share2 className="h-5 w-5" />
-              <span>Share</span>
-            </Button>
-          </div>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+              Join Fans · M200
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
