@@ -290,17 +290,31 @@ export function getNigerianStatesForFilter() {
   return nigerianStates.map(s => ({ id: s.id, name: s.name }));
 }
 
-// Helper to get LGAs for a state
-export function getLGAsForState(stateId: string) {
-  const state = nigerianStates.find(s => s.id === stateId);
-  return state?.lgas.map(l => ({ id: l.id, name: l.name })) ?? [];
+// Helper to get LGAs for a state, or ALL LGAs if no state specified
+export function getLGAsForState(stateId?: string) {
+  if (stateId) {
+    const state = nigerianStates.find(s => s.id === stateId);
+    return state?.lgas.map(l => ({ id: l.id, name: l.name, stateName: state.name })) ?? [];
+  }
+  // Return all LGAs from all states
+  return nigerianStates.flatMap(s =>
+    s.lgas.map(l => ({ id: l.id, name: `${l.name} (${s.name})`, stateName: s.name }))
+  );
 }
 
-// Helper to get cities for an LGA
-export function getCitiesForLGA(lgaId: string) {
-  for (const state of nigerianStates) {
-    const lga = state.lgas.find(l => l.id === lgaId);
-    if (lga) return lga.cities.map(c => ({ id: c.id, name: c.name }));
+// Helper to get cities for an LGA, or ALL cities if no LGA specified
+export function getCitiesForLGA(lgaId?: string) {
+  if (lgaId) {
+    for (const state of nigerianStates) {
+      const lga = state.lgas.find(l => l.id === lgaId);
+      if (lga) return lga.cities.map(c => ({ id: c.id, name: c.name }));
+    }
+    return [];
   }
-  return [];
+  // Return all cities from all LGAs
+  return nigerianStates.flatMap(s =>
+    s.lgas.flatMap(l =>
+      l.cities.map(c => ({ id: c.id, name: `${c.name} (${l.name}, ${s.name})` }))
+    )
+  );
 }
