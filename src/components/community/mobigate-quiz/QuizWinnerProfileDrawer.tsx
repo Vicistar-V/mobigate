@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [showFanConfirm, setShowFanConfirm] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const commentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
@@ -292,16 +293,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
               <WinnerVideoHighlightsSection videoHighlights={winner.videoHighlights} />
             )}
 
-            {/* Comments - collapsible */}
-            {showComments && (
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-semibold">Comments</span>
-                </div>
-                <CommentSection postId={`winner-${winner.id}`} showHeader={false} className="rounded-xl border bg-muted/20 p-3" />
-              </div>
-            )}
+            {/* Comments moved below action buttons */}
 
             {/* Actions - Row 1: Profile, Add Friend, Message, Comment */}
             <div className="grid grid-cols-4 gap-2">
@@ -346,7 +338,13 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                 className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
                   showComments ? "bg-primary/10 text-primary border-primary/30" : ""
                 }`}
-                onClick={() => setShowComments(!showComments)}
+                onClick={() => {
+                  const next = !showComments;
+                  setShowComments(next);
+                  if (next) {
+                    setTimeout(() => commentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+                  }
+                }}
               >
                 <MessageSquare className="h-5 w-5" />
                 <span>Comment</span>
@@ -396,6 +394,17 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                 <span>Share</span>
               </Button>
             </div>
+
+            {/* Comments - below action buttons */}
+            {showComments && (
+              <div ref={commentRef} className="space-y-2.5" onTouchMove={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold">Comments</span>
+                </div>
+                <CommentSection postId={`winner-${winner.id}`} showHeader={false} className="rounded-xl border bg-muted/20 p-3" />
+              </div>
+            )}
           </DrawerBody>
         </DrawerContent>
       </Drawer>
