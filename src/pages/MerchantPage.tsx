@@ -29,6 +29,7 @@ import {
   Play,
   CalendarPlus,
   Trophy,
+  Star,
   Crown,
   Medal,
   Gift,
@@ -1706,6 +1707,22 @@ function WalletTab({ merchant }: { merchant: QuizMerchant }) {
 function WinnersTab({ merchantId }: { merchantId: string }) {
   const [seasonFilter, setSeasonFilter] = useState("all");
   const [expandedConsolation, setExpandedConsolation] = useState<Record<string, boolean>>({});
+  const [highlightedWinners, setHighlightedWinners] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+
+  const toggleHighlight = (winnerId: string) => {
+    setHighlightedWinners(prev => {
+      const next = new Set(prev);
+      if (next.has(winnerId)) {
+        next.delete(winnerId);
+        toast({ title: "Highlight removed", description: "Winner removed from quiz carousel" });
+      } else {
+        next.add(winnerId);
+        toast({ title: "⭐ Winner highlighted!", description: "They will appear in the quiz carousel" });
+      }
+      return next;
+    });
+  };
 
   const merchantSeasons = mockSeasons.filter((s) => s.merchantId === merchantId);
   const merchantSeasonIds = merchantSeasons.map((s) => s.id);
@@ -1843,7 +1860,16 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
               <div className="p-3 space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Winners</p>
                 {topWinners.map((winner) => (
-                  <div key={winner.id} className={`rounded-xl border p-3 ${getPositionBg(winner.position)}`}>
+                  <div key={winner.id} className={`rounded-xl border p-3 relative ${getPositionBg(winner.position)}`}>
+                    {/* Highlight Star Button */}
+                    <button
+                      className="absolute top-2 right-2 h-8 w-8 flex items-center justify-center rounded-full bg-background/80 border shadow-sm active:scale-90 transition-transform touch-manipulation z-10"
+                      onClick={() => toggleHighlight(winner.id)}
+                    >
+                      <Star
+                        className={`h-4 w-4 ${highlightedWinners.has(winner.id) ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`}
+                      />
+                    </button>
                     <div className="flex items-start gap-3">
                       {/* Avatar + Position */}
                       <div className="flex flex-col items-center gap-1 shrink-0">
@@ -1853,7 +1879,7 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                         </div>
                       </div>
                       {/* Info */}
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 pr-6">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-bold truncate">{winner.playerName}</p>
                           {getPayoutBadge(winner.payoutStatus)}

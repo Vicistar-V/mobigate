@@ -4,10 +4,11 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { mockMerchants, mockSeasons, QuizMerchant } from "@/data/mobigateInteractiveQuizData";
+import { mockMerchants, mockSeasons, mockSeasonWinners, QuizMerchant } from "@/data/mobigateInteractiveQuizData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { InteractiveQuizSeasonSheet } from "./InteractiveQuizSeasonSheet";
 import { LiveScoreboardDrawer } from "./LiveScoreboardDrawer";
+import { HighlightedWinnersCarousel } from "./HighlightedWinnersCarousel";
 
 interface InteractiveQuizMerchantSheetProps {
   open: boolean;
@@ -51,6 +52,11 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
               <Badge className="bg-red-500 text-white border-0 text-xs px-2 py-0.5 animate-pulse">LIVE</Badge>
             </button>
           </div>
+
+          {/* Highlighted Winners Carousel */}
+          {mockSeasonWinners.some(w => w.isHighlighted) && (
+            <HighlightedWinnersCarousel />
+          )}
 
           <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-4">
             <div className="space-y-3">
