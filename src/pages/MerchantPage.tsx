@@ -53,7 +53,9 @@ import {
   Smartphone,
   Facebook,
   Store,
+  Shield,
 } from "lucide-react";
+import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
 import {
   mockMerchants,
   mockSeasons,
@@ -1708,6 +1710,8 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
   const [seasonFilter, setSeasonFilter] = useState("all");
   const [expandedConsolation, setExpandedConsolation] = useState<Record<string, boolean>>({});
   const [highlightedWinners, setHighlightedWinners] = useState<Set<string>>(new Set());
+  const [selectedWinner, setSelectedWinner] = useState<SeasonWinner | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const { toast } = useToast();
 
   const toggleHighlight = (winnerId: string) => {
@@ -1860,11 +1864,15 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
               <div className="p-3 space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Winners</p>
                 {topWinners.map((winner) => (
-                  <div key={winner.id} className={`rounded-xl border p-3 relative ${getPositionBg(winner.position)}`}>
+                  <div
+                    key={winner.id}
+                    className={`rounded-xl border p-3 relative ${getPositionBg(winner.position)} cursor-pointer active:scale-[0.98] transition-transform touch-manipulation`}
+                    onClick={() => { setSelectedWinner(winner); setDrawerOpen(true); }}
+                  >
                     {/* Highlight Star Button */}
                     <button
                       className="absolute top-2 right-2 h-8 w-8 flex items-center justify-center rounded-full bg-background/80 border shadow-sm active:scale-90 transition-transform touch-manipulation z-10"
-                      onClick={() => toggleHighlight(winner.id)}
+                      onClick={(e) => { e.stopPropagation(); toggleHighlight(winner.id); }}
                     >
                       <Star
                         className={`h-4 w-4 ${highlightedWinners.has(winner.id) ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`}
@@ -1888,6 +1896,25 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                         <div className="flex items-center justify-between mt-1.5">
                           <p className="text-sm font-bold text-primary">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
                           <p className="text-xs text-muted-foreground">Score: {winner.score}%</p>
+                        </div>
+                        {/* Tier / Fans / Followers / Share row */}
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 bg-blue-500/10 text-blue-700 border-blue-500/30">
+                            <Shield className="h-2.5 w-2.5" /> T{winner.tier}
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground">{winner.fans >= 1000 ? `${(winner.fans/1000).toFixed(1)}K` : winner.fans} fans</span>
+                          <span className="text-[10px] text-muted-foreground">{winner.followers >= 1000 ? `${(winner.followers/1000).toFixed(1)}K` : winner.followers} followers</span>
+                          <button
+                            className="ml-auto h-6 w-6 flex items-center justify-center rounded-full bg-muted/50 active:scale-90 transition-transform touch-manipulation"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const url = `${window.location.origin}/profile/${winner.id}`;
+                              navigator.clipboard.writeText(url);
+                              toast({ title: "Link copied!", description: "Winner profile link copied" });
+                            }}
+                          >
+                            <Share2 className="h-3 w-3 text-muted-foreground" />
+                          </button>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {format(new Date(winner.completionDate), "MMM dd, yyyy")}
@@ -1967,6 +1994,15 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
           </Card>
         );
       })}
+
+      {/* Winner Profile Drawer */}
+      <QuizWinnerProfileDrawer
+        winner={selectedWinner}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        merchantName={myMerchant.name}
+        seasonName={selectedWinner ? merchantSeasons.find(s => s.id === selectedWinner.seasonId)?.name : undefined}
+      />
     </div>
   );
 }

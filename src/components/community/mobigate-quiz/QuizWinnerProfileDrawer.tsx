@@ -3,11 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye } from "lucide-react";
+import { Trophy, Crown, Medal, Star, UserPlus, MessageCircle, Eye, Shield, Share2, Store, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
 import type { SeasonWinner } from "@/data/mobigateInteractiveQuizData";
+
+function formatCompact(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return String(n);
+}
 
 interface QuizWinnerProfileDrawerProps {
   winner: SeasonWinner | null;
@@ -60,6 +65,13 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
     }
   };
 
+  const getTierColor = (tier: number) => {
+    if (tier >= 6) return "bg-purple-500/15 text-purple-700 border-purple-500/30";
+    if (tier >= 4) return "bg-blue-500/15 text-blue-700 border-blue-500/30";
+    if (tier >= 2) return "bg-emerald-500/15 text-emerald-700 border-emerald-500/30";
+    return "bg-muted text-muted-foreground border-border";
+  };
+
   const handleBecomeFan = () => {
     setIsFan(true);
     toast({
@@ -74,6 +86,25 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
       title: "Friend request sent!",
       description: `Request sent to ${winner.playerName}`,
     });
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `${winner.playerName} - Quiz Winner`,
+      text: `Check out ${winner.playerName}'s ${winner.position} place win with a score of ${winner.score}%!`,
+      url: window.location.origin + `/profile/${winner.id}`,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        toast({ title: "Link copied!", description: "Winner profile link copied to clipboard" });
+      }
+    } catch {
+      await navigator.clipboard.writeText(shareData.url);
+      toast({ title: "Link copied!", description: "Winner profile link copied to clipboard" });
+    }
   };
 
   return (
@@ -96,9 +127,30 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
             <div className="text-center">
               <h3 className="text-lg font-bold">{winner.playerName}</h3>
               <p className="text-sm text-muted-foreground">{winner.state}, {winner.country}</p>
-              <Badge className="mt-1.5 bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
-                {getPositionLabel()}
-              </Badge>
+              <div className="flex items-center justify-center gap-2 mt-1.5">
+                <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs">
+                  {getPositionLabel()}
+                </Badge>
+                <Badge className={`text-xs ${getTierColor(winner.tier)}`}>
+                  <Shield className="h-3 w-3 mr-0.5" /> Tier {winner.tier}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="bg-muted/30 rounded-xl p-2.5 border">
+              <p className="text-base font-bold">{formatCompact(winner.followers)}</p>
+              <p className="text-[10px] text-muted-foreground">Followers</p>
+            </div>
+            <div className="bg-muted/30 rounded-xl p-2.5 border">
+              <p className="text-base font-bold">{formatCompact(winner.fans)}</p>
+              <p className="text-[10px] text-muted-foreground">Fans</p>
+            </div>
+            <div className="bg-muted/30 rounded-xl p-2.5 border">
+              <p className="text-base font-bold">T{winner.tier}</p>
+              <p className="text-[10px] text-muted-foreground">Tier</p>
             </div>
           </div>
 
@@ -135,37 +187,55 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
           </div>
 
           {/* Actions */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2.5">
             <Button
               variant="outline"
-              className="h-12 text-sm touch-manipulation"
+              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
               onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
             >
-              <Eye className="h-4 w-4 mr-1.5" /> View Profile
+              <Eye className="h-4 w-4" />
+              <span>Profile</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 text-sm touch-manipulation"
+              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
               disabled={friendRequestSent}
               onClick={handleAddFriend}
             >
-              <UserPlus className="h-4 w-4 mr-1.5" />
-              {friendRequestSent ? "Sent" : "Add Friend"}
+              <UserPlus className="h-4 w-4" />
+              <span>{friendRequestSent ? "Sent" : "Add Friend"}</span>
             </Button>
             <Button
               variant="outline"
-              className="h-12 text-sm touch-manipulation"
+              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
               onClick={() => toast({ title: "Message", description: `Opening chat with ${winner.playerName}...` })}
             >
-              <MessageCircle className="h-4 w-4 mr-1.5" /> Message
+              <MessageCircle className="h-4 w-4" />
+              <span>Message</span>
             </Button>
             <Button
-              className={`h-12 text-sm touch-manipulation ${isFan ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"}`}
+              className={`h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1 ${isFan ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"}`}
               disabled={isFan}
               onClick={handleBecomeFan}
             >
-              <Star className="h-4 w-4 mr-1.5" fill={isFan ? "currentColor" : "none"} />
-              {isFan ? "Fanned ⭐" : "Fan M200"}
+              <Star className="h-4 w-4" fill={isFan ? "currentColor" : "none"} />
+              <span>{isFan ? "Fanned" : "Fan M200"}</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4" />
+              <span>Share</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-12 text-xs touch-manipulation flex flex-col items-center gap-0.5 px-1"
+              onClick={() => { navigate("/merchant"); onOpenChange(false); }}
+            >
+              <Store className="h-4 w-4" />
+              <span>Mobigate</span>
             </Button>
           </div>
         </DrawerBody>
