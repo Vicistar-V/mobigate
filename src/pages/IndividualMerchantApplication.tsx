@@ -161,19 +161,19 @@ export default function IndividualMerchantApplication() {
                   <Clock className="h-7 w-7 text-amber-600" />
                 </div>
                 <h2 className="font-bold text-base">Application Under Review</h2>
-                <p className="text-xs text-muted-foreground">Your individual merchant application is being reviewed by our team</p>
-                <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400 text-xs">
+                <p className="text-sm text-muted-foreground">Your individual merchant application is being reviewed by our team</p>
+                <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400 text-sm">
                   Estimated: 14–21 business days
                 </Badge>
               </div>
-              <div className="bg-background rounded-lg p-3 space-y-2 border text-xs">
+              <div className="bg-background rounded-lg p-3 space-y-2 border text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Reference</span><span className="font-mono font-bold">{refNumber}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Type</span><Badge variant="secondary" className="text-[10px] h-5">Individual</Badge></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Type</span><Badge variant="secondary" className="text-xs h-5">Individual</Badge></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{firstName} {middleName} {lastName}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{email}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Fee Paid</span><span className="font-medium text-primary">{formatMobi(50000)}</span></div>
               </div>
-              <p className="text-[11px] text-center text-muted-foreground">You will be notified once your application has been reviewed.</p>
+              <p className="text-sm text-center text-muted-foreground">You will be notified once your application has been reviewed.</p>
             </CardContent>
           </Card>
         </div>
