@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink } from "lucide-react";
+import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { mockMerchants, mockSeasons, type QuizSeason } from "@/data/mobigateInteractiveQuizData";
 import { getMerchantHomeData, formatCount, type MerchantGalleryItem } from "@/data/merchantHomeData";
+import { allLocationMerchants } from "@/data/nigerianLocationsData";
 import { MediaGalleryViewer, type MediaItem } from "@/components/MediaGalleryViewer";
 import { CommentDialog } from "@/components/CommentDialog";
 import { ShareDialog } from "@/components/ShareDialog";
@@ -35,7 +37,16 @@ export default function MerchantHomePage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const merchant = mockMerchants.find(m => m.id === merchantId);
+  const quizMerchant = mockMerchants.find(m => m.id === merchantId);
+  const locationMerchant = allLocationMerchants.find(m => m.id === merchantId);
+  
+  // Build a unified merchant object
+  const merchant = quizMerchant 
+    ? quizMerchant 
+    : locationMerchant 
+      ? { id: locationMerchant.id, name: locationMerchant.name, logo: locationMerchant.logo, category: locationMerchant.category, isVerified: locationMerchant.isVerified }
+      : undefined;
+
   const homeData = merchantId ? getMerchantHomeData(merchantId) : undefined;
   const seasons = mockSeasons.filter(s => s.merchantId === merchantId);
 
@@ -139,19 +150,8 @@ export default function MerchantHomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-50 flex items-center gap-3 px-4 py-3 bg-background/95 backdrop-blur border-b border-border">
-        <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{merchant.name}</p>
-          <p className="text-xs text-muted-foreground">{merchant.category}</p>
-        </div>
-        {upcomingSeasons.some(s => s.isLive) && (
-          <Badge className="bg-red-500 text-white animate-pulse text-xs" onClick={() => setScoreboardOpen(true)}>🔴 LIVE</Badge>
-        )}
-      </div>
+      {/* Header */}
+      <Header />
 
       {/* Hero Banner */}
       <div className="relative">

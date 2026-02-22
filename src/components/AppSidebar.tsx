@@ -146,19 +146,10 @@ const menuItems: MenuItem[] = [{
       title: "View Merchants",
       url: "#",
       items: [
-        { 
-          title: "By Countries", 
-          url: "#",
-          items: [
-            { 
-              title: "By States/Provinces", 
-              url: "#",
-              items: [
-                { title: "By Cities/Counties", url: "#" }
-              ]
-            }
-          ]
-        }
+        { title: "By Country", url: "/merchants?view=country" },
+        { title: "By State / Province", url: "/merchants?view=state" },
+        { title: "By LGA / County", url: "/merchants?view=lga" },
+        { title: "By City / Town", url: "/merchants?view=city" },
       ]
     },
     { 
@@ -168,10 +159,6 @@ const menuItems: MenuItem[] = [{
         { title: "Individual Merchant Account", url: "/merchant-application/individual" },
         { title: "Corporate Merchant Account", url: "/merchant-application/corporate" }
       ]
-    },
-    {
-      title: "Merchant Home",
-      url: "/merchant-home/m1",
     },
     {
       title: "Merchant Quizzes Management",

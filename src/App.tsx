@@ -33,6 +33,7 @@ import MerchantApplication from "./pages/MerchantApplication";
 import IndividualMerchantApplication from "./pages/IndividualMerchantApplication";
 import MerchantDetailPage from "./pages/MerchantDetailPage";
 import MerchantHomePage from "./pages/MerchantHomePage";
+import MerchantListingPage from "./pages/MerchantListingPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
@@ -103,6 +104,7 @@ const App = () => {
                   <Route path="/my-quiz-history" element={<MyQuizHistory />} />
                   <Route path="/mobi-quiz-games" element={<MobiQuizGames />} />
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
+                  <Route path="/merchants" element={<MerchantListingPage />} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
