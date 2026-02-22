@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, Star, Radio, Trophy, Flame, Zap, User } from "lucide-react";
+import { Heart, MessageCircle, Share2, Star, Radio, Trophy, Flame, Zap } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 import { shareViaNative, copyToClipboard } from "@/lib/shareUtils";
+import { mockMerchants } from "@/data/mobigateInteractiveQuizData";
 import {
   mockLiveScoreboardPlayers,
   LiveScoreboardPlayer,
@@ -20,6 +21,12 @@ import {
 interface LiveScoreboardDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+// Map merchant names to IDs from actual mock data
+function findMerchantIdByName(name: string): string {
+  const merchant = mockMerchants.find(m => m.name.toLowerCase().includes(name.toLowerCase().split(" ")[0]));
+  return merchant?.id ?? "m1";
 }
 
 export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawerProps) {
@@ -96,8 +103,8 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
   const handleMerchantClick = (e: React.MouseEvent, player: LiveScoreboardPlayer) => {
     e.stopPropagation();
     onOpenChange(false);
-    // Navigate to the merchant's home page (use a simple lookup from the player's merchantName)
-    navigate(`/merchant-home/m1`);
+    const merchantId = findMerchantIdByName(player.merchantName);
+    navigate(`/merchant-home/${merchantId}`);
   };
 
   const getRankStyle = (rank: number) => {
@@ -161,13 +168,15 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                         <span className="text-sm font-bold break-words">{player.name}</span>
                         {player.isOnline && <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />}
                       </div>
-                      <button
-                        className="text-xs text-primary underline-offset-2 hover:underline touch-manipulation"
-                        onClick={(e) => handleMerchantClick(e, player)}
-                      >
-                        {player.merchantName}
-                      </button>
-                      <span className="text-xs text-muted-foreground"> • {player.seasonName}</span>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <button
+                          className="text-xs text-primary underline-offset-2 hover:underline touch-manipulation"
+                          onClick={(e) => handleMerchantClick(e, player)}
+                        >
+                          {player.merchantName}
+                        </button>
+                        <span className="text-xs text-muted-foreground">• {player.seasonName}</span>
+                      </div>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-bold text-amber-600">{player.points.toLocaleString()}</p>
@@ -191,7 +200,6 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
 
                   {/* Fan action bar — Like, Comment, Share only */}
                   <div className="flex items-center justify-around pt-1 border-t border-border/50">
-                    {/* Like */}
                     <button
                       className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg active:bg-red-50 dark:active:bg-red-950/30 transition-colors touch-manipulation"
                       onClick={() => handleFanAction(player, "like")}
@@ -201,7 +209,6 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                       <span className="text-xs text-red-400">{formatMobiAmount(getFeeForAction("like"))}</span>
                     </button>
 
-                    {/* Comment */}
                     <button
                       className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors touch-manipulation ${isCommenting ? "bg-blue-50 dark:bg-blue-950/30" : "active:bg-blue-50 dark:active:bg-blue-950/30"}`}
                       onClick={() => handleFanAction(player, "comment")}
@@ -211,7 +218,6 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
                       <span className="text-xs text-blue-400">{formatMobiAmount(getFeeForAction("comment"))}</span>
                     </button>
 
-                    {/* Share */}
                     <button
                       className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg active:bg-green-50 dark:active:bg-green-950/30 transition-colors touch-manipulation"
                       onClick={() => handleFanAction(player, "share")}

@@ -14,6 +14,7 @@ import { MediaGalleryViewer, type MediaItem } from "@/components/MediaGalleryVie
 import { CommentDialog } from "@/components/CommentDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveScoreboardDrawer";
+import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz/HighlightedWinnersCarousel";
 import { shareViaNative, copyToClipboard } from "@/lib/shareUtils";
 import { format } from "date-fns";
 
@@ -434,6 +435,11 @@ export default function MerchantHomePage() {
           </Collapsible>
         </section>
       )}
+
+      {/* Highlighted Winners */}
+      <section className="py-3">
+        <HighlightedWinnersCarousel />
+      </section>
 
       {/* Events & Calendar */}
       {calendarEvents.length > 0 && (
