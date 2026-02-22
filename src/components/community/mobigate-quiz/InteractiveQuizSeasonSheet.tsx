@@ -143,7 +143,7 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                         <div className="flex gap-1.5 flex-wrap">
                           {season.selectionProcesses.map((sp, idx) => (
                             <Badge key={idx} variant="outline" className="text-xs py-0.5 px-2">
-                              Round {sp.round}
+                              R{sp.round}: {formatLocalAmount(sp.entryFee, "NGN")}
                             </Badge>
                           ))}
                         </div>

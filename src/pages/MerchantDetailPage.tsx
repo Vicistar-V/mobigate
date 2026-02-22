@@ -242,8 +242,9 @@ export default function MerchantDetailPage() {
                     </div>
                     <div className="space-y-1">
                       {season.selectionProcesses.map((sp) => (
-                        <div key={sp.round} className="flex items-center text-xs bg-muted/10 rounded px-2 py-1.5">
+                        <div key={sp.round} className="flex items-center justify-between text-xs bg-muted/10 rounded px-2 py-1.5">
                           <span className="text-muted-foreground">Round {sp.round}</span>
+                          <span className="font-medium">{formatLocalAmount(sp.entryFee, "NGN")}</span>
                         </div>
                       ))}
                     </div>
