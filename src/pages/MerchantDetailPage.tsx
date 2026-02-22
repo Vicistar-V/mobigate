@@ -21,6 +21,7 @@ import {
   Play,
 } from "lucide-react";
 import { mockMerchants, mockSeasons, type QuizSeason } from "@/data/mobigateInteractiveQuizData";
+import { format } from "date-fns";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveScoreboardDrawer";
 import { InteractiveQuizPlayDialog } from "@/components/community/mobigate-quiz/InteractiveQuizPlayDialog";
@@ -174,18 +175,21 @@ export default function MerchantDetailPage() {
             <Card key={season.id} className="overflow-hidden border">
               <CardContent className="p-0">
                 {/* Season Header */}
-                <div className="p-3 flex items-center justify-between border-b bg-muted/10">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <h4 className="font-bold text-sm truncate">{season.name}</h4>
+                <div className="p-3 border-b bg-muted/10 space-y-1">
+                  <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+                    <h4 className="font-bold text-sm break-words">{season.name}</h4>
                     <Badge variant="outline" className={`text-xs shrink-0 ${getSeasonTypeColor(season.type)}`}>
-                      {season.type}
+                      {season.type} Season
                     </Badge>
+                    {season.isLive && (
+                      <Badge className="bg-red-500 text-white text-xs animate-pulse shrink-0">
+                        🔴 LIVE
+                      </Badge>
+                    )}
                   </div>
-                  {season.isLive && (
-                    <Badge className="bg-red-500 text-white text-xs animate-pulse shrink-0 ml-2">
-                      🔴 LIVE
-                    </Badge>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
+                  </p>
                 </div>
 
                 {/* Prize Breakdown */}

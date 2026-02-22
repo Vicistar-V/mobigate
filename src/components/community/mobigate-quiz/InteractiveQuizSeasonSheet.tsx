@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { format } from "date-fns";
 import { Zap, Users, Trophy, Radio, Gift, ArrowRight } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -76,10 +77,10 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                 >
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="text-base font-bold">{season.name}</h4>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <Badge variant="outline" className={`text-xs ${getSeasonTypeColor(season.type)}`}>{season.type}</Badge>
+                      <div className="space-y-1">
+                        <h4 className="text-base font-bold break-words">{season.name}</h4>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline" className={`text-xs ${getSeasonTypeColor(season.type)}`}>{season.type} Season</Badge>
                           {season.isLive && (
                             <Badge className="text-xs bg-red-500 text-white border-0 animate-pulse">
                               <Radio className="h-3 w-3 mr-1" /> LIVE
@@ -91,6 +92,9 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                             </Badge>
                           )}
                         </div>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
+                        </p>
                       </div>
                       <Badge variant="outline" className="text-xs">{season.status}</Badge>
                     </div>
