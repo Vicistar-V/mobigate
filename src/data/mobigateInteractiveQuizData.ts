@@ -258,8 +258,7 @@ export const mockSeasons: QuizSeason[] = [
     ],
     tvShowRounds: [
       { round: 1, entriesSelected: 50, entryFee: 2000, label: "1st TV Show" },
-      { round: 2, entriesSelected: 15, entryFee: 5000, label: "Semi-Final" },
-      { round: 3, entriesSelected: 3, entryFee: 0, label: "Grand Finale" },
+      { round: 2, entriesSelected: 3, entryFee: 0, label: "2nd TV Show / Grand Finale" },
     ],
   },
   {
@@ -283,8 +282,7 @@ export const mockSeasons: QuizSeason[] = [
     ],
     tvShowRounds: [
       { round: 1, entriesSelected: 50, entryFee: 5000, label: "1st TV Show" },
-      { round: 2, entriesSelected: 15, entryFee: 7500, label: "Semi-Final" },
-      { round: 3, entriesSelected: 3, entryFee: 0, label: "Grand Finale" },
+      { round: 2, entriesSelected: 3, entryFee: 0, label: "2nd TV Show / Grand Finale" },
     ],
   },
   {
@@ -306,8 +304,7 @@ export const mockSeasons: QuizSeason[] = [
     ],
     tvShowRounds: [
       { round: 1, entriesSelected: 50, entryFee: 2000, label: "1st TV Show" },
-      { round: 2, entriesSelected: 15, entryFee: 5000, label: "Semi-Final" },
-      { round: 3, entriesSelected: 3, entryFee: 0, label: "Grand Finale" },
+      { round: 2, entriesSelected: 3, entryFee: 0, label: "2nd TV Show / Grand Finale" },
     ],
   },
   {
@@ -331,8 +328,7 @@ export const mockSeasons: QuizSeason[] = [
     ],
     tvShowRounds: [
       { round: 1, entriesSelected: 40, entryFee: 5000, label: "1st TV Show" },
-      { round: 2, entriesSelected: 12, entryFee: 7500, label: "Semi-Final" },
-      { round: 3, entriesSelected: 3, entryFee: 0, label: "Grand Finale" },
+      { round: 2, entriesSelected: 3, entryFee: 0, label: "2nd TV Show / Grand Finale" },
     ],
   },
 ];
