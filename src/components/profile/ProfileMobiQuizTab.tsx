@@ -4,14 +4,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   Trophy, Star, TrendingUp, Gamepad2, Crown, ChevronRight,
-  Users, Zap, GraduationCap, UtensilsCrossed, ToggleLeft, Award, History, Play, BarChart3
+  Users, Zap, GraduationCap, UtensilsCrossed, ToggleLeft, Award, History, Play, BarChart3, Store
 } from "lucide-react";
 import { mobigatePlayerStats, mobigateWalletData } from "@/data/mobigateQuizData";
 import { quizGamesPlayedData, type QuizGameRecord } from "@/data/quizGamesPlayedData";
 import { mockMerchants } from "@/data/mobigateInteractiveQuizData";
 import { QuizGameDetailDrawer } from "@/components/mobigate/QuizGameDetailDrawer";
+import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz/HighlightedWinnersCarousel";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 const IS_CELEBRITY = true; // mock flag for demo
@@ -44,21 +46,27 @@ function groupByMode(games: QuizGameRecord[]) {
 export function ProfileMobiQuizTab() {
   const navigate = useNavigate();
   const [selectedGame, setSelectedGame] = useState<QuizGameRecord | null>(null);
+  const [showCelebrityPicker, setShowCelebrityPicker] = useState(false);
+  const [selectedCelebrityMerchant, setSelectedCelebrityMerchant] = useState<typeof mockMerchants[0] | null>(null);
 
   const stats = mobigatePlayerStats;
   const winRate = stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
   const modeBreakdown = groupByMode(quizGamesPlayedData);
   const recentGames = [...quizGamesPlayedData].sort((a, b) => new Date(b.datePlayed).getTime() - new Date(a.datePlayed).getTime()).slice(0, 5);
   const approvedMerchants = mockMerchants.filter((m) => m.applicationStatus === "approved").slice(0, 3);
+  // Mock: merchants where this user is a celebrity winner
+  const celebrityMerchants = mockMerchants.filter((m) => m.applicationStatus === "approved").slice(0, 2);
 
   return (
     <div className="space-y-4 pb-6">
       {/* Celebrity Badge */}
       {IS_CELEBRITY && (
         <div className="flex items-center justify-center">
-          <Badge className="bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-bold px-4 py-1.5 rounded-full text-sm shadow-lg gap-1.5">
-            <Crown className="h-4 w-4" /> Mobi Celebrity
-          </Badge>
+          <button onClick={() => setShowCelebrityPicker(true)} className="active:scale-[0.96] transition-transform touch-manipulation">
+            <Badge className="bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-bold px-4 py-1.5 rounded-full text-sm shadow-lg gap-1.5 cursor-pointer">
+              <Crown className="h-4 w-4" /> Mobi Celebrity
+            </Badge>
+          </button>
         </div>
       )}
 
@@ -174,6 +182,56 @@ export function ProfileMobiQuizTab() {
 
       {/* Game Detail Drawer */}
       <QuizGameDetailDrawer game={selectedGame} onClose={() => setSelectedGame(null)} />
+
+      {/* Celebrity Merchant Picker Drawer */}
+      <Drawer open={showCelebrityPicker} onOpenChange={setShowCelebrityPicker}>
+        <DrawerContent className="pb-6">
+          <DrawerHeader className="text-center pb-2">
+            <DrawerTitle className="flex items-center justify-center gap-2 text-base">
+              <Crown className="h-5 w-5 text-amber-500" /> Celebrity Quizzes
+            </DrawerTitle>
+            <p className="text-xs text-muted-foreground mt-1">Select a merchant quiz to view celebrity highlights</p>
+          </DrawerHeader>
+          <div className="px-4 space-y-2">
+            {celebrityMerchants.map((merchant) => (
+              <button
+                key={merchant.id}
+                onClick={() => {
+                  setSelectedCelebrityMerchant(merchant);
+                  setShowCelebrityPicker(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 active:scale-[0.97] transition-all touch-manipulation"
+              >
+                <Avatar className="h-10 w-10 border-2 border-amber-400/30 shrink-0">
+                  <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-xs font-bold">
+                    {merchant.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-left flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{merchant.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{merchant.category}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </button>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Celebrity Winners Carousel Drawer */}
+      <Drawer open={!!selectedCelebrityMerchant} onOpenChange={(open) => { if (!open) setSelectedCelebrityMerchant(null); }}>
+        <DrawerContent className="max-h-[85vh] pb-6">
+          <DrawerHeader className="text-center pb-2">
+            <DrawerTitle className="flex items-center justify-center gap-2 text-base">
+              <Trophy className="h-5 w-5 text-amber-500" /> {selectedCelebrityMerchant?.name}
+            </DrawerTitle>
+            <p className="text-xs text-muted-foreground mt-1">Highlighted celebrity winners</p>
+          </DrawerHeader>
+          <div className="px-4 overflow-y-auto">
+            <HighlightedWinnersCarousel />
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
