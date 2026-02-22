@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,6 +43,11 @@ export default function MerchantDetailPage() {
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<QuizSeason | null>(null);
   const [showPlay, setShowPlay] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSettings = () => {
+    settingsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const merchant = mockMerchants.find((m) => m.id === merchantId);
   const seasons = mockSeasons.filter(
@@ -106,33 +111,45 @@ export default function MerchantDetailPage() {
 
       {/* Scrollable Content */}
       <div className="px-4 py-4 space-y-4 pb-24">
-        {/* Merchant Info Card */}
-        <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl">
-          <Avatar className="h-14 w-14 border-2 border-primary/20 shrink-0">
-            <AvatarImage src={merchant.logo} />
-            <AvatarFallback className="bg-primary/10 text-primary font-bold">
-              {merchant.name.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center gap-1.5">
-              <h2 className="font-bold text-base">{merchant.name}</h2>
-              {merchant.isVerified && (
-                <BadgeCheck className="h-4.5 w-4.5 text-blue-500" />
-              )}
+        {/* Merchant Info Card - Restacked for mobile */}
+        <div className="p-4 bg-muted/30 rounded-xl space-y-3">
+          {/* Row 1: Avatar centered */}
+          <div className="flex flex-col items-center gap-1.5">
+            <Avatar className="h-20 w-20 border-2 border-primary/20">
+              <AvatarImage src={merchant.logo} />
+              <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+                {merchant.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1.5">
+                <h2 className="font-bold text-lg leading-tight">{merchant.name}</h2>
+                {merchant.isVerified && (
+                  <BadgeCheck className="h-5 w-5 text-blue-500 shrink-0" />
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">{merchant.category}</p>
+              <Badge variant="secondary" className="mt-1.5 text-xs">
+                Verified Merchant
+              </Badge>
             </div>
-            <p className="text-sm text-muted-foreground">{merchant.category}</p>
-            <Badge variant="secondary" className="mt-1 text-xs">
-              Verified Merchant
-            </Badge>
           </div>
+
+          {/* Row 2: Play Now CTA */}
+          <Button
+            className="w-full h-12 text-sm font-bold gap-2 touch-manipulation active:scale-[0.97] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl"
+            onClick={scrollToSettings}
+          >
+            <Play className="h-5 w-5" />
+            Play Now
+          </Button>
         </div>
 
         {/* Highlighted Winners Carousel */}
         <HighlightedWinnersCarousel />
 
         {/* Platform Settings */}
-        <div className="space-y-2">
+        <div ref={settingsRef} className="space-y-2 scroll-mt-20">
           <h3 className="text-sm font-semibold flex items-center gap-1.5">
             <Target className="h-4 w-4 text-primary" />
             Quiz Platform Settings
