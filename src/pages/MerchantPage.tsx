@@ -56,6 +56,7 @@ import {
   Shield,
 } from "lucide-react";
 import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
+import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz/HighlightedWinnersCarousel";
 import {
   mockMerchants,
   mockSeasons,
@@ -1788,6 +1789,9 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
 
   return (
     <div className="space-y-4">
+      {/* Highlighted Winners Carousel */}
+      <HighlightedWinnersCarousel />
+
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-2">
         <Card>
