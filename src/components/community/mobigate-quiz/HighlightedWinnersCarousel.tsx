@@ -120,7 +120,7 @@ export function HighlightedWinnersCarousel() {
                 </div>
 
                 {/* Row 2: Photo - rounded square */}
-                <div className="h-[72px] w-[72px] rounded-2xl overflow-hidden border-2 border-amber-300/40 shadow-md mb-2">
+                <div className="h-[82px] w-[82px] rounded-lg overflow-hidden border-2 border-amber-300/40 shadow-md mb-2">
                   <img
                     src={winner.playerAvatar}
                     alt={winner.playerName}
@@ -144,7 +144,7 @@ export function HighlightedWinnersCarousel() {
 
                 {/* Row 5: Fan button - full width */}
                 <button
-                  className={`w-full py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors touch-manipulation active:scale-[0.97] ${
+                  className={`w-full py-1 rounded-lg text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors touch-manipulation active:scale-[0.97] ${
                     isFanned
                       ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                       : "bg-gradient-to-r from-amber-500 to-orange-500 text-white active:from-amber-600 active:to-orange-600 shadow-sm"
