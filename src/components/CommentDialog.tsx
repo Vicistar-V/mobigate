@@ -92,9 +92,12 @@ export const CommentDialog = ({
         </DialogHeader>
 
         {/* Scrollable Comment Section */}
-        <ScrollArea className="flex-1 px-3 sm:px-6 py-4 sm:py-6">
+        <div 
+          className="flex-1 overflow-y-auto overscroll-contain px-3 sm:px-6 py-4 sm:py-6 touch-auto"
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           <CommentSection postId={post.id || "unknown"} />
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

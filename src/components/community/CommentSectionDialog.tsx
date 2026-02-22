@@ -339,7 +339,10 @@ export function CommentSectionDialog({
         </div>
 
         {/* Comments List */}
-        <ScrollArea className="flex-1 p-4 sm:px-6">
+        <div 
+          className="flex-1 overflow-y-auto overscroll-contain p-4 sm:px-6 touch-auto"
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           <div className="space-y-4">
             {comments.length > 0 ? (
               comments.map((comment) => renderComment(comment))
@@ -353,7 +356,7 @@ export function CommentSectionDialog({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -52,7 +52,10 @@ export const CommentSection = ({
   };
 
   return (
-    <div className={`space-y-3 sm:space-y-4 ${className}`}>
+    <div 
+      className={`space-y-3 sm:space-y-4 overscroll-contain ${className}`}
+      onTouchMove={(e) => e.stopPropagation()}
+    >
       {/* Header - Only show if showHeader is true */}
       {showHeader && (
         <>
