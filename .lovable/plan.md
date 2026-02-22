@@ -1,50 +1,73 @@
 
 
-# Fix Quiz Entry Flow: Route to Mobigate Quiz Hub Instead of Community Quiz
+# Replace Interactive Merchant Admin with User-Facing Merchant Page
 
-## The Problem
+## Overview
+Remove the entire admin system for Interactive Quiz Merchants and replace it with a beautiful, mobile-first user-facing **Merchant Page**. When users click "Merchant Page" from the sidebar, they'll see a list of approved merchants. Tapping a merchant reveals their quiz seasons, pricing, prizes, and game show details -- all read-only, no admin controls.
 
-When tracing the quiz entry from the sidebar, here is what currently happens:
+## What Gets Deleted
 
-1. **Sidebar** "Play Quiz Games" link navigates to `/mobi-quiz-games`
-2. The **MobiQuizGames page** renders game mode cards AND a "Start Playing" button
-3. Both the "Start Playing" button AND every game mode card click open `MobiQuizGameDialog`
-4. `MobiQuizGameDialog` is the **old Community Quiz dialog** -- it imports from `quizGameData.ts` (community quiz data), shows community quiz questions/rules, and plays the community quiz game
-5. The actual **Mobigate Quiz Hub** (`MobigateQuizHub.tsx`) with all 6 game modes (Group, Standard, Interactive, Food, Scholarship, Toggle) is never opened from this page
+1. **`src/components/mobigate/InteractiveMerchantAdmin.tsx`** (1024-line admin component) -- entirely removed
+2. **`src/pages/admin/quiz/InteractiveMerchantsPage.tsx`** -- entirely removed  
+3. **`src/components/mobigate/MerchantPlatformSettingsDrawer.tsx`** -- admin-only, removed
+4. **`src/components/mobigate/MerchantSelectionProcessDrawer.tsx`** -- admin-only, removed
+5. **`src/components/mobigate/MerchantQuestionBankDrawer.tsx`** -- admin-only, removed
 
-The same problem exists in `QuizSelectionSheet.tsx` -- when a user taps "Mobi Quiz" from within a community, it also opens `MobiQuizGameDialog` (old community quiz) instead of `MobigateQuizHub`.
+## What Gets Created
 
-## The Fix
+### New Page: `src/pages/MerchantPage.tsx`
+A mobile-optimized, user-facing page (not admin) that shows:
 
-### File 1: `src/pages/MobiQuizGames.tsx`
-- **Replace** the import of `MobiQuizGameDialog` with `MobigateQuizHub` from `src/components/community/mobigate-quiz/MobigateQuizHub.tsx`
-- Update the "Start Playing" button to open `MobigateQuizHub` instead
-- Update all game mode card `onClick` handlers: instead of opening one generic dialog, each card should open `MobigateQuizHub` (which lets the user select the specific mode from there)
-- Rename the state variable from `showQuizDialog` to `showQuizHub` for clarity
-- Replace `<MobiQuizGameDialog>` render at the bottom with `<MobigateQuizHub>`
+- **Header** with back navigation and title "Quiz Merchants"
+- **Merchant List** -- all approved/verified merchants displayed as rich cards:
+  - Merchant avatar, name, category, verified badge
+  - Number of active seasons, total participants
+  - Best season's total prize pool as a headline number
+- **Merchant Detail Drawer** -- tapping a merchant opens a bottom drawer showing:
+  - Merchant info card (name, category, verified status)
+  - Merchant settings summary (read-only): questions per pack, cost per question, win percentage threshold, qualifying points, bonus games info
+  - **Seasons list** -- each season card shows:
+    - Season name, type badge (Short/Medium/Complete), LIVE indicator
+    - Full prize breakdown (1st, 2nd, 3rd, consolation)
+    - Total prize pool
+    - Entry fee
+    - Selection process stages (rounds with entries and fees)
+    - TV Show rounds (1st Show, Semi-Final, Grand Finale)
+    - Participant count and current level progress bar
+  - **"Join Season" button** at the bottom to enter the play flow (opens existing `InteractiveQuizSeasonSheet` or `InteractiveQuizPlayDialog`)
+- **Live Scoreboard** button at the top (reuses existing `LiveScoreboardDrawer`)
 
-### File 2: `src/components/community/QuizSelectionSheet.tsx`
-- **Replace** the import of `MobiQuizGameDialog` with `MobigateQuizHub`
-- Change `mobiQuizOpen` state and its handler to open `MobigateQuizHub` instead
-- Replace `<MobiQuizGameDialog>` render with `<MobigateQuizHub>`
+### Design Principles (Mobile-First)
+- Full-width cards with generous padding (p-4)
+- All text minimum `text-xs`, primary content `text-sm` to `text-base`
+- Native scrolling (`overflow-y-auto touch-auto overscroll-contain`)
+- Touch-friendly tap targets (min 44px height)
+- Gradient prize sections with amber/gold theme
+- `max-h-[92vh]` drawer constraint
+- No horizontal overflow on 360px viewport
 
-This way both entry points (the MobiQuizGames page from sidebar AND the community quiz selection sheet) correctly route to the Mobigate Quiz Hub with all 6 game modes.
+## What Gets Updated
 
----
+### `src/App.tsx`
+- Remove `InteractiveMerchantsPage` import
+- Change route `/mobigate-admin/quiz/interactive/merchants` to render new `MerchantPage`
+
+### `src/components/AppSidebar.tsx`
+- Rename "Manage Merchant Quiz" to "Merchant Page"
+- Update URL to `/merchant-page` (new user-facing route)
+
+### `src/components/mobigate/QuizAdminDrawer.tsx`
+- Remove "Merchant Management" link from the interactive quiz section (it's no longer an admin function)
+
+### `src/pages/admin/MobigateAdminDashboard.tsx`
+- Update the "Merchants" card under Interactive Quiz to navigate to `/merchant-page` instead of the old admin route
 
 ## Technical Details
 
-### Changes Summary
-
-**`src/pages/MobiQuizGames.tsx`** (modify):
-- Line 8: Change import from `MobiQuizGameDialog` to `MobigateQuizHub` (from `@/components/community/mobigate-quiz/MobigateQuizHub`)
-- Line 73: Rename `showQuizDialog` to `showQuizHub`
-- Line 129, 195: Update all references from `setShowQuizDialog(true)` to `setShowQuizHub(true)`
-- Line 224: Replace `<MobiQuizGameDialog open={showQuizDialog} onOpenChange={setShowQuizDialog} />` with `<MobigateQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} />`
-
-**`src/components/community/QuizSelectionSheet.tsx`** (modify):
-- Line 5: Change import from `MobiQuizGameDialog` to `MobigateQuizHub` (from `./mobigate-quiz/MobigateQuizHub`)
-- Line 80: Replace `<MobiQuizGameDialog open={mobiQuizOpen} onOpenChange={setMobiQuizOpen} />` with `<MobigateQuizHub open={mobiQuizOpen} onOpenChange={setMobiQuizOpen} />`
-
-No new files needed. Only 2 files modified with import swaps.
+- The new `MerchantPage` uses the same `mockMerchants`, `mockSeasons` data from `mobigateInteractiveQuizData.ts`
+- Filters to show only `applicationStatus === "approved"` merchants
+- Reuses `formatLocalAmount` and `formatMobi` for currency display
+- Reuses `LiveScoreboardDrawer` for the live scoreboard feature
+- Connects to the existing play flow via `InteractiveQuizPlayDialog` when a user joins a season
+- All content is read-only -- no toggle, approve, suspend, wallet management, or question bank controls
 
