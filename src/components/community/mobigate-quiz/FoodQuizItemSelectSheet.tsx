@@ -4,7 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { mockGroceryItems, FOOD_QUIZ_STAKE_PERCENTAGE, GroceryItem } from "@/data/mobigateFoodQuizData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -50,7 +50,7 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
             <p className="text-xs text-muted-foreground">Select grocery items you want to win</p>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 max-h-[55vh] px-4">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
             <div className="space-y-4 pb-4">
               {categories.map(cat => (
                 <div key={cat}>
@@ -85,7 +85,7 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
                 </div>
               ))}
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Summary */}
           <div className="px-4 pb-4 pt-3 border-t space-y-3">
