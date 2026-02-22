@@ -17,6 +17,7 @@ import { ToggleQuizPlayDialog } from "./ToggleQuizPlayDialog";
 interface MobigateQuizHubProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  hideInteractive?: boolean;
 }
 
 const GAME_MODES = [
@@ -88,8 +89,9 @@ const GAME_MODES = [
   },
 ];
 
-export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
+export function MobigateQuizHub({ open, onOpenChange, hideInteractive = false }: MobigateQuizHubProps) {
   const [activeFlow, setActiveFlow] = useState<string | null>(null);
+  const filteredModes = hideInteractive ? GAME_MODES.filter(m => m.id !== "interactive") : GAME_MODES;
 
   const handleClose = () => {
     setActiveFlow(null);
@@ -157,7 +159,7 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
               {/* Game Mode Cards */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Select Game Mode</h3>
-                {GAME_MODES.map((mode) => {
+                {filteredModes.map((mode) => {
                   const Icon = mode.icon;
                   return (
                     <Card
