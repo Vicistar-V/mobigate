@@ -30,7 +30,7 @@ export function HighlightedWinnersCarousel() {
       if (el.scrollLeft >= maxScroll - 4) {
         el.scrollTo({ left: 0, behavior: "smooth" });
       } else {
-        el.scrollBy({ left: 96, behavior: "smooth" });
+        el.scrollBy({ left: 140, behavior: "smooth" });
       }
     }, 3000);
 
@@ -54,10 +54,10 @@ export function HighlightedWinnersCarousel() {
 
   const getPositionIcon = (position: string) => {
     switch (position) {
-      case "1st": return <Crown className="h-3.5 w-3.5 text-amber-500" />;
-      case "2nd": return <Medal className="h-3.5 w-3.5 text-slate-400" />;
-      case "3rd": return <Medal className="h-3.5 w-3.5 text-amber-700" />;
-      default: return <Trophy className="h-3.5 w-3.5 text-purple-500" />;
+      case "1st": return <Crown className="h-4 w-4 text-amber-500" />;
+      case "2nd": return <Medal className="h-4 w-4 text-slate-400" />;
+      case "3rd": return <Medal className="h-4 w-4 text-amber-700" />;
+      default: return <Trophy className="h-4 w-4 text-purple-500" />;
     }
   };
 
@@ -76,42 +76,45 @@ export function HighlightedWinnersCarousel() {
 
   return (
     <>
-      <div className="px-4 pb-2">
-        <div className="flex items-center gap-1.5 mb-2">
-          <Star className="h-3.5 w-3.5 text-amber-500" fill="currentColor" />
-          <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Highlighted Winners</span>
+      <div className="px-4 pb-3">
+        <div className="flex items-center gap-2 mb-3">
+          <Star className="h-4 w-4 text-amber-500" fill="currentColor" />
+          <span className="text-sm font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Highlighted Winners</span>
         </div>
         <div
           ref={scrollRef}
-          className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory touch-pan-x pb-2 -mx-1 px-1"
+          className="flex gap-3 overflow-x-auto snap-x snap-mandatory touch-pan-x pb-2 -mx-1 px-1"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
           onTouchStart={() => setIsTouching(true)}
           onTouchEnd={() => setTimeout(() => setIsTouching(false), 5000)}
         >
           {highlightedWinners.map((winner) => {
-            const initials = winner.playerName.split(" ").map(n => n[0]).join("");
             const isFanned = fannedWinners.has(winner.id);
 
             return (
               <div
                 key={winner.id}
-                className="snap-center shrink-0 w-[92px] rounded-xl border bg-gradient-to-b from-amber-50/80 to-background dark:from-amber-950/20 dark:to-background border-amber-200/50 dark:border-amber-800/30 p-2 flex flex-col items-center gap-1 cursor-pointer active:scale-95 transition-transform touch-manipulation"
+                className="snap-center shrink-0 w-[130px] rounded-2xl border bg-gradient-to-b from-amber-50/80 to-background dark:from-amber-950/20 dark:to-background border-amber-200/50 dark:border-amber-800/30 p-3 flex flex-col items-center gap-2 cursor-pointer active:scale-95 transition-transform touch-manipulation"
                 onClick={() => handleCardClick(winner)}
               >
                 {/* Position icon */}
                 {getPositionIcon(winner.position)}
 
-                {/* Avatar */}
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/30 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-300 border border-amber-300/40">
-                  {initials}
+                {/* Photo - rounded square */}
+                <div className="h-16 w-16 rounded-xl overflow-hidden border-2 border-amber-300/40 shadow-sm">
+                  <img
+                    src={winner.playerAvatar}
+                    alt={winner.playerName}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
 
                 {/* Name */}
-                <p className="text-[11px] font-semibold text-center leading-tight truncate w-full">{winner.playerName.split(" ")[0]}</p>
+                <p className="text-sm font-bold text-center leading-tight truncate w-full">{winner.playerName.split(" ")[0]}</p>
 
                 {/* Tier + Fans */}
-                <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                  <Shield className="h-2.5 w-2.5 text-blue-500" />
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Shield className="h-3 w-3 text-blue-500" />
                   <span className="font-bold">T{winner.tier}</span>
                   <span>·</span>
                   <span>{formatCompact(winner.fans)} fans</span>
@@ -119,7 +122,7 @@ export function HighlightedWinnersCarousel() {
 
                 {/* Fan button */}
                 <button
-                  className={`w-full py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-0.5 transition-colors touch-manipulation ${
+                  className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors touch-manipulation ${
                     isFanned
                       ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
                       : "bg-gradient-to-r from-amber-500 to-orange-500 text-white active:from-amber-600 active:to-orange-600"
@@ -127,7 +130,7 @@ export function HighlightedWinnersCarousel() {
                   disabled={isFanned}
                   onClick={(e) => handleFan(e, winner)}
                 >
-                  <Star className="h-3 w-3" fill={isFanned ? "currentColor" : "none"} />
+                  <Star className="h-3.5 w-3.5" fill={isFanned ? "currentColor" : "none"} />
                   {isFanned ? "Fanned" : "Fan M200"}
                 </button>
               </div>
