@@ -1904,55 +1904,32 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                       <p className="text-xs text-muted-foreground">{format(new Date(winner.completionDate), "MMM dd, yyyy")}</p>
                     </div>
 
-                    {/* Row 3: Tier + Fans + Followers + Highlight + Share */}
-                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 bg-blue-500/10 text-blue-700 border-blue-500/30">
-                        <Shield className="h-2.5 w-2.5" /> T{winner.tier}
+                    {/* Row 3: Tier + Fans + Followers + Highlight */}
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <Badge variant="outline" className="text-xs px-1.5 py-0 gap-0.5 bg-blue-500/10 text-blue-700 border-blue-500/30">
+                        <Shield className="h-3 w-3" /> T{winner.tier}
                       </Badge>
-                      <span className="text-[10px] text-muted-foreground">{winner.fans >= 1000 ? `${(winner.fans/1000).toFixed(1)}K` : winner.fans} fans</span>
-                      <span className="text-[10px] text-muted-foreground">{winner.followers >= 1000 ? `${(winner.followers/1000).toFixed(1)}K` : winner.followers} flw</span>
+                      <span className="text-xs text-muted-foreground">{winner.fans >= 1000 ? `${(winner.fans/1000).toFixed(1)}K` : winner.fans} fans</span>
+                      <span className="text-xs text-muted-foreground">{winner.followers >= 1000 ? `${(winner.followers/1000).toFixed(1)}K` : winner.followers} followers</span>
 
-                      <div className="ml-auto flex items-center gap-1.5">
-                        {/* Highlight Button */}
-                        <button
-                          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border active:scale-95 transition-transform touch-manipulation ${
-                            highlightedWinners.has(winner.id)
-                              ? "bg-amber-500/15 text-amber-700 border-amber-500/40"
-                              : "bg-muted/50 text-muted-foreground border-border"
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (highlightedWinners.has(winner.id)) {
-                              toggleHighlight(winner.id);
-                            } else {
-                              setHighlightConfirmWinner(winner);
-                            }
-                          }}
-                        >
-                          <Star className={`h-3 w-3 ${highlightedWinners.has(winner.id) ? "fill-amber-500 text-amber-500" : ""}`} />
-                          {highlightedWinners.has(winner.id) ? "Highlighted" : "Highlight"}
-                        </button>
-
-                        {/* Share Button */}
-                        <button
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border bg-muted/50 text-muted-foreground border-border active:scale-95 transition-transform touch-manipulation"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const url = `${window.location.origin}/profile/${winner.id}`;
-                            if (navigator.share) {
-                              try {
-                                await navigator.share({ title: `${winner.playerName} - Quiz Winner`, url });
-                              } catch {}
-                            } else {
-                              navigator.clipboard.writeText(url);
-                              toast({ title: "Link copied!", description: "Winner profile link copied" });
-                            }
-                          }}
-                        >
-                          <Share2 className="h-3 w-3" />
-                          Share
-                        </button>
-                      </div>
+                      <button
+                        className={`ml-auto flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border active:scale-95 transition-transform touch-manipulation ${
+                          highlightedWinners.has(winner.id)
+                            ? "bg-amber-500/15 text-amber-700 border-amber-500/40"
+                            : "bg-muted/50 text-muted-foreground border-border"
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (highlightedWinners.has(winner.id)) {
+                            toggleHighlight(winner.id);
+                          } else {
+                            setHighlightConfirmWinner(winner);
+                          }
+                        }}
+                      >
+                        <Star className={`h-3 w-3 ${highlightedWinners.has(winner.id) ? "fill-amber-500 text-amber-500" : ""}`} />
+                        {highlightedWinners.has(winner.id) ? "Highlighted" : "Highlight"}
+                      </button>
                     </div>
                   </div>
                 ))}
