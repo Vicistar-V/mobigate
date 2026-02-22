@@ -114,16 +114,16 @@ export function MerchantEligibilityCard({ className }: MerchantEligibilityCardPr
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {allMet ? (
-            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-[10px] gap-1">
+            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-xs gap-1">
               <CheckCircle2 className="h-3 w-3" /> All Requirements Met
             </Badge>
           ) : (
-            <Badge variant="outline" className="border-amber-400/60 text-amber-700 dark:text-amber-400 text-[10px] gap-1">
+            <Badge variant="outline" className="border-amber-400/60 text-amber-700 dark:text-amber-400 text-xs gap-1">
               <Clock className="h-3 w-3" /> {metCount}/{items.length} Met
             </Badge>
           )}
         </div>
-        <p className="text-[10px] text-muted-foreground">Auto-verified by system</p>
+        <p className="text-xs text-muted-foreground">Auto-verified by system</p>
       </div>
 
       {/* Items */}
@@ -131,7 +131,7 @@ export function MerchantEligibilityCard({ className }: MerchantEligibilityCardPr
         {items.map((item, i) => (
           <div
             key={i}
-            className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-xs ${
+            className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-sm ${
               item.met
                 ? "bg-emerald-50/40 dark:bg-emerald-950/10 border-emerald-200/50 dark:border-emerald-800/30"
                 : "bg-destructive/5 border-destructive/20"
@@ -147,17 +147,17 @@ export function MerchantEligibilityCard({ className }: MerchantEligibilityCardPr
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <item.icon className="h-3 w-3 text-muted-foreground shrink-0" />
-                <p className="font-semibold text-[11px] truncate">{item.label}</p>
+                <p className="font-semibold text-xs truncate">{item.label}</p>
               </div>
-              <p className="text-[10px] text-muted-foreground leading-relaxed">{item.description}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-[10px]">
+                <span className="text-xs">
                   <span className="text-muted-foreground">You: </span>
                   <span className={`font-semibold ${item.met ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"}`}>
                     {item.current}
                   </span>
                 </span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Req: <span className="font-medium">{item.required}</span>
                 </span>
               </div>
@@ -170,7 +170,7 @@ export function MerchantEligibilityCard({ className }: MerchantEligibilityCardPr
       <div className="mt-3 p-2.5 rounded-lg bg-muted/40 border border-border/50">
         <div className="flex items-start gap-2">
           <Store className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-          <div className="text-[10px] text-muted-foreground leading-relaxed space-y-1">
+          <div className="text-xs text-muted-foreground leading-relaxed space-y-1">
             <p>Only Mobi-Merchants can transact directly with the Mobigate central system.</p>
             <p>Purchased Vouchers can be credited to wallet, sent as e-PIN, or gifted to other users.</p>
           </div>
