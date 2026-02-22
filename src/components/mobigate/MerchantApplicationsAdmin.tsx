@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle, Clock, Store, User, Building2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CheckCircle, XCircle, Clock, Store, User, Building2, ChevronDown, Globe, Phone, Mail, Landmark } from "lucide-react";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,10 +12,22 @@ interface MockApplication {
   id: string;
   applicantName: string;
   type: "individual" | "corporate";
-  businessName?: string;
-  regNumber?: string;
+  storeName: string;
+  merchantCode: string;
+  gameType: string;
+  businessProfile?: string;
+  dba?: string;
+  registeredOffice?: string;
+  companyRegNumber?: string;
+  regAuthority?: string;
+  countryOfReg?: string;
+  tin?: string;
+  director1?: string;
+  director2?: string;
   phone: string;
   email: string;
+  website?: string;
+  bankName?: string;
   submittedDate: string;
   feePaid: number;
   eligibility: { label: string; met: boolean }[];
@@ -25,8 +38,13 @@ const mockApplications: MockApplication[] = [
     id: "MERCH-2026-001",
     applicantName: "Adewale Johnson",
     type: "individual",
+    storeName: "AdewaleStore",
+    merchantCode: "54321",
+    gameType: "Single-Code",
+    dba: "AJ Ventures",
     phone: "+234 812 345 6789",
     email: "adewale.johnson@email.com",
+    bankName: "First Bank",
     submittedDate: "2026-02-20",
     feePaid: 50000,
     eligibility: [
@@ -41,10 +59,22 @@ const mockApplications: MockApplication[] = [
     id: "MERCH-2026-002",
     applicantName: "Ngozi Okafor",
     type: "corporate",
-    businessName: "Zenith Foods Nigeria Ltd",
-    regNumber: "RC-789012",
+    storeName: "ZenithFoods",
+    merchantCode: "77890",
+    gameType: "Multi-Code",
+    businessProfile: "Food distribution and retail",
+    dba: "Zenith Foods",
+    registeredOffice: "12 Allen Ave, Ikeja, Lagos",
+    companyRegNumber: "RC-789012",
+    regAuthority: "CAC",
+    countryOfReg: "Nigeria",
+    tin: "TIN-98765432",
+    director1: "Ngozi Okafor",
+    director2: "Emeka Okafor",
     phone: "+234 803 456 7890",
     email: "ngozi@zenithfoods.ng",
+    website: "https://zenithfoods.ng",
+    bankName: "GTBank",
     submittedDate: "2026-02-19",
     feePaid: 50000,
     eligibility: [
@@ -59,8 +89,12 @@ const mockApplications: MockApplication[] = [
     id: "MERCH-2026-003",
     applicantName: "Chidi Eze",
     type: "individual",
+    storeName: "ChidiMart",
+    merchantCode: "22345",
+    gameType: "Single-Code",
     phone: "+234 905 678 1234",
     email: "chidi.eze@email.com",
+    bankName: "UBA",
     submittedDate: "2026-02-18",
     feePaid: 50000,
     eligibility: [
@@ -75,10 +109,17 @@ const mockApplications: MockApplication[] = [
     id: "MERCH-2026-004",
     applicantName: "Fatima Bello",
     type: "corporate",
-    businessName: "AutoParts Express",
-    regNumber: "RC-345678",
+    storeName: "AutoPartsNG",
+    merchantCode: "88001",
+    gameType: "Multi-Code",
+    businessProfile: "Automobile parts retail",
+    companyRegNumber: "RC-345678",
+    regAuthority: "CAC",
+    countryOfReg: "Nigeria",
+    director1: "Fatima Bello",
     phone: "+234 816 789 0123",
     email: "fatima@autoparts.ng",
+    bankName: "Access Bank",
     submittedDate: "2026-02-17",
     feePaid: 50000,
     eligibility: [
@@ -100,6 +141,7 @@ export function MerchantApplicationsAdmin() {
   );
   const [decliningId, setDecliningId] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const counts = {
     pending: Object.values(statuses).filter((s) => s === "pending").length,
@@ -123,6 +165,16 @@ export function MerchantApplicationsAdmin() {
     setDecliningId(null);
     setDeclineReason("");
     toast({ title: "Application Declined", description: `${name}'s merchant application has been declined.` });
+  };
+
+  const DetailRow = ({ label, value }: { label: string; value?: string }) => {
+    if (!value) return null;
+    return (
+      <div className="flex justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium text-right max-w-[55%] truncate">{value}</span>
+      </div>
+    );
   };
 
   return (
@@ -155,6 +207,8 @@ export function MerchantApplicationsAdmin() {
       {/* Applications */}
       {mockApplications.map((app) => {
         const status = statuses[app.id];
+        const isExpanded = expandedId === app.id;
+
         return (
           <Card key={app.id} className={status !== "pending" ? "opacity-60" : ""}>
             <CardContent className="p-4 space-y-3">
@@ -166,7 +220,7 @@ export function MerchantApplicationsAdmin() {
                   </div>
                   <div>
                     <p className="font-semibold text-sm">{app.applicantName}</p>
-                    {app.businessName && <p className="text-xs text-muted-foreground">{app.businessName}</p>}
+                    <p className="text-[11px] text-muted-foreground font-mono">{app.storeName} • {app.merchantCode}</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -181,27 +235,65 @@ export function MerchantApplicationsAdmin() {
                 </div>
               </div>
 
-              {/* Details */}
+              {/* Quick details */}
               <div className="bg-muted/30 rounded-lg p-2.5 space-y-1.5 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Reference</span>
-                  <span className="font-mono text-[11px]">{app.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Submitted</span>
-                  <span>{app.submittedDate}</span>
-                </div>
-                <div className="flex justify-between">
+                <DetailRow label="Reference" value={app.id} />
+                <DetailRow label="Submitted" value={app.submittedDate} />
+                <DetailRow label="Game Type" value={app.gameType} />
+                <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">Fee Paid</span>
-                  <span className="font-medium text-primary">{formatMobi(app.feePaid)} <span className="text-muted-foreground">(≈ {formatLocalAmount(app.feePaid, "NGN")})</span></span>
+                  <span className="font-medium text-primary">{formatMobi(app.feePaid)}</span>
                 </div>
-                {app.regNumber && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Reg. No.</span>
-                    <span>{app.regNumber}</span>
-                  </div>
-                )}
               </div>
+
+              {/* Expandable full details */}
+              <Collapsible open={isExpanded} onOpenChange={() => setExpandedId(isExpanded ? null : app.id)}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center gap-1 text-[11px] text-primary font-medium w-full">
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                    {isExpanded ? "Hide" : "View"} Full Application
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-2 space-y-3">
+                    {/* Business Info */}
+                    {(app.businessProfile || app.dba || app.registeredOffice || app.companyRegNumber) && (
+                      <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                          <Store className="h-3 w-3" /> Business Info
+                        </p>
+                        <DetailRow label="Profile" value={app.businessProfile} />
+                        <DetailRow label="DBA" value={app.dba} />
+                        <DetailRow label="Registered Office" value={app.registeredOffice} />
+                        <DetailRow label="Reg. Number" value={app.companyRegNumber} />
+                        <DetailRow label="Reg. Authority" value={app.regAuthority} />
+                        <DetailRow label="Country" value={app.countryOfReg} />
+                        <DetailRow label="TIN" value={app.tin} />
+                      </div>
+                    )}
+
+                    {/* Directors */}
+                    {(app.director1 || app.director2) && (
+                      <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Principal Officers</p>
+                        <DetailRow label="Director 1" value={app.director1} />
+                        <DetailRow label="Director 2" value={app.director2} />
+                      </div>
+                    )}
+
+                    {/* Contact & Banking */}
+                    <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                        <Mail className="h-3 w-3" /> Contact & Banking
+                      </p>
+                      <DetailRow label="Email" value={app.email} />
+                      <DetailRow label="Phone" value={app.phone} />
+                      <DetailRow label="Website" value={app.website} />
+                      <DetailRow label="Bank" value={app.bankName} />
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
               {/* Eligibility */}
               <div className="space-y-1.5">
@@ -222,14 +314,12 @@ export function MerchantApplicationsAdmin() {
 
               {/* Decline reason input */}
               {decliningId === app.id && status === "pending" && (
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Reason for declining (optional)"
-                    value={declineReason}
-                    onChange={(e) => setDeclineReason(e.target.value)}
-                    className="text-xs h-8"
-                  />
-                </div>
+                <Input
+                  placeholder="Reason for declining (optional)"
+                  value={declineReason}
+                  onChange={(e) => setDeclineReason(e.target.value)}
+                  className="text-xs h-8"
+                />
               )}
 
               {/* Actions */}
