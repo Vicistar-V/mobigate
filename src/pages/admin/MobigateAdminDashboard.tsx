@@ -21,6 +21,10 @@ import {
   Shield,
   Trophy,
   Megaphone,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Store,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
@@ -30,6 +34,48 @@ import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
 // MobigateQuizManagement moved to /mobigate-admin/quiz
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
+import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+
+// Mock waiver requests from merchants
+const mockWaiverRequests = [
+  {
+    id: "w1",
+    merchantName: "Zenith Foods Nigeria",
+    merchantLogo: "🍜",
+    seasonName: "Season 3 - Grand Prize",
+    totalPrizes: 5000000,
+    walletBalance: 2800000,
+    requiredBalance: 3500000,
+    waiverContext: "Sponsorship funds from MTN arriving next week. Already signed MOU.",
+    submittedDate: "2026-02-20",
+    waiverFee: 50000,
+  },
+  {
+    id: "w2",
+    merchantName: "AutoParts Express",
+    merchantLogo: "🔧",
+    seasonName: "Season 1 - Launch",
+    totalPrizes: 2000000,
+    walletBalance: 900000,
+    requiredBalance: 1400000,
+    waiverContext: "",
+    submittedDate: "2026-02-19",
+    waiverFee: 50000,
+  },
+  {
+    id: "w3",
+    merchantName: "FashionHub Lagos",
+    merchantLogo: "👗",
+    seasonName: "Season 2 - Valentine Special",
+    totalPrizes: 3500000,
+    walletBalance: 2100000,
+    requiredBalance: 2450000,
+    waiverContext: "Running a special Valentine promo. Balance will be topped up by Feb 25th from sales revenue.",
+    submittedDate: "2026-02-18",
+    waiverFee: 50000,
+  },
+];
 
 // Mock platform stats
 const platformStats = {
@@ -62,7 +108,21 @@ const topCommunities = [
 
 export default function MobigateAdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [waiverStatuses, setWaiverStatuses] = useState<Record<string, "pending" | "approved" | "rejected">>(
+    Object.fromEntries(mockWaiverRequests.map(w => [w.id, "pending"]))
+  );
+  const { toast } = useToast();
   const navigate = useNavigate();
+
+  const pendingCount = Object.values(waiverStatuses).filter(s => s === "pending").length;
+
+  const handleWaiverAction = (waiverId: string, action: "approved" | "rejected", merchantName: string) => {
+    setWaiverStatuses(prev => ({ ...prev, [waiverId]: action }));
+    toast({
+      title: action === "approved" ? "Waiver Approved" : "Waiver Rejected",
+      description: `${merchantName}'s waiver request has been ${action}.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -439,6 +499,125 @@ export default function MobigateAdminDashboard() {
           <TabsContent value="quiz" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
               <div className="space-y-4 pb-6">
+                {/* Merchant Waiver Requests */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Store className="h-5 w-5 text-amber-500" />
+                        Merchant Waivers
+                      </CardTitle>
+                      {pendingCount > 0 && (
+                        <Badge className="bg-amber-500 text-white">
+                          {pendingCount} pending
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {mockWaiverRequests.map(waiver => {
+                      const status = waiverStatuses[waiver.id];
+                      const shortfall = waiver.requiredBalance - waiver.walletBalance;
+
+                      return (
+                        <div
+                          key={waiver.id}
+                          className={`p-3 rounded-lg border space-y-2.5 ${
+                            status === "approved"
+                              ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800"
+                              : status === "rejected"
+                              ? "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-800 opacity-70"
+                              : "bg-muted/30 border-border"
+                          }`}
+                        >
+                          {/* Merchant + Status */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{waiver.merchantLogo}</span>
+                              <div>
+                                <p className={`font-semibold text-sm ${status === "rejected" ? "line-through text-muted-foreground" : ""}`}>
+                                  {waiver.merchantName}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{waiver.seasonName}</p>
+                              </div>
+                            </div>
+                            {status !== "pending" && (
+                              <Badge
+                                variant={status === "approved" ? "default" : "destructive"}
+                                className="text-xs"
+                              >
+                                {status === "approved" ? (
+                                  <><CheckCircle className="h-3 w-3 mr-1" />Approved</>
+                                ) : (
+                                  <><XCircle className="h-3 w-3 mr-1" />Rejected</>
+                                )}
+                              </Badge>
+                            )}
+                            {status === "pending" && (
+                              <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                                <Clock className="h-3 w-3 mr-1" />Pending
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Financial Details */}
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="p-1.5 rounded bg-background">
+                              <p className="text-[10px] text-muted-foreground">Prize Pool</p>
+                              <p className="text-xs font-bold">{formatMobi(waiver.totalPrizes)}</p>
+                            </div>
+                            <div className="p-1.5 rounded bg-background">
+                              <p className="text-[10px] text-muted-foreground">Wallet</p>
+                              <p className="text-xs font-bold text-amber-600">{formatMobi(waiver.walletBalance)}</p>
+                            </div>
+                            <div className="p-1.5 rounded bg-background">
+                              <p className="text-[10px] text-muted-foreground">Shortfall</p>
+                              <p className="text-xs font-bold text-red-500">{formatMobi(shortfall)}</p>
+                            </div>
+                          </div>
+
+                          {/* Context message */}
+                          {waiver.waiverContext && (
+                            <div className="flex items-start gap-2 p-2 bg-background rounded text-xs">
+                              <AlertCircle className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+                              <p className="text-muted-foreground italic">"{waiver.waiverContext}"</p>
+                            </div>
+                          )}
+
+                          {/* Date + Fee */}
+                          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                            <span>Submitted: {waiver.submittedDate}</span>
+                            <span>Fee paid: {formatMobi(waiver.waiverFee)}</span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          {status === "pending" && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                className="flex-1 h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                onClick={() => handleWaiverAction(waiver.id, "approved", waiver.merchantName)}
+                              >
+                                <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="flex-1 h-8 text-xs"
+                                onClick={() => handleWaiverAction(waiver.id, "rejected", waiver.merchantName)}
+                              >
+                                <XCircle className="h-3.5 w-3.5 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </CardContent>
+                </Card>
+
                 {/* Quiz type cards */}
                 {[
                   { type: "group", label: "Group Quiz", icon: "👥", desc: "Team-based quiz competitions", color: "from-blue-500/10 to-blue-500/5" },
