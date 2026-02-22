@@ -33,3 +33,32 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     return false;
   }
 };
+
+export const shareViaEmail = (subject: string, body: string): void => {
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
+
+export const shareViaSMS = (body: string): void => {
+  // Use ?& for cross-platform compatibility (iOS uses & Android uses ?)
+  window.location.href = `sms:?&body=${encodeURIComponent(body)}`;
+};
+
+export const shareViaNative = async (title: string, text: string, url: string): Promise<boolean> => {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url });
+      return true;
+    } catch (err) {
+      // User cancelled or error
+      return false;
+    }
+  }
+  return false;
+};
+
+export const shareToInstagram = async (url: string): Promise<boolean> => {
+  // Instagram doesn't support direct web sharing, so copy link and open Instagram
+  const copied = await copyToClipboard(url);
+  window.open('https://www.instagram.com/', '_blank');
+  return copied;
+};

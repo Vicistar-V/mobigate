@@ -74,6 +74,10 @@ import {
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { format, addMonths, addWeeks, addDays, addHours } from "date-fns";
+import { shareToFacebook, shareToTwitter, shareToWhatsApp, shareViaEmail, shareViaSMS, shareViaNative, shareToInstagram, copyToClipboard } from "@/lib/shareUtils";
+import { useFriendsList } from "@/hooks/useWindowData";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Simulate "my merchant" = first approved merchant
 const myMerchant = mockMerchants.find((m) => m.applicationStatus === "approved")!;
@@ -252,6 +256,23 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
   const [extensionWeeks, setExtensionWeeks] = useState(2);
   const [extensionReason, setExtensionReason] = useState("");
   const [boostSeasonId, setBoostSeasonId] = useState<string | null>(null);
+  const [boostStep, setBoostStep] = useState<'menu' | 'boost-confirm' | 'friends-picker' | 'store-form' | 'social-picker' | null>('menu');
+  const [boostedSeasons, setBoostedSeasons] = useState<string[]>([]);
+  const [storeListedSeasons, setStoreListedSeasons] = useState<string[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+  const [boostDuration, setBoostDuration] = useState(7);
+  const [storePromoMessage, setStorePromoMessage] = useState("");
+  const friendsData = useFriendsList();
+  const mockFriends = friendsData?.length ? friendsData : [
+    { id: "f1", name: "Adebayo Johnson", avatar: "/placeholder.svg" },
+    { id: "f2", name: "Chioma Okwu", avatar: "/placeholder.svg" },
+    { id: "f3", name: "Emeka Obi", avatar: "/placeholder.svg" },
+    { id: "f4", name: "Fatima Bello", avatar: "/placeholder.svg" },
+    { id: "f5", name: "Grace Adekunle", avatar: "/placeholder.svg" },
+    { id: "f6", name: "Hassan Musa", avatar: "/placeholder.svg" },
+    { id: "f7", name: "Ifeoma Nwosu", avatar: "/placeholder.svg" },
+    { id: "f8", name: "James Okoro", avatar: "/placeholder.svg" },
+  ];
   // Create form state
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<"Short" | "Medium" | "Complete">("Short");
@@ -690,6 +711,12 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                     {season.isLive && (
                       <Badge className="bg-red-500 text-white text-xs animate-pulse shrink-0">🔴 LIVE</Badge>
                     )}
+                    {boostedSeasons.includes(season.id) && (
+                      <Badge className="bg-primary/15 text-primary text-xs shrink-0">🚀 Boosted</Badge>
+                    )}
+                    {storeListedSeasons.includes(season.id) && (
+                      <Badge className="bg-emerald-500/15 text-emerald-700 text-xs shrink-0">🏪 On Store</Badge>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
@@ -855,7 +882,7 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                         <CalendarPlus className="h-3 w-3" /> Extend
                       </Button>
                     )}
-                    <Button size="sm" variant="default" className="h-9 text-xs gap-1 flex-1 bg-gradient-to-r from-primary to-primary/80 touch-manipulation active:scale-[0.97]" onClick={() => setBoostSeasonId(season.id)}>
+                    <Button size="sm" variant="default" className="h-9 text-xs gap-1 flex-1 bg-gradient-to-r from-primary to-primary/80 touch-manipulation active:scale-[0.97]" onClick={() => { setBoostSeasonId(season.id); setBoostStep('menu'); setSelectedFriends([]); setStorePromoMessage(""); }}>
                       <Megaphone className="h-3 w-3" /> Boost Show
                     </Button>
                     <Button size="sm" variant="destructive" className="h-9 text-xs gap-1 touch-manipulation active:scale-[0.97]" onClick={() => deleteSeason(season.id)}>
@@ -864,126 +891,270 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                   </div>
 
                   {/* Boost Show Drawer */}
-                  {boostSeasonId === season.id && (
+                  {boostSeasonId === season.id && (() => {
+                    const shareUrl = `${window.location.origin}/quiz-season/${season.id}`;
+                    const shareText = `Join "${season.name}" on Mobigate! Play quizzes and win up to ${formatLocalAmount(season.firstPrize, "NGN")} in prizes. 🏆`;
+                    const emailSubject = `Join ${season.name} on Mobigate!`;
+                    const emailBody = `Hey!\n\nI wanted to share this amazing quiz season with you:\n\n🎯 ${season.name}\n💰 Win up to ${formatLocalAmount(season.firstPrize, "NGN")}\n🏆 Total Prize Pool: ${formatLocalAmount(season.totalWinningPrizes, "NGN")}\n\nJoin now: ${shareUrl}\n\nSee you there!`;
+                    const smsBody = `${shareText}\n\nJoin: ${shareUrl}`;
+
+                    return (
                     <div className="border-t bg-muted/10">
                       <div className="p-3 space-y-3">
                         <div className="flex items-center justify-between">
                           <h4 className="text-sm font-bold flex items-center gap-2">
                             <Megaphone className="h-4 w-4 text-primary" />
-                            Boost Show
+                            {boostStep === 'menu' && 'Boost Show'}
+                            {boostStep === 'boost-confirm' && 'Boost on Mobigate'}
+                            {boostStep === 'friends-picker' && 'Share with Friends'}
+                            {boostStep === 'store-form' && 'List on Mobi-Store'}
+                            {boostStep === 'social-picker' && 'Share on Social Media'}
                           </h4>
-                          <button onClick={() => setBoostSeasonId(null)} className="text-muted-foreground touch-manipulation active:scale-[0.95]">
-                            <X className="h-4 w-4" />
+                          <button onClick={() => { if (boostStep !== 'menu') { setBoostStep('menu'); } else { setBoostSeasonId(null); } }} className="text-muted-foreground touch-manipulation active:scale-[0.95]">
+                            {boostStep !== 'menu' ? <ArrowLeft className="h-4 w-4" /> : <X className="h-4 w-4" />}
                           </button>
                         </div>
-                        <p className="text-xs text-muted-foreground">Promote "{season.name}" to reach more participants</p>
 
-                        <div className="space-y-2">
-                          {/* Boost on Mobigate */}
-                          <button
-                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
-                            onClick={() => {
-                              toast({ title: "🚀 Boost Activated", description: "Your season is now being boosted on Mobigate!" });
-                              setBoostSeasonId(null);
-                            }}
-                          >
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                              <Megaphone className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <p className="text-sm font-semibold">Boost on Mobigate</p>
-                              <p className="text-xs text-muted-foreground">Promote to all Mobigate users</p>
-                            </div>
-                          </button>
+                        {/* ── MENU ── */}
+                        {boostStep === 'menu' && (
+                          <>
+                            <p className="text-xs text-muted-foreground">Promote "{season.name}" to reach more participants</p>
+                            <div className="space-y-2">
+                              <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => setBoostStep('boost-confirm')}>
+                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><Megaphone className="h-5 w-5 text-primary" /></div>
+                                <div className="text-left flex-1 min-w-0">
+                                  <p className="text-sm font-semibold">Boost on Mobigate</p>
+                                  <p className="text-xs text-muted-foreground">Promote to all Mobigate users</p>
+                                </div>
+                                {boostedSeasons.includes(season.id) && <Badge className="bg-primary/15 text-primary text-xs shrink-0">Active</Badge>}
+                              </button>
 
-                          {/* Share with Mobigate Users */}
-                          <button
-                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
-                            onClick={() => {
-                              toast({ title: "👥 Shared!", description: "Season shared with your Mobigate friends." });
-                              setBoostSeasonId(null);
-                            }}
-                          >
-                            <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                              <Users className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <p className="text-sm font-semibold">Share with Mobigate Users</p>
-                              <p className="text-xs text-muted-foreground">Especially friends & connections</p>
-                            </div>
-                          </button>
+                              <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => setBoostStep('friends-picker')}>
+                                <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0"><Users className="h-5 w-5 text-blue-600" /></div>
+                                <div className="text-left flex-1 min-w-0">
+                                  <p className="text-sm font-semibold">Share with Mobigate Users</p>
+                                  <p className="text-xs text-muted-foreground">Especially friends & connections</p>
+                                </div>
+                              </button>
 
-                          {/* Share on Mobi-Store */}
-                          <button
-                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
-                            onClick={() => {
-                              toast({ title: "🏪 Listed!", description: "Season promoted on Mobi-Store." });
-                              setBoostSeasonId(null);
-                            }}
-                          >
-                            <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                              <Store className="h-5 w-5 text-emerald-600" />
-                            </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <p className="text-sm font-semibold">Share on Mobi-Store</p>
-                              <p className="text-xs text-muted-foreground">Feature in the Mobi-Store marketplace</p>
-                            </div>
-                          </button>
+                              <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => setBoostStep('store-form')}>
+                                <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Store className="h-5 w-5 text-emerald-600" /></div>
+                                <div className="text-left flex-1 min-w-0">
+                                  <p className="text-sm font-semibold">Share on Mobi-Store</p>
+                                  <p className="text-xs text-muted-foreground">Feature in the Mobi-Store marketplace</p>
+                                </div>
+                                {storeListedSeasons.includes(season.id) && <Badge className="bg-emerald-500/15 text-emerald-700 text-xs shrink-0">Listed</Badge>}
+                              </button>
 
-                          {/* Share on Social Media */}
-                          <button
-                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
-                            onClick={() => {
-                              toast({ title: "📱 Social Share", description: "Share links generated for Facebook, WhatsApp, Instagram & Twitter." });
-                              setBoostSeasonId(null);
-                            }}
-                          >
-                            <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-                              <Share2 className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <p className="text-sm font-semibold">Share on Social Media</p>
-                              <p className="text-xs text-muted-foreground">Facebook, WhatsApp, Instagram, Twitter</p>
-                            </div>
-                          </button>
+                              <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => setBoostStep('social-picker')}>
+                                <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0"><Share2 className="h-5 w-5 text-purple-600" /></div>
+                                <div className="text-left flex-1 min-w-0">
+                                  <p className="text-sm font-semibold">Share on Social Media</p>
+                                  <p className="text-xs text-muted-foreground">Facebook, WhatsApp, Instagram, Twitter</p>
+                                </div>
+                              </button>
 
-                          {/* Share via Email */}
-                          <button
-                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
-                            onClick={() => {
-                              toast({ title: "✉️ Email Draft", description: "Invitation email prepared and ready to send." });
-                              setBoostSeasonId(null);
-                            }}
-                          >
-                            <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                              <Mail className="h-5 w-5 text-amber-600" />
-                            </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <p className="text-sm font-semibold">Share via Email</p>
-                              <p className="text-xs text-muted-foreground">Send invitation email to contacts</p>
-                            </div>
-                          </button>
+                              <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => { shareViaEmail(emailSubject, emailBody); toast({ title: "✉️ Email App Opening", description: "Your email app should open with the invitation." }); }}>
+                                <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0"><Mail className="h-5 w-5 text-amber-600" /></div>
+                                <div className="text-left flex-1 min-w-0">
+                                  <p className="text-sm font-semibold">Share via Email</p>
+                                  <p className="text-xs text-muted-foreground">Opens your email app with invitation</p>
+                                </div>
+                              </button>
 
-                          {/* Share via SMS */}
-                          <button
-                            className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]"
-                            onClick={() => {
-                              toast({ title: "💬 SMS Ready", description: "SMS invitation ready to send." });
-                              setBoostSeasonId(null);
-                            }}
-                          >
-                            <div className="h-10 w-10 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
-                              <Smartphone className="h-5 w-5 text-teal-600" />
+                              <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => { shareViaSMS(smsBody); toast({ title: "💬 SMS App Opening", description: "Your messaging app should open with the invitation." }); }}>
+                                <div className="h-10 w-10 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0"><Smartphone className="h-5 w-5 text-teal-600" /></div>
+                                <div className="text-left flex-1 min-w-0">
+                                  <p className="text-sm font-semibold">Share via SMS</p>
+                                  <p className="text-xs text-muted-foreground">Opens messaging app with invitation</p>
+                                </div>
+                              </button>
                             </div>
-                            <div className="text-left flex-1 min-w-0">
-                              <p className="text-sm font-semibold">Share via SMS</p>
-                              <p className="text-xs text-muted-foreground">Send text message invitations</p>
+                          </>
+                        )}
+
+                        {/* ── BOOST CONFIRM ── */}
+                        {boostStep === 'boost-confirm' && (
+                          <div className="space-y-3">
+                            <p className="text-xs text-muted-foreground">Select how long to boost "{season.name}" on Mobigate's featured feed.</p>
+                            <div className="space-y-2">
+                              {[
+                                { days: 7, price: 5000, label: "7 Days", desc: "Reach ~2,000 users" },
+                                { days: 14, price: 8500, label: "14 Days", desc: "Reach ~5,000 users" },
+                                { days: 30, price: 15000, label: "30 Days", desc: "Reach ~12,000 users" },
+                              ].map((opt) => (
+                                <button
+                                  key={opt.days}
+                                  className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors touch-manipulation active:scale-[0.97] ${boostDuration === opt.days ? 'border-primary bg-primary/5' : 'bg-card hover:bg-accent/50'}`}
+                                  onClick={() => setBoostDuration(opt.days)}
+                                >
+                                  <div className="text-left">
+                                    <p className="text-sm font-semibold">{opt.label}</p>
+                                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-sm font-bold text-primary">{formatLocalAmount(opt.price, "NGN")}</p>
+                                    <p className="text-xs text-muted-foreground">M{opt.price.toLocaleString()}</p>
+                                  </div>
+                                </button>
+                              ))}
                             </div>
-                          </button>
-                        </div>
+                            <Button
+                              className="w-full h-12 text-sm font-bold gap-2 touch-manipulation active:scale-[0.97]"
+                              onClick={() => {
+                                setBoostedSeasons((p) => [...new Set([...p, season.id])]);
+                                toast({ title: "🚀 Boost Activated!", description: `"${season.name}" is now boosted for ${boostDuration} days on Mobigate.` });
+                                setBoostSeasonId(null);
+                              }}
+                            >
+                              <Megaphone className="h-4 w-4" />
+                              Confirm Boost — {boostDuration} Days
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* ── FRIENDS PICKER ── */}
+                        {boostStep === 'friends-picker' && (
+                          <div className="space-y-3">
+                            <p className="text-xs text-muted-foreground">Select friends to share "{season.name}" with.</p>
+                            <div className="space-y-1 max-h-64 overflow-y-auto overscroll-y-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+                              {mockFriends.map((friend: any) => (
+                                <button
+                                  key={friend.id}
+                                  className={`w-full flex items-center gap-3 p-2.5 rounded-lg border transition-colors touch-manipulation active:scale-[0.98] ${selectedFriends.includes(friend.id) ? 'border-primary bg-primary/5' : 'bg-card hover:bg-accent/50'}`}
+                                  onClick={() => {
+                                    setSelectedFriends((p) =>
+                                      p.includes(friend.id) ? p.filter((id) => id !== friend.id) : [...p, friend.id]
+                                    );
+                                  }}
+                                >
+                                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${selectedFriends.includes(friend.id) ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                    {friend.name.charAt(0)}
+                                  </div>
+                                  <span className="text-sm font-medium flex-1 text-left truncate">{friend.name}</span>
+                                  <Checkbox checked={selectedFriends.includes(friend.id)} className="shrink-0 pointer-events-none" />
+                                </button>
+                              ))}
+                            </div>
+                            {selectedFriends.length > 0 && (
+                              <Button
+                                className="w-full h-12 text-sm font-bold gap-2 touch-manipulation active:scale-[0.97]"
+                                onClick={() => {
+                                  toast({ title: "👥 Shared!", description: `Season shared with ${selectedFriends.length} friend${selectedFriends.length > 1 ? 's' : ''}.` });
+                                  setSelectedFriends([]);
+                                  setBoostSeasonId(null);
+                                }}
+                              >
+                                <Users className="h-4 w-4" />
+                                Send to {selectedFriends.length} Friend{selectedFriends.length > 1 ? 's' : ''}
+                              </Button>
+                            )}
+                          </div>
+                        )}
+
+                        {/* ── STORE FORM ── */}
+                        {boostStep === 'store-form' && (
+                          <div className="space-y-3">
+                            <p className="text-xs text-muted-foreground">Add a promotional message for your Mobi-Store listing.</p>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Promotional Message</Label>
+                              <Textarea
+                                value={storePromoMessage}
+                                onChange={(e) => setStorePromoMessage(e.target.value)}
+                                placeholder={`e.g. "Don't miss ${season.name}! Win up to ${formatLocalAmount(season.firstPrize, "NGN")}!"`}
+                                className="mt-1 min-h-[80px]"
+                              />
+                            </div>
+                            <div className="p-3 bg-emerald-500/5 rounded-lg space-y-1">
+                              <p className="text-xs font-semibold text-emerald-700">Listing Preview</p>
+                              <p className="text-xs text-muted-foreground">{season.name} — {season.type} Season</p>
+                              <p className="text-xs font-bold">Prize Pool: {formatLocalAmount(season.totalWinningPrizes, "NGN")}</p>
+                              {storePromoMessage && <p className="text-xs italic">"{storePromoMessage}"</p>}
+                            </div>
+                            <Button
+                              className="w-full h-12 text-sm font-bold gap-2 touch-manipulation active:scale-[0.97]"
+                              onClick={() => {
+                                setStoreListedSeasons((p) => [...new Set([...p, season.id])]);
+                                toast({ title: "🏪 Listed on Mobi-Store!", description: `"${season.name}" is now featured on the Mobi-Store marketplace.` });
+                                setStorePromoMessage("");
+                                setBoostSeasonId(null);
+                              }}
+                            >
+                              <Store className="h-4 w-4" />
+                              List on Mobi-Store
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* ── SOCIAL PICKER ── */}
+                        {boostStep === 'social-picker' && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground">Choose a platform to share "{season.name}"</p>
+
+                            {typeof navigator.share === 'function' && (
+                              <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={async () => {
+                                const shared = await shareViaNative(season.name, shareText, shareUrl);
+                                if (shared) { toast({ title: "✅ Shared!", description: "Shared via your device." }); setBoostSeasonId(null); }
+                              }}>
+                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><Share2 className="h-5 w-5 text-primary" /></div>
+                                <div className="text-left flex-1 min-w-0">
+                                  <p className="text-sm font-semibold">Share via Device</p>
+                                  <p className="text-xs text-muted-foreground">Use your phone's native share</p>
+                                </div>
+                              </button>
+                            )}
+
+                            <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => { shareToWhatsApp(shareUrl, shareText); toast({ title: "✅ WhatsApp", description: "Opening WhatsApp..." }); }}>
+                              <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><MessageCircle className="h-5 w-5 text-emerald-600" /></div>
+                              <div className="text-left flex-1 min-w-0">
+                                <p className="text-sm font-semibold">WhatsApp</p>
+                                <p className="text-xs text-muted-foreground">Share to WhatsApp contacts</p>
+                              </div>
+                            </button>
+
+                            <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => { shareToFacebook(shareUrl, season.name); toast({ title: "✅ Facebook", description: "Opening Facebook..." }); }}>
+                              <div className="h-10 w-10 rounded-full bg-blue-600/10 flex items-center justify-center shrink-0"><Facebook className="h-5 w-5 text-blue-600" /></div>
+                              <div className="text-left flex-1 min-w-0">
+                                <p className="text-sm font-semibold">Facebook</p>
+                                <p className="text-xs text-muted-foreground">Share on your Facebook feed</p>
+                              </div>
+                            </button>
+
+                            <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => { shareToTwitter(shareUrl, shareText); toast({ title: "✅ Twitter / X", description: "Opening Twitter..." }); }}>
+                              <div className="h-10 w-10 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0"><Share2 className="h-5 w-5 text-sky-500" /></div>
+                              <div className="text-left flex-1 min-w-0">
+                                <p className="text-sm font-semibold">Twitter / X</p>
+                                <p className="text-xs text-muted-foreground">Tweet about this season</p>
+                              </div>
+                            </button>
+
+                            <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={async () => {
+                              const copied = await shareToInstagram(shareUrl);
+                              toast({ title: copied ? "✅ Link Copied + Instagram Opening" : "📸 Instagram Opening", description: copied ? "Link copied! Paste it in your Instagram post or story." : "Opening Instagram..." });
+                            }}>
+                              <div className="h-10 w-10 rounded-full bg-pink-500/10 flex items-center justify-center shrink-0"><Share2 className="h-5 w-5 text-pink-500" /></div>
+                              <div className="text-left flex-1 min-w-0">
+                                <p className="text-sm font-semibold">Instagram</p>
+                                <p className="text-xs text-muted-foreground">Copy link & open Instagram</p>
+                              </div>
+                            </button>
+
+                            <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={async () => {
+                              const copied = await copyToClipboard(shareUrl);
+                              if (copied) toast({ title: "📋 Link Copied!", description: "Share link copied to clipboard." });
+                            }}>
+                              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0"><Link className="h-5 w-5 text-muted-foreground" /></div>
+                              <div className="text-left flex-1 min-w-0">
+                                <p className="text-sm font-semibold">Copy Link</p>
+                                <p className="text-xs text-muted-foreground">Copy share URL to clipboard</p>
+                              </div>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
                 </div>
               )}
             </CardContent>
