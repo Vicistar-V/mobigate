@@ -25,7 +25,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
   const [questionText, setQuestionText] = useState("");
   const [options, setOptions] = useState<string[]>(Array(8).fill(""));
   const [correctIndex, setCorrectIndex] = useState<number>(0);
-  const [selectedLevels, setSelectedLevels] = useState<string[]>(["All Levels"]);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [timeLimit, setTimeLimit] = useState(10);
   const [points, setPoints] = useState(10);
 

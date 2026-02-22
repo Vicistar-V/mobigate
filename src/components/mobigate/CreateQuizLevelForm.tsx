@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, AlertTriangle } from "lucide-react";
 import { PRESET_QUIZ_CATEGORIES, PRESET_LEVEL_TIERS } from "@/data/mobigateQuizLevelsData";
@@ -19,7 +20,8 @@ interface CreateQuizLevelFormProps {
 }
 
 export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps) {
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [customLevel, setCustomLevel] = useState("");
@@ -27,11 +29,25 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
   const [winningAmount, setWinningAmount] = useState("");
   const [isActive, setIsActive] = useState(true);
 
-  const isAllCategories = selectedCategory === "__all__";
-  const isCustomCategory = selectedCategory === "__custom__";
+  const allPresetsSelected = PRESET_QUIZ_CATEGORIES.every(c => selectedCategories.includes(c));
   const isCustomLevel = selectedLevel === "__custom__";
 
-  // Auto-fill stake/winning when a preset level is selected
+  const toggleCategory = (cat: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCategories(prev => [...prev, cat]);
+    } else {
+      setSelectedCategories(prev => prev.filter(c => c !== cat));
+    }
+  };
+
+  const toggleAllCategories = (checked: boolean) => {
+    if (checked) {
+      setSelectedCategories([...PRESET_QUIZ_CATEGORIES]);
+    } else {
+      setSelectedCategories([]);
+    }
+  };
+
   const handleLevelChange = (value: string) => {
     setSelectedLevel(value);
     if (value !== "__custom__") {
@@ -44,24 +60,27 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
   };
 
   const handleSubmit = () => {
-    const category = isCustomCategory ? customCategory.trim() : selectedCategory;
     const levelName = isCustomLevel ? customLevel.trim() : selectedLevel;
     const stake = parseInt(stakeAmount);
     const winning = parseInt(winningAmount);
 
-    if ((!category && !isAllCategories) || !levelName || isNaN(stake) || isNaN(winning) || stake <= 0 || winning <= 0) return;
+    if (!levelName || isNaN(stake) || isNaN(winning) || stake <= 0 || winning <= 0) return;
 
-    if (isAllCategories) {
-      // Batch create for all preset categories
-      PRESET_QUIZ_CATEGORIES.forEach((cat) => {
-        onCreateLevel({ category: cat, levelName, stakeAmount: stake, winningAmount: winning, isActive });
-      });
-    } else {
-      onCreateLevel({ category, levelName, stakeAmount: stake, winningAmount: winning, isActive });
+    // Collect all categories to create for
+    const categoriesToCreate: string[] = [...selectedCategories];
+    if (showCustomCategory && customCategory.trim()) {
+      categoriesToCreate.push(customCategory.trim());
     }
 
+    if (categoriesToCreate.length === 0) return;
+
+    categoriesToCreate.forEach((cat) => {
+      onCreateLevel({ category: cat, levelName, stakeAmount: stake, winningAmount: winning, isActive });
+    });
+
     // Reset
-    setSelectedCategory("");
+    setSelectedCategories([]);
+    setShowCustomCategory(false);
     setCustomCategory("");
     setSelectedLevel("");
     setCustomLevel("");
@@ -71,12 +90,14 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
   };
 
   const canSubmit = () => {
-    const category = isAllCategories ? "__all__" : (isCustomCategory ? customCategory.trim() : selectedCategory);
+    const hasCategories = selectedCategories.length > 0 || (showCustomCategory && customCategory.trim());
     const levelName = isCustomLevel ? customLevel.trim() : selectedLevel;
     const stake = parseInt(stakeAmount);
     const winning = parseInt(winningAmount);
-    return category && levelName && !isNaN(stake) && !isNaN(winning) && stake > 0 && winning > 0;
+    return hasCategories && levelName && !isNaN(stake) && !isNaN(winning) && stake > 0 && winning > 0;
   };
+
+  const totalSelected = selectedCategories.length + (showCustomCategory && customCategory.trim() ? 1 : 0);
 
   return (
     <Card>
@@ -87,33 +108,50 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Category */}
+        {/* Category Multi-Select */}
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">Select Category</Label>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="h-12 text-base touch-manipulation">
-              <SelectValue placeholder="Choose a category" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60">
-              <SelectItem value="__all__" className="text-sm font-bold text-emerald-600">
-                ✅ All Categories (23)
-              </SelectItem>
-              {PRESET_QUIZ_CATEGORIES.map((cat) => (
-                <SelectItem key={cat} value={cat} className="text-sm">
-                  {cat}
-                </SelectItem>
-              ))}
-              <SelectItem value="__custom__" className="text-sm font-medium text-primary">
-                Custom (Specify)
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          {isAllCategories && (
-            <div className="flex items-start gap-1.5 text-xs text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 p-2 rounded-md">
-              <span>This will create the selected level for all 23 preset categories at once.</span>
-            </div>
-          )}
-          {isCustomCategory && (
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">Select Categories</Label>
+            {selectedCategories.length > 0 && (
+              <button
+                type="button"
+                className="text-[11px] text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
+                onClick={() => setSelectedCategories([])}
+              >
+                Deselect All
+              </button>
+            )}
+          </div>
+          <div className="border border-border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto touch-auto">
+            {/* All Categories toggle */}
+            <label className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation min-h-[44px]">
+              <Checkbox
+                checked={allPresetsSelected}
+                onCheckedChange={(checked) => toggleAllCategories(!!checked)}
+              />
+              <span className="text-sm font-medium">All Categories ({PRESET_QUIZ_CATEGORIES.length})</span>
+            </label>
+            <div className="border-t border-border/40" />
+            {PRESET_QUIZ_CATEGORIES.map((cat) => (
+              <label key={cat} className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation min-h-[44px]">
+                <Checkbox
+                  checked={selectedCategories.includes(cat)}
+                  onCheckedChange={(checked) => toggleCategory(cat, !!checked)}
+                />
+                <span className="text-sm">{cat}</span>
+              </label>
+            ))}
+            <div className="border-t border-border/40" />
+            {/* Custom category checkbox */}
+            <label className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation min-h-[44px]">
+              <Checkbox
+                checked={showCustomCategory}
+                onCheckedChange={(checked) => setShowCustomCategory(!!checked)}
+              />
+              <span className="text-sm font-medium text-primary">Custom (Specify)</span>
+            </label>
+          </div>
+          {showCustomCategory && (
             <Input
               placeholder="Type custom category name"
               value={customCategory}
@@ -121,6 +159,11 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
               className="h-12 text-base touch-manipulation"
             />
           )}
+          <p className="text-[10px] text-muted-foreground">
+            {totalSelected > 0
+              ? `${totalSelected} categor${totalSelected === 1 ? "y" : "ies"} selected — level will be created for each.`
+              : "Select at least one category."}
+          </p>
         </div>
 
         {/* Level */}
