@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Store, ChevronDown, Clock, Shield, ArrowLeft, CreditCard,
-  Upload, Eye, EyeOff, Building2
+  Upload, Eye, EyeOff, Building2, Plus, Trash2
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -44,13 +44,28 @@ export default function MerchantApplication() {
   const [countryOfReg, setCountryOfReg] = useState("");
   const [tin, setTin] = useState("");
 
-  // Directors
-  const [director1Name, setDirector1Name] = useState("");
-  const [director1Address, setDirector1Address] = useState("");
-  const [director1Photo, setDirector1Photo] = useState<string | null>(null);
-  const [director2Name, setDirector2Name] = useState("");
-  const [director2Address, setDirector2Address] = useState("");
-  const [director2Photo, setDirector2Photo] = useState<string | null>(null);
+  // Directors (dynamic list)
+  const [directors, setDirectors] = useState<{ name: string; address: string; photo: string | null }[]>([
+    { name: "", address: "", photo: null },
+    { name: "", address: "", photo: null },
+  ]);
+
+  const updateDirector = (index: number, field: "name" | "address", value: string) => {
+    setDirectors(prev => prev.map((d, i) => i === index ? { ...d, [field]: value } : d));
+  };
+
+  const updateDirectorPhoto = (index: number, photo: string | null) => {
+    setDirectors(prev => prev.map((d, i) => i === index ? { ...d, photo } : d));
+  };
+
+  const addDirector = () => {
+    setDirectors(prev => [...prev, { name: "", address: "", photo: null }]);
+  };
+
+  const removeDirector = (index: number) => {
+    if (directors.length <= 1) return;
+    setDirectors(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Other addresses
   const [address1, setAddress1] = useState("");
@@ -77,12 +92,11 @@ export default function MerchantApplication() {
   const [bankBranch1, setBankBranch1] = useState("");
   const [bankBranch2, setBankBranch2] = useState("");
 
-  const handlePhotoUpload = (director: 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      if (director === 1) setDirector1Photo(url);
-      else setDirector2Photo(url);
+      updateDirectorPhoto(index, url);
     }
   };
 
@@ -291,41 +305,49 @@ export default function MerchantApplication() {
           <CardContent className="p-4 space-y-4">
             <SectionTitle>Name & Address of Principal Officers</SectionTitle>
 
-            <div className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50">
-              <p className="text-xs font-semibold text-muted-foreground">[Director-1]</p>
-              <Input value={director1Name} onChange={e => setDirector1Name(e.target.value)} placeholder="Full name" className="text-sm h-9" />
-              <Label className="text-xs font-medium">Address</Label>
-              <Input value={director1Address} onChange={e => setDirector1Address(e.target.value)} placeholder="Director's address" className="text-sm h-9" />
-              <Label className="text-xs font-medium">Passport Photograph</Label>
-              <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-border cursor-pointer text-xs text-muted-foreground hover:bg-muted/30 transition-colors">
-                  <Upload className="h-3.5 w-3.5" />
-                  {director1Photo ? "Change Photo" : "Upload"}
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload(1)} />
-                </label>
-                {director1Photo && (
-                  <img src={director1Photo} alt="Director 1" className="h-10 w-10 rounded-md object-cover border" />
-                )}
+            {directors.map((director, index) => (
+              <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-muted-foreground">[Director-{index + 1}]</p>
+                  {directors.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:text-destructive"
+                      onClick={() => removeDirector(index)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+                <Input value={director.name} onChange={e => updateDirector(index, "name", e.target.value)} placeholder="Full name" className="text-sm h-9" />
+                <Label className="text-xs font-medium">Address</Label>
+                <Input value={director.address} onChange={e => updateDirector(index, "address", e.target.value)} placeholder="Director's address" className="text-sm h-9" />
+                <Label className="text-xs font-medium">Passport Photograph</Label>
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-border cursor-pointer text-xs text-muted-foreground hover:bg-muted/30 transition-colors">
+                    <Upload className="h-3.5 w-3.5" />
+                    {director.photo ? "Change Photo" : "Upload"}
+                    <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload(index)} />
+                  </label>
+                  {director.photo && (
+                    <img src={director.photo} alt={`Director ${index + 1}`} className="h-10 w-10 rounded-md object-cover border" />
+                  )}
+                </div>
               </div>
-            </div>
+            ))}
 
-            <div className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50">
-              <p className="text-xs font-semibold text-muted-foreground">[Director-2]</p>
-              <Input value={director2Name} onChange={e => setDirector2Name(e.target.value)} placeholder="Full name" className="text-sm h-9" />
-              <Label className="text-xs font-medium">Address</Label>
-              <Input value={director2Address} onChange={e => setDirector2Address(e.target.value)} placeholder="Director's address" className="text-sm h-9" />
-              <Label className="text-xs font-medium">Passport Photograph</Label>
-              <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-border cursor-pointer text-xs text-muted-foreground hover:bg-muted/30 transition-colors">
-                  <Upload className="h-3.5 w-3.5" />
-                  {director2Photo ? "Change Photo" : "Upload"}
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload(2)} />
-                </label>
-                {director2Photo && (
-                  <img src={director2Photo} alt="Director 2" className="h-10 w-10 rounded-md object-cover border" />
-                )}
-              </div>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full text-xs gap-1.5"
+              onClick={addDirector}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Another Director
+            </Button>
           </CardContent>
         </Card>
 
