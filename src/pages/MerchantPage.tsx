@@ -390,9 +390,9 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Short">Short (4 months, 3 selection levels)</SelectItem>
-                  <SelectItem value="Medium">Medium (6 months, 5 selection levels)</SelectItem>
-                  <SelectItem value="Complete">Complete (12 months, 7 selection levels)</SelectItem>
+                  <SelectItem value="Short">Short Season (4 months, 3 levels)</SelectItem>
+                  <SelectItem value="Medium">Medium Season (6 months, 5 levels)</SelectItem>
+                  <SelectItem value="Complete">Complete Season (12 months, 7 levels)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -404,9 +404,23 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">End Date (auto)</Label>
-                <Input value={computedEndDate || "—"} readOnly className="h-11 mt-1 bg-muted/30" />
+                <Input value={computedEndDate ? format(new Date(computedEndDate), "MMM d, yyyy") : "—"} readOnly className="h-11 mt-1 bg-muted/30" />
               </div>
             </div>
+
+            {/* Season Preview */}
+            {newStartDate && computedEndDate && (
+              <div className="p-3 bg-muted/20 rounded-lg space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline" className={`text-xs ${getSeasonTypeColor(newType)}`}>
+                    {newType} Season
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(newStartDate), "MMM d, yyyy")} — {format(new Date(computedEndDate), "MMM d, yyyy")}
+                </p>
+              </div>
+            )}
 
             <div>
               <Label className="text-xs text-muted-foreground">Initialization Fee per Participant (₦)</Label>
