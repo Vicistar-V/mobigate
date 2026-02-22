@@ -1,73 +1,75 @@
 
 
-## Plan: Scrollable Selection & TV Rounds with Duration-Based Date Entry
+## Plan: Make Boost Show Options Actually Functional
 
-### What Changes
+Currently all 6 Boost Show buttons just show a toast and close. This plan makes each one perform a real action using existing utilities and browser APIs.
 
-**1. Selection Rounds -- Horizontally Scrollable Rows**
+### What Each Button Will Do
 
-Each selection round row (R1, R2, R3...) will become horizontally scrollable on mobile. The X (delete) button will be pinned/sticky on the right side, always visible and never overlapping the scrollable content. The scrollable area will contain:
-- Round label (R1, R2...)
-- Entries input
-- Fee input
-- **New**: Duration input (days) 
-- **New**: Start date picker
-- **New**: Auto-computed end date (read-only, calculated from start date + duration)
+**1. Boost on Mobigate (internal feature)**
+- Since this is a UI template with no backend, this will show a confirmation drawer/dialog with a "Confirm Boost" step (cost preview, duration selector like 7/14/30 days), then show a success state with a "Boosted" badge. Adds a `boosted` visual indicator on the season card.
 
-The layout per row:
-```text
-[Scrollable area >>>>>>>>>>>>>>>>>>>>>>>] [X]
- R1 | Entries | Fee | Duration(days) | Start Date | End Date(auto)
-```
+**2. Share with Mobigate Users (Friends)**
+- Opens a friends picker drawer showing the user's friends list (from `useFriendsList()` hook). User can select multiple friends, then tap "Send". Shows toast confirmation with count of friends notified.
 
-**2. TV Show Rounds -- Same Scrollable Pattern + Hours Support**
+**3. Share on Mobi-Store**
+- Opens a mini-form drawer to set a promotional message and category for the Mobi-Store listing. Tap "List on Store" confirms. Shows a "Listed on Store" badge on the season card.
 
-Same horizontal scroll treatment with sticky X button. The scrollable content will contain:
-- Label input (e.g. "1st TV Show")
-- Entries input
-- Fee input
-- **New**: Duration input (in hours, since TV shows can happen within a single day)
-- **New**: Start date + time picker (datetime-local input for hour precision)
-- **New**: Auto-computed end date/time (start + hours)
+**4. Share on Social Media**
+- Uses the existing `shareUtils.ts` functions (`shareToFacebook`, `shareToTwitter`, `shareToWhatsApp`) to actually open real share windows. Shows a sub-menu with individual platform buttons (Facebook, WhatsApp, Instagram, Twitter) that each open the correct share URL. Also attempts `navigator.share()` (Web Share API) on mobile if available.
 
-```text
-[Scrollable area >>>>>>>>>>>>>>>>>>>>>>>] [X]
- Label | Entries | Fee | Duration(hrs) | Start DateTime | End DateTime(auto)
-```
+**5. Share via Email**
+- Opens a `mailto:` link with a pre-filled subject and body containing the season name, description, and a share URL. This opens the user's native email app.
 
-**3. Data Model Updates**
-
-Add optional fields to the interfaces:
-
-- `SelectionProcess`: add `durationDays?: number`, `startDate?: string`, `endDate?: string`
-- `TVShowRound`: add `durationHours?: number`, `startDateTime?: string`, `endDateTime?: string`
+**6. Share via SMS**
+- Opens an `sms:` link with a pre-filled body containing the season info and share URL. This opens the native SMS app on mobile.
 
 ### Technical Details
 
-**File: `src/data/mobigateInteractiveQuizData.ts`**
-- Add optional fields to `SelectionProcess` and `TVShowRound` interfaces
-
 **File: `src/pages/MerchantPage.tsx`**
-- Refactor each Selection Round row: wrap inputs in a horizontally scrollable `div` with `overflow-x-auto` and `flex-nowrap`, keep X button outside the scroll container with proper spacing
-- Add duration (days) input, start date input, and auto-computed end date display per Selection Round
-- Add handler logic: when duration + start date are set, compute end date using `addDays()`
-- Refactor each TV Show Round row similarly: scrollable content with sticky X
-- Add duration (hours) input, `datetime-local` start input, and auto-computed end datetime per TV Round
-- Add handler logic: when duration hours + start datetime are set, compute end datetime using `addHours()`
-- Import `addDays` and `addHours` from `date-fns`
 
-**Scroll Container Pattern (per row):**
-```
-<div className="flex items-center gap-2">
-  <div className="flex-1 overflow-x-auto min-w-0">
-    <div className="flex items-center gap-2 min-w-max pb-1">
-      {/* all inputs here */}
-    </div>
-  </div>
-  {/* X button outside scroll, shrink-0 */}
-  <button className="shrink-0 ml-1">X</button>
-</div>
-```
+- Import `shareToFacebook`, `shareToTwitter`, `shareToWhatsApp` from `@/lib/shareUtils`
+- Import `useFriendsList` from `@/hooks/useWindowData`
+- Add new state: `boostStep` (to track sub-views like friends picker, boost confirm, social picker)
+- Generate share URL per season: `${window.location.origin}/quiz-season/${season.id}`
+- Generate share text: `"Join ${season.name} on Mobigate! Play quizzes and win prizes."`
 
-This ensures the X never scrolls away and there's no overlap with the scrollable content area. The `min-w-max` on the inner flex ensures content doesn't compress, forcing horizontal scroll on narrow viewports.
+**Button 1 - Boost on Mobigate:**
+- Replace toast-only with a sub-view showing boost duration options (7/14/30 days) with mock pricing
+- "Confirm Boost" button sets a local `boostedSeasons` state Set to show a "Boosted" badge
+
+**Button 2 - Share with Friends:**
+- Show inline friend list from `useFriendsList()` with checkboxes
+- "Send to X friends" button at bottom
+- Toast confirms with friend count
+
+**Button 3 - Share on Mobi-Store:**
+- Show a small form (promotional message textarea)
+- "List on Store" confirms and adds to local `storeListed` state
+
+**Button 4 - Social Media:**
+- Replace single button with expandable sub-buttons for each platform
+- Each calls the real share util function (opens actual Facebook/Twitter/WhatsApp share URLs)
+- Add "Share via device" option using `navigator.share()` API for native mobile sharing
+
+**Button 5 - Email:**
+- `window.location.href = \`mailto:?subject=...&body=...\`` with season details and share link
+- Opens native email client
+
+**Button 6 - SMS:**
+- `window.location.href = \`sms:?body=...\`` with season info and link
+- Opens native SMS app on mobile
+
+**File: `src/lib/shareUtils.ts`**
+- Add `shareViaEmail(subject: string, body: string)` helper
+- Add `shareViaSMS(body: string)` helper
+- Add `shareViaNative(title: string, text: string, url: string)` helper using Web Share API
+- Add `shareToInstagram(url: string)` helper (opens Instagram with a copy-link fallback since Instagram doesn't have a direct web share URL)
+
+### New State Variables in MerchantPage
+- `boostStep: 'menu' | 'boost-confirm' | 'friends-picker' | 'store-form' | 'social-picker' | null`
+- `boostedSeasons: string[]` - tracks which seasons are boosted (visual badge)
+- `storeListedSeasons: string[]` - tracks which are listed on store
+- `selectedFriends: string[]` - for the friends picker
+- `boostDuration: number` - selected boost duration in days
 
