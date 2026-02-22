@@ -11,24 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Store, ChevronDown, Clock, Shield, ArrowLeft, CreditCard,
-  FileText, Users, BookOpen, UserPlus, User, Mail, Phone,
-  MapPin, Building, Globe, Landmark, BadgeCheck, Plus, Minus
+  User, MapPin, Globe, Landmark, BadgeCheck, Plus, Minus
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-
-const requirements = [
-  { icon: Shield, text: "Must be a verified user for minimum 180 days" },
-  { icon: CreditCard, text: `One-time, non-refundable Registration Fee: ${formatMobi(1000000)}` },
-  { icon: CreditCard, text: `Initial Merchant Vouchers Subscription Deposit (IMVSD): min ${formatMobi(1000000)}` },
-  { icon: FileText, text: "IMVSD must equal or exceed total value of initial Mandatory Voucher Packs (100-unit pack × 12 denominations)" },
-  { icon: Users, text: "Must have invited at least 1,000 active friends to Mobigate" },
-  { icon: Users, text: "Must have at least 5,000 friends and 5,000 followers" },
-  { icon: BookOpen, text: "Must have at least 100 e-Library contents with 5,000+ likes each" },
-  { icon: UserPlus, text: "Must have followed at least 500 users/content creators" },
-  { icon: Store, text: "Only Mobi-Merchants can transact directly with Mobigate central system" },
-  { icon: CreditCard, text: "Purchased Vouchers can be credited to wallet, sent as e-PIN, or gifted" },
-];
+import { MerchantEligibilityCard } from "@/components/mobigate/MerchantEligibilityCard";
 
 const genderOptions = ["Male", "Female"];
 const maritalStatusOptions = ["Single", "Married", "Divorced", "Separated", "Widowed", "Complicated"];
@@ -215,25 +202,20 @@ export default function IndividualMerchantApplication() {
           </div>
         </div>
 
-        {/* Requirements */}
+        {/* Eligibility & Requirements */}
         <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
           <Card>
             <CollapsibleTrigger asChild>
               <div className="flex items-center justify-between p-3 cursor-pointer">
                 <p className="text-xs font-semibold flex items-center gap-1.5">
-                  <Shield className="h-3.5 w-3.5 text-primary" /> Merchant Requirements
+                  <Shield className="h-3.5 w-3.5 text-primary" /> Eligibility & Requirements
                 </p>
                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <CardContent className="pt-0 pb-3 space-y-2.5">
-                {requirements.map((req, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <req.icon className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">{req.text}</p>
-                  </div>
-                ))}
+              <CardContent className="pt-0 pb-3">
+                <MerchantEligibilityCard />
               </CardContent>
             </CollapsibleContent>
           </Card>
