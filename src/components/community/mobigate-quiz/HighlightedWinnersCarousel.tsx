@@ -1,0 +1,141 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Crown, Medal, Trophy, Star } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { mockSeasonWinners, mockSeasons, mockMerchants, type SeasonWinner } from "@/data/mobigateInteractiveQuizData";
+import { QuizWinnerProfileDrawer } from "./QuizWinnerProfileDrawer";
+
+export function HighlightedWinnersCarousel() {
+  const { toast } = useToast();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [fannedWinners, setFannedWinners] = useState<Set<string>>(new Set());
+  const [selectedWinner, setSelectedWinner] = useState<SeasonWinner | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isTouching, setIsTouching] = useState(false);
+
+  const highlightedWinners = mockSeasonWinners.filter(w => w.isHighlighted);
+
+  // Auto-scroll
+  useEffect(() => {
+    if (highlightedWinners.length <= 2 || isTouching) return;
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const interval = setInterval(() => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (el.scrollLeft >= maxScroll - 4) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 96, behavior: "smooth" });
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [highlightedWinners.length, isTouching]);
+
+  const handleFan = useCallback((e: React.MouseEvent, winner: SeasonWinner) => {
+    e.stopPropagation();
+    if (fannedWinners.has(winner.id)) return;
+    setFannedWinners(prev => new Set(prev).add(winner.id));
+    toast({
+      title: "⭐ You're now a fan!",
+      description: `M200 debited. Following ${winner.playerName}!`,
+    });
+  }, [fannedWinners, toast]);
+
+  const handleCardClick = useCallback((winner: SeasonWinner) => {
+    setSelectedWinner(winner);
+    setDrawerOpen(true);
+  }, []);
+
+  const getPositionIcon = (position: string) => {
+    switch (position) {
+      case "1st": return <Crown className="h-4 w-4 text-amber-500" />;
+      case "2nd": return <Medal className="h-4 w-4 text-slate-400" />;
+      case "3rd": return <Medal className="h-4 w-4 text-amber-700" />;
+      default: return <Trophy className="h-4 w-4 text-purple-500" />;
+    }
+  };
+
+  const getMerchantName = (winner: SeasonWinner) => {
+    const season = mockSeasons.find(s => s.id === winner.seasonId);
+    if (!season) return "";
+    const merchant = mockMerchants.find(m => m.id === season.merchantId);
+    return merchant?.name || "";
+  };
+
+  const getSeasonName = (winner: SeasonWinner) => {
+    return mockSeasons.find(s => s.id === winner.seasonId)?.name || "";
+  };
+
+  if (highlightedWinners.length === 0) return null;
+
+  return (
+    <>
+      <div className="px-4 pb-2">
+        <div className="flex items-center gap-1.5 mb-2">
+          <Star className="h-3.5 w-3.5 text-amber-500" fill="currentColor" />
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Highlighted Winners</span>
+        </div>
+        <div
+          ref={scrollRef}
+          className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory touch-pan-x pb-2 -mx-1 px-1"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+          onTouchStart={() => setIsTouching(true)}
+          onTouchEnd={() => setTimeout(() => setIsTouching(false), 5000)}
+        >
+          {highlightedWinners.map((winner) => {
+            const initials = winner.playerName.split(" ").map(n => n[0]).join("");
+            const isFanned = fannedWinners.has(winner.id);
+            const merchantName = getMerchantName(winner);
+
+            return (
+              <div
+                key={winner.id}
+                className="snap-center shrink-0 w-[88px] rounded-xl border bg-gradient-to-b from-amber-50/80 to-background dark:from-amber-950/20 dark:to-background border-amber-200/50 dark:border-amber-800/30 p-2 flex flex-col items-center gap-1.5 cursor-pointer active:scale-95 transition-transform touch-manipulation"
+                onClick={() => handleCardClick(winner)}
+              >
+                {/* Position icon */}
+                {getPositionIcon(winner.position)}
+
+                {/* Avatar */}
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-800/30 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-300 border border-amber-300/40">
+                  {initials}
+                </div>
+
+                {/* Name */}
+                <p className="text-[11px] font-semibold text-center leading-tight truncate w-full">{winner.playerName.split(" ")[0]}</p>
+
+                {/* Rank + Merchant */}
+                <p className="text-[9px] text-muted-foreground text-center leading-tight truncate w-full">
+                  {winner.position} · {merchantName.split(" ")[0]}
+                </p>
+
+                {/* Fan button */}
+                <button
+                  className={`w-full py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-0.5 transition-colors touch-manipulation ${
+                    isFanned
+                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                      : "bg-gradient-to-r from-amber-500 to-orange-500 text-white active:from-amber-600 active:to-orange-600"
+                  }`}
+                  disabled={isFanned}
+                  onClick={(e) => handleFan(e, winner)}
+                >
+                  <Star className="h-3 w-3" fill={isFanned ? "currentColor" : "none"} />
+                  {isFanned ? "Fanned" : "Fan M200"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <QuizWinnerProfileDrawer
+        winner={selectedWinner}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        merchantName={selectedWinner ? getMerchantName(selectedWinner) : undefined}
+        seasonName={selectedWinner ? getSeasonName(selectedWinner) : undefined}
+      />
+    </>
+  );
+}
