@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { mockFriendsList, GROUP_MIN_STAKE, GROUP_MIN_PLAYERS, GROUP_MAX_PLAYERS, GroupQuizFriend } from "@/data/mobigateGroupQuizData";
 import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -97,7 +97,7 @@ export function GroupQuizInviteSheet({ open, onOpenChange }: GroupQuizInviteShee
             </div>
 
             {/* Friends List */}
-            <ScrollArea className="flex-1 max-h-[40vh]">
+            <div className="flex-1 overflow-y-auto touch-auto overscroll-contain max-h-[40vh]">
               <div className="space-y-2 pr-2">
                 {filtered.map((friend) => {
                   const isSelected = selected.includes(friend.id);
@@ -126,7 +126,7 @@ export function GroupQuizInviteSheet({ open, onOpenChange }: GroupQuizInviteShee
                   );
                 })}
               </div>
-            </ScrollArea>
+            </div>
 
             <Button
               className="w-full h-12 bg-gradient-to-r from-purple-500 to-violet-600 text-white"

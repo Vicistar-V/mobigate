@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Heart, MessageCircle, Share2, Star, Radio, Trophy, Flame, Zap } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -111,7 +111,7 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
         </DrawerHeader>
 
         {/* Scrollable player list */}
-        <ScrollArea className="flex-1 max-h-[78vh] px-3 pb-4">
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-3 pb-4">
           <div className="space-y-2.5">
             {players.map((player, idx) => {
               const rank = idx + 1;
@@ -229,7 +229,7 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
               );
             })}
           </div>
-        </ScrollArea>
+        </div>
       </DrawerContent>
     </Drawer>
   );
