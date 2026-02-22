@@ -137,7 +137,7 @@ export default function MerchantApplication() {
                 <h2 className="font-bold text-base">Application Under Review</h2>
                 <p className="text-xs text-muted-foreground">Your corporate merchant application is being reviewed</p>
                 <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400 text-xs">
-                  Estimated: 3–5 business days
+                  Estimated: 14–21 business days
                 </Badge>
               </div>
 
