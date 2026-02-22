@@ -71,6 +71,9 @@ export interface SelectionProcess {
   round: number;
   entriesSelected: number;
   entryFee: number;
+  durationDays?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface TVShowRound {
@@ -78,6 +81,9 @@ export interface TVShowRound {
   entriesSelected: number;
   entryFee: number;
   label: string;
+  durationHours?: number;
+  startDateTime?: string;
+  endDateTime?: string;
 }
 
 export interface QuizMerchant {

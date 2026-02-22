@@ -66,7 +66,7 @@ import {
 } from "@/data/mobigateQuizQuestionsData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-import { format, addMonths, addWeeks } from "date-fns";
+import { format, addMonths, addWeeks, addDays, addHours } from "date-fns";
 
 // Simulate "my merchant" = first approved merchant
 const myMerchant = mockMerchants.find((m) => m.applicationStatus === "approved")!;
@@ -491,21 +491,63 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
               </div>
               {newSelectionRounds.map((sr, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-12 shrink-0">R{sr.round}</span>
-                  <Input type="number" placeholder="Entries" value={sr.entriesSelected}
-                    onChange={(e) => {
-                      const copy = [...newSelectionRounds];
-                      copy[idx] = { ...copy[idx], entriesSelected: +e.target.value };
-                      setNewSelectionRounds(copy);
-                    }} className="h-9 text-xs" />
-                  <Input type="number" placeholder="Fee" value={sr.entryFee}
-                    onChange={(e) => {
-                      const copy = [...newSelectionRounds];
-                      copy[idx] = { ...copy[idx], entryFee: +e.target.value };
-                      setNewSelectionRounds(copy);
-                    }} className="h-9 text-xs w-24 shrink-0" />
+                  <div className="flex-1 overflow-x-auto min-w-0">
+                    <div className="flex items-center gap-2 min-w-max pb-1">
+                      <span className="text-xs text-muted-foreground w-8 shrink-0 font-bold">R{sr.round}</span>
+                      <div className="shrink-0 w-20">
+                        <Label className="text-[10px] text-muted-foreground">Entries</Label>
+                        <Input type="number" placeholder="Entries" value={sr.entriesSelected}
+                          onChange={(e) => {
+                            const copy = [...newSelectionRounds];
+                            copy[idx] = { ...copy[idx], entriesSelected: +e.target.value };
+                            setNewSelectionRounds(copy);
+                          }} className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-20">
+                        <Label className="text-[10px] text-muted-foreground">Fee (₦)</Label>
+                        <Input type="number" placeholder="Fee" value={sr.entryFee}
+                          onChange={(e) => {
+                            const copy = [...newSelectionRounds];
+                            copy[idx] = { ...copy[idx], entryFee: +e.target.value };
+                            setNewSelectionRounds(copy);
+                          }} className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-20">
+                        <Label className="text-[10px] text-muted-foreground">Days</Label>
+                        <Input type="number" placeholder="Days" min={1} value={sr.durationDays || ""}
+                          onChange={(e) => {
+                            const copy = [...newSelectionRounds];
+                            const days = +e.target.value || undefined;
+                            const endDate = days && copy[idx].startDate
+                              ? format(addDays(new Date(copy[idx].startDate!), days), "yyyy-MM-dd")
+                              : copy[idx].endDate;
+                            copy[idx] = { ...copy[idx], durationDays: days, endDate };
+                            setNewSelectionRounds(copy);
+                          }} className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-32">
+                        <Label className="text-[10px] text-muted-foreground">Start Date</Label>
+                        <Input type="date" value={sr.startDate || ""}
+                          onChange={(e) => {
+                            const copy = [...newSelectionRounds];
+                            const startDate = e.target.value || undefined;
+                            const endDate = startDate && copy[idx].durationDays
+                              ? format(addDays(new Date(startDate), copy[idx].durationDays!), "yyyy-MM-dd")
+                              : undefined;
+                            copy[idx] = { ...copy[idx], startDate, endDate };
+                            setNewSelectionRounds(copy);
+                          }} className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-32">
+                        <Label className="text-[10px] text-muted-foreground">End Date</Label>
+                        <Input
+                          value={sr.endDate ? format(new Date(sr.endDate), "MMM d, yyyy") : "—"}
+                          readOnly className="h-9 text-xs bg-muted/30" />
+                      </div>
+                    </div>
+                  </div>
                   {newSelectionRounds.length > 1 && (
-                    <button onClick={() => removeSelectionRound(idx)} className="text-red-500 shrink-0">
+                    <button onClick={() => removeSelectionRound(idx)} className="text-red-500 shrink-0 ml-1">
                       <X className="h-4 w-4" />
                     </button>
                   )}
@@ -525,32 +567,75 @@ function SeasonsTab({ merchantId }: { merchantId: string }) {
                 </Button>
               </div>
               {newTvRounds.map((tv, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Input value={tv.label}
-                      onChange={(e) => {
-                        const copy = [...newTvRounds];
-                        copy[idx] = { ...copy[idx], label: e.target.value };
-                        setNewTvRounds(copy);
-                      }} placeholder="Label" className="h-9 text-xs" />
-                    <Input type="number" value={tv.entriesSelected}
-                      onChange={(e) => {
-                        const copy = [...newTvRounds];
-                        copy[idx] = { ...copy[idx], entriesSelected: +e.target.value };
-                        setNewTvRounds(copy);
-                      }} placeholder="Entries" className="h-9 text-xs w-20 shrink-0" />
-                    <Input type="number" value={tv.entryFee}
-                      onChange={(e) => {
-                        const copy = [...newTvRounds];
-                        copy[idx] = { ...copy[idx], entryFee: +e.target.value };
-                        setNewTvRounds(copy);
-                      }} placeholder="Fee" className="h-9 text-xs w-20 shrink-0" />
-                    {newTvRounds.length > 1 && (
-                      <button onClick={() => removeTvRound(idx)} className="text-red-500 shrink-0">
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="flex-1 overflow-x-auto min-w-0">
+                    <div className="flex items-center gap-2 min-w-max pb-1">
+                      <div className="shrink-0 w-28">
+                        <Label className="text-[10px] text-muted-foreground">Label</Label>
+                        <Input value={tv.label}
+                          onChange={(e) => {
+                            const copy = [...newTvRounds];
+                            copy[idx] = { ...copy[idx], label: e.target.value };
+                            setNewTvRounds(copy);
+                          }} placeholder="Label" className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-20">
+                        <Label className="text-[10px] text-muted-foreground">Entries</Label>
+                        <Input type="number" value={tv.entriesSelected}
+                          onChange={(e) => {
+                            const copy = [...newTvRounds];
+                            copy[idx] = { ...copy[idx], entriesSelected: +e.target.value };
+                            setNewTvRounds(copy);
+                          }} placeholder="Entries" className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-20">
+                        <Label className="text-[10px] text-muted-foreground">Fee (₦)</Label>
+                        <Input type="number" value={tv.entryFee}
+                          onChange={(e) => {
+                            const copy = [...newTvRounds];
+                            copy[idx] = { ...copy[idx], entryFee: +e.target.value };
+                            setNewTvRounds(copy);
+                          }} placeholder="Fee" className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-20">
+                        <Label className="text-[10px] text-muted-foreground">Hours</Label>
+                        <Input type="number" placeholder="Hrs" min={1} value={tv.durationHours || ""}
+                          onChange={(e) => {
+                            const copy = [...newTvRounds];
+                            const hours = +e.target.value || undefined;
+                            const endDateTime = hours && copy[idx].startDateTime
+                              ? format(addHours(new Date(copy[idx].startDateTime!), hours), "yyyy-MM-dd'T'HH:mm")
+                              : copy[idx].endDateTime;
+                            copy[idx] = { ...copy[idx], durationHours: hours, endDateTime };
+                            setNewTvRounds(copy);
+                          }} className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-44">
+                        <Label className="text-[10px] text-muted-foreground">Start Date & Time</Label>
+                        <Input type="datetime-local" value={tv.startDateTime || ""}
+                          onChange={(e) => {
+                            const copy = [...newTvRounds];
+                            const startDateTime = e.target.value || undefined;
+                            const endDateTime = startDateTime && copy[idx].durationHours
+                              ? format(addHours(new Date(startDateTime), copy[idx].durationHours!), "yyyy-MM-dd'T'HH:mm")
+                              : undefined;
+                            copy[idx] = { ...copy[idx], startDateTime, endDateTime };
+                            setNewTvRounds(copy);
+                          }} className="h-9 text-xs" />
+                      </div>
+                      <div className="shrink-0 w-36">
+                        <Label className="text-[10px] text-muted-foreground">End Date & Time</Label>
+                        <Input
+                          value={tv.endDateTime ? format(new Date(tv.endDateTime), "MMM d, yyyy h:mm a") : "—"}
+                          readOnly className="h-9 text-xs bg-muted/30" />
+                      </div>
+                    </div>
                   </div>
+                  {newTvRounds.length > 1 && (
+                    <button onClick={() => removeTvRound(idx)} className="text-red-500 shrink-0 ml-1">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
