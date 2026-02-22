@@ -492,27 +492,26 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
             {/* Comments moved below action buttons */}
 
             {/* Actions - Row 1: Profile, Add Friend, Message, Comment */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               <Button
                 variant="outline"
-                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                className="h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal"
                 onClick={() => { navigate(`/profile/${winner.id}`); onOpenChange(false); }}
               >
-                <Eye className="h-5 w-5" />
+                <Eye className="h-4 w-4 shrink-0" />
                 <span>Profile</span>
               </Button>
               <Button
-                variant="outline"
-                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                className="h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal bg-primary text-primary-foreground hover:bg-primary/90"
                 disabled={friendRequestSent}
                 onClick={handleAddFriend}
               >
-                <UserPlus className="h-5 w-5" />
+                <UserPlus className="h-4 w-4 shrink-0" />
                 <span>{friendRequestSent ? "Sent" : "Add Friend"}</span>
               </Button>
               <Button
                 variant="outline"
-                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                className="h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal"
                 onClick={() => {
                   onOpenChange(false);
                   setTimeout(() => {
@@ -526,12 +525,12 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                   }, 300);
                 }}
               >
-                <MessageCircle className="h-5 w-5" />
+                <MessageCircle className="h-4 w-4 shrink-0" />
                 <span>Message</span>
               </Button>
               <Button
                 variant="outline"
-                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                className={`h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal ${
                   showComments ? "bg-primary/10 text-primary border-primary/30" : ""
                 }`}
                 onClick={() => {
@@ -542,35 +541,35 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                   }
                 }}
               >
-                <MessageSquare className="h-5 w-5" />
+                <MessageSquare className="h-4 w-4 shrink-0" />
                 <span>Comment</span>
               </Button>
             </div>
 
             {/* Actions - Row 2: Like, Follow, Join Fan, Share */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               <Button
                 variant="outline"
-                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                className={`h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal ${
                   isLiked ? "bg-red-500/10 text-red-600 border-red-500/30" : ""
                 }`}
                 onClick={handleLike}
               >
-                <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
+                <Heart className="h-4 w-4 shrink-0" fill={isLiked ? "currentColor" : "none"} />
                 <span>{isLiked ? "Liked" : "Like"}</span>
               </Button>
               <Button
                 variant="outline"
-                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                className={`h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal ${
                   isFollowing ? "bg-blue-500/10 text-blue-600 border-blue-500/30" : ""
                 }`}
                 onClick={handleFollow}
               >
-                <Users className="h-5 w-5" />
+                <Users className="h-4 w-4 shrink-0" />
                 <span>{isFollowing ? "Following" : "Follow"}</span>
               </Button>
               <Button
-                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                className={`h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal ${
                   isFan
                     ? "bg-amber-500/15 text-amber-700 border border-amber-500/30 hover:bg-amber-500/20"
                     : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
@@ -578,15 +577,14 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                 disabled={isFan}
                 onClick={handleJoinFanClick}
               >
-                <span className="text-sm font-bold leading-tight">{isFan ? "Joined" : "Join"}</span>
-                {!isFan && <span className="text-sm font-bold leading-tight -mt-1">Fans</span>}
+                <span className="text-xs font-bold leading-tight">{isFan ? "Joined" : "Join Fans"}</span>
               </Button>
               <Button
                 variant="outline"
-                className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
+                className="h-16 text-[11px] touch-manipulation active:scale-[0.97] flex flex-col items-center justify-center gap-1 px-0.5 leading-tight text-center whitespace-normal"
                 onClick={handleShare}
               >
-                <Share2 className="h-5 w-5" />
+                <Share2 className="h-4 w-4 shrink-0" />
                 <span>Share</span>
               </Button>
             </div>
