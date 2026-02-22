@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Store, CheckCircle, Star, MapPin, Search, ChevronDown, Globe, Building2, Map, Home } from "lucide-react";
+import { Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home } from "lucide-react";
 import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,7 +36,11 @@ export default function MerchantListingPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const countries = useMemo(() => getUniqueCountries(), []);
-  const states = useMemo(() => getNigerianStatesForFilter(), []);
+  const states = useMemo(() => {
+    // Only show Nigerian states when Nigeria is selected
+    if (selectedCountry === "ng") return getNigerianStatesForFilter();
+    return [];
+  }, [selectedCountry]);
   const lgas = useMemo(() => (selectedState ? getLGAsForState(selectedState) : []), [selectedState]);
   const cities = useMemo(() => (selectedLGA ? getCitiesForLGA(selectedLGA) : []), [selectedLGA]);
 
@@ -50,6 +53,28 @@ export default function MerchantListingPage() {
     setSearchQuery("");
   };
 
+  const handleCountryChange = (v: string) => {
+    setSelectedCountry(v === "all" ? "" : v);
+    setSelectedState("");
+    setSelectedLGA("");
+    setSelectedCity("");
+  };
+
+  const handleStateChange = (v: string) => {
+    setSelectedState(v === "all" ? "" : v);
+    setSelectedLGA("");
+    setSelectedCity("");
+  };
+
+  const handleLGAChange = (v: string) => {
+    setSelectedLGA(v === "all" ? "" : v);
+    setSelectedCity("");
+  };
+
+  const handleCityChange = (v: string) => {
+    setSelectedCity(v === "all" ? "" : v);
+  };
+
   const filteredMerchants = useMemo(() => {
     let list = allLocationMerchants.filter(m => m.isActive);
 
@@ -58,31 +83,28 @@ export default function MerchantListingPage() {
       list = list.filter(m => m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
     }
 
-    switch (viewMode) {
-      case "country":
-        if (selectedCountry) list = list.filter(m => m.countryId === selectedCountry);
-        break;
-      case "state":
-        if (selectedState) list = list.filter(m => m.stateId === selectedState);
-        else list = list.filter(m => m.countryId === "ng");
-        break;
-      case "lga":
-        if (selectedLGA) list = list.filter(m => m.lgaId === selectedLGA);
-        else if (selectedState) list = list.filter(m => m.stateId === selectedState);
-        else list = list.filter(m => m.countryId === "ng");
-        break;
-      case "city":
-        if (selectedCity) list = list.filter(m => m.cityId === selectedCity);
-        else if (selectedLGA) list = list.filter(m => m.lgaId === selectedLGA);
-        else if (selectedState) list = list.filter(m => m.stateId === selectedState);
-        else list = list.filter(m => m.countryId === "ng");
-        break;
+    // Apply cascading filters — most specific filter wins
+    if (selectedCity) {
+      list = list.filter(m => m.cityId === selectedCity);
+    } else if (selectedLGA) {
+      list = list.filter(m => m.lgaId === selectedLGA);
+    } else if (selectedState) {
+      list = list.filter(m => m.stateId === selectedState);
+    } else if (selectedCountry) {
+      list = list.filter(m => m.countryId === selectedCountry);
     }
 
     return list;
-  }, [viewMode, selectedCountry, selectedState, selectedLGA, selectedCity, searchQuery]);
+  }, [selectedCountry, selectedState, selectedLGA, selectedCity, searchQuery]);
 
-  const ViewIcon = viewModeConfig[viewMode].icon;
+  // Determine which dropdowns to show based on view mode
+  const showCountry = true; // Always show country
+  const showState = viewMode === "state" || viewMode === "lga" || viewMode === "city";
+  const showLGA = viewMode === "lga" || viewMode === "city";
+  const showCity = viewMode === "city";
+
+  // Check if Nigeria is selected (states/LGA/city only available for Nigeria)
+  const isNigeria = selectedCountry === "ng";
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -137,11 +159,12 @@ export default function MerchantListingPage() {
             />
           </div>
 
-          {/* Dropdown filters */}
-          <div className="flex gap-2 flex-wrap">
-            {viewMode === "country" && (
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger className="h-10 flex-1 min-w-[140px] text-sm">
+          {/* Cascading Dropdown filters — stacked vertically for mobile */}
+          <div className="space-y-2">
+            {/* Country — always visible */}
+            {showCountry && (
+              <Select value={selectedCountry || "all"} onValueChange={handleCountryChange}>
+                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
                   <SelectValue placeholder="All Countries" />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,9 +176,10 @@ export default function MerchantListingPage() {
               </Select>
             )}
 
-            {(viewMode === "state" || viewMode === "lga" || viewMode === "city") && (
-              <Select value={selectedState} onValueChange={v => { setSelectedState(v === "all" ? "" : v); setSelectedLGA(""); setSelectedCity(""); }}>
-                <SelectTrigger className="h-10 flex-1 min-w-[130px] text-sm">
+            {/* State — show when tab is state/lga/city AND Nigeria is selected */}
+            {showState && isNigeria && states.length > 0 && (
+              <Select value={selectedState || "all"} onValueChange={handleStateChange}>
+                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
                   <SelectValue placeholder="All States" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,13 +191,21 @@ export default function MerchantListingPage() {
               </Select>
             )}
 
-            {(viewMode === "lga" || viewMode === "city") && selectedState && (
-              <Select value={selectedLGA} onValueChange={v => { setSelectedLGA(v === "all" ? "" : v); setSelectedCity(""); }}>
-                <SelectTrigger className="h-10 flex-1 min-w-[130px] text-sm">
-                  <SelectValue placeholder="All LGAs" />
+            {/* State hint for non-Nigeria */}
+            {showState && !isNigeria && selectedCountry && (
+              <p className="text-xs text-muted-foreground italic px-1">
+                State/Province data is currently available for Nigeria only. Select 🇳🇬 Nigeria to browse by state.
+              </p>
+            )}
+
+            {/* LGA — show when tab is lga/city AND a state is selected */}
+            {showLGA && selectedState && lgas.length > 0 && (
+              <Select value={selectedLGA || "all"} onValueChange={handleLGAChange}>
+                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
+                  <SelectValue placeholder="All LGAs / Counties" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All LGAs</SelectItem>
+                  <SelectItem value="all">All LGAs / Counties</SelectItem>
                   {lgas.map(l => (
                     <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                   ))}
@@ -181,13 +213,14 @@ export default function MerchantListingPage() {
               </Select>
             )}
 
-            {viewMode === "city" && selectedLGA && (
-              <Select value={selectedCity} onValueChange={v => setSelectedCity(v === "all" ? "" : v)}>
-                <SelectTrigger className="h-10 flex-1 min-w-[130px] text-sm">
-                  <SelectValue placeholder="All Cities" />
+            {/* City — show when tab is city AND an LGA is selected */}
+            {showCity && selectedLGA && cities.length > 0 && (
+              <Select value={selectedCity || "all"} onValueChange={handleCityChange}>
+                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
+                  <SelectValue placeholder="All Cities / Towns" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Cities</SelectItem>
+                  <SelectItem value="all">All Cities / Towns</SelectItem>
                   {cities.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
@@ -212,7 +245,7 @@ export default function MerchantListingPage() {
             </div>
           ) : (
             filteredMerchants.map(merchant => (
-              <MerchantCard key={merchant.id} merchant={merchant} viewMode={viewMode} onClick={() => navigate(`/merchant-home/m1`)} />
+              <MerchantCard key={merchant.id} merchant={merchant} onClick={() => navigate(`/merchant-home/m1`)} />
             ))
           )}
         </div>
@@ -221,7 +254,7 @@ export default function MerchantListingPage() {
   );
 }
 
-function MerchantCard({ merchant, viewMode, onClick }: { merchant: LocationMerchant; viewMode: ViewMode; onClick: () => void }) {
+function MerchantCard({ merchant, onClick }: { merchant: LocationMerchant; onClick: () => void }) {
   return (
     <Card
       className="p-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 border-l-primary/60"
@@ -248,10 +281,9 @@ function MerchantCard({ merchant, viewMode, onClick }: { merchant: LocationMerch
             )}
             <span className="text-xs text-muted-foreground flex items-center gap-0.5">
               <MapPin className="h-3 w-3" />
-              {viewMode === "country" && <>{merchant.countryFlag} {merchant.countryName}</>}
-              {viewMode === "state" && <>{merchant.stateName || merchant.countryName}</>}
-              {viewMode === "lga" && <>{merchant.lgaName || merchant.stateName || merchant.countryName}</>}
-              {viewMode === "city" && <>{merchant.cityName || merchant.lgaName || merchant.countryName}</>}
+              {merchant.cityName && <>{merchant.cityName}, </>}
+              {merchant.stateName && <>{merchant.stateName}, </>}
+              {merchant.countryFlag} {merchant.countryName}
             </span>
           </div>
         </div>
