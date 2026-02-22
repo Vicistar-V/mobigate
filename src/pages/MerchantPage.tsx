@@ -56,6 +56,16 @@ import {
   Shield,
 } from "lucide-react";
 import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   mockMerchants,
@@ -1713,6 +1723,7 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
   const [highlightedWinners, setHighlightedWinners] = useState<Set<string>>(new Set());
   const [selectedWinner, setSelectedWinner] = useState<SeasonWinner | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [highlightConfirmWinner, setHighlightConfirmWinner] = useState<SeasonWinner | null>(null);
   const { toast } = useToast();
 
   const toggleHighlight = (winnerId: string) => {
@@ -1868,59 +1879,79 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                 {topWinners.map((winner) => (
                   <div
                     key={winner.id}
-                    className={`rounded-xl border p-3 relative ${getPositionBg(winner.position)} cursor-pointer active:scale-[0.98] transition-transform touch-manipulation`}
+                    className={`rounded-xl border p-3 ${getPositionBg(winner.position)} cursor-pointer active:scale-[0.98] transition-transform touch-manipulation`}
                     onClick={() => { setSelectedWinner(winner); setDrawerOpen(true); }}
                   >
-                    {/* Highlight Star Button */}
-                    <button
-                      className="absolute top-2 right-2 h-8 w-8 flex items-center justify-center rounded-full bg-background/80 border shadow-sm active:scale-90 transition-transform touch-manipulation z-10"
-                      onClick={(e) => { e.stopPropagation(); toggleHighlight(winner.id); }}
-                    >
-                      <Star
-                        className={`h-4 w-4 ${highlightedWinners.has(winner.id) ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`}
+                    {/* Row 1: Position + Avatar + Name + Payout */}
+                    <div className="flex items-center gap-2.5">
+                      <div className="shrink-0">{getPositionIcon(winner.position)}</div>
+                      <img
+                        src={winner.playerAvatar}
+                        alt={winner.playerName}
+                        className="h-11 w-11 rounded-lg object-cover shrink-0"
                       />
-                    </button>
-                    <div className="flex items-start gap-3">
-                      {/* Avatar + Position */}
-                      <div className="flex flex-col items-center gap-1 shrink-0">
-                        {getPositionIcon(winner.position)}
-                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                          {winner.playerName.split(" ").map((n) => n[0]).join("")}
-                        </div>
-                      </div>
-                      {/* Info */}
-                      <div className="flex-1 min-w-0 pr-6">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-bold truncate">{winner.playerName}</p>
-                          {getPayoutBadge(winner.payoutStatus)}
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate">{winner.playerName}</p>
                         <p className="text-xs text-muted-foreground">{winner.state}, {winner.country}</p>
-                        <div className="flex items-center justify-between mt-1.5">
-                          <p className="text-sm font-bold text-primary">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
-                          <p className="text-xs text-muted-foreground">Score: {winner.score}%</p>
-                        </div>
-                        {/* Tier / Fans / Followers / Share row */}
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 bg-blue-500/10 text-blue-700 border-blue-500/30">
-                            <Shield className="h-2.5 w-2.5" /> T{winner.tier}
-                          </Badge>
-                          <span className="text-[10px] text-muted-foreground">{winner.fans >= 1000 ? `${(winner.fans/1000).toFixed(1)}K` : winner.fans} fans</span>
-                          <span className="text-[10px] text-muted-foreground">{winner.followers >= 1000 ? `${(winner.followers/1000).toFixed(1)}K` : winner.followers} followers</span>
-                          <button
-                            className="ml-auto h-6 w-6 flex items-center justify-center rounded-full bg-muted/50 active:scale-90 transition-transform touch-manipulation"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const url = `${window.location.origin}/profile/${winner.id}`;
+                      </div>
+                      <div className="shrink-0">{getPayoutBadge(winner.payoutStatus)}</div>
+                    </div>
+
+                    {/* Row 2: Prize + Score + Date */}
+                    <div className="flex items-center justify-between mt-2 px-0.5">
+                      <p className="text-sm font-bold text-primary">{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
+                      <p className="text-xs text-muted-foreground">Score: {winner.score}%</p>
+                      <p className="text-xs text-muted-foreground">{format(new Date(winner.completionDate), "MMM dd, yyyy")}</p>
+                    </div>
+
+                    {/* Row 3: Tier + Fans + Followers + Highlight + Share */}
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 bg-blue-500/10 text-blue-700 border-blue-500/30">
+                        <Shield className="h-2.5 w-2.5" /> T{winner.tier}
+                      </Badge>
+                      <span className="text-[10px] text-muted-foreground">{winner.fans >= 1000 ? `${(winner.fans/1000).toFixed(1)}K` : winner.fans} fans</span>
+                      <span className="text-[10px] text-muted-foreground">{winner.followers >= 1000 ? `${(winner.followers/1000).toFixed(1)}K` : winner.followers} flw</span>
+
+                      <div className="ml-auto flex items-center gap-1.5">
+                        {/* Highlight Button */}
+                        <button
+                          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border active:scale-95 transition-transform touch-manipulation ${
+                            highlightedWinners.has(winner.id)
+                              ? "bg-amber-500/15 text-amber-700 border-amber-500/40"
+                              : "bg-muted/50 text-muted-foreground border-border"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (highlightedWinners.has(winner.id)) {
+                              toggleHighlight(winner.id);
+                            } else {
+                              setHighlightConfirmWinner(winner);
+                            }
+                          }}
+                        >
+                          <Star className={`h-3 w-3 ${highlightedWinners.has(winner.id) ? "fill-amber-500 text-amber-500" : ""}`} />
+                          {highlightedWinners.has(winner.id) ? "Highlighted" : "Highlight"}
+                        </button>
+
+                        {/* Share Button */}
+                        <button
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border bg-muted/50 text-muted-foreground border-border active:scale-95 transition-transform touch-manipulation"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const url = `${window.location.origin}/profile/${winner.id}`;
+                            if (navigator.share) {
+                              try {
+                                await navigator.share({ title: `${winner.playerName} - Quiz Winner`, url });
+                              } catch {}
+                            } else {
                               navigator.clipboard.writeText(url);
                               toast({ title: "Link copied!", description: "Winner profile link copied" });
-                            }}
-                          >
-                            <Share2 className="h-3 w-3 text-muted-foreground" />
-                          </button>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {format(new Date(winner.completionDate), "MMM dd, yyyy")}
-                        </p>
+                            }
+                          }}
+                        >
+                          <Share2 className="h-3 w-3" />
+                          Share
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1948,15 +1979,13 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
                       <div className="mt-2 space-y-1.5">
                         {consolationWinners.map((winner) => (
                           <div key={winner.id} className="flex items-center gap-3 p-2.5 rounded-lg border bg-muted/20">
-                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold shrink-0">
-                              {winner.playerName.split(" ").map((n) => n[0]).join("")}
-                            </div>
+                            <img src={winner.playerAvatar} alt={winner.playerName} className="h-8 w-8 rounded-lg object-cover shrink-0" />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-semibold truncate">{winner.playerName}</p>
                               <p className="text-xs text-muted-foreground">{winner.state} · Score: {winner.score}%</p>
                             </div>
                             <div className="text-right shrink-0">
-                              <p className="text-xs font-bold">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
+                              <p className="text-xs font-bold">{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
                               {getPayoutBadge(winner.payoutStatus)}
                             </div>
                           </div>
@@ -1996,6 +2025,32 @@ function WinnersTab({ merchantId }: { merchantId: string }) {
           </Card>
         );
       })}
+
+      {/* Highlight Confirmation Dialog */}
+      <AlertDialog open={!!highlightConfirmWinner} onOpenChange={(open) => !open && setHighlightConfirmWinner(null)}>
+        <AlertDialogContent className="max-w-[90vw] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Highlight Winner?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will feature <span className="font-semibold text-foreground">{highlightConfirmWinner?.playerName}</span> in the quiz carousel for all visitors to see.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-xl"
+              onClick={() => {
+                if (highlightConfirmWinner) {
+                  toggleHighlight(highlightConfirmWinner.id);
+                  setHighlightConfirmWinner(null);
+                }
+              }}
+            >
+              <Star className="h-4 w-4 mr-1.5" /> Highlight
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Winner Profile Drawer */}
       <QuizWinnerProfileDrawer
