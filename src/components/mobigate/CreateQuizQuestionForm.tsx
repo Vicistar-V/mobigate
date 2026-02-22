@@ -20,7 +20,9 @@ interface Props {
 const DIFFICULTIES: QuizDifficulty[] = ["Easy", "Medium", "Hard", "Expert"];
 
 export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
-  const [category, setCategory] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
   const [difficulty, setDifficulty] = useState<QuizDifficulty>("Medium");
   const [questionText, setQuestionText] = useState("");
   const [options, setOptions] = useState<string[]>(Array(8).fill(""));
@@ -33,13 +35,29 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
     setOptions(prev => prev.map((o, i) => (i === idx ? val : o)));
   };
 
+  const resolvedCategories = [
+    ...selectedCategories,
+    ...(showCustomCategory && customCategory.trim() ? [customCategory.trim()] : []),
+  ];
+
+  const toggleCategory = (cat: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCategories(prev => [...prev, cat]);
+    } else {
+      setSelectedCategories(prev => prev.filter(c => c !== cat));
+    }
+  };
+
+  const allPresetsSelected = PRESET_QUIZ_CATEGORIES.every(c => selectedCategories.includes(c));
+
   const handleSubmit = () => {
-    if (!category || !questionText.trim() || options.some(o => !o.trim())) return;
+    if (resolvedCategories.length === 0 || !questionText.trim() || options.some(o => !o.trim())) return;
+    // Create the question for the first category (questions have a single category field)
     onCreateQuestion({
       question: questionText.trim(),
       options: options.map(o => o.trim()) as AdminQuizQuestion["options"],
       correctAnswerIndex: correctIndex,
-      category,
+      category: resolvedCategories[0],
       difficulty,
       timeLimit,
       points,
@@ -53,9 +71,12 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
     setCorrectIndex(0);
     setTimeLimit(10);
     setPoints(10);
+    setSelectedCategories([]);
+    setShowCustomCategory(false);
+    setCustomCategory("");
   };
 
-  const isValid = category && questionText.trim() && options.every(o => o.trim());
+  const isValid = resolvedCategories.length > 0 && questionText.trim() && options.every(o => o.trim());
 
   return (
     <Card>
@@ -66,19 +87,66 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0 px-4 pb-4">
-        {/* Category - full width */}
+        {/* Category - multi-select checkboxes */}
         <div className="space-y-1.5">
-          <Label className="text-xs">Category</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="h-12 text-base">
-              <SelectValue placeholder="Select category..." />
-            </SelectTrigger>
-            <SelectContent>
-              {PRESET_QUIZ_CATEGORIES.map(c => (
-                <SelectItem key={c} value={c} className="text-sm">{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Category</Label>
+            {selectedCategories.length > 0 && (
+              <button
+                type="button"
+                className="text-[11px] text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
+                onClick={() => setSelectedCategories([])}
+              >
+                Deselect All
+              </button>
+            )}
+          </div>
+          <div className="border border-border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto touch-auto">
+            <label className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation min-h-[44px]">
+              <Checkbox
+                checked={allPresetsSelected}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setSelectedCategories([...PRESET_QUIZ_CATEGORIES]);
+                  } else {
+                    setSelectedCategories([]);
+                  }
+                }}
+              />
+              <span className="text-sm font-medium">All Categories ({PRESET_QUIZ_CATEGORIES.length})</span>
+            </label>
+            <div className="border-t border-border/40" />
+            {PRESET_QUIZ_CATEGORIES.map(cat => (
+              <label key={cat} className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation min-h-[44px]">
+                <Checkbox
+                  checked={selectedCategories.includes(cat)}
+                  onCheckedChange={(checked) => toggleCategory(cat, !!checked)}
+                />
+                <span className="text-sm">{cat}</span>
+              </label>
+            ))}
+            <div className="border-t border-border/40" />
+            <label className="flex items-center gap-2.5 py-1 cursor-pointer touch-manipulation min-h-[44px]">
+              <Checkbox
+                checked={showCustomCategory}
+                onCheckedChange={(checked) => setShowCustomCategory(!!checked)}
+              />
+              <span className="text-sm font-medium text-primary">Custom (Specify)</span>
+            </label>
+          </div>
+          {showCustomCategory && (
+            <Input
+              placeholder="Type custom category name"
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              className="h-12 text-base touch-manipulation"
+            />
+          )}
+          <p className="text-[10px] text-muted-foreground">
+            {resolvedCategories.length > 0
+              ? `${resolvedCategories.length} categor${resolvedCategories.length === 1 ? "y" : "ies"} selected.`
+              : "Select at least one category."}
+          </p>
         </div>
 
         {/* Difficulty - full width */}
