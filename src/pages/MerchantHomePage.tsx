@@ -47,7 +47,7 @@ export default function MerchantHomePage() {
       ? { id: locationMerchant.id, name: locationMerchant.name, logo: locationMerchant.logo, category: locationMerchant.category, isVerified: locationMerchant.isVerified }
       : undefined;
 
-  const homeData = merchantId ? getMerchantHomeData(merchantId) : undefined;
+  const homeData = merchantId ? getMerchantHomeData(merchantId) : null;
   const seasons = mockSeasons.filter(s => s.merchantId === merchantId);
 
   const upcomingSeasons = seasons.filter(s => s.status === "open" || s.status === "in_progress" || s.isLive);
