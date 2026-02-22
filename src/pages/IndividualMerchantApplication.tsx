@@ -7,21 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Store, ChevronDown, Clock, Shield, ArrowLeft, CreditCard,
-  FileText, Users, BookOpen, UserPlus, User, Mail, Phone
+  FileText, Users, BookOpen, UserPlus, User, Mail, Phone,
+  MapPin, Building, Globe, Landmark, BadgeCheck, Plus, Minus
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-
-const MOCK_USER = {
-  name: "Adewale Johnson",
-  email: "adewale.johnson@email.com",
-  phone: "+234 812 345 6789",
-  username: "adewale_j",
-  verifiedDays: 245,
-};
 
 const requirements = [
   { icon: Shield, text: "Must be a verified user for minimum 180 days" },
@@ -36,6 +30,51 @@ const requirements = [
   { icon: CreditCard, text: "Purchased Vouchers can be credited to wallet, sent as e-PIN, or gifted" },
 ];
 
+const genderOptions = ["Male", "Female"];
+const maritalStatusOptions = ["Single", "Married", "Divorced", "Separated", "Widowed", "Complicated"];
+const verificationTypes = [
+  "National Identification Number (NIN)",
+  "National Driver's Licence Number",
+  "International Passport Number",
+  "Permanent Voter's Card",
+  "National Insurance Security Number",
+  "National Health Insurance Number",
+  "Other",
+];
+
+const currencyOptions = [
+  { value: "NGN", label: "Nigerian Naira (₦)" },
+  { value: "USD", label: "US Dollar ($)" },
+  { value: "GBP", label: "British Pound (£)" },
+  { value: "EUR", label: "Euro (€)" },
+  { value: "GHS", label: "Ghanaian Cedi (₵)" },
+  { value: "KES", label: "Kenyan Shilling (KSh)" },
+  { value: "ZAR", label: "South African Rand (R)" },
+  { value: "INR", label: "Indian Rupee (₹)" },
+  { value: "CNY", label: "Chinese Yuan (¥)" },
+  { value: "JPY", label: "Japanese Yen (¥)" },
+];
+
+function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
+  return (
+    <div className="border-b border-border pb-1.5 mb-3 flex items-center gap-2">
+      <Icon className="h-3.5 w-3.5 text-primary" />
+      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
+    </div>
+  );
+}
+
+function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs font-medium">
+        {label} {required && <span className="text-destructive">*</span>}
+      </Label>
+      {children}
+    </div>
+  );
+}
+
 export default function IndividualMerchantApplication() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -45,9 +84,73 @@ export default function IndividualMerchantApplication() {
   const [submitted, setSubmitted] = useState(false);
   const [refNumber, setRefNumber] = useState("");
 
+  // Personal Data
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobYear, setDobYear] = useState("");
+  const [birthTown, setBirthTown] = useState("");
+  const [birthLGA, setBirthLGA] = useState("");
+  const [birthState, setBirthState] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [profession, setProfession] = useState("");
+
+  // Contact Details
+  const [hometownAddress, setHometownAddress] = useState("");
+  const [nearestTown, setNearestTown] = useState("");
+  const [lgaOfOrigin, setLgaOfOrigin] = useState("");
+  const [stateOfOrigin, setStateOfOrigin] = useState("");
+  const [nationality, setNationality] = useState("");
+  const [currentAddress, setCurrentAddress] = useState("");
+  const [townOfResidence, setTownOfResidence] = useState("");
+  const [lgaOfResidence, setLgaOfResidence] = useState("");
+  const [stateOfResidence, setStateOfResidence] = useState("");
+  const [countryOfResidence, setCountryOfResidence] = useState("");
+  const [phone1, setPhone1] = useState("");
+  const [phone2, setPhone2] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Banking
+  const [bankEntries, setBankEntries] = useState([{ bankName: "", accountName: "", accountNumber: "" }]);
+
+  // Application Data
+  const [preferredCurrency, setPreferredCurrency] = useState("NGN");
+
+  // Verification
+  const [verifications, setVerifications] = useState([{ type: "", number: "" }]);
+
+  const addBankEntry = () => {
+    if (bankEntries.length < 3) setBankEntries([...bankEntries, { bankName: "", accountName: "", accountNumber: "" }]);
+  };
+  const removeBankEntry = (i: number) => {
+    if (bankEntries.length > 1) setBankEntries(bankEntries.filter((_, idx) => idx !== i));
+  };
+  const updateBank = (i: number, field: string, value: string) => {
+    const updated = [...bankEntries];
+    (updated[i] as any)[field] = value;
+    setBankEntries(updated);
+  };
+
+  const addVerification = () => {
+    if (verifications.length < 4) setVerifications([...verifications, { type: "", number: "" }]);
+  };
+  const removeVerification = (i: number) => {
+    if (verifications.length > 1) setVerifications(verifications.filter((_, idx) => idx !== i));
+  };
+  const updateVerification = (i: number, field: string, value: string) => {
+    const updated = [...verifications];
+    (updated[i] as any)[field] = value;
+    setVerifications(updated);
+  };
+
+  const isFormValid = firstName && lastName && gender && dobDay && dobMonth && dobYear && nationality && phone1 && email && acceptedPolicies;
+
   const handleSubmit = () => {
-    if (!acceptedPolicies) {
-      toast({ title: "Accept Terms", description: "You must agree to the terms before submitting.", variant: "destructive" });
+    if (!isFormValid) {
+      toast({ title: "Incomplete Form", description: "Please fill all required fields and accept the terms.", variant: "destructive" });
       return;
     }
     const ref = generateTransactionReference("MERCH-IND");
@@ -64,7 +167,6 @@ export default function IndividualMerchantApplication() {
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1 -ml-2">
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
-
           <Card className="border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/10">
             <CardContent className="p-5 space-y-4">
               <div className="flex flex-col items-center text-center gap-3">
@@ -77,33 +179,14 @@ export default function IndividualMerchantApplication() {
                   Estimated: 3–5 business days
                 </Badge>
               </div>
-
               <div className="bg-background rounded-lg p-3 space-y-2 border text-xs">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Reference</span>
-                  <span className="font-mono font-bold">{refNumber}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Type</span>
-                  <Badge variant="secondary" className="text-[10px] h-5">Individual</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Name</span>
-                  <span className="font-medium">{MOCK_USER.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Email</span>
-                  <span className="font-medium">{MOCK_USER.email}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Fee Paid</span>
-                  <span className="font-medium text-primary">{formatMobi(50000)}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Reference</span><span className="font-mono font-bold">{refNumber}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Type</span><Badge variant="secondary" className="text-[10px] h-5">Individual</Badge></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{firstName} {middleName} {lastName}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{email}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Fee Paid</span><span className="font-medium text-primary">{formatMobi(50000)}</span></div>
               </div>
-
-              <p className="text-[11px] text-center text-muted-foreground">
-                You will be notified once your application has been reviewed. This screen will update with your approval status.
-              </p>
+              <p className="text-[11px] text-center text-muted-foreground">You will be notified once your application has been reviewed.</p>
             </CardContent>
           </Card>
         </div>
@@ -111,10 +194,11 @@ export default function IndividualMerchantApplication() {
     );
   }
 
+  const inputCls = "h-9 text-sm";
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <Header />
-
       <div className="p-4 max-w-lg mx-auto space-y-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1 -ml-2">
           <ArrowLeft className="h-4 w-4" /> Back
@@ -155,66 +239,199 @@ export default function IndividualMerchantApplication() {
           </Card>
         </Collapsible>
 
-        {/* Your Account Details (auto-filled, read-only) */}
+        {/* ─── PERSONAL DATA ─── */}
         <Card>
           <CardContent className="p-4 space-y-3">
-            <div className="border-b border-border pb-1 mb-3">
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Your Account Details</p>
+            <SectionHeader icon={User} title="Personal Data" />
+
+            <div className="grid grid-cols-1 gap-3">
+              <FormField label="First Name" required>
+                <Input className={inputCls} placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)} />
+              </FormField>
+              <FormField label="Middle Name">
+                <Input className={inputCls} placeholder="Middle name" value={middleName} onChange={e => setMiddleName(e.target.value)} />
+              </FormField>
+              <FormField label="Last Name (Surname)" required>
+                <Input className={inputCls} placeholder="Surname" value={lastName} onChange={e => setLastName(e.target.value)} />
+              </FormField>
             </div>
-            <p className="text-[10px] text-muted-foreground">
-              The following details are captured from your Mobigate account and cannot be edited.
-            </p>
+
+            <FormField label="Gender" required>
+              <Select value={gender} onValueChange={setGender}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                <SelectContent>
+                  {genderOptions.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </FormField>
+
+            <FormField label="Date of Birth" required>
+              <div className="grid grid-cols-3 gap-2">
+                <Input className={inputCls} placeholder="DD" maxLength={2} value={dobDay} onChange={e => setDobDay(e.target.value.replace(/\D/g, ""))} />
+                <Input className={inputCls} placeholder="MM" maxLength={2} value={dobMonth} onChange={e => setDobMonth(e.target.value.replace(/\D/g, ""))} />
+                <Input className={inputCls} placeholder="YYYY" maxLength={4} value={dobYear} onChange={e => setDobYear(e.target.value.replace(/\D/g, ""))} />
+              </div>
+            </FormField>
 
             <div className="space-y-1">
-              <Label className="text-xs font-medium">Full Name</Label>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/40 border border-border/50">
-                <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="text-sm font-medium">{MOCK_USER.name}</span>
+              <Label className="text-xs font-medium">Place of Birth</Label>
+              <div className="grid grid-cols-1 gap-2">
+                <Input className={inputCls} placeholder="Town / City" value={birthTown} onChange={e => setBirthTown(e.target.value)} />
+                <Input className={inputCls} placeholder="Local Govt / District / County" value={birthLGA} onChange={e => setBirthLGA(e.target.value)} />
+                <Input className={inputCls} placeholder="State / Province" value={birthState} onChange={e => setBirthState(e.target.value)} />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Email Address</Label>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/40 border border-border/50">
-                <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="text-sm">{MOCK_USER.email}</span>
-              </div>
-            </div>
+            <FormField label="Marital Status" required>
+              <Select value={maritalStatus} onValueChange={setMaritalStatus}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select status" /></SelectTrigger>
+                <SelectContent>
+                  {maritalStatusOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </FormField>
 
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Phone Number</Label>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/40 border border-border/50">
-                <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="text-sm">{MOCK_USER.phone}</span>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Username</Label>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/40 border border-border/50">
-                <span className="text-sm text-muted-foreground">@</span>
-                <span className="text-sm">{MOCK_USER.username}</span>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Account Verified</Label>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-800/30">
-                <Shield className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">{MOCK_USER.verifiedDays} days</span>
-                <Badge variant="outline" className="text-[9px] h-4 border-emerald-300 text-emerald-600 ml-auto">Eligible</Badge>
-              </div>
-            </div>
+            <FormField label="Profession / Occupation" required>
+              <Input className={inputCls} placeholder="e.g. Software Engineer" value={profession} onChange={e => setProfession(e.target.value)} />
+            </FormField>
           </CardContent>
         </Card>
 
-        {/* Application Fee Info */}
+        {/* ─── CONTACT DETAILS ─── */}
         <Card>
           <CardContent className="p-4 space-y-3">
-            <div className="border-b border-border pb-1 mb-3">
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Application Fee</p>
+            <SectionHeader icon={MapPin} title="Contact Details" />
+
+            <FormField label="Permanent Home-Town Address" required>
+              <Input className={inputCls} placeholder="Full home-town address" value={hometownAddress} onChange={e => setHometownAddress(e.target.value)} />
+            </FormField>
+            <FormField label="Nearest Town/City to Home-Town">
+              <Input className={inputCls} placeholder="Nearest town or city" value={nearestTown} onChange={e => setNearestTown(e.target.value)} />
+            </FormField>
+            <FormField label="Local Govt / District of Origin">
+              <Input className={inputCls} placeholder="LGA / District of origin" value={lgaOfOrigin} onChange={e => setLgaOfOrigin(e.target.value)} />
+            </FormField>
+            <FormField label="State / Province of Origin">
+              <Input className={inputCls} placeholder="State / Province" value={stateOfOrigin} onChange={e => setStateOfOrigin(e.target.value)} />
+            </FormField>
+            <FormField label="Nationality" required>
+              <Input className={inputCls} placeholder="e.g. Nigerian" value={nationality} onChange={e => setNationality(e.target.value)} />
+            </FormField>
+
+            <div className="border-t border-border pt-3 mt-2">
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">Current Residence</p>
             </div>
 
+            <FormField label="Current Address (Descriptive)" required>
+              <Input className={inputCls} placeholder="Full current address" value={currentAddress} onChange={e => setCurrentAddress(e.target.value)} />
+            </FormField>
+            <FormField label="Town / City of Residence">
+              <Input className={inputCls} placeholder="Town / City" value={townOfResidence} onChange={e => setTownOfResidence(e.target.value)} />
+            </FormField>
+            <FormField label="Local Govt / District / County of Residence">
+              <Input className={inputCls} placeholder="LGA / District / County" value={lgaOfResidence} onChange={e => setLgaOfResidence(e.target.value)} />
+            </FormField>
+            <FormField label="State / Province of Residence">
+              <Input className={inputCls} placeholder="State / Province" value={stateOfResidence} onChange={e => setStateOfResidence(e.target.value)} />
+            </FormField>
+            <FormField label="Country of Residence" required>
+              <Input className={inputCls} placeholder="Country" value={countryOfResidence} onChange={e => setCountryOfResidence(e.target.value)} />
+            </FormField>
+
+            <div className="border-t border-border pt-3 mt-2">
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">Phone & Email</p>
+            </div>
+
+            <FormField label="Telephone Number 1" required>
+              <Input className={inputCls} placeholder="+234 xxx xxx xxxx" value={phone1} onChange={e => setPhone1(e.target.value)} />
+            </FormField>
+            <FormField label="Telephone Number 2">
+              <Input className={inputCls} placeholder="+234 xxx xxx xxxx" value={phone2} onChange={e => setPhone2(e.target.value)} />
+            </FormField>
+            <FormField label="Email Address" required>
+              <Input className={inputCls} type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+            </FormField>
+          </CardContent>
+        </Card>
+
+        {/* ─── BANKING INFORMATION ─── */}
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <SectionHeader icon={Landmark} title="Banking Information" />
+            {bankEntries.map((bank, i) => (
+              <div key={i} className="space-y-2 p-3 rounded-lg border border-border/60 bg-muted/20 relative">
+                {bankEntries.length > 1 && (
+                  <Button variant="ghost" size="icon" className="h-6 w-6 absolute top-2 right-2" onClick={() => removeBankEntry(i)}>
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                )}
+                <p className="text-[10px] font-semibold text-muted-foreground">Bank {i + 1}</p>
+                <Input className={inputCls} placeholder="Bank Name" value={bank.bankName} onChange={e => updateBank(i, "bankName", e.target.value)} />
+                <Input className={inputCls} placeholder="Account Name" value={bank.accountName} onChange={e => updateBank(i, "accountName", e.target.value)} />
+                <Input className={inputCls} placeholder="Account Number" value={bank.accountNumber} onChange={e => updateBank(i, "accountNumber", e.target.value)} />
+              </div>
+            ))}
+            {bankEntries.length < 3 && (
+              <Button variant="outline" size="sm" className="w-full gap-1 text-xs" onClick={addBankEntry}>
+                <Plus className="h-3 w-3" /> Add Another Bank
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ─── APPLICATION DATA ─── */}
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <SectionHeader icon={Globe} title="Application Data" />
+
+            <FormField label="Preferred Account Currency" required>
+              <Select value={preferredCurrency} onValueChange={setPreferredCurrency}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select currency" /></SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </FormField>
+          </CardContent>
+        </Card>
+
+        {/* ─── VERIFICATION INFORMATION ─── */}
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <SectionHeader icon={BadgeCheck} title="Verification / Identification" />
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              Provide at least one valid identification document for verification purposes.
+            </p>
+
+            {verifications.map((v, i) => (
+              <div key={i} className="space-y-2 p-3 rounded-lg border border-border/60 bg-muted/20 relative">
+                {verifications.length > 1 && (
+                  <Button variant="ghost" size="icon" className="h-6 w-6 absolute top-2 right-2" onClick={() => removeVerification(i)}>
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                )}
+                <p className="text-[10px] font-semibold text-muted-foreground">ID {i + 1}</p>
+                <Select value={v.type} onValueChange={val => updateVerification(i, "type", val)}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select ID type" /></SelectTrigger>
+                  <SelectContent>
+                    {verificationTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Input className={inputCls} placeholder="ID Number" value={v.number} onChange={e => updateVerification(i, "number", e.target.value)} />
+              </div>
+            ))}
+            {verifications.length < 4 && (
+              <Button variant="outline" size="sm" className="w-full gap-1 text-xs" onClick={addVerification}>
+                <Plus className="h-3 w-3" /> Add Another ID
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ─── APPLICATION FEE ─── */}
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <SectionHeader icon={CreditCard} title="Application Fee" />
             <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
               <div>
                 <p className="text-xs font-medium">Non-refundable application fee</p>
@@ -228,7 +445,7 @@ export default function IndividualMerchantApplication() {
           </CardContent>
         </Card>
 
-        {/* Terms & Submit */}
+        {/* ─── TERMS & SUBMIT ─── */}
         <Card>
           <CardContent className="p-4 space-y-4">
             <div className="flex items-start gap-2.5 p-3 bg-muted/30 rounded-lg border">
