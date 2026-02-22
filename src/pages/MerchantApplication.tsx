@@ -135,20 +135,20 @@ export default function MerchantApplication() {
                   <Clock className="h-7 w-7 text-amber-600" />
                 </div>
                 <h2 className="font-bold text-base">Application Under Review</h2>
-                <p className="text-xs text-muted-foreground">Your corporate merchant application is being reviewed</p>
-                <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400 text-xs">
+                <p className="text-sm text-muted-foreground">Your corporate merchant application is being reviewed</p>
+                <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400 text-sm">
                   Estimated: 14–21 business days
                 </Badge>
               </div>
 
-              <div className="bg-background rounded-lg p-3 space-y-2 border text-xs">
+              <div className="bg-background rounded-lg p-3 space-y-2 border text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Reference</span>
                   <span className="font-mono font-bold">{refNumber}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type</span>
-                  <Badge variant="secondary" className="text-[10px] h-5">Corporate</Badge>
+                  <Badge variant="secondary" className="text-xs h-5">Corporate</Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Store Name</span>
