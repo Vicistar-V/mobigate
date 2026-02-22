@@ -1,45 +1,37 @@
 
 
-## Add Gallery and Video Highlights to Winner Profile Drawer
+## Add "Mobi-Quiz" Tab to Profile Page
 
-This plan adds two new interactive media sections to the winner profile drawer: a **Photo Gallery** and **Video Highlights** section, both organized in folders with a full-screen viewer experience.
+This plan adds a new **Mobi-Quiz** tab to the main profile page, positioned right after the Community tab. It will showcase everything quiz-related about the user: stats overview, celebrity status, recent game history by mode, favorite merchants, and interactive navigation to deeper pages.
 
 ---
 
 ### What You'll Get
 
-1. **Gallery Section** - A thumbnail grid of the winner's photos organized in folders (e.g., "Quiz Moments", "Award Ceremony", "Behind the Scenes"). Tapping any thumbnail opens a full-screen swipeable gallery viewer with navigation dots, zoom, and close gesture.
-
-2. **Video Highlights Section** - A horizontal scrollable list of video highlight thumbnails with play overlays, also organized in folders (e.g., "Quiz Rounds", "Victory Moments"). Tapping opens a full-screen video player.
-
-3. **Folder Navigation** - Both sections have tappable folder tabs/chips at the top to filter content by category. An "All" tab shows everything.
-
-4. **Full Gallery Viewer** - Uses the existing `MediaGalleryViewer` component for a polished full-screen experience with swipe navigation, like/share actions, and smooth transitions.
+1. **New "Mobi-Quiz" tab** in the profile page tab bar, right after "Community"
+2. **Hero Stats Card** - Games played, win rate, net profit, current streak, global rank, and a prominent "Mobi Celebrity" badge if qualified
+3. **Performance Breakdown by Game Mode** - Cards for each mode (Group, Standard Solo, Interactive, Food for Home, Scholarship, Toggle) showing wins/losses and total earnings per mode. Tapping a mode card navigates to `/my-quiz-history` with that mode pre-filtered
+4. **Recent Games Section** - Last 5 games from `quizGamesPlayedData` displayed as compact result cards. Tapping any opens the `QuizGameDetailDrawer` with full details
+5. **Favorite Merchants Section** - Shows merchants the user has interacted with (from `mockMerchants`). Tapping navigates to `/mobi-quiz-games/merchant/:id`
+6. **Quick Action Buttons** - "View Full History", "Play Now", and "Leaderboard" CTAs
 
 ---
 
 ### Technical Details
 
-**1. Update `SeasonWinner` interface** (`src/data/mobigateInteractiveQuizData.ts`)
-- Add `gallery` field: array of `{ url: string; folder: string }` objects
-- Add `videoHighlights` field: array of `{ url: string; thumbnail: string; title: string; folder: string; duration: string }` objects
-- Populate mock data with realistic Unsplash images grouped into folders and sample video URLs
+**1. Create `ProfileMobiQuizTab` component** (`src/components/profile/ProfileMobiQuizTab.tsx`)
+- Import data from `mobigateQuizData` (player stats, wallet), `quizGamesPlayedData` (game history), and `mobigateInteractiveQuizData` (merchants)
+- Hero section: Stats grid (2-col) with games played, win rate, net profit/loss, streak, global rank
+- Celebrity badge: Conditionally rendered based on a mock flag (set to true for demo)
+- Mode breakdown: Group results from `quizGamesPlayedData` by `gameMode`, show count + earnings per mode in tappable cards with mode-specific icons/colors
+- Recent games: Map last 5 entries from `quizGamesPlayedData` into compact cards showing result badge, mode, score, and prize. Tap opens `QuizGameDetailDrawer`
+- Merchants section: Show top 3 approved merchants from `mockMerchants` as avatar+name cards. Tap navigates to merchant detail page
+- CTAs: "View Full History" links to `/my-quiz-history`, "Play Now" links to `/mobi-quiz-games`
 
-**2. Create `WinnerGallerySection` component** (`src/components/community/mobigate-quiz/WinnerGallerySection.tsx`)
-- Folder chip tabs at top (horizontal scroll)
-- 3-column thumbnail grid below
-- Tap opens `MediaGalleryViewer` at the correct index
-- Mobile-optimized: compact thumbnails, touch-friendly chips, smooth scroll
+**2. Update `Profile.tsx`**
+- Import `ProfileMobiQuizTab`
+- Add `<TabsTrigger value="mobi-quiz">Mobi-Quiz</TabsTrigger>` after the "community" trigger (line 784)
+- Add `<TabsContent value="mobi-quiz"><ProfileMobiQuizTab /></TabsContent>` after the community TabsContent (line 911)
 
-**3. Create `WinnerVideoHighlightsSection` component** (`src/components/community/mobigate-quiz/WinnerVideoHighlightsSection.tsx`)
-- Folder chip tabs at top
-- Horizontal scroll of video cards with play icon overlay and duration badge
-- Tap opens `MediaGalleryViewer` in video mode
-- Mobile-optimized: snap scrolling, compact cards
+All styling is mobile-first with touch-manipulation, compact cards, and rounded-xl throughout, matching the existing ProfileCommunityTab pattern.
 
-**4. Update `QuizWinnerProfileDrawer`** (`src/components/community/mobigate-quiz/QuizWinnerProfileDrawer.tsx`)
-- Import and render both new sections between the Details card and the Action buttons
-- Each section has a header with icon and item count
-- Sections only render when data exists
-
-All changes are mobile-first with touch-manipulation, snap scroll, and compact sizing throughout.
