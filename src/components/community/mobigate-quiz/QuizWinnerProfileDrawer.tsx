@@ -348,9 +348,8 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                 disabled={isFan}
                 onClick={handleJoinFanClick}
               >
-                
-                <span>{isFan ? "Joined" : "Join"}</span>
-                <span className="-mt-1.5 text-[10px]">{isFan ? "" : "Fan"}</span>
+                <span className="text-sm font-bold leading-tight">{isFan ? "Joined" : "Join"}</span>
+                {!isFan && <span className="text-sm font-bold leading-tight -mt-1">Fan</span>}
               </Button>
               <Button
                 variant="outline"
