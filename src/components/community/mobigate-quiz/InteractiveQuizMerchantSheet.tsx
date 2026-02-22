@@ -34,7 +34,7 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
             <DrawerTitle className="flex items-center gap-2">
               <Star className="h-5 w-5 text-blue-500" /> Interactive Quiz - Merchants
             </DrawerTitle>
-            <p className="text-xs text-muted-foreground">Choose a merchant to explore quiz seasons</p>
+            <p className="text-sm text-muted-foreground">Choose a merchant to explore quiz seasons</p>
           </DrawerHeader>
 
           {/* Live Scoreboard Button */}
@@ -47,9 +47,9 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
               </span>
-              <Radio className="h-3.5 w-3.5 text-red-500" />
-              <span className="text-xs font-bold text-red-600 dark:text-red-400">Live Scoreboard</span>
-              <Badge className="bg-red-500 text-white border-0 text-[8px] px-1.5 py-0 animate-pulse">LIVE</Badge>
+              <Radio className="h-4 w-4 text-red-500" />
+              <span className="text-sm font-bold text-red-600 dark:text-red-400">Live Scoreboard</span>
+              <Badge className="bg-red-500 text-white border-0 text-xs px-2 py-0.5 animate-pulse">LIVE</Badge>
             </button>
           </div>
 
@@ -67,23 +67,23 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
                     className="cursor-pointer hover:border-blue-300 transition-all touch-manipulation"
                     onClick={() => setSelectedMerchant(merchant)}
                   >
-                    <CardContent className="p-3 space-y-2">
+                    <CardContent className="p-4 space-y-3">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 rounded-lg">
-                          <AvatarFallback className="rounded-lg bg-blue-100 text-blue-700 text-xs font-bold">
+                        <Avatar className="h-14 w-14 rounded-lg">
+                          <AvatarFallback className="rounded-lg bg-blue-100 text-blue-700 text-sm font-bold">
                             {merchant.name.substring(0, 2)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-0.5">
-                            <h4 className="text-sm font-bold truncate">{merchant.name}</h4>
-                            {merchant.isVerified && <span className="text-blue-500 text-xs">✓</span>}
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <h4 className="text-base font-bold break-words">{merchant.name}</h4>
+                            {merchant.isVerified && <span className="text-blue-500 text-sm">✓</span>}
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="outline" className="text-[9px]">{merchant.category}</Badge>
-                            <span className="text-[10px] text-muted-foreground">{activeSeasons.length} season{activeSeasons.length !== 1 ? "s" : ""}</span>
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                              <Users className="h-2.5 w-2.5" />{totalParticipants.toLocaleString()}
+                            <Badge variant="outline" className="text-xs">{merchant.category}</Badge>
+                            <span className="text-xs text-muted-foreground">{activeSeasons.length} season{activeSeasons.length !== 1 ? "s" : ""}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Users className="h-3.5 w-3.5" />{totalParticipants.toLocaleString()}
                             </span>
                           </div>
                         </div>
@@ -92,12 +92,12 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
 
                       {/* Winning Prizes Display */}
                       {bestSeason && (
-                        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg p-2.5 border border-amber-200/50 dark:border-amber-800/30">
-                          <div className="flex items-center gap-1 mb-1.5">
-                            <Trophy className="h-3 w-3 text-amber-500" />
-                            <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase">Winning Prizes</span>
+                        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg p-3 border border-amber-200/50 dark:border-amber-800/30">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Trophy className="h-4 w-4 text-amber-500" />
+                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase">Winning Prizes</span>
                           </div>
-                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                             <span className="text-muted-foreground">🥇 1st Prize:</span>
                             <span className="font-semibold">{formatLocalAmount(bestSeason.firstPrize, "NGN")}</span>
                             <span className="text-muted-foreground">🥈 2nd Prize:</span>
@@ -111,8 +111,8 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
                               </>
                             )}
                           </div>
-                          <div className="mt-1.5 pt-1.5 border-t border-amber-200/50 dark:border-amber-800/30">
-                            <div className="flex justify-between text-[10px]">
+                          <div className="mt-2 pt-2 border-t border-amber-200/50 dark:border-amber-800/30">
+                            <div className="flex justify-between text-sm">
                               <span className="font-bold text-amber-700 dark:text-amber-400">Total Prize Pool:</span>
                               <span className="font-bold text-green-600">{formatLocalAmount(bestSeason.totalWinningPrizes, "NGN")}</span>
                             </div>
