@@ -39,6 +39,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
   const navigate = useNavigate();
   const { toast } = useToast();
   const [friendRequestSent, setFriendRequestSent] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [isFan, setIsFan] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -54,6 +55,7 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
       setIsFollowing(false);
       setCurrentPhoto(0);
       setShowFanConfirm(false);
+      setShowComments(false);
     }
   }, [open]);
 
@@ -290,17 +292,19 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
               <WinnerVideoHighlightsSection videoHighlights={winner.videoHighlights} />
             )}
 
-            {/* Comments Section */}
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold">Comments</span>
+            {/* Comments - collapsible */}
+            {showComments && (
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold">Comments</span>
+                </div>
+                <CommentSection postId={`winner-${winner.id}`} showHeader={false} className="rounded-xl border bg-muted/20 p-3" />
               </div>
-              <CommentSection postId={`winner-${winner.id}`} showHeader={false} className="rounded-xl border bg-muted/20 p-3" />
-            </div>
+            )}
 
-            {/* Actions - Row 1: Profile, Add Friend, Message */}
-            <div className="grid grid-cols-3 gap-2.5">
+            {/* Actions - Row 1: Profile, Add Friend, Message, Comment */}
+            <div className="grid grid-cols-4 gap-2">
               <Button
                 variant="outline"
                 className="h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1"
@@ -336,6 +340,16 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
               >
                 <MessageCircle className="h-5 w-5" />
                 <span>Message</span>
+              </Button>
+              <Button
+                variant="outline"
+                className={`h-14 text-xs touch-manipulation active:scale-[0.97] flex flex-col items-center gap-1 px-1 ${
+                  showComments ? "bg-primary/10 text-primary border-primary/30" : ""
+                }`}
+                onClick={() => setShowComments(!showComments)}
+              >
+                <MessageSquare className="h-5 w-5" />
+                <span>Comment</span>
               </Button>
             </div>
 
