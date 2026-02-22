@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Crown, Medal, Trophy, Star } from "lucide-react";
+import { Crown, Medal, Trophy, Star, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { mockSeasonWinners, mockSeasons, mockMerchants, type SeasonWinner } from "@/data/mobigateInteractiveQuizData";
 import { QuizWinnerProfileDrawer } from "./QuizWinnerProfileDrawer";
+
+function formatCompact(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return String(n);
+}
 
 export function HighlightedWinnersCarousel() {
   const { toast } = useToast();
@@ -49,10 +54,10 @@ export function HighlightedWinnersCarousel() {
 
   const getPositionIcon = (position: string) => {
     switch (position) {
-      case "1st": return <Crown className="h-4 w-4 text-amber-500" />;
-      case "2nd": return <Medal className="h-4 w-4 text-slate-400" />;
-      case "3rd": return <Medal className="h-4 w-4 text-amber-700" />;
-      default: return <Trophy className="h-4 w-4 text-purple-500" />;
+      case "1st": return <Crown className="h-3.5 w-3.5 text-amber-500" />;
+      case "2nd": return <Medal className="h-3.5 w-3.5 text-slate-400" />;
+      case "3rd": return <Medal className="h-3.5 w-3.5 text-amber-700" />;
+      default: return <Trophy className="h-3.5 w-3.5 text-purple-500" />;
     }
   };
 
@@ -86,12 +91,11 @@ export function HighlightedWinnersCarousel() {
           {highlightedWinners.map((winner) => {
             const initials = winner.playerName.split(" ").map(n => n[0]).join("");
             const isFanned = fannedWinners.has(winner.id);
-            const merchantName = getMerchantName(winner);
 
             return (
               <div
                 key={winner.id}
-                className="snap-center shrink-0 w-[88px] rounded-xl border bg-gradient-to-b from-amber-50/80 to-background dark:from-amber-950/20 dark:to-background border-amber-200/50 dark:border-amber-800/30 p-2 flex flex-col items-center gap-1.5 cursor-pointer active:scale-95 transition-transform touch-manipulation"
+                className="snap-center shrink-0 w-[92px] rounded-xl border bg-gradient-to-b from-amber-50/80 to-background dark:from-amber-950/20 dark:to-background border-amber-200/50 dark:border-amber-800/30 p-2 flex flex-col items-center gap-1 cursor-pointer active:scale-95 transition-transform touch-manipulation"
                 onClick={() => handleCardClick(winner)}
               >
                 {/* Position icon */}
@@ -105,10 +109,13 @@ export function HighlightedWinnersCarousel() {
                 {/* Name */}
                 <p className="text-[11px] font-semibold text-center leading-tight truncate w-full">{winner.playerName.split(" ")[0]}</p>
 
-                {/* Rank + Merchant */}
-                <p className="text-[9px] text-muted-foreground text-center leading-tight truncate w-full">
-                  {winner.position} · {merchantName.split(" ")[0]}
-                </p>
+                {/* Tier + Fans */}
+                <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
+                  <Shield className="h-2.5 w-2.5 text-blue-500" />
+                  <span className="font-bold">T{winner.tier}</span>
+                  <span>·</span>
+                  <span>{formatCompact(winner.fans)} fans</span>
+                </div>
 
                 {/* Fan button */}
                 <button
