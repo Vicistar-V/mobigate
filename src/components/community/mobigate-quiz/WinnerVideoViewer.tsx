@@ -66,11 +66,12 @@ export function WinnerVideoViewer({ open, onOpenChange, folders, playerName }: W
                 </button>
                 <video
                   ref={videoRef}
+                  key={playingVideo.item.id}
                   src={playingVideo.item.url}
                   controls
-                  autoPlay
-                  className="max-h-[70vh] max-w-full rounded-lg"
                   playsInline
+                  preload="auto"
+                  className="max-h-[70vh] max-w-full rounded-lg"
                 />
                 <button
                   className="absolute right-1 z-10 p-1.5 bg-white/20 backdrop-blur-sm rounded-full touch-manipulation active:scale-95"
