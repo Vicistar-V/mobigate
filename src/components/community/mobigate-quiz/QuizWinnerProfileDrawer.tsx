@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
 import type { SeasonWinner } from "@/data/mobigateInteractiveQuizData";
+import { WinnerGallerySection } from "./WinnerGallerySection";
+import { WinnerVideoHighlightsSection } from "./WinnerVideoHighlightsSection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -276,6 +278,16 @@ export function QuizWinnerProfileDrawer({ winner, open, onOpenChange, merchantNa
                 {getPayoutBadge()}
               </div>
             </div>
+
+            {/* Gallery Section */}
+            {winner.gallery && winner.gallery.length > 0 && (
+              <WinnerGallerySection gallery={winner.gallery} />
+            )}
+
+            {/* Video Highlights Section */}
+            {winner.videoHighlights && winner.videoHighlights.length > 0 && (
+              <WinnerVideoHighlightsSection videoHighlights={winner.videoHighlights} />
+            )}
 
             {/* Actions - Row 1: Profile, Add Friend, Message */}
             <div className="grid grid-cols-3 gap-2.5">
