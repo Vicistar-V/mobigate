@@ -107,7 +107,7 @@ export default function IndividualMerchantApplication() {
   const [preferredCurrency, setPreferredCurrency] = useState("NGN");
 
   // Verification
-  const [verifications, setVerifications] = useState([{ type: "", number: "" }]);
+  const [verifications, setVerifications] = useState([{ type: "", number: "", customType: "" }]);
 
   const addBankEntry = () => {
     if (bankEntries.length < 3) setBankEntries([...bankEntries, { bankName: "", accountName: "", accountNumber: "" }]);
@@ -122,7 +122,7 @@ export default function IndividualMerchantApplication() {
   };
 
   const addVerification = () => {
-    if (verifications.length < 4) setVerifications([...verifications, { type: "", number: "" }]);
+    if (verifications.length < 4) setVerifications([...verifications, { type: "", number: "", customType: "" }]);
   };
   const removeVerification = (i: number) => {
     if (verifications.length > 1) setVerifications(verifications.filter((_, idx) => idx !== i));
@@ -399,6 +399,9 @@ export default function IndividualMerchantApplication() {
                     {verificationTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {v.type === "Other" && (
+                  <Input className={inputCls} placeholder="Specify ID type" value={v.customType || ""} onChange={e => updateVerification(i, "customType", e.target.value)} />
+                )}
                 <Input className={inputCls} placeholder="ID Number" value={v.number} onChange={e => updateVerification(i, "number", e.target.value)} />
               </div>
             ))}
