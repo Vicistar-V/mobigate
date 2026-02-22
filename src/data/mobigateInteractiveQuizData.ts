@@ -349,6 +349,39 @@ export const mockQuestions: MerchantQuestion[] = [
   { id: "q7", merchantId: "m3", question: "What is the chemical symbol for Gold?", type: "objective", options: ["Au", "Ag", "Fe", "Cu", "Zn", "Pb", "Sn", "Ni"], correctAnswerIndex: 0, alternativeAnswers: [], category: "Science", difficulty: "easy", timeLimit: 30, costPerQuestion: 200 },
 ];
 
+// ── Season Winners ──────────────────────────────────────────────────────
+
+export interface SeasonWinner {
+  id: string;
+  seasonId: string;
+  playerName: string;
+  playerAvatar: string;
+  state: string;
+  country: string;
+  position: "1st" | "2nd" | "3rd" | "consolation";
+  prizeAmount: number;
+  score: number;
+  completionDate: string;
+  payoutStatus: "paid" | "pending" | "processing";
+}
+
+export const mockSeasonWinners: SeasonWinner[] = [
+  // Season s1 winners
+  { id: "w1", seasonId: "s1", playerName: "Chidera Okafor", playerAvatar: "", state: "Lagos", country: "Nigeria", position: "1st", prizeAmount: 6000000, score: 98, completionDate: "2025-06-28", payoutStatus: "paid" },
+  { id: "w2", seasonId: "s1", playerName: "Amina Yusuf", playerAvatar: "", state: "Kano", country: "Nigeria", position: "2nd", prizeAmount: 3000000, score: 95, completionDate: "2025-06-28", payoutStatus: "paid" },
+  { id: "w3", seasonId: "s1", playerName: "Tunde Adeyemi", playerAvatar: "", state: "Oyo", country: "Nigeria", position: "3rd", prizeAmount: 1500000, score: 92, completionDate: "2025-06-28", payoutStatus: "processing" },
+  { id: "w4", seasonId: "s1", playerName: "Ngozi Eze", playerAvatar: "", state: "Enugu", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 85, completionDate: "2025-06-27", payoutStatus: "paid" },
+  { id: "w5", seasonId: "s1", playerName: "Ibrahim Musa", playerAvatar: "", state: "Kaduna", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 84, completionDate: "2025-06-27", payoutStatus: "pending" },
+  { id: "w6", seasonId: "s1", playerName: "Blessing Okonkwo", playerAvatar: "", state: "Anambra", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 83, completionDate: "2025-06-26", payoutStatus: "pending" },
+  // Season s2 winners
+  { id: "w7", seasonId: "s2", playerName: "Oluwaseun Balogun", playerAvatar: "", state: "Lagos", country: "Nigeria", position: "1st", prizeAmount: 8000000, score: 97, completionDate: "2025-12-20", payoutStatus: "pending" },
+  { id: "w8", seasonId: "s2", playerName: "Fatima Abdullahi", playerAvatar: "", state: "Abuja", country: "Nigeria", position: "2nd", prizeAmount: 4000000, score: 94, completionDate: "2025-12-20", payoutStatus: "pending" },
+  { id: "w9", seasonId: "s2", playerName: "Emeka Nnamdi", playerAvatar: "", state: "Rivers", country: "Nigeria", position: "3rd", prizeAmount: 2000000, score: 91, completionDate: "2025-12-20", payoutStatus: "pending" },
+  { id: "w10", seasonId: "s2", playerName: "Aisha Bello", playerAvatar: "", state: "Katsina", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 86, completionDate: "2025-12-19", payoutStatus: "pending" },
+  { id: "w11", seasonId: "s2", playerName: "Chukwuma Obi", playerAvatar: "", state: "Delta", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 85, completionDate: "2025-12-19", payoutStatus: "pending" },
+  { id: "w12", seasonId: "s2", playerName: "Halima Suleiman", playerAvatar: "", state: "Sokoto", country: "Nigeria", position: "consolation", prizeAmount: 500000, score: 84, completionDate: "2025-12-18", payoutStatus: "pending" },
+];
+
 export const INTERACTIVE_QUESTIONS_PER_SESSION = 15;
 export const INTERACTIVE_OBJECTIVE_QUESTIONS = 10; // picked randomly from 15 in mixed mode
 export const INTERACTIVE_NON_OBJECTIVE_QUESTIONS = 5;

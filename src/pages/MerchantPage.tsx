@@ -57,6 +57,7 @@ import {
   mockMerchants,
   mockSeasons,
   mockQuestions,
+  mockSeasonWinners,
   MERCHANT_MIN_WALLET_PERCENT,
   WAIVER_REQUEST_FEE,
   SEASON_TYPE_CONFIG,
@@ -65,6 +66,7 @@ import {
   type MerchantQuestion,
   type SelectionProcess,
   type TVShowRound,
+  type SeasonWinner,
 } from "@/data/mobigateInteractiveQuizData";
 import {
   INITIAL_ADMIN_QUESTIONS,
@@ -72,6 +74,8 @@ import {
   type AdminQuizQuestion,
 } from "@/data/mobigateQuizQuestionsData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { format, addMonths, addWeeks, addDays, addHours } from "date-fns";
 import { shareToFacebook, shareToTwitter, shareToWhatsApp, shareViaEmail, shareViaSMS, shareViaNative, shareToInstagram, copyToClipboard } from "@/lib/shareUtils";
@@ -1698,6 +1702,249 @@ function WalletTab({ merchant }: { merchant: QuizMerchant }) {
   );
 }
 
+// ─── Winners Tab ─────────────────────────────────────────────────────
+function WinnersTab({ merchantId }: { merchantId: string }) {
+  const [seasonFilter, setSeasonFilter] = useState("all");
+  const [expandedConsolation, setExpandedConsolation] = useState<Record<string, boolean>>({});
+
+  const merchantSeasons = mockSeasons.filter((s) => s.merchantId === merchantId);
+  const merchantSeasonIds = merchantSeasons.map((s) => s.id);
+
+  const allWinners = mockSeasonWinners.filter((w) => merchantSeasonIds.includes(w.seasonId));
+  const filteredWinners = seasonFilter === "all" ? allWinners : allWinners.filter((w) => w.seasonId === seasonFilter);
+
+  // Group by season
+  const winnersByseason = filteredWinners.reduce<Record<string, SeasonWinner[]>>((acc, w) => {
+    if (!acc[w.seasonId]) acc[w.seasonId] = [];
+    acc[w.seasonId].push(w);
+    return acc;
+  }, {});
+
+  // Stats
+  const totalWinners = allWinners.length;
+  const totalPaidOut = allWinners.filter((w) => w.payoutStatus === "paid").reduce((s, w) => s + w.prizeAmount, 0);
+  const seasonsWithWinners = new Set(allWinners.map((w) => w.seasonId)).size;
+
+  const getPositionIcon = (position: string) => {
+    switch (position) {
+      case "1st": return <Trophy className="h-5 w-5 text-yellow-500" />;
+      case "2nd": return <Crown className="h-5 w-5 text-gray-400" />;
+      case "3rd": return <Medal className="h-5 w-5 text-amber-700" />;
+      default: return <Gift className="h-4 w-4 text-purple-500" />;
+    }
+  };
+
+  const getPositionBg = (position: string) => {
+    switch (position) {
+      case "1st": return "bg-yellow-500/10 border-yellow-500/30";
+      case "2nd": return "bg-gray-300/10 border-gray-400/30";
+      case "3rd": return "bg-amber-700/10 border-amber-700/30";
+      default: return "bg-muted/50 border-border";
+    }
+  };
+
+  const getPayoutBadge = (status: string) => {
+    switch (status) {
+      case "paid": return <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-[10px] px-1.5 py-0">Paid</Badge>;
+      case "processing": return <Badge className="bg-blue-500/15 text-blue-700 border-blue-500/30 text-[10px] px-1.5 py-0">Processing</Badge>;
+      default: return <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-[10px] px-1.5 py-0">Pending</Badge>;
+    }
+  };
+
+  if (allWinners.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+          <Trophy className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="font-bold text-base mb-1">No Winners Yet</h3>
+        <p className="text-xs text-muted-foreground max-w-[260px]">
+          Winners will appear here once your seasons have concluded and prizes have been awarded.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-2">
+        <Card>
+          <CardContent className="p-3 text-center">
+            <Users className="h-4 w-4 mx-auto text-primary mb-1" />
+            <p className="text-lg font-bold">{totalWinners}</p>
+            <p className="text-[10px] text-muted-foreground">Total Winners</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <DollarSign className="h-4 w-4 mx-auto text-emerald-600 mb-1" />
+            <p className="text-sm font-bold">₦{(totalPaidOut / 1000000).toFixed(1)}M</p>
+            <p className="text-[10px] text-muted-foreground">Prizes Paid</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <Trophy className="h-4 w-4 mx-auto text-amber-500 mb-1" />
+            <p className="text-lg font-bold">{seasonsWithWinners}</p>
+            <p className="text-[10px] text-muted-foreground">Seasons</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Season Filter */}
+      <Select value={seasonFilter} onValueChange={setSeasonFilter}>
+        <SelectTrigger className="h-11 text-sm">
+          <SelectValue placeholder="Filter by season" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Seasons</SelectItem>
+          {merchantSeasons.map((s) => (
+            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Per-Season Winner Cards */}
+      {Object.entries(winnersByseason).map(([seasonId, winners]) => {
+        const season = merchantSeasons.find((s) => s.id === seasonId);
+        if (!season) return null;
+
+        const topWinners = winners.filter((w) => w.position !== "consolation").sort((a, b) => {
+          const order = { "1st": 1, "2nd": 2, "3rd": 3 };
+          return (order[a.position as keyof typeof order] || 4) - (order[b.position as keyof typeof order] || 4);
+        });
+        const consolationWinners = winners.filter((w) => w.position === "consolation");
+        const totalPrizePool = season.totalWinningPrizes;
+        const paidAmount = winners.filter((w) => w.payoutStatus === "paid").reduce((s, w) => s + w.prizeAmount, 0);
+        const pendingAmount = winners.reduce((s, w) => s + w.prizeAmount, 0) - paidAmount;
+        const payoutPercent = totalPrizePool > 0 ? Math.round((paidAmount / totalPrizePool) * 100) : 0;
+
+        return (
+          <Card key={seasonId} className="overflow-hidden">
+            <CardContent className="p-0">
+              {/* Season Header */}
+              <div className="p-3 border-b bg-muted/30 flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold truncate">{season.name}</h3>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${getSeasonTypeColor(season.type)}`}>
+                      {season.type}
+                    </Badge>
+                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${getStatusColor(season.quizStatus)}`}>
+                      {getStatusLabel(season.quizStatus)}
+                    </Badge>
+                  </div>
+                </div>
+                <Trophy className="h-5 w-5 text-amber-500 shrink-0" />
+              </div>
+
+              {/* Top 3 Winners */}
+              <div className="p-3 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Winners</p>
+                {topWinners.map((winner) => (
+                  <div key={winner.id} className={`rounded-xl border p-3 ${getPositionBg(winner.position)}`}>
+                    <div className="flex items-start gap-3">
+                      {/* Avatar + Position */}
+                      <div className="flex flex-col items-center gap-1 shrink-0">
+                        {getPositionIcon(winner.position)}
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
+                          {winner.playerName.split(" ").map((n) => n[0]).join("")}
+                        </div>
+                      </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold truncate">{winner.playerName}</p>
+                          {getPayoutBadge(winner.payoutStatus)}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">{winner.state}, {winner.country}</p>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-sm font-bold text-primary">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
+                          <p className="text-[10px] text-muted-foreground">Score: {winner.score}%</p>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {format(new Date(winner.completionDate), "MMM dd, yyyy")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Consolation Winners */}
+              {consolationWinners.length > 0 && (
+                <div className="px-3 pb-3">
+                  <Collapsible
+                    open={expandedConsolation[seasonId] || false}
+                    onOpenChange={(open) => setExpandedConsolation((p) => ({ ...p, [seasonId]: open }))}
+                  >
+                    <CollapsibleTrigger className="w-full flex items-center justify-between h-11 px-3 rounded-lg bg-muted/50 text-sm font-medium active:scale-[0.98] transition-transform touch-manipulation">
+                      <div className="flex items-center gap-2">
+                        <Gift className="h-4 w-4 text-purple-500" />
+                        <span>Consolation Winners ({consolationWinners.length})</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">₦{(consolationWinners.reduce((s, w) => s + w.prizeAmount, 0) / 1000000).toFixed(1)}M</span>
+                        {expandedConsolation[seasonId] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="mt-2 space-y-1.5">
+                        {consolationWinners.map((winner) => (
+                          <div key={winner.id} className="flex items-center gap-3 p-2.5 rounded-lg border bg-muted/20">
+                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold shrink-0">
+                              {winner.playerName.split(" ").map((n) => n[0]).join("")}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold truncate">{winner.playerName}</p>
+                              <p className="text-[10px] text-muted-foreground">{winner.state} · Score: {winner.score}%</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-xs font-bold">₦{formatLocalAmount(winner.prizeAmount, "NGN")}</p>
+                              {getPayoutBadge(winner.payoutStatus)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </div>
+              )}
+
+              {/* Season Prize Summary */}
+              <div className="p-3 border-t bg-muted/20 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prize Summary</p>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-xs font-bold">₦{(totalPrizePool / 1000000).toFixed(1)}M</p>
+                    <p className="text-[9px] text-muted-foreground">Total Pool</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-emerald-600">₦{(paidAmount / 1000000).toFixed(1)}M</p>
+                    <p className="text-[9px] text-muted-foreground">Paid</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-amber-600">₦{(pendingAmount / 1000000).toFixed(1)}M</p>
+                    <p className="text-[9px] text-muted-foreground">Pending</p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-muted-foreground">Payout Progress</p>
+                    <p className="text-[10px] font-semibold">{payoutPercent}%</p>
+                  </div>
+                  <Progress value={payoutPercent} className="h-2" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────
 export default function MerchantPage() {
   const navigate = useNavigate();
@@ -1725,24 +1972,30 @@ export default function MerchantPage() {
       {/* Tabs */}
       <div className="px-4 pt-3">
         <Tabs defaultValue="settings" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 h-11">
-            <TabsTrigger value="settings" className="text-xs px-1">
-              <Settings className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
-              Settings
-            </TabsTrigger>
-            <TabsTrigger value="seasons" className="text-xs px-1">
-              <Gamepad2 className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
-              Seasons
-            </TabsTrigger>
-            <TabsTrigger value="questions" className="text-xs px-1">
-              <HelpCircle className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
-              Questions
-            </TabsTrigger>
-            <TabsTrigger value="wallet" className="text-xs px-1">
-              <Wallet className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
-              Wallet
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-1 px-1 touch-pan-x">
+            <TabsList className="w-full grid grid-cols-5 h-11 min-w-[320px]">
+              <TabsTrigger value="settings" className="text-[11px] px-1">
+                <Settings className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+                Settings
+              </TabsTrigger>
+              <TabsTrigger value="seasons" className="text-[11px] px-1">
+                <Gamepad2 className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+                Seasons
+              </TabsTrigger>
+              <TabsTrigger value="questions" className="text-[11px] px-1">
+                <HelpCircle className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+                Questions
+              </TabsTrigger>
+              <TabsTrigger value="wallet" className="text-[11px] px-1">
+                <Wallet className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+                Wallet
+              </TabsTrigger>
+              <TabsTrigger value="winners" className="text-[11px] px-1">
+                <Trophy className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+                Winners
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="settings" className="mt-4">
             <PlatformSettingsTab merchant={myMerchant} />
@@ -1758,6 +2011,10 @@ export default function MerchantPage() {
 
           <TabsContent value="wallet" className="mt-4">
             <WalletTab merchant={myMerchant} />
+          </TabsContent>
+
+          <TabsContent value="winners" className="mt-4">
+            <WinnersTab merchantId={myMerchant.id} />
           </TabsContent>
         </Tabs>
       </div>
