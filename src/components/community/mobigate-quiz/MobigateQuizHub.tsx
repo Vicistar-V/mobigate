@@ -4,7 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { mobigateWalletData, mobigatePlayerStats } from "@/data/mobigateQuizData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { GroupQuizInviteSheet } from "./GroupQuizInviteSheet";
@@ -111,7 +111,7 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
                     Mobigate Quiz <Flame className="h-4 w-4" />
                   </h2>
-                  <p className="text-xs text-amber-100">Choose your game mode</p>
+              <p className="text-xs text-amber-100">Choose your game mode</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8 text-white hover:bg-white/20">
@@ -120,7 +120,7 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
             </div>
           </div>
 
-          <ScrollArea className="flex-1 max-h-[calc(95vh-140px)]">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
             <div className="p-4 space-y-4">
               {/* Wallet Bar */}
               <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
@@ -132,23 +132,23 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
                     </div>
                     <div className="text-right">
                       <span className="font-bold text-amber-700 dark:text-amber-300">{formatLocalAmount(mobigateWalletData.balance, "NGN")}</span>
-                      <p className="text-[10px] text-amber-500">({formatMobiAmount(mobigateWalletData.balance)})</p>
+                      <p className="text-xs text-amber-500">({formatMobiAmount(mobigateWalletData.balance)})</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-amber-200 dark:border-amber-700">
                     <div className="text-center">
-                      <p className="text-[10px] text-amber-600">Rank</p>
-                      <p className="font-bold text-xs text-amber-700">#{mobigatePlayerStats.globalRank}</p>
+                      <p className="text-xs text-amber-600">Rank</p>
+                      <p className="font-bold text-sm text-amber-700">#{mobigatePlayerStats.globalRank}</p>
                     </div>
                     <div className="text-center border-x border-amber-200 dark:border-amber-700">
-                      <p className="text-[10px] text-amber-600">Streak</p>
-                      <p className="font-bold text-xs text-amber-700 flex items-center justify-center gap-1">
+                      <p className="text-xs text-amber-600">Streak</p>
+                      <p className="font-bold text-sm text-amber-700 flex items-center justify-center gap-1">
                         {mobigatePlayerStats.currentStreak} <Flame className="h-3 w-3 text-orange-500" />
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-[10px] text-amber-600">Won</p>
-                      <p className="font-bold text-xs text-green-600">+{formatLocalAmount(mobigatePlayerStats.netProfit, "NGN")}</p>
+                      <p className="text-xs text-amber-600">Won</p>
+                      <p className="font-bold text-sm text-green-600">+{formatLocalAmount(mobigatePlayerStats.netProfit, "NGN")}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -156,7 +156,7 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
 
               {/* Game Mode Cards */}
               <div className="space-y-3">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Select Game Mode</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Select Game Mode</h3>
                 {GAME_MODES.map((mode) => {
                   const Icon = mode.icon;
                   return (
@@ -172,16 +172,16 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <h3 className="font-bold text-white text-sm">{mode.title}</h3>
+                              <h3 className="font-bold text-white text-base">{mode.title}</h3>
                             </div>
-                            <Badge className="text-[9px] bg-white/20 border-0 text-white px-1.5 py-0">{mode.badge}</Badge>
+                            <Badge className="text-xs bg-white/20 border-0 text-white px-2 py-0.5">{mode.badge}</Badge>
                           </div>
                           <ChevronRight className="h-5 w-5 text-white/70 shrink-0" />
                         </div>
                         <div className={`px-3 py-2.5 ${mode.bgLight}`}>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{mode.description}</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">{mode.description}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-[10px] text-muted-foreground">Min Stake: <span className="font-semibold">{formatMobiAmount(mode.minStake)}</span></span>
+                            <span className="text-xs text-muted-foreground">Min Stake: <span className="font-semibold">{formatMobiAmount(mode.minStake)}</span></span>
                             <Button size="sm" className={`h-7 text-xs bg-gradient-to-r ${mode.gradient} text-white border-0`}>
                               <Zap className="h-3 w-3 mr-1" /> Play
                             </Button>
@@ -202,26 +202,26 @@ export function MobigateQuizHub({ open, onOpenChange }: MobigateQuizHubProps) {
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     <div className="text-center p-2 bg-muted/50 rounded-lg">
-                      <p className="font-bold text-sm">{mobigatePlayerStats.gamesPlayed}</p>
-                      <p className="text-[9px] text-muted-foreground">Played</p>
+                      <p className="font-bold text-base">{mobigatePlayerStats.gamesPlayed}</p>
+                      <p className="text-xs text-muted-foreground">Played</p>
                     </div>
                     <div className="text-center p-2 bg-muted/50 rounded-lg">
-                      <p className="font-bold text-sm text-green-600">{mobigatePlayerStats.gamesWon}</p>
-                      <p className="text-[9px] text-muted-foreground">Won</p>
+                      <p className="font-bold text-base text-green-600">{mobigatePlayerStats.gamesWon}</p>
+                      <p className="text-xs text-muted-foreground">Won</p>
                     </div>
                     <div className="text-center p-2 bg-muted/50 rounded-lg">
-                      <p className="font-bold text-sm text-amber-600">{mobigatePlayerStats.partialWins}</p>
-                      <p className="text-[9px] text-muted-foreground">Partial</p>
+                      <p className="font-bold text-base text-amber-600">{mobigatePlayerStats.partialWins}</p>
+                      <p className="text-xs text-muted-foreground">Partial</p>
                     </div>
                     <div className="text-center p-2 bg-muted/50 rounded-lg">
-                      <p className="font-bold text-sm text-red-500">{mobigatePlayerStats.gamesLost}</p>
-                      <p className="text-[9px] text-muted-foreground">Lost</p>
+                      <p className="font-bold text-base text-red-500">{mobigatePlayerStats.gamesLost}</p>
+                      <p className="text-xs text-muted-foreground">Lost</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
-          </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
 
