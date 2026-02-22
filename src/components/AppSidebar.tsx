@@ -170,6 +170,10 @@ const menuItems: MenuItem[] = [{
       ]
     },
     {
+      title: "Merchant Home",
+      url: "/merchant-home/m1",
+    },
+    {
       title: "Merchant Quizzes Management",
       url: "/merchant-page",
     }
