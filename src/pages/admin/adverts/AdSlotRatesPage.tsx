@@ -29,6 +29,9 @@ export default function AdSlotRatesPage() {
   const [baseRate, setBaseRate] = useState(500);
   const [durations, setDurations] = useState(initialDurations);
   const [dpdTiers, setDpdTiers] = useState(initialDpdTiers);
+  const [slotPacks, setSlotPacks] = useState(
+    SLOT_PACKS.map(p => ({ ...p }))
+  );
 
   const handleSaveSlotRates = () => {
     toast({ title: "Slot Rates Updated", description: "Base rate and pack discounts saved successfully." });
@@ -82,19 +85,63 @@ export default function AdSlotRatesPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {SLOT_PACKS.map(pack => {
+              {slotPacks.map((pack, i) => {
                 const effectiveRate = Math.round(baseRate * (1 - pack.discountPercentage / 100));
                 return (
-                  <div key={pack.id} className="p-3 bg-muted/30 rounded-lg space-y-2">
+                  <div key={pack.id} className="p-3 bg-muted/30 rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-sm">{pack.name}</p>
-                        <p className="text-xs text-muted-foreground">{pack.minSlots}–{pack.maxSlots} slots</p>
-                      </div>
+                      <p className="font-semibold text-sm">{pack.name}</p>
                       <Badge variant={pack.discountPercentage > 0 ? "default" : "secondary"}>
                         {pack.discountPercentage > 0 ? `-${pack.discountPercentage}%` : "Full Price"}
                       </Badge>
                     </div>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Min Slots</label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={pack.minSlots}
+                          onChange={e => {
+                            const updated = [...slotPacks];
+                            updated[i] = { ...pack, minSlots: Number(e.target.value) };
+                            setSlotPacks(updated);
+                          }}
+                          className="h-10 text-center font-bold text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Max Slots</label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={pack.maxSlots}
+                          onChange={e => {
+                            const updated = [...slotPacks];
+                            updated[i] = { ...pack, maxSlots: Number(e.target.value) };
+                            setSlotPacks(updated);
+                          }}
+                          className="h-10 text-center font-bold text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Discount %</label>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={pack.discountPercentage}
+                          onChange={e => {
+                            const updated = [...slotPacks];
+                            updated[i] = { ...pack, discountPercentage: Number(e.target.value) };
+                            setSlotPacks(updated);
+                          }}
+                          className="h-10 text-center font-bold text-sm"
+                        />
+                      </div>
+                    </div>
+
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Effective rate:</span>
                       <span className="font-bold text-primary">{effectiveRate} Mobi/slot</span>
