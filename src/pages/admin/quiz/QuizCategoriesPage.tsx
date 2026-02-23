@@ -107,17 +107,17 @@ export default function QuizCategoriesPage() {
               <Card><CardContent className="p-2 text-center">
                 <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
                 <p className="text-base font-bold">{categories.length}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Total</p>
+                <p className="text-xs text-muted-foreground uppercase">Total</p>
               </CardContent></Card>
               <Card><CardContent className="p-2 text-center">
                 <CheckCircle className="h-4 w-4 mx-auto mb-1 text-emerald-500" />
                 <p className="text-base font-bold text-emerald-600">{activeCount}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Active</p>
+                <p className="text-xs text-muted-foreground uppercase">Active</p>
               </CardContent></Card>
               <Card><CardContent className="p-2 text-center">
                 <FolderOpen className="h-4 w-4 mx-auto mb-1 text-primary" />
                 <p className="text-base font-bold">{totalQuestions}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Questions</p>
+                <p className="text-xs text-muted-foreground uppercase">Questions</p>
               </CardContent></Card>
             </div>
 
@@ -133,9 +133,9 @@ export default function QuizCategoriesPage() {
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-xs text-muted-foreground">{cat.questionCount} questions</span>
                           {cat.isPreset ? (
-                            <Badge variant="secondary" className="text-[10px] h-4">Preset</Badge>
+                            <Badge variant="secondary" className="text-xs h-4">Preset</Badge>
                           ) : (
-                            <Badge variant="outline" className="text-[10px] h-4 text-primary border-primary/30">Custom</Badge>
+                            <Badge variant="outline" className="text-xs h-4 text-primary border-primary/30">Custom</Badge>
                           )}
                         </div>
                       </div>

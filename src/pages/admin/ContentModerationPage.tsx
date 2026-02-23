@@ -138,7 +138,7 @@ export default function ContentModerationPage() {
           <div className="w-max min-w-full">
             <TabsList className="h-11 bg-transparent w-max">
               <TabsTrigger value="pending" className="gap-1">
-                Pending <Badge variant="destructive" className="text-[10px] px-1">{stats.totalPending}</Badge>
+                Pending <Badge variant="destructive" className="text-xs px-1">{stats.totalPending}</Badge>
               </TabsTrigger>
               <TabsTrigger value="news">News</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>

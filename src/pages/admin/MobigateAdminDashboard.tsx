@@ -156,7 +156,7 @@ export default function MobigateAdminDashboard() {
               <TabsTrigger value="merchants" className="text-xs py-2 px-3 relative">
                 <Store className="h-4 w-4 mr-1" />
                 Merchants
-                <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-[9px] px-1">4</Badge>
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-xs px-1">4</Badge>
               </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2 px-3">
                 <Settings className="h-4 w-4 mr-1" />
@@ -569,15 +569,15 @@ export default function MobigateAdminDashboard() {
                           {/* Financial Details */}
                           <div className="grid grid-cols-3 gap-2 text-center">
                             <div className="p-1.5 rounded bg-background">
-                              <p className="text-[10px] text-muted-foreground">Prize Pool</p>
+                              <p className="text-xs text-muted-foreground">Prize Pool</p>
                               <p className="text-xs font-bold">{formatMobi(waiver.totalPrizes)}</p>
                             </div>
                             <div className="p-1.5 rounded bg-background">
-                              <p className="text-[10px] text-muted-foreground">Wallet</p>
+                              <p className="text-xs text-muted-foreground">Wallet</p>
                               <p className="text-xs font-bold text-amber-600">{formatMobi(waiver.walletBalance)}</p>
                             </div>
                             <div className="p-1.5 rounded bg-background">
-                              <p className="text-[10px] text-muted-foreground">Shortfall</p>
+                              <p className="text-xs text-muted-foreground">Shortfall</p>
                               <p className="text-xs font-bold text-red-500">{formatMobi(shortfall)}</p>
                             </div>
                           </div>
@@ -591,7 +591,7 @@ export default function MobigateAdminDashboard() {
                           )}
 
                           {/* Date + Fee */}
-                          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>Submitted: {waiver.submittedDate}</span>
                             <span>Fee paid: {formatMobi(waiver.waiverFee)}</span>
                           </div>

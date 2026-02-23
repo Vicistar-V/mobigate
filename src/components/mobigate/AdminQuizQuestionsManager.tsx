@@ -68,12 +68,12 @@ export function AdminQuizQuestionsManager() {
               <div className="p-2 rounded-lg bg-muted/30">
                 <FileQuestion className="h-4 w-4 mx-auto mb-1 text-primary" />
                 <p className="text-lg font-bold">{totalQuestions}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Total Questions</p>
+                <p className="text-xs text-muted-foreground uppercase">Total Questions</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/30">
                 <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
                 <p className="text-lg font-bold">{categoryCount}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Categories Used</p>
+                <p className="text-xs text-muted-foreground uppercase">Categories Used</p>
               </div>
             </div>
           </CardContent>

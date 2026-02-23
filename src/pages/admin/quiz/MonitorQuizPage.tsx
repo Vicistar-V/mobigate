@@ -179,7 +179,7 @@ export default function MonitorQuizPage() {
               <div className="space-y-2.5 pt-2 pb-1">
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <p className="text-[10px] text-muted-foreground mb-1 font-medium uppercase tracking-wide">Sort</p>
+                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wide">Sort</p>
                     <Select value={sortBy} onValueChange={setSortBy}>
                       <SelectTrigger className="h-8 text-xs"><ArrowUpDown className="h-3 w-3 mr-1 shrink-0" /><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-background z-50">
@@ -189,7 +189,7 @@ export default function MonitorQuizPage() {
                     </Select>
                   </div>
                   <div className="flex-1">
-                    <p className="text-[10px] text-muted-foreground mb-1 font-medium uppercase tracking-wide">Result</p>
+                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wide">Result</p>
                     <Select value={resultFilter} onValueChange={setResultFilter}>
                       <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-background z-50">
@@ -202,7 +202,7 @@ export default function MonitorQuizPage() {
                 </div>
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <p className="text-[10px] text-muted-foreground mb-1 font-medium uppercase tracking-wide">Date Range</p>
+                    <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wide">Date Range</p>
                     <div className="flex gap-1">
                       <Popover open={showFromCal} onOpenChange={setShowFromCal}>
                         <PopoverTrigger asChild>
@@ -267,7 +267,7 @@ export default function MonitorQuizPage() {
               ))
             )}
             {filteredResults.length > 0 && (
-              <p className="text-[10px] text-muted-foreground text-center pt-1">
+              <p className="text-xs text-muted-foreground text-center pt-1">
                 Showing {filteredResults.length} results
               </p>
             )}

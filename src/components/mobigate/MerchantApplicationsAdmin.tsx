@@ -170,7 +170,7 @@ export function MerchantApplicationsAdmin() {
   const DetailRow = ({ label, value }: { label: string; value?: string }) => {
     if (!value) return null;
     return (
-      <div className="flex justify-between text-xs">
+      <div className="flex justify-between text-sm">
         <span className="text-muted-foreground">{label}</span>
         <span className="font-medium text-right max-w-[55%] truncate">{value}</span>
       </div>
@@ -185,21 +185,21 @@ export function MerchantApplicationsAdmin() {
           <CardContent className="p-3 text-center">
             <Clock className="h-4 w-4 text-amber-600 mx-auto mb-1" />
             <p className="text-xl font-bold">{counts.pending}</p>
-            <p className="text-[10px] text-muted-foreground">Pending</p>
+            <p className="text-xs text-muted-foreground">Pending</p>
           </CardContent>
         </Card>
         <Card className="bg-emerald-50/50 dark:bg-emerald-950/20">
           <CardContent className="p-3 text-center">
             <CheckCircle className="h-4 w-4 text-emerald-600 mx-auto mb-1" />
             <p className="text-xl font-bold">{counts.approved}</p>
-            <p className="text-[10px] text-muted-foreground">Approved</p>
+            <p className="text-xs text-muted-foreground">Approved</p>
           </CardContent>
         </Card>
         <Card className="bg-red-50/50 dark:bg-red-950/20">
           <CardContent className="p-3 text-center">
             <XCircle className="h-4 w-4 text-red-500 mx-auto mb-1" />
             <p className="text-xl font-bold">{counts.declined}</p>
-            <p className="text-[10px] text-muted-foreground">Declined</p>
+            <p className="text-xs text-muted-foreground">Declined</p>
           </CardContent>
         </Card>
       </div>
@@ -220,15 +220,15 @@ export function MerchantApplicationsAdmin() {
                   </div>
                   <div>
                     <p className="font-semibold text-sm">{app.applicantName}</p>
-                    <p className="text-[11px] text-muted-foreground font-mono">{app.storeName} • {app.merchantCode}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{app.storeName} • {app.merchantCode}</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <Badge variant={app.type === "individual" ? "secondary" : "outline"} className="text-[10px] h-5">
+                  <Badge variant={app.type === "individual" ? "secondary" : "outline"} className="text-xs h-5">
                     {app.type === "individual" ? "Individual" : "Corporate"}
                   </Badge>
                   {status !== "pending" && (
-                    <Badge variant={status === "approved" ? "default" : "destructive"} className="text-[10px] h-5">
+                    <Badge variant={status === "approved" ? "default" : "destructive"} className="text-xs h-5">
                       {status === "approved" ? "Approved" : "Declined"}
                     </Badge>
                   )}
@@ -236,11 +236,11 @@ export function MerchantApplicationsAdmin() {
               </div>
 
               {/* Quick details */}
-              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1.5 text-xs">
+              <div className="bg-muted/30 rounded-lg p-2.5 space-y-1.5 text-sm">
                 <DetailRow label="Reference" value={app.id} />
                 <DetailRow label="Submitted" value={app.submittedDate} />
                 
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Fee Paid</span>
                   <span className="font-medium text-primary">{formatMobi(app.feePaid)}</span>
                 </div>
@@ -249,7 +249,7 @@ export function MerchantApplicationsAdmin() {
               {/* Expandable full details */}
               <Collapsible open={isExpanded} onOpenChange={() => setExpandedId(isExpanded ? null : app.id)}>
                 <CollapsibleTrigger asChild>
-                  <button className="flex items-center gap-1 text-[11px] text-primary font-medium w-full">
+                  <button className="flex items-center gap-1 text-xs text-primary font-medium w-full">
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                     {isExpanded ? "Hide" : "View"} Full Application
                   </button>
@@ -259,8 +259,8 @@ export function MerchantApplicationsAdmin() {
                     {/* Business Info */}
                     {(app.businessProfile || app.dba || app.registeredOffice || app.companyRegNumber) && (
                       <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                          <Store className="h-3 w-3" /> Business Info
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                          <Store className="h-3.5 w-3.5" /> Business Info
                         </p>
                         <DetailRow label="Profile" value={app.businessProfile} />
                         <DetailRow label="DBA" value={app.dba} />
@@ -275,7 +275,7 @@ export function MerchantApplicationsAdmin() {
                     {/* Directors */}
                     {(app.director1 || app.director2) && (
                       <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Principal Officers</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Principal Officers</p>
                         <DetailRow label="Director 1" value={app.director1} />
                         <DetailRow label="Director 2" value={app.director2} />
                       </div>
@@ -283,8 +283,8 @@ export function MerchantApplicationsAdmin() {
 
                     {/* Contact & Banking */}
                     <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> Contact & Banking
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                        <Mail className="h-3.5 w-3.5" /> Contact & Banking
                       </p>
                       <DetailRow label="Email" value={app.email} />
                       <DetailRow label="Phone" value={app.phone} />
@@ -297,10 +297,10 @@ export function MerchantApplicationsAdmin() {
 
               {/* Eligibility */}
               <div className="space-y-1.5">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Eligibility Check</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Eligibility Check</p>
                 <div className="grid grid-cols-1 gap-1">
                   {app.eligibility.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs">
+                    <div key={i} className="flex items-center gap-2 text-sm">
                       {item.met ? (
                         <CheckCircle className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                       ) : (

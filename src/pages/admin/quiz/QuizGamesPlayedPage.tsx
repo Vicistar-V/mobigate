@@ -187,7 +187,7 @@ export default function QuizGamesPlayedPage() {
               {/* Row 4: Category + Difficulty + Date */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-muted-foreground">{game.category}</span>
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{game.difficulty}</Badge>
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">{game.difficulty}</Badge>
                 <span className="text-xs text-muted-foreground ml-auto">{format(new Date(game.datePlayed), "MMM dd, yyyy")}</span>
               </div>
             </button>
