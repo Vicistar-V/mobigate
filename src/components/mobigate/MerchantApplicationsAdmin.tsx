@@ -239,7 +239,7 @@ export function MerchantApplicationsAdmin() {
               <div className="bg-muted/30 rounded-lg p-2.5 space-y-1.5 text-xs">
                 <DetailRow label="Reference" value={app.id} />
                 <DetailRow label="Submitted" value={app.submittedDate} />
-                <DetailRow label="Game Type" value={app.gameType} />
+                
                 <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">Fee Paid</span>
                   <span className="font-medium text-primary">{formatMobi(app.feePaid)}</span>
