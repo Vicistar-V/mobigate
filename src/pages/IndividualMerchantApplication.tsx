@@ -46,7 +46,7 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
   return (
     <div className="border-b border-border pb-1.5 mb-3 flex items-center gap-2">
       <Icon className="h-3.5 w-3.5 text-primary" />
-      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
+      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
     </div>
   );
 }
@@ -258,7 +258,7 @@ export default function IndividualMerchantApplication() {
           </div>
           <div>
             <h1 className="text-lg font-bold">Individual Merchant Application</h1>
-            <p className="text-[11px] text-muted-foreground">Apply as an individual Mobi-Merchant</p>
+            <p className="text-xs text-muted-foreground">Apply as an individual Mobi-Merchant</p>
           </div>
         </div>
 
@@ -377,7 +377,7 @@ export default function IndividualMerchantApplication() {
             </FormField>
 
             <div className="border-t border-border pt-3 mt-2">
-              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">Current Residence</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2">Current Residence</p>
             </div>
 
             <FormField label="Current Address (Descriptive)" required>
@@ -397,7 +397,7 @@ export default function IndividualMerchantApplication() {
             </FormField>
 
             <div className="border-t border-border pt-3 mt-2">
-              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">Phone & Email</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2">Phone & Email</p>
             </div>
 
             <FormField label="Telephone Number 1" required>
@@ -423,7 +423,7 @@ export default function IndividualMerchantApplication() {
                     <Minus className="h-3 w-3" />
                   </Button>
                 )}
-                <p className="text-[10px] font-semibold text-muted-foreground">Bank {i + 1}</p>
+                <p className="text-xs font-semibold text-muted-foreground">Bank {i + 1}</p>
                 <Input className={inputCls} placeholder="Bank Name" value={bank.bankName} onChange={e => updateBank(i, "bankName", e.target.value)} />
                 <Input className={inputCls} placeholder="Account Name" value={bank.accountName} onChange={e => updateBank(i, "accountName", e.target.value)} />
                 <Input className={inputCls} placeholder="Account Number" value={bank.accountNumber} onChange={e => updateBank(i, "accountNumber", e.target.value)} />
@@ -457,7 +457,7 @@ export default function IndividualMerchantApplication() {
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionHeader icon={BadgeCheck} title="Verification / Identification" />
-            <p className="text-[10px] text-muted-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Provide at least one valid identification document for verification purposes.
             </p>
 
@@ -468,7 +468,7 @@ export default function IndividualMerchantApplication() {
                     <Minus className="h-3 w-3" />
                   </Button>
                 )}
-                <p className="text-[10px] font-semibold text-muted-foreground">ID {i + 1}</p>
+                <p className="text-xs font-semibold text-muted-foreground">ID {i + 1}</p>
                 <Select value={v.type} onValueChange={val => updateVerification(i, "type", val)}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select ID type" /></SelectTrigger>
                   <SelectContent>
@@ -496,11 +496,11 @@ export default function IndividualMerchantApplication() {
             <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
               <div>
                 <p className="text-xs font-medium">Non-refundable application fee</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Charged upon submission</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Charged upon submission</p>
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold text-primary">{formatMobi(50000)}</p>
-                <p className="text-[10px] text-muted-foreground">≈ {formatLocalAmount(50000, "NGN")}</p>
+                <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(50000, "NGN")}</p>
               </div>
             </div>
           </CardContent>
@@ -516,7 +516,7 @@ export default function IndividualMerchantApplication() {
                 onCheckedChange={(checked) => setAcceptedPolicies(checked === true)}
                 className="mt-0.5"
               />
-              <Label htmlFor="accept-policies" className="text-[11px] leading-relaxed cursor-pointer">
+              <Label htmlFor="accept-policies" className="text-xs leading-relaxed cursor-pointer">
                 You must read and agree to the{" "}
                 <span className="text-primary font-semibold underline">Terms and Conditions</span>{" "}
                 of MOBIGATE Application usage and management policy. By submitting, you agree to the application fee of{" "}

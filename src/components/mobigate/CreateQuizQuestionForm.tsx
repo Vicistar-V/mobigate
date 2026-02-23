@@ -94,7 +94,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
             {selectedCategories.length > 0 && (
               <button
                 type="button"
-                className="text-[11px] text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
+                className="text-xs text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
                 onClick={() => setSelectedCategories([])}
               >
                 Deselect All
@@ -142,7 +142,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
               className="h-12 text-base touch-manipulation"
             />
           )}
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {resolvedCategories.length > 0
               ? `${resolvedCategories.length} categor${resolvedCategories.length === 1 ? "y" : "ies"} selected.`
               : "Select at least one category."}
@@ -179,7 +179,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-[10px] text-muted-foreground">Leave empty for Global Pool questions</p>
+            <p className="text-xs text-muted-foreground">Leave empty for Global Pool questions</p>
           </div>
         )}
 
@@ -190,7 +190,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
             {selectedLevels.length > 0 && (
               <button
                 type="button"
-                className="text-[11px] text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
+                className="text-xs text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
                 onClick={() => setSelectedLevels([])}
               >
                 Deselect All
@@ -234,7 +234,7 @@ export function CreateQuizQuestionForm({ onCreateQuestion, quizType }: Props) {
               </label>
             ))}
           </div>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {selectedLevels.includes("All Levels")
               ? "Universal — this question will feature in all Quiz Levels."
               : selectedLevels.length > 0

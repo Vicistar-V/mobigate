@@ -115,7 +115,7 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
             {selectedCategories.length > 0 && (
               <button
                 type="button"
-                className="text-[11px] text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
+                className="text-xs text-destructive font-medium touch-manipulation active:scale-[0.97] px-2 py-0.5 rounded"
                 onClick={() => setSelectedCategories([])}
               >
                 Deselect All
@@ -159,7 +159,7 @@ export function CreateQuizLevelForm({ onCreateLevel }: CreateQuizLevelFormProps)
               className="h-12 text-base touch-manipulation"
             />
           )}
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {totalSelected > 0
               ? `${totalSelected} categor${totalSelected === 1 ? "y" : "ies"} selected — level will be created for each.`
               : "Select at least one category."}

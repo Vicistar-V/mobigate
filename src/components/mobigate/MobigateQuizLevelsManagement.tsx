@@ -83,17 +83,17 @@ export function MobigateQuizLevelsManagement({ quizType }: Props) {
               <div className="p-2 rounded-lg bg-muted/30">
                 <Layers className="h-4 w-4 mx-auto mb-1 text-primary" />
                 <p className="text-lg font-bold">{totalLevels}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Total</p>
+                <p className="text-xs text-muted-foreground uppercase">Total</p>
               </div>
               <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20">
                 <CheckCircle className="h-4 w-4 mx-auto mb-1 text-emerald-500" />
                 <p className="text-lg font-bold text-emerald-600">{activeLevels}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Active</p>
+                <p className="text-xs text-muted-foreground uppercase">Active</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/30">
                 <XCircle className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
                 <p className="text-lg font-bold">{inactiveLevels}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Inactive</p>
+                <p className="text-xs text-muted-foreground uppercase">Inactive</p>
               </div>
             </div>
           </CardContent>

@@ -227,7 +227,7 @@ export function QuizSettingsCard() {
 
           <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg">
             <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Players will be charged this amount from their main wallet to view played quiz questions in their history.
             </p>
           </div>
@@ -270,7 +270,7 @@ export function QuizSettingsCard() {
 
           <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg">
             <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Merchants must have at least this percentage of their total prize pool in their wallet to create a season without requesting a waiver.
             </p>
           </div>

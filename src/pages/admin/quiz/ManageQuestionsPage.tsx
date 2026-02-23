@@ -97,17 +97,17 @@ export default function ManageQuestionsPage() {
                   <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20">
                     <Zap className="h-4 w-4 mx-auto mb-1 text-emerald-600 dark:text-emerald-400" />
                     <p className="text-lg font-bold">{counts.active}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase">Active</p>
+                    <p className="text-xs text-muted-foreground uppercase">Active</p>
                   </div>
                   <div className="p-2 rounded-lg bg-sky-50 dark:bg-sky-950/20">
                     <Snowflake className="h-4 w-4 mx-auto mb-1 text-sky-600 dark:text-sky-400" />
                     <p className="text-lg font-bold">{counts.frozen}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase">Frozen</p>
+                    <p className="text-xs text-muted-foreground uppercase">Frozen</p>
                   </div>
                   <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/20">
                     <Ban className="h-4 w-4 mx-auto mb-1 text-red-600 dark:text-red-400" />
                     <p className="text-lg font-bold">{counts.suspended}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase">Suspended</p>
+                    <p className="text-xs text-muted-foreground uppercase">Suspended</p>
                   </div>
                 </div>
               </CardContent>
@@ -115,9 +115,9 @@ export default function ManageQuestionsPage() {
 
             <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as QuizQuestionStatus)}>
               <TabsList className="w-full grid grid-cols-3">
-                <TabsTrigger value="active" className="text-xs gap-1">Active <span className="text-[10px] opacity-70">({counts.active})</span></TabsTrigger>
-                <TabsTrigger value="frozen" className="text-xs gap-1">Frozen <span className="text-[10px] opacity-70">({counts.frozen})</span></TabsTrigger>
-                <TabsTrigger value="suspended" className="text-xs gap-1">Suspended <span className="text-[10px] opacity-70">({counts.suspended})</span></TabsTrigger>
+                <TabsTrigger value="active" className="text-xs gap-1">Active <span className="text-xs opacity-70">({counts.active})</span></TabsTrigger>
+                <TabsTrigger value="frozen" className="text-xs gap-1">Frozen <span className="text-xs opacity-70">({counts.frozen})</span></TabsTrigger>
+                <TabsTrigger value="suspended" className="text-xs gap-1">Suspended <span className="text-xs opacity-70">({counts.suspended})</span></TabsTrigger>
               </TabsList>
             </Tabs>
 

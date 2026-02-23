@@ -115,7 +115,7 @@ export function FanEngagementSettingsCard() {
             {feeRows.map(row => (
               <div key={row.label} className={`p-2 rounded-lg ${row.bg} border`}>
                 <row.icon className={`h-3.5 w-3.5 mx-auto mb-0.5 ${row.color}`} />
-                <p className="text-[10px] text-muted-foreground">{row.label.replace(" Fee", "")}</p>
+                <p className="text-xs text-muted-foreground">{row.label.replace(" Fee", "")}</p>
                 <p className={`font-bold text-xs ${row.color}`}>{formatMobiAmount(row.value)}</p>
               </div>
             ))}

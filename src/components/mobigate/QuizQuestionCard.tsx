@@ -98,7 +98,7 @@ export function QuizQuestionCard({ question, onEdit, onDelete, onSuspend, onReac
               {StatusIcon && <StatusIcon className="h-3 w-3" />}
               {status.label}
             </Badge>
-            <span className="text-[10px] text-muted-foreground ml-auto">
+            <span className="text-xs text-muted-foreground ml-auto">
               Asked: {question.timesAsked}/3
             </span>
           </div>
@@ -122,7 +122,7 @@ export function QuizQuestionCard({ question, onEdit, onDelete, onSuspend, onReac
                 <p className="text-xs text-red-700 dark:text-red-300">
                   Suspended by Admin
                 </p>
-                <p className="text-[10px] text-red-600/70 dark:text-red-400/70 flex items-center gap-1 mt-0.5">
+                <p className="text-xs text-red-600/70 dark:text-red-400/70 flex items-center gap-1 mt-0.5">
                   <Clock className="h-3 w-3" />
                   {getSuspensionLabel()}
                   {question.suspendedUntil && (
