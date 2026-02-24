@@ -12,6 +12,7 @@ import SubmitAdvert from "./pages/SubmitAdvert";
 import MyAdverts from "./pages/MyAdverts";
 import AdminManageAdverts from "./pages/AdminManageAdverts";
 import AdSlotRatesPage from "./pages/admin/adverts/AdSlotRatesPage";
+import AdvertRatesPage from "./pages/AdvertRatesPage";
 import ManageAdvertsPage from "./pages/admin/adverts/ManageAdvertsPage";
 import PromotionalAdsPage from "./pages/admin/adverts/PromotionalAdsPage";
 import Community from "./pages/Community";
@@ -106,6 +107,7 @@ const App = () => {
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   <Route path="/merchants" element={<MerchantListingPage />} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
+                  <Route path="/advert-rates" element={<AdvertRatesPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
