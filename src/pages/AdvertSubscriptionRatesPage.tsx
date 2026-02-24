@@ -131,29 +131,27 @@ const REPEAT_EVERY = [
   { interval: "Every 48 hours", charge: "+5% of DPD Charge" },
 ];
 
-// ─── Vertically-stacked Size Card ───
+// ─── Size Card: Row 1 = size + badge (inline), Row 2 = description (only wraps naturally) ───
 function SizeTable({ title, icon, data }: { title: string; icon: React.ReactNode; data: typeof SINGLE_SIZES }) {
   return (
     <Card className="border-border/60">
-      <CardHeader className="pb-3 px-4 pt-4">
+      <CardHeader className="pb-2 px-4 pt-4">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           {icon}
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 pb-4">
-        <div className="space-y-0">
+        <div className="divide-y divide-border/30">
           {data.map((item, i) => (
-            <div key={i} className="py-3 border-b border-border/30 last:border-0">
-              {/* Row 1: Size + Fee badge */}
-              <div className="flex items-center justify-between gap-2 mb-1">
+            <div key={i} className="py-2.5">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-bold text-foreground">{item.size}</span>
-                <Badge variant="secondary" className="text-xs font-semibold">
+                <Badge variant="secondary" className="text-xs font-semibold whitespace-nowrap">
                   {item.fee} of Setup Fee
                 </Badge>
               </div>
-              {/* Row 2: Description */}
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
+              <p className="text-sm text-muted-foreground mt-0.5 break-words">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -162,29 +160,37 @@ function SizeTable({ title, icon, data }: { title: string; icon: React.ReactNode
   );
 }
 
-// ─── Vertically-stacked Setup Fee Card ───
+// ─── Setup Fee Card: label + fee on same row, fee uses text-xs to fit ───
 function SetupTable({ title, icon, data }: { title: string; icon: React.ReactNode; data: { label: string; fee: string }[] }) {
   return (
     <Card className="border-border/60">
-      <CardHeader className="pb-3 px-4 pt-4">
+      <CardHeader className="pb-2 px-4 pt-4">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           {icon}
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 pb-4">
-        <div className="space-y-0">
+        <div className="divide-y divide-border/30">
           {data.map((item, i) => (
-            <div key={i} className="py-3 border-b border-border/30 last:border-0">
-              {/* Row 1: Label */}
-              <p className="text-sm font-semibold text-foreground mb-1">{item.label}</p>
-              {/* Row 2: Fee */}
-              <p className="text-sm text-muted-foreground">{item.fee}</p>
+            <div key={i} className="py-2.5 flex items-center justify-between gap-2">
+              <span className="text-sm font-semibold text-foreground whitespace-nowrap">{item.label}</span>
+              <span className="text-xs text-muted-foreground font-medium text-right">{item.fee}</span>
             </div>
           ))}
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Two-column row: label + badge, always inline ───
+function TwoColRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="py-2.5 flex items-center justify-between gap-2">
+      <span className="text-sm font-semibold text-foreground whitespace-nowrap">{label}</span>
+      <span className="text-xs text-muted-foreground font-medium text-right whitespace-nowrap">{value}</span>
+    </div>
   );
 }
 
@@ -240,25 +246,25 @@ export default function AdvertSubscriptionRatesPage() {
               Displays Per Day (DPD) Packages
             </h2>
             <Card className="border-border/60">
-              <CardHeader className="pb-3 px-4 pt-4">
+              <CardHeader className="pb-2 px-4 pt-4">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Zap className="h-5 w-5 text-primary" />
                   DPD Rates Per Month
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="space-y-0">
+                <div className="divide-y divide-border/30">
                   {DPD_PACKAGES.map((pkg, i) => (
-                    <div key={i} className="py-3 border-b border-border/30 last:border-0">
-                      {/* Row 1: Name + DPD badge */}
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-bold text-foreground">{pkg.name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {pkg.dpd} DPD
-                        </Badge>
+                    <div key={i} className="py-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-foreground">{pkg.name}</span>
+                          <Badge variant="outline" className="text-xs whitespace-nowrap shrink-0">
+                            {pkg.dpd} DPD
+                          </Badge>
+                        </div>
                       </div>
-                      {/* Row 2: Price */}
-                      <p className="text-sm text-muted-foreground">{pkg.price}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{pkg.price}</p>
                     </div>
                   ))}
                 </div>
@@ -274,23 +280,16 @@ export default function AdvertSubscriptionRatesPage() {
 
             {/* Extended Exposure */}
             <Card className="border-border/60">
-              <CardHeader className="pb-3 px-4 pt-4">
+              <CardHeader className="pb-2 px-4 pt-4">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Clock className="h-5 w-5 text-primary" />
                   Extended Exposure Duration
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="space-y-0">
+                <div className="divide-y divide-border/30">
                   {EXTENDED_EXPOSURE.map((item, i) => (
-                    <div key={i} className="py-3 border-b border-border/30 last:border-0">
-                      {/* Row 1: Duration label */}
-                      <p className="text-sm font-semibold text-foreground mb-1">{item.extra}</p>
-                      {/* Row 2: Charge */}
-                      <Badge variant="secondary" className="text-xs">
-                        +{item.charge}
-                      </Badge>
-                    </div>
+                    <TwoColRow key={i} label={item.extra} value={"+" + item.charge} />
                   ))}
                 </div>
               </CardContent>
@@ -298,7 +297,7 @@ export default function AdvertSubscriptionRatesPage() {
 
             {/* Repeat After */}
             <Card className="border-border/60">
-              <CardHeader className="pb-3 px-4 pt-4">
+              <CardHeader className="pb-2 px-4 pt-4">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <RefreshCw className="h-5 w-5 text-primary" />
                   Recurrent Exposure — Repeat After
@@ -306,14 +305,9 @@ export default function AdvertSubscriptionRatesPage() {
                 <p className="text-sm text-muted-foreground mt-1">Single repeat after a set delay from last exposure</p>
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="space-y-0">
+                <div className="divide-y divide-border/30">
                   {REPEAT_AFTER.map((item, i) => (
-                    <div key={i} className="py-3 border-b border-border/30 last:border-0">
-                      <p className="text-sm font-semibold text-foreground mb-1">{item.interval}</p>
-                      <Badge variant="secondary" className="text-xs">
-                        {item.charge}
-                      </Badge>
-                    </div>
+                    <TwoColRow key={i} label={item.interval} value={item.charge} />
                   ))}
                 </div>
               </CardContent>
@@ -321,7 +315,7 @@ export default function AdvertSubscriptionRatesPage() {
 
             {/* Repeat Every */}
             <Card className="border-border/60">
-              <CardHeader className="pb-3 px-4 pt-4">
+              <CardHeader className="pb-2 px-4 pt-4">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Repeat className="h-5 w-5 text-primary" />
                   Recurrent Exposure — Repeat Every
@@ -329,14 +323,9 @@ export default function AdvertSubscriptionRatesPage() {
                 <p className="text-sm text-muted-foreground mt-1">Continuous repeat at fixed intervals</p>
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="space-y-0">
+                <div className="divide-y divide-border/30">
                   {REPEAT_EVERY.map((item, i) => (
-                    <div key={i} className="py-3 border-b border-border/30 last:border-0">
-                      <p className="text-sm font-semibold text-foreground mb-1">{item.interval}</p>
-                      <Badge variant="secondary" className="text-xs">
-                        {item.charge}
-                      </Badge>
-                    </div>
+                    <TwoColRow key={i} label={item.interval} value={item.charge} />
                   ))}
                 </div>
               </CardContent>
