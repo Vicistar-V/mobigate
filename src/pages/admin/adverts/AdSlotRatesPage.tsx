@@ -17,18 +17,36 @@ const initialDurations = [
   { days: 90, label: "90 Days", multiplier: 7.5 },
 ];
 
-const initialDpdTiers = [
-  { label: "Tier 1 (1-100 views/day)", rate: 50 },
-  { label: "Tier 2 (101-500 views/day)", rate: 120 },
-  { label: "Tier 3 (501-2000 views/day)", rate: 300 },
-  { label: "Tier 4 (2000+ views/day)", rate: 500 },
+const initialDpdPackages = [
+  { name: "Basic", dpd: 1000, price: 10000 },
+  { name: "Standard", dpd: 2000, price: 20000 },
+  { name: "Professional", dpd: 3000, price: 30000 },
+  { name: "Business", dpd: 4000, price: 40000 },
+  { name: "Enterprise", dpd: 5000, price: 50000 },
+  { name: "Entrepreneur", dpd: 6000, price: 60000 },
+  { name: "Deluxe", dpd: 7000, price: 70000 },
+  { name: "Deluxe Super", dpd: 8000, price: 80000 },
+  { name: "Deluxe Super Plus", dpd: 9000, price: 90000 },
+  { name: "Deluxe Silver", dpd: 10000, price: 100000 },
+  { name: "Deluxe Bronze", dpd: 12000, price: 120000 },
+  { name: "Deluxe Gold", dpd: 14000, price: 140000 },
+  { name: "Deluxe Gold Plus", dpd: 16000, price: 160000 },
+  { name: "Deluxe Diamond", dpd: 18000, price: 180000 },
+  { name: "Deluxe Diamond Plus", dpd: 20000, price: 200000 },
+  { name: "Deluxe Platinum", dpd: 25000, price: 250000 },
+  { name: "Deluxe Platinum Plus", dpd: 30000, price: 300000 },
+  { name: "Bumper Gold", dpd: 35000, price: 350000 },
+  { name: "Bumper Diamond", dpd: 40000, price: 400000 },
+  { name: "Bumper Platinum", dpd: 45000, price: 450000 },
+  { name: "Bumper Infinity", dpd: 50000, price: 500000 },
+  { name: "Unlimited", dpd: null, price: 600000 },
 ];
 
 export default function AdSlotRatesPage() {
   const { toast } = useToast();
   const [baseRate, setBaseRate] = useState(500);
   const [durations, setDurations] = useState(initialDurations);
-  const [dpdTiers, setDpdTiers] = useState(initialDpdTiers);
+  const [dpdPackages, setDpdPackages] = useState(initialDpdPackages.map(p => ({ ...p })));
   const [slotPacks, setSlotPacks] = useState(
     SLOT_PACKS.map(p => ({ ...p }))
   );
@@ -42,7 +60,7 @@ export default function AdSlotRatesPage() {
   };
 
   const handleSaveDpd = () => {
-    toast({ title: "DPD Tiers Updated", description: "Display-per-day pricing saved successfully." });
+    toast({ title: "DPD Packages Updated", description: "Display-per-day packages saved successfully." });
   };
 
   return (
@@ -194,38 +212,37 @@ export default function AdSlotRatesPage() {
             </CardContent>
           </Card>
 
-          {/* DPD Pricing Tiers */}
+          {/* DPD Packages */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-emerald-500" />
-                DPD Pricing Tiers
+                <TrendingUp className="h-5 w-5 text-primary" />
+                DPD Rates Per Month
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-xs text-muted-foreground">Display-Per-Day rate based on estimated daily impressions.</p>
-              {dpdTiers.map((tier, i) => (
-                <div key={i} className="flex items-center justify-between gap-3 p-3 bg-muted/30 rounded-lg">
-                  <p className="text-sm flex-1">{tier.label}</p>
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      value={tier.rate}
-                      onChange={e => {
-                        const updated = [...dpdTiers];
-                        updated[i] = { ...tier, rate: Number(e.target.value) };
-                        setDpdTiers(updated);
-                      }}
-                      className="h-10 w-20 text-center font-bold"
-                    />
-                    <span className="text-xs text-muted-foreground shrink-0">Mobi</span>
+            <CardContent className="space-y-1">
+              {dpdPackages.map((pkg, i) => (
+                <div key={i} className="flex items-center justify-between gap-2 py-2 px-3 border-b border-border/30 last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-foreground">{pkg.name}: </span>
+                    <span className="text-sm text-muted-foreground">
+                      {pkg.dpd ? `${pkg.dpd.toLocaleString()} DPD` : "Unlimited DPD"}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {" "}@ ₦{pkg.price.toLocaleString()}/{pkg.price.toLocaleString()} Mobi
+                    </span>
                   </div>
+                  <Button variant="outline" size="sm" className="h-8 text-xs shrink-0">
+                    Edit
+                  </Button>
                 </div>
               ))}
-              <Button onClick={handleSaveDpd} variant="outline" className="w-full h-12 mt-2">
-                <Save className="h-4 w-4 mr-2" />
-                Save DPD Tiers
-              </Button>
+              <div className="pt-2">
+                <Button onClick={handleSaveDpd} variant="outline" className="w-full h-12 mt-2">
+                  <Save className="h-4 w-4 mr-2" />
+                  Save DPD Packages
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
