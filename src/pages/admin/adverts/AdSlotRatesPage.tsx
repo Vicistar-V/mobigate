@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Clock, Save, TrendingUp, Percent } from "lucide-react";
+import { Clock, Save, TrendingUp, Percent, Gift } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SLOT_PACKS } from "@/data/slotPacks";
 import { useToast } from "@/hooks/use-toast";
@@ -149,6 +149,35 @@ export default function AdSlotRatesPage() {
                 <Save className="h-4 w-4 mr-2" />
                 Save Slot Rates
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Special Bonus Advert Slot */}
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Gift className="h-5 w-5 text-primary" />
+                Special Bonus [1-FREE] Advert Slot
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {[
+                { label: "Basic Slot Pack", slots: "3-4 Slots", multiplier: 15, minimum: 45 },
+                { label: "Standard Slot Pack", slots: "5-7 Slots", multiplier: 9, minimum: 45 },
+                { label: "Business Slot Pack", slots: "8-10 Slots", multiplier: 6, minimum: 48 },
+                { label: "Enterprise Slot Pack", slots: "11-15 Slots", multiplier: 4, minimum: 44 },
+                { label: "Cumulative Slot Pack", slots: "45 Randomly", multiplier: null, minimum: null },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between py-2 px-3 bg-background rounded-lg border border-border/40">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">{String.fromCharCode(97 + i)}. {item.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      [{item.slots}]{item.multiplier ? ` × ${item.multiplier}` : ""}{item.minimum ? ` (Minimum of ${item.minimum})` : ""}
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="shrink-0 text-primary border-primary/40">FREE</Badge>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
