@@ -176,7 +176,7 @@ export default function AdSlotRatesPage() {
                       [{item.slots}]{item.multiplier ? ` × ${item.multiplier}` : ""}{item.minimum ? ` (Minimum of ${item.minimum})` : ""}
                     </p>
                   </div>
-                  <Badge variant="outline" className="shrink-0 text-primary border-primary/40">FREE</Badge>
+                  <Badge variant="outline" className="shrink-0 text-primary border-primary/40">1-Free Ad Slot</Badge>
                 </div>
               ))}
             </CardContent>
