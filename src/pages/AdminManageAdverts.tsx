@@ -673,15 +673,88 @@ export default function AdminManageAdverts() {
                 Filter
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[80vh]">
+            <SheetContent side="bottom" className="h-[92vh] overflow-y-auto touch-auto">
               <SheetHeader>
                 <SheetTitle>Filter Adverts</SheetTitle>
                 <SheetDescription>
                   Apply filters to narrow down your search
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-6">
-                <p className="text-sm text-muted-foreground">Additional filters coming soon...</p>
+              <div className="mt-4 space-y-5">
+                {/* Status Filter */}
+                <div>
+                  <Label className="text-sm font-semibold mb-2 block">Status</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {["all", "pending", "approved", "active", "paused", "rejected", "expired"].map((status) => (
+                      <Button
+                        key={status}
+                        size="sm"
+                        variant={activeTab === status ? "default" : "outline"}
+                        onClick={() => {
+                          setActiveTab(status);
+                        }}
+                        className="capitalize"
+                      >
+                        {status}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Category Filter */}
+                <div>
+                  <Label className="text-sm font-semibold mb-2 block">Category</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {["pictoral", "video"].map((cat) => (
+                      <Button
+                        key={cat}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSearchQuery(cat);
+                          setFilterDrawerOpen(false);
+                        }}
+                        className="capitalize"
+                      >
+                        {cat}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Quick Search */}
+                <div>
+                  <Label className="text-sm font-semibold mb-2 block">Search</Label>
+                  <Input
+                    type="search"
+                    placeholder="Search by ID, user, category..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setActiveTab("all");
+                      setSearchQuery("");
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={() => setFilterDrawerOpen(false)}
+                  >
+                    Apply Filters
+                  </Button>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
