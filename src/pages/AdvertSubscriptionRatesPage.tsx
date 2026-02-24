@@ -155,10 +155,10 @@ function SizeTable({ title, icon, data }: { title: string; icon: React.ReactNode
           {data.map((item, i) => (
             <div key={i} className="flex items-start justify-between gap-2 py-1.5 border-b border-border/30 last:border-0">
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-medium text-foreground">{item.size}</span>
-                <p className="text-[10px] text-muted-foreground leading-tight">{item.desc}</p>
+                <span className="text-sm font-medium text-foreground">{item.size}</span>
+                <p className="text-xs text-muted-foreground leading-tight">{item.desc}</p>
               </div>
-              <Badge variant="secondary" className="text-[10px] shrink-0 font-semibold">
+              <Badge variant="secondary" className="text-xs shrink-0 font-semibold">
                 {item.fee} of Setup Fee
               </Badge>
             </div>
@@ -183,8 +183,8 @@ function SetupTable({ title, icon, data }: { title: string; icon: React.ReactNod
         <div className="space-y-1.5">
           {data.map((item, i) => (
             <div key={i} className="flex items-center justify-between gap-2 py-1.5 border-b border-border/30 last:border-0">
-              <span className="text-xs font-medium text-foreground">{item.label}</span>
-              <span className="text-[10px] text-muted-foreground font-medium shrink-0">{item.fee}</span>
+              <span className="text-sm font-medium text-foreground">{item.label}</span>
+              <span className="text-xs text-muted-foreground font-medium shrink-0">{item.fee}</span>
             </div>
           ))}
         </div>
@@ -208,20 +208,20 @@ export default function AdvertSubscriptionRatesPage() {
             </Button>
             <div>
               <h1 className="text-base font-bold text-foreground">Advertisement Subscription Rates</h1>
-              <p className="text-[10px] text-muted-foreground">Complete pricing guide for all advert types</p>
+              <p className="text-xs text-muted-foreground">Complete pricing guide for all advert types</p>
             </div>
           </div>
 
           {/* Info banner */}
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
-            <p className="text-[11px] text-primary font-medium leading-relaxed">
+            <p className="text-sm text-primary font-medium leading-relaxed">
               All prices are shown in both Naira (₦) and Mobi tokens at a 1:1 rate. Charges are per subscription month unless stated otherwise.
             </p>
           </div>
 
           {/* ══════════ SECTION 1: Ad Space Sizes & Charges ══════════ */}
           <div className="space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-1">
               Advert Space Sizes & Charges
             </h2>
             <SizeTable
@@ -243,7 +243,7 @@ export default function AdvertSubscriptionRatesPage() {
 
           {/* ══════════ SECTION 2: Setup Fees ══════════ */}
           <div className="space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-1">
               Advert Subscription Set-Up Fees
             </h2>
             <SetupTable
@@ -265,7 +265,7 @@ export default function AdvertSubscriptionRatesPage() {
 
           {/* ══════════ SECTION 3: DPD Packages ══════════ */}
           <div className="space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-1">
               Displays Per Day (DPD) Packages
             </h2>
             <Card className="border-border/60">
@@ -280,12 +280,12 @@ export default function AdvertSubscriptionRatesPage() {
                   {DPD_PACKAGES.map((pkg, i) => (
                     <div key={i} className="flex items-center justify-between gap-2 py-1.5 border-b border-border/30 last:border-0">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-xs font-medium text-foreground">{pkg.name}</span>
-                        <Badge variant="outline" className="text-[9px] shrink-0">
+                        <span className="text-sm font-medium text-foreground">{pkg.name}</span>
+                        <Badge variant="outline" className="text-xs shrink-0">
                           {pkg.dpd} DPD
                         </Badge>
                       </div>
-                      <span className="text-[10px] text-muted-foreground font-medium shrink-0">{pkg.price}</span>
+                      <span className="text-xs text-muted-foreground font-medium shrink-0">{pkg.price}</span>
                     </div>
                   ))}
                 </div>
@@ -295,7 +295,7 @@ export default function AdvertSubscriptionRatesPage() {
 
           {/* ══════════ SECTION 4: Value-Added Features ══════════ */}
           <div className="space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-1">
               Value-Added Features & Sundry Charges
             </h2>
 
@@ -311,8 +311,8 @@ export default function AdvertSubscriptionRatesPage() {
                 <div className="space-y-1">
                   {EXTENDED_EXPOSURE.map((item, i) => (
                     <div key={i} className="flex items-center justify-between gap-2 py-1.5 border-b border-border/30 last:border-0">
-                      <span className="text-xs font-medium text-foreground">{item.extra}</span>
-                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                      <span className="text-sm font-medium text-foreground">{item.extra}</span>
+                      <Badge variant="secondary" className="text-xs shrink-0">
                         +{item.charge}
                       </Badge>
                     </div>
@@ -328,14 +328,14 @@ export default function AdvertSubscriptionRatesPage() {
                   <RefreshCw className="h-4 w-4 text-violet-500" />
                   Recurrent Exposure — Repeat After
                 </CardTitle>
-                <p className="text-[10px] text-muted-foreground">Single repeat after a set delay from last exposure</p>
+                <p className="text-xs text-muted-foreground">Single repeat after a set delay from last exposure</p>
               </CardHeader>
               <CardContent className="px-3 pb-3">
                 <div className="space-y-1">
                   {REPEAT_AFTER.map((item, i) => (
                     <div key={i} className="flex items-center justify-between gap-2 py-1.5 border-b border-border/30 last:border-0">
-                      <span className="text-xs font-medium text-foreground">{item.interval}</span>
-                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                      <span className="text-sm font-medium text-foreground">{item.interval}</span>
+                      <Badge variant="secondary" className="text-xs shrink-0">
                         {item.charge}
                       </Badge>
                     </div>
@@ -351,14 +351,14 @@ export default function AdvertSubscriptionRatesPage() {
                   <Repeat className="h-4 w-4 text-rose-500" />
                   Recurrent Exposure — Repeat Every
                 </CardTitle>
-                <p className="text-[10px] text-muted-foreground">Continuous repeat at fixed intervals</p>
+                <p className="text-xs text-muted-foreground">Continuous repeat at fixed intervals</p>
               </CardHeader>
               <CardContent className="px-3 pb-3">
                 <div className="space-y-1">
                   {REPEAT_EVERY.map((item, i) => (
                     <div key={i} className="flex items-center justify-between gap-2 py-1.5 border-b border-border/30 last:border-0">
-                      <span className="text-xs font-medium text-foreground">{item.interval}</span>
-                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                      <span className="text-sm font-medium text-foreground">{item.interval}</span>
+                      <Badge variant="secondary" className="text-xs shrink-0">
                         {item.charge}
                       </Badge>
                     </div>
