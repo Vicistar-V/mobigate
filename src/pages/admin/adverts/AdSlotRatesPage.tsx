@@ -47,6 +47,7 @@ export default function AdSlotRatesPage() {
   const baseRate = 10000;
   const [durations, setDurations] = useState(initialDurations);
   const [dpdPackages, setDpdPackages] = useState(initialDpdPackages.map(p => ({ ...p })));
+  const [editingDpdIndex, setEditingDpdIndex] = useState<number | null>(null);
   const [slotPacks, setSlotPacks] = useState(
     SLOT_PACKS.map(p => ({ ...p }))
   );
@@ -229,19 +230,58 @@ export default function AdSlotRatesPage() {
             </CardHeader>
             <CardContent className="space-y-1">
               {dpdPackages.map((pkg, i) => (
-                <div key={i} className="flex items-center justify-between gap-2 py-2 px-3 border-b border-border/30 last:border-0">
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-semibold text-foreground">{pkg.name}: </span>
-                    <span className="text-sm text-muted-foreground">
-                      {pkg.dpd ? `${pkg.dpd.toLocaleString()} DPD` : "Unlimited DPD"}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {" "}@ ₦{pkg.price.toLocaleString()}/{pkg.price.toLocaleString()} Mobi
-                    </span>
-                  </div>
-                  <Button variant="outline" size="sm" className="h-8 text-xs shrink-0">
-                    Edit
-                  </Button>
+                <div key={i} className="py-2 px-3 border-b border-border/30 last:border-0">
+                  {editingDpdIndex === i ? (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">DPD</label>
+                          <Input
+                            type="number"
+                            value={pkg.dpd ?? ""}
+                            placeholder="Unlimited"
+                            onChange={e => {
+                              const updated = [...dpdPackages];
+                              updated[i] = { ...pkg, dpd: e.target.value ? Number(e.target.value) : null };
+                              setDpdPackages(updated);
+                            }}
+                            className="h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Price (₦/Mobi)</label>
+                          <Input
+                            type="number"
+                            value={pkg.price}
+                            onChange={e => {
+                              const updated = [...dpdPackages];
+                              updated[i] = { ...pkg, price: Number(e.target.value) };
+                              setDpdPackages(updated);
+                            }}
+                            className="h-9 text-sm"
+                          />
+                        </div>
+                      </div>
+                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setEditingDpdIndex(null)}>
+                        Done
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold text-foreground">{pkg.name}: </span>
+                        <span className="text-sm text-muted-foreground">
+                          {pkg.dpd ? `${pkg.dpd.toLocaleString()} DPD` : "Unlimited DPD"}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {" "}@ ₦{pkg.price.toLocaleString()}/{pkg.price.toLocaleString()} Mobi
+                        </span>
+                      </div>
+                      <Button variant="outline" size="sm" className="h-8 text-xs shrink-0" onClick={() => setEditingDpdIndex(i)}>
+                        Edit
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
               <div className="pt-2">
