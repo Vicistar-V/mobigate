@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DollarSign, Clock, Save, TrendingUp, Percent } from "lucide-react";
+import { Clock, Save, TrendingUp, Percent } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SLOT_PACKS } from "@/data/slotPacks";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +44,7 @@ const initialDpdPackages = [
 
 export default function AdSlotRatesPage() {
   const { toast } = useToast();
-  const [baseRate, setBaseRate] = useState(500);
+  const baseRate = 10000;
   const [durations, setDurations] = useState(initialDurations);
   const [dpdPackages, setDpdPackages] = useState(initialDpdPackages.map(p => ({ ...p })));
   const [slotPacks, setSlotPacks] = useState(
@@ -72,28 +72,6 @@ export default function AdSlotRatesPage() {
           <h1 className="text-lg font-bold mb-3">Ad Slot Rates</h1>
         </div>
         <div className="p-4 space-y-4">
-          {/* Base Rate */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-primary" />
-                Base Rate per Slot
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground shrink-0">Mobi per slot:</span>
-                <Input
-                  type="number"
-                  value={baseRate}
-                  onChange={e => setBaseRate(Number(e.target.value))}
-                  className="h-12 text-lg font-bold"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">This is the full price for 1 ad slot before any pack discounts.</p>
-            </CardContent>
-          </Card>
-
           {/* Slot Packs */}
           <Card>
             <CardHeader className="pb-3">
