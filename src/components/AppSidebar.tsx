@@ -208,7 +208,8 @@ const menuItems: MenuItem[] = [{
   items: [
     { title: "Submit Adverts", url: "/submit-advert" },
     { title: "View/Manage Adverts", url: "/my-adverts" },
-    { title: "Advert Subscription Rates", url: "/advert-rates" },
+    { title: "Advert Subscription Rates", url: "#" },
+    { title: "Discounted Advert Rates", url: "/advert-rates" },
     { 
       title: "Accredited Advertisers", 
       url: "#",
