@@ -4,18 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Clock, Save, TrendingUp, Percent, Gift } from "lucide-react";
+import { Save, TrendingUp, Percent, Gift } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SLOT_PACKS } from "@/data/slotPacks";
 import { useToast } from "@/hooks/use-toast";
 
-const initialDurations = [
-  { days: 7, label: "7 Days", multiplier: 1.0 },
-  { days: 14, label: "14 Days", multiplier: 1.8 },
-  { days: 30, label: "30 Days", multiplier: 3.2 },
-  { days: 60, label: "60 Days", multiplier: 5.5 },
-  { days: 90, label: "90 Days", multiplier: 7.5 },
-];
+
+
 
 const initialDpdPackages = [
   { name: "Basic", dpd: 1000, price: 10000 },
@@ -45,7 +40,7 @@ const initialDpdPackages = [
 export default function AdSlotRatesPage() {
   const { toast } = useToast();
   const baseRate = 10000;
-  const [durations, setDurations] = useState(initialDurations);
+  
   const [dpdPackages, setDpdPackages] = useState(initialDpdPackages.map(p => ({ ...p })));
   const [editingDpdIndex, setEditingDpdIndex] = useState<number | null>(null);
   const [slotPacks, setSlotPacks] = useState(
@@ -56,9 +51,8 @@ export default function AdSlotRatesPage() {
     toast({ title: "Slot Rates Updated", description: "Base rate and pack discounts saved successfully." });
   };
 
-  const handleSaveDurations = () => {
-    toast({ title: "Duration Rates Updated", description: "Duration multipliers saved successfully." });
-  };
+
+
 
   const handleSaveDpd = () => {
     toast({ title: "DPD Packages Updated", description: "Display-per-day packages saved successfully." });
@@ -182,43 +176,7 @@ export default function AdSlotRatesPage() {
             </CardContent>
           </Card>
 
-          {/* Duration Multipliers */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-500" />
-                Duration Pricing
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {durations.map((dur, i) => (
-                <div key={dur.days} className="flex items-center justify-between gap-3 p-3 bg-muted/30 rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{dur.label}</p>
-                    <p className="text-xs text-muted-foreground">Cost: {Math.round(baseRate * dur.multiplier)} Mobi</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">×</span>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      value={dur.multiplier}
-                      onChange={e => {
-                        const updated = [...durations];
-                        updated[i] = { ...dur, multiplier: Number(e.target.value) };
-                        setDurations(updated);
-                      }}
-                      className="h-10 w-20 text-center font-bold"
-                    />
-                  </div>
-                </div>
-              ))}
-              <Button onClick={handleSaveDurations} variant="outline" className="w-full h-12 mt-2">
-                <Save className="h-4 w-4 mr-2" />
-                Save Duration Rates
-              </Button>
-            </CardContent>
-          </Card>
+
 
           {/* DPD Packages */}
           <Card>
