@@ -20,11 +20,11 @@ const initialDurations = [
 ];
 
 const initialBonusTiers = [
-  { label: "Basic Slot Pack", slots: "3-4 Slots", multiplier: 15 as number | null, minimum: 45 as number | null },
-  { label: "Standard Slot Pack", slots: "5-7 Slots", multiplier: 9 as number | null, minimum: 45 as number | null },
-  { label: "Business Slot Pack", slots: "8-10 Slots", multiplier: 6 as number | null, minimum: 48 as number | null },
-  { label: "Enterprise Slot Pack", slots: "11-15 Slots", multiplier: 4 as number | null, minimum: 44 as number | null },
-  { label: "Cumulative Slot Pack", slots: "45 Randomly", multiplier: null as number | null, minimum: null as number | null },
+  { label: "Basic Slot Pack", minSlots: 3, maxSlots: 4, multiplier: 15 as number | null, minimum: 45 as number | null },
+  { label: "Standard Slot Pack", minSlots: 5, maxSlots: 7, multiplier: 9 as number | null, minimum: 45 as number | null },
+  { label: "Business Slot Pack", minSlots: 8, maxSlots: 10, multiplier: 6 as number | null, minimum: 48 as number | null },
+  { label: "Enterprise Slot Pack", minSlots: 11, maxSlots: 15, multiplier: 4 as number | null, minimum: 44 as number | null },
+  { label: "Cumulative Slot Pack", minSlots: 45, maxSlots: null as number | null, multiplier: null as number | null, minimum: null as number | null },
 ];
 
 
@@ -179,14 +179,29 @@ export default function AdSlotRatesPage() {
                     <p className="text-sm font-semibold">{String.fromCharCode(97 + i)}. {item.label}</p>
                     <Badge variant="outline" className="shrink-0 text-primary border-primary/40">1-Free</Badge>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     <div>
-                      <label className="text-xs text-muted-foreground block mb-1">Slots</label>
+                      <label className="text-xs text-muted-foreground block mb-1">Min Sl</label>
                       <Input
-                        value={item.slots}
+                        type="number"
+                        value={item.minSlots ?? ""}
                         onChange={e => {
                           const updated = [...bonusTiers];
-                          updated[i] = { ...item, slots: e.target.value };
+                          updated[i] = { ...item, minSlots: e.target.value ? Number(e.target.value) : null };
+                          setBonusTiers(updated);
+                        }}
+                        className="h-10 text-center text-sm font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Max Sl</label>
+                      <Input
+                        type="number"
+                        value={item.maxSlots ?? ""}
+                        placeholder="—"
+                        onChange={e => {
+                          const updated = [...bonusTiers];
+                          updated[i] = { ...item, maxSlots: e.target.value ? Number(e.target.value) : null };
                           setBonusTiers(updated);
                         }}
                         className="h-10 text-center text-sm font-bold"
