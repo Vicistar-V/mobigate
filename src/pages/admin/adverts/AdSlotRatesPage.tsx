@@ -204,8 +204,11 @@ export default function AdSlotRatesPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               {durations.map((dur, i) => (
-                <div key={i} className="flex items-center justify-between py-2 px-3 bg-muted/30 rounded-lg">
-                  <span className="text-sm font-medium">{dur.label}</span>
+                <div key={i} className="py-3 px-3 bg-muted/30 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold">{dur.label}</span>
+                    <Badge variant="secondary" className="text-xs">{dur.days} days</Badge>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Input
                       type="number"
@@ -215,9 +218,9 @@ export default function AdSlotRatesPage() {
                         updated[i] = { ...dur, price: Number(e.target.value) };
                         setDurations(updated);
                       }}
-                      className="h-9 w-24 text-right text-sm font-bold"
+                      className="h-10 flex-1 text-sm font-bold"
                     />
-                    <span className="text-xs text-muted-foreground">Mobi</span>
+                    <span className="text-sm text-muted-foreground shrink-0">Mobi</span>
                   </div>
                 </div>
               ))}
