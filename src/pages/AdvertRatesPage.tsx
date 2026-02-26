@@ -2,13 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Clock, TrendingUp, Percent, Layers, Image, Video, Maximize, ArrowLeft, Info, Zap, Star } from "lucide-react";
+import { Clock, TrendingUp, Percent, Layers, Image, Video, Maximize, ArrowLeft, Info, Zap, Star } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-// Hardcoded mock rates mirroring what admin sets
-const BASE_RATE = 500;
+
 
 const SLOT_PACKS = [
   { name: "Entry Pack", range: "1–2 slots", discount: 0, rate: 500, tag: "" },
@@ -95,23 +94,6 @@ export default function AdvertRatesPage() {
               Rates shown are the current community prices. Discounts stack — slot pack + subscription + accredited tier savings all apply together.
             </p>
           </div>
-
-          {/* Base Rate */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-primary" />
-                Base Rate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-primary">{BASE_RATE}</span>
-                <span className="text-sm text-muted-foreground">Mobi per ad slot</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Full price before any discounts apply</p>
-            </CardContent>
-          </Card>
 
           {/* Slot Pack Discounts */}
           <Card>
