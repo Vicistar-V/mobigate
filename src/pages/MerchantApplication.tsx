@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -43,6 +44,7 @@ export default function MerchantApplication() {
   const [regAuthority, setRegAuthority] = useState("");
   const [countryOfReg, setCountryOfReg] = useState("");
   const [tin, setTin] = useState("");
+  const [businessCategory, setBusinessCategory] = useState("");
 
   // Directors (dynamic list)
   const [directors, setDirectors] = useState<{ name: string; address: string; photo: string | null }[]>([
@@ -375,6 +377,21 @@ export default function MerchantApplication() {
 
             <FieldRow label="Company Registration Number">
               <Input value={companyRegNumber} onChange={e => setCompanyRegNumber(e.target.value)} placeholder="e.g. RC-123456" className="text-sm h-9" />
+            </FieldRow>
+
+            <FieldRow label="Business Category">
+              <Select value={businessCategory} onValueChange={setBusinessCategory}>
+                <SelectTrigger className="text-sm h-9">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="business_name">Business Name</SelectItem>
+                  <SelectItem value="limited_liability">Limited Liability Company</SelectItem>
+                  <SelectItem value="limited_partnership">Limited Partnership</SelectItem>
+                  <SelectItem value="llp">Limited Liability Partnership</SelectItem>
+                  <SelectItem value="incorporated_trustee">Incorporated Trustee</SelectItem>
+                </SelectContent>
+              </Select>
             </FieldRow>
 
             <FieldRow label="Registration Authority">
