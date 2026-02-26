@@ -241,26 +241,10 @@ export default function AdvertRatesPage() {
               {SLOT_PACKS.map((pack) => (
                 <div key={pack.name} className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">{pack.name}</p>
-                      {pack.tag && (
-                        <Badge variant="default" className="text-[10px] px-1.5 py-0">
-                          {pack.tag}
-                        </Badge>
-                      )}
-                    </div>
+                    <p className="font-semibold text-sm">{pack.name}</p>
                     <p className="text-xs text-muted-foreground">{pack.range}</p>
                   </div>
-                  <div className="text-right shrink-0">
-                    {pack.discount > 0 ? (
-                      <>
-                        <Badge variant="secondary" className="text-xs mb-0.5">-{pack.discount}%</Badge>
-                        <p className="text-sm font-bold text-primary">{pack.rate} Mobi/slot</p>
-                      </>
-                    ) : (
-                      <p className="text-sm font-bold">{pack.rate} Mobi/slot</p>
-                    )}
-                  </div>
+                  <Badge variant="secondary" className="text-xs font-bold shrink-0">-{pack.discount}%</Badge>
                 </div>
               ))}
             </CardContent>
