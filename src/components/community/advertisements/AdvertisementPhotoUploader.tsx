@@ -75,7 +75,7 @@ export function AdvertisementPhotoUploader({
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-foreground">
-        Product Photos & Videos ({media.length}/{maxItems})
+        Product Photos & Videos ({media.length}/{maxItems}) <span className="text-muted-foreground font-normal text-xs">• Min 1 required</span>
       </label>
       <div className="grid grid-cols-2 gap-2">
         {slots.map((index) => {
