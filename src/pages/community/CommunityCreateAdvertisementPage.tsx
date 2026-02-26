@@ -42,7 +42,7 @@ export default function CreateAdvertisementPage() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const isFormValid = formData.businessName.trim() && formData.productTitle.trim() && formData.description.trim() && formData.city.trim() && formData.phone1.trim();
+  const isFormValid = formData.businessName.trim() && formData.productTitle.trim() && formData.description.trim() && formData.city.trim() && formData.phone1.trim() && formData.media.length >= 1;
 
   const handleBack = () => {
     navigate(`/community/${communityId}`);
