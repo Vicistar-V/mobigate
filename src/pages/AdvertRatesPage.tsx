@@ -201,7 +201,7 @@ export default function AdvertRatesPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-lg font-bold">Advert Subscription Rates</h1>
+            <h1 className="text-lg font-bold">Discounted Advert Rates</h1>
             <p className="text-xs text-muted-foreground">All pricing in Mobi tokens</p>
           </div>
         </div>

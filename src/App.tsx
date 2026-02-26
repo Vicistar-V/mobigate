@@ -111,7 +111,7 @@ const App = () => {
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   <Route path="/merchants" element={<MerchantListingPage />} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
-                  <Route path="/advert-rates" element={<AdvertRatesPage />} />
+                  <Route path="/discounted-advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />
                   <Route path="/community/:communityId/advert-rates" element={<CommunityAdvertRatesPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
