@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Save, TrendingUp, Percent, Gift, Clock, Users } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SLOT_PACKS } from "@/data/slotPacks";
@@ -75,36 +75,34 @@ export default function AdSlotRatesPage() {
     <div className="min-h-screen bg-background pb-20">
       <Header />
 
-      <div className="h-[calc(100vh-80px)] overflow-y-auto touch-auto overscroll-contain">
-        <div className="px-3 pt-3 pb-1">
-          <h1 className="text-lg font-bold">Ad Slot Rates</h1>
+      <ScrollArea className="h-[calc(100vh-80px)]">
+        <div className="px-4 pt-4">
+          <h1 className="text-lg font-bold mb-3">Ad Slot Rates</h1>
         </div>
-        <div className="px-3 pb-6 space-y-3">
-
-          {/* ── Slot Pack Discounts ── */}
+        <div className="p-4 space-y-4">
+          {/* Slot Packs */}
           <Card>
-            <CardHeader className="px-3 py-2.5">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Percent className="h-4 w-4 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Percent className="h-5 w-5 text-amber-500" />
                 Slot Pack Discounts
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-3 pb-3 space-y-2">
+            <CardContent className="space-y-3">
               {slotPacks.map((pack, i) => {
                 const effectiveRate = Math.round(baseRate * (1 - pack.discountPercentage / 100));
                 return (
-                  <div key={pack.id} className="p-2.5 bg-muted/30 rounded-lg space-y-2">
-                    {/* Row 1: Name + Badge */}
+                  <div key={pack.id} className="p-3 bg-muted/30 rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="font-semibold text-sm truncate">{pack.name}</p>
-                      <Badge variant={pack.discountPercentage > 0 ? "default" : "secondary"} className="text-xs shrink-0 ml-2">
-                        {pack.discountPercentage > 0 ? `-${pack.discountPercentage}%` : "Full"}
+                      <p className="font-semibold text-sm">{pack.name}</p>
+                      <Badge variant={pack.discountPercentage > 0 ? "default" : "secondary"}>
+                        {pack.discountPercentage > 0 ? `-${pack.discountPercentage}%` : "Full Price"}
                       </Badge>
                     </div>
-                    {/* Row 2: 3-col inputs */}
-                    <div className="grid grid-cols-3 gap-1.5">
+                    
+                    <div className="grid grid-cols-3 gap-2">
                       <div>
-                        <label className="text-[10px] text-muted-foreground block mb-0.5">Min</label>
+                        <label className="text-xs text-muted-foreground block mb-1">Min Slots</label>
                         <Input
                           type="number"
                           min={1}
@@ -114,11 +112,11 @@ export default function AdSlotRatesPage() {
                             updated[i] = { ...pack, minSlots: Number(e.target.value) };
                             setSlotPacks(updated);
                           }}
-                          className="h-9 text-center font-bold text-sm px-1"
+                          className="h-10 text-center font-bold text-sm"
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground block mb-0.5">Max</label>
+                        <label className="text-xs text-muted-foreground block mb-1">Max Slots</label>
                         <Input
                           type="number"
                           min={1}
@@ -128,11 +126,11 @@ export default function AdSlotRatesPage() {
                             updated[i] = { ...pack, maxSlots: Number(e.target.value) };
                             setSlotPacks(updated);
                           }}
-                          className="h-9 text-center font-bold text-sm px-1"
+                          className="h-10 text-center font-bold text-sm"
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground block mb-0.5">Disc %</label>
+                        <label className="text-xs text-muted-foreground block mb-1">Discount %</label>
                         <Input
                           type="number"
                           min={0}
@@ -143,34 +141,34 @@ export default function AdSlotRatesPage() {
                             updated[i] = { ...pack, discountPercentage: Number(e.target.value) };
                             setSlotPacks(updated);
                           }}
-                          className="h-9 text-center font-bold text-sm px-1"
+                          className="h-10 text-center font-bold text-sm"
                         />
                       </div>
                     </div>
-                    {/* Row 3: Effective rate */}
+
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Effective rate:</span>
-                      <span className="font-bold text-primary whitespace-nowrap">{effectiveRate.toLocaleString()} Mobi/slot</span>
+                      <span className="font-bold text-primary">{effectiveRate} Mobi/slot</span>
                     </div>
                   </div>
                 );
               })}
-              <Button onClick={handleSaveSlotRates} className="w-full h-11 mt-1 text-sm touch-manipulation">
+              <Button onClick={handleSaveSlotRates} className="w-full h-12 mt-2">
                 <Save className="h-4 w-4 mr-2" />
                 Save Slot Rates
               </Button>
             </CardContent>
           </Card>
 
-          {/* ── Special Bonus [1-FREE] ── */}
+          {/* Special Bonus Advert Slot */}
           <Card className="border-primary/30 bg-primary/5">
-            <CardHeader className="px-3 py-2.5">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Gift className="h-4 w-4 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Gift className="h-5 w-5 text-primary" />
                 Special Bonus [1-FREE] Advert Slot
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-3 pb-3 space-y-1.5">
+            <CardContent className="space-y-2">
               {[
                 { label: "Basic Slot Pack", slots: "3-4 Slots", multiplier: 15, minimum: 45 },
                 { label: "Standard Slot Pack", slots: "5-7 Slots", multiplier: 9, minimum: 45 },
@@ -178,38 +176,37 @@ export default function AdSlotRatesPage() {
                 { label: "Enterprise Slot Pack", slots: "11-15 Slots", multiplier: 4, minimum: 44 },
                 { label: "Cumulative Slot Pack", slots: "45 Randomly", multiplier: null, minimum: null },
               ].map((item, i) => (
-                <div key={i} className="py-2 px-2.5 bg-background rounded-lg border border-border/40">
-                  {/* Row 1: Label + Badge */}
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold truncate">{String.fromCharCode(97 + i)}. {item.label}</p>
-                    <Badge variant="outline" className="shrink-0 text-primary border-primary/40 text-[10px]">1-Free</Badge>
+                <div key={i} className="flex items-center justify-between py-2 px-3 bg-background rounded-lg border border-border/40">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">{String.fromCharCode(97 + i)}. {item.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      [{item.slots}]{item.multiplier ? ` × ${item.multiplier}` : ""}{item.minimum ? ` (Minimum of ${item.minimum})` : ""}
+                    </p>
                   </div>
-                  {/* Row 2: Metadata */}
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    [{item.slots}]{item.multiplier ? ` × ${item.multiplier}` : ""}{item.minimum ? ` (Min ${item.minimum})` : ""}
-                  </p>
+                  <Badge variant="outline" className="shrink-0 text-primary border-primary/40">1-Free Ad Slot</Badge>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          {/* ── Community Duration Pricing ── */}
+
+          {/* Community Duration Pricing */}
           <Card className="border-accent/30">
-            <CardHeader className="px-3 py-2.5">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Clock className="h-4 w-4 text-accent-foreground" />
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-5 w-5 text-accent-foreground" />
                 Community Duration Pricing
               </CardTitle>
-              <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                <Users className="h-3 w-3" />
-                Community adverts only
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                <Users className="h-3.5 w-3.5" />
+                These rates apply to community adverts only
               </p>
             </CardHeader>
-            <CardContent className="px-3 pb-3 space-y-1.5">
+            <CardContent className="space-y-2">
               {durations.map((dur, i) => (
-                <div key={i} className="flex items-center justify-between py-2 px-2.5 bg-muted/30 rounded-lg">
-                  <span className="text-sm font-medium whitespace-nowrap">{dur.label}</span>
-                  <div className="flex items-center gap-1.5">
+                <div key={i} className="flex items-center justify-between py-2 px-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm font-medium">{dur.label}</span>
+                  <div className="flex items-center gap-2">
                     <Input
                       type="number"
                       value={dur.price}
@@ -218,35 +215,35 @@ export default function AdSlotRatesPage() {
                         updated[i] = { ...dur, price: Number(e.target.value) };
                         setDurations(updated);
                       }}
-                      className="h-8 w-20 text-right text-sm font-bold px-2"
+                      className="h-9 w-24 text-right text-sm font-bold"
                     />
-                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">Mobi</span>
+                    <span className="text-xs text-muted-foreground">Mobi</span>
                   </div>
                 </div>
               ))}
-              <Button onClick={handleSaveDurations} variant="outline" className="w-full h-11 mt-1 text-sm touch-manipulation">
+              <Button onClick={handleSaveDurations} variant="outline" className="w-full h-12 mt-2">
                 <Save className="h-4 w-4 mr-2" />
-                Save Community Rates
+                Save Community Duration Rates
               </Button>
             </CardContent>
           </Card>
 
-          {/* ── DPD Packages ── */}
+          {/* DPD Packages */}
           <Card>
-            <CardHeader className="px-3 py-2.5">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
                 DPD Rates Per Month
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-3 pb-3 space-y-0">
+            <CardContent className="space-y-1">
               {dpdPackages.map((pkg, i) => (
-                <div key={i} className="py-1.5 px-2 border-b border-border/20 last:border-0">
+                <div key={i} className="py-2 px-3 border-b border-border/30 last:border-0">
                   {editingDpdIndex === i ? (
-                    <div className="space-y-2 py-1">
+                    <div className="space-y-2">
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-[10px] text-muted-foreground block mb-0.5">DPD</label>
+                          <label className="text-xs text-muted-foreground block mb-1">DPD</label>
                           <Input
                             type="number"
                             value={pkg.dpd ?? ""}
@@ -256,11 +253,11 @@ export default function AdSlotRatesPage() {
                               updated[i] = { ...pkg, dpd: e.target.value ? Number(e.target.value) : null };
                               setDpdPackages(updated);
                             }}
-                            className="h-8 text-sm px-2"
+                            className="h-9 text-sm"
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground block mb-0.5">Price</label>
+                          <label className="text-xs text-muted-foreground block mb-1">Price (₦/Mobi)</label>
                           <Input
                             type="number"
                             value={pkg.price}
@@ -269,38 +266,42 @@ export default function AdSlotRatesPage() {
                               updated[i] = { ...pkg, price: Number(e.target.value) };
                               setDpdPackages(updated);
                             }}
-                            className="h-8 text-sm px-2"
+                            className="h-9 text-sm"
                           />
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" className="h-7 text-xs touch-manipulation" onClick={() => setEditingDpdIndex(null)}>
+                      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setEditingDpdIndex(null)}>
                         Done
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between gap-1">
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs font-semibold text-foreground">{pkg.name}</span>
-                        <span className="text-xs text-muted-foreground ml-1">
-                          {pkg.dpd ? `${pkg.dpd.toLocaleString()}` : "∞"} DPD
+                        <span className="text-sm font-semibold text-foreground">{pkg.name}: </span>
+                        <span className="text-sm text-muted-foreground">
+                          {pkg.dpd ? `${pkg.dpd.toLocaleString()} DPD` : "Unlimited DPD"}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {" "}@ ₦{pkg.price.toLocaleString()}/{pkg.price.toLocaleString()} Mobi
                         </span>
                       </div>
-                      <span className="text-xs font-bold text-foreground whitespace-nowrap">{pkg.price.toLocaleString()}</span>
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] shrink-0 touch-manipulation" onClick={() => setEditingDpdIndex(i)}>
+                      <Button variant="outline" size="sm" className="h-8 text-xs shrink-0" onClick={() => setEditingDpdIndex(i)}>
                         Edit
                       </Button>
                     </div>
                   )}
                 </div>
               ))}
-              <Button onClick={handleSaveDpd} variant="outline" className="w-full h-11 mt-2 text-sm touch-manipulation">
-                <Save className="h-4 w-4 mr-2" />
-                Save DPD Packages
-              </Button>
+              <div className="pt-2">
+                <Button onClick={handleSaveDpd} variant="outline" className="w-full h-12 mt-2">
+                  <Save className="h-4 w-4 mr-2" />
+                  Save DPD Packages
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }
