@@ -17,13 +17,6 @@ const SLOT_PACKS = [
   { name: "Enterprise Pack", range: "11–15 slots", discount: 35, rate: 325, tag: "Best Value" },
 ];
 
-const DURATION_PRICING = [
-  { label: "7 Days", cost: 500, perDay: 71 },
-  { label: "14 Days", cost: 900, perDay: 64 },
-  { label: "30 Days", cost: 1600, perDay: 53 },
-  { label: "60 Days", cost: 2750, perDay: 46 },
-  { label: "90 Days", cost: 3750, perDay: 42 },
-];
 
 const ACCREDITED_TIERS = [
   { tier: "Bronze", discount: "5%", requirement: "10+ adverts" },
@@ -250,27 +243,6 @@ export default function AdvertRatesPage() {
             </CardContent>
           </Card>
 
-          {/* Duration Pricing */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-500" />
-                Duration Pricing
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-2">Longer durations = lower daily cost</p>
-              {DURATION_PRICING.map((dur) => (
-                <div key={dur.label} className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-sm">{dur.label}</p>
-                    <p className="text-xs text-muted-foreground">≈ {dur.perDay} Mobi/day</p>
-                  </div>
-                  <p className="font-bold text-sm">{dur.cost.toLocaleString()} Mobi</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
 
           {/* Accredited Advertiser Tiers */}
           <Card>
