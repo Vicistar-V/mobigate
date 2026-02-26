@@ -555,6 +555,16 @@ export function CommunityMainMenu({
                 >
                   My Advertisements
                 </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start pl-4 h-9 transition-colors duration-200"
+                  onClick={() => {
+                    navigate(`/community/${communityId}/advert-rates`);
+                    setOpen(false);
+                  }}
+                >
+                  Community Advert Rates
+                </Button>
               </AccordionContent>
             </AccordionItem>
 
