@@ -38,6 +38,7 @@ import MerchantHomePage from "./pages/MerchantHomePage";
 import MerchantListingPage from "./pages/MerchantListingPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import CreateAdvertisementPage from "./pages/community/CommunityCreateAdvertisementPage";
+import CommunityAdvertRatesPage from "./pages/community/CommunityAdvertRatesPage";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
 import { ScrollToTop } from "./components/ScrollToTop";
@@ -112,6 +113,7 @@ const App = () => {
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
                   <Route path="/advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />
+                  <Route path="/community/:communityId/advert-rates" element={<CommunityAdvertRatesPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
