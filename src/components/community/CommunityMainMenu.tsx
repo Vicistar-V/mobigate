@@ -43,7 +43,7 @@ import { CandidateDashboardSheet } from "./elections/CandidateDashboardSheet";
 import { MemberImpeachmentDrawer } from "./elections/MemberImpeachmentDrawer";
 import { NominateCandidateSheet } from "./elections/NominateCandidateSheet";
 import { VerifyCertificateDrawer } from "./elections/VerifyCertificateDrawer";
-import { CreateAdvertisementDrawer } from "./advertisements/CreateAdvertisementDrawer";
+
 import { AdvertisementsListSheet } from "./advertisements/AdvertisementsListSheet";
 import { QuizWalletDrawer } from "./QuizWalletDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -102,7 +102,7 @@ export function CommunityMainMenu({
   const [impeachmentMode, setImpeachmentMode] = useState<"start" | "view">("view");
   const [showNominateCandidate, setShowNominateCandidate] = useState(false);
   const [showVerifyCertificate, setShowVerifyCertificate] = useState(false);
-  const [showCreateAdvert, setShowCreateAdvert] = useState(false);
+  
   const [showAdvertisements, setShowAdvertisements] = useState(false);
   const [showMyAdverts, setShowMyAdverts] = useState(false);
   const [showQuizWallet, setShowQuizWallet] = useState(false);
@@ -528,7 +528,7 @@ export function CommunityMainMenu({
                   variant="ghost"
                   className="w-full justify-start pl-4 h-10 transition-colors duration-200 bg-amber-100/50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-medium"
                   onClick={() => {
-                    setShowCreateAdvert(true);
+                    navigate(`/community/${communityId}/create-advert`);
                     setOpen(false);
                   }}
                 >
@@ -1394,22 +1394,24 @@ export function CommunityMainMenu({
         onOpenChange={setShowVerifyCertificate}
       />
 
-      {/* Advertisement Drawers */}
-      <CreateAdvertisementDrawer
-        open={showCreateAdvert}
-        onOpenChange={setShowCreateAdvert}
-      />
+      {/* Advertisement Sheets */}
       <AdvertisementsListSheet
         open={showAdvertisements}
         onOpenChange={setShowAdvertisements}
         initialTab="all_active"
-        onCreateNew={() => setShowCreateAdvert(true)}
+        onCreateNew={() => {
+          navigate(`/community/${communityId}/create-advert`);
+          setShowAdvertisements(false);
+        }}
       />
       <AdvertisementsListSheet
         open={showMyAdverts}
         onOpenChange={setShowMyAdverts}
         initialTab="my_active"
-        onCreateNew={() => setShowCreateAdvert(true)}
+        onCreateNew={() => {
+          navigate(`/community/${communityId}/create-advert`);
+          setShowMyAdverts(false);
+        }}
       />
     </>
   );
