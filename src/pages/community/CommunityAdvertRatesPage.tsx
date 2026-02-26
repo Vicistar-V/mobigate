@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Clock, Percent, Star, ArrowLeft, Info, Maximize, Monitor, Layers, RotateCcw, Zap, RefreshCw, Repeat } from "lucide-react";
+import { Clock, Percent, Star, ArrowLeft, Info, Maximize, Monitor, Layers, RotateCcw, Zap, RefreshCw, Repeat, Megaphone } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router-dom";
@@ -468,6 +468,17 @@ export default function CommunityAdvertRatesPage() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+
+          {/* CTA */}
+          <div className="pt-4 pb-6">
+            <Button
+              className="w-full h-12 text-base font-semibold gap-2"
+              onClick={() => navigate(`/community/${communityId}/create-advert`)}
+            >
+              <Megaphone className="h-5 w-5" />
+              Create Advertisement
+            </Button>
+          </div>
         </div>
       </ScrollArea>
     </div>
