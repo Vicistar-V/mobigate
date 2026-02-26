@@ -237,6 +237,34 @@ export default function AdvertRatesPage() {
             </CardContent>
           </Card>
 
+          {/* Special Bonus [1-FREE] Advert Slot */}
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Star className="h-5 w-5 text-primary" />
+                Special Bonus [1-FREE] Advert Slot
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {[
+                { label: "Basic Slot Pack", slots: "3-4 Slots", multiplier: 15, minimum: 45 },
+                { label: "Standard Slot Pack", slots: "5-7 Slots", multiplier: 9, minimum: 45 },
+                { label: "Business Slot Pack", slots: "8-10 Slots", multiplier: 6, minimum: 48 },
+                { label: "Enterprise Slot Pack", slots: "11-15 Slots", multiplier: 4, minimum: 44 },
+                { label: "Cumulative Slot Pack", slots: "45 Randomly", multiplier: null, minimum: null },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between py-2 px-3 bg-background rounded-lg border border-border/40">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">{String.fromCharCode(97 + i)}. {item.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      [{item.slots}]{item.multiplier ? ` × ${item.multiplier}` : ""}{item.minimum ? ` [Minimum of ${item.minimum}]` : ""}
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="shrink-0 text-primary border-primary/40 text-xs">1-Free</Badge>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
 
           {/* ══════════ SUBSCRIPTION RATES — Expandable Accordion ══════════ */}
