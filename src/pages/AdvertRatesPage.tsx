@@ -2,12 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Clock, TrendingUp, Percent, Layers, Image, Video, Maximize, ArrowLeft, Info, Zap, Star } from "lucide-react";
+import { Clock, TrendingUp, Percent, Layers, Image, Video, Maximize, ArrowLeft, Info, Zap, Star, Monitor, RotateCcw, RefreshCw, Repeat } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-
-
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const SLOT_PACKS = [
   { name: "Entry Pack", range: "1–2 slots", discount: 0, rate: 500, tag: "" },
@@ -25,47 +24,180 @@ const DURATION_PRICING = [
   { label: "90 Days", cost: 3750, perDay: 42 },
 ];
 
-const DPD_TIERS = [
-  { label: "1–100 views/day", rate: 50, tier: "Tier 1" },
-  { label: "101–500 views/day", rate: 120, tier: "Tier 2" },
-  { label: "501–2,000 views/day", rate: 300, tier: "Tier 3" },
-  { label: "2,000+ views/day", rate: 500, tier: "Tier 4" },
-];
-
-const SIZE_RATES = [
-  { size: "Small", multiplier: "×1.0", cost: "500 Mobi" },
-  { size: "Medium", multiplier: "×1.5", cost: "750 Mobi" },
-  { size: "Large", multiplier: "×2.0", cost: "1,000 Mobi" },
-  { size: "Full Width", multiplier: "×2.5", cost: "1,250 Mobi" },
-];
-
-const DISPLAY_MODES = [
-  { mode: "Single", desc: "1 image/video displayed", setupFee: "500 Mobi" },
-  { mode: "Multiple (2–10)", desc: "Carousel of 2–10 items", setupFee: "800–2,500 Mobi" },
-  { mode: "Rollout (2–15)", desc: "Sequential reveal of items", setupFee: "1,000–3,500 Mobi" },
-];
-
-const CATEGORY_RATES = [
-  { category: "Pictoral (Image)", icon: Image, base: "500 Mobi", desc: "Static image adverts" },
-  { category: "Video", icon: Video, base: "800 Mobi", desc: "Video-based adverts" },
-];
-
-const SUBSCRIPTION_DISCOUNTS = [
-  { months: "1 Month", discount: "0%" },
-  { months: "3 Months", discount: "5%" },
-  { months: "6 Months", discount: "10%" },
-  { months: "9 Months", discount: "12%" },
-  { months: "12 Months", discount: "15%" },
-  { months: "18 Months", discount: "18%" },
-  { months: "24 Months", discount: "22%" },
-];
-
 const ACCREDITED_TIERS = [
   { tier: "Bronze", discount: "5%", requirement: "10+ adverts" },
   { tier: "Silver", discount: "10%", requirement: "25+ adverts" },
   { tier: "Gold", discount: "15%", requirement: "50+ adverts" },
   { tier: "Platinum", discount: "20%", requirement: "100+ adverts" },
 ];
+
+// ─── Subscription Rates Data ───
+
+const SINGLE_SIZES = [
+  { size: "2×3", desc: "1/5 Screen Height × Half Screen Width", fee: "2%" },
+  { size: "2×6", desc: "1/5 Screen Height × Full Screen Width", fee: "4%" },
+  { size: "2.5×3", desc: "Quarter Screen Height × Half Screen Width", fee: "6%" },
+  { size: "2.5×6", desc: "Quarter Screen Height × Full Screen Width", fee: "8%" },
+  { size: "3.5×3", desc: "1/3 Screen Height × Half Screen Width", fee: "10%" },
+  { size: "3.5×6", desc: "1/3 Screen Height × Full Screen Width", fee: "12%" },
+  { size: "5×6", desc: "Half Screen Height × Full Screen Width", fee: "14%" },
+  { size: "6.5×3", desc: "2/3 Screen Height × Half Screen Width", fee: "16%" },
+  { size: "6.5×6", desc: "2/3 Screen Height × Full Screen Width", fee: "18%" },
+  { size: "10×6", desc: "Full Screen Height × Full Screen Width", fee: "20%" },
+];
+
+const BUNDLED_SIZES = [
+  { size: "2×3", desc: "1/5 Screen Height × Half Screen Width", fee: "12%" },
+  { size: "2×6", desc: "1/5 Screen Height × Full Screen Width", fee: "14%" },
+  { size: "2.5×3", desc: "Quarter Screen Height × Half Screen Width", fee: "16%" },
+  { size: "2.5×6", desc: "Quarter Screen Height × Full Screen Width", fee: "18%" },
+  { size: "3.5×3", desc: "1/3 Screen Height × Half Screen Width", fee: "20%" },
+  { size: "3.5×6", desc: "1/3 Screen Height × Full Screen Width", fee: "22%" },
+  { size: "5×6", desc: "Half Screen Height × Full Screen Width", fee: "24%" },
+  { size: "6.5×3", desc: "2/3 Screen Height × Half Screen Width", fee: "26%" },
+  { size: "6.5×6", desc: "2/3 Screen Height × Full Screen Width", fee: "28%" },
+  { size: "10×6", desc: "Full Screen Height × Full Screen Width", fee: "30%" },
+];
+
+const ROLLOUT_SIZES = [
+  { size: "5×6", desc: "Half Screen Height × Full Screen Width", fee: "30%" },
+  { size: "6.5×6", desc: "2/3 Screen Height × Full Screen Width", fee: "35%" },
+  { size: "10×6", desc: "Full Screen Height × Full Screen Width", fee: "40%" },
+];
+
+const SINGLE_SETUP = { label: "Single Display", fee: "₦40,000 / 40,000 Mobi" };
+
+const BUNDLED_SETUP = [
+  { label: "2-in-1 Display", fee: "₦40,000 / 40,000 Mobi" },
+  { label: "3-in-1 Display", fee: "₦60,000 / 60,000 Mobi" },
+  { label: "4-in-1 Display", fee: "₦80,000 / 80,000 Mobi" },
+  { label: "5-in-1 Display", fee: "₦100,000 / 100,000 Mobi" },
+  { label: "6-in-1 Display", fee: "₦120,000 / 120,000 Mobi" },
+  { label: "7-in-1 Display", fee: "₦140,000 / 140,000 Mobi" },
+  { label: "8-in-1 Display", fee: "₦160,000 / 160,000 Mobi" },
+  { label: "9-in-1 Display", fee: "₦180,000 / 180,000 Mobi" },
+  { label: "10-in-1 Display", fee: "₦200,000 / 200,000 Mobi" },
+  { label: "15-in-1 Display", fee: "₦250,000 / 250,000 Mobi" },
+];
+
+const ROLLOUT_SETUP = [
+  { label: "2-in-1 Display", fee: "₦70,000 / 70,000 Mobi" },
+  { label: "3-in-1 Display", fee: "₦100,000 / 100,000 Mobi" },
+  { label: "4-in-1 Display", fee: "₦140,000 / 140,000 Mobi" },
+  { label: "5-in-1 Display", fee: "₦160,000 / 160,000 Mobi" },
+  { label: "6-in-1 Display", fee: "₦180,000 / 180,000 Mobi" },
+  { label: "7-in-1 Display", fee: "₦200,000 / 200,000 Mobi" },
+  { label: "8-in-1 Display", fee: "₦220,000 / 220,000 Mobi" },
+  { label: "9-in-1 Display", fee: "₦240,000 / 240,000 Mobi" },
+  { label: "10-in-1 Display", fee: "₦260,000 / 260,000 Mobi" },
+  { label: "15-in-1 Display", fee: "₦300,000 / 300,000 Mobi" },
+];
+
+const DPD_PACKAGES = [
+  { name: "Basic", dpd: "1,000", price: "₦10,000 / 10,000 Mobi" },
+  { name: "Standard", dpd: "2,000", price: "₦20,000 / 20,000 Mobi" },
+  { name: "Professional", dpd: "3,000", price: "₦30,000 / 30,000 Mobi" },
+  { name: "Business", dpd: "4,000", price: "₦40,000 / 40,000 Mobi" },
+  { name: "Enterprise", dpd: "5,000", price: "₦50,000 / 50,000 Mobi" },
+  { name: "Entrepreneur", dpd: "6,000", price: "₦60,000 / 60,000 Mobi" },
+  { name: "Deluxe", dpd: "7,000", price: "₦70,000 / 70,000 Mobi" },
+  { name: "Deluxe Super", dpd: "8,000", price: "₦80,000 / 80,000 Mobi" },
+  { name: "Deluxe Super Plus", dpd: "9,000", price: "₦90,000 / 90,000 Mobi" },
+  { name: "Deluxe Silver", dpd: "10,000", price: "₦100,000 / 100,000 Mobi" },
+  { name: "Deluxe Bronze", dpd: "12,000", price: "₦120,000 / 120,000 Mobi" },
+  { name: "Deluxe Gold", dpd: "14,000", price: "₦140,000 / 140,000 Mobi" },
+  { name: "Deluxe Gold Plus", dpd: "16,000", price: "₦160,000 / 160,000 Mobi" },
+  { name: "Deluxe Diamond", dpd: "18,000", price: "₦180,000 / 180,000 Mobi" },
+  { name: "Deluxe Diamond Plus", dpd: "20,000", price: "₦200,000 / 200,000 Mobi" },
+  { name: "Deluxe Platinum", dpd: "25,000", price: "₦250,000 / 250,000 Mobi" },
+  { name: "Deluxe Platinum Plus", dpd: "30,000", price: "₦300,000 / 300,000 Mobi" },
+  { name: "Bumper Gold", dpd: "35,000", price: "₦350,000 / 350,000 Mobi" },
+  { name: "Bumper Diamond", dpd: "40,000", price: "₦400,000 / 400,000 Mobi" },
+  { name: "Bumper Platinum", dpd: "45,000", price: "₦450,000 / 450,000 Mobi" },
+  { name: "Bumper Infinity", dpd: "50,000", price: "₦500,000 / 500,000 Mobi" },
+  { name: "Unlimited", dpd: "Unlimited", price: "₦600,000 / 600,000 Mobi" },
+];
+
+const EXTENDED_EXPOSURE = [
+  { extra: "Extra 1 minute", charge: "12% of DPD Charge" },
+  { extra: "Extra 2 minutes", charge: "14% of DPD Charge" },
+  { extra: "Extra 3 minutes", charge: "16% of DPD Charge" },
+  { extra: "Extra 4 minutes", charge: "18% of DPD Charge" },
+  { extra: "Extra 5 minutes", charge: "20% of DPD Charge" },
+  { extra: "Extra 6 minutes", charge: "22% of DPD Charge" },
+  { extra: "Extra 7 minutes", charge: "24% of DPD Charge" },
+  { extra: "Extra 8 minutes", charge: "26% of DPD Charge" },
+  { extra: "Extra 9 minutes", charge: "28% of DPD Charge" },
+  { extra: "Extra 10 minutes", charge: "30% of DPD Charge" },
+];
+
+const REPEAT_AFTER = [
+  { interval: "After 10 minutes", charge: "+10% of DPD Charge" },
+  { interval: "After 30 minutes", charge: "+10% of DPD Charge" },
+  { interval: "After 1 hour", charge: "+10% of DPD Charge" },
+  { interval: "After 3 hours", charge: "+10% of DPD Charge" },
+  { interval: "After 6 hours", charge: "+10% of DPD Charge" },
+  { interval: "After 12 hours", charge: "+10% of DPD Charge" },
+  { interval: "After 18 hours", charge: "+10% of DPD Charge" },
+  { interval: "After 24 hours", charge: "+10% of DPD Charge" },
+];
+
+const REPEAT_EVERY = [
+  { interval: "Every 10 minutes", charge: "+35% of DPD Charge" },
+  { interval: "Every 30 minutes", charge: "+30% of DPD Charge" },
+  { interval: "Every 1 hour", charge: "+25% of DPD Charge" },
+  { interval: "Every 3 hours", charge: "+20% of DPD Charge" },
+  { interval: "Every 6 hours", charge: "+15% of DPD Charge" },
+  { interval: "Every 12 hours", charge: "+12% of DPD Charge" },
+  { interval: "Every 18 hours", charge: "+10% of DPD Charge" },
+  { interval: "Every 24 hours", charge: "+9% of DPD Charge" },
+  { interval: "Every 30 hours", charge: "+8% of DPD Charge" },
+  { interval: "Every 36 hours", charge: "+7% of DPD Charge" },
+  { interval: "Every 42 hours", charge: "+6% of DPD Charge" },
+  { interval: "Every 48 hours", charge: "+5% of DPD Charge" },
+];
+
+// ─── Sub-components for subscription rate content ───
+
+function SizeList({ data }: { data: { size: string; desc: string; fee: string }[] }) {
+  return (
+    <div className="divide-y divide-border/30">
+      {data.map((item, i) => (
+        <div key={i} className="py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-bold text-foreground">{item.size}</span>
+            <Badge variant="secondary" className="text-xs font-semibold whitespace-nowrap">
+              {item.fee} of Setup Fee
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5 break-words">{item.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SetupList({ data }: { data: { label: string; fee: string }[] }) {
+  return (
+    <div className="divide-y divide-border/30">
+      {data.map((item, i) => (
+        <div key={i} className="py-2.5 flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{item.label}</span>
+          <span className="text-xs text-muted-foreground font-medium text-right">{item.fee}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TwoColRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="py-2.5 flex items-center justify-between gap-2">
+      <span className="text-sm font-semibold text-foreground whitespace-nowrap">{label}</span>
+      <span className="text-xs text-muted-foreground font-medium text-right whitespace-nowrap">{value}</span>
+    </div>
+  );
+}
 
 export default function AdvertRatesPage() {
   const navigate = useNavigate();
@@ -155,9 +287,6 @@ export default function AdvertRatesPage() {
             </CardContent>
           </Card>
 
-
-
-
           {/* Accredited Advertiser Tiers */}
           <Card>
             <CardHeader className="pb-2">
@@ -179,6 +308,178 @@ export default function AdvertRatesPage() {
               ))}
             </CardContent>
           </Card>
+
+          {/* ══════════ SUBSCRIPTION RATES — Expandable Accordion ══════════ */}
+          <Separator className="my-2" />
+          
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-1">
+              Full Subscription Rate Card
+            </h2>
+            <p className="text-xs text-muted-foreground px-1">
+              Tap each category to expand detailed pricing. All prices in ₦ and Mobi (1:1 rate).
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-2">
+            {/* 1. Ad Space Sizes */}
+            <AccordionItem value="space-sizes" className="border rounded-xl overflow-hidden bg-card">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2 text-left">
+                  <Maximize className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">Advert Space Sizes & Charges</p>
+                    <p className="text-xs text-muted-foreground font-normal">Single, Bundled & Roll-Out display sizes</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Monitor className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Single Display [H × W]</p>
+                  </div>
+                  <SizeList data={SINGLE_SIZES} />
+                </div>
+                <Separator />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Layers className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Multiples Bundled Display [H × W]</p>
+                  </div>
+                  <SizeList data={BUNDLED_SIZES} />
+                </div>
+                <Separator />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <RotateCcw className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Multiples Roll-Out Display [H × W]</p>
+                  </div>
+                  <SizeList data={ROLLOUT_SIZES} />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 2. Setup Fees */}
+            <AccordionItem value="setup-fees" className="border rounded-xl overflow-hidden bg-card">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2 text-left">
+                  <Zap className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">Advert Subscription Set-Up Fees</p>
+                    <p className="text-xs text-muted-foreground font-normal">One-time fees per display type</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Monitor className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Single Display</p>
+                  </div>
+                  <SetupList data={[SINGLE_SETUP]} />
+                </div>
+                <Separator />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Layers className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Multiple Bundled Display</p>
+                  </div>
+                  <SetupList data={BUNDLED_SETUP} />
+                </div>
+                <Separator />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <RotateCcw className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Multiples Roll-Out Display</p>
+                  </div>
+                  <SetupList data={ROLLOUT_SETUP} />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 3. DPD Packages */}
+            <AccordionItem value="dpd-packages" className="border rounded-xl overflow-hidden bg-card">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2 text-left">
+                  <TrendingUp className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">Displays Per Day (DPD) Packages</p>
+                    <p className="text-xs text-muted-foreground font-normal">22 packages from Basic to Unlimited</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="divide-y divide-border/30">
+                  {DPD_PACKAGES.map((pkg, i) => (
+                    <div key={i} className="py-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-foreground">{pkg.name}</span>
+                          <Badge variant="outline" className="text-xs whitespace-nowrap shrink-0">
+                            {pkg.dpd} DPD
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{pkg.price}</p>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 4. Value-Added Features */}
+            <AccordionItem value="value-added" className="border rounded-xl overflow-hidden bg-card">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2 text-left">
+                  <Star className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">Value-Added Features & Sundry Charges</p>
+                    <p className="text-xs text-muted-foreground font-normal">Extended exposure, repeat options</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Extended Exposure Duration</p>
+                  </div>
+                  <div className="divide-y divide-border/30">
+                    {EXTENDED_EXPOSURE.map((item, i) => (
+                      <TwoColRow key={i} label={item.extra} value={"+" + item.charge} />
+                    ))}
+                  </div>
+                </div>
+                <Separator />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <RefreshCw className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Recurrent Exposure — Repeat After</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Single repeat after a set delay from last exposure</p>
+                  <div className="divide-y divide-border/30">
+                    {REPEAT_AFTER.map((item, i) => (
+                      <TwoColRow key={i} label={item.interval} value={item.charge} />
+                    ))}
+                  </div>
+                </div>
+                <Separator />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Repeat className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Recurrent Exposure — Repeat Every</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Continuous repeat at fixed intervals</p>
+                  <div className="divide-y divide-border/30">
+                    {REPEAT_EVERY.map((item, i) => (
+                      <TwoColRow key={i} label={item.interval} value={item.charge} />
+                    ))}
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           {/* CTA */}
           <Button className="w-full h-12 text-base font-bold" onClick={() => navigate("/submit-advert")}>
