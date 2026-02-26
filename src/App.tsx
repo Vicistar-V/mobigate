@@ -37,6 +37,7 @@ import MerchantDetailPage from "./pages/MerchantDetailPage";
 import MerchantHomePage from "./pages/MerchantHomePage";
 import MerchantListingPage from "./pages/MerchantListingPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
+import CreateAdvertisementPage from "./pages/community/CreateAdvertisementPage";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
 import { ScrollToTop } from "./components/ScrollToTop";
@@ -79,6 +80,7 @@ const App = () => {
                   <Route path="/community" element={<Community />} />
                   <Route path="/community/:communityId" element={<CommunityProfile />} />
                   <Route path="/community/:communityId/join" element={<CommunityMembershipApplication />} />
+                  <Route path="/community/:communityId/create-advert" element={<CreateAdvertisementPage />} />
                   <Route path="/community/:communityId/admin" element={<CommunityAdminDashboard />} />
                   <Route path="/community/:communityId/admin/elections" element={<ElectionManagementPage />} />
                   <Route path="/community/:communityId/admin/content" element={<ContentModerationPage />} />
