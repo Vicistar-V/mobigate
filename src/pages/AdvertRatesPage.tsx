@@ -18,12 +18,6 @@ const SLOT_PACKS = [
 ];
 
 
-const ACCREDITED_TIERS = [
-  { tier: "Bronze", discount: "5%", requirement: "10+ adverts" },
-  { tier: "Silver", discount: "10%", requirement: "25+ adverts" },
-  { tier: "Gold", discount: "15%", requirement: "50+ adverts" },
-  { tier: "Platinum", discount: "20%", requirement: "100+ adverts" },
-];
 
 // ─── Subscription Rates Data ───
 
@@ -244,27 +238,6 @@ export default function AdvertRatesPage() {
           </Card>
 
 
-          {/* Accredited Advertiser Tiers */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Star className="h-5 w-5 text-amber-500" />
-                Accredited Advertiser Tiers
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-2">Earn loyalty discounts based on your total advert history</p>
-              {ACCREDITED_TIERS.map((at) => (
-                <div key={at.tier} className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-sm">{at.tier}</p>
-                    <p className="text-xs text-muted-foreground">{at.requirement}</p>
-                  </div>
-                  <Badge variant="secondary" className="text-xs font-bold">-{at.discount}</Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
 
           {/* ══════════ SUBSCRIPTION RATES — Expandable Accordion ══════════ */}
           <Separator className="my-2" />
