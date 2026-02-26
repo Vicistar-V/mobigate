@@ -37,7 +37,7 @@ import MerchantDetailPage from "./pages/MerchantDetailPage";
 import MerchantHomePage from "./pages/MerchantHomePage";
 import MerchantListingPage from "./pages/MerchantListingPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
-import CreateAdvertisementPage from "./pages/community/CreateAdvertisementPage";
+import CreateAdvertisementPage from "./pages/community/CommunityCreateAdvertisementPage";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
 import { ScrollToTop } from "./components/ScrollToTop";
