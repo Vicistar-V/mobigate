@@ -19,6 +19,13 @@ const initialDurations = [
   { label: "12 Months", days: 365, price: 14000 },
 ];
 
+const initialBonusTiers = [
+  { label: "Basic Slot Pack", slots: "3-4 Slots", multiplier: 15 as number | null, minimum: 45 as number | null },
+  { label: "Standard Slot Pack", slots: "5-7 Slots", multiplier: 9 as number | null, minimum: 45 as number | null },
+  { label: "Business Slot Pack", slots: "8-10 Slots", multiplier: 6 as number | null, minimum: 48 as number | null },
+  { label: "Enterprise Slot Pack", slots: "11-15 Slots", multiplier: 4 as number | null, minimum: 44 as number | null },
+  { label: "Cumulative Slot Pack", slots: "45 Randomly", multiplier: null as number | null, minimum: null as number | null },
+];
 
 
 const initialDpdPackages = [
@@ -53,6 +60,7 @@ export default function AdSlotRatesPage() {
   const [dpdPackages, setDpdPackages] = useState(initialDpdPackages.map(p => ({ ...p })));
   const [editingDpdIndex, setEditingDpdIndex] = useState<number | null>(null);
   const [durations, setDurations] = useState(initialDurations.map(d => ({ ...d })));
+  const [bonusTiers, setBonusTiers] = useState(initialBonusTiers.map(b => ({ ...b })));
 
   const [slotPacks, setSlotPacks] = useState(
     SLOT_PACKS.map(p => ({ ...p }))
@@ -65,6 +73,10 @@ export default function AdSlotRatesPage() {
 
   const handleSaveDurations = () => {
     toast({ title: "Community Duration Rates Updated", description: "Duration pricing for communities saved successfully." });
+  };
+
+  const handleSaveBonus = () => {
+    toast({ title: "Bonus Tiers Updated", description: "Special bonus advert slot tiers saved successfully." });
   };
 
   const handleSaveDpd = () => {
@@ -89,9 +101,7 @@ export default function AdSlotRatesPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {slotPacks.map((pack, i) => {
-                const effectiveRate = Math.round(baseRate * (1 - pack.discountPercentage / 100));
-                return (
+              {slotPacks.map((pack, i) => (
                   <div key={pack.id} className="p-3 bg-muted/30 rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="font-semibold text-sm">{pack.name}</p>
@@ -145,14 +155,8 @@ export default function AdSlotRatesPage() {
                         />
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Effective rate:</span>
-                      <span className="font-bold text-primary">{effectiveRate} Mobi/slot</span>
-                    </div>
                   </div>
-                );
-              })}
+              ))}
               <Button onClick={handleSaveSlotRates} className="w-full h-12 mt-2">
                 <Save className="h-4 w-4 mr-2" />
                 Save Slot Rates
@@ -160,7 +164,7 @@ export default function AdSlotRatesPage() {
             </CardContent>
           </Card>
 
-          {/* Special Bonus Advert Slot */}
+          {/* Special Bonus Advert Slot - Editable */}
           <Card className="border-primary/30 bg-primary/5">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -168,24 +172,61 @@ export default function AdSlotRatesPage() {
                 Special Bonus [1-FREE] Advert Slot
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {[
-                { label: "Basic Slot Pack", slots: "3-4 Slots", multiplier: 15, minimum: 45 },
-                { label: "Standard Slot Pack", slots: "5-7 Slots", multiplier: 9, minimum: 45 },
-                { label: "Business Slot Pack", slots: "8-10 Slots", multiplier: 6, minimum: 48 },
-                { label: "Enterprise Slot Pack", slots: "11-15 Slots", multiplier: 4, minimum: 44 },
-                { label: "Cumulative Slot Pack", slots: "45 Randomly", multiplier: null, minimum: null },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-2 px-3 bg-background rounded-lg border border-border/40">
-                  <div className="min-w-0">
+            <CardContent className="space-y-3">
+              {bonusTiers.map((item, i) => (
+                <div key={i} className="p-3 bg-background rounded-lg border border-border/40 space-y-2">
+                  <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold">{String.fromCharCode(97 + i)}. {item.label}</p>
-                    <p className="text-xs text-muted-foreground">
-                      [{item.slots}]{item.multiplier ? ` × ${item.multiplier}` : ""}{item.minimum ? ` (Minimum of ${item.minimum})` : ""}
-                    </p>
+                    <Badge variant="outline" className="shrink-0 text-primary border-primary/40">1-Free</Badge>
                   </div>
-                  <Badge variant="outline" className="shrink-0 text-primary border-primary/40">1-Free Ad Slot</Badge>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Slots</label>
+                      <Input
+                        value={item.slots}
+                        onChange={e => {
+                          const updated = [...bonusTiers];
+                          updated[i] = { ...item, slots: e.target.value };
+                          setBonusTiers(updated);
+                        }}
+                        className="h-10 text-center text-sm font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Multiplier</label>
+                      <Input
+                        type="number"
+                        value={item.multiplier ?? ""}
+                        placeholder="—"
+                        onChange={e => {
+                          const updated = [...bonusTiers];
+                          updated[i] = { ...item, multiplier: e.target.value ? Number(e.target.value) : null };
+                          setBonusTiers(updated);
+                        }}
+                        className="h-10 text-center text-sm font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Minimum</label>
+                      <Input
+                        type="number"
+                        value={item.minimum ?? ""}
+                        placeholder="—"
+                        onChange={e => {
+                          const updated = [...bonusTiers];
+                          updated[i] = { ...item, minimum: e.target.value ? Number(e.target.value) : null };
+                          setBonusTiers(updated);
+                        }}
+                        className="h-10 text-center text-sm font-bold"
+                      />
+                    </div>
+                  </div>
                 </div>
               ))}
+              <Button onClick={handleSaveBonus} variant="outline" className="w-full h-12 mt-2">
+                <Save className="h-4 w-4 mr-2" />
+                Save Bonus Tiers
+              </Button>
             </CardContent>
           </Card>
 
@@ -226,7 +267,7 @@ export default function AdSlotRatesPage() {
               ))}
               <Button onClick={handleSaveDurations} variant="outline" className="w-full h-12 mt-2">
                 <Save className="h-4 w-4 mr-2" />
-                Save Community Duration Rates
+                Save Durations
               </Button>
             </CardContent>
           </Card>
