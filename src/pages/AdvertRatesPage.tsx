@@ -155,49 +155,6 @@ export default function AdvertRatesPage() {
             </CardContent>
           </Card>
 
-          {/* DPD Tiers */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-emerald-500" />
-                Display-Per-Day (DPD) Tiers
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-2">Extra cost based on how many daily impressions your ad gets</p>
-              {DPD_TIERS.map((tier) => (
-                <div key={tier.tier} className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-sm">{tier.tier}</p>
-                    <p className="text-xs text-muted-foreground">{tier.label}</p>
-                  </div>
-                  <p className="font-bold text-sm">{tier.rate} Mobi</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Ad Sizes */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Maximize className="h-5 w-5 text-violet-500" />
-                Ad Size Pricing
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-2">Bigger ads cost more — multiplied from base rate</p>
-              {SIZE_RATES.map((s) => (
-                <div key={s.size} className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-sm">{s.size}</p>
-                    <p className="text-xs text-muted-foreground">{s.multiplier}</p>
-                  </div>
-                  <p className="font-bold text-sm">{s.cost}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
 
           {/* Display Modes */}
           <Card>
