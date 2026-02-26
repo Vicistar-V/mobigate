@@ -33,6 +33,8 @@ export function AdvertisementPhotoUploader({
     }
 
     const filesToProcess = Array.from(files).slice(0, remaining);
+    const newItems: AdMediaItem[] = [];
+    let processed = 0;
 
     filesToProcess.forEach((file) => {
       const isImage = file.type.startsWith("image/");
@@ -40,6 +42,10 @@ export function AdvertisementPhotoUploader({
 
       if (!isImage && !isVideo) {
         toast({ title: "Invalid file", description: "Only image and video files are allowed", variant: "destructive" });
+        processed++;
+        if (processed === filesToProcess.length && newItems.length > 0) {
+          onMediaChange([...media, ...newItems]);
+        }
         return;
       }
 
@@ -48,17 +54,24 @@ export function AdvertisementPhotoUploader({
 
       if (file.size > maxSize) {
         toast({ title: "File too large", description: `Max file size for ${isVideo ? "videos" : "images"} is ${maxLabel}`, variant: "destructive" });
+        processed++;
+        if (processed === filesToProcess.length && newItems.length > 0) {
+          onMediaChange([...media, ...newItems]);
+        }
         return;
       }
 
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
-        const newItem: AdMediaItem = {
+        newItems.push({
           url: result,
           type: isVideo ? 'video' : 'image',
-        };
-        onMediaChange([...media, newItem]);
+        });
+        processed++;
+        if (processed === filesToProcess.length) {
+          onMediaChange([...media, ...newItems]);
+        }
       };
       reader.readAsDataURL(file);
     });
