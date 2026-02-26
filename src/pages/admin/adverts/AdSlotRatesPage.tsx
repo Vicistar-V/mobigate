@@ -4,11 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save, TrendingUp, Percent, Gift } from "lucide-react";
+import { Save, TrendingUp, Percent, Gift, Clock, Users } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SLOT_PACKS } from "@/data/slotPacks";
 import { useToast } from "@/hooks/use-toast";
 
+const initialDurations = [
+  { label: "7 Days", days: 7, price: 500 },
+  { label: "14 Days", days: 14, price: 900 },
+  { label: "1 Month", days: 30, price: 1500 },
+  { label: "2 Months", days: 60, price: 2800 },
+  { label: "3 Months", days: 90, price: 4000 },
+  { label: "6 Months", days: 180, price: 7500 },
+  { label: "12 Months", days: 365, price: 14000 },
+];
 
 
 
@@ -43,6 +52,8 @@ export default function AdSlotRatesPage() {
   
   const [dpdPackages, setDpdPackages] = useState(initialDpdPackages.map(p => ({ ...p })));
   const [editingDpdIndex, setEditingDpdIndex] = useState<number | null>(null);
+  const [durations, setDurations] = useState(initialDurations.map(d => ({ ...d })));
+
   const [slotPacks, setSlotPacks] = useState(
     SLOT_PACKS.map(p => ({ ...p }))
   );
@@ -52,7 +63,9 @@ export default function AdSlotRatesPage() {
   };
 
 
-
+  const handleSaveDurations = () => {
+    toast({ title: "Community Duration Rates Updated", description: "Duration pricing for communities saved successfully." });
+  };
 
   const handleSaveDpd = () => {
     toast({ title: "DPD Packages Updated", description: "Display-per-day packages saved successfully." });
@@ -177,6 +190,43 @@ export default function AdSlotRatesPage() {
           </Card>
 
 
+          {/* Community Duration Pricing */}
+          <Card className="border-accent/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-5 w-5 text-accent-foreground" />
+                Community Duration Pricing
+              </CardTitle>
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                <Users className="h-3.5 w-3.5" />
+                These rates apply to community adverts only
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {durations.map((dur, i) => (
+                <div key={i} className="flex items-center justify-between py-2 px-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm font-medium">{dur.label}</span>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={dur.price}
+                      onChange={e => {
+                        const updated = [...durations];
+                        updated[i] = { ...dur, price: Number(e.target.value) };
+                        setDurations(updated);
+                      }}
+                      className="h-9 w-24 text-right text-sm font-bold"
+                    />
+                    <span className="text-xs text-muted-foreground">Mobi</span>
+                  </div>
+                </div>
+              ))}
+              <Button onClick={handleSaveDurations} variant="outline" className="w-full h-12 mt-2">
+                <Save className="h-4 w-4 mr-2" />
+                Save Community Duration Rates
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* DPD Packages */}
           <Card>
