@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Clock, TrendingUp, Percent, Layers, Maximize, ArrowLeft, Info, Zap, Star, Monitor, RotateCcw, RefreshCw, Repeat } from "lucide-react";
+import { Clock, TrendingUp, Percent, Layers, Maximize, ArrowLeft, Info, Zap, Star, Monitor, RotateCcw, RefreshCw, Repeat, CalendarDays } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -446,6 +446,40 @@ export default function AdvertRatesPage() {
                       <TwoColRow key={i} label={item.interval} value={item.charge} />
                     ))}
                   </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 5. Subscription Volume */}
+            <AccordionItem value="subscription-volume" data-accordion-item="subscription-volume" className="border rounded-xl overflow-hidden bg-card">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2 text-left">
+                  <CalendarDays className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">Subscription Volume [in 30-Day Months]</p>
+                    <p className="text-xs text-muted-foreground font-normal">Volume discounts for longer subscriptions</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="divide-y divide-border/30">
+                  {[
+                    { label: "1-Month [30 Days]", discount: "0%" },
+                    { label: "3-Month [90 Days]", discount: "0%" },
+                    { label: "4-Month [120 Days]", discount: "0%" },
+                    { label: "6-Month [180 Days]", discount: "5%" },
+                    { label: "9-Month [270 Days]", discount: "7%" },
+                    { label: "12-Month [360 Days]", discount: "10%" },
+                    { label: "18-Month [540 Days]", discount: "12%" },
+                    { label: "24-Month [720 Days]", discount: "15%" },
+                  ].map((item, i) => (
+                    <div key={i} className="py-2.5 flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-foreground break-words">{item.label}</span>
+                      <Badge variant="secondary" className="text-xs font-bold shrink-0 whitespace-nowrap">
+                        @ {item.discount} Discount
+                      </Badge>
+                    </div>
+                  ))}
                 </div>
               </AccordionContent>
             </AccordionItem>
