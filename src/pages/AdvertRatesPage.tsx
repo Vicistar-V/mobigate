@@ -6,6 +6,7 @@ import { Clock, TrendingUp, Percent, Layers, Maximize, ArrowLeft, Info, Zap, Sta
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useCallback } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const SLOT_PACKS = [
@@ -321,9 +322,22 @@ export default function AdvertRatesPage() {
             </p>
           </div>
 
-          <Accordion type="single" collapsible className="space-y-2">
+          <Accordion
+            type="single"
+            collapsible
+            className="space-y-2"
+            onValueChange={(value) => {
+              if (value) {
+                setTimeout(() => {
+                  const el = document.querySelector(`[data-state="open"][data-accordion-item="${value}"]`) 
+                    || document.querySelector(`[data-state="open"].border.rounded-xl`);
+                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 350);
+              }
+            }}
+          >
             {/* 1. Ad Space Sizes */}
-            <AccordionItem value="space-sizes" className="border rounded-xl overflow-hidden bg-card">
+            <AccordionItem value="space-sizes" data-accordion-item="space-sizes" className="border rounded-xl overflow-hidden bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 text-left">
                   <Maximize className="h-5 w-5 text-primary shrink-0" />
@@ -361,7 +375,7 @@ export default function AdvertRatesPage() {
             </AccordionItem>
 
             {/* 2. Setup Fees */}
-            <AccordionItem value="setup-fees" className="border rounded-xl overflow-hidden bg-card">
+            <AccordionItem value="setup-fees" data-accordion-item="setup-fees" className="border rounded-xl overflow-hidden bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 text-left">
                   <Zap className="h-5 w-5 text-primary shrink-0" />
@@ -399,7 +413,7 @@ export default function AdvertRatesPage() {
             </AccordionItem>
 
             {/* 3. DPD Packages */}
-            <AccordionItem value="dpd-packages" className="border rounded-xl overflow-hidden bg-card">
+            <AccordionItem value="dpd-packages" data-accordion-item="dpd-packages" className="border rounded-xl overflow-hidden bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 text-left">
                   <TrendingUp className="h-5 w-5 text-primary shrink-0" />
@@ -429,7 +443,7 @@ export default function AdvertRatesPage() {
             </AccordionItem>
 
             {/* 4. Value-Added Features */}
-            <AccordionItem value="value-added" className="border rounded-xl overflow-hidden bg-card">
+            <AccordionItem value="value-added" data-accordion-item="value-added" className="border rounded-xl overflow-hidden bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 text-left">
                   <Star className="h-5 w-5 text-primary shrink-0" />
