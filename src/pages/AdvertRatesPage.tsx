@@ -156,51 +156,6 @@ export default function AdvertRatesPage() {
           </Card>
 
 
-          {/* Display Modes */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Layers className="h-5 w-5 text-orange-500" />
-                Display Mode Setup Fees
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-2">One-time setup fee based on display type</p>
-              {DISPLAY_MODES.map((dm) => (
-                <div key={dm.mode} className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{dm.mode}</p>
-                    <p className="text-xs text-muted-foreground">{dm.desc}</p>
-                  </div>
-                  <p className="font-bold text-sm shrink-0 ml-2">{dm.setupFee}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Category Rates */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Image className="h-5 w-5 text-pink-500" />
-                Category Base Rates
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {CATEGORY_RATES.map((cat) => (
-                <div key={cat.category} className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <cat.icon className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium text-sm">{cat.category}</p>
-                      <p className="text-xs text-muted-foreground">{cat.desc}</p>
-                    </div>
-                  </div>
-                  <p className="font-bold text-sm">{cat.base}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
 
           {/* Subscription Discounts */}
           <Card>
