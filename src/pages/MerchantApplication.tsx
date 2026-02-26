@@ -47,7 +47,6 @@ export default function MerchantApplication() {
   // Directors (dynamic list)
   const [directors, setDirectors] = useState<{ name: string; address: string; photo: string | null }[]>([
     { name: "", address: "", photo: null },
-    { name: "", address: "", photo: null },
   ]);
 
   const updateDirector = (index: number, field: "name" | "address", value: string) => {
@@ -84,13 +83,23 @@ export default function MerchantApplication() {
   const [phone1, setPhone1] = useState("");
   const [phone2, setPhone2] = useState("");
 
-  // Banking
-  const [bankAcct1, setBankAcct1] = useState("");
-  const [bankAcct2, setBankAcct2] = useState("");
-  const [bankName1, setBankName1] = useState("");
-  const [bankName2, setBankName2] = useState("");
-  const [bankBranch1, setBankBranch1] = useState("");
-  const [bankBranch2, setBankBranch2] = useState("");
+  // Banking (dynamic list)
+  const [bankAccounts, setBankAccounts] = useState<{ acct: string; name: string; branch: string }[]>([
+    { acct: "", name: "", branch: "" },
+  ]);
+
+  const updateBankAccount = (index: number, field: "acct" | "name" | "branch", value: string) => {
+    setBankAccounts(prev => prev.map((b, i) => i === index ? { ...b, [field]: value } : b));
+  };
+
+  const addBankAccount = () => {
+    setBankAccounts(prev => [...prev, { acct: "", name: "", branch: "" }]);
+  };
+
+  const removeBankAccount = (index: number) => {
+    if (bankAccounts.length <= 1) return;
+    setBankAccounts(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handlePhotoUpload = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,23 +140,23 @@ export default function MerchantApplication() {
       address1, address2, address3,
       affiliate1Name, affiliate1Address, affiliate2Name, affiliate2Address,
       emailAddress, website, phone1, phone2,
-      bankAcct1, bankAcct2, bankName1, bankName2, bankBranch1, bankBranch2,
+      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, name: b.name, branch: b.branch })),
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     toast({ title: "Draft Saved", description: "Your progress has been saved. You can resume later." });
-  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, address1, address2, address3, affiliate1Name, affiliate1Address, affiliate2Name, affiliate2Address, emailAddress, website, phone1, phone2, bankAcct1, bankAcct2, bankName1, bankName2, bankBranch1, bankBranch2, toast]);
+  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, address1, address2, address3, affiliate1Name, affiliate1Address, affiliate2Name, affiliate2Address, emailAddress, website, phone1, phone2, bankAccounts, toast]);
 
   const clearDraft = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setStoreName(""); setAccountEmail(""); setPassword(""); setConfirmPassword("");
     setMerchantName(""); setBusinessProfile(""); setDba(""); setRegisteredOffice("");
     setCompanyRegNumber(""); setRegAuthority(""); setCountryOfReg(""); setTin("");
-    setDirectors([{ name: "", address: "", photo: null }, { name: "", address: "", photo: null }]);
+    setDirectors([{ name: "", address: "", photo: null }]);
     setAddress1(""); setAddress2(""); setAddress3("");
     setAffiliate1Name(""); setAffiliate1Address(""); setAffiliate2Name(""); setAffiliate2Address("");
     setEmailAddress(""); setWebsite(""); setPhone1(""); setPhone2("");
-    setBankAcct1(""); setBankAcct2(""); setBankName1(""); setBankName2(""); setBankBranch1(""); setBankBranch2("");
+    setBankAccounts([{ acct: "", name: "", branch: "" }]);
     setAcceptedPolicies(false);
     toast({ title: "Draft Cleared", description: "All form data has been cleared." });
   }, [toast]);
@@ -174,9 +183,9 @@ export default function MerchantApplication() {
         setAffiliate2Name(draft.affiliate2Name || ""); setAffiliate2Address(draft.affiliate2Address || "");
         setEmailAddress(draft.emailAddress || ""); setWebsite(draft.website || "");
         setPhone1(draft.phone1 || ""); setPhone2(draft.phone2 || "");
-        setBankAcct1(draft.bankAcct1 || ""); setBankAcct2(draft.bankAcct2 || "");
-        setBankName1(draft.bankName1 || ""); setBankName2(draft.bankName2 || "");
-        setBankBranch1(draft.bankBranch1 || ""); setBankBranch2(draft.bankBranch2 || "");
+        if (draft.bankAccounts?.length) {
+          setBankAccounts(draft.bankAccounts.map((b: any) => ({ acct: b.acct || "", name: b.name || "", branch: b.branch || "" })));
+        }
         setHasDraft(true);
         if (draft.savedAt) {
           setDraftDate(new Date(draft.savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }));
@@ -502,35 +511,47 @@ export default function MerchantApplication() {
 
         {/* ===== BANKING ===== */}
         <Card>
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-4 space-y-4">
             <SectionTitle>Banking Information</SectionTitle>
 
-            <div className="grid grid-cols-2 gap-2">
-              <FieldRow label="Bank Account No. [i]">
-                <Input value={bankAcct1} onChange={e => setBankAcct1(e.target.value)} placeholder="Account number" className="text-sm h-9" />
-              </FieldRow>
-              <FieldRow label="Bank Account No. [ii]">
-                <Input value={bankAcct2} onChange={e => setBankAcct2(e.target.value)} placeholder="Account number" className="text-sm h-9" />
-              </FieldRow>
-            </div>
+            {bankAccounts.map((bank, index) => (
+              <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-muted-foreground">Bank Account [{index + 1}]</p>
+                  {bankAccounts.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:text-destructive"
+                      onClick={() => removeBankAccount(index)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+                <FieldRow label="Account Number">
+                  <Input value={bank.acct} onChange={e => updateBankAccount(index, "acct", e.target.value)} placeholder="Account number" className="text-sm h-9" />
+                </FieldRow>
+                <FieldRow label="Bank Name">
+                  <Input value={bank.name} onChange={e => updateBankAccount(index, "name", e.target.value)} placeholder="Bank name" className="text-sm h-9" />
+                </FieldRow>
+                <FieldRow label="Branch Address">
+                  <Input value={bank.branch} onChange={e => updateBankAccount(index, "branch", e.target.value)} placeholder="Branch address" className="text-sm h-9" />
+                </FieldRow>
+              </div>
+            ))}
 
-            <div className="grid grid-cols-2 gap-2">
-              <FieldRow label="Bank Name [i]">
-                <Input value={bankName1} onChange={e => setBankName1(e.target.value)} placeholder="Bank name" className="text-sm h-9" />
-              </FieldRow>
-              <FieldRow label="Bank Name [ii]">
-                <Input value={bankName2} onChange={e => setBankName2(e.target.value)} placeholder="Bank name" className="text-sm h-9" />
-              </FieldRow>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <FieldRow label="Branch Address [i]">
-                <Input value={bankBranch1} onChange={e => setBankBranch1(e.target.value)} placeholder="Branch address" className="text-sm h-9" />
-              </FieldRow>
-              <FieldRow label="Branch Address [ii]">
-                <Input value={bankBranch2} onChange={e => setBankBranch2(e.target.value)} placeholder="Branch address" className="text-sm h-9" />
-              </FieldRow>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full text-xs gap-1.5"
+              onClick={addBankAccount}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Another Bank Account
+            </Button>
           </CardContent>
         </Card>
 
