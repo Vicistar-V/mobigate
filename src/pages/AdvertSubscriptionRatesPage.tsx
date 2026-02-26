@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Monitor, Layers, RotateCcw, Zap, Clock, RefreshCw, Repeat } from "lucide-react";
+import { ArrowLeft, Monitor, Layers, RotateCcw, Zap, Clock, RefreshCw, Repeat, CalendarDays } from "lucide-react";
 import { Header } from "@/components/Header";
 
 // ─── Data (unchanged) ───
@@ -129,6 +129,17 @@ const REPEAT_EVERY = [
   { interval: "Every 36 hours", charge: "+7% of DPD Charge" },
   { interval: "Every 42 hours", charge: "+6% of DPD Charge" },
   { interval: "Every 48 hours", charge: "+5% of DPD Charge" },
+];
+
+const SUBSCRIPTION_VOLUME = [
+  { label: "1-Month [30 Days]", discount: "0%" },
+  { label: "3-Month [90 Days]", discount: "0%" },
+  { label: "4-Month [120 Days]", discount: "0%" },
+  { label: "6-Month [180 Days]", discount: "5%" },
+  { label: "9-Month [270 Days]", discount: "7%" },
+  { label: "12-Month [360 Days]", discount: "10%" },
+  { label: "18-Month [540 Days]", discount: "12%" },
+  { label: "24-Month [720 Days]", discount: "15%" },
 ];
 
 // ─── Size Card: Row 1 = size + badge (inline), Row 2 = description (only wraps naturally) ───
@@ -326,6 +337,33 @@ export default function AdvertSubscriptionRatesPage() {
                 <div className="divide-y divide-border/30">
                   {REPEAT_EVERY.map((item, i) => (
                     <TwoColRow key={i} label={item.interval} value={item.charge} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* ══════════ SECTION 5: Subscription Volume ══════════ */}
+          <div className="space-y-3">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-1">
+              Subscription Volume [in 30-Day Months]
+            </h2>
+            <Card className="border-border/60">
+              <CardHeader className="pb-2 px-4 pt-4">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <CalendarDays className="h-5 w-5 text-primary" />
+                  Volume Discounts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="divide-y divide-border/30">
+                  {SUBSCRIPTION_VOLUME.map((item, i) => (
+                    <div key={i} className="py-2.5 flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-foreground break-words">{item.label}</span>
+                      <Badge variant="secondary" className="text-xs font-bold shrink-0 whitespace-nowrap">
+                        @ {item.discount} Discount
+                      </Badge>
+                    </div>
                   ))}
                 </div>
               </CardContent>
