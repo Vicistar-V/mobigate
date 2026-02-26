@@ -157,26 +157,6 @@ export default function AdvertRatesPage() {
 
 
 
-          {/* Subscription Discounts */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="h-5 w-5 text-yellow-500" />
-                Subscription Discounts
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-2">Commit to a longer subscription for recurring savings</p>
-              <div className="grid grid-cols-2 gap-2">
-                {SUBSCRIPTION_DISCOUNTS.map((sub) => (
-                  <div key={sub.months} className="p-3 bg-muted/30 rounded-lg text-center">
-                    <p className="font-medium text-sm">{sub.months}</p>
-                    <p className="text-lg font-black text-primary">{sub.discount}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Accredited Advertiser Tiers */}
           <Card>
