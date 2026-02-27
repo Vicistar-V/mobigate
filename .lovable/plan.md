@@ -1,65 +1,72 @@
+# Buy Vouchers System - Full Page Implementation
 
+## Overview
 
-## Merchant Home Page
+Build a dedicated "Buy Vouchers" page accessible from the sidebar's "Merchants Menu > Buy Vouchers" link. This is a multi-step, mobile-first flow where users select voucher denominations (cart-style), then pick a merchant to see localized pricing, then proceed to payment.
 
-A new colorful, public-facing page for each merchant that visitors can browse, interact with, and explore. This page sits between the sidebar navigation and the quiz-focused MerchantDetailPage.
+## Step 1: Expand Voucher Denominations Data
 
-### What Gets Built
+Update `src/data/rechargeVouchersData.ts` to include all requested denominations in a 2-column grid layout:
 
-**1. New Sidebar Link: "Merchant Home"**
-- Added under "Merchants Menu" in `src/components/AppSidebar.tsx`, positioned above "Merchant Quizzes Management"
-- Links to `/merchant-home/:merchantId` (defaulting to the first approved merchant for demo)
+- **Low tier**: 100, 200, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000
+- **Mid tier**: 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 95000, 100000
+- **High tier**: 100000, 125000, 150000, 175000, 200000, 225000, 250000, 275000, 300000 ... up to 1000000
 
-**2. New Route**
-- `/merchant-home/:merchantId` in `src/App.tsx`
+Each entry will follow the existing `RechargeVoucher` interface (mobiValue, ngnPrice, usdPrice, isActive). The NGN:Mobi ratio stays 1:1.
 
-**3. New Page: `src/pages/MerchantHomePage.tsx`**
-A vibrant, mobile-first merchant storefront with these sections:
+## Step 2: Create the Buy Vouchers Page
 
-- **Hero Banner** -- Full-width gradient banner with merchant logo, name, category, verified badge, follower count, and Follow/Report buttons
-- **Quick Actions Bar** -- Horizontal scroll row with colorful icon buttons: Play Quiz, Gallery, Events, Shows, Calendar, Contact
-- **Image Gallery Section** -- Horizontal scrollable photo cards from mock merchant gallery data. Tapping opens `MediaGalleryViewer`. "View All" link
-- **Video Highlights Section** -- Horizontal scrollable video thumbnail cards with play overlay. Tapping opens `MediaGalleryViewer` in video mode
-- **Upcoming Shows** -- Cards for scheduled quiz shows/TV rounds pulled from `mockSeasons` data (upcoming + live). Each card shows date, season name, status badge (LIVE/Upcoming/Past), participant count. Tapping navigates to `/mobi-quiz-games/merchant/:merchantId`
-- **Past Shows** -- Collapsed section showing completed seasons with winner highlights
-- **Events & Calendar** -- A mini calendar-style list of upcoming season dates, selection round dates, and TV show dates extracted from season data
-- **Links Section** -- Merchant external links (website, social media) rendered as tappable cards that open in new tabs
-- **Social Interaction Bar** -- Fixed bottom bar with Like, Comment, Share, Follow buttons using existing `CommentDialog` and `ShareDialog` components
-- **Live Video Placeholder** -- A card with a "LIVE" badge and play button for when merchant is streaming (links to scoreboard drawer)
+New file: `src/pages/BuyVouchersPage.tsx`
 
-**4. New Mock Data: `src/data/merchantHomeData.ts`**
-- Gallery photos, external links, event descriptions, and follower/like counts for each mock merchant
-- Reuses existing `mockMerchants` and `mockSeasons` from `mobigateInteractiveQuizData.ts`
+A full-page, mobile-first multi-step flow with 3 steps:
 
-### Navigation Flow
-Sidebar "Merchants Menu" -> "Merchant Home" -> Opens the colorful merchant home page -> From there, "Play Quiz" button navigates to existing `/mobi-quiz-games/merchant/:merchantId`
+### Step A - Select Vouchers (Cart-style)
 
-### Existing Components Reused
-- `MediaGalleryViewer` for photo/video full-screen viewing
-- `CommentDialog` for commenting
-- `ShareDialog` for sharing
-- `LiveScoreboardDrawer` for live scoreboard access
-- `Calendar` component for date display
-- `Avatar`, `Badge`, `Button`, `Card` from UI library
-- `HighlightedWinnersCarousel` for winner showcase
+- Sticky header with back arrow and title "Buy Vouchers"
+- **2-column grid** of denomination cards (compact, touch-friendly)
+- Each card shows the Mobi value (e.g., "500", "1,000", "10,000")
+- Tapping a card selects it (highlighted border/bg)
+- When selected, a quantity stepper appears (+/- buttons) on the card
+- A **sticky bottom bar** shows running total: total items count, total value in Naira/Mobi, and a "Continue" button
+- Cards grouped into sections with subtle headers ("Low", "Mid", "High" tiers)
 
-### Technical Details
+### Step B - Select Merchant
 
-**Files created:**
-- `src/pages/MerchantHomePage.tsx` -- Main page component (~400-500 lines)
-- `src/data/merchantHomeData.ts` -- Mock gallery, links, events data (~100 lines)
+- Reuses the existing country-then-merchant pattern from `MerchantSelectionStep`
+- Shows countries first, then merchants within that country
+- Each merchant card shows: name, city, rating, discount %, and **the actual price the user will pay** after discount (based on their cart total)
+- Savings amount shown per merchant
+- Tapping a merchant proceeds to Step C
 
-**Files modified:**
-- `src/components/AppSidebar.tsx` -- Add "Merchant Home" link under Merchants Menu
-- `src/App.tsx` -- Add route for `/merchant-home/:merchantId`
+### Step C - Payment Confirmation
 
-**Mobile-first design priorities:**
-- All touch targets 44px+ minimum
-- Horizontal scroll sections with `overflow-x-auto scrollbar-hide`
-- Sticky header with back button
-- Fixed bottom social action bar (56px height)
-- `pb-20` on main content to account for bottom bar
-- No horizontal overflow on 360px viewport
-- Colorful gradients on hero, section headers, and action buttons
-- Native scroll behavior (`touch-auto`, `overscroll-contain`)
+- Shows order summary: selected vouchers with quantities, merchant info, discount applied, final amount
+- A prominent "Pay Now" button that shows a toast: "Payment is being initialized..." (placeholder)
+- Back button to return to merchant selection
 
+## Step 3: Wire Up Routing and Sidebar
+
+- `**src/App.tsx**`: Add route `/buy-vouchers` pointing to `BuyVouchersPage`
+- `**src/components/AppSidebar.tsx**`: Update "Buy Vouchers" menu item URL from `"#"` to `"/buy-vouchers"`
+
+## Technical Details
+
+- **No backend** - pure UI template with mock data
+- **Mobile-only focus** - designed for 360px viewport, no desktop considerations
+- Reuses existing components: `Card`, `Badge`, `Button` from shadcn
+- Reuses existing data: `mobiMerchantsData.ts` for merchants, expanded `rechargeVouchersData.ts` for denominations
+- Reuses existing helpers: `calculateVoucherTotals`, `calculateDiscountedAmount`
+- Uses `useNavigate` for step navigation within the page (no dialogs/drawers - full page flow)
+- Touch-optimized: `touch-manipulation`, `active:scale-[0.97]`, proper tap targets
+- Native scrolling with `overflow-y-auto touch-auto overscroll-contain`
+
+## Files to Create/Modify
+
+1. **Modify** `src/data/rechargeVouchersData.ts` - expand denominations to full range (100 to 1,000,000)
+2. **Create** `src/pages/BuyVouchersPage.tsx` - the full 3-step page
+3. **Modify** `src/App.tsx` - add route
+4. **Modify** `src/components/AppSidebar.tsx` - update sidebar link
+
+&nbsp;
+
+remember what they are actualy trying to buy is mobi thats our currnelcy with symbole M buut they see merhcnat rate in there local currency like example naira
