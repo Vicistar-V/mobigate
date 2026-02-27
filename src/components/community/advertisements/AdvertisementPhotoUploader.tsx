@@ -53,8 +53,8 @@ export function AdvertisementPhotoUploader({
         return;
       }
 
-      const maxSize = isVideo ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
-      const maxLabel = isVideo ? "10MB" : "2MB";
+      const maxSize = isVideo ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+      const maxLabel = isVideo ? "10MB" : "5MB";
 
       if (file.size > maxSize) {
         toast({ title: "File too large", description: `Max file size for ${isVideo ? "videos" : "images"} is ${maxLabel}`, variant: "destructive" });
@@ -200,7 +200,7 @@ export function AdvertisementPhotoUploader({
         onChange={handleFileSelect}
       />
       <p className="text-[11px] text-muted-foreground">
-        JPG, PNG, WebP, MP4, WebM • Images max 2MB, Videos max 10MB
+        JPG, PNG, WebP, MP4, WebM • Images max 5MB, Videos max 10MB
       </p>
     </div>
   );
