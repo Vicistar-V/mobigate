@@ -37,6 +37,7 @@ export default function CreateAdvertisementPage() {
   const [formData, setFormData] = useState<AdvertisementFormData>(initialFormData);
   const [showPreview, setShowPreview] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
 
   const updateField = <K extends keyof AdvertisementFormData>(key: K, value: AdvertisementFormData[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -201,6 +202,8 @@ export default function CreateAdvertisementPage() {
           <AdvertisementPhotoUploader
             media={formData.media}
             onMediaChange={(media) => updateField("media", media)}
+            featuredIndex={featuredIndex}
+            onFeaturedChange={setFeaturedIndex}
           />
         </div>
       </main>

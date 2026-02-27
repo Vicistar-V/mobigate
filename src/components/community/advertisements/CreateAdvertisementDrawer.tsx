@@ -40,6 +40,7 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
   const [formData, setFormData] = useState<AdvertisementFormData>(initialFormData);
   const [showPreview, setShowPreview] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
   // Track if we should reopen the drawer after child sheet closes
   const [pendingReopen, setPendingReopen] = useState(false);
 
@@ -260,6 +261,8 @@ export function CreateAdvertisementDrawer({ open, onOpenChange }: CreateAdvertis
               <AdvertisementPhotoUploader
                 media={formData.media}
                 onMediaChange={(media) => updateField("media", media)}
+                featuredIndex={featuredIndex}
+                onFeaturedChange={setFeaturedIndex}
               />
             </div>
           </ScrollArea>

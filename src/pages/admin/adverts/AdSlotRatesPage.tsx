@@ -251,7 +251,7 @@ export default function AdSlotRatesPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Clock className="h-5 w-5 text-accent-foreground" />
-                Community Duration Pricing
+                Community Advert Duration Pricing
               </CardTitle>
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                 <Users className="h-3.5 w-3.5" />
