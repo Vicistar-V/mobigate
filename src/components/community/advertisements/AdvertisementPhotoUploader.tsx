@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, X, ImageIcon, Video, Play } from "lucide-react";
+import { Plus, X, ImageIcon, Video, Play, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { AdMediaItem } from "@/types/advertisementSystem";
 
@@ -8,12 +8,16 @@ interface AdvertisementPhotoUploaderProps {
   media: AdMediaItem[];
   onMediaChange: (media: AdMediaItem[]) => void;
   maxItems?: number;
+  featuredIndex?: number;
+  onFeaturedChange?: (index: number) => void;
 }
 
 export function AdvertisementPhotoUploader({
   media,
   onMediaChange,
   maxItems = 4,
+  featuredIndex = 0,
+  onFeaturedChange,
 }: AdvertisementPhotoUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -126,6 +130,19 @@ export function AdvertisementPhotoUploader({
                 <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                   {index + 1}
                 </div>
+                {/* Featured star */}
+                <button
+                  type="button"
+                  onClick={() => onFeaturedChange?.(index)}
+                  className={`absolute top-1 left-8 p-1 rounded-full transition-all ${
+                    featuredIndex === index
+                      ? "bg-yellow-500 text-white"
+                      : "bg-black/40 text-white/70 hover:bg-black/60"
+                  }`}
+                  title={featuredIndex === index ? "Featured" : "Set as featured"}
+                >
+                  <Star className={`h-3 w-3 ${featuredIndex === index ? "fill-current" : ""}`} />
+                </button>
                 {/* Type indicator */}
                 <div className="absolute bottom-1 left-1 bg-black/60 text-white p-1 rounded">
                   {item.type === 'video' ? (
