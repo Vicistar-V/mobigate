@@ -141,7 +141,7 @@ const menuItems: MenuItem[] = [{
   title: "Merchants Menu",
   icon: Store,
   items: [
-    { title: "Buy Vouchers", url: "#" },
+    { title: "Buy Vouchers", url: "/buy-vouchers" },
     { 
       title: "View Merchants",
       url: "#",

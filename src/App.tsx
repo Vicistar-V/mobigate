@@ -36,6 +36,7 @@ import IndividualMerchantApplication from "./pages/IndividualMerchantApplication
 import MerchantDetailPage from "./pages/MerchantDetailPage";
 import MerchantHomePage from "./pages/MerchantHomePage";
 import MerchantListingPage from "./pages/MerchantListingPage";
+import BuyVouchersPage from "./pages/BuyVouchersPage";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import CreateAdvertisementPage from "./pages/community/CommunityCreateAdvertisementPage";
 import CommunityAdvertRatesPage from "./pages/community/CommunityAdvertRatesPage";
@@ -110,6 +111,7 @@ const App = () => {
                   <Route path="/mobi-quiz-games" element={<MobiQuizGames />} />
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   <Route path="/merchants" element={<MerchantListingPage />} />
+                  <Route path="/buy-vouchers" element={<BuyVouchersPage />} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
                   <Route path="/discounted-advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />
