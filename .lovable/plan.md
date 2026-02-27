@@ -1,72 +1,79 @@
-# Buy Vouchers System - Full Page Implementation
+
+# Post-Payment Flow: Success Animation, Distribution & Transfer System
 
 ## Overview
+After tapping "Pay Now" on the order summary, the user enters a rich post-payment experience with animated success screens, a voucher distribution system (use for self or send to others), and a transfer UI with multi-user selection and amount splitting -- all mobile-only, full-page components within BuyVouchersPage.
 
-Build a dedicated "Buy Vouchers" page accessible from the sidebar's "Merchants Menu > Buy Vouchers" link. This is a multi-step, mobile-first flow where users select voucher denominations (cart-style), then pick a merchant to see localized pricing, then proceed to payment.
+## New Steps Added to the Flow
 
-## Step 1: Expand Voucher Denominations Data
+The current `Step` type expands from 4 to 8 states:
 
-Update `src/data/rechargeVouchersData.ts` to include all requested denominations in a 2-column grid layout:
+```text
+vouchers -> countries -> merchants -> payment -> processing -> success -> distribute -> sendToUsers
+```
 
-- **Low tier**: 100, 200, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000
-- **Mid tier**: 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 95000, 100000
-- **High tier**: 100000, 125000, 150000, 175000, 200000, 225000, 250000, 275000, 300000 ... up to 1000000
+### Step 5: Processing (Loading Screen)
+- Full-screen centered loading animation
+- Pulsing Mobi logo / spinning circle with gradient
+- Text transitions: "Connecting to merchant..." -> "Processing payment..." -> "Verifying transaction..." -> "Almost done..."
+- Auto-advances to Success after ~3 seconds using staged timeouts
 
-Each entry will follow the existing `RechargeVoucher` interface (mobiValue, ngnPrice, usdPrice, isActive). The NGN:Mobi ratio stays 1:1.
+### Step 6: Payment Success (Animated)
+- Green checkmark animation that scales in with a satisfying bounce effect (CSS keyframes)
+- Circular green background that expands outward
+- Shows "Payment Successful!" with confetti-like sparkle accents
+- Displays the Mobi amount received (M{total}) prominently
+- After a brief pause, two action buttons fade in:
+  - **"Use for Myself"** -- triggers a 5-second loading simulation then a final success screen showing "M{amount} credited to your Mobi Wallet" before navigating home
+  - **"Send to Someone"** -- proceeds to the distribution step
 
-## Step 2: Create the Buy Vouchers Page
+### Step 7: Distribute (Choose Recipient Type)
+- Full-page with sticky header showing remaining Mobi balance
+- Two large cards:
+  - **"Community Members"** -- shows community icon, taps to open user list filtered from `communityPeople` data
+  - **"Mobigate Friends"** -- shows friends icon, taps to open user list filtered from `mockFriends` data
+- Below: Transaction history section showing any transfers already made in this session (recipient name, amount, timestamp)
+- If all Mobi has been distributed, show a success summary screen with "All vouchers distributed!" and a "Done" button
 
-New file: `src/pages/BuyVouchersPage.tsx`
+### Step 8: Send to Users (Full-Page User Selection + Amount Split)
+- **Sticky header**: Back arrow + "Select Recipients" title
+- **Sticky balance banner** (same pattern as merchant step): Shows remaining Mobi available to send, updates live as amounts are assigned
+- **Search bar**: Filters the user list by name in real-time
+- **Scrollable user list**: Each user row shows avatar, name, online status
+  - Tapping a user selects them (highlighted with checkmark, similar to voucher card selection pattern)
+  - When selected, an **amount input stepper** appears inline (same card-expand pattern as voucher quantity stepper but for Mobi amounts with preset quick-pick buttons like M100, M500, M1000, or manual entry)
+- **Multiple users** can be selected simultaneously, each with their own amount
+- Running total of allocated amounts shown in the sticky banner
+- Validation: Cannot allocate more than remaining balance
+- **"Send" button** at bottom (fixed, sticky) -- disabled until at least one user has an amount assigned
+- On send: 5-second loading simulation (same awesome loading as processing step) then success screen showing transfer summary
+- Returns to the distribute step with updated remaining balance and the new transactions in the history
 
-A full-page, mobile-first multi-step flow with 3 steps:
+## Data Sources for User Lists
+- **Community Members**: Import from `communityPeople` in `src/data/communityPeopleData.ts`
+- **Mobigate Friends**: Import from `mockFriends` in `src/data/profileData.ts`
+- Both mapped to a common shape: `{ id, name, avatar, isOnline? }`
 
-### Step A - Select Vouchers (Cart-style)
+## State Management
+All within BuyVouchersPage component state:
+- `remainingMobi: number` -- starts at `totalMobi`, decreases as transfers happen
+- `transfers: Array<{ id, recipientName, recipientAvatar, amount, timestamp }>` -- session transfer log
+- `recipientType: "community" | "friends" | null` -- which list to show
+- `selectedRecipients: Record<string, number>` -- userId -> allocated Mobi amount
 
-- Sticky header with back arrow and title "Buy Vouchers"
-- **2-column grid** of denomination cards (compact, touch-friendly)
-- Each card shows the Mobi value (e.g., "500", "1,000", "10,000")
-- Tapping a card selects it (highlighted border/bg)
-- When selected, a quantity stepper appears (+/- buttons) on the card
-- A **sticky bottom bar** shows running total: total items count, total value in Naira/Mobi, and a "Continue" button
-- Cards grouped into sections with subtle headers ("Low", "Mid", "High" tiers)
+## Animation Details
+All animations use pure CSS keyframes (already configured in tailwind):
+- **Processing spinner**: Custom `animate-spin` with gradient ring + staged text transitions via `setTimeout`
+- **Success checkmark**: `scale-in` keyframe with spring-like bounce (custom `@keyframes checkmark-draw` for the SVG path)
+- **Card transitions**: `animate-fade-in` for step content appearing
+- **Button reveals**: Staggered `animate-fade-in` with delays
 
-### Step B - Select Merchant
+## Files to Modify
+1. **`src/pages/BuyVouchersPage.tsx`** -- All changes happen here. Add the new step types, new render functions for each step, state variables for distribution tracking, and all animation styles via inline Tailwind + custom keyframe classes.
 
-- Reuses the existing country-then-merchant pattern from `MerchantSelectionStep`
-- Shows countries first, then merchants within that country
-- Each merchant card shows: name, city, rating, discount %, and **the actual price the user will pay** after discount (based on their cart total)
-- Savings amount shown per merchant
-- Tapping a merchant proceeds to Step C
-
-### Step C - Payment Confirmation
-
-- Shows order summary: selected vouchers with quantities, merchant info, discount applied, final amount
-- A prominent "Pay Now" button that shows a toast: "Payment is being initialized..." (placeholder)
-- Back button to return to merchant selection
-
-## Step 3: Wire Up Routing and Sidebar
-
-- `**src/App.tsx**`: Add route `/buy-vouchers` pointing to `BuyVouchersPage`
-- `**src/components/AppSidebar.tsx**`: Update "Buy Vouchers" menu item URL from `"#"` to `"/buy-vouchers"`
-
-## Technical Details
-
-- **No backend** - pure UI template with mock data
-- **Mobile-only focus** - designed for 360px viewport, no desktop considerations
-- Reuses existing components: `Card`, `Badge`, `Button` from shadcn
-- Reuses existing data: `mobiMerchantsData.ts` for merchants, expanded `rechargeVouchersData.ts` for denominations
-- Reuses existing helpers: `calculateVoucherTotals`, `calculateDiscountedAmount`
-- Uses `useNavigate` for step navigation within the page (no dialogs/drawers - full page flow)
-- Touch-optimized: `touch-manipulation`, `active:scale-[0.97]`, proper tap targets
-- Native scrolling with `overflow-y-auto touch-auto overscroll-contain`
-
-## Files to Create/Modify
-
-1. **Modify** `src/data/rechargeVouchersData.ts` - expand denominations to full range (100 to 1,000,000)
-2. **Create** `src/pages/BuyVouchersPage.tsx` - the full 3-step page
-3. **Modify** `src/App.tsx` - add route
-4. **Modify** `src/components/AppSidebar.tsx` - update sidebar link
-
-&nbsp;
-
-remember what they are actualy trying to buy is mobi thats our currnelcy with symbole M buut they see merhcnat rate in there local currency like example naira
+## Technical Notes
+- No new files needed -- everything stays in BuyVouchersPage to keep the flow cohesive
+- No backend -- all simulated with timeouts and local state
+- Mobile-only: all layouts use single-column, full-width, touch-manipulation
+- Scrolling: document-level scroll, `window.scrollTo(0,0)` on every step transition
+- The "Use for Myself" flow: 5s loading -> success toast + animated screen -> auto-navigate to home after 3s or tap "Done"
