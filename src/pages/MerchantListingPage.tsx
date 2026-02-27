@@ -250,7 +250,17 @@ export default function MerchantListingPage() {
   );
 }
 
+function getMerchantOfferings(merchantId: string): { hasQuiz: boolean; hasVoucher: boolean } {
+  const hash = merchantId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const mod = hash % 3;
+  if (mod === 0) return { hasQuiz: true, hasVoucher: true };
+  if (mod === 1) return { hasQuiz: true, hasVoucher: false };
+  return { hasQuiz: false, hasVoucher: true };
+}
+
 function MerchantCard({ merchant, onClick }: { merchant: LocationMerchant; onClick: () => void }) {
+  const { hasQuiz, hasVoucher } = getMerchantOfferings(merchant.id);
+
   return (
     <Card
       className="p-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 border-l-primary/60"
@@ -281,6 +291,18 @@ function MerchantCard({ merchant, onClick }: { merchant: LocationMerchant; onCli
               {merchant.stateName && <>{merchant.stateName}, </>}
               {merchant.countryFlag} {merchant.countryName}
             </span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            {hasQuiz && (
+              <Badge className="text-[10px] h-[18px] px-1.5 bg-amber-500/15 text-amber-700 border-amber-300 hover:bg-amber-500/20" variant="outline">
+                🎮 Quiz Game
+              </Badge>
+            )}
+            {hasVoucher && (
+              <Badge className="text-[10px] h-[18px] px-1.5 bg-emerald-500/15 text-emerald-700 border-emerald-300 hover:bg-emerald-500/20" variant="outline">
+                🎟️ Voucher
+              </Badge>
+            )}
           </div>
         </div>
       </div>
