@@ -189,7 +189,7 @@ export default function BuyVouchersPage() {
 
   // ─── STEP 1: VOUCHER SELECTION ───
   const renderVoucherStep = () => (
-    <div className="flex flex-col h-full min-h-screen bg-background">
+    <div className="bg-background pb-32">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
@@ -207,7 +207,7 @@ export default function BuyVouchersPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pt-4 pb-28">
+      <div className="px-4 pt-4">
         {renderTier("Standard", lowTier, "M100 – M10,000")}
         {renderTier("Premium", midTier, "M15,000 – M100,000")}
         {renderTier("Elite", highTier, "M125,000 – M1,000,000")}
@@ -239,7 +239,7 @@ export default function BuyVouchersPage() {
     const others = getOtherCountries();
 
     return (
-      <div className="flex flex-col h-full min-h-screen bg-background">
+      <div className="bg-background pb-6">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -250,7 +250,7 @@ export default function BuyVouchersPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pt-4 pb-6">
+        <div className="px-4 pt-4">
           {/* Info */}
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 mb-4">
             <p className="text-xs text-foreground leading-relaxed">
@@ -308,7 +308,7 @@ export default function BuyVouchersPage() {
       .sort((a, b) => b.discountPercent - a.discountPercent);
 
     return (
-      <div className="flex flex-col h-full min-h-screen bg-background">
+      <div className="bg-background pb-6">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -319,7 +319,7 @@ export default function BuyVouchersPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pt-4 pb-6 space-y-2.5">
+        <div className="px-4 pt-4 space-y-2.5">
           {activeMerchants.map((merchant) => {
             const { discounted, savings } = calculateDiscountedAmount(totalMobi, merchant.discountPercent);
             return (
@@ -376,7 +376,7 @@ export default function BuyVouchersPage() {
     const { discounted, savings } = calculateDiscountedAmount(totalMobi, selectedMerchant.discountPercent);
 
     return (
-      <div className="flex flex-col h-full min-h-screen bg-background">
+      <div className="bg-background pb-32">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -387,7 +387,7 @@ export default function BuyVouchersPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pt-4 pb-28">
+        <div className="px-4 pt-4">
           {/* Merchant info */}
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 mb-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
