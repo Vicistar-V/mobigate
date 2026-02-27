@@ -313,29 +313,34 @@ export default function BuyVouchersPage() {
 
     return (
       <div className="bg-background pb-6">
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
-          <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
-            <ArrowLeft className="h-5 w-5 text-foreground" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-base font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
-            <p className="text-xs text-muted-foreground">Select a merchant</p>
+        {/* Sticky header */}
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+          <div className="px-4 py-3 flex items-center gap-3">
+            <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+              <ArrowLeft className="h-5 w-5 text-foreground" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-base font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
+              <p className="text-xs text-muted-foreground">Select a merchant</p>
+            </div>
+          </div>
+
+          {/* Sticky Mobi order banner */}
+          <div className="px-4 pb-3">
+            <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Your Mobi Order</p>
+                <p className="text-xl font-bold text-foreground">M{formatNum(totalMobi)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""}</p>
+                <p className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Prominent Mobi total banner */}
-        <div className="mx-4 mt-4 mb-3 rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Your Mobi Order</p>
-            <p className="text-xl font-bold text-foreground">M{formatNum(totalMobi)}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""}</p>
-            <p className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
-          </div>
-        </div>
-
-        <div className="px-4 space-y-2.5">
+        <div className="px-4 pt-3 space-y-2.5">
           {activeMerchants.map((merchant) => {
             const { discounted, savings } = calculateDiscountedAmount(totalMobi, merchant.discountPercent);
             return (
