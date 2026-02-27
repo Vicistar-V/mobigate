@@ -181,7 +181,9 @@ export default function BuyVouchersPage() {
   }, [step, totalMobi]);
 
   const handleUseForSelf = () => {
+    setStep("success");
     setSelfLoading(true);
+    window.scrollTo(0, 0);
     setTimeout(() => {
       setSelfLoading(false);
       setSelfSuccess(true);
