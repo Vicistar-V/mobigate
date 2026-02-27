@@ -128,8 +128,8 @@ export default function BuyVouchersPage() {
         {/* Popular badge */}
         {v.isPopular && (
           <div className="absolute -top-2 -right-2">
-            <Badge className="bg-amber-500 text-white text-[9px] px-1.5 py-0 h-4 gap-0.5">
-              <Sparkles className="h-2.5 w-2.5" /> Hot
+            <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0 h-5 gap-0.5">
+              <Sparkles className="h-3 w-3" /> Hot
             </Badge>
           </div>
         )}
@@ -143,11 +143,11 @@ export default function BuyVouchersPage() {
 
         {/* Value */}
         <div className="text-center pt-1">
-          <p className="text-[10px] text-muted-foreground mb-0.5">Mobi</p>
+          <p className="text-xs text-muted-foreground mb-0.5">Mobi</p>
           <p className={`font-bold ${v.mobiValue >= 100000 ? "text-sm" : "text-base"} text-foreground`}>
             M{formatNum(v.mobiValue)}
           </p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             ≈ ₦{formatNum(v.ngnPrice)}
           </p>
         </div>
@@ -197,7 +197,7 @@ export default function BuyVouchersPage() {
         </button>
         <div className="flex-1">
           <h1 className="text-base font-bold text-foreground">Buy Mobi Vouchers</h1>
-          <p className="text-[11px] text-muted-foreground">Select denominations & quantities</p>
+          <p className="text-xs text-muted-foreground">Select denominations & quantities</p>
         </div>
         {totalItems > 0 && (
           <button onClick={clearCart} className="text-xs text-destructive font-medium active:opacity-70 touch-manipulation">
@@ -217,10 +217,10 @@ export default function BuyVouchersPage() {
       <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <p className="text-[11px] text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""} selected</p>
+            <p className="text-xs text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""} selected</p>
             <p className="text-lg font-bold text-foreground">M{formatNum(totalMobi)}</p>
           </div>
-          <p className="text-xs text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
+          <p className="text-sm text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
         </div>
         <Button
           onClick={goToCountries}
@@ -246,14 +246,14 @@ export default function BuyVouchersPage() {
           </button>
           <div className="flex-1">
             <h1 className="text-base font-bold text-foreground">Select Country</h1>
-            <p className="text-[11px] text-muted-foreground">Cart: M{formatNum(totalMobi)} ({totalItems} items)</p>
+            <p className="text-xs text-muted-foreground">Cart: M{formatNum(totalMobi)} ({totalItems} items)</p>
           </div>
         </div>
 
         <div className="px-4 pt-4">
           {/* Info */}
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 mb-4">
-            <p className="text-xs text-foreground leading-relaxed">
+            <p className="text-sm text-foreground leading-relaxed">
               Choose your country to see accredited merchants and their rates in your local currency.
             </p>
           </div>
@@ -271,7 +271,7 @@ export default function BuyVouchersPage() {
                   <p className="font-bold text-sm text-foreground">{local.name}</p>
                   <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} merchants</p>
                 </div>
-                <Badge className="bg-primary/10 text-primary text-[10px]">Local</Badge>
+                <Badge className="bg-primary/10 text-primary text-xs">Local</Badge>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
             </div>
@@ -289,7 +289,7 @@ export default function BuyVouchersPage() {
                 <span className="text-2xl">{country.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{country.name}</p>
-                  <p className="text-[11px] text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} merchants</p>
+                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} merchants</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -315,11 +315,23 @@ export default function BuyVouchersPage() {
           </button>
           <div className="flex-1">
             <h1 className="text-base font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
-            <p className="text-[11px] text-muted-foreground">Select a merchant • M{formatNum(totalMobi)}</p>
+            <p className="text-xs text-muted-foreground">Select a merchant</p>
           </div>
         </div>
 
-        <div className="px-4 pt-4 space-y-2.5">
+        {/* Prominent Mobi total banner */}
+        <div className="mx-4 mt-4 mb-3 rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">Your Mobi Order</p>
+            <p className="text-xl font-bold text-foreground">M{formatNum(totalMobi)}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""}</p>
+            <p className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
+          </div>
+        </div>
+
+        <div className="px-4 space-y-2.5">
           {activeMerchants.map((merchant) => {
             const { discounted, savings } = calculateDiscountedAmount(totalMobi, merchant.discountPercent);
             return (
@@ -334,33 +346,33 @@ export default function BuyVouchersPage() {
                       <p className="font-bold text-sm text-foreground truncate">{merchant.name}</p>
                       {merchant.isVerified && <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
                     </div>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <MapPin className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-[11px] text-muted-foreground">{merchant.city}</span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">{merchant.city}</span>
                       <span className="text-muted-foreground mx-1">•</span>
-                      <Star className="h-3 w-3 text-amber-500" />
-                      <span className="text-[11px] text-muted-foreground">{merchant.rating}</span>
+                      <Star className="h-3.5 w-3.5 text-amber-500" />
+                      <span className="text-xs text-muted-foreground">{merchant.rating}</span>
                     </div>
                   </div>
-                  <Badge className="bg-emerald-500/15 text-emerald-600 text-[11px] font-bold shrink-0">
+                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold shrink-0">
                     {merchant.discountPercent}% OFF
                   </Badge>
                 </div>
 
                 <div className="flex items-end justify-between pt-2 border-t border-border/30">
                   <div>
-                    <p className="text-[10px] text-muted-foreground">You pay</p>
-                    <p className="text-base font-bold text-foreground">
+                    <p className="text-xs font-medium text-muted-foreground">You pay</p>
+                    <p className="text-lg font-bold text-foreground">
                       {selectedCountry.currencySymbol}{formatNum(discounted)}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] text-muted-foreground">You save</p>
-                    <p className="text-sm font-semibold text-emerald-600">
+                    <p className="text-xs font-medium text-muted-foreground">You save</p>
+                    <p className="text-sm font-bold text-emerald-600">
                       {selectedCountry.currencySymbol}{formatNum(savings)}
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 ml-2" />
+                  <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 ml-2" />
                 </div>
               </div>
             );
@@ -383,7 +395,7 @@ export default function BuyVouchersPage() {
           </button>
           <div>
             <h1 className="text-base font-bold text-foreground">Order Summary</h1>
-            <p className="text-[11px] text-muted-foreground">Review & pay</p>
+            <p className="text-xs text-muted-foreground">Review & pay</p>
           </div>
         </div>
 
@@ -395,7 +407,7 @@ export default function BuyVouchersPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm text-foreground">{selectedMerchant.name}</p>
-              <p className="text-[11px] text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% discount</p>
+              <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% discount</p>
             </div>
           </div>
 
@@ -409,7 +421,7 @@ export default function BuyVouchersPage() {
                 <div key={voucher.id} className="px-3 py-2.5 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-foreground">M{formatNum(voucher.mobiValue)}</p>
-                    <p className="text-[10px] text-muted-foreground">× {quantity} piece{quantity > 1 ? "s" : ""}</p>
+                    <p className="text-xs text-muted-foreground">× {quantity} piece{quantity > 1 ? "s" : ""}</p>
                   </div>
                   <p className="text-sm font-bold text-foreground">M{formatNum(voucher.mobiValue * quantity)}</p>
                 </div>
@@ -435,7 +447,7 @@ export default function BuyVouchersPage() {
               <span className="font-bold text-foreground">Total to Pay</span>
               <span className="font-bold text-lg text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</span>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center">
+            <p className="text-xs text-muted-foreground text-center">
               You receive M{formatNum(totalMobi)} in Mobi vouchers
             </p>
           </div>
