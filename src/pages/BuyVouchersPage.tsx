@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Sparkles, Check, MapPin, Star, ShieldCheck, ChevronRight, Ticket, CreditCard } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Sparkles, Check, MapPin, Star, ShieldCheck, ChevronRight, Ticket, CreditCard, Users, UserPlus, Search, Send, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -13,13 +13,30 @@ import {
   getOtherCountries,
   calculateDiscountedAmount,
 } from "@/data/mobiMerchantsData";
+import { communityPeople } from "@/data/communityPeopleData";
+import { mockFriends } from "@/data/profileData";
 
-type Step = "vouchers" | "countries" | "merchants" | "payment";
+type Step = "vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers";
 
 // Cart: voucherId -> quantity
 type Cart = Record<string, number>;
 
+interface Transfer {
+  id: string;
+  recipientName: string;
+  recipientAvatar: string;
+  amount: number;
+  timestamp: Date;
+}
+
 const formatNum = (n: number) => n.toLocaleString("en-NG");
+
+const PROCESSING_MESSAGES = [
+  "Connecting to merchant...",
+  "Processing payment...",
+  "Verifying transaction...",
+  "Almost done..."
+];
 
 export default function BuyVouchersPage() {
   const navigate = useNavigate();
@@ -29,6 +46,19 @@ export default function BuyVouchersPage() {
   const [cart, setCart] = useState<Cart>({});
   const [selectedCountry, setSelectedCountry] = useState<MerchantCountry | null>(null);
   const [selectedMerchant, setSelectedMerchant] = useState<MobiMerchant | null>(null);
+
+  // Post-payment state
+  const [remainingMobi, setRemainingMobi] = useState(0);
+  const [transfers, setTransfers] = useState<Transfer[]>([]);
+  const [recipientType, setRecipientType] = useState<"community" | "friends" | null>(null);
+  const [selectedRecipients, setSelectedRecipients] = useState<Record<string, number>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [processingMsg, setProcessingMsg] = useState(0);
+  const [showSuccessButtons, setShowSuccessButtons] = useState(false);
+  const [selfLoading, setSelfLoading] = useState(false);
+  const [selfSuccess, setSelfSuccess] = useState(false);
+  const [sendLoading, setSendLoading] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState(false);
 
   // Derived
   const lowTier = rechargeVouchers.filter((v) => v.tier === "low");
@@ -51,6 +81,11 @@ export default function BuyVouchersPage() {
   const totalItems = useMemo(
     () => cartItems.reduce((s, i) => s + i.quantity, 0),
     [cartItems]
+  );
+
+  const totalAllocated = useMemo(
+    () => Object.values(selectedRecipients).reduce((s, v) => s + v, 0),
+    [selectedRecipients]
   );
 
   // Cart helpers
@@ -107,11 +142,121 @@ export default function BuyVouchersPage() {
     if (step === "countries") setStep("vouchers");
     else if (step === "merchants") setStep("countries");
     else if (step === "payment") setStep("merchants");
+    else if (step === "distribute") {
+      setStep("success");
+      setShowSuccessButtons(true);
+    }
+    else if (step === "sendToUsers") {
+      setStep("distribute");
+      setSelectedRecipients({});
+      setSearchQuery("");
+    }
     window.scrollTo(0, 0);
   };
 
+  // ─── PAYMENT FLOW ───
   const handlePay = () => {
-    toast({ title: "Payment initializing...", description: `Processing M${formatNum(totalMobi)} purchase via ${selectedMerchant?.name}` });
+    setStep("processing");
+    setProcessingMsg(0);
+    window.scrollTo(0, 0);
+  };
+
+  // Processing auto-advance
+  useEffect(() => {
+    if (step !== "processing") return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    PROCESSING_MESSAGES.forEach((_, i) => {
+      if (i > 0) {
+        timers.push(setTimeout(() => setProcessingMsg(i), i * 800));
+      }
+    });
+    timers.push(setTimeout(() => {
+      setRemainingMobi(totalMobi);
+      setStep("success");
+      setShowSuccessButtons(false);
+      window.scrollTo(0, 0);
+      setTimeout(() => setShowSuccessButtons(true), 1200);
+    }, 3200));
+    return () => timers.forEach(clearTimeout);
+  }, [step, totalMobi]);
+
+  const handleUseForSelf = () => {
+    setSelfLoading(true);
+    setTimeout(() => {
+      setSelfLoading(false);
+      setSelfSuccess(true);
+    }, 5000);
+  };
+
+  const handleSelfDone = () => {
+    navigate("/");
+  };
+
+  const handleSendToSomeone = () => {
+    setStep("distribute");
+    window.scrollTo(0, 0);
+  };
+
+  const handleChooseRecipientType = (type: "community" | "friends") => {
+    setRecipientType(type);
+    setSelectedRecipients({});
+    setSearchQuery("");
+    setStep("sendToUsers");
+    window.scrollTo(0, 0);
+  };
+
+  const toggleRecipient = (id: string) => {
+    setSelectedRecipients(prev => {
+      if (prev[id] !== undefined) {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      }
+      return { ...prev, [id]: 0 };
+    });
+  };
+
+  const setRecipientAmount = (id: string, amount: number) => {
+    const maxForThis = remainingMobi - totalAllocated + (selectedRecipients[id] || 0);
+    const clamped = Math.max(0, Math.min(amount, maxForThis));
+    setSelectedRecipients(prev => ({ ...prev, [id]: clamped }));
+  };
+
+  const handleSendToRecipients = () => {
+    const entries = Object.entries(selectedRecipients).filter(([, amt]) => amt > 0);
+    if (entries.length === 0) return;
+    setSendLoading(true);
+
+    setTimeout(() => {
+      const userList = recipientType === "community"
+        ? communityPeople.map(p => ({ id: p.id, name: p.name, avatar: p.imageUrl }))
+        : mockFriends.map(f => ({ id: f.id, name: f.name, avatar: f.avatar }));
+
+      const newTransfers: Transfer[] = entries.map(([userId, amount]) => {
+        const user = userList.find(u => u.id === userId);
+        return {
+          id: `t-${Date.now()}-${userId}`,
+          recipientName: user?.name || "Unknown",
+          recipientAvatar: user?.avatar || "",
+          amount,
+          timestamp: new Date(),
+        };
+      });
+
+      const totalSent = entries.reduce((s, [, amt]) => s + amt, 0);
+      setRemainingMobi(prev => prev - totalSent);
+      setTransfers(prev => [...prev, ...newTransfers]);
+      setSendLoading(false);
+      setSendSuccess(true);
+    }, 5000);
+  };
+
+  const handleSendDone = () => {
+    setSendSuccess(false);
+    setSelectedRecipients({});
+    setSearchQuery("");
+    setStep("distribute");
+    window.scrollTo(0, 0);
   };
 
   // ─── RENDER: Voucher Card ───
@@ -129,7 +274,6 @@ export default function BuyVouchersPage() {
             : "border-border/50 bg-card hover:border-border"
         }`}
       >
-        {/* Popular badge */}
         {v.isPopular && (
           <div className="absolute -top-2 -right-2">
             <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0 h-5 gap-0.5">
@@ -137,39 +281,25 @@ export default function BuyVouchersPage() {
             </Badge>
           </div>
         )}
-
-        {/* Selection check */}
         {selected && (
           <div className="absolute top-1.5 left-1.5 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
             <Check className="h-3 w-3 text-primary-foreground" />
           </div>
         )}
-
-        {/* Value */}
         <div className="text-center pt-1">
           <p className="text-xs text-muted-foreground mb-0.5">Mobi</p>
           <p className={`font-bold ${v.mobiValue >= 100000 ? "text-sm" : "text-base"} text-foreground`}>
             M{formatNum(v.mobiValue)}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            ≈ ₦{formatNum(v.ngnPrice)}
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">≈ ₦{formatNum(v.ngnPrice)}</p>
         </div>
-
-        {/* Quantity stepper */}
         {selected && (
           <div className="flex items-center justify-center gap-2 mt-2 pt-2 border-t border-border/50">
-            <button
-              onClick={(e) => changeQty(v.id, -1, e)}
-              className="h-7 w-7 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation"
-            >
+            <button onClick={(e) => changeQty(v.id, -1, e)} className="h-7 w-7 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
               <Minus className="h-3.5 w-3.5 text-foreground" />
             </button>
             <span className="text-sm font-bold text-foreground w-6 text-center">{qty}</span>
-            <button
-              onClick={(e) => changeQty(v.id, 1, e)}
-              className="h-7 w-7 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation"
-            >
+            <button onClick={(e) => changeQty(v.id, 1, e)} className="h-7 w-7 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation">
               <Plus className="h-3.5 w-3.5 text-primary-foreground" />
             </button>
           </div>
@@ -194,7 +324,6 @@ export default function BuyVouchersPage() {
   // ─── STEP 1: VOUCHER SELECTION ───
   const renderVoucherStep = () => (
     <div className="bg-background pb-32">
-      {/* Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
           <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -209,15 +338,11 @@ export default function BuyVouchersPage() {
           </button>
         )}
       </div>
-
-      {/* Content */}
       <div className="px-4 pt-4">
         {renderTier("Standard", lowTier, "M100 – M10,000")}
         {renderTier("Premium", midTier, "M15,000 – M100,000")}
         {renderTier("Elite", highTier, "M125,000 – M1,000,000")}
       </div>
-
-      {/* Sticky bottom bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
         <div className="flex items-center justify-between mb-2">
           <div>
@@ -226,11 +351,7 @@ export default function BuyVouchersPage() {
           </div>
           <p className="text-sm text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
         </div>
-        <Button
-          onClick={goToCountries}
-          disabled={totalItems === 0}
-          className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]"
-        >
+        <Button onClick={goToCountries} disabled={totalItems === 0} className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]">
           Continue to Merchant <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
@@ -241,7 +362,6 @@ export default function BuyVouchersPage() {
   const renderCountriesStep = () => {
     const local = getLocalCountry();
     const others = getOtherCountries();
-
     return (
       <div className="bg-background pb-6">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
@@ -253,23 +373,16 @@ export default function BuyVouchersPage() {
             <p className="text-xs text-muted-foreground">Cart: M{formatNum(totalMobi)} ({totalItems} items)</p>
           </div>
         </div>
-
         <div className="px-4 pt-4">
-          {/* Info */}
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 mb-4">
             <p className="text-sm text-foreground leading-relaxed">
               Choose your country to see accredited merchants and their rates in your local currency.
             </p>
           </div>
-
-          {/* Local country */}
           {local && (
             <div className="mb-5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">Your Country</p>
-              <div
-                onClick={() => goToMerchants(local)}
-                className="rounded-xl border-2 border-primary/30 bg-primary/5 p-4 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
-              >
+              <div onClick={() => goToMerchants(local)} className="rounded-xl border-2 border-primary/30 bg-primary/5 p-4 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
                 <span className="text-3xl">{local.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-foreground">{local.name}</p>
@@ -280,16 +393,10 @@ export default function BuyVouchersPage() {
               </div>
             </div>
           )}
-
-          {/* Other countries */}
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">International</p>
           <div className="space-y-2">
             {others.map((country) => (
-              <div
-                key={country.id}
-                onClick={() => goToMerchants(country)}
-                className="rounded-xl border border-border/50 bg-card p-3.5 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
-              >
+              <div key={country.id} onClick={() => goToMerchants(country)} className="rounded-xl border border-border/50 bg-card p-3.5 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
                 <span className="text-2xl">{country.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{country.name}</p>
@@ -307,13 +414,9 @@ export default function BuyVouchersPage() {
   // ─── STEP 3: MERCHANT SELECTION ───
   const renderMerchantsStep = () => {
     if (!selectedCountry) return null;
-    const activeMerchants = selectedCountry.merchants
-      .filter((m) => m.isActive)
-      .sort((a, b) => b.discountPercent - a.discountPercent);
-
+    const activeMerchants = selectedCountry.merchants.filter((m) => m.isActive).sort((a, b) => b.discountPercent - a.discountPercent);
     return (
       <div className="bg-background pb-6">
-        {/* Sticky header */}
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
           <div className="px-4 py-3 flex items-center gap-3">
             <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
@@ -324,8 +427,6 @@ export default function BuyVouchersPage() {
               <p className="text-xs text-muted-foreground">Select a merchant</p>
             </div>
           </div>
-
-          {/* Sticky Mobi order banner */}
           <div className="px-4 pb-3">
             <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
               <div>
@@ -339,16 +440,11 @@ export default function BuyVouchersPage() {
             </div>
           </div>
         </div>
-
         <div className="px-4 pt-3 space-y-2.5">
           {activeMerchants.map((merchant) => {
             const { discounted, savings } = calculateDiscountedAmount(totalMobi, merchant.discountPercent);
             return (
-              <div
-                key={merchant.id}
-                onClick={() => goToPayment(merchant)}
-                className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
-              >
+              <div key={merchant.id} onClick={() => goToPayment(merchant)} className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
@@ -363,23 +459,16 @@ export default function BuyVouchersPage() {
                       <span className="text-xs text-muted-foreground">{merchant.rating}</span>
                     </div>
                   </div>
-                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold shrink-0">
-                    {merchant.discountPercent}% OFF
-                  </Badge>
+                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold shrink-0">{merchant.discountPercent}% OFF</Badge>
                 </div>
-
                 <div className="flex items-end justify-between pt-2 border-t border-border/30">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">You pay</p>
-                    <p className="text-lg font-bold text-foreground">
-                      {selectedCountry.currencySymbol}{formatNum(discounted)}
-                    </p>
+                    <p className="text-lg font-bold text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-medium text-muted-foreground">You save</p>
-                    <p className="text-sm font-bold text-emerald-600">
-                      {selectedCountry.currencySymbol}{formatNum(savings)}
-                    </p>
+                    <p className="text-sm font-bold text-emerald-600">{selectedCountry.currencySymbol}{formatNum(savings)}</p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 ml-2" />
                 </div>
@@ -395,7 +484,6 @@ export default function BuyVouchersPage() {
   const renderPaymentStep = () => {
     if (!selectedMerchant || !selectedCountry) return null;
     const { discounted, savings } = calculateDiscountedAmount(totalMobi, selectedMerchant.discountPercent);
-
     return (
       <div className="bg-background pb-32">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
@@ -407,9 +495,7 @@ export default function BuyVouchersPage() {
             <p className="text-xs text-muted-foreground">Review & pay</p>
           </div>
         </div>
-
         <div className="px-4 pt-4">
-          {/* Merchant info */}
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 mb-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Ticket className="h-5 w-5 text-primary" />
@@ -419,8 +505,6 @@ export default function BuyVouchersPage() {
               <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% discount</p>
             </div>
           </div>
-
-          {/* Cart items */}
           <div className="rounded-xl border border-border/50 bg-card overflow-hidden mb-4">
             <div className="px-3 py-2 bg-muted/50 border-b border-border/30">
               <p className="text-xs font-semibold text-muted-foreground uppercase">Vouchers ({totalItems})</p>
@@ -437,8 +521,6 @@ export default function BuyVouchersPage() {
               ))}
             </div>
           </div>
-
-          {/* Totals */}
           <div className="rounded-xl border border-border/50 bg-card p-3 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal (Mobi)</span>
@@ -456,20 +538,460 @@ export default function BuyVouchersPage() {
               <span className="font-bold text-foreground">Total to Pay</span>
               <span className="font-bold text-lg text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</span>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              You receive M{formatNum(totalMobi)} in Mobi vouchers
-            </p>
+            <p className="text-xs text-muted-foreground text-center">You receive M{formatNum(totalMobi)} in Mobi vouchers</p>
+          </div>
+        </div>
+        <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
+          <Button onClick={handlePay} className="w-full h-12 text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
+            <CreditCard className="h-4 w-4 mr-2" />
+            Pay {selectedCountry.currencySymbol}{formatNum(discounted)}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  // ─── STEP 5: PROCESSING ───
+  const renderProcessingStep = () => (
+    <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+      {/* Spinning gradient ring */}
+      <div className="relative w-24 h-24 mb-8">
+        <div className="absolute inset-0 rounded-full border-4 border-muted/30" />
+        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary border-r-primary/50 animate-spin" />
+        <div className="absolute inset-3 rounded-full bg-primary/10 flex items-center justify-center">
+          <span className="text-2xl font-black text-primary">M</span>
+        </div>
+      </div>
+      <p className="text-base font-semibold text-foreground mb-2 animate-fade-in">
+        {PROCESSING_MESSAGES[processingMsg]}
+      </p>
+      <p className="text-xs text-muted-foreground animate-fade-in">Please wait, do not close this page</p>
+      {/* Progress dots */}
+      <div className="flex gap-2 mt-6">
+        {PROCESSING_MESSAGES.map((_, i) => (
+          <div key={i} className={`h-2 w-2 rounded-full transition-all duration-300 ${i <= processingMsg ? "bg-primary scale-110" : "bg-muted"}`} />
+        ))}
+      </div>
+    </div>
+  );
+
+  // ─── STEP 6: SUCCESS ───
+  const renderSuccessStep = () => {
+    if (selfLoading) {
+      return (
+        <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+          <div className="relative w-20 h-20 mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-300 animate-spin" />
+            <div className="absolute inset-3 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <span className="text-xl font-black text-emerald-600">M</span>
+            </div>
+          </div>
+          <p className="text-base font-semibold text-foreground mb-1">Crediting your wallet...</p>
+          <p className="text-xs text-muted-foreground">M{formatNum(totalMobi)} incoming</p>
+          <div className="flex gap-1.5 mt-6">
+            {[0,1,2].map(i => (
+              <div key={i} className="h-2 w-8 rounded-full bg-emerald-500/30 overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full animate-[shimmer_1.5s_ease-in-out_infinite]" style={{ animationDelay: `${i * 0.3}s` }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (selfSuccess) {
+      return (
+        <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+          <div className="relative w-28 h-28 mb-6 animate-scale-in">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: "2s" }} />
+            <div className="absolute inset-0 rounded-full bg-emerald-500/10" />
+            <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center">
+              <CheckCircle2 className="h-14 w-14 text-white" />
+            </div>
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-1 animate-fade-in">Wallet Credited!</h2>
+          <p className="text-3xl font-black text-emerald-600 mb-2 animate-fade-in">M{formatNum(totalMobi)}</p>
+          <p className="text-sm text-muted-foreground mb-8 animate-fade-in">Successfully added to your Mobi Wallet</p>
+          <Button onClick={handleSelfDone} className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97] animate-fade-in">
+            Done
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+        {/* Animated checkmark */}
+        <div className="relative w-32 h-32 mb-6">
+          {/* Expanding ring */}
+          <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" style={{ animationDuration: "2s" }} />
+          <div className="absolute inset-0 rounded-full bg-emerald-500/5" />
+          {/* Green circle with check */}
+          <div className="absolute inset-3 rounded-full bg-emerald-500 flex items-center justify-center animate-scale-in">
+            <svg className="h-16 w-16 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 13l4 4L19 7" className="animate-[draw_0.6s_ease-out_0.3s_both]" style={{ strokeDasharray: 24, strokeDashoffset: 24, animation: "draw 0.6s ease-out 0.3s forwards" }} />
+            </svg>
+          </div>
+          {/* Sparkles */}
+          {[0,1,2,3,4,5].map(i => (
+            <div key={i} className="absolute w-2 h-2 rounded-full bg-amber-400" style={{
+              top: `${15 + 35 * Math.sin(i * Math.PI / 3)}%`,
+              left: `${15 + 35 * Math.cos(i * Math.PI / 3)}%`,
+              animation: `sparkle 1.5s ease-out ${0.5 + i * 0.1}s both`
+            }} />
+          ))}
+        </div>
+
+        <h2 className="text-2xl font-black text-foreground mb-1 animate-fade-in" style={{ animationDelay: "0.5s", animationFillMode: "both" }}>
+          Payment Successful!
+        </h2>
+        <p className="text-sm text-muted-foreground mb-2 animate-fade-in" style={{ animationDelay: "0.7s", animationFillMode: "both" }}>
+          You've received
+        </p>
+        <p className="text-4xl font-black text-primary mb-8 animate-fade-in" style={{ animationDelay: "0.9s", animationFillMode: "both" }}>
+          M{formatNum(totalMobi)}
+        </p>
+
+        {showSuccessButtons && (
+          <div className="w-full space-y-3 animate-fade-in">
+            <Button onClick={handleUseForSelf} className="w-full h-14 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
+              <CheckCircle2 className="h-5 w-5 mr-2" />
+              Use for Myself
+            </Button>
+            <Button onClick={handleSendToSomeone} variant="outline" className="w-full h-14 rounded-xl text-sm font-bold border-2 touch-manipulation active:scale-[0.97]">
+              <Send className="h-5 w-5 mr-2" />
+              Send to Someone
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ─── STEP 7: DISTRIBUTE ───
+  const renderDistributeStep = () => {
+    const allDistributed = remainingMobi <= 0;
+
+    if (allDistributed) {
+      return (
+        <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+          <div className="relative w-28 h-28 mb-6 animate-scale-in">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: "2s" }} />
+            <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center">
+              <CheckCircle2 className="h-14 w-14 text-white" />
+            </div>
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-1">All Vouchers Distributed!</h2>
+          <p className="text-sm text-muted-foreground mb-3">M{formatNum(totalMobi)} shared across {transfers.length} transfer{transfers.length !== 1 ? "s" : ""}</p>
+          {/* Transfer history */}
+          <div className="w-full rounded-xl border border-border/50 bg-card overflow-hidden mb-6 max-h-48 overflow-y-auto">
+            {transfers.map(t => (
+              <div key={t.id} className="px-3 py-2.5 flex items-center gap-3 border-b border-border/20 last:border-0">
+                <img src={t.recipientAvatar} alt="" className="h-8 w-8 rounded-full object-cover bg-muted" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-foreground truncate">{t.recipientName}</p>
+                  <p className="text-[10px] text-muted-foreground">{t.timestamp.toLocaleTimeString()}</p>
+                </div>
+                <p className="text-sm font-bold text-foreground">M{formatNum(t.amount)}</p>
+              </div>
+            ))}
+          </div>
+          <Button onClick={() => navigate("/")} className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
+            Done
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-background min-h-screen pb-6">
+        {/* Sticky header with balance */}
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+          <div className="px-4 py-3 flex items-center gap-3">
+            <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+              <ArrowLeft className="h-5 w-5 text-foreground" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-base font-bold text-foreground">Distribute Vouchers</h1>
+              <p className="text-xs text-muted-foreground">Send or use your Mobi</p>
+            </div>
+          </div>
+          <div className="px-4 pb-3">
+            <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Available to Share</p>
+                <p className="text-xl font-bold text-foreground">M{formatNum(remainingMobi)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">of M{formatNum(totalMobi)}</p>
+                <p className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNum(remainingMobi)}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Pay button */}
+        <div className="px-4 pt-4 space-y-3">
+          {/* Send options */}
+          <div onClick={() => handleChooseRecipientType("community")} className="rounded-xl border-2 border-border/50 bg-card p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Users className="h-7 w-7 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm text-foreground">Community Members</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send to community elders & members</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          <div onClick={() => handleChooseRecipientType("friends")} className="rounded-xl border-2 border-border/50 bg-card p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
+            <div className="h-14 w-14 rounded-2xl bg-accent/50 flex items-center justify-center">
+              <UserPlus className="h-7 w-7 text-foreground" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm text-foreground">Mobigate Friends</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send to your friends on Mobigate</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          {/* Use for self option */}
+          <div onClick={handleUseForSelf} className="rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
+            <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+              <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm text-foreground">Use Remaining for Myself</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Credit M{formatNum(remainingMobi)} to your wallet</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          {/* Transfer history */}
+          {transfers.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">Recent Transfers</p>
+              <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+                {transfers.map(t => (
+                  <div key={t.id} className="px-3 py-2.5 flex items-center gap-3 border-b border-border/20 last:border-0">
+                    <img src={t.recipientAvatar} alt="" className="h-8 w-8 rounded-full object-cover bg-muted" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">{t.recipientName}</p>
+                      <p className="text-[10px] text-muted-foreground">{t.timestamp.toLocaleTimeString()}</p>
+                    </div>
+                    <p className="text-sm font-bold text-emerald-600">-M{formatNum(t.amount)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ─── STEP 8: SEND TO USERS ───
+  const renderSendToUsersStep = () => {
+    if (sendLoading) {
+      return (
+        <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+          <div className="relative w-20 h-20 mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary border-r-primary/50 animate-spin" />
+            <div className="absolute inset-3 rounded-full bg-primary/10 flex items-center justify-center">
+              <Send className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <p className="text-base font-semibold text-foreground mb-1">Sending Mobi...</p>
+          <p className="text-xs text-muted-foreground">Transferring to {Object.keys(selectedRecipients).filter(k => selectedRecipients[k] > 0).length} recipient(s)</p>
+          <div className="flex gap-1.5 mt-6">
+            {[0,1,2].map(i => (
+              <div key={i} className="h-2 w-8 rounded-full bg-primary/30 overflow-hidden">
+                <div className="h-full bg-primary rounded-full" style={{ animation: `shimmer 1.5s ease-in-out infinite ${i * 0.3}s` }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (sendSuccess) {
+      const sentEntries = Object.entries(selectedRecipients).filter(([, amt]) => amt > 0);
+      const totalSent = sentEntries.reduce((s, [, amt]) => s + amt, 0);
+      const userList = recipientType === "community"
+        ? communityPeople.map(p => ({ id: p.id, name: p.name, avatar: p.imageUrl }))
+        : mockFriends.map(f => ({ id: f.id, name: f.name, avatar: f.avatar }));
+
+      return (
+        <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+          <div className="relative w-24 h-24 mb-6 animate-scale-in">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: "2s" }} />
+            <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center">
+              <Check className="h-12 w-12 text-white" />
+            </div>
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-1 animate-fade-in">Transfer Complete!</h2>
+          <p className="text-2xl font-black text-emerald-600 mb-4 animate-fade-in">M{formatNum(totalSent)}</p>
+          <div className="w-full rounded-xl border border-border/50 bg-card overflow-hidden mb-6 max-h-40 overflow-y-auto touch-auto">
+            {sentEntries.map(([userId, amount]) => {
+              const user = userList.find(u => u.id === userId);
+              return (
+                <div key={userId} className="px-3 py-2.5 flex items-center gap-3 border-b border-border/20 last:border-0">
+                  <img src={user?.avatar || ""} alt="" className="h-8 w-8 rounded-full object-cover bg-muted" />
+                  <p className="text-xs font-semibold text-foreground flex-1 truncate">{user?.name}</p>
+                  <p className="text-sm font-bold text-foreground">M{formatNum(amount)}</p>
+                </div>
+              );
+            })}
+          </div>
+          <Button onClick={handleSendDone} className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
+            Continue
+          </Button>
+        </div>
+      );
+    }
+
+    // Normal user selection view
+    const userList = recipientType === "community"
+      ? communityPeople.map(p => ({ id: p.id, name: p.name, avatar: p.imageUrl, isOnline: Math.random() > 0.5 }))
+      : mockFriends.map(f => ({ id: f.id, name: f.name, avatar: f.avatar, isOnline: f.isOnline }));
+
+    const filtered = searchQuery
+      ? userList.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : userList;
+
+    const quickAmounts = [100, 500, 1000, 5000];
+    const canSend = Object.values(selectedRecipients).some(v => v > 0);
+
+    return (
+      <div className="bg-background min-h-screen pb-28">
+        {/* Sticky header */}
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+          <div className="px-4 py-3 flex items-center gap-3">
+            <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+              <ArrowLeft className="h-5 w-5 text-foreground" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-base font-bold text-foreground">Select Recipients</h1>
+              <p className="text-xs text-muted-foreground">{recipientType === "community" ? "Community Members" : "Mobigate Friends"}</p>
+            </div>
+          </div>
+          {/* Balance banner */}
+          <div className="px-4 pb-3">
+            <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground">Available</p>
+                <p className="text-lg font-bold text-foreground">M{formatNum(remainingMobi - totalAllocated)}</p>
+              </div>
+              <div className="text-right">
+                {totalAllocated > 0 && (
+                  <>
+                    <p className="text-xs text-muted-foreground">Allocating</p>
+                    <p className="text-sm font-bold text-primary">M{formatNum(totalAllocated)}</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Search */}
+          <div className="px-4 pb-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full h-10 pl-9 pr-9 rounded-xl bg-muted/50 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 touch-manipulation">
+                  <X className="h-4 w-4 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* User list */}
+        <div className="px-4 pt-3 space-y-2 overflow-y-auto touch-auto">
+          {filtered.map(user => {
+            const isSelected = selectedRecipients[user.id] !== undefined;
+            const allocatedAmount = selectedRecipients[user.id] || 0;
+            const maxForThisUser = remainingMobi - totalAllocated + allocatedAmount;
+
+            return (
+              <div key={user.id} className={`rounded-xl border-2 transition-all duration-150 overflow-hidden ${isSelected ? "border-primary bg-primary/5" : "border-border/50 bg-card"}`}>
+                {/* User row */}
+                <div onClick={() => toggleRecipient(user.id)} className="p-3 flex items-center gap-3 touch-manipulation cursor-pointer active:bg-muted/30">
+                  <div className="relative">
+                    <img src={user.avatar} alt="" className="h-10 w-10 rounded-full object-cover bg-muted" />
+                    {user.isOnline && <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-background" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{user.isOnline ? "Online" : "Offline"}</p>
+                  </div>
+                  {isSelected ? (
+                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="h-3.5 w-3.5 text-primary-foreground" />
+                    </div>
+                  ) : (
+                    <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/30" />
+                  )}
+                </div>
+
+                {/* Amount allocator */}
+                {isSelected && (
+                  <div className="px-3 pb-3 pt-1 border-t border-border/30 animate-fade-in">
+                    <p className="text-[10px] text-muted-foreground mb-2">Set amount (max M{formatNum(maxForThisUser)})</p>
+                    {/* Quick picks */}
+                    <div className="flex gap-1.5 mb-2 flex-wrap">
+                      {quickAmounts.filter(a => a <= maxForThisUser).map(amt => (
+                        <button key={amt} onClick={() => setRecipientAmount(user.id, amt)} className={`h-7 px-3 rounded-lg text-xs font-semibold touch-manipulation active:scale-90 transition-all ${allocatedAmount === amt ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+                          M{formatNum(amt)}
+                        </button>
+                      ))}
+                      {maxForThisUser >= 10000 && (
+                        <button onClick={() => setRecipientAmount(user.id, 10000)} className={`h-7 px-3 rounded-lg text-xs font-semibold touch-manipulation active:scale-90 transition-all ${allocatedAmount === 10000 ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+                          M10,000
+                        </button>
+                      )}
+                    </div>
+                    {/* Manual stepper */}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setRecipientAmount(user.id, Math.max(0, allocatedAmount - 100))} className="h-8 w-8 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+                        <Minus className="h-3.5 w-3.5 text-foreground" />
+                      </button>
+                      <div className="flex-1 text-center">
+                        <input
+                          type="number"
+                          value={allocatedAmount || ""}
+                          onChange={e => setRecipientAmount(user.id, parseInt(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full text-center text-lg font-bold bg-transparent text-foreground focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <p className="text-[10px] text-muted-foreground">Mobi</p>
+                      </div>
+                      <button onClick={() => setRecipientAmount(user.id, allocatedAmount + 100)} className="h-8 w-8 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation">
+                        <Plus className="h-3.5 w-3.5 text-primary-foreground" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-sm text-muted-foreground">No users found</p>
+            </div>
+          )}
+        </div>
+
+        {/* Sticky send button */}
         <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
-          <Button
-            onClick={handlePay}
-            className="w-full h-12 text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]"
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            Pay {selectedCountry.currencySymbol}{formatNum(discounted)}
+          <Button onClick={handleSendToRecipients} disabled={!canSend} className="w-full h-12 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 touch-manipulation active:scale-[0.97]">
+            <Send className="h-4 w-4 mr-2" />
+            Send M{formatNum(totalAllocated)} to {Object.keys(selectedRecipients).filter(k => selectedRecipients[k] > 0).length} recipient(s)
           </Button>
         </div>
       </div>
@@ -481,5 +1003,9 @@ export default function BuyVouchersPage() {
   if (step === "countries") return renderCountriesStep();
   if (step === "merchants") return renderMerchantsStep();
   if (step === "payment") return renderPaymentStep();
+  if (step === "processing") return renderProcessingStep();
+  if (step === "success") return renderSuccessStep();
+  if (step === "distribute") return renderDistributeStep();
+  if (step === "sendToUsers") return renderSendToUsersStep();
   return null;
 }
