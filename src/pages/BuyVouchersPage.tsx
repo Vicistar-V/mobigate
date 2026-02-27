@@ -589,7 +589,7 @@ export default function BuyVouchersPage() {
             </div>
           </div>
           <p className="text-base font-semibold text-foreground mb-1">Crediting your wallet...</p>
-          <p className="text-xs text-muted-foreground">M{formatNum(totalMobi)} incoming</p>
+          <p className="text-xs text-muted-foreground">M{formatNum(remainingMobi)} incoming</p>
           <div className="flex gap-1.5 mt-6">
             {[0,1,2].map(i => (
               <div key={i} className="h-2 w-8 rounded-full bg-emerald-500/30 overflow-hidden">
@@ -612,7 +612,7 @@ export default function BuyVouchersPage() {
             </div>
           </div>
           <h2 className="text-xl font-bold text-foreground mb-1 animate-fade-in">Wallet Credited!</h2>
-          <p className="text-3xl font-black text-emerald-600 mb-2 animate-fade-in">M{formatNum(totalMobi)}</p>
+          <p className="text-3xl font-black text-emerald-600 mb-2 animate-fade-in">M{formatNum(remainingMobi)}</p>
           <p className="text-sm text-muted-foreground mb-8 animate-fade-in">Successfully added to your Mobi Wallet</p>
           <Button onClick={handleSelfDone} className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97] animate-fade-in">
             Done
