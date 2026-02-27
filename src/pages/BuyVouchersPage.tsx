@@ -88,22 +88,26 @@ export default function BuyVouchersPage() {
       return;
     }
     setStep("countries");
+    window.scrollTo(0, 0);
   };
 
   const goToMerchants = (country: MerchantCountry) => {
     setSelectedCountry(country);
     setStep("merchants");
+    window.scrollTo(0, 0);
   };
 
   const goToPayment = (merchant: MobiMerchant) => {
     setSelectedMerchant(merchant);
     setStep("payment");
+    window.scrollTo(0, 0);
   };
 
   const handleBack = () => {
     if (step === "countries") setStep("vouchers");
     else if (step === "merchants") setStep("countries");
     else if (step === "payment") setStep("merchants");
+    window.scrollTo(0, 0);
   };
 
   const handlePay = () => {
