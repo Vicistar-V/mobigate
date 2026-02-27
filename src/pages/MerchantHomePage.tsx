@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink } from "lucide-react";
+import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink, Ticket } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -217,6 +217,29 @@ export default function MerchantHomePage() {
           <Button size="sm" variant="outline" className="h-10 touch-manipulation active:scale-95" onClick={handleReport}>
             <Flag className="h-4 w-4 mr-1" /> Report
           </Button>
+        </div>
+
+        {/* Voucher CTA */}
+        <div className="mt-4 px-2">
+          <button
+            onClick={() => toast({ title: "Vouchers", description: `Browse ${merchant.name} vouchers & bundles` })}
+            className="w-full relative overflow-hidden rounded-2xl p-3.5 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-lg active:scale-[0.97] transition-transform touch-manipulation"
+          >
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/30" />
+              <div className="absolute -left-2 -bottom-2 h-16 w-16 rounded-full bg-white/20" />
+            </div>
+            <div className="relative flex items-center gap-3">
+              <div className="h-11 w-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                <Ticket className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <p className="font-bold text-sm">Get Vouchers & Bundles</p>
+                <p className="text-xs text-white/80 mt-0.5">Save up to 20% on Mobi top-ups</p>
+              </div>
+              <ExternalLink className="h-4 w-4 text-white/60 shrink-0" />
+            </div>
+          </button>
         </div>
 
         {homeData?.about && (
