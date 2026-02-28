@@ -54,6 +54,11 @@ export default function SubMerchantVoucherBatchDetail() {
     if (batchStatusFilter) {
       result = result.filter(bundle => classifyBundle(bundle) === batchStatusFilter);
     }
+    result = [...result].sort((a, b) => {
+      const aNewest = Math.max(...a.cards.map(c => c.createdAt.getTime()));
+      const bNewest = Math.max(...b.cards.map(c => c.createdAt.getTime()));
+      return bNewest - aNewest;
+    });
     return result;
   }, [batch?.bundles, searchQuery, batchStatusFilter]);
 
