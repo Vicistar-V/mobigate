@@ -218,7 +218,22 @@ const SubMerchantApplicationStatus = () => {
                     )}
                     {app.status === "rejected" && (
                       <Button
-                        onClick={() => navigate(`/apply-sub-merchant/${app.merchantId}`)}
+                        onClick={() => navigate(`/apply-sub-merchant/${app.merchantId}`, {
+                          state: {
+                            reapply: true,
+                            previousData: {
+                              fullName: "Chinedu Okonkwo",
+                              businessName: "QuickStop Retail",
+                              phone: "+234 803 456 7890",
+                              email: "chinedu@quickstop.ng",
+                              city: "Port Harcourt",
+                              state: "Rivers",
+                              businessTypes: ["retail_shop", "mobi_kiosk"],
+                              description: "A retail shop and Mobi kiosk operating in Port Harcourt's main market area, serving over 200 customers daily.",
+                              yearsInBusiness: "4_to_7",
+                            }
+                          }
+                        })}
                         variant="outline"
                         className="w-full h-11 rounded-xl touch-manipulation active:scale-[0.97] text-sm font-semibold border-red-500/30 text-red-700 hover:bg-red-500/10"
                       >
