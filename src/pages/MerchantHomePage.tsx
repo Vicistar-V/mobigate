@@ -222,7 +222,7 @@ export default function MerchantHomePage() {
         {/* Voucher CTA */}
         <div className="mt-4 px-2">
           <button
-            onClick={() => toast({ title: "Vouchers", description: `Browse ${merchant.name} vouchers & bundles` })}
+            onClick={() => navigate(`/buy-vouchers?merchant=${encodeURIComponent(merchant.name)}`)}
             className="w-full relative overflow-hidden rounded-2xl p-3.5 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-lg active:scale-[0.97] transition-transform touch-manipulation"
           >
             <div className="absolute inset-0 opacity-10">
