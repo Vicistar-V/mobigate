@@ -1,117 +1,54 @@
 
-# Buy Vouchers Sub-Merchant Flags, Discount Details, and Sub-Merchant Application System
 
-## Summary
-This plan covers 5 changes:
-1. Flag all merchants in the Buy Vouchers merchant list as "Sub-Merchant" (users only buy from sub-merchants, not primary merchants)
-2. Enhance the "Your Mobi Order" banner with per-item discount breakdown
-3. Conditionally show/hide discount info on merchant cards based on whether the user has qualifying items
-4. Add "Apply as Sub-Merchant" button on the Merchant Home page with a full application flow
-5. Make "My Merchants" tab items in SubMerchantVoucherManagement clickable to navigate to merchant home
+## Fundraiser Campaign Form Improvements (Mobile-First)
 
----
+### Changes Overview
 
-## Part 1: Flag All Merchants as Sub-Merchant in Buy Vouchers
+**1. MediaGalleryUpload - Remove checkmarks, add per-thumbnail delete (X) buttons**
+- Remove the checkbox overlay from the main image display
+- Remove the `selected` state logic (toggleSelection, checkbox)
+- Add an X (close) button on each thumbnail in the strip to delete that specific item
+- Preview button: shows the current image full-screen (no selection needed)
+- Delete button: deletes the currently displayed (active) item
+- Save button: remains as-is
+- Fix button overflow by ensuring buttons stay within the Card's bounds
 
-### Data Change - `src/data/mobiMerchantsData.ts`
-- Set `isSubMerchant: true` on ALL merchants across ALL countries (Nigeria, Ghana, Kenya, South Africa, UK, USA, Canada, UAE)
-- These are the shops users buy from -- they are all sub-merchants/retailers
+**2. RequestAudienceSection - "This Community" checked by default and locked**
+- In `FundRaiserRaiseCampaignTab`, initialize `audience` state with `["this-community"]`
+- In `RequestAudienceSection`, prevent unchecking "this-community" (disable the checkbox or skip the toggle)
+- Change "this-community" `chargePercent` from `0` to mark it as included in the base price
 
-### UI Change - `src/pages/BuyVouchersPage.tsx` (merchant step)
-- The "Sub-Merchant" badge already renders when `merchant.isSubMerchant` is true -- no card changes needed since the data change handles it
-- Change header text from "Select a merchant" to "Select a Sub-Merchant"
-- Change country step text from "merchants" to "sub-merchants" where appropriate
+**3. Audience pricing: percentage of base 1000 Mobi, not compounding**
+- Calculate total cost as: `1000 + (sum of selected chargePercents * 10)` (10% of 1000 = 100, 15% = 150, 20% = 200, etc.)
+- Display the computed total cost prominently in the submission card instead of the hardcoded "1000 Mobi"
+- Pass the total cost down or compute it where needed
 
----
-
-## Part 2: Conditional Discount Display on Merchant Cards
-
-### Logic - `src/pages/BuyVouchersPage.tsx` (renderMerchantsStep)
-- Compute which cart items qualify for discount (qty >= 10) and which don't
-- Calculate total discount-eligible amount vs non-eligible amount
-- If NO items qualify for discount (all qty < 10):
-  - Remove the discount badge ("X% OFF") from merchant cards
-  - Remove "You save" section
-  - Show "You pay" as the full undiscounted amount
-  - Show a subtle note: "No bulk discounts applied"
-- If SOME items qualify:
-  - Show discount badge but with note like "Discount on 2 of 5 items"
-  - "You save" shows only the savings from eligible items
-  - "You pay" shows the correctly calculated total
-
-### Merchant Card Changes
-- Compute per-merchant savings considering only discount-eligible cart items
-- Only show green discount badge if there are actual savings for this user's cart
+**4. Make the cost amount more prominent in the submission section**
+- Replace the small inline "1000 Mobi" text with a larger, bold, highlighted total amount that updates dynamically
 
 ---
 
-## Part 3: Enhanced "Your Mobi Order" Banner
+### Technical Details
 
-### `src/pages/BuyVouchersPage.tsx` (renderMerchantsStep, sticky header)
-- Expand the "Your Mobi Order" banner to show a mini breakdown:
-  - Total order value
-  - Number of items qualifying for discount (qty >= 10) vs total items
-  - Eligible discount amount (in text like "3 items qualify for discount")
-  - If none qualify: "No items qualify for bulk discount yet"
-- Keep it compact -- use text-xs sizing, max 3-4 lines
+#### File: `src/data/fundraiserData.ts`
+- Change "this-community" `chargePercent` to `0` (already 0, keep it -- it's the base, always included)
 
----
+#### File: `src/components/community/fundraiser/MediaGalleryUpload.tsx`
+- Remove `Checkbox` import and checkbox overlay from main image
+- Remove `toggleSelection` function and `selected` state references
+- Add X button on each thumbnail for individual deletion
+- Update Preview to preview current item directly (no selection required)
+- Update Delete to delete the current item
+- Ensure all buttons fit within the Card container on mobile (use smaller text, proper wrapping)
 
-## Part 4: Sub-Merchant Application on Merchant Home Page
+#### File: `src/components/community/fundraiser/RequestAudienceSection.tsx`
+- Accept a new prop `lockedAudiences?: string[]` to prevent unchecking certain items
+- Disable checkbox for "this-community" (visually checked, not toggleable)
+- Expose `totalExtraCharge` via a callback prop so the parent can use it for cost calculation
 
-### New Page - `src/pages/SubMerchantApplicationPage.tsx`
-- A new page at route `/apply-sub-merchant/:merchantId`
-- Shows the target merchant info at top (name, location, discount rate)
-- Application form fields:
-  - Applicant Full Name
-  - Business/Store Name
-  - Phone Number
-  - Email Address
-  - City
-  - State
-  - Business Type (select: "Retail Shop", "Kiosk", "Online Store", "Mobile Agent")
-  - Brief description of business (textarea)
-  - How many years in business (select)
-  - Agree to terms (checkbox)
-- Submit button (simulated -- shows success toast and navigates back)
-- Application fee notice at bottom
+#### File: `src/components/community/fundraiser/FundRaiserRaiseCampaignTab.tsx`
+- Initialize `audience` with `["this-community"]`
+- Track `totalExtraCharge` from `RequestAudienceSection`
+- Calculate dynamic cost: `baseCost (1000) + sum of (chargePercent / 100 * 1000)` for each selected audience (excluding the base "this-community")
+- Update the submission Card to show the dynamic total prominently with large bold text
 
-### Merchant Home Page - `src/pages/MerchantHomePage.tsx`
-- Add an "Apply as Sub-Merchant" button below the Voucher CTA
-- Styled as a secondary CTA (outline style, with Store icon)
-- Navigates to `/apply-sub-merchant/:merchantId`
-
-### Sidebar - `src/components/AppSidebar.tsx`
-- Add "Apply as Sub-Merchant" item under the merchant section, linking to `/apply-sub-merchant/m1` (default merchant for demo)
-
-### Routes - `src/App.tsx`
-- Add route: `/apply-sub-merchant/:merchantId` -> `SubMerchantApplicationPage`
-
----
-
-## Part 5: Clickable "My Merchants" in SubMerchantVoucherManagement
-
-### `src/pages/SubMerchantVoucherManagement.tsx`
-- Make each merchant card in the "My Merchants" tab clickable
-- On click, navigate to `/merchant-home/${merchantId}` (map parent merchant IDs to merchant home IDs, default to `m1` for demo)
-- Add a ChevronRight icon to indicate tappability
-- Add `cursor-pointer active:scale-[0.97]` touch feedback
-
----
-
-## Files to Create
-1. `src/pages/SubMerchantApplicationPage.tsx` -- New application form page
-
-## Files to Modify
-1. `src/data/mobiMerchantsData.ts` -- Add `isSubMerchant: true` to all merchants
-2. `src/pages/BuyVouchersPage.tsx` -- Conditional discount display, enhanced order banner, sub-merchant labeling
-3. `src/pages/MerchantHomePage.tsx` -- Add "Apply as Sub-Merchant" CTA button
-4. `src/pages/SubMerchantVoucherManagement.tsx` -- Make My Merchants tab items clickable to merchant home
-5. `src/components/AppSidebar.tsx` -- Add sidebar link for sub-merchant application
-6. `src/App.tsx` -- Add route for SubMerchantApplicationPage
-
-## Technical Notes
-- All new UI is mobile-first (360px target), no desktop considerations
-- Touch targets minimum 44px, minimum font size 12px (text-xs)
-- Sub-merchant application is UI-only with mock submission (toast confirmation)
-- Discount logic: only cart items with quantity >= 10 get the merchant's discount percentage applied
