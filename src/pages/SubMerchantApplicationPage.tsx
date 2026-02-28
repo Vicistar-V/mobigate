@@ -27,7 +27,7 @@ export default function SubMerchantApplicationPage() {
     ? { id: quizMerchant.id, name: quizMerchant.name, category: quizMerchant.category }
     : locationMerchant
       ? { id: locationMerchant.id, name: locationMerchant.name, category: locationMerchant.category }
-      : { id: merchantId || "unknown", name: "Merchant", category: "General" };
+      : { id: merchantId || "unknown", name: reapplyData?.merchantName || "Merchant", category: reapplyData?.merchantCategory || "General" };
 
   // Find discount info from mobiMerchantsData
   const allMerchants = merchantCountries.flatMap(c => c.merchants);

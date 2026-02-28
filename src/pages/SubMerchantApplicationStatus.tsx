@@ -234,6 +234,8 @@ const SubMerchantApplicationStatus = () => {
                               retailShopAddress: "45 Market Road, Port Harcourt",
                               onlineStoreUrl: "",
                               mobiShopUrl: "",
+                              merchantName: app.merchantName,
+                              merchantCategory: "Retail",
                             }
                           }
                         })}
