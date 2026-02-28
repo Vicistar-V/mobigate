@@ -70,21 +70,13 @@ export function VoucherDiscountSettingsCard() {
     if (!password.trim()) return;
     setIsVerifying(true);
     await new Promise(r => setTimeout(r, 600));
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setIsOpen(true);
-      setShowPasswordInput(false);
-      setPassword("");
-      setIsVerifying(false);
-      toast({ title: "Access granted", description: "Settings unlocked" });
-    } else {
-      setIsVerifying(false);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      toast({ title: "Access denied", description: "Incorrect password", variant: "destructive" });
-      setPassword("");
-      passwordRef.current?.focus();
-    }
+    // Accept any non-empty password for now
+    setIsAuthenticated(true);
+    setIsOpen(true);
+    setShowPasswordInput(false);
+    setPassword("");
+    setIsVerifying(false);
+    toast({ title: "Access granted", description: "Settings unlocked" });
   };
 
   const hasChanges =
