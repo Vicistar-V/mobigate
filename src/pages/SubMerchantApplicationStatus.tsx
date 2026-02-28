@@ -160,7 +160,7 @@ const SubMerchantApplicationStatus = () => {
                     <p className="text-xs text-muted-foreground">{app.merchantCity}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant="outline" className={`text-[10px] ${meta.badgeBg}`}>
+                    <Badge variant="outline" className={`text-xs ${meta.badgeBg}`}>
                       {meta.label}
                     </Badge>
                     <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
