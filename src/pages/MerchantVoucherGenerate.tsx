@@ -11,7 +11,7 @@ import {
   formatNum,
   generateBatchNumber,
 } from "@/data/merchantVoucherData";
-import { platformVoucherDiscountSettings } from "@/data/platformSettingsData";
+import { platformVoucherDiscountSettings, getTieredDiscount } from "@/data/platformSettingsData";
 
 type Step = "denomination" | "bundles" | "summary" | "processing" | "complete";
 
@@ -287,12 +287,14 @@ export default function MerchantVoucherGenerate() {
           {/* Discount info */}
           <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
             <div className="px-4 py-2.5 border-b border-border/30 bg-muted/30">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Bulk Discount Rate</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Bulk Discount Tier</p>
             </div>
             <div className="px-4 py-3 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground">Rate per bundle</span>
-                <Badge className="text-xs h-5 bg-emerald-500/15 text-emerald-600">{platformVoucherDiscountSettings.discountPercentPerBundle}% / bundle</Badge>
+                <span className="text-xs text-foreground">Current tier</span>
+                <Badge className="text-xs h-5 bg-primary/10 text-primary">
+                  Tier {currentTier.tier} ({currentTier.tierLabel})
+                </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground">Your discount ({bundleCount} bundles)</span>
@@ -300,6 +302,20 @@ export default function MerchantVoucherGenerate() {
                   {discount.discountPercent > 0 ? `${discount.discountPercent}% off` : "No discount"}
                 </Badge>
               </div>
+              {(() => {
+                const s = platformVoucherDiscountSettings;
+                const nextTierStart = currentTier.tier * s.tierSize + 1;
+                const nextDisc = getTieredDiscount(nextTierStart);
+                if (nextDisc.discountPercent > currentTier.discountPercent) {
+                  const bundlesNeeded = nextTierStart - bundleCount;
+                  return (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Add <strong>{bundlesNeeded}</strong> more bundle{bundlesNeeded !== 1 ? "s" : ""} for <strong>{nextDisc.discountPercent}%</strong> discount
+                    </p>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
         </div>

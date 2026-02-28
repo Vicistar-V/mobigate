@@ -57,21 +57,23 @@ export interface MerchantWalletTransaction {
   batchId: string | null;
 }
 
-// ─── Discount Calculation (dynamic, based on platform settings) ───
-import { platformVoucherDiscountSettings } from "@/data/platformSettingsData";
+// ─── Discount Calculation (tiered, based on platform settings) ───
+import { getTieredDiscount } from "@/data/platformSettingsData";
 
 export interface DiscountResult {
   discountPercent: number;
   label: string;
+  tier: number;
+  tierLabel: string;
 }
 
 export function getDiscountForBundles(bundleCount: number): DiscountResult {
-  const rate = platformVoucherDiscountSettings.discountPercentPerBundle;
-  const percent = bundleCount * rate;
-  const rounded = Math.round(percent * 100) / 100;
+  const result = getTieredDiscount(bundleCount);
   return {
-    discountPercent: rounded,
-    label: rounded > 0 ? `${rounded}% off` : "No discount",
+    discountPercent: result.discountPercent,
+    label: result.discountPercent > 0 ? `${result.discountPercent}% off` : "No discount",
+    tier: result.tier,
+    tierLabel: result.tierLabel,
   };
 }
 

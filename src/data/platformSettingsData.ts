@@ -178,49 +178,118 @@ export function setMerchantSolvencyPercent(newPercent: number): void {
   }
 }
 
-// ─── Platform Voucher Discount Settings ───
+// ─── Platform Voucher Discount Settings (Tiered) ───
 export interface PlatformVoucherDiscountSettings {
-  discountPercentPerBundle: number;
-  discountPercentMin: number;
-  discountPercentMax: number;
-  maxDiscountPercent: number;
-  maxDiscountPercentMin: number;
-  maxDiscountPercentMax: number;
+  tierSize: number;        // bundles per tier group (default 5)
+  tierSizeMin: number;
+  tierSizeMax: number;
+  baseRate: number;        // % discount for first tier (default 1.0)
+  baseRateMin: number;
+  baseRateMax: number;
+  incrementRate: number;   // % added per subsequent tier (default 0.5)
+  incrementRateMin: number;
+  incrementRateMax: number;
+  maxDiscount: number;     // absolute cap % (default 25)
+  maxDiscountMin: number;
+  maxDiscountMax: number;
   lastUpdatedAt: Date;
   lastUpdatedBy: string;
 }
 
 export const platformVoucherDiscountSettings: PlatformVoucherDiscountSettings = {
-  discountPercentPerBundle: 0.5,
-  discountPercentMin: 0,
-  discountPercentMax: 2,
-  maxDiscountPercent: 25,
-  maxDiscountPercentMin: 5,
-  maxDiscountPercentMax: 50,
+  tierSize: 5,
+  tierSizeMin: 3,
+  tierSizeMax: 10,
+  baseRate: 1.0,
+  baseRateMin: 0.5,
+  baseRateMax: 5,
+  incrementRate: 0.5,
+  incrementRateMin: 0.25,
+  incrementRateMax: 2,
+  maxDiscount: 25,
+  maxDiscountMin: 5,
+  maxDiscountMax: 50,
   lastUpdatedAt: new Date(),
   lastUpdatedBy: "Mobigate Admin",
 };
 
+// Backward-compatible alias
 export function getDiscountPercentPerBundle(): number {
-  return platformVoucherDiscountSettings.discountPercentPerBundle;
+  return platformVoucherDiscountSettings.baseRate;
 }
 
 export function setDiscountPercentPerBundle(value: number): void {
-  if (value >= platformVoucherDiscountSettings.discountPercentMin &&
-      value <= platformVoucherDiscountSettings.discountPercentMax) {
-    platformVoucherDiscountSettings.discountPercentPerBundle = value;
+  platformVoucherDiscountSettings.baseRate = value;
+  platformVoucherDiscountSettings.lastUpdatedAt = new Date();
+}
+
+export function setTierSize(value: number): void {
+  if (value >= platformVoucherDiscountSettings.tierSizeMin &&
+      value <= platformVoucherDiscountSettings.tierSizeMax) {
+    platformVoucherDiscountSettings.tierSize = value;
+    platformVoucherDiscountSettings.lastUpdatedAt = new Date();
+  }
+}
+
+export function setBaseRate(value: number): void {
+  if (value >= platformVoucherDiscountSettings.baseRateMin &&
+      value <= platformVoucherDiscountSettings.baseRateMax) {
+    platformVoucherDiscountSettings.baseRate = value;
+    platformVoucherDiscountSettings.lastUpdatedAt = new Date();
+  }
+}
+
+export function setIncrementRate(value: number): void {
+  if (value >= platformVoucherDiscountSettings.incrementRateMin &&
+      value <= platformVoucherDiscountSettings.incrementRateMax) {
+    platformVoucherDiscountSettings.incrementRate = value;
+    platformVoucherDiscountSettings.lastUpdatedAt = new Date();
+  }
+}
+
+export function setMaxDiscount(value: number): void {
+  if (value >= platformVoucherDiscountSettings.maxDiscountMin &&
+      value <= platformVoucherDiscountSettings.maxDiscountMax) {
+    platformVoucherDiscountSettings.maxDiscount = value;
     platformVoucherDiscountSettings.lastUpdatedAt = new Date();
   }
 }
 
 export function getMaxDiscountPercent(): number {
-  return platformVoucherDiscountSettings.maxDiscountPercent;
+  return platformVoucherDiscountSettings.maxDiscount;
 }
 
 export function setMaxDiscountPercent(value: number): void {
-  if (value >= platformVoucherDiscountSettings.maxDiscountPercentMin &&
-      value <= platformVoucherDiscountSettings.maxDiscountPercentMax) {
-    platformVoucherDiscountSettings.maxDiscountPercent = value;
-    platformVoucherDiscountSettings.lastUpdatedAt = new Date();
+  setMaxDiscount(value);
+}
+
+/** Calculate the tiered discount for a given bundle count */
+export function getTieredDiscount(bundleCount: number): { tier: number; discountPercent: number; tierLabel: string } {
+  const s = platformVoucherDiscountSettings;
+  if (bundleCount <= 0) return { tier: 0, discountPercent: 0, tierLabel: "No bundles" };
+  const tier = Math.ceil(bundleCount / s.tierSize);
+  const raw = s.baseRate + (tier - 1) * s.incrementRate;
+  const discountPercent = Math.min(Math.round(raw * 100) / 100, s.maxDiscount);
+  const rangeStart = (tier - 1) * s.tierSize + 1;
+  const rangeEnd = tier * s.tierSize;
+  const tierLabel = `${rangeStart}–${rangeEnd} bundles`;
+  return { tier, discountPercent, tierLabel };
+}
+
+/** Generate a preview of all tiers up to max discount */
+export function getTierPreview(): Array<{ tier: number; rangeStart: number; rangeEnd: number; discountPercent: number }> {
+  const s = platformVoucherDiscountSettings;
+  const tiers: Array<{ tier: number; rangeStart: number; rangeEnd: number; discountPercent: number }> = [];
+  let t = 1;
+  while (true) {
+    const raw = s.baseRate + (t - 1) * s.incrementRate;
+    const disc = Math.min(Math.round(raw * 100) / 100, s.maxDiscount);
+    const rangeStart = (t - 1) * s.tierSize + 1;
+    const rangeEnd = t * s.tierSize;
+    tiers.push({ tier: t, rangeStart, rangeEnd, discountPercent: disc });
+    if (disc >= s.maxDiscount) break;
+    t++;
+    if (t > 100) break; // safety
   }
+  return tiers;
 }
