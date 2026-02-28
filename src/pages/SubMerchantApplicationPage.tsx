@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Store, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,9 @@ import { allLocationMerchants } from "@/data/nigerianLocationsData";
 export default function SubMerchantApplicationPage() {
   const { merchantId } = useParams<{ merchantId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const reapplyData = (location.state as any)?.previousData;
 
   // Find merchant info
   const quizMerchant = mockMerchants.find(m => m.id === merchantId);
@@ -32,15 +34,15 @@ export default function SubMerchantApplicationPage() {
   const mobiMerchant = allMerchants.find(m => m.id === merchantId);
 
   const [form, setForm] = useState({
-    fullName: "",
-    businessName: "",
-    phone: "",
-    email: "",
-    city: "",
-    state: "",
-    businessTypes: [] as string[],
-    description: "",
-    yearsInBusiness: "",
+    fullName: reapplyData?.fullName || "",
+    businessName: reapplyData?.businessName || "",
+    phone: reapplyData?.phone || "",
+    email: reapplyData?.email || "",
+    city: reapplyData?.city || "",
+    state: reapplyData?.state || "",
+    businessTypes: (reapplyData?.businessTypes as string[]) || ([] as string[]),
+    description: reapplyData?.description || "",
+    yearsInBusiness: reapplyData?.yearsInBusiness || "",
     agreeTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
