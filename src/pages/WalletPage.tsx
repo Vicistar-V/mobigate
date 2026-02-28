@@ -14,6 +14,7 @@ import {
 import { formatNumberFull } from "@/lib/financialDisplay";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import useEmblaCarousel from "embla-carousel-react";
 
 // ── Mock wallet data ──
 const LOCAL_WALLET = {
@@ -87,10 +88,16 @@ export default function WalletPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Carousel state
-  const [activeWallet, setActiveWallet] = useState(0); // 0 = local, 1 = mobi
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchDelta, setTouchDelta] = useState(0);
+  // Embla carousel
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "center", containScroll: false });
+  const [activeWallet, setActiveWallet] = useState(0);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setActiveWallet(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi]);
 
   // Fund local wallet drawer
   const [fundDrawerOpen, setFundDrawerOpen] = useState(false);
@@ -105,23 +112,6 @@ export default function WalletPage() {
   const [search, setSearch] = useState("");
   const [selectedTx, setSelectedTx] = useState<WalletTransaction | null>(null);
   const [showFilterSheet, setShowFilterSheet] = useState(false);
-
-  // Swipe handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.touches[0].clientX);
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStart === null) return;
-    setTouchDelta(e.touches[0].clientX - touchStart);
-  };
-  const handleTouchEnd = () => {
-    if (Math.abs(touchDelta) > 60) {
-      if (touchDelta < 0 && activeWallet === 0) setActiveWallet(1);
-      if (touchDelta > 0 && activeWallet === 1) setActiveWallet(0);
-    }
-    setTouchStart(null);
-    setTouchDelta(0);
-  };
 
   // Fund local wallet processing
   const handleFundLocal = useCallback(() => {
@@ -206,7 +196,7 @@ export default function WalletPage() {
           {wallets.map((_, i) => (
             <button
               key={i}
-              onClick={() => setActiveWallet(i)}
+              onClick={() => emblaApi?.scrollTo(i)}
               className={cn(
                 "h-2 rounded-full transition-all duration-300 touch-manipulation",
                 i === activeWallet ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
@@ -215,28 +205,17 @@ export default function WalletPage() {
           ))}
         </div>
 
-        {/* Swipeable Cards */}
-        <div
-          className="relative px-4"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div
-            className="flex transition-transform duration-300 ease-out"
-            style={{
-              gap: "12px",
-              transform: `translateX(calc(-${activeWallet} * (calc(100% - 48px) + 12px) + ${touchStart !== null ? touchDelta : 0}px))`,
-            }}
-          >
+        {/* Embla Carousel */}
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex" style={{ gap: "12px", paddingLeft: "16px", paddingRight: "16px" }}>
             {wallets.map((w, i) => (
               <div
                 key={i}
                 className={cn(
-                  "shrink-0 transition-opacity duration-300",
-                  i !== activeWallet && "opacity-50"
+                  "shrink-0 grow-0 transition-opacity duration-300",
+                  i !== activeWallet && "opacity-40"
                 )}
-                style={{ width: "calc(100% - 48px)" }}
+                style={{ flexBasis: "85%" }}
               >
                 <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br p-5 border border-white/10", w.gradient)}>
                   {/* Subtle geometric accent */}
