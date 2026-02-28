@@ -80,12 +80,12 @@ export default function SubMerchantVoucherBatchDetail() {
     setBatches(prev => prev.map(b => {
       if (b.id !== batch.id) return b;
       const updatedBundles = b.bundles.map(bundle => {
-        const updatedCards = bundle.cards.map(card => {
-          if (card.status !== "invalidated") return card;
-          return {
+        const newCards = bundle.cards
+          .filter(card => card.status === "invalidated")
+          .map((card, i) => ({
             ...card,
-            id: `card-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-            serialNumber: generateCardSerial(bundle.serialPrefix, Math.floor(Math.random() * 10000)),
+            id: `card-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${i}`,
+            serialNumber: generateCardSerial(bundle.serialPrefix, Math.floor(Math.random() * 10000) + i),
             pin: generatePin(),
             status: "available" as const,
             createdAt: now,
@@ -93,9 +93,9 @@ export default function SubMerchantVoucherBatchDetail() {
             soldVia: null,
             soldAt: null,
             usedAt: null,
-          };
-        });
-        return { ...bundle, cards: updatedCards };
+            generationType: "replacement" as const,
+          }));
+        return { ...bundle, cards: [...bundle.cards, ...newCards] };
       });
       return { ...b, bundles: updatedBundles, status: "active" as const };
     }));
