@@ -206,27 +206,31 @@ export default function SubMerchantApplicationPage() {
 
           <div>
             <Label className="text-xs font-semibold text-foreground mb-1.5 block">Business Type * <span className="font-normal text-muted-foreground">(select all that apply)</span></Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
               {[
                 { value: "retail_shop", label: "Retail Shop" },
                 { value: "mobi_kiosk", label: "Mobi Kiosk" },
                 { value: "online_store", label: "Online Store" },
+                { value: "mobi_shop", label: "Mobi Shop" },
                 { value: "mobile_agent", label: "Mobile Agent" },
               ].map(opt => {
                 const selected = form.businessTypes.includes(opt.value);
                 return (
-                  <button
+                  <label
                     key={opt.value}
-                    type="button"
-                    onClick={() => toggleBusinessType(opt.value)}
-                    className={`h-11 rounded-xl text-sm font-medium border transition-colors touch-manipulation active:scale-[0.97] ${
+                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors touch-manipulation active:scale-[0.98] ${
                       selected
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-foreground border-border hover:border-primary/50"
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-card"
                     }`}
                   >
-                    {opt.label}
-                  </button>
+                    <Checkbox
+                      checked={selected}
+                      onCheckedChange={() => toggleBusinessType(opt.value)}
+                      className="h-5 w-5"
+                    />
+                    <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                  </label>
                 );
               })}
             </div>
