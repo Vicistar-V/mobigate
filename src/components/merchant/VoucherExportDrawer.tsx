@@ -76,7 +76,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
       <style>
         @media print {
           body > *:not(#voucher-print-area) { display: none !important; }
-          #voucher-print-area { display: block !important; }
+          #voucher-print-area { display: block !important; position: static !important; left: auto !important; }
         }
         #voucher-print-area {
           font-family: 'Courier New', monospace;
@@ -136,7 +136,9 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
       </div>
     `;
 
-    printContainer.style.display = "none";
+    printContainer.style.position = "absolute";
+    printContainer.style.left = "-9999px";
+    printContainer.style.top = "0";
     document.body.appendChild(printContainer);
 
     const onAfterPrint = () => {
@@ -150,11 +152,10 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
 
     window.addEventListener("afterprint", onAfterPrint);
 
-    // Show print area, trigger print
-    printContainer.style.display = "block";
+    // Trigger print after brief render
     setTimeout(() => {
       window.print();
-    }, 100);
+    }, 200);
   }, [selectedCards, selectedCardIds, batch, onOpenChange, onPrintComplete]);
 
   return (
