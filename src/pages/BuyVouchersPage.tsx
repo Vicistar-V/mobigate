@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Minus, Plus, Sparkles, Check, MapPin, Star, ShieldCheck, ChevronRight, Ticket, CreditCard, Users, UserPlus, Search, Send, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,8 @@ const PROCESSING_MESSAGES = [
 
 export default function BuyVouchersPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isFundWallet = searchParams.get("source") === "fund-wallet";
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("vouchers");
@@ -331,8 +333,8 @@ export default function BuyVouchersPage() {
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
         <div className="flex-1">
-          <h1 className="text-base font-bold text-foreground">Buy Mobi Vouchers</h1>
-          <p className="text-xs text-muted-foreground">Select denominations & quantities</p>
+          <h1 className="text-base font-bold text-foreground">{isFundWallet ? "Fund Mobi Wallet" : "Buy Mobi Vouchers"}</h1>
+          <p className="text-xs text-muted-foreground">{isFundWallet ? "Select amount to fund your wallet" : "Select denominations & quantities"}</p>
         </div>
         {totalItems > 0 && (
           <button onClick={clearCart} className="text-xs text-destructive font-medium active:opacity-70 touch-manipulation">
