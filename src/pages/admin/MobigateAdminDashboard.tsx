@@ -31,6 +31,7 @@ import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFe
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
+import { VoucherDiscountSettingsCard } from "@/components/mobigate/VoucherDiscountSettingsCard";
 // MobigateQuizManagement moved to /mobigate-admin/quiz
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { MerchantApplicationsAdmin } from "@/components/mobigate/MerchantApplicationsAdmin";
@@ -728,6 +729,9 @@ export default function MobigateAdminDashboard() {
 
                 {/* Quiz Settings */}
                 <QuizSettingsCard />
+
+                {/* Voucher Discount Settings */}
+                <VoucherDiscountSettingsCard />
               </div>
             </ScrollArea>
           </TabsContent>

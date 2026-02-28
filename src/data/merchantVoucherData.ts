@@ -57,26 +57,23 @@ export interface MerchantWalletTransaction {
   batchId: string | null;
 }
 
-// ─── Discount Tiers ───
-export interface DiscountTier {
-  minBundles: number;
-  maxBundles: number | null;
+// ─── Discount Calculation (dynamic, based on platform settings) ───
+import { platformVoucherDiscountSettings } from "@/data/platformSettingsData";
+
+export interface DiscountResult {
   discountPercent: number;
   label: string;
 }
 
-export const discountTiers: DiscountTier[] = [
-  { minBundles: 1, maxBundles: 9, discountPercent: 0, label: "No discount" },
-  { minBundles: 10, maxBundles: 49, discountPercent: 5, label: "5% off" },
-  { minBundles: 50, maxBundles: 99, discountPercent: 8, label: "8% off" },
-  { minBundles: 100, maxBundles: null, discountPercent: 12, label: "12% off" },
-];
-
-export function getDiscountForBundles(bundleCount: number): DiscountTier {
-  for (let i = discountTiers.length - 1; i >= 0; i--) {
-    if (bundleCount >= discountTiers[i].minBundles) return discountTiers[i];
-  }
-  return discountTiers[0];
+export function getDiscountForBundles(bundleCount: number): DiscountResult {
+  const rate = platformVoucherDiscountSettings.discountPercentPerBundle;
+  const cap = platformVoucherDiscountSettings.maxDiscountPercent;
+  const percent = Math.min(bundleCount * rate, cap);
+  const rounded = Math.round(percent * 100) / 100;
+  return {
+    discountPercent: rounded,
+    label: rounded > 0 ? `${rounded}% off` : "No discount",
+  };
 }
 
 export function calculateBulkDiscount(denomination: number, bundleCount: number): {
@@ -90,16 +87,16 @@ export function calculateBulkDiscount(denomination: number, bundleCount: number)
 } {
   const cardsPerBundle = 100;
   const totalCards = bundleCount * cardsPerBundle;
-  const unitCost = denomination; // 1 Mobi = ₦1
+  const unitCost = denomination;
   const subtotal = totalCards * unitCost;
-  const tier = getDiscountForBundles(bundleCount);
-  const discountAmount = Math.round(subtotal * tier.discountPercent / 100);
+  const disc = getDiscountForBundles(bundleCount);
+  const discountAmount = Math.round(subtotal * disc.discountPercent / 100);
   return {
     cardsPerBundle,
     totalCards,
     unitCost,
     subtotal,
-    discountPercent: tier.discountPercent,
+    discountPercent: disc.discountPercent,
     discountAmount,
     total: subtotal - discountAmount,
   };
