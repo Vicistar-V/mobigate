@@ -178,7 +178,7 @@ export default function SubMerchantVoucherBatchDetail() {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-foreground">{batch.batchNumber}</h1>
-              <Badge variant="outline" className="text-xs px-2 h-5 border-primary/30 text-primary">Sub-Merchant</Badge>
+              
               {batch.generationType === "replacement" && (
                 <Badge variant="outline" className="text-xs px-2 h-5 border-amber-500 text-amber-600">Replacement</Badge>
               )}
