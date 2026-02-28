@@ -94,7 +94,8 @@ const App = () => {
                   <Route path="/community/:communityId/admin/elections" element={<ElectionManagementPage />} />
                   <Route path="/community/:communityId/admin/content" element={<ContentModerationPage />} />
                   <Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
-                  <Route path="/mobigate-admin/merchants" element={<ManageMerchantsPage />} />
+                  {/* COMMENTED OUT — re-enable when ready */}
+                  {/* <Route path="/mobigate-admin/merchants" element={<ManageMerchantsPage />} /> */}
 
                   {/* Quiz type-scoped routes */}
                   <Route path="/mobigate-admin/quiz/:quizType/categories" element={<QuizCategoriesPage />} />
@@ -120,12 +121,13 @@ const App = () => {
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   <Route path="/merchants" element={<MerchantListingPage />} />
                   <Route path="/buy-vouchers" element={<BuyVouchersPage />} />
-                  <Route path="/merchant-voucher-management" element={<MerchantVoucherManagement />} />
-                  <Route path="/merchant-voucher-generate" element={<MerchantVoucherGenerate />} />
-                  <Route path="/merchant-wallet-fund" element={<MerchantWalletFund />} />
-                  <Route path="/merchant-voucher-batches" element={<MerchantVoucherBatches />} />
-                  <Route path="/merchant-voucher-batch/:batchId" element={<MerchantVoucherBatchDetail />} />
-                  <Route path="/merchant-voucher-transactions" element={<MerchantVoucherTransactions />} />
+                  {/* COMMENTED OUT — re-enable when ready */}
+                  {/* <Route path="/merchant-voucher-management" element={<MerchantVoucherManagement />} /> */}
+                  {/* <Route path="/merchant-voucher-generate" element={<MerchantVoucherGenerate />} /> */}
+                  {/* <Route path="/merchant-wallet-fund" element={<MerchantWalletFund />} /> */}
+                  {/* <Route path="/merchant-voucher-batches" element={<MerchantVoucherBatches />} /> */}
+                  {/* <Route path="/merchant-voucher-batch/:batchId" element={<MerchantVoucherBatchDetail />} /> */}
+                  {/* <Route path="/merchant-voucher-transactions" element={<MerchantVoucherTransactions />} /> */}
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
                   <Route path="/discounted-advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />
