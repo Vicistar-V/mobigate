@@ -1,0 +1,305 @@
+import { useState, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  initialMockBatches,
+  VoucherBatch,
+  VoucherBundle,
+  VoucherCard,
+  getBatchStatusCounts,
+  getBundleStatusCounts,
+  getInvalidatableCards,
+  hashPin,
+  formatNum,
+} from "@/data/merchantVoucherData";
+
+type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string } | { type: "card"; cardId: string; bundleId: string };
+
+export default function MerchantVoucherBatchDetail() {
+  const navigate = useNavigate();
+  const { batchId } = useParams();
+  const [batches, setBatches] = useState(initialMockBatches);
+  const [expandedBundles, setExpandedBundles] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);
+
+  const batch = batches.find(b => b.id === batchId);
+
+  const counts = batch ? getBatchStatusCounts(batch) : { available: 0, sold_unused: 0, used: 0, invalidated: 0, total: 0 };
+  const batchInvalidatable = batch ? getInvalidatableCards(batch.bundles.flatMap(b => b.cards)) : [];
+
+  const toggleBundle = (id: string) => {
+    setExpandedBundles(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const filteredBundles = useMemo(() => {
+    if (!batch) return [];
+    if (!searchQuery) return batch.bundles;
+    const q = searchQuery.toLowerCase();
+    return batch.bundles.filter(bundle =>
+      bundle.serialPrefix.toLowerCase().includes(q) ||
+      bundle.cards.some(c =>
+        c.serialNumber.toLowerCase().includes(q) ||
+        c.pin.slice(-4).includes(q)
+      )
+    );
+  }, [batch?.bundles, searchQuery]);
+
+  const handleInvalidate = () => {
+    if (!invalidateTarget) return;
+    setBatches(prev => prev.map(b => {
+      if (b.id !== batchId) return b;
+      const updated = { ...b, bundles: b.bundles.map(bundle => ({
+        ...bundle,
+        cards: bundle.cards.map(card => {
+          const canInvalidate =
+            (card.status === "available") ||
+            (card.status === "sold_unused" && card.soldVia === "physical");
+
+          if (invalidateTarget.type === "batch" && canInvalidate) {
+            return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
+          }
+          if (invalidateTarget.type === "bundle" && bundle.id === invalidateTarget.bundleId && canInvalidate) {
+            return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
+          }
+          if (invalidateTarget.type === "card" && card.id === invalidateTarget.cardId && canInvalidate) {
+            return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
+          }
+          return card;
+        }),
+      }))};
+      return updated;
+    }));
+    setInvalidateTarget(null);
+  };
+
+  const getInvalidateCount = (): number => {
+    if (!invalidateTarget) return 0;
+    if (invalidateTarget.type === "batch") return batchInvalidatable.length;
+    if (invalidateTarget.type === "bundle") {
+      const bundle = batch.bundles.find(b => b.id === invalidateTarget.bundleId);
+      return bundle ? getInvalidatableCards(bundle.cards).length : 0;
+    }
+    return 1;
+  };
+
+  const statusColor = (status: string) => {
+    switch (status) {
+      case "available": return "bg-emerald-500/15 text-emerald-600";
+      case "sold_unused": return "bg-amber-500/15 text-amber-600";
+      case "used": return "bg-primary/15 text-primary";
+      case "invalidated": return "bg-destructive/15 text-destructive";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case "available": return "Available";
+      case "sold_unused": return "Sold";
+      case "used": return "Used";
+      case "invalidated": return "Invalid";
+      default: return status;
+    }
+  };
+
+  if (!batch) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-4">Batch not found</p>
+          <Button onClick={() => navigate(-1)} variant="outline">Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background min-h-screen pb-6">
+      {/* Header */}
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+            <ArrowLeft className="h-5 w-5 text-foreground" />
+          </button>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-bold text-foreground">{batch.batchNumber}</h1>
+              {batch.generationType === "replacement" && (
+                <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-amber-500 text-amber-600">Replacement</Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              M{formatNum(batch.denomination)} • {batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 pt-4 space-y-4">
+        {/* Status Cards */}
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { label: "Avail", count: counts.available, color: "text-emerald-600" },
+            { label: "Sold", count: counts.sold_unused, color: "text-amber-600" },
+            { label: "Used", count: counts.used, color: "text-primary" },
+            { label: "Invalid", count: counts.invalidated, color: "text-destructive" },
+          ].map(s => (
+            <div key={s.label} className="rounded-xl border border-border/50 bg-card p-2.5 text-center">
+              <p className={`text-lg font-black ${s.color}`}>{s.count}</p>
+              <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Invalidate Batch Button */}
+        {batchInvalidatable.length > 0 && (
+          <Button
+            onClick={() => setInvalidateTarget({ type: "batch" })}
+            variant="outline"
+            className="w-full h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]"
+          >
+            <ShieldAlert className="h-4 w-4 mr-2" />
+            Invalidate Batch ({batchInvalidatable.length} cards)
+          </Button>
+        )}
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search serial or last 4 of PIN..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full h-10 pl-9 pr-9 rounded-xl bg-muted/50 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+              <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+
+        {/* Bundle List */}
+        <div className="space-y-2">
+          {filteredBundles.map(bundle => {
+            const bCounts = getBundleStatusCounts(bundle);
+            const isExpanded = expandedBundles.has(bundle.id);
+            const bundleInvalidatable = getInvalidatableCards(bundle.cards);
+
+            return (
+              <div key={bundle.id} className="rounded-xl border border-border/50 bg-card overflow-hidden">
+                {/* Bundle header */}
+                <div
+                  onClick={() => toggleBundle(bundle.id)}
+                  className="p-3.5 flex items-center gap-3 touch-manipulation cursor-pointer active:bg-muted/30"
+                >
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Package className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-foreground truncate">{bundle.serialPrefix}</p>
+                    <div className="flex gap-1.5 mt-1">
+                      {bCounts.available > 0 && <span className="text-[10px] text-emerald-600 font-semibold">{bCounts.available} avail</span>}
+                      {bCounts.sold_unused > 0 && <span className="text-[10px] text-amber-600 font-semibold">{bCounts.sold_unused} sold</span>}
+                      {bCounts.used > 0 && <span className="text-[10px] text-primary font-semibold">{bCounts.used} used</span>}
+                      {bCounts.invalidated > 0 && <span className="text-[10px] text-destructive font-semibold">{bCounts.invalidated} inv</span>}
+                    </div>
+                  </div>
+                  {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+                </div>
+
+                {/* Expanded cards */}
+                {isExpanded && (
+                  <div className="border-t border-border/30">
+                    {/* Invalidate bundle */}
+                    {bundleInvalidatable.length > 0 && (
+                      <div className="px-3 py-2 border-b border-border/30">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setInvalidateTarget({ type: "bundle", bundleId: bundle.id }); }}
+                          className="text-xs text-destructive font-semibold touch-manipulation flex items-center gap-1"
+                        >
+                          <ShieldAlert className="h-3 w-3" /> Invalidate Bundle ({bundleInvalidatable.length})
+                        </button>
+                      </div>
+                    )}
+                    <div className="max-h-[400px] overflow-y-auto touch-auto">
+                      {bundle.cards.map(card => {
+                        const canInvalidateCard =
+                          (card.status === "available") ||
+                          (card.status === "sold_unused" && card.soldVia === "physical");
+
+                        return (
+                          <div key={card.id} className="px-3 py-2.5 border-b border-border/20 last:border-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="text-[10px] font-mono text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
+                              <Badge className={`${statusColor(card.status)} text-[10px] h-4 px-1.5`}>{statusLabel(card.status)}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <p className="text-[10px] text-muted-foreground font-mono">PIN: {hashPin(card.pin)}</p>
+                              <div className="flex items-center gap-2">
+                                {card.soldAt && <span className="text-[10px] text-muted-foreground">Sold {card.soldAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short" })}</span>}
+                                {canInvalidateCard && (
+                                  <button
+                                    onClick={() => setInvalidateTarget({ type: "card", cardId: card.id, bundleId: bundle.id })}
+                                    className="text-[10px] text-destructive font-semibold touch-manipulation"
+                                  >
+                                    Invalidate
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Invalidation Confirmation Dialog */}
+      <AlertDialog open={!!invalidateTarget} onOpenChange={(open) => !open && setInvalidateTarget(null)}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Confirm Invalidation
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              This will invalidate <strong>{getInvalidateCount()}</strong> voucher card{getInvalidateCount() !== 1 ? "s" : ""}.
+              Only "Available" and "Sold (Physical)" cards will be affected. Used cards and Mobigate digital purchases are protected.
+              Invalidated cards will be replaced in a new batch.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-10 rounded-xl text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleInvalidate} className="h-10 rounded-xl text-xs bg-destructive hover:bg-destructive/90">
+              Invalidate {getInvalidateCount()} Cards
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

@@ -37,6 +37,12 @@ import MerchantDetailPage from "./pages/MerchantDetailPage";
 import MerchantHomePage from "./pages/MerchantHomePage";
 import MerchantListingPage from "./pages/MerchantListingPage";
 import BuyVouchersPage from "./pages/BuyVouchersPage";
+import MerchantVoucherManagement from "./pages/MerchantVoucherManagement";
+import MerchantVoucherGenerate from "./pages/MerchantVoucherGenerate";
+import MerchantWalletFund from "./pages/MerchantWalletFund";
+import MerchantVoucherBatches from "./pages/MerchantVoucherBatches";
+import MerchantVoucherBatchDetail from "./pages/MerchantVoucherBatchDetail";
+import MerchantVoucherTransactions from "./pages/MerchantVoucherTransactions";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import CreateAdvertisementPage from "./pages/community/CommunityCreateAdvertisementPage";
 import CommunityAdvertRatesPage from "./pages/community/CommunityAdvertRatesPage";
@@ -112,6 +118,12 @@ const App = () => {
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   <Route path="/merchants" element={<MerchantListingPage />} />
                   <Route path="/buy-vouchers" element={<BuyVouchersPage />} />
+                  <Route path="/merchant-voucher-management" element={<MerchantVoucherManagement />} />
+                  <Route path="/merchant-voucher-generate" element={<MerchantVoucherGenerate />} />
+                  <Route path="/merchant-wallet-fund" element={<MerchantWalletFund />} />
+                  <Route path="/merchant-voucher-batches" element={<MerchantVoucherBatches />} />
+                  <Route path="/merchant-voucher-batch/:batchId" element={<MerchantVoucherBatchDetail />} />
+                  <Route path="/merchant-voucher-transactions" element={<MerchantVoucherTransactions />} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
                   <Route path="/discounted-advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />
