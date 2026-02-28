@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle, XCircle, Clock, Store, User, Building2, ChevronDown, Globe, Phone, Mail, Landmark } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Store, User, Building2, ChevronDown, Globe, Phone, Mail, Landmark, ShieldCheck, Loader2 } from "lucide-react";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-
 interface MockApplication {
   id: string;
   applicantName: string;
@@ -27,7 +26,9 @@ interface MockApplication {
   phone: string;
   email: string;
   website?: string;
-  bankName?: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
   submittedDate: string;
   feePaid: number;
   eligibility: { label: string; met: boolean }[];
@@ -45,6 +46,8 @@ const mockApplications: MockApplication[] = [
     phone: "+234 812 345 6789",
     email: "adewale.johnson@email.com",
     bankName: "First Bank",
+    bankAccountNumber: "3045678901",
+    bankAccountName: "Adewale Johnson",
     submittedDate: "2026-02-20",
     feePaid: 50000,
     eligibility: [
@@ -75,6 +78,8 @@ const mockApplications: MockApplication[] = [
     email: "ngozi@zenithfoods.ng",
     website: "https://zenithfoods.ng",
     bankName: "GTBank",
+    bankAccountNumber: "0123456789",
+    bankAccountName: "Zenith Foods Ltd",
     submittedDate: "2026-02-19",
     feePaid: 50000,
     eligibility: [
@@ -95,6 +100,8 @@ const mockApplications: MockApplication[] = [
     phone: "+234 905 678 1234",
     email: "chidi.eze@email.com",
     bankName: "UBA",
+    bankAccountNumber: "2098765432",
+    bankAccountName: "Chidi Eze",
     submittedDate: "2026-02-18",
     feePaid: 50000,
     eligibility: [
@@ -120,6 +127,8 @@ const mockApplications: MockApplication[] = [
     phone: "+234 816 789 0123",
     email: "fatima@autoparts.ng",
     bankName: "Access Bank",
+    bankAccountNumber: "1234567890",
+    bankAccountName: "Fatima Bello Enterprises",
     submittedDate: "2026-02-17",
     feePaid: 50000,
     eligibility: [
@@ -142,6 +151,17 @@ export function MerchantApplicationsAdmin() {
   const [decliningId, setDecliningId] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [verifyingBank, setVerifyingBank] = useState<Record<string, "idle" | "verifying" | "success">>({});
+
+  const handleVerifyBank = async (appId: string) => {
+    setVerifyingBank(prev => ({ ...prev, [appId]: "verifying" }));
+    // Simulate multi-step verification
+    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 600));
+    setVerifyingBank(prev => ({ ...prev, [appId]: "success" }));
+    toast({ title: "Bank Details Verified", description: "Account information has been confirmed" });
+  };
 
   const counts = {
     pending: Object.values(statuses).filter((s) => s === "pending").length,
@@ -284,12 +304,58 @@ export function MerchantApplicationsAdmin() {
                     {/* Contact & Banking */}
                     <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
                       <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                        <Mail className="h-3.5 w-3.5" /> Contact & Banking
+                        <Mail className="h-3.5 w-3.5" /> Contact Info
                       </p>
                       <DetailRow label="Email" value={app.email} />
                       <DetailRow label="Phone" value={app.phone} />
                       <DetailRow label="Website" value={app.website} />
-                      <DetailRow label="Bank" value={app.bankName} />
+                    </div>
+
+                    {/* Bank Account */}
+                    <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 border border-border/50">
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
+                        <Landmark className="h-3.5 w-3.5" /> Bank Account
+                      </p>
+                      <DetailRow label="Bank Name" value={app.bankName} />
+                      <DetailRow label="Account Number" value={app.bankAccountNumber} />
+                      <DetailRow label="Account Name" value={app.bankAccountName} />
+                      
+                      {/* Verify Bank Button */}
+                      {(() => {
+                        const bankStatus = verifyingBank[app.id] || "idle";
+                        return (
+                          <div className="pt-1.5">
+                            <Button
+                              size="sm"
+                              variant={bankStatus === "success" ? "outline" : "default"}
+                              className={`w-full text-xs h-9 transition-all duration-300 ${
+                                bankStatus === "success" 
+                                  ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400" 
+                                  : ""
+                              }`}
+                              disabled={bankStatus === "verifying" || bankStatus === "success"}
+                              onClick={() => handleVerifyBank(app.id)}
+                            >
+                              {bankStatus === "verifying" ? (
+                                <>
+                                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                  Verifying Bank Details...
+                                </>
+                              ) : bankStatus === "success" ? (
+                                <>
+                                  <ShieldCheck className="h-3.5 w-3.5 mr-1.5" />
+                                  Bank Details Verified
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheck className="h-3.5 w-3.5 mr-1.5" />
+                                  Verify Bank Details
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </CollapsibleContent>
