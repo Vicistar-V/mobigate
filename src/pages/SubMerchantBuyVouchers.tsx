@@ -131,7 +131,7 @@ export default function SubMerchantBuyVouchers() {
   if (step === "denomination") {
     return (
       <div className="bg-background min-h-screen pb-6">
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
@@ -164,7 +164,7 @@ export default function SubMerchantBuyVouchers() {
   if (step === "bundles") {
     return (
       <div className="bg-background min-h-screen pb-32">
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
@@ -221,7 +221,7 @@ export default function SubMerchantBuyVouchers() {
   if (step === "merchant") {
     return (
       <div className="bg-background min-h-screen pb-6">
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
@@ -269,7 +269,7 @@ export default function SubMerchantBuyVouchers() {
   if (step === "summary") {
     return (
       <div className="bg-background min-h-screen pb-32">
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>

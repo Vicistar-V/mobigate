@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { Header } from "@/components/Header";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import SubmitAdvert from "./pages/SubmitAdvert";
@@ -63,6 +64,8 @@ import { initializeMockData } from "./data/mockAdvertData";
 import { startAdvertSimulator } from "./lib/advertSimulator";
 
 const queryClient = new QueryClient();
+
+const WithHeader = ({ children }: { children: React.ReactNode }) => <><Header />{children}</>;
 
 const App = () => {
   useEffect(() => {
@@ -127,22 +130,22 @@ const App = () => {
                   <Route path="/mobi-quiz-games" element={<MobiQuizGames />} />
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   <Route path="/merchants" element={<MerchantListingPage />} />
-                  <Route path="/buy-vouchers" element={<BuyVouchersPage />} />
-                  <Route path="/merchant-voucher-management" element={<MerchantVoucherManagement />} />
-                  <Route path="/merchant-voucher-generate" element={<MerchantVoucherGenerate />} />
-                  <Route path="/merchant-wallet-fund" element={<MerchantWalletFund />} />
-                  <Route path="/merchant-voucher-batches" element={<MerchantVoucherBatches />} />
-                  <Route path="/merchant-voucher-batch/:batchId" element={<MerchantVoucherBatchDetail />} />
-                  <Route path="/merchant-voucher-transactions" element={<MerchantVoucherTransactions />} />
-                  <Route path="/merchant-sub-merchants" element={<ManageSubMerchants />} />
-                  <Route path="/merchant-sub-merchant/:subMerchantId" element={<SubMerchantDetail />} />
-                  <Route path="/sub-merchant-voucher-management" element={<SubMerchantVoucherManagement />} />
-                  <Route path="/sub-merchant-buy-vouchers" element={<SubMerchantBuyVouchers />} />
-                  <Route path="/sub-merchant-voucher-batches" element={<SubMerchantVoucherBatches />} />
-                  <Route path="/sub-merchant-voucher-batch/:batchId" element={<SubMerchantVoucherBatchDetail />} />
-                  <Route path="/sub-merchant-voucher-transactions" element={<SubMerchantVoucherTransactions />} />
+                  <Route path="/buy-vouchers" element={<WithHeader><BuyVouchersPage /></WithHeader>} />
+                  <Route path="/merchant-voucher-management" element={<WithHeader><MerchantVoucherManagement /></WithHeader>} />
+                  <Route path="/merchant-voucher-generate" element={<WithHeader><MerchantVoucherGenerate /></WithHeader>} />
+                  <Route path="/merchant-wallet-fund" element={<WithHeader><MerchantWalletFund /></WithHeader>} />
+                  <Route path="/merchant-voucher-batches" element={<WithHeader><MerchantVoucherBatches /></WithHeader>} />
+                  <Route path="/merchant-voucher-batch/:batchId" element={<WithHeader><MerchantVoucherBatchDetail /></WithHeader>} />
+                  <Route path="/merchant-voucher-transactions" element={<WithHeader><MerchantVoucherTransactions /></WithHeader>} />
+                  <Route path="/merchant-sub-merchants" element={<WithHeader><ManageSubMerchants /></WithHeader>} />
+                  <Route path="/merchant-sub-merchant/:subMerchantId" element={<WithHeader><SubMerchantDetail /></WithHeader>} />
+                  <Route path="/sub-merchant-voucher-management" element={<WithHeader><SubMerchantVoucherManagement /></WithHeader>} />
+                  <Route path="/sub-merchant-buy-vouchers" element={<WithHeader><SubMerchantBuyVouchers /></WithHeader>} />
+                  <Route path="/sub-merchant-voucher-batches" element={<WithHeader><SubMerchantVoucherBatches /></WithHeader>} />
+                  <Route path="/sub-merchant-voucher-batch/:batchId" element={<WithHeader><SubMerchantVoucherBatchDetail /></WithHeader>} />
+                  <Route path="/sub-merchant-voucher-transactions" element={<WithHeader><SubMerchantVoucherTransactions /></WithHeader>} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
-                  <Route path="/apply-sub-merchant/:merchantId" element={<SubMerchantApplicationPage />} />
+                  <Route path="/apply-sub-merchant/:merchantId" element={<WithHeader><SubMerchantApplicationPage /></WithHeader>} />
                   <Route path="/discounted-advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />
                   <Route path="/community/:communityId/advert-rates" element={<CommunityAdvertRatesPage />} />
