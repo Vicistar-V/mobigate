@@ -110,7 +110,7 @@ const menuItems: MenuItem[] = [{
   title: "Wallet Menu",
   icon: Wallet,
   items: [
-    { title: "Fund Your Wallet", url: "/buy-vouchers" },
+    { title: "Fund Your Wallet", url: "/buy-vouchers?source=fund-wallet" },
     { title: "Wallet Funding History", url: "/coins_purchase_history.php" },
     { title: "My Financial Summary", url: "#" }
   ]
