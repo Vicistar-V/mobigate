@@ -100,35 +100,31 @@ export default function MerchantVoucherBatchDetail() {
   const handleRegenerate = () => {
     if (!batch || regenCount === 0) return;
     const now = new Date();
-    const newBatchId = `batch-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const newBatchNumber = generateBatchNumber(now);
-    const bundleSize = 100;
-    const numBundles = Math.ceil(regenCount / bundleSize);
-    const bundles: VoucherBatch["bundles"] = [];
-    let remaining = regenCount;
-    for (let b = 0; b < numBundles; b++) {
-      const cardsInBundle = Math.min(bundleSize, remaining);
-      remaining -= cardsInBundle;
-      const prefix = generateBundlePrefix(batch.denomination, now);
-      const cards: VoucherBatch["bundles"][0]["cards"] = [];
-      for (let c = 0; c < cardsInBundle; c++) {
-        cards.push({
-          id: `card-${newBatchId}-${b}-${c}`, serialNumber: generateCardSerial(prefix, c), pin: generatePin(),
-          denomination: batch.denomination, status: "available" as const, batchId: newBatchId, bundleSerialPrefix: prefix,
-          soldVia: null, createdAt: now, invalidatedAt: null, soldAt: null, usedAt: null,
+    setBatches(prev => prev.map(b => {
+      if (b.id !== batch.id) return b;
+      const updatedBundles = b.bundles.map(bundle => {
+        const updatedCards = bundle.cards.map(card => {
+          if (card.status !== "invalidated") return card;
+          // Regenerate this card in-place with new serial/pin but keep position
+          return {
+            ...card,
+            id: `card-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            serialNumber: generateCardSerial(bundle.serialPrefix, Math.floor(Math.random() * 10000)),
+            pin: generatePin(),
+            status: "available" as const,
+            createdAt: now,
+            invalidatedAt: null,
+            soldVia: null,
+            soldAt: null,
+            usedAt: null,
+          };
         });
-      }
-      bundles.push({ id: `bundle-${newBatchId}-${b}`, serialPrefix: prefix, denomination: batch.denomination, batchId: newBatchId, cardCount: cardsInBundle, cards });
-    }
-    const newBatch: VoucherBatch = {
-      id: newBatchId, batchNumber: newBatchNumber, denomination: batch.denomination, bundleCount: numBundles, totalCards: regenCount,
-      status: "active", createdAt: now, totalCost: 0, discountApplied: false, discountPercent: 0,
-      generationType: "replacement", replacedBatchId: batch.id, bundles,
-    };
-    setBatches(prev => [...prev, newBatch]);
+        return { ...bundle, cards: updatedCards };
+      });
+      return { ...b, bundles: updatedBundles, status: "active" as const };
+    }));
     setShowRegenConfirm(false);
-    toast({ title: "Replacement Batch Created", description: `${newBatchNumber} — ${regenCount} cards regenerated` });
-    navigate(`/merchant-voucher-batch/${newBatchId}`);
+    toast({ title: "Cards Regenerated", description: `${regenCount} invalidated cards have been regenerated in this batch` });
   };
 
   const handlePrintComplete = (cardIds: string[]) => {
@@ -416,8 +412,7 @@ export default function MerchantVoucherBatchDetail() {
               <RefreshCw className="h-5 w-5 text-amber-600" /> Regenerate Cards
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
-              This will create a new replacement batch with <strong>{regenCount}</strong> card{regenCount !== 1 ? "s" : ""} to replace the invalidated ones.
-              Cards will be grouped into bundles of 100.
+              This will regenerate <strong>{regenCount}</strong> invalidated card{regenCount !== 1 ? "s" : ""} in this batch with new serial numbers and PINs. Non-invalidated cards will remain unchanged.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
