@@ -10,6 +10,7 @@ type Status = "pending" | "approved" | "rejected";
 
 interface SubMerchantApp {
   id: string;
+  merchantId: string;
   merchantName: string;
   merchantCity: string;
   refNo: string;
@@ -22,6 +23,7 @@ interface SubMerchantApp {
 const mockApplications: SubMerchantApp[] = [
   {
     id: "1",
+    merchantId: "techhub",
     merchantName: "TechHub Solutions",
     merchantCity: "Lagos, Nigeria",
     refNo: "MG-SUB-2026-0118",
@@ -31,6 +33,7 @@ const mockApplications: SubMerchantApp[] = [
   },
   {
     id: "2",
+    merchantId: "greenleaf",
     merchantName: "GreenLeaf Stores",
     merchantCity: "Abuja, Nigeria",
     refNo: "MG-SUB-2026-0095",
@@ -40,12 +43,13 @@ const mockApplications: SubMerchantApp[] = [
   },
   {
     id: "3",
+    merchantId: "quickmart",
     merchantName: "QuickMart Ltd",
     merchantCity: "Port Harcourt, Nigeria",
     refNo: "MG-SUB-2026-0071",
     dateSubmitted: "5 Feb 2026",
     status: "rejected",
-    rejectionReason: "Your application was not approved by the parent merchant. Please contact them directly or re-apply.",
+    rejectionReason: "Your application was not approved because your location is not acceptable at the moment.",
     estimatedReview: "",
   },
 ];
@@ -214,7 +218,7 @@ const SubMerchantApplicationStatus = () => {
                     )}
                     {app.status === "rejected" && (
                       <Button
-                        onClick={() => navigate("/merchants?mode=apply")}
+                        onClick={() => navigate(`/apply-sub-merchant/${app.merchantId}`)}
                         variant="outline"
                         className="w-full h-11 rounded-xl touch-manipulation active:scale-[0.97] text-sm font-semibold border-red-500/30 text-red-700 hover:bg-red-500/10"
                       >
