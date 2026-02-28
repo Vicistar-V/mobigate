@@ -31,13 +31,12 @@ const superadminMenuItems = [
     icon: Gamepad2,
     isDrawerTrigger: true,
   },
-  // COMMENTED OUT — re-enable when ready
-  // {
-  //   title: "Manage Merchants",
-  //   icon: Store,
-  //   url: "/mobigate-admin/merchants",
-  //   isDirectLink: true,
-  // },
+  {
+    title: "Manage Merchants",
+    icon: Store,
+    url: "/mobigate-admin/merchants",
+    isDirectLink: true,
+  },
   {
     title: "Manage e-Library",
     icon: Library,
@@ -171,11 +170,10 @@ const menuItems: MenuItem[] = [{
       title: "Merchant Quizzes Management",
       url: "/merchant-page",
     },
-    // COMMENTED OUT — re-enable when ready
-    // {
-    //   title: "Merchant Voucher Management",
-    //   url: "/merchant-voucher-management",
-    // }
+    {
+      title: "Merchant Voucher Management",
+      url: "/merchant-voucher-management",
+    }
   ]
 }, {
   title: "Friendship Menu",
