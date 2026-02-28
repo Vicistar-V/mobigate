@@ -163,12 +163,9 @@ const menuItems: MenuItem[] = [{
       url: "#",
       items: [
         { title: "Individual Merchant Account", url: "/merchant-application/individual" },
-        { title: "Corporate Merchant Account", url: "/merchant-application/corporate" }
+        { title: "Corporate Merchant Account", url: "/merchant-application/corporate" },
+        { title: "Application Status", url: "/merchant-application-status" }
       ]
-    },
-    {
-      title: "Application Status",
-      url: "/merchant-application-status",
     },
     {
       title: "Merchant Quizzes Management",
