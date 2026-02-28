@@ -370,8 +370,18 @@ export default function BuyVouchersPage() {
             </button>
           </div>
         )}
+        {selected && qty >= 10 && (
+          <div className="flex items-center justify-center gap-1 mt-1.5">
+            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-[10px] px-2 py-0.5 h-auto gap-1 font-semibold animate-in fade-in-0 zoom-in-95 duration-200">
+              <Sparkles className="h-3 w-3" />
+              Discount Unlocked!
+            </Badge>
+          </div>
+        )}
         {selected && qty < 10 && (
-          <p className="text-[10px] text-amber-600 text-center mt-1">Min 10 for discount</p>
+          <p className="text-[10px] text-amber-600 text-center mt-1">
+            {qty > 0 ? `Add ${10 - qty} more for discount` : "Min 10 for discount"}
+          </p>
         )}
       </div>
     );
