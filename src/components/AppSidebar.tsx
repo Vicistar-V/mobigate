@@ -32,6 +32,12 @@ const superadminMenuItems = [
     isDrawerTrigger: true,
   },
   {
+    title: "Manage Merchants",
+    icon: Store,
+    url: "/mobigate-admin/merchants",
+    isDirectLink: true,
+  },
+  {
     title: "Manage e-Library",
     icon: Library,
     items: [
@@ -394,6 +400,36 @@ export function AppSidebar() {
                           <item.icon className="h-4 w-4" />
                         </div>
                         <span className="font-medium flex-1 whitespace-normal break-words leading-tight text-left">{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+
+                // Direct link item (Manage Merchants)
+                if ((item as any).isDirectLink && (item as any).url) {
+                  const isInternalRoute = (item as any).url.startsWith('/');
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.title}
+                        className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2.5rem] py-2"
+                      >
+                        {isInternalRoute ? (
+                          <Link to={(item as any).url} onClick={handleLinkClick}>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="font-medium flex-1 whitespace-normal break-words leading-tight text-left">{item.title}</span>
+                          </Link>
+                        ) : (
+                          <a href={(item as any).url} onClick={handleLinkClick}>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="font-medium flex-1 whitespace-normal break-words leading-tight text-left">{item.title}</span>
+                          </a>
+                        )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );

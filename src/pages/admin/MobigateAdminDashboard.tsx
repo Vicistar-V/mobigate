@@ -31,10 +31,10 @@ import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFe
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
-import { VoucherDiscountSettingsCard } from "@/components/mobigate/VoucherDiscountSettingsCard";
+// VoucherDiscountSettingsCard moved to ManageMerchantsPage
 // MobigateQuizManagement moved to /mobigate-admin/quiz
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
-import { MerchantApplicationsAdmin } from "@/components/mobigate/MerchantApplicationsAdmin";
+// MerchantApplicationsAdmin moved to ManageMerchantsPage
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -154,10 +154,9 @@ export default function MobigateAdminDashboard() {
                 <Megaphone className="h-4 w-4 mr-1" />
                 Adverts
               </TabsTrigger>
-              <TabsTrigger value="merchants" className="text-xs py-2 px-3 relative">
+              <TabsTrigger value="merchants" className="text-xs py-2 px-3" onClick={() => navigate("/mobigate-admin/merchants")}>
                 <Store className="h-4 w-4 mr-1" />
                 Merchants
-                <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-xs px-1">4</Badge>
               </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2 px-3">
                 <Settings className="h-4 w-4 mr-1" />
@@ -733,16 +732,12 @@ export default function MobigateAdminDashboard() {
             </ScrollArea>
           </TabsContent>
 
-          {/* Merchants Tab */}
+          {/* Merchants Tab - Redirects to dedicated page */}
           <TabsContent value="merchants" className="mt-0">
-            <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="pb-6 space-y-4">
-                <MerchantApplicationsAdmin />
-
-                {/* Voucher Bulk Discount Config */}
-                <VoucherDiscountSettingsCard />
-              </div>
-            </ScrollArea>
+            <div className="py-12 text-center">
+              <Store className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">Redirecting to Manage Merchants...</p>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
