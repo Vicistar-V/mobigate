@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Printer } from "lucide-react";
+import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Printer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,10 +8,15 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { initialSubMerchantBatches } from "@/data/subMerchantVoucherData";
-import { getBatchStatusCounts, getBundleStatusCounts, getInvalidatableCards, hashPin, formatNum } from "@/data/merchantVoucherData";
+import {
+  VoucherBatch,
+  getBatchStatusCounts, getBundleStatusCounts, getInvalidatableCards, hashPin, formatNum,
+  generateBatchNumber, generateBundlePrefix, generateCardSerial, generatePin,
+} from "@/data/merchantVoucherData";
 import { useToast } from "@/hooks/use-toast";
+import { VoucherPrintDrawer } from "@/components/merchant/VoucherExportDrawer";
 
-type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string } | { type: "card"; cardId: string; bundleId: string };
+type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string };
 
 export default function SubMerchantVoucherBatchDetail() {
   const navigate = useNavigate();
@@ -21,10 +26,13 @@ export default function SubMerchantVoucherBatchDetail() {
   const [expandedBundles, setExpandedBundles] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);
+  const [printDrawerOpen, setPrintDrawerOpen] = useState(false);
+  const [showRegenConfirm, setShowRegenConfirm] = useState(false);
 
   const batch = batches.find(b => b.id === batchId);
   const counts = batch ? getBatchStatusCounts(batch) : { available: 0, sold_unused: 0, used: 0, invalidated: 0, total: 0 };
   const batchInvalidatable = batch ? getInvalidatableCards(batch.bundles.flatMap(b => b.cards)) : [];
+  const regenCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "invalidated").length : 0;
 
   const toggleBundle = (id: string) => {
     setExpandedBundles(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
@@ -47,12 +55,92 @@ export default function SubMerchantVoucherBatchDetail() {
           const can = card.status === "available" || (card.status === "sold_unused" && card.soldVia === "physical");
           if (invalidateTarget.type === "batch" && can) return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
           if (invalidateTarget.type === "bundle" && bundle.id === invalidateTarget.bundleId && can) return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
-          if (invalidateTarget.type === "card" && card.id === invalidateTarget.cardId && can) return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
           return card;
         }),
       }))};
     }));
     setInvalidateTarget(null);
+  };
+
+  const handleRegenerate = () => {
+    if (!batch || regenCount === 0) return;
+    const now = new Date();
+    const newBatchId = `sm-batch-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const newBatchNumber = generateBatchNumber(now, "SM01");
+    const bundleSize = 100;
+    const numBundles = Math.ceil(regenCount / bundleSize);
+    const bundles: VoucherBatch["bundles"] = [];
+    let remaining = regenCount;
+
+    for (let b = 0; b < numBundles; b++) {
+      const cardsInBundle = Math.min(bundleSize, remaining);
+      remaining -= cardsInBundle;
+      const prefix = generateBundlePrefix(batch.denomination, now);
+      const cards: VoucherBatch["bundles"][0]["cards"] = [];
+      for (let c = 0; c < cardsInBundle; c++) {
+        cards.push({
+          id: `card-${newBatchId}-${b}-${c}`,
+          serialNumber: generateCardSerial(prefix, c),
+          pin: generatePin(),
+          denomination: batch.denomination,
+          status: "available" as const,
+          batchId: newBatchId,
+          bundleSerialPrefix: prefix,
+          soldVia: null,
+          createdAt: now,
+          invalidatedAt: null,
+          soldAt: null,
+          usedAt: null,
+        });
+      }
+      bundles.push({
+        id: `bundle-${newBatchId}-${b}`,
+        serialPrefix: prefix,
+        denomination: batch.denomination,
+        batchId: newBatchId,
+        cardCount: cardsInBundle,
+        cards,
+      });
+    }
+
+    const newBatch = {
+      id: newBatchId,
+      batchNumber: newBatchNumber,
+      denomination: batch.denomination,
+      bundleCount: numBundles,
+      totalCards: regenCount,
+      status: "active" as const,
+      createdAt: now,
+      totalCost: 0,
+      discountApplied: false,
+      discountPercent: 0,
+      generationType: "replacement" as const,
+      replacedBatchId: batch.id,
+      bundles,
+      purchasedFrom: (batch as any).purchasedFrom || "",
+    };
+
+    setBatches(prev => [...prev, newBatch]);
+    setShowRegenConfirm(false);
+    toast({ title: "Replacement Batch Created", description: `${newBatchNumber} — ${regenCount} cards regenerated` });
+  };
+
+  const handlePrintComplete = (cardIds: string[]) => {
+    setBatches(prev => prev.map(b => {
+      if (b.id !== batchId) return b;
+      return {
+        ...b,
+        bundles: b.bundles.map(bundle => ({
+          ...bundle,
+          cards: bundle.cards.map(card =>
+            cardIds.includes(card.id)
+              ? { ...card, status: "sold_unused" as const, soldVia: "physical" as const, soldAt: new Date() }
+              : card
+          ),
+        })),
+      };
+    }));
+    toast({ title: "Print Complete", description: `${cardIds.length} cards printed and marked as sold` });
   };
 
   const getInvalidateCount = (): number => {
@@ -62,7 +150,7 @@ export default function SubMerchantVoucherBatchDetail() {
       const bundle = batch!.bundles.find(b => b.id === invalidateTarget.bundleId);
       return bundle ? getInvalidatableCards(bundle.cards).length : 0;
     }
-    return 1;
+    return 0;
   };
 
   const statusColor = (s: string) => {
@@ -91,6 +179,9 @@ export default function SubMerchantVoucherBatchDetail() {
             <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-foreground">{batch.batchNumber}</h1>
               <Badge variant="outline" className="text-xs px-2 h-5 border-primary/30 text-primary">Sub-Merchant</Badge>
+              {batch.generationType === "replacement" && (
+                <Badge variant="outline" className="text-xs px-2 h-5 border-amber-500 text-amber-600">Replacement</Badge>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">M{formatNum(batch.denomination)} • {batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
           </div>
@@ -112,9 +203,39 @@ export default function SubMerchantVoucherBatchDetail() {
           ))}
         </div>
 
-        {batchInvalidatable.length > 0 && (
-          <Button onClick={() => setInvalidateTarget({ type: "batch" })} variant="outline" className="w-full h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]">
-            <ShieldAlert className="h-4 w-4 mr-2" /> Invalidate ({batchInvalidatable.length})
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {counts.available > 0 && (
+            <Button
+              onClick={() => setPrintDrawerOpen(true)}
+              variant="outline"
+              className="flex-1 h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97]"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Print Cards ({counts.available})
+            </Button>
+          )}
+          {batchInvalidatable.length > 0 && (
+            <Button
+              onClick={() => setInvalidateTarget({ type: "batch" })}
+              variant="outline"
+              className="flex-1 h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]"
+            >
+              <ShieldAlert className="h-4 w-4 mr-2" />
+              Invalidate ({batchInvalidatable.length})
+            </Button>
+          )}
+        </div>
+
+        {/* Regeneration Button */}
+        {regenCount > 0 && (
+          <Button
+            onClick={() => setShowRegenConfirm(true)}
+            variant="outline"
+            className="w-full h-11 rounded-xl text-xs font-semibold border-amber-500/30 text-amber-600 hover:bg-amber-500/5 touch-manipulation active:scale-[0.97]"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Regenerate Invalidated Cards ({regenCount})
           </Button>
         )}
 
@@ -129,6 +250,9 @@ export default function SubMerchantVoucherBatchDetail() {
           {filteredBundles.map(bundle => {
             const bCounts = getBundleStatusCounts(bundle);
             const isExpanded = expandedBundles.has(bundle.id);
+            const bundleInvalidatable = getInvalidatableCards(bundle.cards);
+            const bundleAvailable = bundle.cards.filter(c => c.status === "available").length;
+
             return (
               <div key={bundle.id} className="rounded-xl border border-border/50 bg-card overflow-hidden">
                 <div onClick={() => toggleBundle(bundle.id)} className="p-3.5 flex items-center gap-3 touch-manipulation cursor-pointer active:bg-muted/30">
@@ -147,21 +271,50 @@ export default function SubMerchantVoucherBatchDetail() {
                   {isExpanded ? <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />}
                 </div>
                 {isExpanded && (
-                  <div className="border-t border-border/30 max-h-[400px] overflow-y-auto touch-auto">
-                    {bundle.cards.map(card => (
-                      <div key={card.id} className="px-3.5 py-3 border-b border-border/20 last:border-0">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <p className="text-xs font-mono font-semibold text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
-                          <Badge className={`${statusColor(card.status)} text-xs h-5 px-2`}>{statusLabel(card.status)}</Badge>
+                  <div className="border-t border-border/30">
+                    {/* Bundle actions */}
+                    <div className="px-3 py-2.5 border-b border-border/30 flex items-center gap-3">
+                      {bundleAvailable > 0 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setPrintDrawerOpen(true); }}
+                          className="text-xs text-primary font-semibold touch-manipulation flex items-center gap-1.5 h-8"
+                        >
+                          <Printer className="h-3.5 w-3.5" /> Print Bundle ({bundleAvailable})
+                        </button>
+                      )}
+                      {bundleInvalidatable.length > 0 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setInvalidateTarget({ type: "bundle", bundleId: bundle.id }); }}
+                          className="text-xs text-destructive font-semibold touch-manipulation flex items-center gap-1.5 h-8"
+                        >
+                          <ShieldAlert className="h-3.5 w-3.5" /> Invalidate ({bundleInvalidatable.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-[400px] overflow-y-auto touch-auto">
+                      {bundle.cards.map(card => (
+                        <div key={card.id} className="px-3.5 py-3 border-b border-border/20 last:border-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-mono font-semibold text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
+                            <Badge className={`${statusColor(card.status)} text-xs h-5 px-2`}>{statusLabel(card.status)}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs text-muted-foreground font-mono">PIN: {hashPin(card.pin)}</p>
+                            <span className="text-xs font-bold text-foreground">M{formatNum(card.denomination)}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>{card.createdAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "2-digit" })}</span>
+                            <span className="font-mono">{card.bundleSerialPrefix}</span>
+                            {card.soldVia && (
+                              <span className={card.soldVia === "physical" ? "text-amber-600" : "text-primary"}>
+                                {card.soldVia === "physical" ? "Physical" : "Digital"}
+                              </span>
+                            )}
+                            {card.soldAt && <span>Sold {card.soldAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short" })}</span>}
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-muted-foreground font-mono">PIN: {hashPin(card.pin)}</p>
-                          {(card.status === "available" || (card.status === "sold_unused" && card.soldVia === "physical")) && (
-                            <button onClick={() => setInvalidateTarget({ type: "card", cardId: card.id, bundleId: bundle.id })} className="text-xs text-destructive font-semibold touch-manipulation h-7 px-1">Invalidate</button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -170,12 +323,14 @@ export default function SubMerchantVoucherBatchDetail() {
         </div>
       </div>
 
+      {/* Invalidation Dialog */}
       <AlertDialog open={!!invalidateTarget} onOpenChange={(open) => !open && setInvalidateTarget(null)}>
         <AlertDialogContent className="max-w-[340px] rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-base"><AlertTriangle className="h-5 w-5 text-destructive" /> Confirm Invalidation</AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
               This will invalidate <strong>{getInvalidateCount()}</strong> card{getInvalidateCount() !== 1 ? "s" : ""}.
+              Only "Available" and "Sold (Physical)" cards will be affected.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -184,6 +339,35 @@ export default function SubMerchantVoucherBatchDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Regeneration Dialog */}
+      <AlertDialog open={showRegenConfirm} onOpenChange={setShowRegenConfirm}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-base">
+              <RefreshCw className="h-5 w-5 text-amber-600" /> Regenerate Cards
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              Create a replacement batch with <strong>{regenCount}</strong> card{regenCount !== 1 ? "s" : ""}.
+              Cards will be grouped into bundles of 100.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-10 rounded-xl text-sm">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRegenerate} className="h-10 rounded-xl text-sm bg-amber-600 hover:bg-amber-700 text-white">
+              Regenerate {regenCount} Cards
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Print Drawer */}
+      <VoucherPrintDrawer
+        open={printDrawerOpen}
+        onOpenChange={setPrintDrawerOpen}
+        batch={batch}
+        onPrintComplete={handlePrintComplete}
+      />
     </div>
   );
 }

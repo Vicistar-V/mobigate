@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Printer, Package, ListChecks } from "lucide-react";
-import { VoucherBatch } from "@/data/merchantVoucherData";
+import { VoucherBatch, formatNum } from "@/data/merchantVoucherData";
 
 interface VoucherPrintDrawerProps {
   open: boolean;
@@ -28,6 +28,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     batch.bundles.map(b => ({
       ...b,
       availableCount: b.cards.filter(c => c.status === "available").length,
+      availableCards: b.cards.filter(c => c.status === "available"),
       availableCardIds: b.cards.filter(c => c.status === "available").map(c => c.id),
     })).filter(b => b.availableCount > 0),
   [batch.bundles]);
@@ -38,6 +39,12 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     bundlesWithAvailable
       .filter(b => selectedBundles.has(b.id))
       .flatMap(b => b.availableCardIds),
+  [bundlesWithAvailable, selectedBundles]);
+
+  const selectedCards = useMemo(() =>
+    bundlesWithAvailable
+      .filter(b => selectedBundles.has(b.id))
+      .flatMap(b => b.availableCards),
   [bundlesWithAvailable, selectedBundles]);
 
   const allSelected = bundlesWithAvailable.length > 0 && selectedBundles.size === bundlesWithAvailable.length;
@@ -58,14 +65,97 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     }
   };
 
-  const handlePrint = async () => {
+  const handlePrint = useCallback(() => {
+    if (selectedCards.length === 0) return;
     setIsPrinting(true);
-    await new Promise(r => setTimeout(r, 2000));
-    setIsPrinting(false);
-    onOpenChange(false);
-    onPrintComplete(selectedCardIds);
-    setSelectedBundles(new Set());
-  };
+
+    // Create print container
+    const printContainer = document.createElement("div");
+    printContainer.id = "voucher-print-area";
+    printContainer.innerHTML = `
+      <style>
+        @media print {
+          body > *:not(#voucher-print-area) { display: none !important; }
+          #voucher-print-area { display: block !important; }
+        }
+        #voucher-print-area {
+          font-family: 'Courier New', monospace;
+          padding: 12mm;
+        }
+        .print-header {
+          text-align: center;
+          margin-bottom: 8mm;
+          border-bottom: 2px solid #000;
+          padding-bottom: 4mm;
+        }
+        .print-header h1 { font-size: 16pt; margin: 0 0 2mm 0; }
+        .print-header p { font-size: 9pt; margin: 0; color: #555; }
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 3mm;
+        }
+        .voucher-card-print {
+          border: 1.5px solid #333;
+          border-radius: 2mm;
+          padding: 3mm;
+          page-break-inside: avoid;
+          font-size: 8pt;
+        }
+        .voucher-card-print .denom {
+          font-size: 12pt;
+          font-weight: 900;
+          text-align: center;
+          border-bottom: 1px solid #ccc;
+          padding-bottom: 1.5mm;
+          margin-bottom: 1.5mm;
+        }
+        .voucher-card-print .field { margin-bottom: 1mm; }
+        .voucher-card-print .label { color: #777; font-size: 6pt; text-transform: uppercase; }
+        .voucher-card-print .value { font-weight: bold; font-size: 8pt; word-break: break-all; }
+        .voucher-card-print .pin-value { font-size: 10pt; font-weight: 900; letter-spacing: 1px; text-align: center; padding: 2mm 0; background: #f5f5f5; border-radius: 1mm; margin: 1.5mm 0; }
+        @page { size: A4; margin: 10mm; }
+        .page-break { page-break-after: always; }
+      </style>
+      <div class="print-header">
+        <h1>VOUCHER CARDS</h1>
+        <p>Batch: ${batch.batchNumber} | Denomination: M${formatNum(batch.denomination)} | Date: ${new Date().toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })} | Cards: ${selectedCards.length}</p>
+      </div>
+      <div class="card-grid">
+        ${selectedCards.map((card, i) => `
+          ${i > 0 && i % 20 === 0 ? '</div><div class="page-break"></div><div class="card-grid">' : ''}
+          <div class="voucher-card-print">
+            <div class="denom">M${formatNum(card.denomination)}</div>
+            <div class="field"><div class="label">Serial</div><div class="value">${card.serialNumber}</div></div>
+            <div class="pin-value">${card.pin}</div>
+            <div class="field"><div class="label">Bundle</div><div class="value">${card.bundleSerialPrefix}</div></div>
+            <div class="field"><div class="label">Generated</div><div class="value">${card.createdAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</div></div>
+            <div class="field"><div class="label">Batch</div><div class="value" style="font-size:6pt">${batch.batchNumber}</div></div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    printContainer.style.display = "none";
+    document.body.appendChild(printContainer);
+
+    const onAfterPrint = () => {
+      document.body.removeChild(printContainer);
+      window.removeEventListener("afterprint", onAfterPrint);
+      setIsPrinting(false);
+      onOpenChange(false);
+      onPrintComplete(selectedCardIds);
+      setSelectedBundles(new Set());
+    };
+
+    window.addEventListener("afterprint", onAfterPrint);
+
+    // Show print area, trigger print
+    printContainer.style.display = "block";
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  }, [selectedCards, selectedCardIds, batch, onOpenChange, onPrintComplete]);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -76,7 +166,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             Print Voucher Cards
           </DrawerTitle>
           <DrawerDescription className="text-sm">
-            Select bundles to print. Only available cards will be included with full PINs.
+            Select bundles to print. Cards will be printed with full PINs on A4 paper via your browser's print dialog.
           </DrawerDescription>
         </DrawerHeader>
 
@@ -158,12 +248,12 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             {isPrinting ? (
               <>
                 <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                Printing...
+                Opening Print Dialog...
               </>
             ) : (
               <>
                 <Printer className="h-4 w-4 mr-2" />
-                Print {selectedCardIds.length} Cards as PDF
+                Print {selectedCardIds.length} Cards
               </>
             )}
           </Button>

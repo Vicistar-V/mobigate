@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Check, Sparkles, CreditCard, ChevronRight, Wallet, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Check, Sparkles, CreditCard, ChevronRight, Wallet, AlertTriangle, Printer, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { rechargeVouchers, RechargeVoucher } from "@/data/rechargeVouchersData";
@@ -9,6 +9,7 @@ import {
   getDiscountForBundles,
   initialMerchantWalletBalance,
   formatNum,
+  generateBatchNumber,
 } from "@/data/merchantVoucherData";
 import { platformVoucherDiscountSettings } from "@/data/platformSettingsData";
 
@@ -29,6 +30,11 @@ export default function MerchantVoucherGenerate() {
   const [bundleCount, setBundleCount] = useState(1);
   const [processingMsg, setProcessingMsg] = useState(0);
   const [walletBalance] = useState(initialMerchantWalletBalance);
+  const [receiptData] = useState(() => ({
+    transactionRef: `TXN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    batchNumber: generateBatchNumber(new Date()),
+    dateTime: new Date(),
+  }));
 
   const lowTier = rechargeVouchers.filter(v => v.tier === "low");
   const midTier = rechargeVouchers.filter(v => v.tier === "mid");
@@ -63,6 +69,61 @@ export default function MerchantVoucherGenerate() {
     }, 3500));
     return () => timers.forEach(clearTimeout);
   }, [step]);
+
+  const handlePrintReceipt = useCallback(() => {
+    if (!selectedDenom || !discount) return;
+    const printDiv = document.createElement("div");
+    printDiv.id = "receipt-print-area";
+    printDiv.innerHTML = `
+      <style>
+        @media print {
+          body > *:not(#receipt-print-area) { display: none !important; }
+          #receipt-print-area { display: block !important; }
+        }
+        #receipt-print-area {
+          font-family: 'Courier New', monospace;
+          max-width: 80mm;
+          margin: 0 auto;
+          padding: 8mm;
+        }
+        .receipt-title { text-align: center; font-size: 14pt; font-weight: 900; margin-bottom: 4mm; border-bottom: 2px dashed #000; padding-bottom: 4mm; }
+        .receipt-row { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 2mm; }
+        .receipt-row .label { color: #555; }
+        .receipt-row .val { font-weight: bold; text-align: right; }
+        .receipt-divider { border-top: 1px dashed #999; margin: 3mm 0; }
+        .receipt-total { font-size: 12pt; font-weight: 900; text-align: center; margin: 4mm 0; }
+        .receipt-footer { text-align: center; font-size: 7pt; color: #888; margin-top: 6mm; }
+        @page { size: auto; margin: 10mm; }
+      </style>
+      <div class="receipt-title">VOUCHER GENERATION<br/>RECEIPT</div>
+      <div class="receipt-row"><span class="label">Receipt No</span><span class="val">${receiptData.transactionRef}</span></div>
+      <div class="receipt-row"><span class="label">Date</span><span class="val">${receiptData.dateTime.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
+      <div class="receipt-row"><span class="label">Time</span><span class="val">${receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}</span></div>
+      <div class="receipt-row"><span class="label">Merchant ID</span><span class="val">0001</span></div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="label">Denomination</span><span class="val">M${formatNum(selectedDenom.mobiValue)}</span></div>
+      <div class="receipt-row"><span class="label">Bundles</span><span class="val">${bundleCount}</span></div>
+      <div class="receipt-row"><span class="label">Total Cards</span><span class="val">${formatNum(discount.totalCards)}</span></div>
+      <div class="receipt-row"><span class="label">Batch Number</span><span class="val">${receiptData.batchNumber}</span></div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="label">Subtotal</span><span class="val">₦${formatNum(discount.subtotal)}</span></div>
+      ${discount.discountPercent > 0 ? `<div class="receipt-row"><span class="label">Discount (${discount.discountPercent}%)</span><span class="val">-₦${formatNum(discount.discountAmount)}</span></div>` : ''}
+      <div class="receipt-divider"></div>
+      <div class="receipt-total">TOTAL: ₦${formatNum(discount.total)}</div>
+      <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(walletBalance - discount.total)}</span></div>
+      <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
+    `;
+    printDiv.style.display = "none";
+    document.body.appendChild(printDiv);
+
+    const cleanup = () => {
+      document.body.removeChild(printDiv);
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+    printDiv.style.display = "block";
+    setTimeout(() => window.print(), 100);
+  }, [selectedDenom, discount, bundleCount, receiptData, walletBalance]);
 
   // ─── Denomination Selection ───
   const renderDenomCard = (v: RechargeVoucher) => {
@@ -385,40 +446,103 @@ export default function MerchantVoucherGenerate() {
     );
   }
 
-  // ─── Complete ───
+  // ─── Complete with Receipt ───
   if (step === "complete" && selectedDenom && discount) {
     return (
-      <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
-        <div className="relative w-28 h-28 mb-6">
-          <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" style={{ animationDuration: "2s" }} />
-          <div className="absolute inset-0 rounded-full bg-emerald-500/5" />
-          <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center animate-scale-in">
-            <svg className="h-14 w-14 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 24, strokeDashoffset: 24, animation: "draw 0.6s ease-out 0.3s forwards" }} />
-            </svg>
+      <div className="bg-background min-h-screen pb-6">
+        {/* Success Header */}
+        <div className="flex flex-col items-center pt-8 pb-4 px-6">
+          <div className="relative w-20 h-20 mb-4">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" style={{ animationDuration: "2s" }} />
+            <div className="absolute inset-0 rounded-full bg-emerald-500/5" />
+            <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center animate-scale-in">
+              <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 24, strokeDashoffset: 24, animation: "draw 0.6s ease-out 0.3s forwards" }} />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-lg font-black text-foreground mb-0.5">Generation Complete!</h2>
+          <p className="text-sm text-muted-foreground">Your vouchers are ready</p>
+        </div>
+
+        {/* Receipt Card */}
+        <div className="mx-4">
+          <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+            {/* Receipt Header */}
+            <div className="bg-muted/40 px-4 py-3 border-b border-border/30 text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Receipt className="h-4 w-4 text-muted-foreground" />
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Voucher Generation Receipt</p>
+              </div>
+              <p className="text-xs text-muted-foreground font-mono">{receiptData.transactionRef}</p>
+            </div>
+
+            <div className="p-4 space-y-2.5">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Date & Time</span>
+                <span className="font-semibold text-foreground text-right">
+                  {receiptData.dateTime.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}{" "}
+                  {receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Merchant ID</span>
+                <span className="font-semibold text-foreground">0001</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Batch Number</span>
+                <span className="font-bold text-foreground text-right text-xs font-mono">{receiptData.batchNumber}</span>
+              </div>
+
+              <div className="border-t border-dashed border-border/50 my-1" />
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Denomination</span>
+                <span className="font-bold text-foreground">M{formatNum(selectedDenom.mobiValue)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Bundles</span>
+                <span className="font-bold text-foreground">{bundleCount}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Cards</span>
+                <span className="font-bold text-foreground">{formatNum(discount.totalCards)}</span>
+              </div>
+
+              <div className="border-t border-dashed border-border/50 my-1" />
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-semibold text-foreground">₦{formatNum(discount.subtotal)}</span>
+              </div>
+              {discount.discountPercent > 0 && (
+                <div className="flex justify-between text-sm text-emerald-600">
+                  <span>Discount ({discount.discountPercent}%)</span>
+                  <span className="font-bold">-₦{formatNum(discount.discountAmount)}</span>
+                </div>
+              )}
+              <div className="border-t border-border/50 pt-2 flex justify-between">
+                <span className="font-bold text-foreground">Total Paid</span>
+                <span className="font-black text-lg text-foreground">₦{formatNum(discount.total)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Wallet Balance</span>
+                <span className="font-semibold text-emerald-600">₦{formatNum(walletBalance - discount.total)}</span>
+              </div>
+            </div>
           </div>
         </div>
-        <h2 className="text-xl font-black text-foreground mb-1">Generation Complete!</h2>
-        <p className="text-sm text-muted-foreground mb-6">Your vouchers are ready</p>
-        <div className="w-full rounded-xl border border-border/50 bg-card p-4 space-y-2 mb-6">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Denomination</span>
-            <span className="font-bold text-foreground">M{formatNum(selectedDenom.mobiValue)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Bundles</span>
-            <span className="font-bold text-foreground">{bundleCount}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Cards</span>
-            <span className="font-bold text-foreground">{formatNum(discount.totalCards)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Amount Paid</span>
-            <span className="font-bold text-foreground">₦{formatNum(discount.total)}</span>
-          </div>
-        </div>
-        <div className="w-full space-y-3">
+
+        {/* Action Buttons */}
+        <div className="mx-4 mt-4 space-y-3">
+          <Button
+            onClick={handlePrintReceipt}
+            variant="outline"
+            className="w-full h-12 rounded-xl text-sm font-semibold touch-manipulation active:scale-[0.97]"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Print Receipt
+          </Button>
           <Button
             onClick={() => navigate("/merchant-voucher-batches")}
             className="w-full h-12 rounded-xl text-sm font-semibold bg-primary hover:bg-primary/90 touch-manipulation active:scale-[0.97]"

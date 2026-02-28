@@ -150,3 +150,14 @@ All colors MUST be HSL.
   0% { transform: translateX(-100%); }
   100% { transform: translateX(200%); }
 }
+
+/* Print styles */
+@media print {
+  body > *:not(#voucher-print-area):not(#receipt-print-area) {
+    display: none !important;
+  }
+  #voucher-print-area,
+  #receipt-print-area {
+    display: block !important;
+  }
+}

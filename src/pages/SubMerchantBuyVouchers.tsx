@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Check, Store, ChevronRight, CreditCard, CheckCircle2, Package } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Check, Store, ChevronRight, CreditCard, CheckCircle2, Package, Printer, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { mockParentMerchants, ParentMerchant, MerchantStock, initialSubMerchantWalletBalance } from "@/data/subMerchantVoucherData";
-import { formatNum } from "@/data/merchantVoucherData";
+import { formatNum, generateBatchNumber } from "@/data/merchantVoucherData";
 
 type Step = "denomination" | "bundles" | "merchant" | "summary" | "processing" | "success";
 
@@ -24,6 +24,11 @@ export default function SubMerchantBuyVouchers() {
   const [bundleCount, setBundleCount] = useState(1);
   const [selectedMerchant, setSelectedMerchant] = useState<ParentMerchant | null>(null);
   const [processingMsg, setProcessingMsg] = useState(0);
+  const [receiptData] = useState(() => ({
+    transactionRef: `TXN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    batchNumber: generateBatchNumber(new Date(), "SM01"),
+    dateTime: new Date(),
+  }));
 
   const availableDenoms = useMemo(() => {
     const denoms = new Set<number>();
@@ -73,6 +78,54 @@ export default function SubMerchantBuyVouchers() {
     timers.push(setTimeout(() => { setStep("success"); window.scrollTo(0, 0); }, 3200));
     return () => timers.forEach(clearTimeout);
   }, [step]);
+
+  const handlePrintReceipt = useCallback(() => {
+    const printDiv = document.createElement("div");
+    printDiv.id = "receipt-print-area";
+    printDiv.innerHTML = `
+      <style>
+        @media print {
+          body > *:not(#receipt-print-area) { display: none !important; }
+          #receipt-print-area { display: block !important; }
+        }
+        #receipt-print-area {
+          font-family: 'Courier New', monospace;
+          max-width: 80mm;
+          margin: 0 auto;
+          padding: 8mm;
+        }
+        .receipt-title { text-align: center; font-size: 14pt; font-weight: 900; margin-bottom: 4mm; border-bottom: 2px dashed #000; padding-bottom: 4mm; }
+        .receipt-row { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 2mm; }
+        .receipt-row .label { color: #555; }
+        .receipt-row .val { font-weight: bold; text-align: right; }
+        .receipt-divider { border-top: 1px dashed #999; margin: 3mm 0; }
+        .receipt-total { font-size: 12pt; font-weight: 900; text-align: center; margin: 4mm 0; }
+        .receipt-footer { text-align: center; font-size: 7pt; color: #888; margin-top: 6mm; }
+        @page { size: auto; margin: 10mm; }
+      </style>
+      <div class="receipt-title">VOUCHER PURCHASE<br/>RECEIPT</div>
+      <div class="receipt-row"><span class="label">Receipt No</span><span class="val">${receiptData.transactionRef}</span></div>
+      <div class="receipt-row"><span class="label">Date</span><span class="val">${receiptData.dateTime.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
+      <div class="receipt-row"><span class="label">Time</span><span class="val">${receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}</span></div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="label">Purchased From</span><span class="val">${selectedMerchant?.name || ""}</span></div>
+      <div class="receipt-row"><span class="label">Denomination</span><span class="val">M${formatNum(selectedDenom || 0)}</span></div>
+      <div class="receipt-row"><span class="label">Bundles</span><span class="val">${bundleCount}</span></div>
+      <div class="receipt-row"><span class="label">Total Cards</span><span class="val">${formatNum(totalCards)}</span></div>
+      <div class="receipt-row"><span class="label">Batch Number</span><span class="val">${receiptData.batchNumber}</span></div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="label">Price/Bundle</span><span class="val">₦${formatNum(selectedStock?.pricePerBundle || 0)}</span></div>
+      <div class="receipt-total">TOTAL: ₦${formatNum(totalCost)}</div>
+      <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(initialSubMerchantWalletBalance - totalCost)}</span></div>
+      <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
+    `;
+    printDiv.style.display = "none";
+    document.body.appendChild(printDiv);
+    const cleanup = () => { document.body.removeChild(printDiv); window.removeEventListener("afterprint", cleanup); };
+    window.addEventListener("afterprint", cleanup);
+    printDiv.style.display = "block";
+    setTimeout(() => window.print(), 100);
+  }, [selectedDenom, selectedMerchant, bundleCount, totalCards, totalCost, selectedStock, receiptData]);
 
   // Step 1: Select denomination
   if (step === "denomination") {
@@ -281,21 +334,93 @@ export default function SubMerchantBuyVouchers() {
     );
   }
 
-  // Step 6: Success
+  // Step 6: Success with Receipt
   return (
-    <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
-      <div className="relative w-28 h-28 mb-6">
-        <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: "2s" }} />
-        <div className="absolute inset-0 rounded-full bg-emerald-500/10" />
-        <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center animate-scale-in">
-          <CheckCircle2 className="h-14 w-14 text-white" />
+    <div className="bg-background min-h-screen pb-6">
+      {/* Success Header */}
+      <div className="flex flex-col items-center pt-8 pb-4 px-6">
+        <div className="relative w-20 h-20 mb-4">
+          <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: "2s" }} />
+          <div className="absolute inset-0 rounded-full bg-emerald-500/10" />
+          <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center animate-scale-in">
+            <CheckCircle2 className="h-10 w-10 text-white" />
+          </div>
+        </div>
+        <h2 className="text-lg font-black text-foreground mb-0.5">Purchase Complete!</h2>
+        <p className="text-sm text-muted-foreground">From {selectedMerchant?.name}</p>
+      </div>
+
+      {/* Receipt Card */}
+      <div className="mx-4">
+        <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+          <div className="bg-muted/40 px-4 py-3 border-b border-border/30 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Receipt className="h-4 w-4 text-muted-foreground" />
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Voucher Purchase Receipt</p>
+            </div>
+            <p className="text-xs text-muted-foreground font-mono">{receiptData.transactionRef}</p>
+          </div>
+
+          <div className="p-4 space-y-2.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Date & Time</span>
+              <span className="font-semibold text-foreground text-right">
+                {receiptData.dateTime.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}{" "}
+                {receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Purchased From</span>
+              <span className="font-bold text-foreground">{selectedMerchant?.name}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Batch Number</span>
+              <span className="font-bold text-foreground text-right text-xs font-mono">{receiptData.batchNumber}</span>
+            </div>
+
+            <div className="border-t border-dashed border-border/50 my-1" />
+
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Denomination</span>
+              <span className="font-bold text-foreground">M{formatNum(selectedDenom!)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Bundles</span>
+              <span className="font-bold text-foreground">{bundleCount}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Total Cards</span>
+              <span className="font-bold text-foreground">{formatNum(totalCards)}</span>
+            </div>
+
+            <div className="border-t border-dashed border-border/50 my-1" />
+
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Price per Bundle</span>
+              <span className="font-semibold text-foreground">₦{formatNum(selectedStock?.pricePerBundle || 0)}</span>
+            </div>
+            <div className="border-t border-border/50 pt-2 flex justify-between">
+              <span className="font-bold text-foreground">Total Paid</span>
+              <span className="font-black text-lg text-foreground">₦{formatNum(totalCost)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Wallet Balance</span>
+              <span className="font-semibold text-emerald-600">₦{formatNum(initialSubMerchantWalletBalance - totalCost)}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <h2 className="text-xl font-bold text-foreground mb-1">Purchase Complete!</h2>
-      <p className="text-sm text-muted-foreground mb-2">From {selectedMerchant?.name}</p>
-      <p className="text-3xl font-black text-emerald-600 mb-1">{formatNum(totalCards)} cards</p>
-      <p className="text-sm text-muted-foreground mb-6">M{formatNum(selectedDenom!)} × {bundleCount} bundle{bundleCount !== 1 ? "s" : ""}</p>
-      <div className="w-full space-y-3">
+
+      {/* Action Buttons */}
+      <div className="mx-4 mt-4 space-y-3">
+        <Button
+          onClick={handlePrintReceipt}
+          variant="outline"
+          className="w-full h-12 rounded-xl text-sm font-semibold touch-manipulation active:scale-[0.97]"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          Print Receipt
+        </Button>
         <Button
           onClick={() => navigate("/sub-merchant-voucher-batches")}
           className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]"
