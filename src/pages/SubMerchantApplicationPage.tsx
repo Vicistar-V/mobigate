@@ -43,6 +43,9 @@ export default function SubMerchantApplicationPage() {
     businessTypes: (reapplyData?.businessTypes as string[]) || ([] as string[]),
     description: reapplyData?.description || "",
     yearsInBusiness: reapplyData?.yearsInBusiness || "",
+    retailShopAddress: reapplyData?.retailShopAddress || "",
+    onlineStoreUrl: reapplyData?.onlineStoreUrl || "",
+    mobiShopUrl: reapplyData?.mobiShopUrl || "",
     agreeTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -53,7 +56,10 @@ export default function SubMerchantApplicationPage() {
   };
 
   const isValid = form.fullName.trim() && form.businessName.trim() && form.phone.trim() &&
-    form.city.trim() && form.state.trim() && form.businessTypes.length > 0 && form.agreeTerms;
+    form.city.trim() && form.state.trim() && form.businessTypes.length > 0 && form.agreeTerms &&
+    (!form.businessTypes.includes("retail_shop") || form.retailShopAddress.trim()) &&
+    (!form.businessTypes.includes("online_store") || form.onlineStoreUrl.trim()) &&
+    (!form.businessTypes.includes("mobi_shop") || form.mobiShopUrl.trim());
 
   const toggleBusinessType = (type: string) => {
     setForm(prev => ({
@@ -218,21 +224,46 @@ export default function SubMerchantApplicationPage() {
               ].map(opt => {
                 const selected = form.businessTypes.includes(opt.value);
                 return (
-                  <label
-                    key={opt.value}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors touch-manipulation active:scale-[0.98] ${
-                      selected
-                        ? "border-primary bg-primary/5"
-                        : "border-border bg-card"
-                    }`}
-                  >
-                    <Checkbox
-                      checked={selected}
-                      onCheckedChange={() => toggleBusinessType(opt.value)}
-                      className="h-5 w-5"
-                    />
-                    <span className="text-sm font-medium text-foreground">{opt.label}</span>
-                  </label>
+                  <div key={opt.value} className="space-y-2">
+                    <label
+                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors touch-manipulation active:scale-[0.98] ${
+                        selected
+                          ? "border-primary bg-primary/5"
+                          : "border-border bg-card"
+                      }`}
+                    >
+                      <Checkbox
+                        checked={selected}
+                        onCheckedChange={() => toggleBusinessType(opt.value)}
+                        className="h-5 w-5"
+                      />
+                      <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                    </label>
+                    {selected && opt.value === "retail_shop" && (
+                      <Input
+                        value={form.retailShopAddress}
+                        onChange={e => updateField("retailShopAddress", e.target.value)}
+                        placeholder="Enter your shop address *"
+                        className="h-11 rounded-xl text-sm ml-8"
+                      />
+                    )}
+                    {selected && opt.value === "online_store" && (
+                      <Input
+                        value={form.onlineStoreUrl}
+                        onChange={e => updateField("onlineStoreUrl", e.target.value)}
+                        placeholder="Enter website or store URL *"
+                        className="h-11 rounded-xl text-sm ml-8"
+                      />
+                    )}
+                    {selected && opt.value === "mobi_shop" && (
+                      <Input
+                        value={form.mobiShopUrl}
+                        onChange={e => updateField("mobiShopUrl", e.target.value)}
+                        placeholder="Enter Mobi Shop web address *"
+                        className="h-11 rounded-xl text-sm ml-8"
+                      />
+                    )}
+                  </div>
                 );
               })}
             </div>
