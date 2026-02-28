@@ -16,7 +16,7 @@ import {
 import { communityPeople } from "@/data/communityPeopleData";
 import { mockFriends } from "@/data/profileData";
 
-type Step = "vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers";
+type Step = "vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers" | "redeemPin" | "redeemProcessing" | "redeemSuccess";
 
 // Cart: voucherId -> quantity
 type Cart = Record<string, number>;
@@ -61,6 +61,8 @@ export default function BuyVouchersPage() {
   const [selfSuccess, setSelfSuccess] = useState(false);
   const [sendLoading, setSendLoading] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
+  const [redeemPin, setRedeemPin] = useState("");
+  const [redeemError, setRedeemError] = useState("");
 
   // Derived
   const lowTier = rechargeVouchers.filter((v) => v.tier === "low");
@@ -144,6 +146,7 @@ export default function BuyVouchersPage() {
     if (step === "countries") setStep("vouchers");
     else if (step === "merchants") setStep("countries");
     else if (step === "payment") setStep("merchants");
+    else if (step === "redeemPin") { setStep("vouchers"); setRedeemPin(""); setRedeemError(""); }
     else if (step === "distribute") {
       setStep("success");
       setShowSuccessButtons(true);
@@ -343,6 +346,21 @@ export default function BuyVouchersPage() {
         )}
       </div>
       <div className="px-4 pt-4">
+        {/* Redeem Voucher Code Section */}
+        <div
+          onClick={() => { setStep("redeemPin"); setRedeemPin(""); setRedeemError(""); window.scrollTo(0, 0); }}
+          className="rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 mb-6 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
+        >
+          <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Ticket className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-foreground">Have a Voucher Code?</p>
+            <p className="text-xs text-muted-foreground">Redeem a physical voucher PIN to fund your wallet</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        </div>
+
         {renderTier("Standard", lowTier, "M100 – M10,000")}
         {renderTier("Premium", midTier, "M15,000 – M100,000")}
         {renderTier("Elite", highTier, "M125,000 – M1,000,000")}
@@ -1002,8 +1020,123 @@ export default function BuyVouchersPage() {
     );
   };
 
+  // ─── REDEEM PIN STEP ───
+  const renderRedeemPinStep = () => (
+    <div className="bg-background min-h-screen pb-28">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+          <ArrowLeft className="h-5 w-5 text-foreground" />
+        </button>
+        <div>
+          <h1 className="text-base font-bold text-foreground">Redeem Voucher</h1>
+          <p className="text-xs text-muted-foreground">Enter your voucher PIN code</p>
+        </div>
+      </div>
+      <div className="px-4 pt-6 flex flex-col items-center">
+        <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+          <Ticket className="h-8 w-8 text-primary" />
+        </div>
+        <p className="text-sm text-foreground font-semibold mb-1 text-center">Enter Your PIN Code</p>
+        <p className="text-xs text-muted-foreground mb-6 text-center">Find the 16-digit PIN on your physical voucher card</p>
+        <input
+          type="text"
+          inputMode="numeric"
+          maxLength={16}
+          value={redeemPin}
+          onChange={e => { setRedeemPin(e.target.value.replace(/[^0-9]/g, "").slice(0, 16)); setRedeemError(""); }}
+          placeholder="Enter 16-digit PIN"
+          className="w-full h-14 text-center text-xl font-mono font-bold tracking-[0.3em] rounded-xl border-2 border-primary/30 bg-card text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+        />
+        {redeemError && (
+          <p className="text-xs text-destructive mt-2 text-center">{redeemError}</p>
+        )}
+        <div className="flex gap-2 mt-3 text-center">
+          <div className={`h-1.5 flex-1 rounded-full ${redeemPin.length >= 4 ? "bg-primary" : "bg-muted"}`} />
+          <div className={`h-1.5 flex-1 rounded-full ${redeemPin.length >= 8 ? "bg-primary" : "bg-muted"}`} />
+          <div className={`h-1.5 flex-1 rounded-full ${redeemPin.length >= 12 ? "bg-primary" : "bg-muted"}`} />
+          <div className={`h-1.5 flex-1 rounded-full ${redeemPin.length >= 16 ? "bg-emerald-500" : "bg-muted"}`} />
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-1">{redeemPin.length}/16 digits</p>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
+        <Button
+          onClick={() => {
+            if (redeemPin.length !== 16) { setRedeemError("Please enter a valid 16-digit PIN"); return; }
+            setStep("redeemProcessing");
+            window.scrollTo(0, 0);
+            setTimeout(() => { setStep("redeemSuccess"); window.scrollTo(0, 0); }, 3000);
+          }}
+          disabled={redeemPin.length < 16}
+          className="w-full h-12 text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]"
+        >
+          Redeem Voucher
+        </Button>
+      </div>
+    </div>
+  );
+
+  // ─── REDEEM PROCESSING ───
+  const renderRedeemProcessingStep = () => (
+    <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+      <div className="relative w-24 h-24 mb-8">
+        <div className="absolute inset-0 rounded-full border-4 border-muted/30" />
+        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-300 animate-spin" />
+        <div className="absolute inset-3 rounded-full bg-emerald-500/10 flex items-center justify-center">
+          <Ticket className="h-6 w-6 text-emerald-600" />
+        </div>
+      </div>
+      <p className="text-base font-semibold text-foreground mb-2">Verifying PIN...</p>
+      <p className="text-xs text-muted-foreground">Checking voucher validity</p>
+      <div className="flex gap-1.5 mt-6">
+        {[0,1,2].map(i => (
+          <div key={i} className="h-2 w-8 rounded-full bg-emerald-500/30 overflow-hidden">
+            <div className="h-full bg-emerald-500 rounded-full" style={{ animation: `shimmer 1.5s ease-in-out infinite ${i * 0.3}s` }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ─── REDEEM SUCCESS ───
+  const renderRedeemSuccessStep = () => {
+    const mockDenom = 5000; // simulated denomination
+    return (
+      <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
+        <div className="relative w-28 h-28 mb-6">
+          <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: "2s" }} />
+          <div className="absolute inset-0 rounded-full bg-emerald-500/10" />
+          <div className="absolute inset-2 rounded-full bg-emerald-500 flex items-center justify-center animate-scale-in">
+            <CheckCircle2 className="h-14 w-14 text-white" />
+          </div>
+        </div>
+        <h2 className="text-xl font-bold text-foreground mb-1">Voucher Redeemed!</h2>
+        <p className="text-3xl font-black text-emerald-600 mb-2">M{formatNum(mockDenom)}</p>
+        <p className="text-sm text-muted-foreground mb-6">Successfully credited to your Mobi Wallet</p>
+        <div className="w-full rounded-xl border border-border/50 bg-card p-4 space-y-2 mb-6">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">PIN Used</span>
+            <span className="font-mono text-xs text-foreground">****{redeemPin.slice(-4)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Amount Credited</span>
+            <span className="font-bold text-emerald-600">M{formatNum(mockDenom)}</span>
+          </div>
+        </div>
+        <Button
+          onClick={() => { setStep("vouchers"); setRedeemPin(""); window.scrollTo(0, 0); }}
+          className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]"
+        >
+          Done
+        </Button>
+      </div>
+    );
+  };
+
   // ─── MAIN RENDER ───
   if (step === "vouchers") return renderVoucherStep();
+  if (step === "redeemPin") return renderRedeemPinStep();
+  if (step === "redeemProcessing") return renderRedeemProcessingStep();
+  if (step === "redeemSuccess") return renderRedeemSuccessStep();
   if (step === "countries") return renderCountriesStep();
   if (step === "merchants") return renderMerchantsStep();
   if (step === "payment") return renderPaymentStep();
