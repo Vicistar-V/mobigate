@@ -231,6 +231,9 @@ const SubMerchantApplicationStatus = () => {
                               businessTypes: ["retail_shop", "mobi_kiosk"],
                               description: "A retail shop and Mobi kiosk operating in Port Harcourt's main market area, serving over 200 customers daily.",
                               yearsInBusiness: "4_to_7",
+                              retailShopAddress: "45 Market Road, Port Harcourt",
+                              onlineStoreUrl: "",
+                              mobiShopUrl: "",
                             }
                           }
                         })}
