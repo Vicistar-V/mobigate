@@ -87,12 +87,13 @@ export default function SubMerchantDetail() {
           ) : (
             <div className="space-y-2">
               {purchases.map(p => (
-                <div key={p.id} className="rounded-xl border border-border/50 bg-card p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground">M{formatNum(p.denomination)} × {p.totalCards} cards</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{p.bundlesBought} bundle{p.bundlesBought !== 1 ? "s" : ""}</p>
-                    </div>
+                <div
+                  key={p.id}
+                  onClick={() => navigate("/sub-merchant-voucher-batches")}
+                  className="rounded-xl border border-border/50 bg-card p-4 cursor-pointer active:scale-[0.97] transition-transform touch-manipulation"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-bold text-foreground">M{formatNum(p.denomination)} × {p.bundlesBought} bundles</p>
                     <Badge className={`text-xs h-5 px-2 ${
                       p.status === "completed" ? "bg-emerald-500/15 text-emerald-600" :
                       p.status === "processing" ? "bg-amber-500/15 text-amber-600" :
