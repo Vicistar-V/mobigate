@@ -729,9 +729,6 @@ export default function MobigateAdminDashboard() {
 
                 {/* Quiz Settings */}
                 <QuizSettingsCard />
-
-                {/* Voucher Discount Settings */}
-                <VoucherDiscountSettingsCard />
               </div>
             </ScrollArea>
           </TabsContent>
@@ -739,8 +736,11 @@ export default function MobigateAdminDashboard() {
           {/* Merchants Tab */}
           <TabsContent value="merchants" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="pb-6">
+              <div className="pb-6 space-y-4">
                 <MerchantApplicationsAdmin />
+
+                {/* Voucher Bulk Discount Config */}
+                <VoucherDiscountSettingsCard />
               </div>
             </ScrollArea>
           </TabsContent>
