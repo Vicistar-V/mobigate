@@ -157,24 +157,21 @@ export default function SubMerchantVoucherManagement() {
                       onClick={() => navigate(`/sub-merchant-voucher-batch/${batch.id}`)}
                       className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-bold text-foreground">{batch.batchNumber}</p>
-                            <Badge variant="outline" className="text-xs px-2 h-5 border-primary/30 text-primary">Sub-Merchant</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            M{formatNum(batch.denomination)} • {batch.bundleCount} bundle{batch.bundleCount !== 1 ? "s" : ""} • {formatNum(batch.totalCards)} cards
-                          </p>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-sm font-bold text-foreground">{batch.batchNumber}</p>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        M{formatNum(batch.denomination)} • {batch.bundleCount} bundle{batch.bundleCount !== 1 ? "s" : ""} • {formatNum(batch.totalCards)} cards
+                      </p>
+                      <div className="flex items-center justify-between mt-2.5">
+                        <div className="flex gap-1.5 flex-wrap">
+                          {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} avail</Badge>}
+                          {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} sold</Badge>}
+                          {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} used</Badge>}
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
+                        <p className="text-xs text-muted-foreground shrink-0 ml-2">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
                       </div>
-                      <div className="flex gap-2 flex-wrap">
-                        {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} avail</Badge>}
-                        {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} sold</Badge>}
-                        {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} used</Badge>}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
                     </div>
                   );
                 })}
