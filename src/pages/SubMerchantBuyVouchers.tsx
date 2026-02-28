@@ -285,7 +285,7 @@ export default function SubMerchantBuyVouchers() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">{selectedMerchant?.name}</p>
-              <p className="text-xs text-muted-foreground">{selectedMerchant?.discountRate}% discount rate</p>
+              <p className="text-xs text-muted-foreground">{selectedMerchant?.discountRate}% Discount Rate</p>
             </div>
           </div>
 

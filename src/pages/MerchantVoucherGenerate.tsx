@@ -299,7 +299,7 @@ export default function MerchantVoucherGenerate() {
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground">Your discount ({bundleCount} bundles)</span>
                 <Badge className={`text-xs h-5 ${discount.discountPercent > 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
-                  {discount.discountPercent > 0 ? `${discount.discountPercent}% off` : "No discount"}
+                  {discount.discountPercent > 0 ? `${discount.discountPercent}% off` : "No Discount"}
                 </Badge>
               </div>
               {(() => {

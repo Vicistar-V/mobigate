@@ -578,7 +578,7 @@ export default function BuyVouchersPage() {
                 if (eligibleItems.length === 0) {
                   return (
                     <p className="text-xs text-amber-600 mt-1.5 pt-1.5 border-t border-primary/10">
-                      No items qualify for bulk discount yet (min 10 per denomination)
+                      No items qualify for Bulk Discount yet (min 10 per denomination)
                     </p>
                   );
                 }

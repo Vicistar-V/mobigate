@@ -35,8 +35,8 @@ export const VolumeDiscountInfo = ({
                       {VOLUME_DISCOUNTS.map((tier, index) => {
                         const nextTier = VOLUME_DISCOUNTS[index + 1];
                         const label = nextTier 
-                          ? `${tier.minAdverts}-${nextTier.minAdverts - 1} adverts: ${tier.percentage}% discount`
-                          : `${tier.minAdverts}+ adverts: ${tier.percentage}% discount`;
+                          ? `${tier.minAdverts}-${nextTier.minAdverts - 1} adverts: ${tier.percentage}% Discount`
+                          : `${tier.minAdverts}+ adverts: ${tier.percentage}% Discount`;
                         
                         return <li key={tier.minAdverts}>• {label}</li>;
                       })}
@@ -69,7 +69,7 @@ export const VolumeDiscountInfo = ({
                 <div className="pt-2 border-t border-primary/10">
                   <p className="text-xs text-muted-foreground">
                     Create {nextTier.minAdverts - activeAdvertCount} more {nextTier.minAdverts - activeAdvertCount === 1 ? 'advert' : 'adverts'} to unlock{" "}
-                    <span className="font-semibold text-primary">{nextTier.percentage}% discount</span>
+                    <span className="font-semibold text-primary">{nextTier.percentage}% Discount</span>
                   </p>
                 </div>
               )}

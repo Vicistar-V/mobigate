@@ -65,7 +65,7 @@ export function AccreditationVerification({ onVerified, onBack }: AccreditationV
           </div>
           <h1 className="text-3xl font-bold">Verify Accreditation</h1>
           <p className="text-muted-foreground">
-            Enter your <span className="font-semibold text-primary">Accreditation Code</span> to access Slot Packs with volume discounts
+            Enter your <span className="font-semibold text-primary">Accreditation Code</span> to access Slot Packs with Volume Discounts
           </p>
         </div>
 

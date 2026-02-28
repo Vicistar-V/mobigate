@@ -24,7 +24,7 @@ export function UserTypeSelector({ selectedType, onSelectType }: UserTypeSelecto
       type: "accredited" as UserType,
       icon: Award,
       title: "Accredited Advertiser",
-      description: "Access Slot Packs with volume discounts and premium features",
+      description: "Access Slot Packs with Volume Discounts and premium features",
       badge: "20-35% Discount",
       badgeClass: "bg-green-500 hover:bg-green-600 text-white"
     }
