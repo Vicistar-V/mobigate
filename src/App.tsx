@@ -44,6 +44,13 @@ import MerchantWalletFund from "./pages/MerchantWalletFund";
 import MerchantVoucherBatches from "./pages/MerchantVoucherBatches";
 import MerchantVoucherBatchDetail from "./pages/MerchantVoucherBatchDetail";
 import MerchantVoucherTransactions from "./pages/MerchantVoucherTransactions";
+import ManageSubMerchants from "./pages/ManageSubMerchants";
+import SubMerchantDetail from "./pages/SubMerchantDetail";
+import SubMerchantVoucherManagement from "./pages/SubMerchantVoucherManagement";
+import SubMerchantBuyVouchers from "./pages/SubMerchantBuyVouchers";
+import SubMerchantVoucherBatches from "./pages/SubMerchantVoucherBatches";
+import SubMerchantVoucherBatchDetail from "./pages/SubMerchantVoucherBatchDetail";
+import SubMerchantVoucherTransactions from "./pages/SubMerchantVoucherTransactions";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import CreateAdvertisementPage from "./pages/community/CommunityCreateAdvertisementPage";
 import CommunityAdvertRatesPage from "./pages/community/CommunityAdvertRatesPage";
@@ -126,6 +133,13 @@ const App = () => {
                   <Route path="/merchant-voucher-batches" element={<MerchantVoucherBatches />} />
                   <Route path="/merchant-voucher-batch/:batchId" element={<MerchantVoucherBatchDetail />} />
                   <Route path="/merchant-voucher-transactions" element={<MerchantVoucherTransactions />} />
+                  <Route path="/merchant-sub-merchants" element={<ManageSubMerchants />} />
+                  <Route path="/merchant-sub-merchant/:subMerchantId" element={<SubMerchantDetail />} />
+                  <Route path="/sub-merchant-voucher-management" element={<SubMerchantVoucherManagement />} />
+                  <Route path="/sub-merchant-buy-vouchers" element={<SubMerchantBuyVouchers />} />
+                  <Route path="/sub-merchant-voucher-batches" element={<SubMerchantVoucherBatches />} />
+                  <Route path="/sub-merchant-voucher-batch/:batchId" element={<SubMerchantVoucherBatchDetail />} />
+                  <Route path="/sub-merchant-voucher-transactions" element={<SubMerchantVoucherTransactions />} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
                   <Route path="/discounted-advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />

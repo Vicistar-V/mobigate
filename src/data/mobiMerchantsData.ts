@@ -6,6 +6,7 @@ export interface MobiMerchant {
   rating: number; // 1-5 stars
   isVerified: boolean;
   isActive: boolean;
+  isSubMerchant?: boolean;
   stateId?: string;
   stateName?: string;
   lgaId?: string;
@@ -32,6 +33,9 @@ const nigeriaMerchants: MobiMerchant[] = [
   { id: "ng-006", name: "9ja Mobi Deals", discountPercent: 12, city: "Enugu", rating: 4.4, isVerified: true, isActive: true, stateId: "enugu", stateName: "Enugu", lgaId: "enugu-north", lgaName: "Enugu North" },
   { id: "ng-007", name: "PayFast Benin", discountPercent: 6, city: "Benin City", rating: 4.2, isVerified: true, isActive: true, stateId: "edo", stateName: "Edo", lgaId: "oredo", lgaName: "Oredo" },
   { id: "ng-008", name: "MobiKing Owerri", discountPercent: 15, city: "Owerri", rating: 4.9, isVerified: true, isActive: true, stateId: "imo", stateName: "Imo", lgaId: "owerri-municipal", lgaName: "Owerri Municipal" },
+  { id: "ng-sm-001", name: "Adewale Mini Store", discountPercent: 3, city: "Ikeja", rating: 4.1, isVerified: true, isActive: true, isSubMerchant: true, stateId: "lagos", stateName: "Lagos", lgaId: "ikeja", lgaName: "Ikeja" },
+  { id: "ng-sm-002", name: "ChiChi Voucher Hub", discountPercent: 2, city: "Surulere", rating: 4.0, isVerified: true, isActive: true, isSubMerchant: true, stateId: "lagos", stateName: "Lagos", lgaId: "surulere", lgaName: "Surulere" },
+  { id: "ng-sm-003", name: "Fatima Mobi Corner", discountPercent: 3, city: "Kano", rating: 3.9, isVerified: true, isActive: true, isSubMerchant: true, stateId: "kano", stateName: "Kano", lgaId: "kano-municipal", lgaName: "Kano Municipal" },
 ];
 
 // Ghana Merchants
