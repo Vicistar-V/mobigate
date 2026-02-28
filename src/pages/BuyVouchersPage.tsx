@@ -42,12 +42,29 @@ export default function BuyVouchersPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isFundWallet = searchParams.get("source") === "fund-wallet";
+  const merchantParam = searchParams.get("merchant");
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("vouchers");
   const [cart, setCart] = useState<Cart>({});
   const [selectedCountry, setSelectedCountry] = useState<MerchantCountry | null>(null);
   const [selectedMerchant, setSelectedMerchant] = useState<MobiMerchant | null>(null);
+  const [preSelectedMerchant, setPreSelectedMerchant] = useState(false);
+
+  // Auto-select local merchant when coming from a merchant page
+  useEffect(() => {
+    if (merchantParam) {
+      const local = getLocalCountry();
+      if (local) {
+        const firstActive = local.merchants.find(m => m.isActive);
+        if (firstActive) {
+          setSelectedCountry(local);
+          setSelectedMerchant(firstActive);
+          setPreSelectedMerchant(true);
+        }
+      }
+    }
+  }, [merchantParam]);
 
   // Post-payment state
   const [remainingMobi, setRemainingMobi] = useState(0);
@@ -126,7 +143,11 @@ export default function BuyVouchersPage() {
       toast({ title: "Select vouchers", description: "Pick at least one voucher denomination" });
       return;
     }
-    setStep("countries");
+    if (preSelectedMerchant && selectedCountry && selectedMerchant) {
+      setStep("payment");
+    } else {
+      setStep("countries");
+    }
     window.scrollTo(0, 0);
   };
 
@@ -145,7 +166,7 @@ export default function BuyVouchersPage() {
   const handleBack = () => {
     if (step === "countries") setStep("vouchers");
     else if (step === "merchants") setStep("countries");
-    else if (step === "payment") setStep("merchants");
+    else if (step === "payment") setStep(preSelectedMerchant ? "vouchers" : "merchants");
     else if (step === "redeemPin") { setStep("vouchers"); setRedeemPin(""); setRedeemError(""); }
     else if (step === "distribute") {
       setStep("success");
@@ -346,6 +367,18 @@ export default function BuyVouchersPage() {
         )}
       </div>
       <div className="px-4 pt-4">
+        {/* Pre-selected merchant banner */}
+        {preSelectedMerchant && merchantParam && (
+          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 mb-4 flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0">
+              <Ticket className="h-4 w-4 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Buying from {decodeURIComponent(merchantParam)}</p>
+              <p className="text-xs text-muted-foreground">Select vouchers, then proceed to payment</p>
+            </div>
+          </div>
+        )}
         {/* Redeem Voucher Code Section */}
         <div
           onClick={() => { setStep("redeemPin"); setRedeemPin(""); setRedeemError(""); window.scrollTo(0, 0); }}
