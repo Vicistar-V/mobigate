@@ -184,12 +184,14 @@ export default function SubMerchantBuyVouchers() {
                 type="number"
                 inputMode="numeric"
                 min={1}
-                value={bundleCount}
+                value={bundleCount === 0 ? '' : bundleCount}
                 onChange={(e) => {
-                  const val = parseInt(e.target.value);
-                  if (!isNaN(val) && val >= 1) setBundleCount(val);
-                  else if (e.target.value === '') setBundleCount(1);
+                  const raw = e.target.value;
+                  if (raw === '') { setBundleCount(0); return; }
+                  const val = parseInt(raw);
+                  if (!isNaN(val) && val >= 0) setBundleCount(val);
                 }}
+                onBlur={() => { if (bundleCount < 1) setBundleCount(1); }}
                 className="w-20 text-4xl font-black text-foreground text-center bg-transparent border-b-2 border-primary/40 focus:border-primary outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 style={{ MozAppearance: 'textfield' }}
               />
