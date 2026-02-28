@@ -20,18 +20,19 @@ export default function SubMerchantApplicationPage() {
   const { toast } = useToast();
   const reapplyData = (location.state as any)?.previousData;
 
-  // Find merchant info
+  // Find merchant info from all data sources
   const quizMerchant = mockMerchants.find(m => m.id === merchantId);
   const locationMerchant = allLocationMerchants.find(m => m.id === merchantId);
+  const allMerchants = merchantCountries.flatMap(c => c.merchants);
+  const mobiMerchant = allMerchants.find(m => m.id === merchantId);
+
   const merchant = quizMerchant
     ? { id: quizMerchant.id, name: quizMerchant.name, category: quizMerchant.category }
     : locationMerchant
       ? { id: locationMerchant.id, name: locationMerchant.name, category: locationMerchant.category }
-      : { id: merchantId || "unknown", name: reapplyData?.merchantName || "Merchant", category: reapplyData?.merchantCategory || "General" };
-
-  // Find discount info from mobiMerchantsData
-  const allMerchants = merchantCountries.flatMap(c => c.merchants);
-  const mobiMerchant = allMerchants.find(m => m.id === merchantId);
+      : mobiMerchant
+        ? { id: mobiMerchant.id, name: mobiMerchant.name, category: "General" }
+        : { id: merchantId || "unknown", name: reapplyData?.merchantName || "Merchant", category: reapplyData?.merchantCategory || "General" };
 
   const [form, setForm] = useState({
     fullName: reapplyData?.fullName || "",
