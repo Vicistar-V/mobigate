@@ -181,6 +181,10 @@ const menuItems: MenuItem[] = [{
     {
       title: "Sub-Merchant Voucher Management",
       url: "/sub-merchant-voucher-management",
+    },
+    {
+      title: "Apply as Sub-Merchant",
+      url: "/apply-sub-merchant/m1",
     }
   ]
 }, {

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink, Ticket } from "lucide-react";
+import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink, Ticket, Store } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -239,6 +239,23 @@ export default function MerchantHomePage() {
               </div>
               <ExternalLink className="h-4 w-4 text-white/60 shrink-0" />
             </div>
+          </button>
+        </div>
+
+        {/* Apply as Sub-Merchant CTA */}
+        <div className="mt-3 px-2">
+          <button
+            onClick={() => navigate(`/apply-sub-merchant/${merchantId}`)}
+            className="w-full rounded-2xl p-3 border-2 border-primary/30 bg-primary/5 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation"
+          >
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Store className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 text-left min-w-0">
+              <p className="font-bold text-sm text-foreground">Apply as Sub-Merchant</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Become a retailer for this merchant</p>
+            </div>
+            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
           </button>
         </div>
 

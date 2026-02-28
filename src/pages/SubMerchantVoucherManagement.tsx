@@ -186,15 +186,22 @@ export default function SubMerchantVoucherManagement() {
           <TabsContent value="merchants">
             <div className="space-y-2.5">
               {mockParentMerchants.map(pm => (
-                <div key={pm.id} className="rounded-xl border border-border/50 bg-card p-4">
+                <div
+                  key={pm.id}
+                  onClick={() => navigate(`/merchant-home/${pm.id}`)}
+                  className="rounded-xl border border-border/50 bg-card p-4 cursor-pointer active:scale-[0.97] transition-transform touch-manipulation"
+                >
                   <div className="flex items-start justify-between mb-2">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-foreground">{pm.name}</p>
                       <p className="text-xs text-muted-foreground">{pm.city}, {pm.state}</p>
                     </div>
-                    <Badge className={`text-xs h-5 px-2 ${pm.status === "active" ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
-                      {pm.status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`text-xs h-5 px-2 ${pm.status === "active" ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
+                        {pm.status}
+                      </Badge>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                    </div>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                     <span className="font-semibold text-emerald-600">{pm.discountRate}% discount</span>
