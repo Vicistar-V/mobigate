@@ -10,13 +10,16 @@ import {
 import { initialSubMerchantBatches } from "@/data/subMerchantVoucherData";
 import {
   VoucherBatch,
-  getBatchStatusCounts, getBundleStatusCounts, getInvalidatableCards, hashPin, formatNum,
+  getBundleStatusCounts, getInvalidatableCards, hashPin, formatNum,
   generateBatchNumber, generateBundlePrefix, generateCardSerial, generatePin,
+  getBatchBundleCounts, classifyBundle,
 } from "@/data/merchantVoucherData";
 import { useToast } from "@/hooks/use-toast";
 import { VoucherPrintDrawer } from "@/components/merchant/VoucherExportDrawer";
 
 type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string };
+type BatchFilter = "available" | "sold" | "invalidated" | null;
+type CardFilter = "used" | "unused" | null;
 
 export default function SubMerchantVoucherBatchDetail() {
   const navigate = useNavigate();
@@ -28,11 +31,14 @@ export default function SubMerchantVoucherBatchDetail() {
   const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);
   const [printDrawerOpen, setPrintDrawerOpen] = useState(false);
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
+  const [batchStatusFilter, setBatchStatusFilter] = useState<BatchFilter>(null);
+  const [bundleCardFilter, setBundleCardFilter] = useState<Record<string, CardFilter>>({});
 
   const batch = batches.find(b => b.id === batchId);
-  const counts = batch ? getBatchStatusCounts(batch) : { available: 0, sold_unused: 0, used: 0, invalidated: 0, total: 0 };
+  const bundleCounts = batch ? getBatchBundleCounts(batch) : { available: 0, sold: 0, invalidated: 0, total: 0 };
   const batchInvalidatable = batch ? getInvalidatableCards(batch.bundles.flatMap(b => b.cards)) : [];
   const regenCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "invalidated").length : 0;
+  const availableCardCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "available").length : 0;
 
   const toggleBundle = (id: string) => {
     setExpandedBundles(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
@@ -40,10 +46,16 @@ export default function SubMerchantVoucherBatchDetail() {
 
   const filteredBundles = useMemo(() => {
     if (!batch) return [];
-    if (!searchQuery) return batch.bundles;
-    const q = searchQuery.toLowerCase();
-    return batch.bundles.filter(b => b.serialPrefix.toLowerCase().includes(q) || b.cards.some(c => c.serialNumber.toLowerCase().includes(q)));
-  }, [batch?.bundles, searchQuery]);
+    let result = batch.bundles;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(b => b.serialPrefix.toLowerCase().includes(q) || b.cards.some(c => c.serialNumber.toLowerCase().includes(q)));
+    }
+    if (batchStatusFilter) {
+      result = result.filter(bundle => classifyBundle(bundle) === batchStatusFilter);
+    }
+    return result;
+  }, [batch?.bundles, searchQuery, batchStatusFilter]);
 
   const handleInvalidate = () => {
     if (!invalidateTarget) return;
@@ -71,7 +83,6 @@ export default function SubMerchantVoucherBatchDetail() {
     const numBundles = Math.ceil(regenCount / bundleSize);
     const bundles: VoucherBatch["bundles"] = [];
     let remaining = regenCount;
-
     for (let b = 0; b < numBundles; b++) {
       const cardsInBundle = Math.min(bundleSize, remaining);
       remaining -= cardsInBundle;
@@ -79,47 +90,19 @@ export default function SubMerchantVoucherBatchDetail() {
       const cards: VoucherBatch["bundles"][0]["cards"] = [];
       for (let c = 0; c < cardsInBundle; c++) {
         cards.push({
-          id: `card-${newBatchId}-${b}-${c}`,
-          serialNumber: generateCardSerial(prefix, c),
-          pin: generatePin(),
-          denomination: batch.denomination,
-          status: "available" as const,
-          batchId: newBatchId,
-          bundleSerialPrefix: prefix,
-          soldVia: null,
-          createdAt: now,
-          invalidatedAt: null,
-          soldAt: null,
-          usedAt: null,
+          id: `card-${newBatchId}-${b}-${c}`, serialNumber: generateCardSerial(prefix, c), pin: generatePin(),
+          denomination: batch.denomination, status: "available" as const, batchId: newBatchId, bundleSerialPrefix: prefix,
+          soldVia: null, createdAt: now, invalidatedAt: null, soldAt: null, usedAt: null,
         });
       }
-      bundles.push({
-        id: `bundle-${newBatchId}-${b}`,
-        serialPrefix: prefix,
-        denomination: batch.denomination,
-        batchId: newBatchId,
-        cardCount: cardsInBundle,
-        cards,
-      });
+      bundles.push({ id: `bundle-${newBatchId}-${b}`, serialPrefix: prefix, denomination: batch.denomination, batchId: newBatchId, cardCount: cardsInBundle, cards });
     }
-
     const newBatch = {
-      id: newBatchId,
-      batchNumber: newBatchNumber,
-      denomination: batch.denomination,
-      bundleCount: numBundles,
-      totalCards: regenCount,
-      status: "active" as const,
-      createdAt: now,
-      totalCost: 0,
-      discountApplied: false,
-      discountPercent: 0,
-      generationType: "replacement" as const,
-      replacedBatchId: batch.id,
-      bundles,
+      id: newBatchId, batchNumber: newBatchNumber, denomination: batch.denomination, bundleCount: numBundles, totalCards: regenCount,
+      status: "active" as const, createdAt: now, totalCost: 0, discountApplied: false, discountPercent: 0,
+      generationType: "replacement" as const, replacedBatchId: batch.id, bundles,
       purchasedFrom: (batch as any).purchasedFrom || "",
     };
-
     setBatches(prev => [...prev, newBatch]);
     setShowRegenConfirm(false);
     toast({ title: "Replacement Batch Created", description: `${newBatchNumber} — ${regenCount} cards regenerated` });
@@ -128,17 +111,9 @@ export default function SubMerchantVoucherBatchDetail() {
   const handlePrintComplete = (cardIds: string[]) => {
     setBatches(prev => prev.map(b => {
       if (b.id !== batchId) return b;
-      return {
-        ...b,
-        bundles: b.bundles.map(bundle => ({
-          ...bundle,
-          cards: bundle.cards.map(card =>
-            cardIds.includes(card.id)
-              ? { ...card, status: "sold_unused" as const, soldVia: "physical" as const, soldAt: new Date() }
-              : card
-          ),
-        })),
-      };
+      return { ...b, bundles: b.bundles.map(bundle => ({ ...bundle, cards: bundle.cards.map(card =>
+        cardIds.includes(card.id) ? { ...card, status: "sold_unused" as const, soldVia: "physical" as const, soldAt: new Date() } : card
+      )}))};
     }));
     toast({ title: "Print Complete", description: `${cardIds.length} cards printed and marked as sold` });
   };
@@ -160,6 +135,10 @@ export default function SubMerchantVoucherBatchDetail() {
     switch (s) { case "available": return "Available"; case "sold_unused": return "Sold"; case "used": return "Used"; case "invalidated": return "Invalid"; default: return s; }
   };
 
+  const toggleBundleCardFilter = (bundleId: string, filter: CardFilter) => {
+    setBundleCardFilter(prev => ({ ...prev, [bundleId]: prev[bundleId] === filter ? null : filter }));
+  };
+
   if (!batch) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center px-6">
@@ -178,7 +157,6 @@ export default function SubMerchantVoucherBatchDetail() {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-foreground">{batch.batchNumber}</h1>
-              
               {batch.generationType === "replacement" && (
                 <Badge variant="outline" className="text-xs px-2 h-5 border-amber-500 text-amber-600">Replacement</Badge>
               )}
@@ -189,53 +167,47 @@ export default function SubMerchantVoucherBatchDetail() {
       </div>
 
       <div className="px-4 pt-4 space-y-4">
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { label: "Available", count: counts.available, color: "text-emerald-600" },
-            { label: "Sold", count: counts.sold_unused, color: "text-amber-600" },
-            { label: "Used", count: counts.used, color: "text-primary" },
-            { label: "Invalid", count: counts.invalidated, color: "text-destructive" },
-          ].map(s => (
-            <div key={s.label} className="rounded-xl border border-border/50 bg-card p-2.5 text-center">
+        {/* Status Cards — 3 cols, bundle-level, clickable filters */}
+        <div className="grid grid-cols-3 gap-2">
+          {([
+            { label: "Available", key: "available" as const, count: bundleCounts.available, color: "text-emerald-600", ring: "ring-emerald-500" },
+            { label: "Sold", key: "sold" as const, count: bundleCounts.sold, color: "text-amber-600", ring: "ring-amber-500" },
+            { label: "Invalid", key: "invalidated" as const, count: bundleCounts.invalidated, color: "text-destructive", ring: "ring-destructive" },
+          ]).map(s => (
+            <button
+              key={s.label}
+              onClick={() => setBatchStatusFilter(prev => prev === s.key ? null : s.key)}
+              className={`rounded-xl border bg-card p-2.5 text-center touch-manipulation active:scale-[0.96] transition-all ${
+                batchStatusFilter === s.key ? `ring-2 ${s.ring} border-transparent` : "border-border/50"
+              }`}
+            >
               <p className={`text-xl font-black ${s.color}`}>{s.count}</p>
               <p className="text-xs text-muted-foreground">{s.label}</p>
-            </div>
+              <p className="text-[10px] text-muted-foreground/70">bundles</p>
+            </button>
           ))}
         </div>
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          {counts.available > 0 && (
-            <Button
-              onClick={() => setPrintDrawerOpen(true)}
-              variant="outline"
-              className="flex-1 h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97]"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Print Cards ({counts.available})
+          {availableCardCount > 0 && (
+            <Button onClick={() => setPrintDrawerOpen(true)} variant="outline"
+              className="flex-1 h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97]">
+              <Printer className="h-4 w-4 mr-2" /> Print Cards ({availableCardCount})
             </Button>
           )}
           {batchInvalidatable.length > 0 && (
-            <Button
-              onClick={() => setInvalidateTarget({ type: "batch" })}
-              variant="outline"
-              className="flex-1 h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]"
-            >
-              <ShieldAlert className="h-4 w-4 mr-2" />
-              Invalidate ({batchInvalidatable.length})
+            <Button onClick={() => setInvalidateTarget({ type: "batch" })} variant="outline"
+              className="flex-1 h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]">
+              <ShieldAlert className="h-4 w-4 mr-2" /> Invalidate ({batchInvalidatable.length})
             </Button>
           )}
         </div>
 
-        {/* Regeneration Button */}
         {regenCount > 0 && (
-          <Button
-            onClick={() => setShowRegenConfirm(true)}
-            variant="outline"
-            className="w-full h-11 rounded-xl text-xs font-semibold border-amber-500/30 text-amber-600 hover:bg-amber-500/5 touch-manipulation active:scale-[0.97]"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Regenerate Invalidated Cards ({regenCount})
+          <Button onClick={() => setShowRegenConfirm(true)} variant="outline"
+            className="w-full h-11 rounded-xl text-xs font-semibold border-amber-500/30 text-amber-600 hover:bg-amber-500/5 touch-manipulation active:scale-[0.97]">
+            <RefreshCw className="h-4 w-4 mr-2" /> Regenerate Invalidated Cards ({regenCount})
           </Button>
         )}
 
@@ -252,6 +224,14 @@ export default function SubMerchantVoucherBatchDetail() {
             const isExpanded = expandedBundles.has(bundle.id);
             const bundleInvalidatable = getInvalidatableCards(bundle.cards);
             const bundleAvailable = bundle.cards.filter(c => c.status === "available").length;
+            const currentCardFilter = bundleCardFilter[bundle.id] || null;
+            const unusedCount = bundle.cards.filter(c => c.status === "available" || c.status === "sold_unused").length;
+            const usedCount = bundle.cards.filter(c => c.status === "used").length;
+            const displayedCards = currentCardFilter === "unused"
+              ? bundle.cards.filter(c => c.status === "available" || c.status === "sold_unused")
+              : currentCardFilter === "used"
+                ? bundle.cards.filter(c => c.status === "used")
+                : bundle.cards;
 
             return (
               <div key={bundle.id} className="rounded-xl border border-border/50 bg-card overflow-hidden">
@@ -264,35 +244,49 @@ export default function SubMerchantVoucherBatchDetail() {
                     <div className="flex gap-2 mt-1 flex-wrap">
                       {bCounts.available > 0 && <span className="text-xs text-emerald-600 font-semibold">{bCounts.available} avail</span>}
                       {bCounts.sold_unused > 0 && <span className="text-xs text-amber-600 font-semibold">{bCounts.sold_unused} sold</span>}
-                      {bCounts.used > 0 && <span className="text-xs text-primary font-semibold">{bCounts.used} used</span>}
-                      {bCounts.invalidated > 0 && <span className="text-xs text-destructive font-semibold">{bCounts.invalidated} inv</span>}
                     </div>
                   </div>
                   {isExpanded ? <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />}
                 </div>
                 {isExpanded && (
                   <div className="border-t border-border/30">
-                    {/* Bundle actions */}
                     <div className="px-3 py-2.5 border-b border-border/30 flex items-center gap-3">
                       {bundleAvailable > 0 && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setPrintDrawerOpen(true); }}
-                          className="text-xs text-primary font-semibold touch-manipulation flex items-center gap-1.5 h-8"
-                        >
+                        <button onClick={(e) => { e.stopPropagation(); setPrintDrawerOpen(true); }}
+                          className="text-xs text-primary font-semibold touch-manipulation flex items-center gap-1.5 h-8">
                           <Printer className="h-3.5 w-3.5" /> Print Bundle ({bundleAvailable})
                         </button>
                       )}
                       {bundleInvalidatable.length > 0 && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setInvalidateTarget({ type: "bundle", bundleId: bundle.id }); }}
-                          className="text-xs text-destructive font-semibold touch-manipulation flex items-center gap-1.5 h-8"
-                        >
+                        <button onClick={(e) => { e.stopPropagation(); setInvalidateTarget({ type: "bundle", bundleId: bundle.id }); }}
+                          className="text-xs text-destructive font-semibold touch-manipulation flex items-center gap-1.5 h-8">
                           <ShieldAlert className="h-3.5 w-3.5" /> Invalidate ({bundleInvalidatable.length})
                         </button>
                       )}
                     </div>
+
+                    {/* Used / Unused pill filter toggles */}
+                    <div className="px-3 py-2 border-b border-border/30 flex gap-2">
+                      <button
+                        onClick={() => toggleBundleCardFilter(bundle.id, "unused")}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all touch-manipulation active:scale-95 ${
+                          currentCardFilter === "unused" ? "bg-emerald-500 text-white" : "bg-emerald-500/10 text-emerald-600"
+                        }`}
+                      >
+                        Unused {unusedCount}
+                      </button>
+                      <button
+                        onClick={() => toggleBundleCardFilter(bundle.id, "used")}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all touch-manipulation active:scale-95 ${
+                          currentCardFilter === "used" ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+                        }`}
+                      >
+                        Used {usedCount}
+                      </button>
+                    </div>
+
                     <div className="max-h-[400px] overflow-y-auto touch-auto">
-                      {bundle.cards.map(card => (
+                      {displayedCards.map(card => (
                         <div key={card.id} className="px-3.5 py-3 border-b border-border/20 last:border-0">
                           <div className="flex items-center justify-between mb-1">
                             <p className="text-sm font-mono font-semibold text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
@@ -314,6 +308,9 @@ export default function SubMerchantVoucherBatchDetail() {
                           </div>
                         </div>
                       ))}
+                      {displayedCards.length === 0 && (
+                        <div className="px-3.5 py-6 text-center text-xs text-muted-foreground">No cards match this filter</div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -323,7 +320,6 @@ export default function SubMerchantVoucherBatchDetail() {
         </div>
       </div>
 
-      {/* Invalidation Dialog */}
       <AlertDialog open={!!invalidateTarget} onOpenChange={(open) => !open && setInvalidateTarget(null)}>
         <AlertDialogContent className="max-w-[340px] rounded-2xl">
           <AlertDialogHeader>
@@ -340,7 +336,6 @@ export default function SubMerchantVoucherBatchDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Regeneration Dialog */}
       <AlertDialog open={showRegenConfirm} onOpenChange={setShowRegenConfirm}>
         <AlertDialogContent className="max-w-[340px] rounded-2xl">
           <AlertDialogHeader>
@@ -361,13 +356,7 @@ export default function SubMerchantVoucherBatchDetail() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Print Drawer */}
-      <VoucherPrintDrawer
-        open={printDrawerOpen}
-        onOpenChange={setPrintDrawerOpen}
-        batch={batch}
-        onPrintComplete={handlePrintComplete}
-      />
+      <VoucherPrintDrawer open={printDrawerOpen} onOpenChange={setPrintDrawerOpen} batch={batch} onPrintComplete={handlePrintComplete} />
     </div>
   );
 }
