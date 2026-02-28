@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Filter, Wallet, Package, ArrowUpRight, ArrowDownLeft } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { initialMockTransactions, MerchantWalletTransaction, formatNum } from "@/data/merchantVoucherData";
+import { ArrowLeft, Filter, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { initialMockTransactions, formatNum } from "@/data/merchantVoucherData";
 
 type FilterType = "all" | "funding" | "voucher_generation";
 type SortOption = "newest" | "oldest" | "amount_high" | "amount_low";
@@ -49,18 +48,18 @@ export default function MerchantVoucherTransactions() {
         {showFilters && (
           <div className="px-4 pb-3 space-y-3 border-t border-border/30 pt-3">
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Type</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Type</p>
               <div className="flex gap-1.5">
                 {([["all", "All"], ["funding", "Funding"], ["voucher_generation", "Generation"]] as [FilterType, string][]).map(([val, label]) => (
-                  <button key={val} onClick={() => setFilterType(val)} className={`h-7 px-2.5 rounded-lg text-xs font-semibold touch-manipulation ${filterType === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
+                  <button key={val} onClick={() => setFilterType(val)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${filterType === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Sort</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Sort</p>
               <div className="flex gap-1.5 flex-wrap">
                 {([["newest", "Newest"], ["oldest", "Oldest"], ["amount_high", "Amount ↓"], ["amount_low", "Amount ↑"]] as [SortOption, string][]).map(([val, label]) => (
-                  <button key={val} onClick={() => setSortBy(val)} className={`h-7 px-2.5 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
+                  <button key={val} onClick={() => setSortBy(val)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
                 ))}
               </div>
             </div>
@@ -68,14 +67,14 @@ export default function MerchantVoucherTransactions() {
         )}
       </div>
 
-      <div className="px-4 pt-3 space-y-2">
+      <div className="px-4 pt-3 space-y-2.5">
         {filtered.map(txn => {
           const isFunding = txn.type === "funding";
           return (
             <div
               key={txn.id}
               onClick={() => txn.batchId ? navigate(`/merchant-voucher-batch/${txn.batchId}`) : undefined}
-              className={`rounded-xl border border-border/50 bg-card p-3.5 ${txn.batchId ? "active:scale-[0.97] transition-transform touch-manipulation cursor-pointer" : ""}`}
+              className={`rounded-xl border border-border/50 bg-card p-4 ${txn.batchId ? "active:scale-[0.97] transition-transform touch-manipulation cursor-pointer" : ""}`}
             >
               <div className="flex items-start gap-3">
                 <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
@@ -84,16 +83,19 @@ export default function MerchantVoucherTransactions() {
                   {isFunding ? <ArrowDownLeft className="h-5 w-5 text-emerald-600" /> : <ArrowUpRight className="h-5 w-5 text-primary" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
+                  {/* Row 1: Title + Amount */}
+                  <div className="flex items-center justify-between mb-1">
                     <p className="text-sm font-bold text-foreground">{isFunding ? "Wallet Funding" : "Voucher Generation"}</p>
                     <p className={`text-sm font-bold ${isFunding ? "text-emerald-600" : "text-foreground"}`}>
                       {isFunding ? "+" : ""}₦{formatNum(Math.abs(txn.amount))}
                     </p>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{txn.description}</p>
-                  <div className="flex items-center justify-between mt-1.5">
-                    <p className="text-[10px] text-muted-foreground font-mono">{txn.reference}</p>
-                    <p className="text-[10px] text-muted-foreground">{txn.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
+                  {/* Row 2: Description */}
+                  <p className="text-xs text-muted-foreground truncate mb-1.5">{txn.description}</p>
+                  {/* Row 3: Reference + Date */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground font-mono">{txn.reference}</p>
+                    <p className="text-xs text-muted-foreground">{txn.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
                   </div>
                 </div>
               </div>

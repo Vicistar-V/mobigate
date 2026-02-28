@@ -45,7 +45,7 @@ export function VoucherDiscountSettingsCard() {
             Voucher Bulk Discounts
           </CardTitle>
           {hasChanges && (
-            <Badge variant="secondary" className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+            <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
               Modified
             </Badge>
           )}
@@ -66,7 +66,7 @@ export function VoucherDiscountSettingsCard() {
             step={5}
             className="w-full"
           />
-          <div className="flex justify-between text-[10px] text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{platformVoucherDiscountSettings.discountPercentMin}%</span>
             <span>{platformVoucherDiscountSettings.discountPercentMax}%</span>
           </div>
@@ -86,7 +86,7 @@ export function VoucherDiscountSettingsCard() {
             step={1}
             className="w-full"
           />
-          <div className="flex justify-between text-[10px] text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{platformVoucherDiscountSettings.maxDiscountPercentMin}%</span>
             <span>{platformVoucherDiscountSettings.maxDiscountPercentMax}%</span>
           </div>
@@ -97,12 +97,12 @@ export function VoucherDiscountSettingsCard() {
         {/* Preview */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-            <Calculator className="h-3 w-3" /> Discount Preview
+            <Calculator className="h-3.5 w-3.5" /> Discount Preview
           </p>
           <div className="grid grid-cols-2 gap-2">
             {[5, 10, 20, 50].map(n => (
-              <div key={n} className="p-2 rounded-lg bg-muted/40 text-center">
-                <p className="text-[10px] text-muted-foreground">{n} bundles</p>
+              <div key={n} className="p-2.5 rounded-lg bg-muted/40 text-center">
+                <p className="text-xs text-muted-foreground">{n} bundles</p>
                 <p className="text-sm font-bold text-primary">{previewDiscount(n).toFixed(1)}%</p>
               </div>
             ))}
@@ -110,9 +110,9 @@ export function VoucherDiscountSettingsCard() {
         </div>
 
         {/* Info note */}
-        <div className="flex gap-2 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
-          <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
+        <div className="flex gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
+          <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Each bundle purchased adds <strong>{ratePerBundle}%</strong> discount, up to a maximum of <strong>{maxCap}%</strong>. Applies to all merchant voucher generations.
           </p>
         </div>

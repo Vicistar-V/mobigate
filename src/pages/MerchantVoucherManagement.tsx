@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, ShieldCheck, Layers } from "lucide-react";
+import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -104,30 +104,19 @@ export default function MerchantVoucherManagement() {
             <p className="text-xs font-bold text-foreground uppercase tracking-wider">Inventory Overview</p>
           </div>
           <div className="grid grid-cols-2 divide-x divide-y divide-border/30">
-            <div className="p-3 text-center">
-              <p className="text-lg font-black text-foreground">{formatNum(stats.totalCards)}</p>
-              <p className="text-xs text-muted-foreground">Total Cards</p>
-            </div>
-            <div className="p-3 text-center">
-              <p className="text-lg font-black text-foreground">{formatNum(stats.totalBundles)}</p>
-              <p className="text-xs text-muted-foreground">Total Bundles</p>
-            </div>
-            <div className="p-3 text-center">
-              <p className="text-lg font-black text-emerald-600">{formatNum(stats.available)}</p>
-              <p className="text-xs text-muted-foreground">Available</p>
-            </div>
-            <div className="p-3 text-center">
-              <p className="text-lg font-black text-amber-600">{formatNum(stats.soldUnused)}</p>
-              <p className="text-xs text-muted-foreground">Sold (Unused)</p>
-            </div>
-            <div className="p-3 text-center">
-              <p className="text-lg font-black text-primary">{formatNum(stats.used)}</p>
-              <p className="text-xs text-muted-foreground">Used</p>
-            </div>
-            <div className="p-3 text-center">
-              <p className="text-lg font-black text-destructive">{formatNum(stats.invalidated)}</p>
-              <p className="text-xs text-muted-foreground">Invalidated</p>
-            </div>
+            {[
+              { label: "Total Cards", value: formatNum(stats.totalCards), color: "text-foreground" },
+              { label: "Total Bundles", value: formatNum(stats.totalBundles), color: "text-foreground" },
+              { label: "Available", value: formatNum(stats.available), color: "text-emerald-600" },
+              { label: "Sold (Unused)", value: formatNum(stats.soldUnused), color: "text-amber-600" },
+              { label: "Used", value: formatNum(stats.used), color: "text-primary" },
+              { label: "Invalidated", value: formatNum(stats.invalidated), color: "text-destructive" },
+            ].map(item => (
+              <div key={item.label} className="p-3.5 text-center">
+                <p className={`text-lg font-black ${item.color}`}>{item.value}</p>
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -146,29 +135,29 @@ export default function MerchantVoucherManagement() {
                 <div
                   key={batch.id}
                   onClick={() => navigate(`/merchant-voucher-batch/${batch.id}`)}
-                  className="rounded-xl border border-border/50 bg-card p-3.5 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
+                  className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-foreground">{batch.batchNumber}</p>
                         {batch.generationType === "replacement" && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-amber-500 text-amber-600">Replacement</Badge>
+                          <Badge variant="outline" className="text-xs px-2 h-5 border-amber-500 text-amber-600">Replacement</Badge>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         M{formatNum(batch.denomination)} • {batch.bundleCount} bundle{batch.bundleCount !== 1 ? "s" : ""} • {formatNum(batch.totalCards)} cards
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-[10px] px-1.5 h-5">{counts.available} avail</Badge>}
-                    {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-[10px] px-1.5 h-5">{counts.sold_unused} sold</Badge>}
-                    {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-[10px] px-1.5 h-5">{counts.used} used</Badge>}
-                    {counts.invalidated > 0 && <Badge className="bg-destructive/15 text-destructive text-[10px] px-1.5 h-5">{counts.invalidated} invalid</Badge>}
+                    {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} avail</Badge>}
+                    {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} sold</Badge>}
+                    {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} used</Badge>}
+                    {counts.invalidated > 0 && <Badge className="bg-destructive/15 text-destructive text-xs px-2 h-5">{counts.invalidated} invalid</Badge>}
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-2">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
                 </div>
               );
             })}
