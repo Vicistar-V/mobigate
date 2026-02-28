@@ -188,7 +188,7 @@ export function AdminMembershipSection({
               <div className="text-left min-w-0 flex-1">
                 <h3 className="font-semibold text-sm">Membership</h3>
                 <p className="text-xs text-muted-foreground">
-                  {stats.totalMembers.toLocaleString()} members • {stats.pendingRequests} pending
+                  {stats.totalMembers.toLocaleString()} members • {stats.pendingRequests} Pending
                 </p>
               </div>
             </div>

@@ -509,7 +509,7 @@ export const ExpenseSourceDetailSheet = ({
             </Badge>
             {pendingCount > 0 && (
               <Badge className="text-[10px] bg-amber-500/10 text-amber-600">
-                {pendingCount} pending
+                {pendingCount} Pending
               </Badge>
             )}
           </div>

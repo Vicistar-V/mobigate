@@ -40,7 +40,7 @@ export function calculateAccreditedAdvertiserDiscount(
     name: `Accredited Advertiser (${tier.charAt(0).toUpperCase() + tier.slice(1)})`,
     percentage: discountInfo.percentage,
     amount,
-    description: `${discountInfo.percentage}% discount for ${tier} tier status`,
+    description: `${discountInfo.percentage}% Discount for ${tier} tier status`,
   };
 }
 
@@ -154,6 +154,6 @@ export function calculatePackDiscount(
     name: `Slot Pack Discount`,
     percentage: packDiscountPercentage,
     amount,
-    description: `${packDiscountPercentage}% discount for slot pack bundle`
+    description: `${packDiscountPercentage}% Discount for slot pack bundle`
   };
 }

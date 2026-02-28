@@ -116,7 +116,7 @@ export default function SubMerchantApplicationPage() {
             <p className="font-bold text-sm text-foreground">{merchant.name}</p>
             <p className="text-xs text-muted-foreground">{merchant.category}</p>
             {mobiMerchant && (
-              <Badge className="bg-emerald-500/15 text-emerald-600 text-xs mt-1">1–25% discount rate</Badge>
+              <Badge className="bg-emerald-500/15 text-emerald-600 text-xs mt-1">1–25% Discount Rate</Badge>
             )}
           </div>
         </div>

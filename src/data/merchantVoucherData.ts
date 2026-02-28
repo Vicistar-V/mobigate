@@ -72,7 +72,7 @@ export function getDiscountForBundles(bundleCount: number): DiscountResult {
   const result = getTieredDiscount(bundleCount);
   return {
     discountPercent: result.discountPercent,
-    label: result.discountPercent > 0 ? `${result.discountPercent}% off` : "No discount",
+    label: result.discountPercent > 0 ? `${result.discountPercent}% off` : "No Discount",
     tier: result.tier,
     tierLabel: result.tierLabel,
   };
