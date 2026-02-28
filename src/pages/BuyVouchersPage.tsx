@@ -50,6 +50,7 @@ export default function BuyVouchersPage() {
   const [selectedCountry, setSelectedCountry] = useState<MerchantCountry | null>(null);
   const [selectedMerchant, setSelectedMerchant] = useState<MobiMerchant | null>(null);
   const [preSelectedMerchant, setPreSelectedMerchant] = useState(false);
+  const [merchantSort, setMerchantSort] = useState<"discount_high" | "discount_low" | "rating_high" | "rating_low">("discount_high");
 
   // Auto-select local merchant when coming from a merchant page
   useEffect(() => {
@@ -469,7 +470,26 @@ export default function BuyVouchersPage() {
   // ─── STEP 3: MERCHANT SELECTION ───
   const renderMerchantsStep = () => {
     if (!selectedCountry) return null;
-    const activeMerchants = selectedCountry.merchants.filter((m) => m.isActive).sort((a, b) => b.discountPercent - a.discountPercent);
+    const activeMerchants = selectedCountry.merchants.filter((m) => m.isActive);
+
+    // Sort merchants based on selected sort option
+    const sortedMerchants = [...activeMerchants].sort((a, b) => {
+      switch (merchantSort) {
+        case "discount_high": return b.discountPercent - a.discountPercent;
+        case "discount_low": return a.discountPercent - b.discountPercent;
+        case "rating_high": return b.rating - a.rating;
+        case "rating_low": return a.rating - b.rating;
+        default: return b.discountPercent - a.discountPercent;
+      }
+    });
+
+    const sortOptions: { value: typeof merchantSort; label: string }[] = [
+      { value: "discount_high", label: "Highest Discount" },
+      { value: "discount_low", label: "Lowest Discount" },
+      { value: "rating_high", label: "Highest Rating" },
+      { value: "rating_low", label: "Lowest Rating" },
+    ];
+
     return (
       <div className="bg-background pb-6">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
@@ -494,9 +514,25 @@ export default function BuyVouchersPage() {
               </div>
             </div>
           </div>
+          {/* Sort chips */}
+          <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
+            {sortOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setMerchantSort(opt.value)}
+                className={`h-8 px-3 rounded-full text-xs font-medium whitespace-nowrap shrink-0 touch-manipulation transition-colors ${
+                  merchantSort === opt.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="px-4 pt-3 space-y-2.5">
-          {activeMerchants.map((merchant) => {
+          {sortedMerchants.map((merchant) => {
             const { discounted, savings } = calculateDiscountedAmount(totalMobi, merchant.discountPercent);
             return (
               <div key={merchant.id} onClick={() => goToPayment(merchant)} className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
@@ -578,19 +614,23 @@ export default function BuyVouchersPage() {
           </div>
           <div className="rounded-xl border border-border/50 bg-card p-3 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal (Mobi)</span>
-              <span className="font-semibold text-foreground">M{formatNum(totalMobi)}</span>
+              <span className="text-muted-foreground">Total Voucher Value</span>
+              <span className="font-semibold text-primary">M{formatNum(totalMobi)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Merchant Rate</span>
+              <span className="text-muted-foreground">Regular Price Value</span>
               <span className="font-semibold text-foreground">{selectedCountry.currencySymbol}{formatNum(totalMobi)}</span>
             </div>
             <div className="flex justify-between text-sm text-emerald-600">
-              <span>Discount ({selectedMerchant.discountPercent}%)</span>
+              <span>Merchant's Discount ({selectedMerchant.discountPercent}%)</span>
               <span className="font-semibold">-{selectedCountry.currencySymbol}{formatNum(savings)}</span>
             </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Merchants' Price</span>
+              <span className="font-semibold text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</span>
+            </div>
             <div className="border-t border-border/50 pt-2 flex justify-between">
-              <span className="font-bold text-foreground">Total to Pay</span>
+              <span className="font-bold text-foreground">Amount to Pay</span>
               <span className="font-bold text-lg text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</span>
             </div>
             <p className="text-xs text-muted-foreground text-center">You receive M{formatNum(totalMobi)} in Mobi vouchers</p>
