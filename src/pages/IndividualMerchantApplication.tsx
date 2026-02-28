@@ -47,16 +47,16 @@ const currencyOptions = [
 function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
   return (
     <div className="border-b border-border pb-1.5 mb-3 flex items-center gap-2">
-      <Icon className="h-3.5 w-3.5 text-primary" />
-      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
+      <Icon className="h-4 w-4 text-primary" />
+      <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
     </div>
   );
 }
 
 function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div className="space-y-1">
-      <Label className="text-xs font-medium">
+    <div className="space-y-1.5">
+      <Label className="text-sm font-medium">
         {label} {required && <span className="text-destructive">*</span>}
       </Label>
       {children}
@@ -246,7 +246,7 @@ export default function IndividualMerchantApplication() {
     );
   }
 
-  const inputCls = "h-9 text-sm";
+  const inputCls = "h-10 text-sm";
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -288,8 +288,8 @@ export default function IndividualMerchantApplication() {
           <Card>
             <CollapsibleTrigger asChild>
               <div className="flex items-center justify-between p-3 cursor-pointer">
-                <p className="text-xs font-semibold flex items-center gap-1.5">
-                  <Shield className="h-3.5 w-3.5 text-primary" /> Merchant Application Requirements
+                <p className="text-sm font-semibold flex items-center gap-1.5">
+                  <Shield className="h-4 w-4 text-primary" /> Merchant Application Requirements
                 </p>
                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
               </div>
@@ -312,8 +312,8 @@ export default function IndividualMerchantApplication() {
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
                 <div className="text-left">
-                  <p className="text-xs font-bold">Request a Waiver</p>
-                  <p className="text-[11px] text-muted-foreground">Non-refundable fee of {formatMobi(50000)}</p>
+                  <p className="text-sm font-bold">Request a Waiver</p>
+                  <p className="text-xs text-muted-foreground">Non-refundable fee of {formatMobi(50000)}</p>
                 </div>
               </div>
               {waiverMode ? (
@@ -391,7 +391,7 @@ export default function IndividualMerchantApplication() {
 
             <FormField label="Gender" required>
               <Select value={gender} onValueChange={setGender}>
-                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                <SelectTrigger className="h-10 text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger>
                 <SelectContent>
                   {genderOptions.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
                 </SelectContent>
@@ -406,8 +406,8 @@ export default function IndividualMerchantApplication() {
               </div>
             </FormField>
 
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Place of Birth</Label>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Place of Birth</Label>
               <div className="grid grid-cols-1 gap-2">
                 <Input className={inputCls} placeholder="Town / City" value={birthTown} onChange={e => setBirthTown(e.target.value)} />
                 <Input className={inputCls} placeholder="Local Govt / District / County" value={birthLGA} onChange={e => setBirthLGA(e.target.value)} />
@@ -417,7 +417,7 @@ export default function IndividualMerchantApplication() {
 
             <FormField label="Marital Status" required>
               <Select value={maritalStatus} onValueChange={setMaritalStatus}>
-                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select status" /></SelectTrigger>
+                <SelectTrigger className="h-10 text-sm"><SelectValue placeholder="Select status" /></SelectTrigger>
                 <SelectContent>
                   {maritalStatusOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                 </SelectContent>
