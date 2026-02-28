@@ -207,7 +207,7 @@ export default function SubMerchantApplicationPage() {
           </div>
 
           <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5 block">Business Type * <span className="font-normal text-muted-foreground">(select all that apply)</span></Label>
+            <Label className="text-xs font-semibold text-foreground mb-1.5 block">Business Type * <span className="font-normal text-muted-foreground">(select as applicable)</span></Label>
             <div className="space-y-2">
               {[
                 { value: "retail_shop", label: "Retail Shop" },
