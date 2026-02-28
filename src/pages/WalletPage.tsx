@@ -234,17 +234,6 @@ export default function WalletPage() {
                       {w.symbol}{formatNumberFull(w.balance)}
                     </p>
 
-                    {/* Stats row */}
-                    <div className="flex gap-6 mb-5">
-                      <div>
-                        <p className="text-white/40 text-xs font-medium mb-0.5">Income</p>
-                        <p className="text-white/90 text-sm font-semibold font-mono">{w.symbol}{formatNumberFull(w.monthlyIn, 0)}</p>
-                      </div>
-                      <div>
-                        <p className="text-white/40 text-xs font-medium mb-0.5">Spent</p>
-                        <p className="text-white/90 text-sm font-semibold font-mono">{w.symbol}{formatNumberFull(w.monthlyOut, 0)}</p>
-                      </div>
-                    </div>
 
                     {/* Fund button */}
                     <Button
