@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import {
   Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home,
   Ticket, Gamepad2, Eye, TrendingUp, BarChart3, Package, CreditCard, Users, Trophy,
+  ShieldCheck, ShieldBan, ShieldAlert, AlertTriangle,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -325,6 +327,15 @@ function AdminMerchantCard({ merchant, onClick }: { merchant: LocationMerchant; 
 
 function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchant | null; onClose: () => void }) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Derive initial status from merchant id hash
+  const initialStatus = merchant
+    ? (["active", "suspended", "banned"] as const)[(merchant.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 10 < 8 ? 0 : (merchant.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 10 < 9 ? 1 : 2]
+    : "active";
+  const [merchantStatus, setMerchantStatus] = useState<"active" | "suspended" | "banned">(initialStatus);
+  const [confirmAction, setConfirmAction] = useState<"suspend" | "ban" | "activate" | null>(null);
+
   if (!merchant) return null;
 
   const { hasQuiz, hasVoucher } = getMerchantOfferings(merchant.id);
@@ -332,15 +343,34 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
   const qStats = getMerchantQuizStats(merchant.id);
   const formatCurrency = (n: number) => "₦" + n.toLocaleString();
 
+  const statusConfig = {
+    active: { label: "Active", icon: ShieldCheck, color: "text-emerald-600", bg: "bg-emerald-500/10 border-emerald-500/20" },
+    suspended: { label: "Suspended", icon: ShieldAlert, color: "text-amber-600", bg: "bg-amber-500/10 border-amber-500/20" },
+    banned: { label: "Banned", icon: ShieldBan, color: "text-red-600", bg: "bg-red-500/10 border-red-500/20" },
+  };
+
+  const currentStatus = statusConfig[merchantStatus];
+  const StatusIcon = currentStatus.icon;
+
+  const handleStatusChange = (action: "suspend" | "ban" | "activate") => {
+    const newStatus = action === "activate" ? "active" : action === "suspend" ? "suspended" : "banned";
+    setMerchantStatus(newStatus);
+    setConfirmAction(null);
+    toast({
+      title: `Merchant ${action === "activate" ? "Activated" : action === "suspend" ? "Suspended" : "Banned"}`,
+      description: `${merchant.name} has been ${newStatus}.`,
+    });
+  };
+
   return (
-    <Drawer open={!!merchant} onOpenChange={(open) => !open && onClose()}>
+    <Drawer open={!!merchant} onOpenChange={(open) => { if (!open) { onClose(); setConfirmAction(null); } }}>
       <DrawerContent className="max-h-[92vh]">
         <DrawerHeader className="pb-2">
           <DrawerTitle className="text-base">Merchant Details</DrawerTitle>
         </DrawerHeader>
         <DrawerBody className="overflow-y-auto touch-auto px-4 pb-8">
           {/* Profile Header */}
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-16 w-16 border-2 border-primary/20">
               <AvatarImage src={merchant.logo} alt={merchant.name} />
               <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
@@ -364,6 +394,100 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Status Management */}
+          <div className={`rounded-xl border p-3 mb-5 ${currentStatus.bg}`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <StatusIcon className={`h-5 w-5 ${currentStatus.color}`} />
+                <div>
+                  <p className="text-sm font-bold">Account Status</p>
+                  <p className={`text-xs font-semibold ${currentStatus.color}`}>{currentStatus.label}</p>
+                </div>
+              </div>
+              <Badge variant="outline" className={`text-xs ${currentStatus.color} border-current`}>
+                {currentStatus.label}
+              </Badge>
+            </div>
+
+            {/* Confirm action UI */}
+            {confirmAction && (
+              <div className="rounded-lg bg-background border border-border p-3 mb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <p className="text-sm font-semibold">
+                    {confirmAction === "activate" ? "Reactivate" : confirmAction === "suspend" ? "Suspend" : "Ban"} {merchant.name}?
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {confirmAction === "ban"
+                    ? "This will permanently restrict the merchant from all platform activities."
+                    : confirmAction === "suspend"
+                    ? "The merchant will be temporarily restricted from operations."
+                    : "The merchant will regain full access to all platform features."}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-10 text-xs touch-manipulation"
+                    onClick={() => setConfirmAction(null)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    className={`flex-1 h-10 text-xs touch-manipulation ${
+                      confirmAction === "ban" ? "bg-red-600 hover:bg-red-700 text-white" :
+                      confirmAction === "suspend" ? "bg-amber-600 hover:bg-amber-700 text-white" :
+                      "bg-emerald-600 hover:bg-emerald-700 text-white"
+                    }`}
+                    onClick={() => handleStatusChange(confirmAction)}
+                  >
+                    Confirm {confirmAction === "activate" ? "Activate" : confirmAction === "suspend" ? "Suspend" : "Ban"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Status action buttons */}
+            {!confirmAction && (
+              <div className="flex gap-2">
+                {merchantStatus !== "active" && (
+                  <Button
+                    size="sm"
+                    className="flex-1 h-10 text-xs bg-emerald-600 hover:bg-emerald-700 text-white touch-manipulation active:scale-[0.97]"
+                    onClick={() => setConfirmAction("activate")}
+                  >
+                    <ShieldCheck className="h-3.5 w-3.5 mr-1" />
+                    Activate
+                  </Button>
+                )}
+                {merchantStatus !== "suspended" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-10 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 touch-manipulation active:scale-[0.97]"
+                    onClick={() => setConfirmAction("suspend")}
+                  >
+                    <ShieldAlert className="h-3.5 w-3.5 mr-1" />
+                    Suspend
+                  </Button>
+                )}
+                {merchantStatus !== "banned" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-10 text-xs text-red-600 border-red-300 hover:bg-red-50 touch-manipulation active:scale-[0.97]"
+                    onClick={() => setConfirmAction("ban")}
+                  >
+                    <ShieldBan className="h-3.5 w-3.5 mr-1" />
+                    Ban
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Voucher Statistics */}
