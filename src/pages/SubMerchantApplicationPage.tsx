@@ -209,7 +209,7 @@ export default function SubMerchantApplicationPage() {
             <div className="grid grid-cols-2 gap-2">
               {[
                 { value: "retail_shop", label: "Retail Shop" },
-                { value: "kiosk", label: "Kiosk" },
+                { value: "mobi_kiosk", label: "Mobi Kiosk" },
                 { value: "online_store", label: "Online Store" },
                 { value: "mobile_agent", label: "Mobile Agent" },
               ].map(opt => {
