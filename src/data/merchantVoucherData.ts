@@ -313,3 +313,23 @@ export function getBundleStatusCounts(bundle: VoucherBundle) {
 }
 
 export const formatNum = (n: number) => n.toLocaleString("en-NG");
+
+// ─── Bundle-level batch classification ───
+export type BundleClassification = "available" | "sold" | "invalidated";
+
+export function classifyBundle(bundle: VoucherBundle): BundleClassification {
+  if (bundle.cards.some(c => c.status === "invalidated")) return "invalidated";
+  if (bundle.cards.some(c => c.status === "sold_unused")) return "sold";
+  return "available";
+}
+
+export function getBatchBundleCounts(batch: VoucherBatch) {
+  let available = 0, sold = 0, invalidated = 0;
+  for (const bundle of batch.bundles) {
+    const cls = classifyBundle(bundle);
+    if (cls === "available") available++;
+    else if (cls === "sold") sold++;
+    else invalidated++;
+  }
+  return { available, sold, invalidated, total: batch.bundles.length };
+}
