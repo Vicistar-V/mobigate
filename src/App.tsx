@@ -60,6 +60,7 @@ import CreateAdvertisementPage from "./pages/community/CommunityCreateAdvertisem
 import CommunityAdvertRatesPage from "./pages/community/CommunityAdvertRatesPage";
 import MyQuizHistory from "./pages/MyQuizHistory";
 import MobiQuizGames from "./pages/MobiQuizGames";
+import WalletPage from "./pages/WalletPage";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 import { initializeMockData } from "./data/mockAdvertData";
@@ -132,6 +133,7 @@ const App = () => {
                   <Route path="/mobi-quiz-games" element={<MobiQuizGames />} />
                   <Route path="/mobi-quiz-games/merchant/:merchantId" element={<MerchantDetailPage />} />
                   <Route path="/merchants" element={<MerchantListingPage />} />
+                  <Route path="/wallet" element={<WithHeader><WalletPage /></WithHeader>} />
                   <Route path="/buy-vouchers" element={<WithHeader><BuyVouchersPage /></WithHeader>} />
                   <Route path="/merchant-voucher-management" element={<WithHeader><MerchantVoucherManagement /></WithHeader>} />
                   <Route path="/merchant-voucher-generate" element={<WithHeader><MerchantVoucherGenerate /></WithHeader>} />
