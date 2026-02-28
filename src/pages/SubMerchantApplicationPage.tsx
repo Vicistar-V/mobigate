@@ -243,10 +243,10 @@ export default function SubMerchantApplicationPage() {
                 <SelectValue placeholder="How long have you been in business?" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="less_than_1">Less than 1 year</SelectItem>
                 <SelectItem value="1_to_3">1 - 3 years</SelectItem>
-                <SelectItem value="3_to_5">3 - 5 years</SelectItem>
-                <SelectItem value="5_plus">5+ years</SelectItem>
+                <SelectItem value="4_to_7">4 - 7 years</SelectItem>
+                <SelectItem value="8_to_10">8 - 10 years</SelectItem>
+                <SelectItem value="10_plus">More than 10 years</SelectItem>
               </SelectContent>
             </Select>
           </div>
