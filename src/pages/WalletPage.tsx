@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Wallet, ArrowUpRight, ArrowDownLeft, Plus, ChevronRight, ChevronLeft,
-  Search, Filter, TrendingUp, TrendingDown, Clock, CheckCircle2,
+  Search, Filter, ArrowUpDown, Clock, CheckCircle2,
   XCircle, AlertCircle, Coins, Banknote, Loader2, Sparkles, ShieldCheck
 } from "lucide-react";
 import { formatNumberFull } from "@/lib/financialDisplay";
@@ -276,56 +277,34 @@ export default function WalletPage() {
           />
         </div>
 
-        {/* Filter + Sort pills */}
-        <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar touch-pan-x">
-          {(["all", "credit", "debit"] as FilterType[]).map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all touch-manipulation active:scale-[0.97]",
-                filter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted/50 text-muted-foreground"
-              )}
-            >
-              {f === "all" ? "All" : f === "credit" ? "💰 Income" : "💸 Expenses"}
-            </button>
-          ))}
-          <div className="border-l border-border/50 mx-1" />
-          {(["newest", "oldest", "highest", "lowest"] as SortType[]).map(s => (
-            <button
-              key={s}
-              onClick={() => setSort(s)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all touch-manipulation active:scale-[0.97]",
-                sort === s
-                  ? "bg-accent text-accent-foreground ring-1 ring-primary/30"
-                  : "bg-muted/30 text-muted-foreground"
-              )}
-            >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
-            </button>
-          ))}
+        {/* Filter & Sort */}
+        <div className="flex gap-2 mb-3">
+          <Select value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
+            <SelectTrigger className="h-9 text-xs font-medium rounded-lg flex-1">
+              <Filter className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Transactions</SelectItem>
+              <SelectItem value="credit">Income Only</SelectItem>
+              <SelectItem value="debit">Expenses Only</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sort} onValueChange={(v) => setSort(v as SortType)}>
+            <SelectTrigger className="h-9 text-xs font-medium rounded-lg flex-1">
+              <ArrowUpDown className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="highest">Highest Amount</SelectItem>
+              <SelectItem value="lowest">Lowest Amount</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Summary bar */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-emerald-500/10 rounded-xl p-2.5 text-center">
-            <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Total In</p>
-            <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(totalCredit, 0)}</p>
-          </div>
-          <div className="bg-red-500/10 rounded-xl p-2.5 text-center">
-            <p className="text-xs text-red-700 dark:text-red-400 font-medium">Total Out</p>
-            <p className="text-sm font-bold text-red-700 dark:text-red-400">₦{formatNumberFull(totalDebit, 0)}</p>
-          </div>
-          <div className="bg-primary/10 rounded-xl p-2.5 text-center">
-            <p className="text-xs text-primary font-medium">Net</p>
-            <p className={cn("text-sm font-bold", totalCredit - totalDebit >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400")}>
-              {totalCredit - totalDebit >= 0 ? "+" : ""}₦{formatNumberFull(totalCredit - totalDebit, 0)}
-            </p>
-          </div>
-        </div>
 
         {/* Transaction list */}
         <div className="space-y-2">
