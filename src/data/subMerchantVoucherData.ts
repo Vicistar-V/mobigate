@@ -1,6 +1,6 @@
 // Sub-Merchant Voucher Management Data Layer
 
-import { VoucherBatch, VoucherBundle, VoucherCard, VoucherCardStatus, SoldVia, MerchantWalletTransaction, formatNum, generateBundlePrefix, generateCardSerial, generatePin, calculateBulkDiscount } from "@/data/merchantVoucherData";
+import { VoucherBatch, VoucherBundle, VoucherCard, VoucherCardStatus, SoldVia, MerchantWalletTransaction, formatNum, generateBundlePrefix, generateCardSerial, generatePin, calculateBulkDiscount, generateBatchNumber } from "@/data/merchantVoucherData";
 
 export interface ParentMerchant {
   id: string;
@@ -94,7 +94,7 @@ function createSubMerchantBatch(
   const createdAt = new Date();
   createdAt.setDate(createdAt.getDate() - daysAgo);
   const batchId = `sm-batch-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-  const batchNumber = `SM-BATCH-${Math.floor(1000 + Math.random() * 9000)}`;
+  const batchNumber = generateBatchNumber(createdAt, "SM01");
   const discount = calculateBulkDiscount(denomination, bundleCount);
 
   const bundles: VoucherBundle[] = [];
