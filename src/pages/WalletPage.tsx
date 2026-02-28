@@ -194,7 +194,7 @@ export default function WalletPage() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">My Wallet</h1>
-            <p className="text-[11px] text-muted-foreground">Manage your finances</p>
+            <p className="text-xs text-muted-foreground">Manage your finances</p>
           </div>
         </div>
       </div>
@@ -215,21 +215,21 @@ export default function WalletPage() {
           ))}
         </div>
 
-        {/* Swipeable Card */}
+        {/* Swipeable Card - shows peek of next card */}
         <div
-          className="relative overflow-hidden rounded-2xl"
+          className="relative overflow-visible"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           <div
-            className="flex transition-transform duration-300 ease-out"
+            className="flex transition-transform duration-300 ease-out gap-3"
             style={{
-              transform: `translateX(calc(-${activeWallet * 100}% + ${touchStart !== null ? touchDelta : 0}px))`,
+              transform: `translateX(calc(-${activeWallet * 85}% + ${touchStart !== null ? touchDelta : 0}px))`,
             }}
           >
             {wallets.map((w, i) => (
-              <div key={i} className="w-full shrink-0 px-0.5">
+              <div key={i} className="shrink-0" style={{ width: "82%" }}>
                 <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br p-5", w.gradient)}>
                   {/* Decorative circles */}
                   <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10" />
@@ -240,10 +240,10 @@ export default function WalletPage() {
                       <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
                         <w.icon className="h-4 w-4 text-white" />
                       </div>
-                      <span className="text-white/80 text-xs font-medium">{w.label}</span>
+                      <span className="text-white/90 text-sm font-semibold">{w.label}</span>
                     </div>
 
-                    <p className="text-white/60 text-[11px] font-medium mb-1 tracking-wide uppercase">Available Balance</p>
+                    <p className="text-white/70 text-xs font-medium mb-1 tracking-wide uppercase">Available Balance</p>
                     <p className="text-white text-3xl font-black tracking-tight mb-4">
                       {w.symbol}{formatNumberFull(w.balance)}
                     </p>
@@ -255,8 +255,8 @@ export default function WalletPage() {
                           <TrendingUp className="h-3 w-3 text-white" />
                         </div>
                         <div>
-                          <p className="text-white/50 text-[9px]">Income</p>
-                          <p className="text-white text-xs font-bold">{w.symbol}{formatNumberFull(w.monthlyIn, 0)}</p>
+                          <p className="text-white/60 text-xs">Income</p>
+                          <p className="text-white text-sm font-bold">{w.symbol}{formatNumberFull(w.monthlyIn, 0)}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -264,8 +264,8 @@ export default function WalletPage() {
                           <TrendingDown className="h-3 w-3 text-white" />
                         </div>
                         <div>
-                          <p className="text-white/50 text-[9px]">Spent</p>
-                          <p className="text-white text-xs font-bold">{w.symbol}{formatNumberFull(w.monthlyOut, 0)}</p>
+                          <p className="text-white/60 text-xs">Spent</p>
+                          <p className="text-white text-sm font-bold">{w.symbol}{formatNumberFull(w.monthlyOut, 0)}</p>
                         </div>
                       </div>
                     </div>
@@ -292,7 +292,7 @@ export default function WalletPage() {
         </div>
 
         {/* Swipe hint */}
-        <p className="text-center text-[10px] text-muted-foreground/60 mt-2 flex items-center justify-center gap-1">
+        <p className="text-center text-xs text-muted-foreground/60 mt-3 flex items-center justify-center gap-1">
           <ChevronLeft className="h-3 w-3" /> Swipe to switch wallets <ChevronRight className="h-3 w-3" />
         </p>
       </div>
@@ -301,7 +301,7 @@ export default function WalletPage() {
       <div className="px-4 mt-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-foreground">Transactions</h2>
-          <Badge variant="secondary" className="text-[10px] font-medium">
+          <Badge variant="secondary" className="text-xs font-medium">
             {filteredTxns.length} records
           </Badge>
         </div>
@@ -353,16 +353,16 @@ export default function WalletPage() {
         {/* Summary bar */}
         <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="bg-emerald-500/10 rounded-xl p-2.5 text-center">
-            <p className="text-[9px] text-emerald-700 dark:text-emerald-400 font-medium">Total In</p>
-            <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(totalCredit, 0)}</p>
+            <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Total In</p>
+            <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(totalCredit, 0)}</p>
           </div>
           <div className="bg-red-500/10 rounded-xl p-2.5 text-center">
-            <p className="text-[9px] text-red-700 dark:text-red-400 font-medium">Total Out</p>
-            <p className="text-xs font-bold text-red-700 dark:text-red-400">₦{formatNumberFull(totalDebit, 0)}</p>
+            <p className="text-xs text-red-700 dark:text-red-400 font-medium">Total Out</p>
+            <p className="text-sm font-bold text-red-700 dark:text-red-400">₦{formatNumberFull(totalDebit, 0)}</p>
           </div>
           <div className="bg-primary/10 rounded-xl p-2.5 text-center">
-            <p className="text-[9px] text-primary font-medium">Net</p>
-            <p className={cn("text-xs font-bold", totalCredit - totalDebit >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400")}>
+            <p className="text-xs text-primary font-medium">Net</p>
+            <p className={cn("text-sm font-bold", totalCredit - totalDebit >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400")}>
               {totalCredit - totalDebit >= 0 ? "+" : ""}₦{formatNumberFull(totalCredit - totalDebit, 0)}
             </p>
           </div>
@@ -399,9 +399,9 @@ export default function WalletPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] text-muted-foreground">{formatRelativeDate(tx.date)}</span>
-                        <span className="text-[10px] text-muted-foreground/40">•</span>
-                        <span className="text-[10px] text-muted-foreground">{tx.category}</span>
+                        <span className="text-xs text-muted-foreground">{formatRelativeDate(tx.date)}</span>
+                        <span className="text-xs text-muted-foreground/40">•</span>
+                        <span className="text-xs text-muted-foreground">{tx.category}</span>
                         <div className="ml-auto flex items-center gap-1">
                           <st.icon className={cn("h-3 w-3", st.color)} />
                         </div>
@@ -488,7 +488,7 @@ export default function WalletPage() {
                 <div className="space-y-5">
                   {/* Current balance */}
                   <div className="bg-emerald-500/10 rounded-2xl p-4 text-center">
-                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium uppercase tracking-wide">Current Balance</p>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium uppercase tracking-wide">Current Balance</p>
                     <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
                       ₦{formatNumberFull(LOCAL_WALLET.balance)}
                     </p>
@@ -528,7 +528,7 @@ export default function WalletPage() {
                           key={amt}
                           onClick={() => { setFundAmount(amt); setFundCustom(amt.toString()); }}
                           className={cn(
-                            "py-2.5 rounded-xl text-xs font-bold transition-all touch-manipulation active:scale-[0.97]",
+                            "py-2.5 rounded-xl text-sm font-bold transition-all touch-manipulation active:scale-[0.97]",
                             fundAmount === amt
                               ? "bg-primary text-primary-foreground ring-2 ring-primary/30"
                               : "bg-muted/40 text-foreground hover:bg-muted/60"
@@ -600,7 +600,7 @@ export default function WalletPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-xs text-muted-foreground">Reference</span>
-                      <span className="text-[10px] font-mono font-semibold text-foreground">TXN-{Date.now().toString().slice(-8)}</span>
+                      <span className="text-xs font-mono font-semibold text-foreground">TXN-{Date.now().toString().slice(-8)}</span>
                     </div>
                   </div>
 
