@@ -179,19 +179,38 @@ export default function ManageSubMerchants() {
             )}
             {processedApps.length > 0 && (
               <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">Processed</p>
-                <div className="space-y-2">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">Processed ({processedApps.length})</p>
+                <div className="space-y-2.5">
                   {processedApps.map(app => (
-                    <div key={app.id} className="rounded-xl border border-border/50 bg-card p-3.5">
-                      <div className="flex items-center justify-between">
+                    <div key={app.id} className={`rounded-xl border-2 p-4 ${app.status === "approved" ? "border-emerald-500/30 bg-emerald-500/5" : "border-destructive/30 bg-destructive/5"}`}>
+                      <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="text-sm font-semibold text-foreground">{app.applicantName}</p>
-                          <p className="text-xs text-muted-foreground">{app.city}, {app.state} • {app.dateSubmitted.toLocaleDateString("en-NG", { day: "numeric", month: "short" })}</p>
+                          <p className="text-sm font-bold text-foreground">{app.applicantName}</p>
+                          <p className="text-xs text-muted-foreground">{app.city}, {app.state}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Submitted {app.dateSubmitted.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Fee: ₦{formatNum(app.feePaid)}</p>
                         </div>
                         <Badge className={`text-xs h-5 px-2 ${app.status === "approved" ? "bg-emerald-500/15 text-emerald-600" : "bg-destructive/15 text-destructive"}`}>
-                          {app.status === "approved" ? "Approved" : "Rejected"}
+                          {app.status === "approved" ? (
+                            <><Check className="h-3 w-3 mr-1" /> Approved</>
+                          ) : (
+                            <><X className="h-3 w-3 mr-1" /> Rejected</>
+                          )}
                         </Badge>
                       </div>
+                      {app.status === "rejected" && (
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            onClick={() => setConfirmAction({ app, action: "approve" })}
+                            size="sm"
+                            className="flex-1 h-10 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation"
+                          >
+                            <Check className="h-3.5 w-3.5 mr-1" /> Reconsider
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
