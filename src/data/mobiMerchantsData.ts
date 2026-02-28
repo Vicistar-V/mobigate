@@ -6,6 +6,10 @@ export interface MobiMerchant {
   rating: number; // 1-5 stars
   isVerified: boolean;
   isActive: boolean;
+  stateId?: string;
+  stateName?: string;
+  lgaId?: string;
+  lgaName?: string;
 }
 
 export interface MerchantCountry {
@@ -20,14 +24,14 @@ export interface MerchantCountry {
 
 // Nigeria Merchants (Local Country)
 const nigeriaMerchants: MobiMerchant[] = [
-  { id: "ng-001", name: "Mobi-Express Lagos", discountPercent: 5, city: "Lagos", rating: 4.8, isVerified: true, isActive: true },
-  { id: "ng-002", name: "QuickPay Solutions", discountPercent: 3, city: "Abuja", rating: 4.5, isVerified: true, isActive: true },
-  { id: "ng-003", name: "VoucherHub Nigeria", discountPercent: 8, city: "Port Harcourt", rating: 4.7, isVerified: true, isActive: true },
-  { id: "ng-004", name: "Naira2Mobi Store", discountPercent: 10, city: "Kano", rating: 4.3, isVerified: true, isActive: true },
-  { id: "ng-005", name: "FastCredit Ibadan", discountPercent: 7, city: "Ibadan", rating: 4.6, isVerified: true, isActive: true },
-  { id: "ng-006", name: "9ja Mobi Deals", discountPercent: 12, city: "Enugu", rating: 4.4, isVerified: true, isActive: true },
-  { id: "ng-007", name: "PayFast Benin", discountPercent: 6, city: "Benin City", rating: 4.2, isVerified: true, isActive: true },
-  { id: "ng-008", name: "MobiKing Owerri", discountPercent: 15, city: "Owerri", rating: 4.9, isVerified: true, isActive: true },
+  { id: "ng-001", name: "Mobi-Express Lagos", discountPercent: 5, city: "Lagos", rating: 4.8, isVerified: true, isActive: true, stateId: "lagos", stateName: "Lagos", lgaId: "ikeja", lgaName: "Ikeja" },
+  { id: "ng-002", name: "QuickPay Solutions", discountPercent: 3, city: "Abuja", rating: 4.5, isVerified: true, isActive: true, stateId: "fct", stateName: "Abuja (FCT)", lgaId: "amac", lgaName: "Municipal Area Council" },
+  { id: "ng-003", name: "VoucherHub Nigeria", discountPercent: 8, city: "Port Harcourt", rating: 4.7, isVerified: true, isActive: true, stateId: "rivers", stateName: "Rivers", lgaId: "ph", lgaName: "Port Harcourt" },
+  { id: "ng-004", name: "Naira2Mobi Store", discountPercent: 10, city: "Kano", rating: 4.3, isVerified: true, isActive: true, stateId: "kano", stateName: "Kano", lgaId: "kano-municipal", lgaName: "Kano Municipal" },
+  { id: "ng-005", name: "FastCredit Ibadan", discountPercent: 7, city: "Ibadan", rating: 4.6, isVerified: true, isActive: true, stateId: "oyo", stateName: "Oyo", lgaId: "ibadan-north", lgaName: "Ibadan North" },
+  { id: "ng-006", name: "9ja Mobi Deals", discountPercent: 12, city: "Enugu", rating: 4.4, isVerified: true, isActive: true, stateId: "enugu", stateName: "Enugu", lgaId: "enugu-north", lgaName: "Enugu North" },
+  { id: "ng-007", name: "PayFast Benin", discountPercent: 6, city: "Benin City", rating: 4.2, isVerified: true, isActive: true, stateId: "edo", stateName: "Edo", lgaId: "oredo", lgaName: "Oredo" },
+  { id: "ng-008", name: "MobiKing Owerri", discountPercent: 15, city: "Owerri", rating: 4.9, isVerified: true, isActive: true, stateId: "imo", stateName: "Imo", lgaId: "owerri-municipal", lgaName: "Owerri Municipal" },
 ];
 
 // Ghana Merchants
