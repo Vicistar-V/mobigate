@@ -209,17 +209,26 @@ function createMockBatch(
   };
 }
 
-// Create mock batches with varied statuses
+// Create mock batches with varied statuses for testing
 const statusOverrides1: Record<number, { status: VoucherCardStatus; soldVia: SoldVia }> = {};
-// First batch: mix of statuses across 200 cards (2 bundles)
-for (let i = 0; i < 50; i++) statusOverrides1[i] = { status: "sold_unused", soldVia: "physical" };
-for (let i = 50; i < 70; i++) statusOverrides1[i] = { status: "used", soldVia: "physical" };
-for (let i = 70; i < 80; i++) statusOverrides1[i] = { status: "sold_unused", soldVia: "mobigate_digital" };
-for (let i = 80; i < 85; i++) statusOverrides1[i] = { status: "used", soldVia: "mobigate_digital" };
+// Bundle 0 (cards 0-99): mostly sold, some used — should show "Sold Out"
+for (let i = 0; i < 60; i++) statusOverrides1[i] = { status: "sold_unused", soldVia: "physical" };
+for (let i = 60; i < 100; i++) statusOverrides1[i] = { status: "used", soldVia: "physical" };
+// Bundle 1 (cards 100-199): mix — has available, some sold — should show "Available"
+for (let i = 130; i < 160; i++) statusOverrides1[i] = { status: "sold_unused", soldVia: "physical" };
+for (let i = 160; i < 180; i++) statusOverrides1[i] = { status: "used", soldVia: "mobigate_digital" };
 
 const statusOverrides2: Record<number, { status: VoucherCardStatus; soldVia: SoldVia }> = {};
-for (let i = 0; i < 30; i++) statusOverrides2[i] = { status: "used", soldVia: "physical" };
-for (let i = 30; i < 45; i++) statusOverrides2[i] = { status: "sold_unused", soldVia: "physical" };
+// Bundle 0 (cards 0-99): all used — "Sold Out"
+for (let i = 0; i < 100; i++) statusOverrides2[i] = { status: "used", soldVia: "physical" };
+// Bundle 1 (cards 100-199): all sold_unused — "Sold Out"
+for (let i = 100; i < 200; i++) statusOverrides2[i] = { status: "sold_unused", soldVia: "mobigate_digital" };
+// Bundle 2 (cards 200-299): fully available — "Available"
+// Bundle 3 (cards 300-399): mix of available + sold — "Available"
+for (let i = 300; i < 340; i++) statusOverrides2[i] = { status: "sold_unused", soldVia: "physical" };
+for (let i = 340; i < 355; i++) statusOverrides2[i] = { status: "used", soldVia: "physical" };
+// Bundle 4 (cards 400-499): some invalidated — "Invalidated" 
+for (let i = 400; i < 500; i++) statusOverrides2[i] = { status: "invalidated", soldVia: null };
 
 export const initialMockBatches: VoucherBatch[] = [
   createMockBatch(500, 2, 14, "new", null, statusOverrides1),

@@ -290,18 +290,22 @@ export default function MerchantVoucherBatchDetail() {
 
             return (
               <div key={bundle.id} className="rounded-xl border border-border/50 bg-card overflow-hidden">
-                {/* Bundle header — only available + sold */}
+                {/* Bundle header — simple Available / Sold Out badge */}
                 <div onClick={() => toggleBundle(bundle.id)} className="p-3.5 flex items-center gap-3 touch-manipulation cursor-pointer active:bg-muted/30">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <Package className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-foreground truncate">{bundle.serialPrefix}</p>
-                    <div className="flex gap-2 mt-1 flex-wrap">
-                      {bCounts.available > 0 && <span className="text-xs text-emerald-600 font-semibold">{bCounts.available} avail</span>}
-                      {bCounts.sold_unused > 0 && <span className="text-xs text-amber-600 font-semibold">{bCounts.sold_unused} sold</span>}
-                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{bundle.cardCount} cards</p>
                   </div>
+                  {(() => {
+                    const allInvalidated = bundle.cards.every(c => c.status === "invalidated");
+                    const hasAvailable = bundle.cards.some(c => c.status === "available");
+                    if (allInvalidated) return <Badge className="bg-destructive/15 text-destructive text-xs h-5 px-2 shrink-0">Invalidated</Badge>;
+                    if (hasAvailable) return <Badge className="bg-emerald-500/15 text-emerald-600 text-xs h-5 px-2 shrink-0">Available</Badge>;
+                    return <Badge className="bg-amber-500/15 text-amber-600 text-xs h-5 px-2 shrink-0">Sold Out</Badge>;
+                  })()}
                   {isExpanded ? <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />}
                 </div>
 
