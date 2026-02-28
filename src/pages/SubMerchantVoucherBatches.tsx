@@ -79,10 +79,7 @@ export default function SubMerchantVoucherBatches() {
             <div key={batch.id} onClick={() => navigate(`/sub-merchant-voucher-batch/${batch.id}`)} className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-foreground">{batch.batchNumber}</p>
-                    <Badge variant="outline" className="text-xs px-2 h-5 border-primary/30 text-primary">Sub-Merchant</Badge>
-                  </div>
                   <p className="text-xs text-muted-foreground mt-0.5">M{formatNum(batch.denomination)} • {batch.bundleCount} bundle{batch.bundleCount !== 1 ? "s" : ""} • {formatNum(batch.totalCards)} cards</p>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
