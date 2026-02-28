@@ -102,7 +102,7 @@ export default function MerchantVoucherGenerate() {
     <div className="mb-5" key={label}>
       <div className="flex items-center justify-between mb-2 px-1">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</h3>
-        <span className="text-[10px] text-muted-foreground">{desc}</span>
+        <span className="text-xs text-muted-foreground">{desc}</span>
       </div>
       <div className="grid grid-cols-2 gap-2.5">
         {vouchers.map(renderDenomCard)}
@@ -231,17 +231,17 @@ export default function MerchantVoucherGenerate() {
             <div className="px-4 py-3 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground">Rate per bundle</span>
-                <Badge className="text-[10px] h-5 bg-emerald-500/15 text-emerald-600">{platformVoucherDiscountSettings.discountPercentPerBundle}% / bundle</Badge>
+                <Badge className="text-xs h-5 bg-emerald-500/15 text-emerald-600">{platformVoucherDiscountSettings.discountPercentPerBundle}% / bundle</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-foreground">Your discount ({bundleCount} bundles)</span>
-                <Badge className={`text-[10px] h-5 ${discount.discountPercent > 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
+                <Badge className={`text-xs h-5 ${discount.discountPercent > 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
                   {discount.discountPercent > 0 ? `${discount.discountPercent}% off` : "No discount"}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Max cap</span>
-                <span className="text-[10px] text-muted-foreground">{platformVoucherDiscountSettings.maxDiscountPercent}%</span>
+                <span className="text-xs text-muted-foreground">{platformVoucherDiscountSettings.maxDiscountPercent}%</span>
               </div>
             </div>
           </div>
@@ -284,17 +284,17 @@ export default function MerchantVoucherGenerate() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-lg bg-background/80 p-2">
+              <div className="rounded-lg bg-background/80 p-2.5">
                 <p className="text-lg font-bold text-foreground">{bundleCount}</p>
-                <p className="text-[10px] text-muted-foreground">Bundles</p>
+                <p className="text-xs text-muted-foreground">Bundles</p>
               </div>
-              <div className="rounded-lg bg-background/80 p-2">
+              <div className="rounded-lg bg-background/80 p-2.5">
                 <p className="text-lg font-bold text-foreground">{formatNum(discount.totalCards)}</p>
-                <p className="text-[10px] text-muted-foreground">Cards</p>
+                <p className="text-xs text-muted-foreground">Cards</p>
               </div>
-              <div className="rounded-lg bg-background/80 p-2">
+              <div className="rounded-lg bg-background/80 p-2.5">
                 <p className="text-lg font-bold text-emerald-600">{discount.discountPercent}%</p>
-                <p className="text-[10px] text-muted-foreground">Discount</p>
+                <p className="text-xs text-muted-foreground">Discount</p>
               </div>
             </div>
           </div>

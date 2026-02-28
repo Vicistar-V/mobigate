@@ -23,7 +23,7 @@ import {
   formatNum,
 } from "@/data/merchantVoucherData";
 import { useToast } from "@/hooks/use-toast";
-import { VoucherExportDrawer } from "@/components/merchant/VoucherExportDrawer";
+import { VoucherPrintDrawer } from "@/components/merchant/VoucherExportDrawer";
 
 type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string } | { type: "card"; cardId: string; bundleId: string };
 
@@ -35,7 +35,7 @@ export default function MerchantVoucherBatchDetail() {
   const [expandedBundles, setExpandedBundles] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);
-  const [exportDrawerOpen, setExportDrawerOpen] = useState(false);
+  const [printDrawerOpen, setPrintDrawerOpen] = useState(false);
 
   const batch = batches.find(b => b.id === batchId);
 
@@ -91,7 +91,7 @@ export default function MerchantVoucherBatchDetail() {
     setInvalidateTarget(null);
   };
 
-  const handleExportComplete = (cardIds: string[]) => {
+  const handlePrintComplete = (cardIds: string[]) => {
     setBatches(prev => prev.map(b => {
       if (b.id !== batchId) return b;
       return {
@@ -107,8 +107,8 @@ export default function MerchantVoucherBatchDetail() {
       };
     }));
     toast({
-      title: "Export Complete",
-      description: `${cardIds.length} cards exported and marked as sold`,
+      title: "Print Complete",
+      description: `${cardIds.length} cards printed and marked as sold`,
     });
   };
 
@@ -116,7 +116,7 @@ export default function MerchantVoucherBatchDetail() {
     if (!invalidateTarget) return 0;
     if (invalidateTarget.type === "batch") return batchInvalidatable.length;
     if (invalidateTarget.type === "bundle") {
-      const bundle = batch.bundles.find(b => b.id === invalidateTarget.bundleId);
+      const bundle = batch!.bundles.find(b => b.id === invalidateTarget.bundleId);
       return bundle ? getInvalidatableCards(bundle.cards).length : 0;
     }
     return 1;
@@ -165,7 +165,7 @@ export default function MerchantVoucherBatchDetail() {
             <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-foreground">{batch.batchNumber}</h1>
               {batch.generationType === "replacement" && (
-                <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-amber-500 text-amber-600">Replacement</Badge>
+                <Badge variant="outline" className="text-xs px-2 h-5 border-amber-500 text-amber-600">Replacement</Badge>
               )}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -179,14 +179,14 @@ export default function MerchantVoucherBatchDetail() {
         {/* Status Cards */}
         <div className="grid grid-cols-4 gap-2">
           {[
-            { label: "Avail", count: counts.available, color: "text-emerald-600" },
+            { label: "Available", count: counts.available, color: "text-emerald-600" },
             { label: "Sold", count: counts.sold_unused, color: "text-amber-600" },
             { label: "Used", count: counts.used, color: "text-primary" },
             { label: "Invalid", count: counts.invalidated, color: "text-destructive" },
           ].map(s => (
             <div key={s.label} className="rounded-xl border border-border/50 bg-card p-2.5 text-center">
-              <p className={`text-lg font-black ${s.color}`}>{s.count}</p>
-              <p className="text-[10px] text-muted-foreground">{s.label}</p>
+              <p className={`text-xl font-black ${s.color}`}>{s.count}</p>
+              <p className="text-xs text-muted-foreground">{s.label}</p>
             </div>
           ))}
         </div>
@@ -195,12 +195,12 @@ export default function MerchantVoucherBatchDetail() {
         <div className="flex gap-2">
           {counts.available > 0 && (
             <Button
-              onClick={() => setExportDrawerOpen(true)}
+              onClick={() => setPrintDrawerOpen(true)}
               variant="outline"
               className="flex-1 h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97]"
             >
               <Printer className="h-4 w-4 mr-2" />
-              Export ({counts.available})
+              Print Cards ({counts.available})
             </Button>
           )}
           {batchInvalidatable.length > 0 && (
@@ -233,11 +233,12 @@ export default function MerchantVoucherBatchDetail() {
         </div>
 
         {/* Bundle List */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {filteredBundles.map(bundle => {
             const bCounts = getBundleStatusCounts(bundle);
             const isExpanded = expandedBundles.has(bundle.id);
             const bundleInvalidatable = getInvalidatableCards(bundle.cards);
+            const bundleAvailable = bundle.cards.filter(c => c.status === "available").length;
 
             return (
               <div key={bundle.id} className="rounded-xl border border-border/50 bg-card overflow-hidden">
@@ -246,35 +247,43 @@ export default function MerchantVoucherBatchDetail() {
                   onClick={() => toggleBundle(bundle.id)}
                   className="p-3.5 flex items-center gap-3 touch-manipulation cursor-pointer active:bg-muted/30"
                 >
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Package className="h-4 w-4 text-primary" />
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Package className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-foreground truncate">{bundle.serialPrefix}</p>
-                    <div className="flex gap-1.5 mt-1">
-                      {bCounts.available > 0 && <span className="text-[10px] text-emerald-600 font-semibold">{bCounts.available} avail</span>}
-                      {bCounts.sold_unused > 0 && <span className="text-[10px] text-amber-600 font-semibold">{bCounts.sold_unused} sold</span>}
-                      {bCounts.used > 0 && <span className="text-[10px] text-primary font-semibold">{bCounts.used} used</span>}
-                      {bCounts.invalidated > 0 && <span className="text-[10px] text-destructive font-semibold">{bCounts.invalidated} inv</span>}
+                    <p className="text-sm font-bold text-foreground truncate">{bundle.serialPrefix}</p>
+                    <div className="flex gap-2 mt-1 flex-wrap">
+                      {bCounts.available > 0 && <span className="text-xs text-emerald-600 font-semibold">{bCounts.available} avail</span>}
+                      {bCounts.sold_unused > 0 && <span className="text-xs text-amber-600 font-semibold">{bCounts.sold_unused} sold</span>}
+                      {bCounts.used > 0 && <span className="text-xs text-primary font-semibold">{bCounts.used} used</span>}
+                      {bCounts.invalidated > 0 && <span className="text-xs text-destructive font-semibold">{bCounts.invalidated} inv</span>}
                     </div>
                   </div>
-                  {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+                  {isExpanded ? <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />}
                 </div>
 
                 {/* Expanded cards */}
                 {isExpanded && (
                   <div className="border-t border-border/30">
-                    {/* Invalidate bundle */}
-                    {bundleInvalidatable.length > 0 && (
-                      <div className="px-3 py-2 border-b border-border/30">
+                    {/* Bundle actions */}
+                    <div className="px-3 py-2.5 border-b border-border/30 flex items-center gap-3">
+                      {bundleAvailable > 0 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setPrintDrawerOpen(true); }}
+                          className="text-xs text-primary font-semibold touch-manipulation flex items-center gap-1.5 h-8"
+                        >
+                          <Printer className="h-3.5 w-3.5" /> Print Bundle ({bundleAvailable})
+                        </button>
+                      )}
+                      {bundleInvalidatable.length > 0 && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setInvalidateTarget({ type: "bundle", bundleId: bundle.id }); }}
-                          className="text-xs text-destructive font-semibold touch-manipulation flex items-center gap-1"
+                          className="text-xs text-destructive font-semibold touch-manipulation flex items-center gap-1.5 h-8"
                         >
-                          <ShieldAlert className="h-3 w-3" /> Invalidate Bundle ({bundleInvalidatable.length})
+                          <ShieldAlert className="h-3.5 w-3.5" /> Invalidate ({bundleInvalidatable.length})
                         </button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                     <div className="max-h-[400px] overflow-y-auto touch-auto">
                       {bundle.cards.map(card => {
                         const canInvalidateCard =
@@ -282,19 +291,21 @@ export default function MerchantVoucherBatchDetail() {
                           (card.status === "sold_unused" && card.soldVia === "physical");
 
                         return (
-                          <div key={card.id} className="px-3 py-2.5 border-b border-border/20 last:border-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="text-[10px] font-mono text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
-                              <Badge className={`${statusColor(card.status)} text-[10px] h-4 px-1.5`}>{statusLabel(card.status)}</Badge>
+                          <div key={card.id} className="px-3.5 py-3 border-b border-border/20 last:border-0">
+                            {/* Row 1: Serial + Status */}
+                            <div className="flex items-center justify-between mb-1.5">
+                              <p className="text-xs font-mono font-semibold text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
+                              <Badge className={`${statusColor(card.status)} text-xs h-5 px-2`}>{statusLabel(card.status)}</Badge>
                             </div>
+                            {/* Row 2: PIN + metadata */}
                             <div className="flex items-center justify-between">
-                              <p className="text-[10px] text-muted-foreground font-mono">PIN: {hashPin(card.pin)}</p>
-                              <div className="flex items-center gap-2">
-                                {card.soldAt && <span className="text-[10px] text-muted-foreground">Sold {card.soldAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short" })}</span>}
+                              <p className="text-xs text-muted-foreground font-mono">PIN: {hashPin(card.pin)}</p>
+                              <div className="flex items-center gap-3">
+                                {card.soldAt && <span className="text-xs text-muted-foreground">Sold {card.soldAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short" })}</span>}
                                 {canInvalidateCard && (
                                   <button
                                     onClick={() => setInvalidateTarget({ type: "card", cardId: card.id, bundleId: bundle.id })}
-                                    className="text-[10px] text-destructive font-semibold touch-manipulation"
+                                    className="text-xs text-destructive font-semibold touch-manipulation h-7 px-1"
                                   >
                                     Invalidate
                                   </button>
@@ -321,27 +332,27 @@ export default function MerchantVoucherBatchDetail() {
               <AlertTriangle className="h-5 w-5 text-destructive" />
               Confirm Invalidation
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogDescription className="text-sm">
               This will invalidate <strong>{getInvalidateCount()}</strong> voucher card{getInvalidateCount() !== 1 ? "s" : ""}.
               Only "Available" and "Sold (Physical)" cards will be affected. Used cards and Mobigate digital purchases are protected.
               Invalidated cards will be replaced in a new batch.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="h-10 rounded-xl text-xs">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleInvalidate} className="h-10 rounded-xl text-xs bg-destructive hover:bg-destructive/90">
+            <AlertDialogCancel className="h-10 rounded-xl text-sm">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleInvalidate} className="h-10 rounded-xl text-sm bg-destructive hover:bg-destructive/90">
               Invalidate {getInvalidateCount()} Cards
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Export Drawer */}
-      <VoucherExportDrawer
-        open={exportDrawerOpen}
-        onOpenChange={setExportDrawerOpen}
+      {/* Print Drawer */}
+      <VoucherPrintDrawer
+        open={printDrawerOpen}
+        onOpenChange={setPrintDrawerOpen}
         batch={batch}
-        onExportComplete={handleExportComplete}
+        onPrintComplete={handlePrintComplete}
       />
     </div>
   );

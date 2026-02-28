@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, X, ChevronRight, Filter, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, Search, X, ChevronRight, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   initialMockBatches,
@@ -91,27 +91,27 @@ export default function MerchantVoucherBatches() {
         {showFilters && (
           <div className="px-4 pb-3 space-y-3 border-t border-border/30 pt-3">
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Denomination</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Denomination</p>
               <div className="flex gap-1.5 flex-wrap">
-                <button onClick={() => setFilterDenom("all")} className={`h-7 px-2.5 rounded-lg text-xs font-semibold touch-manipulation ${filterDenom === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>All</button>
+                <button onClick={() => setFilterDenom("all")} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${filterDenom === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>All</button>
                 {denomOptions.map(d => (
-                  <button key={d} onClick={() => setFilterDenom(d)} className={`h-7 px-2.5 rounded-lg text-xs font-semibold touch-manipulation ${filterDenom === d ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>M{formatNum(d)}</button>
+                  <button key={d} onClick={() => setFilterDenom(d)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${filterDenom === d ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>M{formatNum(d)}</button>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Type</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Type</p>
               <div className="flex gap-1.5">
                 {(["all", "new", "replacement"] as FilterType[]).map(t => (
-                  <button key={t} onClick={() => setFilterType(t)} className={`h-7 px-2.5 rounded-lg text-xs font-semibold touch-manipulation capitalize ${filterType === t ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{t}</button>
+                  <button key={t} onClick={() => setFilterType(t)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation capitalize ${filterType === t ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{t}</button>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Sort</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Sort</p>
               <div className="flex gap-1.5 flex-wrap">
                 {([["newest", "Newest"], ["oldest", "Oldest"], ["denom_high", "Denom ↓"], ["denom_low", "Denom ↑"]] as [SortOption, string][]).map(([val, label]) => (
-                  <button key={val} onClick={() => setSortBy(val)} className={`h-7 px-2.5 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
+                  <button key={val} onClick={() => setSortBy(val)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
                 ))}
               </div>
             </div>
@@ -127,32 +127,35 @@ export default function MerchantVoucherBatches() {
             <div
               key={batch.id}
               onClick={() => navigate(`/merchant-voucher-batch/${batch.id}`)}
-              className="rounded-xl border border-border/50 bg-card p-3.5 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
+              className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer"
             >
+              {/* Row 1: Batch ID */}
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-foreground">{batch.batchNumber}</p>
                     {batch.generationType === "replacement" && (
-                      <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-amber-500 text-amber-600">Replacement</Badge>
+                      <Badge variant="outline" className="text-xs px-2 h-5 border-amber-500 text-amber-600">Replacement</Badge>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     M{formatNum(batch.denomination)} • {batch.bundleCount} bundle{batch.bundleCount !== 1 ? "s" : ""} • {formatNum(batch.totalCards)} cards
                   </p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+                <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
               </div>
+              {/* Row 2: Status badges */}
               <div className="flex gap-2 flex-wrap">
-                {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-[10px] px-1.5 h-5">{counts.available} avail</Badge>}
-                {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-[10px] px-1.5 h-5">{counts.sold_unused} sold</Badge>}
-                {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-[10px] px-1.5 h-5">{counts.used} used</Badge>}
-                {counts.invalidated > 0 && <Badge className="bg-destructive/15 text-destructive text-[10px] px-1.5 h-5">{counts.invalidated} invalid</Badge>}
+                {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} avail</Badge>}
+                {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} sold</Badge>}
+                {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} used</Badge>}
+                {counts.invalidated > 0 && <Badge className="bg-destructive/15 text-destructive text-xs px-2 h-5">{counts.invalidated} invalid</Badge>}
               </div>
+              {/* Row 3: Date + discount */}
               <div className="flex items-center justify-between mt-2">
-                <p className="text-[10px] text-muted-foreground">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
+                <p className="text-xs text-muted-foreground">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
                 {batch.discountApplied && (
-                  <Badge className="bg-emerald-500/15 text-emerald-600 text-[10px] h-4 px-1.5">{batch.discountPercent}% off</Badge>
+                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs h-5 px-2">{batch.discountPercent}% off</Badge>
                 )}
               </div>
             </div>
