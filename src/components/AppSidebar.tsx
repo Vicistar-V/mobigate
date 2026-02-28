@@ -118,8 +118,6 @@ const menuItems: MenuItem[] = [{
   items: [
     { title: "View Wallet", url: "/wallet" },
     { title: "Fund Your Wallet", url: "/buy-vouchers?source=fund-wallet" },
-    { title: "Wallet Funding History", url: "/coins_purchase_history.php" },
-    { title: "My Financial Summary", url: "#" }
   ]
 }, {
   title: "Quiz Games",
