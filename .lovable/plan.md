@@ -1,39 +1,42 @@
 
-# Application Status Pages
+## Add Conditional Input Fields to Business Type Selections
 
-## Overview
-Add "Application Status" navigation items in the sidebar for both Merchant and Sub-Merchant sections, linking to new status pages that show mock application status (pending/approved/rejected) with appropriate visual indicators and action buttons.
+### Overview
+Add mandatory extra input fields that appear when specific business types are selected in the sub-merchant application form. Also update the reapply data to include these new fields.
 
-## New Files
+### Business Type Field Mapping
+- **Retail Shop** -- additional "Shop Address" text input (mandatory)
+- **Mobi Kiosk** -- no additional field
+- **Online Store** -- additional "Website / Store URL" text input (mandatory)
+- **Mobi Shop** -- additional "Mobi Shop Web Address" text input (mandatory)
+- **Mobile Agent** -- no additional field
 
-### 1. `src/pages/MerchantApplicationStatus.tsx`
-A mobile-first status page showing the merchant application status. Uses mock data (defaulting to "pending" status for demo). Three visual states:
+### Changes
 
-- **Approved**: Large green checkmark circle, "Application Approved" heading, date submitted, reference number, and a "Go to Merchant Dashboard" button linking to `/merchant-voucher-management`.
-- **Pending**: Large amber clock circle, "Application Pending" heading, date submitted, reference number, estimated review time (14-21 business days), and a "Send Reminder to Mobigate Admin" button (shows toast on click).
-- **Rejected**: Large red X circle, "Application Rejected" heading, date submitted, rejection reason, and two buttons: "Re-apply as Individual" (`/merchant-application/individual`) and "Re-apply as Corporate" (`/merchant-application/corporate`).
+#### 1. `src/pages/SubMerchantApplicationPage.tsx`
 
-Layout: Sticky header with back arrow at `top-16`, centered content card with status icon, details card with reference/date/type info, and action button(s) at the bottom.
+**Form state**: Add three new fields to the form state:
+- `retailShopAddress: string`
+- `onlineStoreUrl: string`
+- `mobiShopUrl: string`
 
-### 2. `src/pages/SubMerchantApplicationStatus.tsx`
-Same pattern as above but for sub-merchant applications. Three states:
+Pre-fill these from `reapplyData` if available.
 
-- **Approved**: Green checkmark, "Go to Sub-Merchant Dashboard" button linking to `/sub-merchant-voucher-management`.
-- **Pending**: Amber clock, "Send Reminder" button with toast feedback, 7-14 business days estimate.
-- **Rejected**: Red X, single "Re-apply as Sub-Merchant" button linking to `/merchants?mode=apply`.
+**Validation**: Update `isValid` to require:
+- `retailShopAddress` is filled when "retail_shop" is selected
+- `onlineStoreUrl` is filled when "online_store" is selected
+- `mobiShopUrl` is filled when "mobi_shop" is selected
 
-### 3. Route Registration in `src/App.tsx`
-Add two new routes:
-- `/merchant-application-status` -> `MerchantApplicationStatus` (wrapped with `WithHeader`)
-- `/sub-merchant-application-status` -> `SubMerchantApplicationStatus` (wrapped with `WithHeader`)
+**UI**: After each business type checkbox that requires an extra field, conditionally render an Input below it (inside the same label/container or directly after). The input appears only when that business type is checked.
 
-### 4. Sidebar Updates in `src/components/AppSidebar.tsx`
-- Add `{ title: "Application Status", url: "/merchant-application-status" }` as a new item after "Apply for a Merchant Account" in the Merchants Menu section.
-- Add `{ title: "Sub-Merchant Application Status", url: "/sub-merchant-application-status" }` after "Apply as Sub-Merchant" in the same menu section.
+#### 2. `src/pages/SubMerchantApplicationStatus.tsx`
 
-## Technical Details
-- Both pages use the existing `top-16` sticky header offset pattern
-- Mobile-only focus: full-width layout, touch-manipulation buttons, rounded-xl elements, 44px+ touch targets
-- Mock status stored in component state with a toggle for demo purposes (cycle through states by tapping the status badge)
-- Uses existing UI components: `Button`, `Badge`, `Card`, `useToast`
-- Icons from lucide-react: `CheckCircle2`, `Clock`, `XCircle`, `ArrowLeft`, `Bell`, `Store`
+**Reapply data**: Add mock values for the new fields in the `previousData` object:
+- `retailShopAddress: "45 Market Road, Port Harcourt"`
+- `onlineStoreUrl: ""` (not applicable since mock has retail_shop and mobi_kiosk)
+- `mobiShopUrl: ""` (not applicable)
+
+### Technical Details
+- Extra input fields use the same styling as existing inputs (`h-11 rounded-xl text-sm`)
+- Fields slide in below their parent checkbox with a small top margin
+- Each conditional input has a descriptive placeholder (e.g., "Enter your shop address", "Enter website or store URL", "Enter Mobi Shop web address")
