@@ -319,7 +319,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
                         <h4 className="font-medium text-sm break-words">{category.label}</h4>
                         {pendingCount > 0 && (
                           <Badge variant="secondary" className="text-xs px-1.5 bg-amber-100 text-amber-700 shrink-0">
-                            {pendingCount} pending
+                            {pendingCount} Pending
                           </Badge>
                         )}
                       </div>

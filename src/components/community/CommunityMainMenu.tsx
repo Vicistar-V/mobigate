@@ -1222,7 +1222,7 @@ export function CommunityMainMenu({
                   <span className="text-emerald-700 dark:text-emerald-300 font-medium">View All Settings</span>
                   {pendingSettingsCount > 0 && (
                     <Badge className="ml-auto bg-amber-500 text-white text-xs">
-                      {pendingSettingsCount} pending
+                      {pendingSettingsCount} Pending
                     </Badge>
                   )}
                 </Button>

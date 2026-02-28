@@ -223,7 +223,7 @@ export function AdminContentSection({
                 <h3 className="font-semibold text-sm">Content</h3>
                 <p className="text-xs text-muted-foreground">
                   {stats.totalNews + stats.totalEvents + stats.totalArticles + stats.totalVibes} posts
-                  {stats.pendingContent > 0 && ` • ${stats.pendingContent} pending`}
+                  {stats.pendingContent > 0 && ` • ${stats.pendingContent} Pending`}
                 </p>
               </div>
             </div>

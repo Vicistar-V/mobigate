@@ -222,7 +222,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
                     </div>
                     <div className="flex-1 text-left min-w-0">
                       <p className="text-sm font-bold text-foreground truncate">{bundle.serialPrefix}</p>
-                      <p className="text-xs text-muted-foreground">{bundle.availableCount} available cards</p>
+                      <p className="text-xs text-muted-foreground">{bundle.availableCount} Available cards</p>
                     </div>
                     <Badge className="bg-emerald-500/15 text-emerald-600 text-xs h-5 px-2">{bundle.availableCount}</Badge>
                   </button>
@@ -232,7 +232,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
 
             {bundlesWithAvailable.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-sm text-muted-foreground">No available cards to print</p>
+                <p className="text-sm text-muted-foreground">No Available cards to print</p>
               </div>
             )}
           </div>
