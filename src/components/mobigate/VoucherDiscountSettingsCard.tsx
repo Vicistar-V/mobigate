@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Percent, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { Percent, Info, ChevronDown, ChevronUp, Lock, Unlock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   platformVoucherDiscountSettings,
@@ -35,7 +35,10 @@ export function VoucherDiscountSettingsCard() {
   const [maxDiscountVal, setMaxDiscountLocal] = useState(s.maxDiscount);
   const [isSaving, setIsSaving] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [locks, setLocks] = useState({ tierSize: true, baseRate: true, incrementRate: true, maxDiscount: true });
   const { toast } = useToast();
+
+  const toggleLock = (key: keyof typeof locks) => setLocks(prev => ({ ...prev, [key]: !prev[key] }));
 
   const hasChanges =
     tierSize !== s.tierSize ||
@@ -85,16 +88,21 @@ export function VoucherDiscountSettingsCard() {
           {/* Tier Size */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-foreground">Bundles Per Tier</p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => toggleLock('tierSize')} className="touch-manipulation active:scale-[0.9]">
+                  {locks.tierSize ? <Lock className="h-3.5 w-3.5 text-destructive" /> : <Unlock className="h-3.5 w-3.5 text-emerald-500" />}
+                </button>
+                <p className="text-xs font-medium text-foreground">Bundles Per Tier</p>
+              </div>
               <Badge variant="outline" className="font-mono text-xs">{tierSize}</Badge>
             </div>
             <Slider
               value={[tierSize]}
-              onValueChange={([v]) => setTierSizeLocal(v)}
+              onValueChange={([v]) => !locks.tierSize && setTierSizeLocal(v)}
               min={s.tierSizeMin}
               max={s.tierSizeMax}
               step={1}
-              className="w-full"
+              className={`w-full ${locks.tierSize ? 'opacity-50 pointer-events-none' : ''}`}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{s.tierSizeMin}</span>
@@ -105,16 +113,21 @@ export function VoucherDiscountSettingsCard() {
           {/* Base Rate */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-foreground">Base Rate (1st Tier)</p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => toggleLock('baseRate')} className="touch-manipulation active:scale-[0.9]">
+                  {locks.baseRate ? <Lock className="h-3.5 w-3.5 text-destructive" /> : <Unlock className="h-3.5 w-3.5 text-emerald-500" />}
+                </button>
+                <p className="text-xs font-medium text-foreground">Base Rate (1st Tier)</p>
+              </div>
               <Badge variant="outline" className="font-mono text-xs">{baseRate.toFixed(1)}%</Badge>
             </div>
             <Slider
               value={[baseRate * 10]}
-              onValueChange={([v]) => setBaseRateLocal(Math.round(v) / 10)}
+              onValueChange={([v]) => !locks.baseRate && setBaseRateLocal(Math.round(v) / 10)}
               min={s.baseRateMin * 10}
               max={s.baseRateMax * 10}
               step={5}
-              className="w-full"
+              className={`w-full ${locks.baseRate ? 'opacity-50 pointer-events-none' : ''}`}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{s.baseRateMin.toFixed(1)}%</span>
@@ -125,16 +138,21 @@ export function VoucherDiscountSettingsCard() {
           {/* Increment Rate */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-foreground">Increment Per Tier</p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => toggleLock('incrementRate')} className="touch-manipulation active:scale-[0.9]">
+                  {locks.incrementRate ? <Lock className="h-3.5 w-3.5 text-destructive" /> : <Unlock className="h-3.5 w-3.5 text-emerald-500" />}
+                </button>
+                <p className="text-xs font-medium text-foreground">Increment Per Tier</p>
+              </div>
               <Badge variant="outline" className="font-mono text-xs">+{incrementRate.toFixed(1)}%</Badge>
             </div>
             <Slider
               value={[incrementRate * 100]}
-              onValueChange={([v]) => setIncrementRateLocal(Math.round(v) / 100)}
+              onValueChange={([v]) => !locks.incrementRate && setIncrementRateLocal(Math.round(v) / 100)}
               min={s.incrementRateMin * 100}
               max={s.incrementRateMax * 100}
               step={25}
-              className="w-full"
+              className={`w-full ${locks.incrementRate ? 'opacity-50 pointer-events-none' : ''}`}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{s.incrementRateMin.toFixed(1)}%</span>
@@ -145,16 +163,21 @@ export function VoucherDiscountSettingsCard() {
           {/* Max Discount */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-foreground">Max Discount Cap</p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => toggleLock('maxDiscount')} className="touch-manipulation active:scale-[0.9]">
+                  {locks.maxDiscount ? <Lock className="h-3.5 w-3.5 text-destructive" /> : <Unlock className="h-3.5 w-3.5 text-emerald-500" />}
+                </button>
+                <p className="text-xs font-medium text-foreground">Max Discount Cap</p>
+              </div>
               <Badge variant="outline" className="font-mono text-xs">{maxDiscountVal.toFixed(1)}%</Badge>
             </div>
             <Slider
               value={[maxDiscountVal]}
-              onValueChange={([v]) => setMaxDiscountLocal(v)}
+              onValueChange={([v]) => !locks.maxDiscount && setMaxDiscountLocal(v)}
               min={s.maxDiscountMin}
               max={s.maxDiscountMax}
               step={5}
-              className="w-full"
+              className={`w-full ${locks.maxDiscount ? 'opacity-50 pointer-events-none' : ''}`}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{s.maxDiscountMin.toFixed(1)}%</span>
