@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Minus, Plus, Sparkles, Check, MapPin, Star, ShieldCheck, ChevronRight, Ticket, CreditCard, Users, UserPlus, Search, Send, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { rechargeVouchers, RechargeVoucher } from "@/data/rechargeVouchersData";
 import {
@@ -51,6 +52,9 @@ export default function BuyVouchersPage() {
   const [selectedMerchant, setSelectedMerchant] = useState<MobiMerchant | null>(null);
   const [preSelectedMerchant, setPreSelectedMerchant] = useState(false);
   const [merchantSort, setMerchantSort] = useState<"discount_high" | "discount_low" | "rating_high" | "rating_low">("discount_high");
+  const [merchantStateFilter, setMerchantStateFilter] = useState("all");
+  const [merchantLgaFilter, setMerchantLgaFilter] = useState("all");
+  const [merchantCityFilter, setMerchantCityFilter] = useState("all");
 
   // Auto-select local merchant when coming from a merchant page
   useEffect(() => {
@@ -472,7 +476,7 @@ export default function BuyVouchersPage() {
     if (!selectedCountry) return null;
     const activeMerchants = selectedCountry.merchants.filter((m) => m.isActive);
 
-    // Sort merchants based on selected sort option
+    // Sort merchants
     const sortedMerchants = [...activeMerchants].sort((a, b) => {
       switch (merchantSort) {
         case "discount_high": return b.discountPercent - a.discountPercent;
@@ -483,12 +487,19 @@ export default function BuyVouchersPage() {
       }
     });
 
-    const sortOptions: { value: typeof merchantSort; label: string }[] = [
-      { value: "discount_high", label: "Highest Discount" },
-      { value: "discount_low", label: "Lowest Discount" },
-      { value: "rating_high", label: "Highest Rating" },
-      { value: "rating_low", label: "Lowest Rating" },
-    ];
+    // Filter by location
+    const filteredMerchants = sortedMerchants.filter((m) => {
+      if (merchantStateFilter !== "all" && m.stateId !== merchantStateFilter) return false;
+      if (merchantLgaFilter !== "all" && m.lgaId !== merchantLgaFilter) return false;
+      if (merchantCityFilter !== "all" && m.city !== merchantCityFilter) return false;
+      return true;
+    });
+
+    // Derive unique filter options from active merchants
+    const hasLocationData = activeMerchants.some(m => m.stateId);
+    const uniqueStates = [...new Map(activeMerchants.filter(m => m.stateId).map(m => [m.stateId!, { id: m.stateId!, name: m.stateName! }])).values()];
+    const uniqueLgas = [...new Map(activeMerchants.filter(m => m.lgaId && (merchantStateFilter === "all" || m.stateId === merchantStateFilter)).map(m => [m.lgaId!, { id: m.lgaId!, name: m.lgaName! }])).values()];
+    const uniqueCities = [...new Set(activeMerchants.filter(m => (merchantStateFilter === "all" || m.stateId === merchantStateFilter) && (merchantLgaFilter === "all" || m.lgaId === merchantLgaFilter)).map(m => m.city))];
 
     return (
       <div className="bg-background pb-6">
@@ -514,25 +525,63 @@ export default function BuyVouchersPage() {
               </div>
             </div>
           </div>
-          {/* Sort chips */}
+          {/* Filter row */}
           <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
-            {sortOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setMerchantSort(opt.value)}
-                className={`h-8 px-3 rounded-full text-xs font-medium whitespace-nowrap shrink-0 touch-manipulation transition-colors ${
-                  merchantSort === opt.value
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
+            <Select value={merchantSort} onValueChange={(v: typeof merchantSort) => setMerchantSort(v)}>
+              <SelectTrigger className="h-8 rounded-full text-xs font-medium min-w-[120px] shrink-0 px-3">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="discount_high" className="text-xs">Highest Discount</SelectItem>
+                <SelectItem value="discount_low" className="text-xs">Lowest Discount</SelectItem>
+                <SelectItem value="rating_high" className="text-xs">Highest Rating</SelectItem>
+                <SelectItem value="rating_low" className="text-xs">Lowest Rating</SelectItem>
+              </SelectContent>
+            </Select>
+            {hasLocationData && (
+              <>
+                <Select value={merchantStateFilter} onValueChange={(v) => { setMerchantStateFilter(v); setMerchantLgaFilter("all"); setMerchantCityFilter("all"); }}>
+                  <SelectTrigger className="h-8 rounded-full text-xs font-medium min-w-[100px] shrink-0 px-3">
+                    <SelectValue placeholder="State" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all" className="text-xs">All States</SelectItem>
+                    {uniqueStates.map(s => <SelectItem key={s.id} value={s.id} className="text-xs">{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                {merchantStateFilter !== "all" && uniqueLgas.length > 0 && (
+                  <Select value={merchantLgaFilter} onValueChange={(v) => { setMerchantLgaFilter(v); setMerchantCityFilter("all"); }}>
+                    <SelectTrigger className="h-8 rounded-full text-xs font-medium min-w-[100px] shrink-0 px-3">
+                      <SelectValue placeholder="LGA" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs">All LGAs</SelectItem>
+                      {uniqueLgas.map(l => <SelectItem key={l.id} value={l.id} className="text-xs">{l.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
+                {merchantLgaFilter !== "all" && uniqueCities.length > 0 && (
+                  <Select value={merchantCityFilter} onValueChange={setMerchantCityFilter}>
+                    <SelectTrigger className="h-8 rounded-full text-xs font-medium min-w-[100px] shrink-0 px-3">
+                      <SelectValue placeholder="City" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs">All Cities</SelectItem>
+                      {uniqueCities.map(c => <SelectItem key={c} value={c} className="text-xs">{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
+              </>
+            )}
           </div>
         </div>
         <div className="px-4 pt-3 space-y-2.5">
-          {sortedMerchants.map((merchant) => {
+          {filteredMerchants.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">No merchants found for this filter</p>
+            </div>
+          )}
+          {filteredMerchants.map((merchant) => {
             const { discounted, savings } = calculateDiscountedAmount(totalMobi, merchant.discountPercent);
             return (
               <div key={merchant.id} onClick={() => goToPayment(merchant)} className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
