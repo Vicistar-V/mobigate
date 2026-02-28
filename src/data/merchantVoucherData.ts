@@ -67,8 +67,7 @@ export interface DiscountResult {
 
 export function getDiscountForBundles(bundleCount: number): DiscountResult {
   const rate = platformVoucherDiscountSettings.discountPercentPerBundle;
-  const cap = platformVoucherDiscountSettings.maxDiscountPercent;
-  const percent = Math.min(bundleCount * rate, cap);
+  const percent = bundleCount * rate;
   const rounded = Math.round(percent * 100) / 100;
   return {
     discountPercent: rounded,

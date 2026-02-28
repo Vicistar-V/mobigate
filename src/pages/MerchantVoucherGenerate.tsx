@@ -239,10 +239,6 @@ export default function MerchantVoucherGenerate() {
                   {discount.discountPercent > 0 ? `${discount.discountPercent}% off` : "No discount"}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Max cap</span>
-                <span className="text-xs text-muted-foreground">{platformVoucherDiscountSettings.maxDiscountPercent}%</span>
-              </div>
             </div>
           </div>
         </div>
