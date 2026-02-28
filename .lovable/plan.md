@@ -1,148 +1,105 @@
 
 
-# Merchant Voucher Management System
+# Print/Export Vouchers + Admin Discount Settings
 
 ## Overview
 
-Build a complete Merchant Voucher Management system with generation, inventory tracking, invalidation, wallet funding, transaction history, and a user-side PIN recharge flow. Everything is mobile-first (360px), UI-only with mock data.
+Two features to build:
+
+1. **Print/Export on Batch Detail** -- merchants can select voucher cards from a batch and download/print them (with full serial numbers and PINs revealed). Exported cards get marked as "sold_unused" with `soldVia: "physical"`.
+
+2. **Admin Voucher Discount Settings** -- a new section in the Mobigate Admin Dashboard (Settings or Merchants tab) where admins set a single discount percentage per bundle count (not tiered -- just one flat percentage value that applies per bundle purchased).
 
 ---
 
-## Terminology Recap
+## Feature 1: Print/Export Voucher Cards
 
-- **Voucher Card**: Single unit with unique serial number + PIN (PIN is the recharge key)
-- **Bundle**: 100 voucher cards of the same denomination (minimum purchase unit, has its own serial prefix)
-- **Batch**: A single generation order/transaction containing one or more bundles of the same denomination
+### Changes to `src/pages/MerchantVoucherBatchDetail.tsx`
 
----
+- Add a **"Print / Export Cards"** button in the header area (next to the invalidate batch button)
+- Tapping opens a bottom drawer with options:
+  - **Select cards to export**: "All Available" (quick select) or manual bundle-by-bundle selection
+  - Only cards with status "available" can be printed/exported
+  - Show count of selected cards
+- After selecting, tap "Continue" to open the existing `DownloadFormatSheet` component (reuse it) with formats: PDF and CSV
+- On download confirmation:
+  - Generate a mock PDF/CSV preview (simulated -- show a success screen with document name)
+  - **Mark all exported cards as `sold_unused`** with `soldVia: "physical"` and set `soldAt` to current date
+  - Show a toast confirming "X cards exported and marked as sold"
+- The export document (conceptual) contains: batch number, denomination, and for each card: serial number, **full PIN** (unmasked), and status
 
-## New Files to Create
+### New component: `src/components/merchant/VoucherExportDrawer.tsx`
 
-### 1. Data Layer
+- A Drawer component that handles the card selection UI
+- Props: `open`, `onOpenChange`, `batch`, `onExportComplete(cardIds: string[])`
+- Shows list of bundles with checkboxes, "Select All Available" button
+- Displays count of selected exportable cards
+- "Continue to Download" button opens `DownloadFormatSheet`
+- On format selected, simulates a 2-second download, then calls `onExportComplete` with selected card IDs
 
-**`src/data/merchantVoucherData.ts`**
-- Types: `VoucherCard` (id, serialNumber, pin, denomination, status: "available" | "sold_unused" | "used" | "invalidated", batchId, bundleSerialPrefix, soldVia: "physical" | "mobigate_digital" | null, createdAt, invalidatedAt)
-- Types: `VoucherBundle` (serialPrefix, denomination, batchId, cardCount: 100, cards: VoucherCard[])
-- Types: `VoucherBatch` (id, batchNumber, denomination, bundleCount, totalCards, status, createdAt, totalCost, discountApplied, discountPercent, generationType: "new" | "replacement", replacedBatchId?)
-- Types: `MerchantWalletTransaction` (id, type: "funding" | "voucher_generation", amount, currency, reference, createdAt, description, batchId?)
-- Mock data generator: creates serial numbers (bundle prefix + card suffix with date info), hashed PINs for display (showing only last 4 chars), a few pre-existing batches with mixed statuses
-- Discount tiers config: e.g., 1-9 bundles = 0%, 10-49 = 5%, 50-99 = 8%, 100+ = 12% (admin-configurable later)
-- Helper functions: `generateSerialNumber()`, `generatePin()`, `hashPin()`, `calculateBulkDiscount()`, `getInvalidatableCards()`
+### Changes to `src/data/merchantVoucherData.ts`
 
-### 2. Merchant Voucher Management Page
-
-**`src/pages/MerchantVoucherManagement.tsx`**
-- Main page with sticky header + back button
-- Three main sections accessible via prominent action cards at top:
-  - **Generate Vouchers** (primary CTA button)
-  - **View All Batches** (inventory)
-  - **Transaction History**
-- Local currency wallet balance display at top (card with "Fund Wallet" button)
-- Stats overview: total batches, total bundles, total cards, cards by status breakdown
-
-### 3. Generation Flow (sub-pages/steps within the page)
-
-**`src/pages/MerchantVoucherGenerate.tsx`**
-- Step 1: **Select Denomination** - Same voucher grid as user side but styled for merchant (professional blues/slates instead of consumer primary colors). Select ONE denomination per generation
-- Step 2: **Select Bundle Count** - Stepper for number of bundles (each = 100 cards). Shows discount tier kicking in. Total cards = bundles x 100. Total cost calculation with discount applied
-- Step 3: **Payment Summary** - Shows denomination, bundle count, total cards, unit cost, discount %, discounted total. Checks local currency wallet balance. If insufficient, shows "Fund Wallet" CTA
-- Step 4: **Processing** - Similar animated loading as user side but merchant-themed
-- Step 5: **Generation Complete** - Shows batch summary, auto-navigates to the new batch detail page
-
-### 4. Batch List Page
-
-**`src/pages/MerchantVoucherBatches.tsx`**
-- Search bar (by batch number)
-- Filter controls: by denomination, by date range, by status, by generation type (new/replacement)
-- Sort: newest first, oldest, denomination high-low, denomination low-high
-- Each batch card shows: batch number, denomination, bundle count, total cards, date, status breakdown (available/sold/used/invalidated counts), generation type badge
-- Tap to open batch detail
-
-### 5. Batch Detail Page
-
-**`src/pages/MerchantVoucherBatchDetail.tsx`**
-- Header: batch number, denomination, creation date, generation type
-- Status summary cards (4 cards: Available, Sold Unused, Used, Invalidated with counts)
-- Bundle list within the batch (each bundle shows its serial prefix, status breakdown)
-- Tap bundle to expand and see individual cards
-- Card list: serial number (full), PIN (hashed - showing "****XXXX"), status badge, sold date if sold
-- Search within batch (by serial number or last 4 of PIN)
-- Action buttons:
-  - **Invalidate Batch** - Invalidates all cards with status "available" OR "sold_unused" (but NOT cards sold via Mobigate digital, and NOT "used" cards). Confirmation dialog with count of cards to be invalidated. On confirm: invalidated cards get replaced as a new batch (generation type: "replacement")
-  - **Invalidate Bundle** - Same logic but for one bundle
-  - **Invalidate Single Card** - Same logic for one card (only if available or sold_unused and not sold via mobigate digital)
-
-### 6. Merchant Wallet Funding Flow
-
-**`src/pages/MerchantWalletFund.tsx`**
-- Local currency only (no Mobi). Amount input with numeric keypad feel
-- Quick-pick amounts: 50,000 / 100,000 / 500,000 / 1,000,000
-- Custom amount input
-- Processing screen (similar loading animation)
-- Success screen with transaction reference ID, amount funded, new balance
-- Navigate back to voucher management
-
-### 7. Transaction History Page
-
-**`src/pages/MerchantVoucherTransactions.tsx`**
-- Unified list: wallet fundings + voucher generation purchases
-- Each transaction card: type icon, description, amount, date, reference ID, batch link (if generation)
-- Filter: by type (funding/generation), date range
-- Sort: newest/oldest, amount high-low
-
-### 8. User PIN Recharge (modification to existing BuyVouchersPage)
-
-**Modify `src/pages/BuyVouchersPage.tsx`**
-- On the voucher selection step (step 1), add a new option section at the TOP before denomination tiers:
-  - A card/section: "Have a Voucher Code?" with a brief description
-  - Tap opens a new step: **"Redeem Voucher"**
-- Redeem step UI:
-  - Input field for PIN code (styled like OTP input, chunked digits)
-  - "Redeem" button
-  - Processing animation (3 seconds)
-  - Success screen: shows denomination credited, new wallet balance animation
-  - Error state: invalid/used/invalidated PIN message
+- No structural changes needed -- the status update logic lives in the page component's state
 
 ---
 
-## Route & Sidebar Changes
+## Feature 2: Admin Bulk Discount Configuration
 
-**`src/App.tsx`** - Add routes:
-- `/merchant-voucher-management` - Main page
-- `/merchant-voucher-generate` - Generation flow
-- `/merchant-voucher-batches` - Batch list
-- `/merchant-voucher-batch/:batchId` - Batch detail
-- `/merchant-wallet-fund` - Wallet funding
-- `/merchant-voucher-transactions` - Transaction history
+### Changes to `src/data/platformSettingsData.ts`
 
-**`src/components/AppSidebar.tsx`** - Add under Merchants Menu, after "Merchant Quizzes Management":
+Add new settings interface and data:
+
 ```
-{ title: "Merchant Voucher Management", url: "/merchant-voucher-management" }
+PlatformVoucherDiscountSettings {
+  discountPercentPerBundle: number  // e.g., 0.5 means 0.5% per bundle
+  discountPercentMin: number        // 0
+  discountPercentMax: number        // 2
+  maxDiscountPercent: number        // cap at e.g., 25%
+  lastUpdatedAt: Date
+  lastUpdatedBy: string
+}
 ```
 
----
+- Single percentage applied per bundle count (e.g., if set to 0.5%, buying 10 bundles = 5% discount, 20 bundles = 10%, capped at `maxDiscountPercent`)
+- Add getter/setter functions following existing patterns
 
-## Design Principles
+### Changes to `src/data/merchantVoucherData.ts`
 
-- **Mobile-only (360px)**: No desktop considerations. Full-width cards, touch targets 44px+, sticky headers, safe-area-bottom padding
-- **Merchant aesthetic**: Professional color palette (slate/blue tones for merchant pages vs consumer primary). Slightly more data-dense than consumer UI
-- **PIN security**: PINs always displayed as "****XXXX" (last 4 only). Full PIN never visible on merchant screens
-- **Serial numbers**: Format like `BDL-{bundlePrefix}-{YYMMDD}-{sequence}` for bundles, cards inherit bundle prefix + card number
-- **All mock data**: No backend. State managed with useState. Pre-populated with 3-4 sample batches containing cards in various statuses
-- **Invalidation logic**: Only "available" and "sold_unused" (physical sales only, NOT mobigate digital) cards can be invalidated. Used cards are untouchable. Invalidated cards are replaced as a new batch with type "replacement"
+- Update `getDiscountForBundles()` and `calculateBulkDiscount()` to use the platform setting instead of hardcoded tiers
+- Remove the `discountTiers` array (replaced by dynamic calculation)
+
+### New component: `src/components/mobigate/VoucherDiscountSettingsCard.tsx`
+
+- A Card component (same style as `WithdrawalSettingsCard` and `QuizSettingsCard`)
+- Shows current discount rate per bundle, max cap
+- Slider or input to adjust the percentage per bundle (0% to 2%)
+- Slider or input for max discount cap (5% to 50%)
+- "Update" button with toast confirmation
+- Preview section showing example: "10 bundles = X% discount, 50 bundles = Y% discount"
+
+### Changes to `src/pages/admin/MobigateAdminDashboard.tsx`
+
+- Add the `VoucherDiscountSettingsCard` to the **Settings tab** (after QuizSettingsCard)
+- Import the new component
 
 ---
 
 ## Implementation Order
 
-1. Create `merchantVoucherData.ts` (types + mock data + helpers)
-2. Create `MerchantVoucherManagement.tsx` (main dashboard page)
-3. Create `MerchantVoucherGenerate.tsx` (generation flow)
-4. Create `MerchantWalletFund.tsx` (local currency funding)
-5. Create `MerchantVoucherBatches.tsx` (batch listing)
-6. Create `MerchantVoucherBatchDetail.tsx` (batch/bundle/card detail + invalidation)
-7. Create `MerchantVoucherTransactions.tsx` (transaction history)
-8. Modify `BuyVouchersPage.tsx` (add PIN recharge option + flow)
-9. Update `AppSidebar.tsx` (add menu item)
-10. Update `App.tsx` (add all new routes)
+1. Create `src/data/platformSettingsData.ts` additions (voucher discount settings)
+2. Update `src/data/merchantVoucherData.ts` (use platform settings for discount calc)
+3. Create `src/components/mobigate/VoucherDiscountSettingsCard.tsx`
+4. Add to Mobigate Admin Dashboard Settings tab
+5. Create `src/components/merchant/VoucherExportDrawer.tsx`
+6. Update `src/pages/MerchantVoucherBatchDetail.tsx` with export button + status marking logic
+
+---
+
+## Design Notes
+
+- Mobile-only (360px), all drawers at 92vh max
+- Touch targets 44px+, active:scale feedback
+- Professional merchant aesthetic (slate/blue tones)
+- Reuse existing `DownloadFormatSheet` for format selection
+- All mock/UI only -- no backend
 
