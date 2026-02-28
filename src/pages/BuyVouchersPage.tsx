@@ -492,7 +492,7 @@ export default function BuyVouchersPage() {
                 <span className="text-3xl">{local.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-foreground">{local.name}</p>
-                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} merchants</p>
+                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} sub-merchants</p>
                 </div>
                 <Badge className="bg-primary/10 text-primary text-xs">Local</Badge>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -506,7 +506,7 @@ export default function BuyVouchersPage() {
                 <span className="text-2xl">{country.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{country.name}</p>
-                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} merchants</p>
+                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} sub-merchants</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -556,19 +556,38 @@ export default function BuyVouchersPage() {
             </button>
             <div className="flex-1">
               <h1 className="text-base font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
-              <p className="text-xs text-muted-foreground">Select a merchant</p>
+              <p className="text-xs text-muted-foreground">Select a sub-merchant</p>
             </div>
           </div>
           <div className="px-4 pb-3">
-            <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Your Mobi Order</p>
-                <p className="text-xl font-bold text-foreground">M{formatNum(totalMobi)}</p>
+            <div className="rounded-xl bg-primary/10 border border-primary/20 p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Your Mobi Order</p>
+                  <p className="text-xl font-bold text-foreground">M{formatNum(totalMobi)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""}</p>
+                  <p className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""}</p>
-                <p className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
-              </div>
+              {/* Discount eligibility breakdown */}
+              {(() => {
+                const eligibleItems = cartItems.filter(i => i.quantity >= 10);
+                const totalCartItems = cartItems.length;
+                if (eligibleItems.length === 0) {
+                  return (
+                    <p className="text-xs text-amber-600 mt-1.5 pt-1.5 border-t border-primary/10">
+                      No items qualify for bulk discount yet (min 10 per denomination)
+                    </p>
+                  );
+                }
+                return (
+                  <p className="text-xs text-emerald-600 font-medium mt-1.5 pt-1.5 border-t border-primary/10">
+                    ✓ {eligibleItems.length} of {totalCartItems} item{totalCartItems !== 1 ? "s" : ""} qualify for discount
+                  </p>
+                );
+              })()}
             </div>
           </div>
           {/* Filter row */}
@@ -628,7 +647,16 @@ export default function BuyVouchersPage() {
             </div>
           )}
           {filteredMerchants.map((merchant) => {
-            const { discounted, savings } = calculateDiscountedAmount(totalMobi, merchant.discountPercent);
+            // Conditional discount: only cart items with qty >= 10 get discount
+            const eligibleItems = cartItems.filter(i => i.quantity >= 10);
+            const eligibleTotal = eligibleItems.reduce((s, i) => s + i.voucher.mobiValue * i.quantity, 0);
+            const nonEligibleTotal = totalMobi - eligibleTotal;
+            const hasAnyDiscount = eligibleItems.length > 0;
+            const eligibleSavings = hasAnyDiscount 
+              ? calculateDiscountedAmount(eligibleTotal, merchant.discountPercent).savings
+              : 0;
+            const totalToPay = totalMobi - eligibleSavings;
+            
             return (
               <div key={merchant.id} onClick={() => goToPayment(merchant)} className="rounded-xl border border-border/50 bg-card p-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
                 <div className="flex items-start justify-between mb-2">
@@ -648,17 +676,30 @@ export default function BuyVouchersPage() {
                       <span className="text-xs text-muted-foreground">{merchant.rating}</span>
                     </div>
                   </div>
-                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold shrink-0">{merchant.discountPercent}% OFF</Badge>
+                  {hasAnyDiscount ? (
+                    <div className="text-right shrink-0">
+                      <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold">{merchant.discountPercent}% OFF</Badge>
+                      {eligibleItems.length < cartItems.length && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{eligibleItems.length} of {cartItems.length} items</p>
+                      )}
+                    </div>
+                  ) : (
+                    <Badge className="bg-muted text-muted-foreground text-xs shrink-0">No discount</Badge>
+                  )}
                 </div>
                 <div className="flex items-end justify-between pt-2 border-t border-border/30">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">You pay</p>
-                    <p className="text-lg font-bold text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</p>
+                    <p className="text-lg font-bold text-foreground">{selectedCountry.currencySymbol}{formatNum(totalToPay)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-muted-foreground">You save</p>
-                    <p className="text-sm font-bold text-emerald-600">{selectedCountry.currencySymbol}{formatNum(savings)}</p>
-                  </div>
+                  {hasAnyDiscount ? (
+                    <div className="text-right">
+                      <p className="text-xs font-medium text-muted-foreground">You save</p>
+                      <p className="text-sm font-bold text-emerald-600">{selectedCountry.currencySymbol}{formatNum(eligibleSavings)}</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Full price • No bulk discount</p>
+                  )}
                   <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 ml-2" />
                 </div>
               </div>
