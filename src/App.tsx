@@ -53,6 +53,8 @@ import SubMerchantVoucherBatches from "./pages/SubMerchantVoucherBatches";
 import SubMerchantVoucherBatchDetail from "./pages/SubMerchantVoucherBatchDetail";
 import SubMerchantVoucherTransactions from "./pages/SubMerchantVoucherTransactions";
 import SubMerchantApplicationPage from "./pages/SubMerchantApplicationPage";
+import MerchantApplicationStatus from "./pages/MerchantApplicationStatus";
+import SubMerchantApplicationStatus from "./pages/SubMerchantApplicationStatus";
 import ServiceUnavailable from "./pages/ServiceUnavailable";
 import CreateAdvertisementPage from "./pages/community/CommunityCreateAdvertisementPage";
 import CommunityAdvertRatesPage from "./pages/community/CommunityAdvertRatesPage";
@@ -146,6 +148,8 @@ const App = () => {
                   <Route path="/sub-merchant-voucher-transactions" element={<WithHeader><SubMerchantVoucherTransactions /></WithHeader>} />
                   <Route path="/merchant-home/:merchantId" element={<MerchantHomePage />} />
                   <Route path="/apply-sub-merchant/:merchantId" element={<WithHeader><SubMerchantApplicationPage /></WithHeader>} />
+                  <Route path="/merchant-application-status" element={<WithHeader><MerchantApplicationStatus /></WithHeader>} />
+                  <Route path="/sub-merchant-application-status" element={<WithHeader><SubMerchantApplicationStatus /></WithHeader>} />
                   <Route path="/discounted-advert-rates" element={<AdvertRatesPage />} />
                   <Route path="/advert-subscription-rates" element={<AdvertSubscriptionRatesPage />} />
                   <Route path="/community/:communityId/advert-rates" element={<CommunityAdvertRatesPage />} />

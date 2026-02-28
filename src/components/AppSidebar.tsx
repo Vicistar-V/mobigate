@@ -167,6 +167,10 @@ const menuItems: MenuItem[] = [{
       ]
     },
     {
+      title: "Application Status",
+      url: "/merchant-application-status",
+    },
+    {
       title: "Merchant Quizzes Management",
       url: "/merchant-page",
     },
@@ -185,6 +189,10 @@ const menuItems: MenuItem[] = [{
     {
       title: "Apply as Sub-Merchant",
       url: "/merchants?mode=apply",
+    },
+    {
+      title: "Sub-Merchant Application Status",
+      url: "/sub-merchant-application-status",
     }
   ]
 }, {
