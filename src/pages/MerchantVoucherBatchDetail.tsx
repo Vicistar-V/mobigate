@@ -16,6 +16,7 @@ import {
 import {
   initialMockBatches,
   VoucherBatch,
+  type SoldVia,
   getBundleStatusCounts,
   getInvalidatableCards,
   hashPin,
@@ -102,32 +103,61 @@ export default function MerchantVoucherBatchDetail() {
     const now = new Date();
     setBatches(prev => prev.map(b => {
       if (b.id !== batch.id) return b;
-      const updatedBundles = b.bundles.map(bundle => {
-        // Mark invalidated cards as regenerated (keep them for filter) and add new cards alongside
-        const cardsToRegen = bundle.cards.filter(card => card.status === "invalidated" && !card.regenerated);
-        const markedCards = bundle.cards.map(card =>
+
+      // Collect all invalidated (unregenerated) cards across all bundles
+      const invalidatedCards = b.bundles.flatMap(bundle =>
+        bundle.cards.filter(c => c.status === "invalidated" && !c.regenerated)
+      );
+
+      // Mark those cards as regenerated (so they stay visible but won't be regenerated again)
+      const updatedBundles = b.bundles.map(bundle => ({
+        ...bundle,
+        cards: bundle.cards.map(card =>
           card.status === "invalidated" && !card.regenerated ? { ...card, regenerated: true } : card
-        );
-        const newCards = cardsToRegen.map((card, i) => ({
-          ...card,
-          id: `card-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${i}`,
-          serialNumber: generateCardSerial(bundle.serialPrefix, Math.floor(Math.random() * 10000) + i),
-          pin: generatePin(),
-          status: "available" as const,
-          createdAt: now,
-          invalidatedAt: null,
-          soldVia: null,
-          soldAt: null,
-          usedAt: null,
-          regenerated: false,
-          generationType: "replacement" as const,
-        }));
-        return { ...bundle, cards: [...markedCards, ...newCards] };
-      });
-      return { ...b, bundles: updatedBundles, status: "active" as const };
+        ),
+      }));
+
+      // Create new replacement bundles, max 100 cards per bundle (waterfall)
+      const CARDS_PER_BUNDLE = 100;
+      const newBundles: typeof b.bundles = [];
+      for (let i = 0; i < invalidatedCards.length; i += CARDS_PER_BUNDLE) {
+        const chunk = invalidatedCards.slice(i, i + CARDS_PER_BUNDLE);
+        const bundlePrefix = generateBundlePrefix(b.denomination, now) + `-R${newBundles.length + 1}`;
+        const newBundle = {
+          id: `bundle-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${newBundles.length}`,
+          serialPrefix: bundlePrefix,
+          denomination: b.denomination,
+          batchId: b.id,
+          cardCount: chunk.length,
+          cards: chunk.map((card, idx) => ({
+            id: `card-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${idx}`,
+            serialNumber: generateCardSerial(bundlePrefix, idx + 1),
+            pin: generatePin(),
+            denomination: b.denomination,
+            status: "available" as const,
+            batchId: b.id,
+            bundleSerialPrefix: bundlePrefix,
+            soldVia: null as SoldVia,
+            createdAt: now,
+            invalidatedAt: null,
+            soldAt: null,
+            usedAt: null,
+            regenerated: false,
+          })),
+        };
+        newBundles.push(newBundle);
+      }
+
+      return {
+        ...b,
+        bundles: [...updatedBundles, ...newBundles],
+        bundleCount: updatedBundles.length + newBundles.length,
+        totalCards: updatedBundles.reduce((sum, bn) => sum + bn.cards.length, 0) + newBundles.reduce((sum, bn) => sum + bn.cards.length, 0),
+        status: "active" as const,
+      };
     }));
     setShowRegenConfirm(false);
-    toast({ title: "Cards Regenerated", description: `${regenCount} invalidated cards have been regenerated in this batch` });
+    toast({ title: "Cards Regenerated", description: `${regenCount} replacement cards created in new bundles` });
   };
 
   const handlePrintComplete = (cardIds: string[]) => {
