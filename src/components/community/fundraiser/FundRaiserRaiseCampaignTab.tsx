@@ -11,7 +11,7 @@ import { MediaGalleryUpload } from "./MediaGalleryUpload";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PersonalBankDetails, CampaignMediaItem, urgencyLevels } from "@/data/fundraiserData";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export const FundRaiserRaiseCampaignTab = () => {
@@ -43,8 +43,13 @@ export const FundRaiserRaiseCampaignTab = () => {
   });
 
   const [mediaItems, setMediaItems] = useState<CampaignMediaItem[]>([]);
-  const [audience, setAudience] = useState<string[]>([]);
+  const [audience, setAudience] = useState<string[]>(["this-community"]);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [totalCost, setTotalCost] = useState(1000);
+
+  const handleTotalCostChange = useCallback((cost: number) => {
+    setTotalCost(cost);
+  }, []);
 
   const toggleUrgencyLevel = (level: string) => {
     if (requestDetails.urgencyLevels.includes(level)) {
@@ -385,14 +390,21 @@ export const FundRaiserRaiseCampaignTab = () => {
       <RequestAudienceSection
         selectedAudience={audience}
         onAudienceChange={setAudience}
+        lockedAudiences={["this-community"]}
+        onTotalCostChange={handleTotalCostChange}
       />
 
       {/* Submission Section */}
-      <Card className="p-6">
-        <p className="text-sm font-semibold mb-4 text-center">
-          I UNDERSTAND MOBI WILL CHARGE MY WALLET A TOKEN OF{" "}
-          <span className="text-primary">1000 Mobi</span> FOR THIS REQUEST
-        </p>
+      <Card className="p-4">
+        <div className="text-center mb-4">
+          <p className="text-sm text-muted-foreground mb-2">
+            I UNDERSTAND MOBI WILL CHARGE MY WALLET A TOKEN OF
+          </p>
+          <div className="bg-primary/10 rounded-xl py-3 px-4 inline-block">
+            <span className="text-2xl font-extrabold text-primary">{totalCost} Mobi</span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">FOR THIS REQUEST</p>
+        </div>
         
         <div className="flex items-center justify-center gap-2 mb-6">
           <Checkbox
