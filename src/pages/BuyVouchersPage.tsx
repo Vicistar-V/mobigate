@@ -684,7 +684,7 @@ export default function BuyVouchersPage() {
                       )}
                     </div>
                   ) : (
-                    <Badge className="bg-muted text-muted-foreground text-xs shrink-0">No discount</Badge>
+                    <Badge className="bg-muted text-muted-foreground text-xs shrink-0">No Discount</Badge>
                   )}
                 </div>
                 <div className="flex items-end justify-between pt-2 border-t border-border/30">
@@ -698,7 +698,7 @@ export default function BuyVouchersPage() {
                       <p className="text-sm font-bold text-emerald-600">{selectedCountry.currencySymbol}{formatNum(eligibleSavings)}</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground">Full price • No bulk discount</p>
+                    <p className="text-xs text-muted-foreground">Full price • No Bulk Discount</p>
                   )}
                   <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 ml-2" />
                 </div>
@@ -751,7 +751,7 @@ export default function BuyVouchersPage() {
                   <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-primary/30 text-primary">Sub-Merchant</Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% discount</p>
+              <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% Discount</p>
             </div>
           </div>
           <div className="rounded-xl border border-border/50 bg-card overflow-hidden mb-4">
@@ -775,7 +775,7 @@ export default function BuyVouchersPage() {
                       ) : (
                         <>
                           <p className="text-sm font-bold text-foreground">{selectedCountry.currencySymbol}{formatNum(lineTotal)}</p>
-                          <p className="text-xs text-amber-600">No discount</p>
+                          <p className="text-xs text-amber-600">No Discount</p>
                         </>
                       )}
                     </div>
