@@ -124,9 +124,14 @@ export function hashPin(pin: string): string {
   return "****" + pin.slice(-4);
 }
 
-function generateBatchNumber(): string {
-  const num = String(Math.floor(1000 + Math.random() * 9000));
-  return `BATCH-${num}`;
+const DEFAULT_MERCHANT_ID = "0001";
+
+export function generateBatchNumber(date: Date, merchantId: string = DEFAULT_MERCHANT_ID): string {
+  const year = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const unique = String(Math.floor(1000 + Math.random() * 9000));
+  return `BATCH-${year}-${mm}${dd}-${merchantId}-${unique}`;
 }
 
 function generateTransactionRef(): string {
@@ -146,7 +151,7 @@ function createMockBatch(
   createdAt.setDate(createdAt.getDate() - daysAgo);
 
   const batchId = `batch-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-  const batchNumber = generateBatchNumber();
+  const batchNumber = generateBatchNumber(createdAt);
   const discount = calculateBulkDiscount(denomination, bundleCount);
 
   const bundles: VoucherBundle[] = [];
