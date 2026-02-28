@@ -6,11 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { rechargeVouchers, RechargeVoucher } from "@/data/rechargeVouchersData";
 import {
   calculateBulkDiscount,
-  discountTiers,
   getDiscountForBundles,
   initialMerchantWalletBalance,
   formatNum,
 } from "@/data/merchantVoucherData";
+import { platformVoucherDiscountSettings } from "@/data/platformSettingsData";
 
 type Step = "denomination" | "bundles" | "summary" | "processing" | "complete";
 
@@ -223,28 +223,26 @@ export default function MerchantVoucherGenerate() {
             </div>
           </div>
 
-          {/* Discount tiers info */}
+          {/* Discount info */}
           <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
             <div className="px-4 py-2.5 border-b border-border/30 bg-muted/30">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Bulk Discount Tiers</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Bulk Discount Rate</p>
             </div>
-            <div className="divide-y divide-border/30">
-              {discountTiers.map(tier => (
-                <div key={tier.minBundles} className={`px-4 py-2.5 flex items-center justify-between ${
-                  bundleCount >= tier.minBundles && (tier.maxBundles === null || bundleCount <= tier.maxBundles)
-                    ? "bg-primary/5"
-                    : ""
-                }`}>
-                  <span className="text-xs text-foreground">
-                    {tier.maxBundles ? `${tier.minBundles}–${tier.maxBundles}` : `${tier.minBundles}+`} bundles
-                  </span>
-                  <Badge className={`text-[10px] h-5 ${
-                    tier.discountPercent > 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"
-                  }`}>
-                    {tier.label}
-                  </Badge>
-                </div>
-              ))}
+            <div className="px-4 py-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground">Rate per bundle</span>
+                <Badge className="text-[10px] h-5 bg-emerald-500/15 text-emerald-600">{platformVoucherDiscountSettings.discountPercentPerBundle}% / bundle</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground">Your discount ({bundleCount} bundles)</span>
+                <Badge className={`text-[10px] h-5 ${discount.discountPercent > 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
+                  {discount.discountPercent > 0 ? `${discount.discountPercent}% off` : "No discount"}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Max cap</span>
+                <span className="text-[10px] text-muted-foreground">{platformVoucherDiscountSettings.maxDiscountPercent}%</span>
+              </div>
             </div>
           </div>
         </div>

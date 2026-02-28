@@ -177,3 +177,50 @@ export function setMerchantSolvencyPercent(newPercent: number): void {
     platformSolvencySettings.lastUpdatedAt = new Date();
   }
 }
+
+// ─── Platform Voucher Discount Settings ───
+export interface PlatformVoucherDiscountSettings {
+  discountPercentPerBundle: number;
+  discountPercentMin: number;
+  discountPercentMax: number;
+  maxDiscountPercent: number;
+  maxDiscountPercentMin: number;
+  maxDiscountPercentMax: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformVoucherDiscountSettings: PlatformVoucherDiscountSettings = {
+  discountPercentPerBundle: 0.5,
+  discountPercentMin: 0,
+  discountPercentMax: 2,
+  maxDiscountPercent: 25,
+  maxDiscountPercentMin: 5,
+  maxDiscountPercentMax: 50,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getDiscountPercentPerBundle(): number {
+  return platformVoucherDiscountSettings.discountPercentPerBundle;
+}
+
+export function setDiscountPercentPerBundle(value: number): void {
+  if (value >= platformVoucherDiscountSettings.discountPercentMin &&
+      value <= platformVoucherDiscountSettings.discountPercentMax) {
+    platformVoucherDiscountSettings.discountPercentPerBundle = value;
+    platformVoucherDiscountSettings.lastUpdatedAt = new Date();
+  }
+}
+
+export function getMaxDiscountPercent(): number {
+  return platformVoucherDiscountSettings.maxDiscountPercent;
+}
+
+export function setMaxDiscountPercent(value: number): void {
+  if (value >= platformVoucherDiscountSettings.maxDiscountPercentMin &&
+      value <= platformVoucherDiscountSettings.maxDiscountPercentMax) {
+    platformVoucherDiscountSettings.maxDiscountPercent = value;
+    platformVoucherDiscountSettings.lastUpdatedAt = new Date();
+  }
+}

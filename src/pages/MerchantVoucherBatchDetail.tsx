@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,24 +16,26 @@ import {
 import {
   initialMockBatches,
   VoucherBatch,
-  VoucherBundle,
-  VoucherCard,
   getBatchStatusCounts,
   getBundleStatusCounts,
   getInvalidatableCards,
   hashPin,
   formatNum,
 } from "@/data/merchantVoucherData";
+import { useToast } from "@/hooks/use-toast";
+import { VoucherExportDrawer } from "@/components/merchant/VoucherExportDrawer";
 
 type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string } | { type: "card"; cardId: string; bundleId: string };
 
 export default function MerchantVoucherBatchDetail() {
   const navigate = useNavigate();
   const { batchId } = useParams();
+  const { toast } = useToast();
   const [batches, setBatches] = useState(initialMockBatches);
   const [expandedBundles, setExpandedBundles] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);
+  const [exportDrawerOpen, setExportDrawerOpen] = useState(false);
 
   const batch = batches.find(b => b.id === batchId);
 
@@ -87,6 +89,27 @@ export default function MerchantVoucherBatchDetail() {
       return updated;
     }));
     setInvalidateTarget(null);
+  };
+
+  const handleExportComplete = (cardIds: string[]) => {
+    setBatches(prev => prev.map(b => {
+      if (b.id !== batchId) return b;
+      return {
+        ...b,
+        bundles: b.bundles.map(bundle => ({
+          ...bundle,
+          cards: bundle.cards.map(card =>
+            cardIds.includes(card.id)
+              ? { ...card, status: "sold_unused" as const, soldVia: "physical" as const, soldAt: new Date() }
+              : card
+          ),
+        })),
+      };
+    }));
+    toast({
+      title: "Export Complete",
+      description: `${cardIds.length} cards exported and marked as sold`,
+    });
   };
 
   const getInvalidateCount = (): number => {
@@ -168,17 +191,29 @@ export default function MerchantVoucherBatchDetail() {
           ))}
         </div>
 
-        {/* Invalidate Batch Button */}
-        {batchInvalidatable.length > 0 && (
-          <Button
-            onClick={() => setInvalidateTarget({ type: "batch" })}
-            variant="outline"
-            className="w-full h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]"
-          >
-            <ShieldAlert className="h-4 w-4 mr-2" />
-            Invalidate Batch ({batchInvalidatable.length} cards)
-          </Button>
-        )}
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {counts.available > 0 && (
+            <Button
+              onClick={() => setExportDrawerOpen(true)}
+              variant="outline"
+              className="flex-1 h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97]"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Export ({counts.available})
+            </Button>
+          )}
+          {batchInvalidatable.length > 0 && (
+            <Button
+              onClick={() => setInvalidateTarget({ type: "batch" })}
+              variant="outline"
+              className="flex-1 h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]"
+            >
+              <ShieldAlert className="h-4 w-4 mr-2" />
+              Invalidate ({batchInvalidatable.length})
+            </Button>
+          )}
+        </div>
 
         {/* Search */}
         <div className="relative">
@@ -300,6 +335,14 @@ export default function MerchantVoucherBatchDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Export Drawer */}
+      <VoucherExportDrawer
+        open={exportDrawerOpen}
+        onOpenChange={setExportDrawerOpen}
+        batch={batch}
+        onExportComplete={handleExportComplete}
+      />
     </div>
   );
 }
