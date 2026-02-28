@@ -55,7 +55,7 @@ export function VoucherDiscountSettingsCard() {
     setIsSaving(false);
     toast({
       title: "Discount Tiers Updated",
-      description: `${preview.length} tiers configured, max ${maxDiscountVal}%`,
+      description: `${preview.length} tiers configured, max ${maxDiscountVal.toFixed(1)}%`,
     });
   };
 
@@ -69,7 +69,7 @@ export function VoucherDiscountSettingsCard() {
           <div className="flex-1 text-left">
             <p className="text-sm font-bold text-foreground">Voucher Bulk Discount</p>
             <p className="text-xs text-muted-foreground">
-              {s.baseRate}% base, +{s.incrementRate}%/tier, max {s.maxDiscount}%
+              {s.baseRate.toFixed(1)}% base, +{s.incrementRate.toFixed(1)}%/tier, max {s.maxDiscount.toFixed(1)}%
             </p>
           </div>
           {hasChanges && (
@@ -106,7 +106,7 @@ export function VoucherDiscountSettingsCard() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-foreground">Base Rate (1st Tier)</p>
-              <Badge variant="outline" className="font-mono text-xs">{baseRate}%</Badge>
+              <Badge variant="outline" className="font-mono text-xs">{baseRate.toFixed(1)}%</Badge>
             </div>
             <Slider
               value={[baseRate * 10]}
@@ -117,8 +117,8 @@ export function VoucherDiscountSettingsCard() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{s.baseRateMin}%</span>
-              <span>{s.baseRateMax}%</span>
+              <span>{s.baseRateMin.toFixed(1)}%</span>
+              <span>{s.baseRateMax.toFixed(1)}%</span>
             </div>
           </div>
 
@@ -126,7 +126,7 @@ export function VoucherDiscountSettingsCard() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-foreground">Increment Per Tier</p>
-              <Badge variant="outline" className="font-mono text-xs">+{incrementRate}%</Badge>
+              <Badge variant="outline" className="font-mono text-xs">+{incrementRate.toFixed(1)}%</Badge>
             </div>
             <Slider
               value={[incrementRate * 100]}
@@ -137,8 +137,8 @@ export function VoucherDiscountSettingsCard() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{s.incrementRateMin}%</span>
-              <span>{s.incrementRateMax}%</span>
+              <span>{s.incrementRateMin.toFixed(1)}%</span>
+              <span>{s.incrementRateMax.toFixed(1)}%</span>
             </div>
           </div>
 
@@ -146,7 +146,7 @@ export function VoucherDiscountSettingsCard() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-foreground">Max Discount Cap</p>
-              <Badge variant="outline" className="font-mono text-xs">{maxDiscountVal}%</Badge>
+              <Badge variant="outline" className="font-mono text-xs">{maxDiscountVal.toFixed(1)}%</Badge>
             </div>
             <Slider
               value={[maxDiscountVal]}
@@ -157,8 +157,8 @@ export function VoucherDiscountSettingsCard() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{s.maxDiscountMin}%</span>
-              <span>{s.maxDiscountMax}%</span>
+              <span>{s.maxDiscountMin.toFixed(1)}%</span>
+              <span>{s.maxDiscountMax.toFixed(1)}%</span>
             </div>
           </div>
 
@@ -176,7 +176,7 @@ export function VoucherDiscountSettingsCard() {
                   <div key={t.tier} className="grid grid-cols-3 gap-0 px-3 py-1.5 border-t border-border/30">
                     <span className="text-xs text-foreground font-medium">Tier {t.tier}</span>
                     <span className="text-xs text-muted-foreground">{t.rangeStart}–{t.rangeEnd}</span>
-                    <span className="text-xs text-emerald-600 font-bold text-right">{t.discountPercent}%</span>
+                    <span className="text-xs text-emerald-600 font-bold text-right">{t.discountPercent.toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
@@ -187,7 +187,7 @@ export function VoucherDiscountSettingsCard() {
           <div className="flex gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Every <strong>{tierSize}</strong> bundles form a tier. Tier 1 gets <strong>{baseRate}%</strong>, each subsequent tier adds <strong>{incrementRate}%</strong>, capped at <strong>{maxDiscountVal}%</strong>.
+              Every <strong>{tierSize}</strong> bundles form a tier. Tier 1 gets <strong>{baseRate.toFixed(1)}%</strong>, each subsequent tier adds <strong>{incrementRate.toFixed(1)}%</strong>, capped at <strong>{maxDiscountVal.toFixed(1)}%</strong>.
             </p>
           </div>
 
