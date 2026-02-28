@@ -199,7 +199,7 @@ export function AdminElectionSection({
               <div className="text-left min-w-0 flex-1">
                 <h3 className="font-semibold text-sm">Elections</h3>
                 <p className="text-xs text-muted-foreground">
-                  {stats.activeElections} active • {stats.accreditedVoters} accredited
+                  {stats.activeElections} Active • {stats.accreditedVoters} Accredited
                 </p>
               </div>
             </div>

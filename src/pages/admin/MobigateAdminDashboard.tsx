@@ -179,7 +179,7 @@ export default function MobigateAdminDashboard() {
                       </div>
                       <p className="text-2xl font-bold">{platformStats.totalCommunities.toLocaleString()}</p>
                       <p className="text-xs text-emerald-600">
-                        {platformStats.activeCommunities.toLocaleString()} active
+                        {platformStats.activeCommunities.toLocaleString()} Active
                       </p>
                     </CardContent>
                   </Card>
@@ -515,7 +515,7 @@ export default function MobigateAdminDashboard() {
                       </CardTitle>
                       {pendingCount > 0 && (
                         <Badge className="bg-amber-500 text-white">
-                          {pendingCount} pending
+                          {pendingCount} Pending
                         </Badge>
                       )}
                     </div>

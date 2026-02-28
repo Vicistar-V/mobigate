@@ -307,7 +307,7 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
               <span className="text-xs font-medium text-blue-800 dark:text-blue-300">Privacy Status</span>
             </div>
             <Badge variant="outline" className="text-xs">
-              {privacySettings.filter(s => s.memberVote === null).length} pending votes
+              {privacySettings.filter(s => s.memberVote === null).length} Pending votes
             </Badge>
           </div>
           <div className="grid grid-cols-4 gap-1.5">

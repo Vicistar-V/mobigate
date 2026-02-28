@@ -255,7 +255,7 @@ export function AdminFinanceSection({
                 <h3 className="font-semibold text-sm">Finance</h3>
                 <p className="text-xs text-muted-foreground">
                   {formatDualCurrency(stats.walletBalance)}
-                  {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} pending`}
+                  {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} Pending`}
                 </p>
               </div>
             </div>

@@ -63,7 +63,7 @@ export function calculateVolumeDiscount(
     name: `Volume Discount (${advertCount} adverts)`,
     percentage: tier.percentage,
     amount,
-    description: `${tier.percentage}% discount for ${advertCount} active adverts`,
+    description: `${tier.percentage}% Discount for ${advertCount} Active adverts`,
   };
 }
 
