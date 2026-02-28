@@ -38,7 +38,7 @@ export default function SubMerchantApplicationPage() {
     email: "",
     city: "",
     state: "",
-    businessType: "",
+    businessTypes: [] as string[],
     description: "",
     yearsInBusiness: "",
     agreeTerms: false,
@@ -51,7 +51,16 @@ export default function SubMerchantApplicationPage() {
   };
 
   const isValid = form.fullName.trim() && form.businessName.trim() && form.phone.trim() &&
-    form.city.trim() && form.state.trim() && form.businessType && form.agreeTerms;
+    form.city.trim() && form.state.trim() && form.businessTypes.length > 0 && form.agreeTerms;
+
+  const toggleBusinessType = (type: string) => {
+    setForm(prev => ({
+      ...prev,
+      businessTypes: prev.businessTypes.includes(type)
+        ? prev.businessTypes.filter(t => t !== type)
+        : [...prev.businessTypes, type],
+    }));
+  };
 
   const handleSubmit = () => {
     if (!isValid) return;
@@ -196,18 +205,31 @@ export default function SubMerchantApplicationPage() {
           </div>
 
           <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5 block">Business Type *</Label>
-            <Select value={form.businessType} onValueChange={v => updateField("businessType", v)}>
-              <SelectTrigger className="h-11 rounded-xl text-sm">
-                <SelectValue placeholder="Select business type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="retail_shop">Retail Shop</SelectItem>
-                <SelectItem value="kiosk">Kiosk</SelectItem>
-                <SelectItem value="online_store">Online Store</SelectItem>
-                <SelectItem value="mobile_agent">Mobile Agent</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label className="text-xs font-semibold text-foreground mb-1.5 block">Business Type * <span className="font-normal text-muted-foreground">(select all that apply)</span></Label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "retail_shop", label: "Retail Shop" },
+                { value: "kiosk", label: "Kiosk" },
+                { value: "online_store", label: "Online Store" },
+                { value: "mobile_agent", label: "Mobile Agent" },
+              ].map(opt => {
+                const selected = form.businessTypes.includes(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => toggleBusinessType(opt.value)}
+                    className={`h-11 rounded-xl text-sm font-medium border transition-colors touch-manipulation active:scale-[0.97] ${
+                      selected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div>
