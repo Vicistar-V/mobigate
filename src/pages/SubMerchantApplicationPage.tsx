@@ -269,7 +269,7 @@ export default function SubMerchantApplicationPage() {
               className="mt-0.5"
             />
             <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-              I agree to the sub-merchant terms and conditions and understand that the ₦5,000 application fee is non-refundable.
+              I agree to the Sub-Merchant Terms and Conditions and understand that the ₦5,000 Application Fee is non-refundable.
             </label>
           </div>
         </div>
