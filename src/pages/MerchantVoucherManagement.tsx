@@ -152,7 +152,7 @@ export default function MerchantVoucherManagement() {
                     <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} avail</Badge>}
+                    {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} available</Badge>}
                     {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} sold</Badge>}
                     {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} used</Badge>}
                     {counts.invalidated > 0 && <Badge className="bg-destructive/15 text-destructive text-xs px-2 h-5">{counts.invalidated} invalid</Badge>}
