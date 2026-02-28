@@ -173,6 +173,14 @@ const menuItems: MenuItem[] = [{
     {
       title: "Merchant Voucher Management",
       url: "/merchant-voucher-management",
+    },
+    {
+      title: "Manage Sub-Merchants",
+      url: "/merchant-sub-merchants",
+    },
+    {
+      title: "Sub-Merchant Voucher Management",
+      url: "/sub-merchant-voucher-management",
     }
   ]
 }, {

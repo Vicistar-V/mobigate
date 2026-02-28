@@ -85,6 +85,8 @@ export default function BuyVouchersPage() {
   const [sendSuccess, setSendSuccess] = useState(false);
   const [redeemPin, setRedeemPin] = useState("");
   const [redeemError, setRedeemError] = useState("");
+  const [editingQtyId, setEditingQtyId] = useState<string | null>(null);
+  const [editingQtyValue, setEditingQtyValue] = useState("");
 
   // Derived
   const lowTier = rechargeVouchers.filter((v) => v.tier === "low");
@@ -296,6 +298,7 @@ export default function BuyVouchersPage() {
   const renderVoucherCard = (v: RechargeVoucher) => {
     const selected = !!cart[v.id];
     const qty = cart[v.id] || 0;
+    const isEditing = editingQtyId === v.id;
 
     return (
       <div
@@ -331,11 +334,44 @@ export default function BuyVouchersPage() {
             <button onClick={(e) => changeQty(v.id, -1, e)} className="h-7 w-7 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
               <Minus className="h-3.5 w-3.5 text-foreground" />
             </button>
-            <span className="text-sm font-bold text-foreground w-6 text-center">{qty}</span>
+            {isEditing ? (
+              <input
+                type="number"
+                autoFocus
+                value={editingQtyValue}
+                onChange={e => setEditingQtyValue(e.target.value)}
+                onBlur={() => {
+                  const val = parseInt(editingQtyValue);
+                  if (val && val >= 1) {
+                    setCart(prev => ({ ...prev, [v.id]: val }));
+                  }
+                  setEditingQtyId(null);
+                }}
+                onKeyDown={e => {
+                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                }}
+                onClick={e => e.stopPropagation()}
+                className="w-12 text-center text-sm font-bold bg-muted/50 rounded-lg h-7 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingQtyId(v.id);
+                  setEditingQtyValue(String(qty));
+                }}
+                className="text-sm font-bold text-foreground w-8 text-center h-7 rounded-lg hover:bg-muted/50 touch-manipulation"
+              >
+                {qty}
+              </button>
+            )}
             <button onClick={(e) => changeQty(v.id, 1, e)} className="h-7 w-7 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation">
               <Plus className="h-3.5 w-3.5 text-primary-foreground" />
             </button>
           </div>
+        )}
+        {selected && qty < 10 && (
+          <p className="text-[10px] text-amber-600 text-center mt-1">Min 10 for discount</p>
         )}
       </div>
     );
@@ -590,6 +626,9 @@ export default function BuyVouchersPage() {
                     <div className="flex items-center gap-1.5">
                       <p className="font-bold text-sm text-foreground truncate">{merchant.name}</p>
                       {merchant.isVerified && <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
+                      {merchant.isSubMerchant && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-primary/30 text-primary shrink-0">Sub-Merchant</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
                       <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
@@ -623,7 +662,21 @@ export default function BuyVouchersPage() {
   // ─── STEP 4: PAYMENT ───
   const renderPaymentStep = () => {
     if (!selectedMerchant || !selectedCountry) return null;
-    const { discounted, savings } = calculateDiscountedAmount(totalMobi, selectedMerchant.discountPercent);
+
+    // Conditional discount: only items with qty >= 10 get discount
+    const itemBreakdown = cartItems.map(({ voucher, quantity }) => {
+      const lineTotal = voucher.mobiValue * quantity;
+      const isDiscountEligible = quantity >= 10;
+      const { discounted, savings } = isDiscountEligible
+        ? calculateDiscountedAmount(lineTotal, selectedMerchant.discountPercent)
+        : { discounted: lineTotal, savings: 0 };
+      return { voucher, quantity, lineTotal, isDiscountEligible, discounted, savings };
+    });
+
+    const totalRegular = itemBreakdown.reduce((s, i) => s + i.lineTotal, 0);
+    const totalSavings = itemBreakdown.reduce((s, i) => s + i.savings, 0);
+    const totalToPay = totalRegular - totalSavings;
+
     return (
       <div className="bg-background pb-32">
         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
@@ -641,7 +694,12 @@ export default function BuyVouchersPage() {
               <Ticket className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm text-foreground">{selectedMerchant.name}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="font-bold text-sm text-foreground">{selectedMerchant.name}</p>
+                {selectedMerchant.isSubMerchant && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-primary/30 text-primary">Sub-Merchant</Badge>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% discount</p>
             </div>
           </div>
@@ -650,13 +708,27 @@ export default function BuyVouchersPage() {
               <p className="text-xs font-semibold text-muted-foreground uppercase">Vouchers ({totalItems})</p>
             </div>
             <div className="divide-y divide-border/30">
-              {cartItems.map(({ voucher, quantity }) => (
-                <div key={voucher.id} className="px-3 py-2.5 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">M{formatNum(voucher.mobiValue)}</p>
-                    <p className="text-xs text-muted-foreground">× {quantity} piece{quantity > 1 ? "s" : ""}</p>
+              {itemBreakdown.map(({ voucher, quantity, lineTotal, isDiscountEligible, discounted, savings }) => (
+                <div key={voucher.id} className="px-3 py-2.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">M{formatNum(voucher.mobiValue)}</p>
+                      <p className="text-xs text-muted-foreground">× {quantity} piece{quantity > 1 ? "s" : ""}</p>
+                    </div>
+                    <div className="text-right">
+                      {isDiscountEligible ? (
+                        <>
+                          <p className="text-sm font-bold text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</p>
+                          <p className="text-xs text-emerald-600 font-semibold">-{selectedCountry.currencySymbol}{formatNum(savings)} ({selectedMerchant.discountPercent}%)</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-bold text-foreground">{selectedCountry.currencySymbol}{formatNum(lineTotal)}</p>
+                          <p className="text-xs text-amber-600">No discount</p>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm font-bold text-foreground">M{formatNum(voucher.mobiValue * quantity)}</p>
                 </div>
               ))}
             </div>
@@ -668,27 +740,32 @@ export default function BuyVouchersPage() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Regular Price Value</span>
-              <span className="font-semibold text-foreground">{selectedCountry.currencySymbol}{formatNum(totalMobi)}</span>
+              <span className="font-semibold text-foreground">{selectedCountry.currencySymbol}{formatNum(totalRegular)}</span>
             </div>
-            <div className="flex justify-between text-sm text-emerald-600">
-              <span>Merchant's Discount ({selectedMerchant.discountPercent}%)</span>
-              <span className="font-semibold">-{selectedCountry.currencySymbol}{formatNum(savings)}</span>
-            </div>
+            {totalSavings > 0 && (
+              <div className="flex justify-between text-sm text-emerald-600">
+                <span>Merchant's Discount</span>
+                <span className="font-semibold">-{selectedCountry.currencySymbol}{formatNum(totalSavings)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Merchants' Price</span>
-              <span className="font-semibold text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</span>
+              <span className="font-semibold text-foreground">{selectedCountry.currencySymbol}{formatNum(totalToPay)}</span>
             </div>
             <div className="border-t border-border/50 pt-2 flex justify-between">
               <span className="font-bold text-foreground">Amount to Pay</span>
-              <span className="font-bold text-lg text-foreground">{selectedCountry.currencySymbol}{formatNum(discounted)}</span>
+              <span className="font-bold text-lg text-foreground">{selectedCountry.currencySymbol}{formatNum(totalToPay)}</span>
             </div>
             <p className="text-xs text-muted-foreground text-center">You receive M{formatNum(totalMobi)} in Mobi vouchers</p>
+            {totalSavings === 0 && (
+              <p className="text-xs text-amber-600 text-center">Tip: Order 10+ of any denomination to unlock discounts</p>
+            )}
           </div>
         </div>
         <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
           <Button onClick={handlePay} className="w-full h-12 text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
             <CreditCard className="h-4 w-4 mr-2" />
-            Pay {selectedCountry.currencySymbol}{formatNum(discounted)}
+            Pay {selectedCountry.currencySymbol}{formatNum(totalToPay)}
           </Button>
         </div>
       </div>
