@@ -1,54 +1,70 @@
 
 
-## Fundraiser Campaign Form Improvements (Mobile-First)
+## Voucher Batch Detail -- Statistics & Filter Overhaul (Both Merchant + Sub-Merchant)
 
-### Changes Overview
+### Summary of Changes
 
-**1. MediaGalleryUpload - Remove checkmarks, add per-thumbnail delete (X) buttons**
-- Remove the checkbox overlay from the main image display
-- Remove the `selected` state logic (toggleSelection, checkbox)
-- Add an X (close) button on each thumbnail in the strip to delete that specific item
-- Preview button: shows the current image full-screen (no selection needed)
-- Delete button: deletes the currently displayed (active) item
-- Save button: remains as-is
-- Fix button overflow by ensuring buttons stay within the Card's bounds
+Three distinct layers of changes across both `MerchantVoucherBatchDetail.tsx` and `SubMerchantVoucherBatchDetail.tsx`:
 
-**2. RequestAudienceSection - "This Community" checked by default and locked**
-- In `FundRaiserRaiseCampaignTab`, initialize `audience` state with `["this-community"]`
-- In `RequestAudienceSection`, prevent unchecking "this-community" (disable the checkbox or skip the toggle)
-- Change "this-community" `chargePercent` from `0` to mark it as included in the base price
+---
 
-**3. Audience pricing: percentage of base 1000 Mobi, not compounding**
-- Calculate total cost as: `1000 + (sum of selected chargePercents * 10)` (10% of 1000 = 100, 15% = 150, 20% = 200, etc.)
-- Display the computed total cost prominently in the submission card instead of the hardcoded "1000 Mobi"
-- Pass the total cost down or compute it where needed
+### 1. Batch-Level Statistics (Top Cards) -- Count by BUNDLES, not cards
 
-**4. Make the cost amount more prominent in the submission section**
-- Replace the small inline "1000 Mobi" text with a larger, bold, highlighted total amount that updates dynamically
+**Current**: 4 stats (Available, Sold, Used, Invalid) counting individual cards.
+
+**New**: 3 stats (Available, Sold, Invalid) counting **bundles**. A bundle is classified by its dominant status:
+- **Available**: All cards in the bundle are `available`
+- **Sold**: At least one card is `sold_unused` and none are `invalidated`
+- **Invalid**: At least one card is `invalidated`
+
+These stats become **clickable filters** -- tapping one filters the bundle list below to show only bundles matching that classification. Tapping the active filter again clears it (show all).
+
+Grid changes from `grid-cols-4` to `grid-cols-3`. "Used" stat is removed entirely from this level.
+
+**New helper**: `getBatchBundleCounts(batch)` that classifies each bundle and returns `{ available, sold, invalidated }` bundle counts.
+
+---
+
+### 2. Bundle Header (Collapsed State) -- Only "Available" or "Sold"
+
+**Current**: Shows up to 4 inline stats (avail, sold, used, inv).
+
+**New**: Show only two stats: `available` count and `sold_unused` count (from card-level `getBundleStatusCounts`). Remove "used" and "inv" from this collapsed view.
+
+---
+
+### 3. Expanded Bundle Content -- Clickable "Used" / "Unused" Card Filters
+
+**Current**: When a bundle is expanded, all cards are listed with no filtering.
+
+**New**: Add a small clickable stat bar inside the expanded area (above the card list) showing:
+- **Unused** count (cards with status `available` or `sold_unused`)
+- **Used** count (cards with status `used`)
+
+Tapping one filters the card list within that bundle. Tapping the active filter again shows all cards. These are pill-style toggles.
 
 ---
 
 ### Technical Details
 
-#### File: `src/data/fundraiserData.ts`
-- Change "this-community" `chargePercent` to `0` (already 0, keep it -- it's the base, always included)
+#### File: `src/data/merchantVoucherData.ts`
+- Add new exported function `getBatchBundleCounts(batch: VoucherBatch)` that iterates over `batch.bundles` and classifies each bundle:
+  - If any card is `invalidated` -> bundle is "invalidated"
+  - Else if any card is `sold_unused` -> bundle is "sold"
+  - Else -> bundle is "available"
+- Returns `{ available: number, sold: number, invalidated: number, total: number }`
 
-#### File: `src/components/community/fundraiser/MediaGalleryUpload.tsx`
-- Remove `Checkbox` import and checkbox overlay from main image
-- Remove `toggleSelection` function and `selected` state references
-- Add X button on each thumbnail for individual deletion
-- Update Preview to preview current item directly (no selection required)
-- Update Delete to delete the current item
-- Ensure all buttons fit within the Card container on mobile (use smaller text, proper wrapping)
+#### File: `src/pages/MerchantVoucherBatchDetail.tsx`
+- Add state: `batchStatusFilter: "available" | "sold" | "invalidated" | null` (default `null`)
+- Add per-bundle state: `bundleCardFilter: Record<string, "used" | "unused" | null>` (default `{}`)
+- Import and use `getBatchBundleCounts` for top stats
+- Top stats grid: `grid-cols-3`, remove "Used", make each stat a tappable button that toggles `batchStatusFilter`
+- Active filter gets a highlighted ring/border style
+- `filteredBundles` memo: additionally filter by `batchStatusFilter` (classify each bundle same way as the count function)
+- Bundle collapsed header: only show `avail` and `sold` counts
+- Expanded bundle: add a row of "Unused" / "Used" pill-toggles with counts, updating `bundleCardFilter[bundle.id]`
+- Card list filters by `bundleCardFilter[bundle.id]`: "unused" shows `available` + `sold_unused`, "used" shows `used`
 
-#### File: `src/components/community/fundraiser/RequestAudienceSection.tsx`
-- Accept a new prop `lockedAudiences?: string[]` to prevent unchecking certain items
-- Disable checkbox for "this-community" (visually checked, not toggleable)
-- Expose `totalExtraCharge` via a callback prop so the parent can use it for cost calculation
-
-#### File: `src/components/community/fundraiser/FundRaiserRaiseCampaignTab.tsx`
-- Initialize `audience` with `["this-community"]`
-- Track `totalExtraCharge` from `RequestAudienceSection`
-- Calculate dynamic cost: `baseCost (1000) + sum of (chargePercent / 100 * 1000)` for each selected audience (excluding the base "this-community")
-- Update the submission Card to show the dynamic total prominently with large bold text
+#### File: `src/pages/SubMerchantVoucherBatchDetail.tsx`
+- Same changes as the merchant version above (mirror implementation)
 
