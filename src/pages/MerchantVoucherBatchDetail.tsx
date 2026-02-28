@@ -128,6 +128,7 @@ export default function MerchantVoucherBatchDetail() {
     setBatches(prev => [...prev, newBatch]);
     setShowRegenConfirm(false);
     toast({ title: "Replacement Batch Created", description: `${newBatchNumber} — ${regenCount} cards regenerated` });
+    navigate(`/merchant-voucher-batch/${newBatchId}`);
   };
 
   const handlePrintComplete = (cardIds: string[]) => {
