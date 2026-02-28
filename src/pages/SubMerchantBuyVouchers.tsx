@@ -180,8 +180,20 @@ export default function SubMerchantBuyVouchers() {
               <Minus className="h-5 w-5 text-foreground" />
             </button>
             <div className="text-center">
-              <p className="text-4xl font-black text-foreground">{bundleCount}</p>
-              <p className="text-xs text-muted-foreground">bundle{bundleCount !== 1 ? "s" : ""}</p>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={bundleCount}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (!isNaN(val) && val >= 1) setBundleCount(val);
+                  else if (e.target.value === '') setBundleCount(1);
+                }}
+                className="w-20 text-4xl font-black text-foreground text-center bg-transparent border-b-2 border-primary/40 focus:border-primary outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                style={{ MozAppearance: 'textfield' }}
+              />
+              <p className="text-xs text-muted-foreground mt-1">bundle{bundleCount !== 1 ? "s" : ""}</p>
             </div>
             <button onClick={() => setBundleCount(bundleCount + 1)} className="h-12 w-12 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation">
               <Plus className="h-5 w-5 text-primary-foreground" />
