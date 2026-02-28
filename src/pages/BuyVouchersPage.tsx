@@ -1245,6 +1245,13 @@ export default function BuyVouchersPage() {
           </div>
         </div>
         <Button
+          onClick={() => navigate("/wallet")}
+          variant="outline"
+          className="w-full h-12 rounded-xl text-sm font-semibold border-emerald-600 text-emerald-600 hover:bg-emerald-50 touch-manipulation active:scale-[0.97] mb-3"
+        >
+          View Wallet Balance Now
+        </Button>
+        <Button
           onClick={() => { setStep("vouchers"); setRedeemPin(""); window.scrollTo(0, 0); }}
           className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]"
         >
