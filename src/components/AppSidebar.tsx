@@ -164,7 +164,7 @@ const menuItems: MenuItem[] = [{
       items: [
         { title: "Individual Merchant Account", url: "/merchant-application/individual" },
         { title: "Corporate Merchant Account", url: "/merchant-application/corporate" },
-        { title: "Application Status", url: "/merchant-application-status" }
+        { title: "Merchant Application Status", url: "/merchant-application-status" }
       ]
     },
     {
