@@ -155,13 +155,14 @@ export default function MerchantListingPage() {
             />
           </div>
 
-          {/* Cascading Dropdown filters — stacked vertically for mobile */}
-          <div className="space-y-2">
-            {/* Country — always visible */}
+          {/* Compact Chip Filters — horizontal scroll */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
+            {/* Country chip */}
             {showCountry && (
               <Select value={selectedCountry || "all"} onValueChange={handleCountryChange}>
-                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
-                  <SelectValue placeholder="All Countries" />
+                <SelectTrigger className="h-9 w-auto min-w-[100px] max-w-[140px] rounded-full text-xs border-primary/30 bg-primary/5 shrink-0 touch-manipulation">
+                  <Globe className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  <SelectValue placeholder="Country" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Countries</SelectItem>
@@ -172,11 +173,12 @@ export default function MerchantListingPage() {
               </Select>
             )}
 
-            {/* State — show when tab is state/lga/city AND Nigeria is selected or no country selected */}
+            {/* State chip */}
             {showState && isNigeria && states.length > 0 && (
               <Select value={selectedState || "all"} onValueChange={handleStateChange}>
-                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
-                  <SelectValue placeholder="All States" />
+                <SelectTrigger className="h-9 w-auto min-w-[90px] max-w-[130px] rounded-full text-xs border-primary/30 bg-primary/5 shrink-0 touch-manipulation">
+                  <Building2 className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  <SelectValue placeholder="State" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All States</SelectItem>
@@ -189,19 +191,20 @@ export default function MerchantListingPage() {
 
             {/* State hint for non-Nigeria */}
             {showState && !isNigeria && selectedCountry && (
-              <p className="text-xs text-muted-foreground italic px-1">
-                State/Province data is currently available for Nigeria only. Select 🇳🇬 Nigeria to browse by state.
-              </p>
+              <div className="flex items-center shrink-0">
+                <p className="text-xs text-muted-foreground italic whitespace-nowrap">States: Nigeria only</p>
+              </div>
             )}
 
-            {/* LGA — show when tab is lga/city, always available (shows all if no state selected) */}
+            {/* LGA chip */}
             {showLGA && isNigeria && lgas.length > 0 && (
               <Select value={selectedLGA || "all"} onValueChange={handleLGAChange}>
-                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
-                  <SelectValue placeholder="All LGAs / Counties" />
+                <SelectTrigger className="h-9 w-auto min-w-[80px] max-w-[130px] rounded-full text-xs border-primary/30 bg-primary/5 shrink-0 touch-manipulation">
+                  <Map className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  <SelectValue placeholder="LGA" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All LGAs / Counties</SelectItem>
+                  <SelectItem value="all">All LGAs</SelectItem>
                   {lgas.map(l => (
                     <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                   ))}
@@ -209,14 +212,15 @@ export default function MerchantListingPage() {
               </Select>
             )}
 
-            {/* City — show when tab is city, always available (shows all if no LGA selected) */}
+            {/* City chip */}
             {showCity && isNigeria && cities.length > 0 && (
               <Select value={selectedCity || "all"} onValueChange={handleCityChange}>
-                <SelectTrigger className="h-11 w-full text-sm touch-manipulation">
-                  <SelectValue placeholder="All Cities / Towns" />
+                <SelectTrigger className="h-9 w-auto min-w-[80px] max-w-[120px] rounded-full text-xs border-primary/30 bg-primary/5 shrink-0 touch-manipulation">
+                  <Home className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  <SelectValue placeholder="City" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Cities / Towns</SelectItem>
+                  <SelectItem value="all">All Cities</SelectItem>
                   {cities.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
@@ -294,12 +298,12 @@ function MerchantCard({ merchant, onClick }: { merchant: LocationMerchant; onCli
           </div>
           <div className="flex items-center gap-1.5 mt-1.5">
             {hasQuiz && (
-              <Badge className="text-[10px] h-[18px] px-1.5 bg-amber-500/15 text-amber-700 border-amber-300 hover:bg-amber-500/20" variant="outline">
+              <Badge className="text-xs h-5 px-1.5 bg-amber-500/15 text-amber-700 border-amber-300 hover:bg-amber-500/20" variant="outline">
                 🎮 Quiz Game
               </Badge>
             )}
             {hasVoucher && (
-              <Badge className="text-[10px] h-[18px] px-1.5 bg-emerald-500/15 text-emerald-700 border-emerald-300 hover:bg-emerald-500/20" variant="outline">
+              <Badge className="text-xs h-5 px-1.5 bg-emerald-500/15 text-emerald-700 border-emerald-300 hover:bg-emerald-500/20" variant="outline">
                 🎟️ Voucher
               </Badge>
             )}

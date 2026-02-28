@@ -24,6 +24,7 @@ import CommunityAdminDashboard from "./pages/CommunityAdminDashboard";
 import ElectionManagementPage from "./pages/admin/ElectionManagementPage";
 import ContentModerationPage from "./pages/admin/ContentModerationPage";
 import MobigateAdminDashboard from "./pages/admin/MobigateAdminDashboard";
+import ManageMerchantsPage from "./pages/admin/ManageMerchantsPage";
 import QuizCategoriesPage from "./pages/admin/quiz/QuizCategoriesPage";
 import QuizLevelsPage from "./pages/admin/quiz/QuizLevelsPage";
 import CreateQuestionPage from "./pages/admin/quiz/CreateQuestionPage";
@@ -93,6 +94,7 @@ const App = () => {
                   <Route path="/community/:communityId/admin/elections" element={<ElectionManagementPage />} />
                   <Route path="/community/:communityId/admin/content" element={<ContentModerationPage />} />
                   <Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
+                  <Route path="/mobigate-admin/merchants" element={<ManageMerchantsPage />} />
 
                   {/* Quiz type-scoped routes */}
                   <Route path="/mobigate-admin/quiz/:quizType/categories" element={<QuizCategoriesPage />} />
