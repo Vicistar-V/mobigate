@@ -88,12 +88,12 @@ export default function SubMerchantApplicationPage() {
           <div className="h-20 w-20 rounded-full bg-emerald-500/15 flex items-center justify-center mb-5">
             <CheckCircle2 className="h-10 w-10 text-emerald-600" />
           </div>
-          <h2 className="text-xl font-bold text-foreground mb-2">Application Received!</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">Application Submitted!</h2>
           <p className="text-sm text-muted-foreground mb-2">
-            Your application to become a sub-merchant under <span className="font-semibold text-foreground">{merchant.name}</span> has been submitted.
+            Your application to become a Sub-Merchant under <span className="font-semibold text-foreground">{merchant.name}</span> has been submitted.
           </p>
           <p className="text-xs text-muted-foreground mb-8">
-            You'll be notified once your application is reviewed. This usually takes 2-5 business days.
+            You'll be notified once your application is reviewed. This usually takes 7-14 business days.
           </p>
           <Button onClick={() => navigate(-1)} className="w-full max-w-xs h-12 rounded-xl touch-manipulation active:scale-[0.97]">
             Go Back
