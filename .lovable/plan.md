@@ -1,41 +1,39 @@
 
+# Application Status Pages
 
-## Fix: Regeneration Not Working + Blank Print Pages
+## Overview
+Add "Application Status" navigation items in the sidebar for both Merchant and Sub-Merchant sections, linking to new status pages that show mock application status (pending/approved/rejected) with appropriate visual indicators and action buttons.
 
-### Problems Identified
+## New Files
 
-1. **Regeneration creates a batch but user never sees it** -- `handleRegenerate` adds a new batch to local state, but the user stays on the current batch page. There's no navigation to the newly created batch, so it appears nothing happened.
+### 1. `src/pages/MerchantApplicationStatus.tsx`
+A mobile-first status page showing the merchant application status. Uses mock data (defaulting to "pending" status for demo). Three visual states:
 
-2. **Printing produces blank A4 pages** -- The print container is created with `display: none`, then switched to `display: block` right before `window.print()`. In the preview iframe environment, this transition combined with the `@media print` CSS hiding rules can fail, resulting in the print area content not being visible when the print dialog renders the page.
+- **Approved**: Large green checkmark circle, "Application Approved" heading, date submitted, reference number, and a "Go to Merchant Dashboard" button linking to `/merchant-voucher-management`.
+- **Pending**: Large amber clock circle, "Application Pending" heading, date submitted, reference number, estimated review time (14-21 business days), and a "Send Reminder to Mobigate Admin" button (shows toast on click).
+- **Rejected**: Large red X circle, "Application Rejected" heading, date submitted, rejection reason, and two buttons: "Re-apply as Individual" (`/merchant-application/individual`) and "Re-apply as Corporate" (`/merchant-application/corporate`).
 
----
+Layout: Sticky header with back arrow at `top-16`, centered content card with status icon, details card with reference/date/type info, and action button(s) at the bottom.
 
-### Fix 1: Navigate to new batch after regeneration
+### 2. `src/pages/SubMerchantApplicationStatus.tsx`
+Same pattern as above but for sub-merchant applications. Three states:
 
-In both `MerchantVoucherBatchDetail.tsx` and `SubMerchantVoucherBatchDetail.tsx`:
-- After `handleRegenerate` creates the new batch and shows the toast, navigate to the new batch's detail page so the user can immediately see the regenerated cards.
-- Use the correct route prefix for each page (`/merchant-voucher-batch/` vs `/sub-merchant-voucher-batch/`).
+- **Approved**: Green checkmark, "Go to Sub-Merchant Dashboard" button linking to `/sub-merchant-voucher-management`.
+- **Pending**: Amber clock, "Send Reminder" button with toast feedback, 7-14 business days estimate.
+- **Rejected**: Red X, single "Re-apply as Sub-Merchant" button linking to `/merchants?mode=apply`.
 
-### Fix 2: Fix blank print pages
+### 3. Route Registration in `src/App.tsx`
+Add two new routes:
+- `/merchant-application-status` -> `MerchantApplicationStatus` (wrapped with `WithHeader`)
+- `/sub-merchant-application-status` -> `SubMerchantApplicationStatus` (wrapped with `WithHeader`)
 
-In `VoucherExportDrawer.tsx`:
-- Instead of toggling `display: none` to `display: block`, create the print container already visible (using `position: fixed; left: -9999px` to keep it off-screen but rendered).
-- Use `visibility` and positioning tricks so the browser's print renderer can actually capture the content.
-- Ensure the `@media print` block makes the print area visible and hides everything else reliably.
+### 4. Sidebar Updates in `src/components/AppSidebar.tsx`
+- Add `{ title: "Application Status", url: "/merchant-application-status" }` as a new item after "Apply for a Merchant Account" in the Merchants Menu section.
+- Add `{ title: "Sub-Merchant Application Status", url: "/sub-merchant-application-status" }` after "Apply as Sub-Merchant" in the same menu section.
 
----
-
-### Technical Details
-
-**File: `src/pages/MerchantVoucherBatchDetail.tsx`** (line ~128-131)
-- After `setBatches(prev => [...prev, newBatch])` and toast, add `navigate(`/merchant-voucher-batch/${newBatchId}`)`.
-
-**File: `src/pages/SubMerchantVoucherBatchDetail.tsx`** (line ~106-109)
-- Same change with route `/sub-merchant-voucher-batch/${newBatchId}`.
-
-**File: `src/components/merchant/VoucherExportDrawer.tsx`** (lines ~72-158)
-- Replace `printContainer.style.display = "none"` with off-screen positioning (`position: absolute; left: -9999px; top: 0`).
-- Remove the `display: none` / `display: block` toggle.
-- Update the `@media print` CSS to use `display: block !important; position: static !important; left: auto !important;` for the print area.
-- Keep existing cleanup and afterprint logic.
-
+## Technical Details
+- Both pages use the existing `top-16` sticky header offset pattern
+- Mobile-only focus: full-width layout, touch-manipulation buttons, rounded-xl elements, 44px+ touch targets
+- Mock status stored in component state with a toggle for demo purposes (cycle through states by tapping the status badge)
+- Uses existing UI components: `Button`, `Badge`, `Card`, `useToast`
+- Icons from lucide-react: `CheckCircle2`, `Clock`, `XCircle`, `ArrowLeft`, `Bell`, `Store`
