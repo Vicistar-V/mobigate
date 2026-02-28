@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Percent, Info, ChevronDown, ChevronUp, Lock, Unlock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Percent, Info, ChevronDown, ChevronUp, Lock, Unlock, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   platformVoucherDiscountSettings,
@@ -27,6 +28,8 @@ function computePreview(tierSize: number, baseRate: number, incrementRate: numbe
   return tiers;
 }
 
+const ADMIN_PASSWORD = "admin123";
+
 export function VoucherDiscountSettingsCard() {
   const s = platformVoucherDiscountSettings;
   const [tierSize, setTierSizeLocal] = useState(s.tierSize);
@@ -35,10 +38,54 @@ export function VoucherDiscountSettingsCard() {
   const [maxDiscountVal, setMaxDiscountLocal] = useState(s.maxDiscount);
   const [isSaving, setIsSaving] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [shake, setShake] = useState(false);
   const [locks, setLocks] = useState({ tierSize: true, baseRate: true, incrementRate: true, maxDiscount: true });
+  const passwordRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const toggleLock = (key: keyof typeof locks) => setLocks(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const handleToggleOpen = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      setIsAuthenticated(false);
+      setShowPasswordInput(false);
+      setPassword("");
+      return;
+    }
+    if (isAuthenticated) {
+      setIsOpen(true);
+      return;
+    }
+    setShowPasswordInput(true);
+    setTimeout(() => passwordRef.current?.focus(), 100);
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!password.trim()) return;
+    setIsVerifying(true);
+    await new Promise(r => setTimeout(r, 600));
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setIsOpen(true);
+      setShowPasswordInput(false);
+      setPassword("");
+      setIsVerifying(false);
+      toast({ title: "Access granted", description: "Settings unlocked" });
+    } else {
+      setIsVerifying(false);
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      toast({ title: "Access denied", description: "Incorrect password", variant: "destructive" });
+      setPassword("");
+      passwordRef.current?.focus();
+    }
+  };
 
   const hasChanges =
     tierSize !== s.tierSize ||
@@ -63,11 +110,14 @@ export function VoucherDiscountSettingsCard() {
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <button className="w-full flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card touch-manipulation active:scale-[0.98]">
+    <div className="space-y-2">
+      <Collapsible open={isOpen} onOpenChange={() => {}}>
+        <button 
+          onClick={handleToggleOpen}
+          className="w-full flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card touch-manipulation active:scale-[0.98]"
+        >
           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Percent className="h-5 w-5 text-primary" />
+            {isAuthenticated ? <ShieldCheck className="h-5 w-5 text-emerald-500" /> : <Percent className="h-5 w-5 text-primary" />}
           </div>
           <div className="flex-1 text-left">
             <p className="text-sm font-bold text-foreground">Voucher Bulk Discount</p>
@@ -82,7 +132,52 @@ export function VoucherDiscountSettingsCard() {
           )}
           {isOpen ? <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />}
         </button>
-      </CollapsibleTrigger>
+
+        {/* Password gate */}
+        {showPasswordInput && !isAuthenticated && (
+          <div className={`mt-2 rounded-xl border border-border/50 bg-card p-4 space-y-3 ${shake ? 'animate-shake' : ''}`}>
+            <div className="flex items-center gap-2 mb-1">
+              <Lock className="h-4 w-4 text-muted-foreground" />
+              <p className="text-xs font-medium text-muted-foreground">Enter admin password to access settings</p>
+            </div>
+            <div className="relative">
+              <Input
+                ref={passwordRef}
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
+                className="pr-10 h-11"
+                disabled={isVerifying}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground touch-manipulation"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => { setShowPasswordInput(false); setPassword(""); }}
+                className="flex-1 h-10 rounded-xl text-xs"
+                disabled={isVerifying}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handlePasswordSubmit}
+                disabled={isVerifying || !password.trim()}
+                className="flex-1 h-10 rounded-xl text-xs"
+              >
+                {isVerifying ? "Verifying..." : "Unlock"}
+              </Button>
+            </div>
+          </div>
+        )}
       <CollapsibleContent>
         <div className="mt-2 rounded-xl border border-border/50 bg-card p-4 space-y-5">
           {/* Tier Size */}
@@ -227,5 +322,6 @@ export function VoucherDiscountSettingsCard() {
         </div>
       </CollapsibleContent>
     </Collapsible>
+    </div>
   );
 }
