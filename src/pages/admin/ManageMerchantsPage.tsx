@@ -58,6 +58,14 @@ function getMerchantOfferings(merchantId: string) {
   return { hasQuiz: false, hasVoucher: true };
 }
 
+function getMerchantStatus(merchantId: string): "active" | "suspended" | "banned" {
+  const hash = merchantId.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const mod = hash % 10;
+  if (mod < 8) return "active";
+  if (mod < 9) return "suspended";
+  return "banned";
+}
+
 export default function ManageMerchantsPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
@@ -68,6 +76,7 @@ export default function ManageMerchantsPage() {
   const [selectedState, setSelectedState] = useState("");
   const [selectedLGA, setSelectedLGA] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended" | "banned">("all");
 
   // Detail drawer
   const [selectedMerchant, setSelectedMerchant] = useState<LocationMerchant | null>(null);
@@ -93,8 +102,9 @@ export default function ManageMerchantsPage() {
     else if (selectedLGA) list = list.filter((m) => m.lgaId === selectedLGA);
     else if (selectedState) list = list.filter((m) => m.stateId === selectedState);
     else if (selectedCountry) list = list.filter((m) => m.countryId === selectedCountry);
+    if (statusFilter !== "all") list = list.filter((m) => getMerchantStatus(m.id) === statusFilter);
     return list;
-  }, [selectedCountry, selectedState, selectedLGA, selectedCity, searchQuery]);
+  }, [selectedCountry, selectedState, selectedLGA, selectedCity, searchQuery, statusFilter]);
 
   const formatCurrency = (n: number) => "₦" + n.toLocaleString();
 
@@ -146,6 +156,25 @@ export default function ManageMerchantsPage() {
 
             {/* Compact Chip Filters — horizontal scroll */}
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
+              {/* Status chip */}
+              <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                <SelectTrigger className={`h-9 w-auto min-w-[90px] max-w-[130px] rounded-full text-xs shrink-0 touch-manipulation ${
+                  statusFilter === "all" ? "border-primary/30 bg-primary/5" :
+                  statusFilter === "active" ? "border-emerald-400 bg-emerald-500/10 text-emerald-700" :
+                  statusFilter === "suspended" ? "border-amber-400 bg-amber-500/10 text-amber-700" :
+                  "border-red-400 bg-red-500/10 text-red-700"
+                }`}>
+                  <ShieldCheck className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">✅ Active</SelectItem>
+                  <SelectItem value="suspended">⚠️ Suspended</SelectItem>
+                  <SelectItem value="banned">🚫 Banned</SelectItem>
+                </SelectContent>
+              </Select>
+
               {/* Country chip */}
               <Select value={selectedCountry || "all"} onValueChange={handleCountryChange}>
                 <SelectTrigger className="h-9 w-auto min-w-[100px] max-w-[140px] rounded-full text-xs border-primary/30 bg-primary/5 shrink-0 touch-manipulation">
@@ -272,10 +301,23 @@ export default function ManageMerchantsPage() {
 function AdminMerchantCard({ merchant, onClick }: { merchant: LocationMerchant; onClick: () => void }) {
   const { hasQuiz, hasVoucher } = getMerchantOfferings(merchant.id);
   const vStats = getMerchantVoucherStats(merchant.id);
+  const status = getMerchantStatus(merchant.id);
+
+  const statusBadge = status === "active" ? null : (
+    <Badge variant="outline" className={`text-xs h-5 px-1.5 ${
+      status === "suspended" ? "text-amber-600 border-amber-300 bg-amber-500/10" : "text-red-600 border-red-300 bg-red-500/10"
+    }`}>
+      {status === "suspended" ? "⚠️ Suspended" : "🚫 Banned"}
+    </Badge>
+  );
 
   return (
     <Card
-      className="p-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 border-l-primary/60"
+      className={`p-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 ${
+        status === "banned" ? "border-l-red-500/60 opacity-75" :
+        status === "suspended" ? "border-l-amber-500/60" :
+        "border-l-primary/60"
+      }`}
       onClick={onClick}
     >
       <div className="flex items-center gap-3">
@@ -289,6 +331,7 @@ function AdminMerchantCard({ merchant, onClick }: { merchant: LocationMerchant; 
           <div className="flex items-center gap-1.5">
             <p className="text-sm font-semibold truncate">{merchant.name}</p>
             {merchant.isVerified && <CheckCircle className="h-4 w-4 text-blue-500 shrink-0" />}
+            {statusBadge}
           </div>
           <p className="text-xs text-muted-foreground">{merchant.category}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
