@@ -379,19 +379,46 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-4">
-        {/* Dashboard Section - Standalone */}
+        {/* Dashboard + Wallet Section */}
         <SidebarGroup className="mb-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Dashboard" className="group relative overflow-hidden transition-all duration-200 hover:bg-accent/50">
-                <a href="/index.php" onClick={handleLinkClick}>
+                <Link to="/" onClick={handleLinkClick}>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
                     <LayoutDashboard className="h-4 w-4" />
                   </div>
                   <span className="font-medium">Dashboard</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
+            {/* Wallet Menu - inline here */}
+            {(() => {
+              const walletItem = menuItems.find(m => m.title === "Wallet Menu");
+              if (!walletItem?.items) return null;
+              const isExpanded = expandedItems.includes(walletItem.title);
+              return (
+                <Collapsible open={isExpanded} onOpenChange={() => toggleExpand(walletItem.title)}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={walletItem.title} className="group hover:bg-accent/50 transition-all duration-200 h-auto min-h-[2.5rem] py-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+                          <walletItem.icon className="h-4 w-4" />
+                        </div>
+                        <span className="font-medium flex-1 whitespace-normal break-words leading-tight text-left">{walletItem.title}</span>
+                        <ChevronRight className={cn("ml-auto h-4 w-4 transition-transform duration-200 shrink-0", isExpanded && "rotate-90")} />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-1">
+                      <SidebarMenuSub className="ml-6 border-l-2 border-primary/20 pl-2">
+                        {walletItem.items.map(subItem => renderMenuItem(subItem, `${walletItem.title}-${subItem.title}`))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              );
+            })()}
           </SidebarMenu>
         </SidebarGroup>
 
@@ -485,7 +512,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {menuItems.map(item => {
+              {menuItems.filter(item => item.title !== "Wallet Menu").map(item => {
                 const isExpanded = expandedItems.includes(item.title);
 
                 // Items with sub-menu
