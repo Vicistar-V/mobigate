@@ -54,10 +54,6 @@ export default function SubMerchantDetail() {
               <span className="text-muted-foreground">Joined</span>
               <span className="font-semibold text-foreground">{sm.joinDate.toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" })}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Discount Rate</span>
-              <span className="font-semibold text-emerald-600">{sm.discountRate}%</span>
-            </div>
           </div>
         </div>
 
