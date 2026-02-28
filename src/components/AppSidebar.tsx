@@ -184,7 +184,7 @@ const menuItems: MenuItem[] = [{
     },
     {
       title: "Apply as Sub-Merchant",
-      url: "/apply-sub-merchant/m1",
+      url: "/merchants?mode=apply",
     }
   ]
 }, {
