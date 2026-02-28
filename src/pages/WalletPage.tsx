@@ -169,8 +169,8 @@ export default function WalletPage() {
   const totalDebit = filteredTxns.filter(t => t.type === "debit").reduce((s, t) => s + t.amount, 0);
 
   const wallets = [
-    { ...LOCAL_WALLET, label: "Local Currency Wallet", icon: Banknote, gradient: "from-slate-800 via-slate-700 to-slate-600 dark:from-slate-700 dark:via-slate-600 dark:to-slate-500" },
-    { ...MOBI_WALLET, label: "Mobi Wallet", icon: Coins, gradient: "from-zinc-800 via-neutral-700 to-stone-600 dark:from-zinc-700 dark:via-neutral-600 dark:to-stone-500" },
+    { ...MOBI_WALLET, label: "Mobi Wallet", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => navigate("/buy-vouchers?source=fund-wallet"), fundLabel: "Fund Mobi Wallet" },
+    { ...LOCAL_WALLET, label: "Local Currency Wallet", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setFundDrawerOpen(true), fundLabel: "Fund Local Wallet" },
   ];
   const currentWallet = wallets[activeWallet];
 
@@ -217,7 +217,7 @@ export default function WalletPage() {
                 )}
                 style={{ flexBasis: "85%" }}
               >
-                <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br p-5 border border-white/10", w.gradient)}>
+                <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br p-5", w.gradient, w.accentBorder, "border")}>
                   {/* Subtle geometric accent */}
                   <div className="absolute top-0 right-0 w-40 h-40 bg-white/[0.04] rounded-bl-[80px]" />
 
@@ -249,16 +249,10 @@ export default function WalletPage() {
                     {/* Fund button */}
                     <Button
                       className="w-full h-11 bg-white/10 hover:bg-white/15 text-white/90 font-semibold text-sm rounded-xl border border-white/15 touch-manipulation active:scale-[0.97] transition-all"
-                      onClick={() => {
-                        if (i === 0) {
-                          setFundDrawerOpen(true);
-                        } else {
-                          navigate("/buy-vouchers?source=fund-wallet");
-                        }
-                      }}
+                      onClick={w.fundAction}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      {i === 0 ? "Fund Local Wallet" : "Fund Mobi Wallet"}
+                      {w.fundLabel}
                     </Button>
                   </div>
                 </div>
