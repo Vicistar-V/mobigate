@@ -352,7 +352,7 @@ function AdminMerchantCard({ merchant, onClick }: { merchant: LocationMerchant; 
             {hasVoucher && (
               <span className="text-xs text-emerald-600 flex items-center gap-0.5">
                 <Ticket className="h-3 w-3" />
-                {vStats.cardsSold} sold
+                {vStats.cardsSold} Sold
               </span>
             )}
             {hasQuiz && (

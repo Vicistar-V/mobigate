@@ -166,9 +166,9 @@ export default function SubMerchantVoucherManagement() {
                       </p>
                       <div className="flex items-center justify-between mt-2.5">
                         <div className="flex gap-1.5 flex-wrap">
-                          {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} available</Badge>}
-                          {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} sold</Badge>}
-                          {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} used</Badge>}
+                          {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} Available</Badge>}
+                          {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} Sold</Badge>}
+                          {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} Used</Badge>}
                         </div>
                         <p className="text-xs text-muted-foreground shrink-0 ml-2">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
                       </div>
@@ -194,14 +194,14 @@ export default function SubMerchantVoucherManagement() {
                       <p className="text-xs text-muted-foreground">{pm.city}, {pm.state}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={`text-xs h-5 px-2 ${pm.status === "active" ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
+                      <Badge className={`text-xs h-5 px-2 capitalize ${pm.status === "active" ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
                         {pm.status}
                       </Badge>
                       <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                    <span className="font-semibold text-emerald-600">{pm.discountRate}% discount</span>
+                    <span className="font-semibold text-emerald-600">{pm.discountRate}% Discount</span>
                     <span>Joined {pm.joinedDate.toLocaleDateString("en-NG", { day: "numeric", month: "short" })}</span>
                   </div>
                   <div className="mt-2 flex gap-1.5 flex-wrap">
@@ -230,7 +230,7 @@ export default function SubMerchantVoucherManagement() {
                       app.status === "accepted" ? "bg-emerald-500/15 text-emerald-600" :
                       app.status === "pending" ? "bg-amber-500/15 text-amber-600" :
                       "bg-destructive/15 text-destructive"
-                    }`}>
+                    } capitalize`}>
                       {app.status}
                     </Badge>
                   </div>

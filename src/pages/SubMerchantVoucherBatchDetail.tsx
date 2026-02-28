@@ -271,8 +271,8 @@ export default function SubMerchantVoucherBatchDetail() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-foreground truncate">{bundle.serialPrefix}</p>
                     <div className="flex gap-2 mt-1 flex-wrap">
-                      {bCounts.available > 0 && <span className="text-xs text-emerald-600 font-semibold">{bCounts.available} available</span>}
-                      {bCounts.sold_unused > 0 && <span className="text-xs text-amber-600 font-semibold">{bCounts.sold_unused} sold</span>}
+                      {bCounts.available > 0 && <span className="text-xs text-emerald-600 font-semibold">{bCounts.available} Available</span>}
+                      {bCounts.sold_unused > 0 && <span className="text-xs text-amber-600 font-semibold">{bCounts.sold_unused} Sold</span>}
                     </div>
                   </div>
                   {isExpanded ? <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" /> : <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />}

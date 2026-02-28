@@ -98,7 +98,7 @@ export default function SubMerchantDetail() {
                       p.status === "completed" ? "bg-emerald-500/15 text-emerald-600" :
                       p.status === "processing" ? "bg-amber-500/15 text-amber-600" :
                       "bg-destructive/15 text-destructive"
-                    }`}>
+                    } capitalize`}>
                       {p.status}
                     </Badge>
                   </div>
