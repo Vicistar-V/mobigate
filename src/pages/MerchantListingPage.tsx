@@ -28,6 +28,7 @@ export default function MerchantListingPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  const applyMode = searchParams.get("mode") === "apply";
   const viewMode = (searchParams.get("view") as ViewMode) || "country";
   const [selectedCountry, setSelectedCountry] = useState(searchParams.get("country") || "");
   const [selectedState, setSelectedState] = useState(searchParams.get("state") || "");
@@ -111,9 +112,9 @@ export default function MerchantListingPage() {
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center gap-2 mb-1">
             <Store className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-bold">View Merchants</h1>
+            <h1 className="text-lg font-bold">{applyMode ? "Apply as Sub-Merchant" : "View Merchants"}</h1>
           </div>
-          <p className="text-sm text-muted-foreground">{viewModeConfig[viewMode].description}</p>
+          <p className="text-sm text-muted-foreground">{applyMode ? "Select a merchant to apply as their sub-merchant" : viewModeConfig[viewMode].description}</p>
         </div>
 
         {/* View Mode Tabs — horizontal scroll */}
@@ -245,7 +246,7 @@ export default function MerchantListingPage() {
             </div>
           ) : (
             filteredMerchants.map(merchant => (
-              <MerchantCard key={merchant.id} merchant={merchant} onClick={() => navigate(`/merchant-home/m1`)} />
+              <MerchantCard key={merchant.id} merchant={merchant} onClick={() => navigate(applyMode ? `/apply-sub-merchant/${merchant.id}` : `/merchant-home/m1`)} />
             ))
           )}
         </div>
