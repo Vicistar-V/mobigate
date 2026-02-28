@@ -1,8 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { CampaignMediaItem } from "@/data/fundraiserData";
-import { ChevronLeft, ChevronRight, Upload, Eye, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Eye, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { MediaUploadDialog } from "@/components/community/MediaUploadDialog";
@@ -33,7 +32,6 @@ export const MediaGalleryUpload = ({
       id: `media-${Date.now()}-${index}`,
       url: file.url,
       type: file.type === "image" ? "photo" : "video",
-      selected: false,
     }));
     onItemsChange([...items, ...newItems]);
   };
@@ -50,45 +48,30 @@ export const MediaGalleryUpload = ({
     }
   };
 
-  const toggleSelection = (itemId: string) => {
-    const updated = items.map((item) =>
-      item.id === itemId ? { ...item, selected: !item.selected } : item
-    );
-    onItemsChange(updated);
-  };
-
   const handlePreview = () => {
-    const selectedItems = items.filter((item) => item.selected);
-    if (selectedItems.length === 0) {
-      toast({
-        title: "No Selection",
-        description: "Please select media items to preview",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (items.length === 0) return;
     setShowPreviewDialog(true);
   };
 
   const handleDelete = () => {
-    const selectedItems = items.filter((item) => item.selected);
-    if (selectedItems.length === 0) {
-      toast({
-        title: "No Selection",
-        description: "Please select media items to delete",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const updated = items.filter((item) => !item.selected);
+    if (items.length === 0) return;
+    const updated = items.filter((_, i) => i !== currentIndex);
     onItemsChange(updated);
-    setCurrentIndex(0);
-    
+    setCurrentIndex(Math.min(currentIndex, Math.max(0, updated.length - 1)));
     toast({
       title: "Deleted",
-      description: `${selectedItems.length} item(s) deleted`,
+      description: "Current media item deleted",
     });
+  };
+
+  const handleDeleteThumbnail = (index: number) => {
+    const updated = items.filter((_, i) => i !== index);
+    onItemsChange(updated);
+    if (currentIndex >= updated.length) {
+      setCurrentIndex(Math.max(0, updated.length - 1));
+    } else if (index < currentIndex) {
+      setCurrentIndex(currentIndex - 1);
+    }
   };
 
   const handleSave = () => {
@@ -102,119 +85,127 @@ export const MediaGalleryUpload = ({
 
   return (
     <>
-      <Card className="p-6">
-        <div className="space-y-4">
-        {/* Upload Button */}
-        <Button
-          onClick={handleUpload}
-          className="w-full bg-blue-600 hover:bg-blue-700"
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          UPLOAD PHOTO / VIDEO
-        </Button>
+      <Card className="p-4">
+        <div className="space-y-3">
+          {/* Upload Button */}
+          <Button
+            onClick={handleUpload}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-sm h-10"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            UPLOAD PHOTO / VIDEO
+          </Button>
 
-        {/* Carousel */}
-        {items.length > 0 && (
-          <div className="space-y-3">
-            {/* Main Image Display */}
-            <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-              <img
-                src={currentItem.url}
-                alt={`Media ${currentIndex + 1}`}
-                className="w-full h-full object-cover"
-              />
-              
-              {/* Checkbox Overlay */}
-              <div className="absolute top-3 right-3 bg-white/90 p-2 rounded">
-                <Checkbox
-                  checked={currentItem.selected || false}
-                  onCheckedChange={() => toggleSelection(currentItem.id)}
+          {/* Carousel */}
+          {items.length > 0 && (
+            <div className="space-y-3">
+              {/* Main Image Display */}
+              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+                <img
+                  src={currentItem.url}
+                  alt={`Media ${currentIndex + 1}`}
+                  className="w-full h-full object-cover"
                 />
-              </div>
 
-              {/* Navigation Arrows */}
-              <div className="absolute inset-0 flex items-center justify-between px-4">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={handlePrevious}
-                  disabled={currentIndex === 0}
-                  className="rounded-full bg-white/80 hover:bg-white"
-                >
-                  <ChevronLeft className="h-6 w-6" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={handleNext}
-                  disabled={currentIndex === items.length - 1}
-                  className="rounded-full bg-white/80 hover:bg-white"
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </Button>
-              </div>
+                {/* Navigation Arrows */}
+                {items.length > 1 && (
+                  <div className="absolute inset-0 flex items-center justify-between px-2">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={handlePrevious}
+                      disabled={currentIndex === 0}
+                      className="rounded-full bg-white/80 hover:bg-white h-8 w-8"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={handleNext}
+                      disabled={currentIndex === items.length - 1}
+                      className="rounded-full bg-white/80 hover:bg-white h-8 w-8"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  </div>
+                )}
 
-              {/* Counter */}
-              <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
-                {currentIndex + 1} / {items.length}
-              </div>
-            </div>
-
-            {/* Thumbnail Strip */}
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {items.map((item, index) => (
-                <div
-                  key={item.id}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 ${
-                    index === currentIndex
-                      ? "border-primary"
-                      : "border-transparent"
-                  }`}
-                >
-                  <img
-                    src={item.url}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                {/* Counter */}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-3 py-0.5 rounded-full text-xs">
+                  {currentIndex + 1} / {items.length}
                 </div>
-              ))}
-            </div>
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handlePreview}
-                className="flex-1"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                PREVIEW
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                className="flex-1"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                DELETE
-              </Button>
-              <Button
-                onClick={handleSave}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                SAVE
-              </Button>
-            </div>
-          </div>
-        )}
+              {/* Thumbnail Strip with X delete buttons */}
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {items.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="relative flex-shrink-0"
+                  >
+                    <div
+                      onClick={() => setCurrentIndex(index)}
+                      className={`w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2 ${
+                        index === currentIndex
+                          ? "border-primary"
+                          : "border-transparent"
+                      }`}
+                    >
+                      <img
+                        src={item.url}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {/* X delete button on thumbnail */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteThumbnail(index);
+                      }}
+                      className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center shadow-md"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
 
-        {items.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            <p>No media uploaded yet</p>
-            <p className="text-sm">Click upload to add photos or videos</p>
-          </div>
-        )}
+              {/* Action Buttons - contained within card */}
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handlePreview}
+                  className="text-xs h-9 px-2"
+                >
+                  <Eye className="h-3.5 w-3.5 mr-1" />
+                  Preview
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  className="text-xs h-9 px-2"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                  Delete
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="text-xs h-9 px-2 bg-green-600 hover:bg-green-700"
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {items.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground">
+              <p className="text-sm">No media uploaded yet</p>
+              <p className="text-xs">Click upload to add photos or videos</p>
+            </div>
+          )}
         </div>
       </Card>
 
