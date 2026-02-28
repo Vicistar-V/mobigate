@@ -19,6 +19,7 @@ export interface VoucherCard {
   invalidatedAt: Date | null;
   soldAt: Date | null;
   usedAt: Date | null;
+  regenerated?: boolean;
 }
 
 export interface VoucherBundle {

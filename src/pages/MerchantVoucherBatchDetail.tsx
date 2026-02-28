@@ -50,7 +50,7 @@ export default function MerchantVoucherBatchDetail() {
   const batch = batches.find(b => b.id === batchId);
   const bundleCounts = batch ? getBatchBundleCounts(batch) : { available: 0, sold: 0, invalidated: 0, total: 0 };
   const batchInvalidatable = batch ? getInvalidatableCards(batch.bundles.flatMap(b => b.cards)) : [];
-  const regenCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "invalidated").length : 0;
+  const regenCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "invalidated" && !c.regenerated).length : 0;
   const availableCardCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "available").length : 0;
 
   const toggleBundle = (id: string) => {
@@ -103,23 +103,26 @@ export default function MerchantVoucherBatchDetail() {
     setBatches(prev => prev.map(b => {
       if (b.id !== batch.id) return b;
       const updatedBundles = b.bundles.map(bundle => {
-        // Keep all existing cards (including invalidated) and add new regenerated cards alongside
-        const newCards = bundle.cards
-          .filter(card => card.status === "invalidated")
-          .map((card, i) => ({
-            ...card,
-            id: `card-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${i}`,
-            serialNumber: generateCardSerial(bundle.serialPrefix, Math.floor(Math.random() * 10000) + i),
-            pin: generatePin(),
-            status: "available" as const,
-            createdAt: now,
-            invalidatedAt: null,
-            soldVia: null,
-            soldAt: null,
-            usedAt: null,
-            generationType: "replacement" as const,
-          }));
-        return { ...bundle, cards: [...bundle.cards, ...newCards] };
+        // Mark invalidated cards as regenerated (keep them for filter) and add new cards alongside
+        const cardsToRegen = bundle.cards.filter(card => card.status === "invalidated" && !card.regenerated);
+        const markedCards = bundle.cards.map(card =>
+          card.status === "invalidated" && !card.regenerated ? { ...card, regenerated: true } : card
+        );
+        const newCards = cardsToRegen.map((card, i) => ({
+          ...card,
+          id: `card-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}-${i}`,
+          serialNumber: generateCardSerial(bundle.serialPrefix, Math.floor(Math.random() * 10000) + i),
+          pin: generatePin(),
+          status: "available" as const,
+          createdAt: now,
+          invalidatedAt: null,
+          soldVia: null,
+          soldAt: null,
+          usedAt: null,
+          regenerated: false,
+          generationType: "replacement" as const,
+        }));
+        return { ...bundle, cards: [...markedCards, ...newCards] };
       });
       return { ...b, bundles: updatedBundles, status: "active" as const };
     }));
