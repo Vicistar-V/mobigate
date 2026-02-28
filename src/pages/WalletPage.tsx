@@ -179,8 +179,8 @@ export default function WalletPage() {
   const totalDebit = filteredTxns.filter(t => t.type === "debit").reduce((s, t) => s + t.amount, 0);
 
   const wallets = [
-    { ...LOCAL_WALLET, label: "Local Currency Wallet", icon: Banknote, gradient: "from-emerald-600 via-emerald-500 to-teal-500" },
-    { ...MOBI_WALLET, label: "Mobi Wallet", icon: Coins, gradient: "from-violet-600 via-purple-500 to-indigo-500" },
+    { ...LOCAL_WALLET, label: "Local Currency Wallet", icon: Banknote, gradient: "from-slate-800 via-slate-700 to-slate-600 dark:from-slate-700 dark:via-slate-600 dark:to-slate-500" },
+    { ...MOBI_WALLET, label: "Mobi Wallet", icon: Coins, gradient: "from-zinc-800 via-neutral-700 to-stone-600 dark:from-zinc-700 dark:via-neutral-600 dark:to-stone-500" },
   ];
   const currentWallet = wallets[activeWallet];
 
@@ -200,9 +200,9 @@ export default function WalletPage() {
       </div>
 
       {/* ── Wallet Carousel ── */}
-      <div className="px-4 pt-4">
+      <div className="pt-4 overflow-hidden">
         {/* Dots */}
-        <div className="flex items-center justify-center gap-2 mb-3">
+        <div className="flex items-center justify-center gap-2 mb-3 px-4">
           {wallets.map((_, i) => (
             <button
               key={i}
@@ -215,64 +215,61 @@ export default function WalletPage() {
           ))}
         </div>
 
-        {/* Swipeable Card - shows peek of next card */}
+        {/* Swipeable Cards */}
         <div
-          className="relative overflow-visible"
+          className="relative px-4"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           <div
-            className="flex transition-transform duration-300 ease-out gap-3"
+            className="flex transition-transform duration-300 ease-out"
             style={{
-              transform: `translateX(calc(-${activeWallet * 85}% + ${touchStart !== null ? touchDelta : 0}px))`,
+              gap: "12px",
+              transform: `translateX(calc(-${activeWallet} * (calc(100% - 48px) + 12px) + ${touchStart !== null ? touchDelta : 0}px))`,
             }}
           >
             {wallets.map((w, i) => (
-              <div key={i} className="shrink-0" style={{ width: "82%" }}>
-                <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br p-5", w.gradient)}>
-                  {/* Decorative circles */}
-                  <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10" />
-                  <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-white/5" />
+              <div
+                key={i}
+                className={cn(
+                  "shrink-0 transition-opacity duration-300",
+                  i !== activeWallet && "opacity-50"
+                )}
+                style={{ width: "calc(100% - 48px)" }}
+              >
+                <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-br p-5 border border-white/10", w.gradient)}>
+                  {/* Subtle geometric accent */}
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/[0.04] rounded-bl-[80px]" />
 
                   <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-                        <w.icon className="h-4 w-4 text-white" />
+                    <div className="flex items-center gap-2.5 mb-5">
+                      <div className="h-9 w-9 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center">
+                        <w.icon className="h-4.5 w-4.5 text-white/80" />
                       </div>
-                      <span className="text-white/90 text-sm font-semibold">{w.label}</span>
+                      <span className="text-white/70 text-sm font-medium tracking-wide">{w.label}</span>
                     </div>
 
-                    <p className="text-white/70 text-xs font-medium mb-1 tracking-wide uppercase">Available Balance</p>
-                    <p className="text-white text-3xl font-black tracking-tight mb-4">
+                    <p className="text-white/50 text-xs font-medium mb-1 uppercase tracking-widest">Available Balance</p>
+                    <p className="text-white text-[28px] font-bold tracking-tight mb-5 font-mono">
                       {w.symbol}{formatNumberFull(w.balance)}
                     </p>
 
-                    {/* Mini stats */}
-                    <div className="flex gap-4">
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center">
-                          <TrendingUp className="h-3 w-3 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-white/60 text-xs">Income</p>
-                          <p className="text-white text-sm font-bold">{w.symbol}{formatNumberFull(w.monthlyIn, 0)}</p>
-                        </div>
+                    {/* Stats row */}
+                    <div className="flex gap-6 mb-5">
+                      <div>
+                        <p className="text-white/40 text-xs font-medium mb-0.5">Income</p>
+                        <p className="text-white/90 text-sm font-semibold font-mono">{w.symbol}{formatNumberFull(w.monthlyIn, 0)}</p>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center">
-                          <TrendingDown className="h-3 w-3 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-white/60 text-xs">Spent</p>
-                          <p className="text-white text-sm font-bold">{w.symbol}{formatNumberFull(w.monthlyOut, 0)}</p>
-                        </div>
+                      <div>
+                        <p className="text-white/40 text-xs font-medium mb-0.5">Spent</p>
+                        <p className="text-white/90 text-sm font-semibold font-mono">{w.symbol}{formatNumberFull(w.monthlyOut, 0)}</p>
                       </div>
                     </div>
 
                     {/* Fund button */}
                     <Button
-                      className="w-full mt-5 h-11 bg-white/20 hover:bg-white/30 text-white font-bold text-sm rounded-xl border border-white/20 backdrop-blur-sm touch-manipulation active:scale-[0.97]"
+                      className="w-full h-11 bg-white/10 hover:bg-white/15 text-white/90 font-semibold text-sm rounded-xl border border-white/15 touch-manipulation active:scale-[0.97] transition-all"
                       onClick={() => {
                         if (i === 0) {
                           setFundDrawerOpen(true);
@@ -292,8 +289,8 @@ export default function WalletPage() {
         </div>
 
         {/* Swipe hint */}
-        <p className="text-center text-xs text-muted-foreground/60 mt-3 flex items-center justify-center gap-1">
-          <ChevronLeft className="h-3 w-3" /> Swipe to switch wallets <ChevronRight className="h-3 w-3" />
+        <p className="text-center text-xs text-muted-foreground/50 mt-3 flex items-center justify-center gap-1">
+          <ChevronLeft className="h-3 w-3" /> Swipe to switch <ChevronRight className="h-3 w-3" />
         </p>
       </div>
 
