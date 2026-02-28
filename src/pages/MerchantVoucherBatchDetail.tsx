@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Printer } from "lucide-react";
+import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Printer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,11 +21,15 @@ import {
   getInvalidatableCards,
   hashPin,
   formatNum,
+  generateBatchNumber,
+  generateBundlePrefix,
+  generateCardSerial,
+  generatePin,
 } from "@/data/merchantVoucherData";
 import { useToast } from "@/hooks/use-toast";
 import { VoucherPrintDrawer } from "@/components/merchant/VoucherExportDrawer";
 
-type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string } | { type: "card"; cardId: string; bundleId: string };
+type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string };
 
 export default function MerchantVoucherBatchDetail() {
   const navigate = useNavigate();
@@ -36,11 +40,15 @@ export default function MerchantVoucherBatchDetail() {
   const [searchQuery, setSearchQuery] = useState("");
   const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);
   const [printDrawerOpen, setPrintDrawerOpen] = useState(false);
+  const [showRegenConfirm, setShowRegenConfirm] = useState(false);
 
   const batch = batches.find(b => b.id === batchId);
 
   const counts = batch ? getBatchStatusCounts(batch) : { available: 0, sold_unused: 0, used: 0, invalidated: 0, total: 0 };
   const batchInvalidatable = batch ? getInvalidatableCards(batch.bundles.flatMap(b => b.cards)) : [];
+
+  // Count invalidated cards that are NOT used (for regeneration)
+  const regenCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "invalidated").length : 0;
 
   const toggleBundle = (id: string) => {
     setExpandedBundles(prev => {
@@ -80,15 +88,77 @@ export default function MerchantVoucherBatchDetail() {
           if (invalidateTarget.type === "bundle" && bundle.id === invalidateTarget.bundleId && canInvalidate) {
             return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
           }
-          if (invalidateTarget.type === "card" && card.id === invalidateTarget.cardId && canInvalidate) {
-            return { ...card, status: "invalidated" as const, invalidatedAt: new Date() };
-          }
           return card;
         }),
       }))};
       return updated;
     }));
     setInvalidateTarget(null);
+  };
+
+  const handleRegenerate = () => {
+    if (!batch || regenCount === 0) return;
+    const now = new Date();
+    const newBatchId = `batch-regen-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const newBatchNumber = generateBatchNumber(now);
+    const bundleSize = 100;
+    const numBundles = Math.ceil(regenCount / bundleSize);
+    const bundles: VoucherBatch["bundles"] = [];
+    let remaining = regenCount;
+
+    for (let b = 0; b < numBundles; b++) {
+      const cardsInBundle = Math.min(bundleSize, remaining);
+      remaining -= cardsInBundle;
+      const prefix = generateBundlePrefix(batch.denomination, now);
+      const cards: VoucherBatch["bundles"][0]["cards"] = [];
+      for (let c = 0; c < cardsInBundle; c++) {
+        cards.push({
+          id: `card-${newBatchId}-${b}-${c}`,
+          serialNumber: generateCardSerial(prefix, c),
+          pin: generatePin(),
+          denomination: batch.denomination,
+          status: "available" as const,
+          batchId: newBatchId,
+          bundleSerialPrefix: prefix,
+          soldVia: null,
+          createdAt: now,
+          invalidatedAt: null,
+          soldAt: null,
+          usedAt: null,
+        });
+      }
+      bundles.push({
+        id: `bundle-${newBatchId}-${b}`,
+        serialPrefix: prefix,
+        denomination: batch.denomination,
+        batchId: newBatchId,
+        cardCount: cardsInBundle,
+        cards,
+      });
+    }
+
+    const newBatch: VoucherBatch = {
+      id: newBatchId,
+      batchNumber: newBatchNumber,
+      denomination: batch.denomination,
+      bundleCount: numBundles,
+      totalCards: regenCount,
+      status: "active",
+      createdAt: now,
+      totalCost: 0,
+      discountApplied: false,
+      discountPercent: 0,
+      generationType: "replacement",
+      replacedBatchId: batch.id,
+      bundles,
+    };
+
+    setBatches(prev => [...prev, newBatch]);
+    setShowRegenConfirm(false);
+    toast({
+      title: "Replacement Batch Created",
+      description: `${newBatchNumber} — ${regenCount} cards regenerated`,
+    });
   };
 
   const handlePrintComplete = (cardIds: string[]) => {
@@ -119,7 +189,7 @@ export default function MerchantVoucherBatchDetail() {
       const bundle = batch!.bundles.find(b => b.id === invalidateTarget.bundleId);
       return bundle ? getInvalidatableCards(bundle.cards).length : 0;
     }
-    return 1;
+    return 0;
   };
 
   const statusColor = (status: string) => {
@@ -215,6 +285,18 @@ export default function MerchantVoucherBatchDetail() {
           )}
         </div>
 
+        {/* Regeneration Button */}
+        {regenCount > 0 && (
+          <Button
+            onClick={() => setShowRegenConfirm(true)}
+            variant="outline"
+            className="w-full h-11 rounded-xl text-xs font-semibold border-amber-500/30 text-amber-600 hover:bg-amber-500/5 touch-manipulation active:scale-[0.97]"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Regenerate Invalidated Cards ({regenCount})
+          </Button>
+        )}
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -285,36 +367,31 @@ export default function MerchantVoucherBatchDetail() {
                       )}
                     </div>
                     <div className="max-h-[400px] overflow-y-auto touch-auto">
-                      {bundle.cards.map(card => {
-                        const canInvalidateCard =
-                          (card.status === "available") ||
-                          (card.status === "sold_unused" && card.soldVia === "physical");
-
-                        return (
-                          <div key={card.id} className="px-3.5 py-3 border-b border-border/20 last:border-0">
-                            {/* Row 1: Serial + Status */}
-                            <div className="flex items-center justify-between mb-1.5">
-                              <p className="text-xs font-mono font-semibold text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
-                              <Badge className={`${statusColor(card.status)} text-xs h-5 px-2`}>{statusLabel(card.status)}</Badge>
-                            </div>
-                            {/* Row 2: PIN + metadata */}
-                            <div className="flex items-center justify-between">
-                              <p className="text-xs text-muted-foreground font-mono">PIN: {hashPin(card.pin)}</p>
-                              <div className="flex items-center gap-3">
-                                {card.soldAt && <span className="text-xs text-muted-foreground">Sold {card.soldAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short" })}</span>}
-                                {canInvalidateCard && (
-                                  <button
-                                    onClick={() => setInvalidateTarget({ type: "card", cardId: card.id, bundleId: bundle.id })}
-                                    className="text-xs text-destructive font-semibold touch-manipulation h-7 px-1"
-                                  >
-                                    Invalidate
-                                  </button>
-                                )}
-                              </div>
-                            </div>
+                      {bundle.cards.map(card => (
+                        <div key={card.id} className="px-3.5 py-3 border-b border-border/20 last:border-0">
+                          {/* Row 1: Serial + Status */}
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-mono font-semibold text-foreground truncate flex-1 mr-2">{card.serialNumber}</p>
+                            <Badge className={`${statusColor(card.status)} text-xs h-5 px-2`}>{statusLabel(card.status)}</Badge>
                           </div>
-                        );
-                      })}
+                          {/* Row 2: PIN + Denomination */}
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs text-muted-foreground font-mono">PIN: {hashPin(card.pin)}</p>
+                            <span className="text-xs font-bold text-foreground">M{formatNum(card.denomination)}</span>
+                          </div>
+                          {/* Row 3: Metadata */}
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>{card.createdAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "2-digit" })}</span>
+                            <span className="font-mono">{card.bundleSerialPrefix}</span>
+                            {card.soldVia && (
+                              <span className={card.soldVia === "physical" ? "text-amber-600" : "text-primary"}>
+                                {card.soldVia === "physical" ? "Physical" : "Digital"}
+                              </span>
+                            )}
+                            {card.soldAt && <span>Sold {card.soldAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short" })}</span>}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -335,13 +412,34 @@ export default function MerchantVoucherBatchDetail() {
             <AlertDialogDescription className="text-sm">
               This will invalidate <strong>{getInvalidateCount()}</strong> voucher card{getInvalidateCount() !== 1 ? "s" : ""}.
               Only "Available" and "Sold (Physical)" cards will be affected. Used cards and Mobigate digital purchases are protected.
-              Invalidated cards will be replaced in a new batch.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="h-10 rounded-xl text-sm">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleInvalidate} className="h-10 rounded-xl text-sm bg-destructive hover:bg-destructive/90">
               Invalidate {getInvalidateCount()} Cards
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Regeneration Confirmation Dialog */}
+      <AlertDialog open={showRegenConfirm} onOpenChange={setShowRegenConfirm}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-base">
+              <RefreshCw className="h-5 w-5 text-amber-600" />
+              Regenerate Cards
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              This will create a new replacement batch with <strong>{regenCount}</strong> card{regenCount !== 1 ? "s" : ""} to replace the invalidated ones.
+              Cards will be grouped into bundles of 100.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-10 rounded-xl text-sm">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRegenerate} className="h-10 rounded-xl text-sm bg-amber-600 hover:bg-amber-700 text-white">
+              Regenerate {regenCount} Cards
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
