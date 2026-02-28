@@ -210,10 +210,10 @@ const SubMerchantApplicationStatus = () => {
                       <Button
                         onClick={() => handleReminder(app.merchantName)}
                         variant="outline"
-                        className="w-full h-11 rounded-xl touch-manipulation active:scale-[0.97] text-sm font-semibold gap-2 border-sky-500/30 text-sky-700 hover:bg-sky-500/10"
+                        className="w-full h-12 rounded-xl touch-manipulation active:scale-[0.97] text-xs font-semibold gap-2 border-sky-500/30 text-sky-700 hover:bg-sky-500/10 flex items-center justify-center"
                       >
-                        <Bell className="h-4 w-4" />
-                        Send Reminder to {app.merchantName}
+                        <Bell className="h-4 w-4 shrink-0" />
+                        <span className="truncate">Send Reminder to {app.merchantName}</span>
                       </Button>
                     )}
                     {app.status === "rejected" && (
