@@ -52,7 +52,7 @@ const MerchantApplicationStatus = () => {
   const handleReminder = () => {
     toast({
       title: "Reminder Sent",
-      description: "A reminder has been sent to the Mobigate Admin to review your application.",
+      description: "A reminder has been sent to Mobigate to review your application.",
     });
   };
 
@@ -137,7 +137,7 @@ const MerchantApplicationStatus = () => {
               className="w-full h-12 rounded-xl touch-manipulation active:scale-[0.97] text-base font-semibold gap-2"
             >
               <Bell className="h-5 w-5" />
-              Send Reminder to Mobigate Admin
+              Send Reminder to Mobigate
             </Button>
           )}
           {status === "rejected" && (

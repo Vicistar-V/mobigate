@@ -462,7 +462,7 @@ export default function BuyVouchersPage() {
           <p className="text-sm text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
         </div>
         <Button onClick={goToCountries} disabled={totalItems === 0} className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]">
-          Continue to Merchant <ChevronRight className="h-4 w-4 ml-1" />
+          Continue to Retail Merchants <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
     </div>
