@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, Store, FileText, ShoppingBag, Eye, ArrowDownRight } from "lucide-react";
+import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, Store, FileText, ShoppingBag, Eye, ArrowDownRight, Settings, Wifi, WifiOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -11,12 +11,26 @@ import {
   initialOfflineTotalCardsSold, initialOfflineTotalTransactions,
   type OfflineWalletTransaction,
 } from "@/data/subMerchantVoucherData";
-import { getBatchStatusCounts, formatNum } from "@/data/merchantVoucherData";
+import { getBatchStatusCounts, formatNum, type VoucherBatch } from "@/data/merchantVoucherData";
 import { SubMerchantDiscountSettings } from "@/components/merchant/SubMerchantDiscountSettings";
 import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "@/hooks/use-toast";
+
+/** Get sold breakdown: online vs offline for a batch */
+function getSoldBreakdown(batch: VoucherBatch) {
+  const allCards = batch.bundles.flatMap(b => b.cards);
+  const soldCards = allCards.filter(c => c.status === "sold_unused");
+  const soldOffline = soldCards.filter(c => c.soldVia === "physical" || c.soldVia === "offline").length;
+  const soldOnline = soldCards.filter(c => c.soldVia === "mobigate_digital").length;
+  return { total: soldCards.length, soldOnline, soldOffline };
+}
 
 export default function SubMerchantVoucherManagement() {
   const navigate = useNavigate();
@@ -24,6 +38,10 @@ export default function SubMerchantVoucherManagement() {
   const [offlineBalance] = useState(initialOfflineWalletBalance);
   const [offlineTransactions] = useState(initialOfflineWalletTransactions);
   const [showOfflineDrawer, setShowOfflineDrawer] = useState(false);
+  // Settings state
+  const [autoTagOffline, setAutoTagOffline] = useState(true);
+  const [offlineNotifications, setOfflineNotifications] = useState(true);
+  const [showOfflineInInventory, setShowOfflineInInventory] = useState(true);
   const batches = initialSubMerchantBatches;
 
   const stats = useMemo(() => {
@@ -31,7 +49,6 @@ export default function SubMerchantVoucherManagement() {
     let totalBundles = batches.reduce((s, b) => s + b.bundleCount, 0);
     let totalCards = batches.reduce((s, b) => s + b.totalCards, 0);
     let available = 0, soldUnused = 0, used = 0, invalidated = 0;
-    // Count offline-sold cards
     let soldOffline = 0;
     batches.forEach(b => {
       const c = getBatchStatusCounts(b);
@@ -39,14 +56,6 @@ export default function SubMerchantVoucherManagement() {
       soldUnused += c.sold_unused;
       used += c.used;
       invalidated += c.invalidated;
-      // Count cards sold via offline channel
-      b.bundles.forEach(bundle => {
-        bundle.cards.forEach(card => {
-          if (card.soldVia === "offline" || (card.soldVia === "physical" && card.status === "sold_unused")) {
-            // physical sold_unused in sub-merchant context are offline sales
-          }
-        });
-      });
     });
     soldOffline = initialOfflineTotalCardsSold;
     return { totalBatches, totalBundles, totalCards, available, soldUnused, used, invalidated, soldOffline };
@@ -73,18 +82,23 @@ export default function SubMerchantVoucherManagement() {
 
       <div className="px-4 pt-4">
         <Tabs defaultValue="dashboard">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="dashboard" className="flex-1 text-xs">Dashboard</TabsTrigger>
-            <TabsTrigger value="merchants" className="flex-1 text-xs">
-              <Store className="h-3.5 w-3.5 mr-1" /> My Merchants
-            </TabsTrigger>
-            <TabsTrigger value="applications" className="flex-1 text-xs">
-              <FileText className="h-3.5 w-3.5 mr-1" /> Applications
-              {pendingApps.length > 0 && (
-                <Badge className="ml-1 bg-amber-500 text-white text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingApps.length}</Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto touch-pan-x -mx-4 px-4 mb-4">
+            <TabsList className="w-max min-w-full h-11 whitespace-nowrap">
+              <TabsTrigger value="dashboard" className="flex-1 text-xs h-9">Dashboard</TabsTrigger>
+              <TabsTrigger value="merchants" className="flex-1 text-xs h-9">
+                <Store className="h-3.5 w-3.5 mr-1" /> My Merchants
+              </TabsTrigger>
+              <TabsTrigger value="applications" className="flex-1 text-xs h-9">
+                <FileText className="h-3.5 w-3.5 mr-1" /> Applications
+                {pendingApps.length > 0 && (
+                  <Badge className="ml-1 bg-amber-500 text-white text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingApps.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex-1 text-xs h-9">
+                <Settings className="h-3.5 w-3.5 mr-1" /> Settings
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-4">
@@ -185,10 +199,7 @@ export default function SubMerchantVoucherManagement() {
                   </p>
                   <div className="space-y-2">
                     {sortedOfflineTxns.map(txn => (
-                      <div
-                        key={txn.id}
-                        className="rounded-xl border border-border/50 bg-card p-3.5"
-                      >
+                      <div key={txn.id} className="rounded-xl border border-border/50 bg-card p-3.5">
                         <div className="flex items-start justify-between mb-1.5">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
@@ -302,6 +313,7 @@ export default function SubMerchantVoucherManagement() {
               <div className="space-y-2">
                 {batches.slice(0, 3).map(batch => {
                   const counts = getBatchStatusCounts(batch);
+                  const soldBreakdown = getSoldBreakdown(batch);
                   return (
                     <div
                       key={batch.id}
@@ -318,7 +330,49 @@ export default function SubMerchantVoucherManagement() {
                       <div className="flex items-center justify-between mt-2.5">
                         <div className="flex gap-1.5 flex-wrap">
                           {counts.available > 0 && <Badge className="bg-emerald-500/15 text-emerald-600 text-xs px-2 h-5">{counts.available} Available</Badge>}
-                          {counts.sold_unused > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5">{counts.sold_unused} Sold</Badge>}
+                          {counts.sold_unused > 0 && (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Badge
+                                  className="bg-amber-500/15 text-amber-600 text-xs px-2 h-5 cursor-pointer active:scale-95 transition-transform touch-manipulation"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {counts.sold_unused} Sold
+                                </Badge>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-52 p-0 rounded-xl overflow-hidden"
+                                side="top"
+                                align="start"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="px-3 py-2.5 border-b border-border/30 bg-muted/30">
+                                  <p className="text-xs font-bold text-foreground">Sold Breakdown</p>
+                                  <p className="text-[10px] text-muted-foreground">{counts.sold_unused} total sold cards</p>
+                                </div>
+                                <div className="p-2.5 space-y-2">
+                                  <div className="flex items-center gap-2.5 p-2 rounded-lg bg-primary/5">
+                                    <div className="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center">
+                                      <Wifi className="h-3.5 w-3.5 text-primary" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="text-xs font-semibold text-foreground">{soldBreakdown.soldOnline} Sold Online</p>
+                                      <p className="text-[10px] text-muted-foreground">Via Mobigate Digital</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/5">
+                                    <div className="h-7 w-7 rounded-md bg-amber-500/10 flex items-center justify-center">
+                                      <WifiOff className="h-3.5 w-3.5 text-amber-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="text-xs font-semibold text-foreground">{soldBreakdown.soldOffline} Sold Offline</p>
+                                      <p className="text-[10px] text-muted-foreground">Physical / In-shop</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          )}
                           {counts.used > 0 && <Badge className="bg-primary/15 text-primary text-xs px-2 h-5">{counts.used} Used</Badge>}
                         </div>
                         <p className="text-xs text-muted-foreground shrink-0 ml-2">{batch.createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p>
@@ -396,6 +450,93 @@ export default function SubMerchantVoucherManagement() {
                   <p className="text-sm text-muted-foreground">No applications yet</p>
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            {/* Discount Settings */}
+            <SubMerchantDiscountSettings />
+
+            {/* Offline Sales Settings */}
+            <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+              <div className="px-4 py-3 border-b border-border/30 flex items-center gap-2">
+                <ShoppingBag className="h-4 w-4 text-amber-600" />
+                <p className="text-sm font-bold text-foreground">Offline Sales Settings</p>
+              </div>
+              <div className="divide-y divide-border/30">
+                <div className="px-4 py-3.5 flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">Auto-tag Offline Sales</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Automatically tag physical sales as "Sold Offline"</p>
+                  </div>
+                  <Switch
+                    checked={autoTagOffline}
+                    onCheckedChange={(v) => {
+                      setAutoTagOffline(v);
+                      toast({ title: v ? "Auto-tagging enabled" : "Auto-tagging disabled", description: "Offline sales will " + (v ? "be" : "not be") + " auto-tagged" });
+                    }}
+                  />
+                </div>
+                <div className="px-4 py-3.5 flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">Offline Sale Notifications</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Get notified when offline sales are recorded</p>
+                  </div>
+                  <Switch
+                    checked={offlineNotifications}
+                    onCheckedChange={(v) => {
+                      setOfflineNotifications(v);
+                      toast({ title: v ? "Notifications enabled" : "Notifications disabled" });
+                    }}
+                  />
+                </div>
+                <div className="px-4 py-3.5 flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">Show Offline in Inventory</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Display "Sold Offline" count in inventory overview</p>
+                  </div>
+                  <Switch
+                    checked={showOfflineInInventory}
+                    onCheckedChange={(v) => {
+                      setShowOfflineInInventory(v);
+                      toast({ title: v ? "Visible in inventory" : "Hidden from inventory" });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Wallet Preferences */}
+            <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+              <div className="px-4 py-3 border-b border-border/30 flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-primary" />
+                <p className="text-sm font-bold text-foreground">Wallet Preferences</p>
+              </div>
+              <div className="divide-y divide-border/30">
+                <div className="px-4 py-3.5">
+                  <p className="text-sm font-medium text-foreground">Default Currency Display</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Nigerian Naira (₦) with Mobi (M) equivalent</p>
+                  <Badge variant="outline" className="mt-2 text-xs">₦ NGN / M Mobi</Badge>
+                </div>
+                <div className="px-4 py-3.5">
+                  <p className="text-sm font-medium text-foreground">Settlement Wallet</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Main wallet for reconciliation & settlements</p>
+                  <p className="text-sm font-bold text-foreground mt-1">₦{formatNum(walletBalance)}</p>
+                </div>
+                <div className="px-4 py-3.5">
+                  <p className="text-sm font-medium text-foreground">Offline Wallet</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Physical sales — excluded from settlements</p>
+                  <p className="text-sm font-bold text-amber-600 mt-1">₦{formatNum(offlineBalance)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="rounded-xl bg-muted/50 border border-border/30 p-3">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">ℹ️ Settings Info:</span> Changes to offline sales settings take effect immediately. Discount rate settings are managed separately and may require merchant approval.
+              </p>
             </div>
           </TabsContent>
         </Tabs>
