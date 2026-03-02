@@ -294,6 +294,37 @@ export function getTierPreview(): Array<{ tier: number; rangeStart: number; rang
   return tiers;
 }
 
+// ─── Question Bank Distribution Settings ───
+export interface PlatformQuestionBankDistribution {
+  mobigatePercent: number;    // Central bank (default 60%)
+  merchantOwnPercent: number; // Merchant's own bank (default 30%)
+  otherMerchantsPercent: number; // Other merchants (default 10%)
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformQuestionBankDistribution: PlatformQuestionBankDistribution = {
+  mobigatePercent: 60,
+  merchantOwnPercent: 30,
+  otherMerchantsPercent: 10,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getQuestionBankDistribution(): PlatformQuestionBankDistribution {
+  return { ...platformQuestionBankDistribution };
+}
+
+export function setQuestionBankDistribution(mobigate: number, merchantOwn: number, otherMerchants: number): boolean {
+  if (mobigate + merchantOwn + otherMerchants !== 100) return false;
+  if (mobigate < 0 || merchantOwn < 0 || otherMerchants < 0) return false;
+  platformQuestionBankDistribution.mobigatePercent = mobigate;
+  platformQuestionBankDistribution.merchantOwnPercent = merchantOwn;
+  platformQuestionBankDistribution.otherMerchantsPercent = otherMerchants;
+  platformQuestionBankDistribution.lastUpdatedAt = new Date();
+  return true;
+}
+
 // ─── Continue Playing Stake Settings ───
 export interface PlatformContinueStakeSettings {
   continuePlayingStakePercent: number;

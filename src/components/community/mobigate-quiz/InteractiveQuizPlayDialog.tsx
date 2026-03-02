@@ -361,7 +361,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
         <div className="shrink-0 bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 px-4 py-3 safe-area-inset-top">
           <div className="text-center">
             <h2 className="font-bold text-sm text-white">Session Saved</h2>
-            <p className="text-[10px] text-white/70">You can resume anytime within 72 hours</p>
+            <p className="text-xs text-white/70">You can resume anytime within 72 hours</p>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
@@ -456,7 +456,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
           </button>
           <div className="text-center flex-1 mx-3">
             <h2 className="font-bold text-sm text-white truncate">{season.name}</h2>
-            <p className="text-[10px] text-white/70">
+            <p className="text-xs text-white/70">
               {phase === "loading" && "Preparing..."}
               {phase === "debit_confirm" && "Payment Confirmed"}
               {phase === "mode_select" && "Choose Play Mode"}
@@ -466,7 +466,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             </p>
           </div>
           <div className="flex items-center gap-1.5">
-            <Badge className="bg-white/20 text-white border-0 text-[10px] gap-1">
+            <Badge className="bg-white/20 text-white border-0 text-xs gap-1">
               <Star className="h-3 w-3" />{accumulatedPoints}
             </Badge>
           </div>
@@ -749,7 +749,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-950/20">
               <CardContent className="p-3 text-center">
                 <p className="text-xs text-muted-foreground">Objective Score: <span className="font-bold text-foreground">{objectiveCorrect}/{activeObjectives.length}</span></p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Written question {currentNonObjQ + 1} of {activeNonObjectives.length}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Written question {currentNonObjQ + 1} of {activeNonObjectives.length}</p>
               </CardContent>
             </Card>
 
@@ -782,19 +782,19 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
               <p className="text-4xl mt-2">{tierInfo.emoji}</p>
               <h3 className={cn("font-black text-xl", tierInfo.color)}>{tierInfo.label}</h3>
               <p className="text-sm text-muted-foreground">{totalCorrect}/{totalQuestions} correct ({percentage}%)</p>
-              <Badge className="bg-muted/50 text-foreground border-0 text-[10px]">
+              <Badge className="bg-muted/50 text-foreground border-0 text-xs">
                 {playMode === "objectives_only" ? "Objectives Only" : "Mixed Mode"}
               </Badge>
 
               {/* Score breakdown */}
               <div className="flex gap-3 justify-center pt-2">
                 <div className="p-3 bg-background/60 rounded-xl text-center min-w-[80px]">
-                  <p className="text-[10px] text-muted-foreground">Objective</p>
+                  <p className="text-xs text-muted-foreground">Objective</p>
                   <p className="font-bold text-lg">{objectiveCorrect}/{activeObjectives.length}</p>
                 </div>
                 {playMode === "mixed" && (
                   <div className="p-3 bg-background/60 rounded-xl text-center min-w-[80px]">
-                    <p className="text-[10px] text-muted-foreground">Written</p>
+                    <p className="text-xs text-muted-foreground">Written</p>
                     <p className="font-bold text-lg">{nonObjectiveCorrect}/{activeNonObjectives.length}</p>
                   </div>
                 )}
@@ -826,7 +826,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                     <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
                     <span className="text-xs font-semibold text-amber-700">Redemption Warning</span>
                   </div>
-                  <div className="space-y-1 text-[10px] text-muted-foreground">
+                  <div className="space-y-1 text-xs text-muted-foreground">
                     <p>• Taking the prize <strong>dissolves all points</strong></p>
                     <p>• <strong>Disqualified from Game Show entry</strong></p>
                     <p>• Alternatively, <strong>skip prize</strong> and keep accumulating</p>
@@ -858,24 +858,24 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 <div className="grid grid-cols-2 gap-3 text-center">
                   <div>
                     <p className="text-xl font-black text-primary">{accumulatedPoints}</p>
-                    <p className="text-[9px] text-muted-foreground">Total Points</p>
+                    <p className="text-xs text-muted-foreground">Total Points</p>
                   </div>
                   <div>
                     <p className="text-xl font-black text-emerald-600">{formatMobiAmount(accumulatedWinnings)}</p>
-                    <p className="text-[9px] text-muted-foreground">Accrued Wins</p>
+                    <p className="text-xs text-muted-foreground">Accrued Wins</p>
                   </div>
                   <div>
                     <p className="text-xl font-black">{totalPlays}</p>
-                    <p className="text-[9px] text-muted-foreground">Sessions</p>
+                    <p className="text-xs text-muted-foreground">Sessions</p>
                   </div>
                   <div>
                     <p className="text-xl font-black text-red-500">{formatMobiAmount(totalStaked)}</p>
-                    <p className="text-[9px] text-muted-foreground">Total Staked</p>
+                    <p className="text-xs text-muted-foreground">Total Staked</p>
                   </div>
                 </div>
                 <div className="mt-3">
                   <Progress value={Math.min((accumulatedPoints / GAME_SHOW_ENTRY_POINTS) * 100, 100)} className="h-2.5 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-indigo-500 [&>div]:to-cyan-500" />
-                  <p className="text-[9px] text-center text-muted-foreground mt-1.5">{accumulatedPoints}/{GAME_SHOW_ENTRY_POINTS} points to Game Show</p>
+                  <p className="text-xs text-center text-muted-foreground mt-1.5">{accumulatedPoints}/{GAME_SHOW_ENTRY_POINTS} points to Game Show</p>
                 </div>
               </CardContent>
             </Card>

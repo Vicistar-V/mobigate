@@ -96,6 +96,9 @@ import { shareToFacebook, shareToTwitter, shareToWhatsApp, shareViaEmail, shareV
 import { useFriendsList } from "@/hooks/useWindowData";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CreateQuizQuestionForm } from "@/components/mobigate/CreateQuizQuestionForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PlusCircle } from "lucide-react";
 
 // Simulate "my merchant" = first approved merchant
 const myMerchant = mockMerchants.find((m) => m.applicationStatus === "approved")!;
@@ -1322,6 +1325,8 @@ function QuestionIntegrationTab({ merchantId }: { merchantId: string }) {
   const [integratedQuestions, setIntegratedQuestions] = useState<IntegratedQuestion[]>([]);
   const [altAnswersEdit, setAltAnswersEdit] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<"available" | "integrated">("available");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [merchantQuestions, setMerchantQuestions] = useState<AdminQuizQuestion[]>([]);
 
   // Available questions pools
   const availableObjective = useMemo(
@@ -1516,7 +1521,64 @@ function QuestionIntegrationTab({ merchantId }: { merchantId: string }) {
             {subTabLabels[t]}
           </Button>
         ))}
+        <Button
+          size="sm"
+          className="h-9 text-xs gap-1.5 shrink-0"
+          onClick={() => setShowCreateDialog(true)}
+        >
+          <PlusCircle className="h-3.5 w-3.5" />
+          Create Question
+        </Button>
       </div>
+
+      {/* Create Question Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base">Create Quiz Question</DialogTitle>
+          </DialogHeader>
+          <CreateQuizQuestionForm
+            quizType="interactive"
+            onCreateQuestion={(q) => {
+              const newQ: AdminQuizQuestion = {
+                ...q,
+                id: `mq-${Date.now()}`,
+                createdAt: new Date().toISOString(),
+              };
+              setMerchantQuestions((prev) => [newQ, ...prev]);
+              setShowCreateDialog(false);
+              toast({ title: "✅ Question Created", description: "Added to your merchant question bank." });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Merchant's Own Questions */}
+      {merchantQuestions.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50/30 dark:bg-amber-950/10">
+          <CardContent className="p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-bold flex items-center gap-1.5">
+                <PlusCircle className="h-4 w-4 text-amber-600" />
+                Your Questions ({merchantQuestions.length})
+              </span>
+              <Badge variant="outline" className="text-xs">Merchant Bank</Badge>
+            </div>
+            <div className="space-y-2">
+              {merchantQuestions.map((q) => (
+                <div key={q.id} className="p-2 bg-background rounded-lg border text-xs space-y-1">
+                  <p className="font-medium text-sm">{q.question}</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    <Badge variant="outline" className="text-xs">{q.category}</Badge>
+                    <Badge variant="outline" className="text-xs">{q.difficulty}</Badge>
+                    <span className="text-xs text-muted-foreground">{q.points} pts</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Integration Counter */}
       <Card className="border-primary/20">
