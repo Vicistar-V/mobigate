@@ -208,9 +208,9 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[95vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-lg max-h-[92vh] p-0 gap-0 flex flex-col overflow-hidden rounded-none sm:rounded-lg">
         {/* Header */}
-        <div className="p-3 pb-2 sticky top-0 bg-gradient-to-r from-teal-500 to-cyan-600 z-10 text-white">
+        <div className="shrink-0 p-3 pb-2 bg-gradient-to-r from-teal-500 to-cyan-600 z-10 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-white/20 rounded-full">
