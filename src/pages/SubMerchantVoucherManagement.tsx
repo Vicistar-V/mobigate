@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, Store, FileText, ShoppingBag, Eye, ArrowDownRight, Settings, Wifi, WifiOff, X } from "lucide-react";
+import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, Store, FileText, ShoppingBag, Eye, ArrowDownRight, Settings, Wifi, WifiOff, X, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -13,6 +13,7 @@ import {
 } from "@/data/subMerchantVoucherData";
 import { getBatchStatusCounts, formatNum, type VoucherBatch } from "@/data/merchantVoucherData";
 import { SubMerchantDiscountSettings } from "@/components/merchant/SubMerchantDiscountSettings";
+import { CreditUsersManuallyDrawer } from "@/components/merchant/CreditUsersManuallyDrawer";
 import {
   Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -38,6 +39,7 @@ export default function SubMerchantVoucherManagement() {
   const [offlineBalance] = useState(initialOfflineWalletBalance);
   const [offlineTransactions] = useState(initialOfflineWalletTransactions);
   const [showOfflineDrawer, setShowOfflineDrawer] = useState(false);
+  const [showCreditDrawer, setShowCreditDrawer] = useState(false);
   // Settings state
   const [autoTagOffline, setAutoTagOffline] = useState(true);
   const [offlineNotifications, setOfflineNotifications] = useState(true);
@@ -250,6 +252,17 @@ export default function SubMerchantVoucherManagement() {
               <Store className="h-5 w-5" />
               Buy Vouchers from Merchant
             </Button>
+
+            {/* Credit Users Manually CTA */}
+            <Button
+              onClick={() => setShowCreditDrawer(true)}
+              variant="outline"
+              className="w-full h-12 rounded-2xl text-sm font-bold border-2 border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97] gap-2"
+            >
+              <UserCheck className="h-5 w-5" />
+              Credit Users Manually
+            </Button>
+            <CreditUsersManuallyDrawer open={showCreditDrawer} onOpenChange={setShowCreditDrawer} />
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-3">
