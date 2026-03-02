@@ -1,86 +1,76 @@
+# Fix: Tiny Text, Button Text Cutoff, and Add Create Questions Button
 
-# Fix: Debit Player on Subsequent Sessions + Track Total Staked + Admin Setting
+## Issues Identified (from screenshots)
 
-## Problem
-1. When a player clicks "Skip Prize, Keep Playing" (or "Continue to Next Session"), subsequent sessions (2nd to 7th+) are NOT debiting the player 50% of the original stake as required.
-2. Statistics don't show "Total Staked" alongside Points, Accrued Wins, and Sessions.
-3. Admin cannot set/edit the "Continue Playing Stake %" percentage.
+1. **Interactive Session Dialog - Scoring & Rules text too tiny** (lines 380-425): Multiple `text-[10px]` and `text-[11px]` instances in the lobby's "Scoring & Rules" card need upgrading to `text-xs` minimum.
+2. **Interactive Session Dialog - Other tiny text**: `text-[10px]` on the local currency amount lines (line 356, 368, 536), Game Show badge (line 323), progress text (line 578).
+3. **Interactive Quiz Play Dialog - Tiny text throughout**: `text-[10px]` on header subtitle (line 459), badge (line 469), score breakdown labels (lines 792, 797), stats labels (lines 861, 865, 869, 873), progress text (line 878), badge (line 785), and redemption warning text (lines 829-833). Also `text-[9px]` on stats labels.
+4. **Interactive Quiz Play Dialog - Written progress text**: `text-[10px]` on line 752.
+5. **Session Complete button text cutoff**: "Continue to Next Session (prize dissolved)" is too long for mobile. Shorten to "Continue to Next Session" with a subtitle or shorter parenthetical.
+6. **Merchant Questions tab - Missing "Create Questions" button**: The QuestionIntegrationTab in MerchantPage.tsx needs a "Create Questions" button above the question list, allowing merchants to create their own questions.
 
-## Changes
+## Plan
 
-### 1. Add Admin Setting: `continuePlayingStakePercent` (platformSettingsData.ts)
-- Add new `PlatformContinueStakeSettings` interface with `continuePlayingStakePercent` (default 50%), min 10%, max 100%.
-- Add getter `getContinuePlayingStakePercent()` and setter `setContinuePlayingStakePercent()`.
+### File 1: `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx`
 
-### 2. Add Admin Slider to QuizSettingsCard.tsx
-- Add a new slider section for "Continue Playing Stake %" between existing settings.
-- Range: 10%-100%, step 5%, default 50%.
-- Description: "Percentage of original stake charged each time a player continues to the next session."
-- Wire into the save handler.
+- **Line 323**: Change `text-[10px]` to `text-xs` on Game Show badge.
+- **Line 356**: Change `text-[10px]` to `text-xs` on local amount.
+- **Line 368**: Change `text-[10px]` to `text-xs` on local amount.
+- **Lines 380-425 (Scoring & Rules)**: Upgrade all `text-[10px]` to `text-xs` and `text-[11px]` to `text-sm` for the scoring rules section.
+- **Line 536**: Change `text-[10px]` to `text-xs` on local amount under instant prize.
+- **Line 549**: Change `text-[10px]` to `text-xs` on reset description.
+- **Line 578**: Change `text-[9px]` to `text-xs` on progress text.
+- **Line 668**: Shorten "Continue to Next Session (prize dissolved)" to "Continue to Next Session" -- move "(prize dissolved)" info to a separate line or remove since the toast already explains it.
 
-### 3. Fix InteractiveQuizPlayDialog.tsx (Standard Interactive Quiz)
-- Add `totalStaked` state, initialized to `season.entryFee` (the first session stake) when the game opens.
-- In `handleSkipPrizeContinuePlaying`: calculate the continuation fee as `season.entryFee * (continuePlayingStakePercent / 100)`, add it to `totalStaked`, and show a toast confirming the debit.
-- In the result phase stats card (the 3-column grid showing Points / Accrued Wins / Sessions): change to a 4-column or 2x2 grid adding "Total Staked" with the running total formatted in Mobi.
+### File 2: `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx`
 
-### 4. Fix InteractiveSessionDialog.tsx (Session-based Quiz)
-- Add `totalStaked` state, initialized to `sessionFee` when the first session starts.
-- In `handleContinueToNext`: calculate the continuation fee as `sessionFee * (continuePlayingStakePercent / 100)`, add it to `totalStaked`, and show a toast confirming the debit.
-- Add "Total Staked" to the lobby stats grid (currently 3-column: Played/Won/Lost) -- make it a 4-column or add a row.
-- Add "Total Staked" to the session_result stats section as well.
-- Include `totalStaked` in the saved session data so it persists across save/resume.
+- **Line 364**: Change `text-[10px]` to `text-xs` on saved confirmation subtitle.
+- **Line 459**: Change `text-[10px]` to `text-xs` on header subtitle.
+- **Line 469**: Change `text-[10px]` to `text-xs` on badge.
+- **Line 752**: Change `text-[10px]` to `text-xs` on written question progress.
+- **Line 785**: Change `text-[10px]` to `text-xs` on mode badge.
+- **Lines 792, 797**: Change `text-[10px]` to `text-xs` on score breakdown labels.
+- **Lines 829-833**: Change `text-[10px]` to `text-xs` on redemption warning items.
+- **Lines 861, 865, 869, 873**: Change `text-[9px]` to `text-xs` on accumulated stats labels.
+- **Line 878**: Change `text-[9px]` to `text-xs` on progress text.
 
-### 5. Update Save/Resume to include totalStaked
-- Both dialogs' `savedSession` state will include `totalStaked`.
-- Resume restores it; the save confirmation screen displays it.
+### File 3: `src/pages/MerchantPage.tsx`
+
+- Add a "Create Questions" button in the `QuestionIntegrationTab` component, placed between the sub-tabs and the integration counter (around line 1519).
+- The button will open a dialog/sheet with the `CreateQuizQuestionForm` component (already exists at `src/components/mobigate/CreateQuizQuestionForm.tsx`).
+- Add state for `showCreateForm` boolean toggle.
+- When a question is created, add it to the available pool and show a success toast.
 
 ## Technical Details
 
-### platformSettingsData.ts
-```text
-New interface: PlatformContinueStakeSettings
-  continuePlayingStakePercent: 50 (default)
-  continuePlayingStakePercentMin: 10
-  continuePlayingStakePercentMax: 100
+### Typography fixes
 
-New exports:
-  platformContinueStakeSettings (constant)
-  getContinuePlayingStakePercent(): number
-  setContinuePlayingStakePercent(value: number): void
-```
+All instances of `text-[10px]`, `text-[9px]`, and `text-[11px]` will be replaced:
 
-### InteractiveQuizPlayDialog.tsx
-- New state: `const [totalStaked, setTotalStaked] = useState(season.entryFee)`
-- `handleSkipPrizeContinuePlaying` updated:
-  ```text
-  const continueFee = Math.round(season.entryFee * getContinuePlayingStakePercent() / 100)
-  setTotalStaked(prev => prev + continueFee)
-  toast: "Debited {continueFee} for next session"
-  resetAllState()
-  ```
-- Result stats grid updated from 3 cols to 2x2 grid with Total Staked added.
-- Save/resume includes totalStaked.
+- `text-[9px]` and `text-[10px]` become `text-xs` (12px)
+- `text-[11px]` becomes `text-sm` (14px) for section headers, or `text-xs` for body text
 
-### InteractiveSessionDialog.tsx
-- New state: `const [totalStaked, setTotalStaked] = useState(0)` (set to sessionFee on first play)
-- `handleStartSession`: if first play, set totalStaked to sessionFee.
-- `handleContinueToNext` updated:
-  ```text
-  const continueFee = Math.round(sessionFee * getContinuePlayingStakePercent() / 100)
-  setTotalStaked(prev => prev + continueFee)
-  toast: "Debited {continueFee} for next session"
-  ```
-- Lobby and result stats grids updated to show Total Staked.
-- savedSession type extended with `totalStaked`.
+### Button text fix
 
-### QuizSettingsCard.tsx
-- New local state: `continueStake` initialized from `getContinuePlayingStakePercent()`.
-- New slider section with Zap icon, range 10-100%, step 5%.
-- `handleSave` calls `setContinuePlayingStakePercent(continueStake)`.
-- `hasChanges` checks include the new setting.
+The "Continue to Next Session (prize dissolved)" button in InteractiveSessionDialog.tsx (line 668) will be shortened. The parenthetical text will be removed from the button label since the dissolution is already communicated via the toast notification.
+
+### Create Questions button
+
+- Import `CreateQuizQuestionForm` and add `Dialog` wrapper in `QuestionIntegrationTab`.
+- Add a `+ Create Question` button with a `PlusCircle` icon next to the sub-tabs or below them.
+- Created questions will be added to a local state array and rendered alongside the existing available questions.
+- The form's `quizType` prop will be set to `"interactive"` since this is for merchant quizzes.
 
 ## Files Modified
-1. `src/data/platformSettingsData.ts` -- new setting
-2. `src/components/mobigate/QuizSettingsCard.tsx` -- admin slider
-3. `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- debit logic + stats
-4. `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- debit logic + stats
+
+1. `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- fix tiny text + button text
+2. `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- fix tiny text
+3. `src/pages/MerchantPage.tsx` -- add Create Questions button + dialog
+
+&nbsp;
+
+Add: 'Create Quiz Questions' button, to enable Quiz Merchants add their custom Questions to their Quiz Game Sessions to backup the Mobigate Central Questions Bank. While Users Play Games on each Merchants' Quizzes, the System will supply like Questions from various available Questions Banks (Mobigate Central Questions Bank - 60%; the particular Merchant's Questions Bank - 30%; then, Other Merchants' respective Questions Banks - 10%)(Mobigate Admin will Set/Edit these).
+
+&nbsp;
+
+Implement the plan completely take your time and carefully implement every single thing and integrate all completely no need to rush and report to me just take your loooong time and make everything perfectly
