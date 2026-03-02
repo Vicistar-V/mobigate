@@ -1,11 +1,15 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, X, ChevronRight, Filter } from "lucide-react";
+import { ArrowLeft, Search, X, ChevronRight, Filter, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { initialSubMerchantBatches } from "@/data/subMerchantVoucherData";
 import { getBatchStatusCounts, formatNum } from "@/data/merchantVoucherData";
 
 type SortOption = "newest" | "oldest" | "denom_high" | "denom_low";
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 export default function SubMerchantVoucherBatches() {
   const navigate = useNavigate();
@@ -13,11 +17,40 @@ export default function SubMerchantVoucherBatches() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilters, setShowFilters] = useState(false);
 
+  // Date filters
+  const [filterYear, setFilterYear] = useState<string>("all");
+  const [filterMonth, setFilterMonth] = useState<string>("all");
+  const [filterDay, setFilterDay] = useState<string>("all");
+  const [filterHour, setFilterHour] = useState<string>("all");
+
+  const yearOptions = useMemo(() => {
+    const years = [...new Set(initialSubMerchantBatches.map(b => b.createdAt.getFullYear()))].sort((a, b) => b - a);
+    return years;
+  }, []);
+
+  const dayOptions = useMemo(() => {
+    if (filterYear === "all" || filterMonth === "all") return Array.from({ length: 31 }, (_, i) => i + 1);
+    const daysInMonth = new Date(Number(filterYear), Number(filterMonth) + 1, 0).getDate();
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  }, [filterYear, filterMonth]);
+
   const filtered = useMemo(() => {
     let result = [...initialSubMerchantBatches];
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(b => b.batchNumber.toLowerCase().includes(q));
+    }
+    if (filterYear !== "all") {
+      result = result.filter(b => b.createdAt.getFullYear() === Number(filterYear));
+    }
+    if (filterMonth !== "all") {
+      result = result.filter(b => b.createdAt.getMonth() === Number(filterMonth));
+    }
+    if (filterDay !== "all") {
+      result = result.filter(b => b.createdAt.getDate() === Number(filterDay));
+    }
+    if (filterHour !== "all") {
+      result = result.filter(b => b.createdAt.getHours() === Number(filterHour));
     }
     result.sort((a, b) => {
       switch (sortBy) {
@@ -29,7 +62,16 @@ export default function SubMerchantVoucherBatches() {
       }
     });
     return result;
-  }, [searchQuery, sortBy]);
+  }, [searchQuery, sortBy, filterYear, filterMonth, filterDay, filterHour]);
+
+  const clearDateFilters = () => {
+    setFilterYear("all");
+    setFilterMonth("all");
+    setFilterDay("all");
+    setFilterHour("all");
+  };
+
+  const hasDateFilter = filterYear !== "all" || filterMonth !== "all" || filterDay !== "all" || filterHour !== "all";
 
   return (
     <div className="bg-background min-h-screen pb-6">
@@ -61,12 +103,73 @@ export default function SubMerchantVoucherBatches() {
           </div>
         </div>
         {showFilters && (
-          <div className="px-4 pb-3 border-t border-border/30 pt-3">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Sort</p>
-            <div className="flex gap-1.5 flex-wrap">
-              {([["newest","Newest"],["oldest","Oldest"],["denom_high","Denom ↓"],["denom_low","Denom ↑"]] as [SortOption,string][]).map(([val,label]) => (
-                <button key={val} onClick={() => setSortBy(val)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
-              ))}
+          <div className="px-4 pb-3 border-t border-border/30 pt-3 space-y-3">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Sort</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {([["newest","Newest"],["oldest","Oldest"],["denom_high","Denom ↓"],["denom_low","Denom ↑"]] as [SortOption,string][]).map(([val,label]) => (
+                  <button key={val} onClick={() => setSortBy(val)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Date Filter */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Filter by Date</p>
+                </div>
+                {hasDateFilter && (
+                  <button onClick={clearDateFilters} className="text-xs text-destructive font-medium touch-manipulation">Clear</button>
+                )}
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                <Select value={filterYear} onValueChange={setFilterYear}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background">
+                    <SelectItem value="all">All</SelectItem>
+                    {yearOptions.map(y => (
+                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterMonth} onValueChange={setFilterMonth}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background">
+                    <SelectItem value="all">All</SelectItem>
+                    {MONTHS.map((m, i) => (
+                      <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterDay} onValueChange={setFilterDay}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Day" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background max-h-48">
+                    <SelectItem value="all">All</SelectItem>
+                    {dayOptions.map(d => (
+                      <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterHour} onValueChange={setFilterHour}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Time" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background max-h-48">
+                    <SelectItem value="all">All</SelectItem>
+                    {HOURS.map(h => (
+                      <SelectItem key={h} value={String(h)}>{String(h).padStart(2, "0")}:00</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         )}
