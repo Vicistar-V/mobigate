@@ -293,3 +293,32 @@ export function getTierPreview(): Array<{ tier: number; rangeStart: number; rang
   }
   return tiers;
 }
+
+// ─── Continue Playing Stake Settings ───
+export interface PlatformContinueStakeSettings {
+  continuePlayingStakePercent: number;
+  continuePlayingStakePercentMin: number;
+  continuePlayingStakePercentMax: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformContinueStakeSettings: PlatformContinueStakeSettings = {
+  continuePlayingStakePercent: 50,
+  continuePlayingStakePercentMin: 10,
+  continuePlayingStakePercentMax: 100,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getContinuePlayingStakePercent(): number {
+  return platformContinueStakeSettings.continuePlayingStakePercent;
+}
+
+export function setContinuePlayingStakePercent(newPercent: number): void {
+  if (newPercent >= platformContinueStakeSettings.continuePlayingStakePercentMin &&
+      newPercent <= platformContinueStakeSettings.continuePlayingStakePercentMax) {
+    platformContinueStakeSettings.continuePlayingStakePercent = newPercent;
+    platformContinueStakeSettings.lastUpdatedAt = new Date();
+  }
+}

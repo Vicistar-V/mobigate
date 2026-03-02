@@ -20,7 +20,7 @@ import {
   PlayMode,
   INTERACTIVE_DEFAULT_OBJECTIVE_PICK,
 } from "@/data/mobigateInteractiveQuizData";
-import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion } from "@/data/platformSettingsData";
+import { getObjectiveTimePerQuestion, getNonObjectiveTimePerQuestion, getContinuePlayingStakePercent } from "@/data/platformSettingsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -88,12 +88,14 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const [accumulatedPoints, setAccumulatedPoints] = useState(0);
   const [accumulatedWinnings, setAccumulatedWinnings] = useState(0);
   const [totalPlays, setTotalPlays] = useState(0);
+  const [totalStaked, setTotalStaked] = useState(season.entryFee);
 
   // Save & Resume session state
   const [savedSession, setSavedSession] = useState<{
     points: number;
     winnings: number;
     plays: number;
+    totalStaked: number;
     savedAt: Date;
     playMode: PlayMode;
   } | null>(null);
@@ -266,6 +268,12 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   };
 
   const handleSkipPrizeContinuePlaying = () => {
+    const continueFee = Math.round(season.entryFee * getContinuePlayingStakePercent() / 100);
+    setTotalStaked(prev => prev + continueFee);
+    toast({
+      title: "💰 Session Fee Debited",
+      description: `${formatMobiAmount(continueFee)} charged for next session (${getContinuePlayingStakePercent()}% of stake)`,
+    });
     resetAllState();
   };
 
@@ -288,6 +296,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
       points: accumulatedPoints,
       winnings: accumulatedWinnings,
       plays: totalPlays,
+      totalStaked,
       savedAt: new Date(),
       playMode,
     });
@@ -310,6 +319,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     setAccumulatedPoints(savedSession.points);
     setAccumulatedWinnings(savedSession.winnings);
     setTotalPlays(savedSession.plays);
+    setTotalStaked(savedSession.totalStaked);
     setPlayMode(savedSession.playMode);
     setSavedSession(null);
     setShowSavedConfirmation(false);
@@ -365,7 +375,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
 
           <Card className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20">
             <CardContent className="p-4 space-y-3">
-              <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="grid grid-cols-2 gap-3 text-center">
                 <div>
                   <p className="text-xl font-black text-primary">{savedSession.points}</p>
                   <p className="text-xs text-muted-foreground">Points</p>
@@ -377,6 +387,10 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                 <div>
                   <p className="text-xl font-black">{savedSession.plays}</p>
                   <p className="text-xs text-muted-foreground">Sessions</p>
+                </div>
+                <div>
+                  <p className="text-xl font-black text-red-500">{formatMobiAmount(savedSession.totalStaked)}</p>
+                  <p className="text-xs text-muted-foreground">Total Staked</p>
                 </div>
               </div>
             </CardContent>
@@ -841,7 +855,7 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             {/* Accumulated Stats */}
             <Card>
               <CardContent className="p-4">
-                <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="grid grid-cols-2 gap-3 text-center">
                   <div>
                     <p className="text-xl font-black text-primary">{accumulatedPoints}</p>
                     <p className="text-[9px] text-muted-foreground">Total Points</p>
@@ -853,6 +867,10 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                   <div>
                     <p className="text-xl font-black">{totalPlays}</p>
                     <p className="text-[9px] text-muted-foreground">Sessions</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-black text-red-500">{formatMobiAmount(totalStaked)}</p>
+                    <p className="text-[9px] text-muted-foreground">Total Staked</p>
                   </div>
                 </div>
                 <div className="mt-3">
