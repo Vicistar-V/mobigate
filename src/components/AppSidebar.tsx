@@ -151,10 +151,26 @@ const menuItems: MenuItem[] = [{
       title: "View Merchants",
       url: "#",
       items: [
-        { title: "By Country", url: "/merchants?view=country" },
-        { title: "By State / Province", url: "/merchants?view=state" },
-        { title: "By LGA / County", url: "/merchants?view=lga" },
-        { title: "By City / Town", url: "/merchants?view=city" },
+        {
+          title: "Retail Merchants",
+          url: "#",
+          items: [
+            { title: "By Country", url: "/merchants?view=country&type=retail" },
+            { title: "By State / Province", url: "/merchants?view=state&type=retail" },
+            { title: "By LGA / County", url: "/merchants?view=lga&type=retail" },
+            { title: "By City / Town", url: "/merchants?view=city&type=retail" },
+          ]
+        },
+        {
+          title: "Bulk Merchants",
+          url: "#",
+          items: [
+            { title: "By Country", url: "/merchants?view=country&type=bulk" },
+            { title: "By State / Province", url: "/merchants?view=state&type=bulk" },
+            { title: "By LGA / County", url: "/merchants?view=lga&type=bulk" },
+            { title: "By City / Town", url: "/merchants?view=city&type=bulk" },
+          ]
+        },
       ]
     },
     { 
