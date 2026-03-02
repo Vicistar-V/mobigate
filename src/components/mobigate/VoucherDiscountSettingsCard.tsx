@@ -11,6 +11,7 @@ import {
   setBaseRate,
   setIncrementRate,
   setMaxDiscount,
+  MIN_DISCOUNT_ORDER_VALUE,
 } from "@/data/platformSettingsData";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -291,6 +292,14 @@ export function VoucherDiscountSettingsCard() {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Min order value note */}
+          <div className="flex gap-2 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
+            <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Minimum total order value of <strong>M{MIN_DISCOUNT_ORDER_VALUE.toLocaleString()}</strong> required to unlock any discount tier.
+            </p>
           </div>
 
           {/* Info note */}

@@ -59,7 +59,7 @@ export interface MerchantWalletTransaction {
 }
 
 // ─── Discount Calculation (tiered, based on platform settings) ───
-import { getTieredDiscount } from "@/data/platformSettingsData";
+import { getTieredDiscount, MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
 
 export interface DiscountResult {
   discountPercent: number;
@@ -78,7 +78,7 @@ export function getDiscountForBundles(bundleCount: number): DiscountResult {
   };
 }
 
-export function calculateBulkDiscount(denomination: number, bundleCount: number): {
+export function calculateBulkDiscount(denomination: number, bundleCount: number, totalOrderValue?: number): {
   cardsPerBundle: number;
   totalCards: number;
   unitCost: number;
@@ -87,18 +87,23 @@ export function calculateBulkDiscount(denomination: number, bundleCount: number)
   discountAmount: number;
   total: number;
 } {
+  // MIN_DISCOUNT_ORDER_VALUE imported at top of file
   const cardsPerBundle = 100;
   const totalCards = bundleCount * cardsPerBundle;
   const unitCost = denomination;
   const subtotal = totalCards * unitCost;
   const disc = getDiscountForBundles(bundleCount);
-  const discountAmount = Math.round(subtotal * disc.discountPercent / 100);
+  // If totalOrderValue is provided, check minimum; otherwise use subtotal
+  const orderValue = totalOrderValue !== undefined ? totalOrderValue : subtotal;
+  const meetsMinOrder = orderValue >= MIN_DISCOUNT_ORDER_VALUE;
+  const effectiveDiscount = meetsMinOrder ? disc.discountPercent : 0;
+  const discountAmount = Math.round(subtotal * effectiveDiscount / 100);
   return {
     cardsPerBundle,
     totalCards,
     unitCost,
     subtotal,
-    discountPercent: disc.discountPercent,
+    discountPercent: effectiveDiscount,
     discountAmount,
     total: subtotal - discountAmount,
   };

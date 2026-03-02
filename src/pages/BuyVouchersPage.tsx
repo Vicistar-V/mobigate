@@ -17,6 +17,7 @@ import {
 import { communityPeople } from "@/data/communityPeopleData";
 import { mockFriends } from "@/data/profileData";
 import { SendViaChannelStep, ChannelType } from "@/components/vouchers/SendViaChannelStep";
+import { MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
 
 type Step = "vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers" | "sendEmail" | "sendMobiChat" | "sendWhatsApp" | "sendSMS" | "redeemPin" | "redeemProcessing" | "redeemSuccess";
 
@@ -374,13 +375,18 @@ export default function BuyVouchersPage() {
             </button>
           </div>
         )}
-        {selected && qty >= 10 && (
+        {selected && qty >= 10 && totalMobi >= MIN_DISCOUNT_ORDER_VALUE && (
           <div className="flex items-center justify-center gap-1 mt-1.5">
             <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-[10px] px-2 py-0.5 h-auto gap-1 font-semibold animate-in fade-in-0 zoom-in-95 duration-200">
               <Sparkles className="h-3 w-3" />
               Discount Unlocked!
             </Badge>
           </div>
+        )}
+        {selected && qty >= 10 && totalMobi < MIN_DISCOUNT_ORDER_VALUE && (
+          <p className="text-[10px] text-amber-600 text-center mt-1">
+            Total order must be ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)}
+          </p>
         )}
         {selected && qty < 10 && (
           <p className="text-[10px] text-amber-600 text-center mt-1">
@@ -579,10 +585,18 @@ export default function BuyVouchersPage() {
               {(() => {
                 const eligibleItems = cartItems.filter(i => i.quantity >= 10);
                 const totalCartItems = cartItems.length;
+                const meetsMinOrder = totalMobi >= MIN_DISCOUNT_ORDER_VALUE;
                 if (eligibleItems.length === 0) {
                   return (
                     <p className="text-xs text-amber-600 mt-1.5 pt-1.5 border-t border-primary/10">
                       No items qualify for Bulk Discount yet (min 10 per denomination)
+                    </p>
+                  );
+                }
+                if (!meetsMinOrder) {
+                  return (
+                    <p className="text-xs text-amber-600 mt-1.5 pt-1.5 border-t border-primary/10">
+                      Total order must be ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} for discount (currently M{formatNum(totalMobi)})
                     </p>
                   );
                 }
@@ -651,11 +665,12 @@ export default function BuyVouchersPage() {
             </div>
           )}
           {filteredMerchants.map((merchant) => {
-            // Conditional discount: only cart items with qty >= 10 get discount
+            // Conditional discount: only cart items with qty >= 10 AND total >= MIN_DISCOUNT_ORDER_VALUE get discount
+            const meetsMinOrder = totalMobi >= MIN_DISCOUNT_ORDER_VALUE;
             const eligibleItems = cartItems.filter(i => i.quantity >= 10);
             const eligibleTotal = eligibleItems.reduce((s, i) => s + i.voucher.mobiValue * i.quantity, 0);
             const nonEligibleTotal = totalMobi - eligibleTotal;
-            const hasAnyDiscount = eligibleItems.length > 0;
+            const hasAnyDiscount = eligibleItems.length > 0 && meetsMinOrder;
             const eligibleSavings = hasAnyDiscount 
               ? calculateDiscountedAmount(eligibleTotal, merchant.discountPercent).savings
               : 0;
@@ -718,10 +733,11 @@ export default function BuyVouchersPage() {
   const renderPaymentStep = () => {
     if (!selectedMerchant || !selectedCountry) return null;
 
-    // Conditional discount: only items with qty >= 10 get discount
+    // Conditional discount: only items with qty >= 10 AND total order >= MIN_DISCOUNT_ORDER_VALUE get discount
+    const meetsMinOrder = totalMobi >= MIN_DISCOUNT_ORDER_VALUE;
     const itemBreakdown = cartItems.map(({ voucher, quantity }) => {
       const lineTotal = voucher.mobiValue * quantity;
-      const isDiscountEligible = quantity >= 10;
+      const isDiscountEligible = quantity >= 10 && meetsMinOrder;
       const { discounted, savings } = isDiscountEligible
         ? calculateDiscountedAmount(lineTotal, selectedMerchant.discountPercent)
         : { discounted: lineTotal, savings: 0 };
@@ -813,7 +829,7 @@ export default function BuyVouchersPage() {
             </div>
             <p className="text-xs text-muted-foreground text-center">You receive M{formatNum(totalMobi)} in Mobi vouchers</p>
             {totalSavings === 0 && (
-              <p className="text-xs text-amber-600 text-center">Tip: Order 10+ of any denomination to unlock discounts</p>
+              <p className="text-xs text-amber-600 text-center">Tip: Order 10+ of any denomination with a total ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} to unlock discounts</p>
             )}
           </div>
         </div>
