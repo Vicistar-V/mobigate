@@ -834,7 +834,7 @@ export default function MyQuizHistory() {
                         <p className={cn("text-[11px] font-semibold", game.won ? "text-green-700 dark:text-green-300" : "text-amber-700 dark:text-amber-300")}>
                           {game.groupWinReason}
                         </p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           Winner must be the highest scorer with a minimum of 40%. Otherwise, all players lose.
                         </p>
                       </div>

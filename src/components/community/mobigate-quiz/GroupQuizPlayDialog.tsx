@@ -320,13 +320,13 @@ export function GroupQuizPlayDialog({ open, onOpenChange, stake, playerCount, pl
                         <span className={cn("text-sm font-bold w-6", isWinner && "text-amber-600")}>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}</span>
                         <div className="flex-1">
                           <p className={cn("text-sm font-medium", p.isYou && "text-purple-600")}>{p.name}{p.isYou ? " (You)" : ""}</p>
-                          <p className="text-[10px] text-muted-foreground">{pPct}%</p>
+                          <p className="text-xs text-muted-foreground">{pPct}%</p>
                         </div>
                         <span className="text-sm font-bold">{p.score}/{totalQuestions}</span>
                       </div>
                     );
                   })}
-                  <div className="text-[10px] text-muted-foreground text-center pt-1 border-t">
+                  <div className="text-xs text-muted-foreground text-center pt-2 border-t">
                     Winner must be highest scorer with ≥{MIN_WIN_PERCENTAGE}% to win
                   </div>
                 </CardContent>
