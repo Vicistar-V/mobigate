@@ -17,6 +17,7 @@ import {
   INTERACTIVE_DEFAULT_OBJECTIVE_PICK,
 } from "@/data/mobigateInteractiveQuizData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { getContinuePlayingStakePercent } from "@/data/platformSettingsData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { QuizPlayEngine, QuizPlayResult } from "./QuizPlayEngine";
@@ -74,6 +75,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   const [lastTier, setLastTier] = useState<ReturnType<typeof calculateQuizTier> | null>(null);
   const [showRedemption, setShowRedemption] = useState(false);
   const [playKey, setPlayKey] = useState(0);
+  const [totalStaked, setTotalStaked] = useState(0);
 
   // Save & Resume session state
   const [savedSession, setSavedSession] = useState<{
@@ -82,6 +84,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
     played: number;
     won: number;
     lost: number;
+    totalStaked: number;
     savedAt: Date;
   } | null>(null);
   const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
@@ -147,9 +150,14 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   }, [sessionsLost, sessionFee, toast, playMode]);
 
   const handleContinueToNext = () => {
+    const continueFee = Math.round(sessionFee * getContinuePlayingStakePercent() / 100);
+    setTotalStaked(prev => prev + continueFee);
     setCurrentWinnings(0);
     setSessionPhase("mode_select");
-    toast({ title: "💨 Instant Prize Dissolved", description: "Points kept. Choose mode for next session." });
+    toast({
+      title: "💰 Session Fee Debited",
+      description: `${formatMobiAmount(continueFee)} charged for next session (${getContinuePlayingStakePercent()}% of stake). Instant prize dissolved.`,
+    });
   };
 
   const handleTakeInstantPrize = () => {
@@ -167,6 +175,9 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   };
 
   const handleStartSession = () => {
+    if (totalStaked === 0) {
+      setTotalStaked(sessionFee);
+    }
     setSessionPhase("mode_select");
   };
 
@@ -188,6 +199,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
       played: sessionsPlayed,
       won: sessionsWon,
       lost: sessionsLost,
+      totalStaked,
       savedAt: new Date(),
     });
     setShowSavedConfirmation(true);
@@ -211,6 +223,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
     setSessionsPlayed(savedSession.played);
     setSessionsWon(savedSession.won);
     setSessionsLost(savedSession.lost);
+    setTotalStaked(savedSession.totalStaked);
     setSavedSession(null);
     setShowSavedConfirmation(false);
     setSessionPhase("lobby");
@@ -313,18 +326,22 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                     </Card>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
                         <p className="text-lg font-bold text-blue-600">{sessionsPlayed}</p>
-                        <p className="text-[10px] text-muted-foreground">Played</p>
+                        <p className="text-xs text-muted-foreground">Played</p>
                       </div>
                       <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-lg text-center">
                         <p className="text-lg font-bold text-green-600">{sessionsWon}</p>
-                        <p className="text-[10px] text-muted-foreground">Won</p>
+                        <p className="text-xs text-muted-foreground">Won</p>
                       </div>
                       <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg text-center">
                         <p className="text-lg font-bold text-red-600">{sessionsLost}</p>
-                        <p className="text-[10px] text-muted-foreground">Lost</p>
+                        <p className="text-xs text-muted-foreground">Lost</p>
+                      </div>
+                      <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg text-center">
+                        <p className="text-lg font-bold text-orange-600">{formatMobiAmount(totalStaked)}</p>
+                        <p className="text-xs text-muted-foreground">Total Staked</p>
                       </div>
                     </div>
 
@@ -535,18 +552,22 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                 )}
 
                 {/* Stats summary */}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center">
                     <p className="font-bold text-blue-600">{sessionsPlayed}</p>
-                    <p className="text-[10px] text-muted-foreground">Played</p>
+                    <p className="text-xs text-muted-foreground">Played</p>
                   </div>
                   <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded-lg text-center">
                     <p className="font-bold text-green-600">{sessionsWon}</p>
-                    <p className="text-[10px] text-muted-foreground">Won</p>
+                    <p className="text-xs text-muted-foreground">Won</p>
                   </div>
                   <div className="p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-center">
                     <p className="font-bold text-amber-600">{sessionPoints}</p>
-                    <p className="text-[10px] text-muted-foreground">Points</p>
+                    <p className="text-xs text-muted-foreground">Points</p>
+                  </div>
+                  <div className="p-2 bg-orange-50 dark:bg-orange-950/30 rounded-lg text-center">
+                    <p className="font-bold text-orange-600">{formatMobiAmount(totalStaked)}</p>
+                    <p className="text-xs text-muted-foreground">Total Staked</p>
                   </div>
                 </div>
 

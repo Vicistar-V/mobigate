@@ -14,16 +14,19 @@ import {
   Eye,
   PenLine,
   Wallet,
+  Zap,
 } from "lucide-react";
 import {
   platformQuizSettings,
   platformQuestionViewSettings,
   platformSolvencySettings,
+  platformContinueStakeSettings,
   setObjectiveTimePerQuestion,
   setNonObjectiveTimePerQuestion,
   setPartialWinPercentage,
   setQuestionViewFee,
   setMerchantSolvencyPercent,
+  setContinuePlayingStakePercent,
 } from "@/data/platformSettingsData";
 import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 
@@ -34,6 +37,7 @@ export function QuizSettingsCard() {
   const [winPercentage, setWinPercentage] = useState(platformQuizSettings.partialWinPercentage);
   const [viewFee, setViewFee] = useState(platformQuestionViewSettings.questionViewFee);
   const [solvencyPercent, setSolvencyPercent] = useState(platformSolvencySettings.merchantSolvencyPercent);
+  const [continueStake, setContinueStake] = useState(platformContinueStakeSettings.continuePlayingStakePercent);
   const [isSaving, setIsSaving] = useState(false);
 
   const hasChanges =
@@ -41,7 +45,8 @@ export function QuizSettingsCard() {
     nonObjTime !== platformQuizSettings.nonObjectiveTimePerQuestion ||
     winPercentage !== platformQuizSettings.partialWinPercentage ||
     viewFee !== platformQuestionViewSettings.questionViewFee ||
-    solvencyPercent !== platformSolvencySettings.merchantSolvencyPercent;
+    solvencyPercent !== platformSolvencySettings.merchantSolvencyPercent ||
+    continueStake !== platformContinueStakeSettings.continuePlayingStakePercent;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -52,10 +57,11 @@ export function QuizSettingsCard() {
     setPartialWinPercentage(winPercentage);
     setQuestionViewFee(viewFee);
     setMerchantSolvencyPercent(solvencyPercent);
+    setContinuePlayingStakePercent(continueStake);
 
     toast({
       title: "Quiz Settings Updated",
-      description: `Objective: ${objTime}s, Non-Objective: ${nonObjTime}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}, Solvency: ${solvencyPercent}%. Changes apply platform-wide.`,
+      description: `Objective: ${objTime}s, Non-Objective: ${nonObjTime}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}, Solvency: ${solvencyPercent}%, Continue Stake: ${continueStake}%. Changes apply platform-wide.`,
     });
     setIsSaving(false);
   };
@@ -272,6 +278,49 @@ export function QuizSettingsCard() {
             <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               Merchants must have at least this percentage of their total prize pool in their wallet to create a season without requesting a waiver.
+            </p>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Continue Playing Stake % */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Continue Playing Stake</span>
+            </div>
+            <Badge variant="secondary" className="text-sm font-bold px-3 py-1">
+              {continueStake}%
+            </Badge>
+          </div>
+
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <p className="text-3xl font-bold text-amber-600">{continueStake}%</p>
+            <p className="text-sm text-muted-foreground">of original stake per continuation</p>
+          </div>
+
+          <div className="px-1">
+            <Slider
+              value={[continueStake]}
+              onValueChange={(values) => setContinueStake(values[0])}
+              min={platformContinueStakeSettings.continuePlayingStakePercentMin}
+              max={platformContinueStakeSettings.continuePlayingStakePercentMax}
+              step={5}
+              className="w-full touch-manipulation"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{platformContinueStakeSettings.continuePlayingStakePercentMin}%</span>
+              <span className="font-medium text-foreground">{continueStake}%</span>
+              <span>{platformContinueStakeSettings.continuePlayingStakePercentMax}%</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg">
+            <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              Percentage of original stake charged each time a player continues to the next session (clicks "Skip Prize, Keep Playing").
             </p>
           </div>
         </div>
