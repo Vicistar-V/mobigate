@@ -450,15 +450,15 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="p-2 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg">
                       <p className="text-xs font-bold text-emerald-700">🌟 100%</p>
-                      <p className="text-[10px] text-muted-foreground">500% Prize</p>
+                      <p className="text-xs text-muted-foreground">500% Prize</p>
                     </div>
                     <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
                       <p className="text-xs font-bold text-blue-700">🔥 90%+</p>
-                      <p className="text-[10px] text-muted-foreground">50% Prize</p>
+                      <p className="text-xs text-muted-foreground">50% Prize</p>
                     </div>
                     <div className="p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
                       <p className="text-xs font-bold text-amber-700">👍 80%+</p>
-                      <p className="text-[10px] text-muted-foreground">20% Prize</p>
+                      <p className="text-xs text-muted-foreground">20% Prize</p>
                     </div>
                   </div>
                 </CardContent>
@@ -487,9 +487,9 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
                     <CardContent className="p-2.5 space-y-1">
                       <div className="flex items-center gap-1.5">
                         <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                        <p className="text-[10px] font-semibold text-amber-700">Reduced Prize: 500% → 350%</p>
+                        <p className="text-xs font-semibold text-amber-700">Reduced Prize: 500% → 350%</p>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">12-14 correct earns 20% consolation prize</p>
+                      <p className="text-xs text-muted-foreground">12-14 correct earns 20% consolation prize</p>
                     </CardContent>
                   </Card>
                 </CardContent>
