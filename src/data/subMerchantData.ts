@@ -15,7 +15,11 @@ export interface SubMerchant {
   totalBundles: number;
   totalCards: number;
   totalSpend: number;
-  discountRate: number; // their own rate for end-users
+  discountRate: number;
+  idCode: string;
+  phone: string;
+  email: string;
+  country: string;
 }
 
 export interface SubMerchantPurchase {
@@ -60,6 +64,10 @@ export const mockSubMerchants: SubMerchant[] = [
     totalCards: 3800,
     totalSpend: 1250000,
     discountRate: 3,
+    idCode: "SM02753900101",
+    phone: "08031234567",
+    email: "adewale@ministore.ng",
+    country: "Ikeja, Lagos, Nigeria",
   },
   {
     id: "sm-002",
@@ -74,6 +82,10 @@ export const mockSubMerchants: SubMerchant[] = [
     totalCards: 2200,
     totalSpend: 780000,
     discountRate: 2,
+    idCode: "SM04819200202",
+    phone: "08059876543",
+    email: "chichi@voucherhub.ng",
+    country: "Surulere, Lagos, Nigeria",
   },
   {
     id: "sm-003",
@@ -88,6 +100,10 @@ export const mockSubMerchants: SubMerchant[] = [
     totalCards: 1200,
     totalSpend: 450000,
     discountRate: 4,
+    idCode: "SM07362100303",
+    phone: "09081122334",
+    email: "ibrahim@digitalpay.ng",
+    country: "Wuse, Abuja (FCT), Nigeria",
   },
   {
     id: "sm-004",
@@ -102,6 +118,10 @@ export const mockSubMerchants: SubMerchant[] = [
     totalCards: 400,
     totalSpend: 150000,
     discountRate: 2,
+    idCode: "SM09154300404",
+    phone: "07044556677",
+    email: "emeka@fastcredit.ng",
+    country: "Port Harcourt, Rivers, Nigeria",
   },
   {
     id: "sm-005",
@@ -116,6 +136,10 @@ export const mockSubMerchants: SubMerchant[] = [
     totalCards: 600,
     totalSpend: 280000,
     discountRate: 3,
+    idCode: "SM06287500505",
+    phone: "08167788990",
+    email: "fatima@mobicorner.ng",
+    country: "Kano, Kano, Nigeria",
   },
 ];
 

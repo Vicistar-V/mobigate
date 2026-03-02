@@ -19,6 +19,7 @@ import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveS
 import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz/HighlightedWinnersCarousel";
 import { shareViaNative, copyToClipboard } from "@/lib/shareUtils";
 import { format } from "date-fns";
+import { SubMerchantAccessGateDrawer } from "@/components/merchant/SubMerchantAccessGateDrawer";
 
 const linkIcons: Record<string, any> = {
   globe: Globe, facebook: Facebook, twitter: Twitter,
@@ -68,6 +69,7 @@ export default function MerchantHomePage() {
   const [showAllVideos, setShowAllVideos] = useState(false);
   const [eventDrawerOpen, setEventDrawerOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<{ date: string; label: string; type: string; seasonId?: string } | null>(null);
+  const [showAccessGate, setShowAccessGate] = useState(false);
 
   const galleryMediaItems: MediaItem[] = useMemo(() =>
     (homeData?.gallery ?? []).map(g => ({
@@ -222,7 +224,7 @@ export default function MerchantHomePage() {
         {/* Voucher CTA */}
         <div className="mt-4 px-2">
           <button
-            onClick={() => navigate(`/buy-vouchers?merchant=${encodeURIComponent(merchant.name)}`)}
+            onClick={() => setShowAccessGate(true)}
             className="w-full relative overflow-hidden rounded-2xl p-3.5 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-lg active:scale-[0.97] transition-transform touch-manipulation"
           >
             <div className="absolute inset-0 opacity-10">
@@ -615,6 +617,11 @@ export default function MerchantHomePage() {
         description={homeData?.about ?? `Check out ${merchant.name} on Mobigate!`}
       />
       <LiveScoreboardDrawer open={scoreboardOpen} onOpenChange={setScoreboardOpen} />
+      <SubMerchantAccessGateDrawer
+        open={showAccessGate}
+        onOpenChange={setShowAccessGate}
+        merchantName={merchant.name}
+      />
     </div>
   );
 }
