@@ -355,7 +355,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                       </div>
                     </div>
                     <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2.5">
-                      <p className="text-[10px] text-muted-foreground">🌟 100% = 500% • 🔥 90% = 50% • 👍 80% = 20%</p>
+                      <p className="text-xs text-muted-foreground">🌟 100% = 500% • 🔥 90% = 50% • 👍 80% = 20%</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -375,9 +375,9 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                       <CardContent className="p-2.5 space-y-1">
                         <div className="flex items-center gap-1.5">
                           <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                          <p className="text-[10px] font-medium text-amber-700">Reduced Prize: 500% → 350%</p>
+                          <p className="text-xs font-medium text-amber-700">Reduced Prize: 500% → 350%</p>
                         </div>
-                        <p className="text-[10px] text-muted-foreground">12-14 correct = 20% consolation prize</p>
+                        <p className="text-xs text-muted-foreground">12-14 correct = 20% consolation prize</p>
                       </CardContent>
                     </Card>
                   </CardContent>
@@ -416,7 +416,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                     <p className="text-sm text-muted-foreground">
                       {lastResult.totalCorrect}/{lastResult.objectiveCorrect + lastResult.nonObjectiveCorrect} correct ({lastResult.percentage}%)
                     </p>
-                    <Badge className="bg-muted text-foreground border-0 text-[10px]">
+                    <Badge className="bg-muted text-foreground border-0 text-xs">
                       {playMode === "objectives_only" ? "Objectives Only" : "Mixed Mode"}
                     </Badge>
                     {lastTier.points > 0 && (
