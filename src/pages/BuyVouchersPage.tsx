@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Sparkles, Check, MapPin, Star, ShieldCheck, ChevronRight, Ticket, CreditCard, Users, UserPlus, Search, Send, X, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Sparkles, Check, MapPin, Star, ShieldCheck, ChevronRight, Ticket, CreditCard, Users, UserPlus, Search, Send, X, CheckCircle2, Mail, MessageCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,8 +16,9 @@ import {
 } from "@/data/mobiMerchantsData";
 import { communityPeople } from "@/data/communityPeopleData";
 import { mockFriends } from "@/data/profileData";
+import { SendViaChannelStep, ChannelType } from "@/components/vouchers/SendViaChannelStep";
 
-type Step = "vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers" | "redeemPin" | "redeemProcessing" | "redeemSuccess";
+type Step = "vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers" | "sendEmail" | "sendMobiChat" | "sendWhatsApp" | "sendSMS" | "redeemPin" | "redeemProcessing" | "redeemSuccess";
 
 // Cart: voucherId -> quantity
 type Cart = Record<string, number>;
@@ -183,6 +184,9 @@ export default function BuyVouchersPage() {
       setStep("distribute");
       setSelectedRecipients({});
       setSearchQuery("");
+    }
+    else if (step === "sendEmail" || step === "sendMobiChat" || step === "sendWhatsApp" || step === "sendSMS") {
+      setStep("distribute");
     }
     window.scrollTo(0, 0);
   };
@@ -1026,6 +1030,54 @@ export default function BuyVouchersPage() {
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </div>
 
+          {/* Send via Email */}
+          <div onClick={() => { setStep("sendEmail"); window.scrollTo(0, 0); }} className="rounded-xl border-2 border-border/50 bg-card p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
+            <div className="h-14 w-14 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+              <Mail className="h-7 w-7 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm text-foreground">Send via Email</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send voucher PIN to an email address</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          {/* Send via Mobi-Chat */}
+          <div onClick={() => { setStep("sendMobiChat"); window.scrollTo(0, 0); }} className="rounded-xl border-2 border-border/50 bg-card p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <MessageCircle className="h-7 w-7 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm text-foreground">Send via Mobi-Chat</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send voucher PIN to a Mobigate user</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          {/* Send via WhatsApp */}
+          <div onClick={() => { setStep("sendWhatsApp"); window.scrollTo(0, 0); }} className="rounded-xl border-2 border-border/50 bg-card p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
+            <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+              <MessageCircle className="h-7 w-7 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm text-foreground">Send via WhatsApp</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send voucher PIN via WhatsApp message</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          {/* Send via SMS */}
+          <div onClick={() => { setStep("sendSMS"); window.scrollTo(0, 0); }} className="rounded-xl border-2 border-border/50 bg-card p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
+            <div className="h-14 w-14 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+              <Phone className="h-7 w-7 text-orange-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm text-foreground">Send via SMS</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send voucher PIN via text message</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+
           {/* Use for self option */}
           <div onClick={handleUseForSelf} className="rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 p-4 flex items-center gap-4 active:scale-[0.97] transition-transform touch-manipulation cursor-pointer">
             <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
@@ -1401,5 +1453,27 @@ export default function BuyVouchersPage() {
   if (step === "success") return renderSuccessStep();
   if (step === "distribute") return renderDistributeStep();
   if (step === "sendToUsers") return renderSendToUsersStep();
+  if (step === "sendEmail" || step === "sendMobiChat" || step === "sendWhatsApp" || step === "sendSMS") {
+    const channelMap: Record<string, ChannelType> = { sendEmail: "email", sendMobiChat: "mobiChat", sendWhatsApp: "whatsApp", sendSMS: "sms" };
+    return (
+      <SendViaChannelStep
+        channel={channelMap[step]}
+        remainingMobi={remainingMobi}
+        onBack={() => { setStep("distribute"); window.scrollTo(0, 0); }}
+        onSendComplete={(amount, recipientLabel) => {
+          setRemainingMobi(prev => prev - amount);
+          setTransfers(prev => [...prev, {
+            id: `t-${Date.now()}`,
+            recipientName: recipientLabel,
+            recipientAvatar: "",
+            amount,
+            timestamp: new Date(),
+          }]);
+          setStep("distribute");
+          window.scrollTo(0, 0);
+        }}
+      />
+    );
+  }
   return null;
 }
