@@ -23,7 +23,7 @@ export function SubMerchantDiscountSettings() {
     setIsSaving(false);
     toast({
       title: "Discount Updated",
-      description: `Your end-user discount set to ${rate}%`,
+      description: `Your end-user discount set to ${rate.toFixed(1)}%`,
     });
   };
 
@@ -36,7 +36,7 @@ export function SubMerchantDiscountSettings() {
           </div>
           <div className="flex-1 text-left">
             <p className="text-sm font-bold text-foreground">My Discount Rate</p>
-            <p className="text-xs text-muted-foreground">Currently {currentRate}% for end-users</p>
+            <p className="text-xs text-muted-foreground">Currently {currentRate.toFixed(1)}% for end-users</p>
           </div>
           {hasChanges && (
             <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 mr-1">
@@ -51,26 +51,26 @@ export function SubMerchantDiscountSettings() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">Discount Percentage</p>
-              <Badge variant="outline" className="font-mono text-xs">{rate}%</Badge>
+              <Badge variant="outline" className="font-mono text-xs">{rate.toFixed(1)}%</Badge>
             </div>
             <Slider
-              value={[rate]}
-              onValueChange={([v]) => setRate(v)}
-              min={0}
-              max={20}
+              value={[rate * 10]}
+              onValueChange={([v]) => setRate(v / 10)}
+              min={1}
+              max={50}
               step={1}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0%</span>
-              <span>20%</span>
+              <span>0.1%</span>
+              <span className="font-semibold text-foreground">≤ 5.0% max</span>
             </div>
           </div>
 
           <div className="flex gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              This is the discount you offer to end-users who purchase vouchers through you. A higher discount attracts more customers.
+              This is the discount you offer to end-users who purchase vouchers through you. Sub-merchants can set discounts between <span className="font-semibold text-foreground">0.1%</span> and <span className="font-semibold text-foreground">5.0%</span> maximum. A higher discount attracts more customers.
             </p>
           </div>
 
