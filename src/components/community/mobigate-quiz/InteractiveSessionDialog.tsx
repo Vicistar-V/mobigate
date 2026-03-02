@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X, Zap, Trophy, AlertTriangle, Shield, Star, TrendingUp, RotateCcw, Gift, BookOpen, Pencil } from "lucide-react";
+import { X, Zap, Trophy, AlertTriangle, Shield, Star, TrendingUp, RotateCcw, Gift, BookOpen, Pencil, Pause, Play, Clock } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -74,6 +74,18 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
   const [lastTier, setLastTier] = useState<ReturnType<typeof calculateQuizTier> | null>(null);
   const [showRedemption, setShowRedemption] = useState(false);
   const [playKey, setPlayKey] = useState(0);
+
+  // Save & Resume session state
+  const [savedSession, setSavedSession] = useState<{
+    points: number;
+    winnings: number;
+    played: number;
+    won: number;
+    lost: number;
+    savedAt: Date;
+  } | null>(null);
+  const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
+  const SAVE_SESSION_EXPIRY_HOURS = 72;
   const [activeObjectives, setActiveObjectives] = useState(allSessionObjectiveQuestions.slice(0, INTERACTIVE_DEFAULT_OBJECTIVE_PICK));
 
   const sessionFee = season.selectionProcesses?.[1]?.entryFee || season.entryFee * 2;
@@ -169,6 +181,51 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
     setSessionPhase("mode_select");
   };
 
+  const handleSaveSession = () => {
+    setSavedSession({
+      points: sessionPoints,
+      winnings: accumulatedWinnings,
+      played: sessionsPlayed,
+      won: sessionsWon,
+      lost: sessionsLost,
+      savedAt: new Date(),
+    });
+    setShowSavedConfirmation(true);
+    toast({
+      title: "💾 Session Saved!",
+      description: `Resume within ${SAVE_SESSION_EXPIRY_HOURS} hours. Points & prizes preserved.`,
+    });
+  };
+
+  const handleResumeSession = () => {
+    if (!savedSession) return;
+    const elapsed = Date.now() - savedSession.savedAt.getTime();
+    const hoursElapsed = elapsed / (1000 * 60 * 60);
+    if (hoursElapsed > SAVE_SESSION_EXPIRY_HOURS) {
+      toast({ title: "⏰ Session Expired", description: "Your saved session has expired (72 hours). Starting fresh.", variant: "destructive" });
+      setSavedSession(null);
+      return;
+    }
+    setSessionPoints(savedSession.points);
+    setAccumulatedWinnings(savedSession.winnings);
+    setSessionsPlayed(savedSession.played);
+    setSessionsWon(savedSession.won);
+    setSessionsLost(savedSession.lost);
+    setSavedSession(null);
+    setShowSavedConfirmation(false);
+    setSessionPhase("lobby");
+    toast({ title: "▶️ Session Resumed!", description: `${savedSession.points} points & ${formatMobiAmount(savedSession.winnings)} winnings restored.` });
+  };
+
+  const handleDismissSaveConfirmation = () => {
+    setShowSavedConfirmation(false);
+    onOpenChange(false);
+  };
+
+  const savedSessionValid = savedSession
+    ? (Date.now() - savedSession.savedAt.getTime()) < SAVE_SESSION_EXPIRY_HOURS * 60 * 60 * 1000
+    : false;
+
   return (
     <>
       <Dialog open={open && !showRedemption} onOpenChange={onOpenChange}>
@@ -216,6 +273,29 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                   </Card>
                 ) : (
                   <>
+                    {/* Resume saved session banner */}
+                    {savedSession && savedSessionValid && (
+                      <Card className="border-2 border-blue-300 bg-blue-50/50 dark:bg-blue-950/20 overflow-hidden">
+                        <div className="h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500" />
+                        <CardContent className="p-3 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Pause className="h-4 w-4 text-blue-600 shrink-0" />
+                            <span className="text-xs font-bold text-blue-700">Saved Session Available</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {savedSession.points} pts · {formatMobiAmount(savedSession.winnings)} winnings · {savedSession.played} sessions
+                          </p>
+                          <Button
+                            className="w-full h-10 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-semibold gap-1.5 touch-manipulation"
+                            onClick={handleResumeSession}
+                          >
+                            <Play className="h-3.5 w-3.5" />
+                            Resume Saved Session
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     {/* Points progress — target 300 */}
                     <Card className="border-amber-200">
                       <CardContent className="p-4 space-y-2">
@@ -527,6 +607,16 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                 >
                   Quit Without Winnings
                 </Button>
+                {(sessionPoints > 0 || accumulatedWinnings > 0) && (
+                  <Button
+                    variant="outline"
+                    className="w-full min-h-[38px] py-2 px-3 text-xs gap-1.5 touch-manipulation border-blue-200 text-blue-600"
+                    onClick={handleSaveSession}
+                  >
+                    <Pause className="h-3.5 w-3.5" />
+                    Save Session to Continue Later
+                  </Button>
+                )}
               </>
             )}
 
@@ -571,6 +661,14 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                   onClick={() => setSessionPhase("lobby")}
                 >
                   Back to Lobby
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full min-h-[38px] py-2 px-3 text-xs gap-1.5 touch-manipulation border-blue-200 text-blue-600"
+                  onClick={handleSaveSession}
+                >
+                  <Pause className="h-3.5 w-3.5" />
+                  Save Session to Continue Later
                 </Button>
               </>
             )}

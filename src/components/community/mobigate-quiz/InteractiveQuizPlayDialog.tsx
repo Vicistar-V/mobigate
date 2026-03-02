@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { 
   ArrowLeft, Clock, Star, Radio, Trophy, Zap, AlertTriangle, Shield, 
   RotateCcw, Gift, BookOpen, Pencil, CheckCircle, Loader2, Wallet,
-  Target, Flame, Skull, Award
+  Target, Flame, Skull, Award, Pause, Play
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,6 +88,18 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
   const [accumulatedPoints, setAccumulatedPoints] = useState(0);
   const [accumulatedWinnings, setAccumulatedWinnings] = useState(0);
   const [totalPlays, setTotalPlays] = useState(0);
+
+  // Save & Resume session state
+  const [savedSession, setSavedSession] = useState<{
+    points: number;
+    winnings: number;
+    plays: number;
+    savedAt: Date;
+    playMode: PlayMode;
+  } | null>(null);
+  const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
+
+  const SAVE_SESSION_EXPIRY_HOURS = 72;
 
   // Loading phase state
   const [loadingStep, setLoadingStep] = useState(0);
@@ -271,6 +283,53 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     }
   };
 
+  const handleSaveSession = () => {
+    setSavedSession({
+      points: accumulatedPoints,
+      winnings: accumulatedWinnings,
+      plays: totalPlays,
+      savedAt: new Date(),
+      playMode,
+    });
+    setShowSavedConfirmation(true);
+    toast({
+      title: "💾 Session Saved!",
+      description: `Resume within ${SAVE_SESSION_EXPIRY_HOURS} hours. Points & prizes preserved.`,
+    });
+  };
+
+  const handleResumeSession = () => {
+    if (!savedSession) return;
+    const elapsed = Date.now() - savedSession.savedAt.getTime();
+    const hoursElapsed = elapsed / (1000 * 60 * 60);
+    if (hoursElapsed > SAVE_SESSION_EXPIRY_HOURS) {
+      toast({ title: "⏰ Session Expired", description: "Your saved session has expired (72 hours). Starting fresh.", variant: "destructive" });
+      setSavedSession(null);
+      return;
+    }
+    setAccumulatedPoints(savedSession.points);
+    setAccumulatedWinnings(savedSession.winnings);
+    setTotalPlays(savedSession.plays);
+    setPlayMode(savedSession.playMode);
+    setSavedSession(null);
+    setShowSavedConfirmation(false);
+    setPhase("mode_select");
+    toast({ title: "▶️ Session Resumed!", description: `${savedSession.points} points & ${formatMobiAmount(savedSession.winnings)} winnings restored.` });
+  };
+
+  const handleDismissSaveConfirmation = () => {
+    setShowSavedConfirmation(false);
+    onOpenChange(false);
+  };
+
+  const savedSessionExpiry = savedSession
+    ? new Date(savedSession.savedAt.getTime() + SAVE_SESSION_EXPIRY_HOURS * 60 * 60 * 1000)
+    : null;
+
+  const savedSessionValid = savedSession
+    ? (Date.now() - savedSession.savedAt.getTime()) < SAVE_SESSION_EXPIRY_HOURS * 60 * 60 * 1000
+    : false;
+
   const progressValue = phase === "mode_select" || phase === "loading" || phase === "debit_confirm" ? 0
     : phase === "objective"
     ? ((currentQ + (showResult ? 1 : 0)) / totalQuestions) * 100
@@ -283,7 +342,73 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
     a => (nonObjectiveAnswers[currentNonObjQ] || "").toLowerCase().includes(a.toLowerCase())
   );
 
-  if (!open && !showRedemption && !showInteractiveSession) return null;
+  if (!open && !showRedemption && !showInteractiveSession && !showSavedConfirmation) return null;
+
+  if (showSavedConfirmation && savedSession) {
+    const expiryDate = new Date(savedSession.savedAt.getTime() + SAVE_SESSION_EXPIRY_HOURS * 60 * 60 * 1000);
+    return (
+      <div className="fixed inset-0 z-50 bg-background flex flex-col">
+        <div className="shrink-0 bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 px-4 py-3 safe-area-inset-top">
+          <div className="text-center">
+            <h2 className="font-bold text-sm text-white">Session Saved</h2>
+            <p className="text-[10px] text-white/70">You can resume anytime within 72 hours</p>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+          <div className="text-center space-y-3">
+            <div className="h-20 w-20 mx-auto rounded-full bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center">
+              <Pause className="h-10 w-10 text-white" />
+            </div>
+            <h3 className="font-bold text-lg">Session Paused</h3>
+            <p className="text-sm text-muted-foreground">Your progress has been saved successfully</p>
+          </div>
+
+          <Card className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20">
+            <CardContent className="p-4 space-y-3">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <p className="text-xl font-black text-primary">{savedSession.points}</p>
+                  <p className="text-xs text-muted-foreground">Points</p>
+                </div>
+                <div>
+                  <p className="text-xl font-black text-emerald-600">{formatMobiAmount(savedSession.winnings)}</p>
+                  <p className="text-xs text-muted-foreground">Winnings</p>
+                </div>
+                <div>
+                  <p className="text-xl font-black">{savedSession.plays}</p>
+                  <p className="text-xs text-muted-foreground">Sessions</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
+            <CardContent className="p-3 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-amber-500 shrink-0" />
+                <span className="text-xs font-semibold text-amber-700">Expiry Notice</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Resume before <strong>{expiryDate.toLocaleDateString()} at {expiryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong> or your session will expire and all progress will be lost.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="shrink-0 border-t bg-background px-4 py-3 space-y-2 safe-area-inset-bottom">
+          <Button
+            className="w-full h-12 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-sm gap-2 touch-manipulation"
+            onClick={handleResumeSession}
+          >
+            <Play className="h-4 w-4" />
+            Resume Session Now
+          </Button>
+          <Button variant="outline" className="w-full h-11 text-sm touch-manipulation" onClick={handleDismissSaveConfirmation}>
+            Exit & Resume Later
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (showRedemption) {
     return <QuizPrizeRedemptionSheet open={showRedemption} onOpenChange={handleRedemptionClose} prizeAmount={instantPrize > 0 ? instantPrize : accumulatedWinnings} prizeType="cash" />;
@@ -421,6 +546,29 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
         {/* MODE SELECT PHASE */}
         {phase === "mode_select" && (
           <div className="px-4 py-6 space-y-5">
+            {/* Resume saved session banner */}
+            {savedSession && savedSessionValid && (
+              <Card className="border-2 border-blue-300 bg-blue-50/50 dark:bg-blue-950/20 overflow-hidden">
+                <div className="h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500" />
+                <CardContent className="p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Pause className="h-4 w-4 text-blue-600 shrink-0" />
+                    <span className="text-xs font-bold text-blue-700">Saved Session Available</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {savedSession.points} pts · {formatMobiAmount(savedSession.winnings)} winnings · {savedSession.plays} sessions played
+                  </p>
+                  <Button
+                    className="w-full h-10 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-semibold gap-1.5 touch-manipulation"
+                    onClick={handleResumeSession}
+                  >
+                    <Play className="h-3.5 w-3.5" />
+                    Resume Saved Session
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="text-center space-y-2">
               <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center mx-auto">
                 <Target className="h-8 w-8 text-white" />
@@ -773,6 +921,10 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
             <Button variant="outline" className="w-full h-10 text-xs touch-manipulation" onClick={handleSkipPrizeContinuePlaying}>
               Continue Playing
             </Button>
+            <Button variant="outline" className="w-full h-10 text-xs gap-1.5 touch-manipulation border-blue-200 text-blue-600" onClick={handleSaveSession}>
+              <Pause className="h-3.5 w-3.5" />
+              Save Session to Continue Later
+            </Button>
           </>
         )}
 
@@ -796,17 +948,27 @@ export function InteractiveQuizPlayDialog({ open, onOpenChange, season }: Intera
               <Star className="h-3.5 w-3.5" />
               Skip Prize, Keep Playing (+{tierResult.points} pts)
             </Button>
+            <Button variant="outline" className="w-full h-10 text-xs gap-1.5 touch-manipulation border-blue-200 text-blue-600" onClick={handleSaveSession}>
+              <Pause className="h-3.5 w-3.5" />
+              Save Session to Continue Later
+            </Button>
           </>
         )}
 
         {/* Result: pass (60-79%) */}
         {phase === "result" && tierResult.tier === "pass" && (
-          <div className="flex gap-2.5">
-            <Button className="flex-1 h-12 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-sm touch-manipulation" onClick={handleSkipPrizeContinuePlaying}>
-              Play Again
-            </Button>
-            <Button variant="outline" className="flex-1 h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
-              Exit
+          <div className="space-y-2">
+            <div className="flex gap-2.5">
+              <Button className="flex-1 h-12 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-sm touch-manipulation" onClick={handleSkipPrizeContinuePlaying}>
+                Play Again
+              </Button>
+              <Button variant="outline" className="flex-1 h-12 text-sm touch-manipulation" onClick={() => onOpenChange(false)}>
+                Exit
+              </Button>
+            </div>
+            <Button variant="outline" className="w-full h-10 text-xs gap-1.5 touch-manipulation border-blue-200 text-blue-600" onClick={handleSaveSession}>
+              <Pause className="h-3.5 w-3.5" />
+              Save Session to Continue Later
             </Button>
           </div>
         )}
