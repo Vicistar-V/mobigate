@@ -204,7 +204,8 @@ export default function MerchantHomePage() {
           </Button>
           <Button
             size="sm"
-            className={`h-10 touch-manipulation active:scale-95 ${isFollowing ? "bg-muted text-foreground hover:bg-muted/80" : "bg-primary text-primary-foreground"}`}
+            variant="outline"
+            className={`h-10 touch-manipulation active:scale-95 ${isFollowing ? "bg-primary/10 border-primary text-primary" : ""}`}
             onClick={handleFollow}
           >
             <UserPlus className="h-4 w-4 mr-1" />
