@@ -11,7 +11,7 @@ import {
   formatNum,
   generateBatchNumber,
 } from "@/data/merchantVoucherData";
-import { platformVoucherDiscountSettings, getTieredDiscount } from "@/data/platformSettingsData";
+import { platformVoucherDiscountSettings, getTieredDiscount, MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
 
 type Step = "denomination" | "bundles" | "summary" | "processing" | "complete";
 
@@ -272,12 +272,20 @@ export default function MerchantVoucherGenerate() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-semibold text-foreground">₦{formatNum(discount.subtotal)}</span>
             </div>
-            {discount.discountPercent > 0 && (
+            {(() => {
+              const batchValue = discount.subtotal;
+              const meetsMinOrder = batchValue >= MIN_DISCOUNT_ORDER_VALUE;
+              return discount.discountPercent > 0 && meetsMinOrder ? (
               <div className="flex justify-between text-sm text-emerald-600">
                 <span>Discount ({discount.discountPercent}%)</span>
                 <span className="font-bold">-₦{formatNum(discount.discountAmount)}</span>
               </div>
-            )}
+              ) : batchValue < MIN_DISCOUNT_ORDER_VALUE && bundleCount >= 5 ? (
+                <p className="text-xs text-amber-600">
+                  Batch value M{formatNum(batchValue)} — needs ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} for discount
+                </p>
+              ) : null;
+            })()}
             <div className="border-t border-border/50 pt-2 flex justify-between">
               <span className="font-bold text-foreground">Total</span>
               <span className="font-black text-lg text-foreground">₦{formatNum(discount.total)}</span>
@@ -303,10 +311,19 @@ export default function MerchantVoucherGenerate() {
                 </Badge>
               </div>
               {(() => {
+                const batchValue = discount.subtotal;
+                const meetsMinOrder = batchValue >= MIN_DISCOUNT_ORDER_VALUE;
+                if (!meetsMinOrder && bundleCount >= 5) {
+                  return (
+                    <p className="text-xs text-amber-600 mt-1">
+                      Batch value M{formatNum(batchValue)} — min M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} needed for discount
+                    </p>
+                  );
+                }
                 const s = platformVoucherDiscountSettings;
                 const nextTierStart = currentTier.tier * s.tierSize + 1;
                 const nextDisc = getTieredDiscount(nextTierStart);
-                if (nextDisc.discountPercent > currentTier.discountPercent) {
+                if (meetsMinOrder && nextDisc.discountPercent > currentTier.discountPercent) {
                   const bundlesNeeded = nextTierStart - bundleCount;
                   return (
                     <p className="text-xs text-muted-foreground mt-1">
