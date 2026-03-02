@@ -1,60 +1,86 @@
 
-# Add Distribution Channels with Manual Recharge PIN Flow
+# Fix: Debit Player on Subsequent Sessions + Track Total Staked + Admin Setting
 
-## Overview
-Add 4 new distribution channels to the "Distribute Vouchers" page (step 7). Each channel sends voucher PINs to recipients via a different method, and recipients must manually recharge the PIN themselves. Each channel gets its own input form drawer and a simulated send flow.
-
-## New Distribution Channels
-1. **Send to Someone's Email** -- enter recipient email + voucher amount, "send" the PIN
-2. **Send to Someone's Mobi-Chat** -- search/select a Mobigate user + voucher amount
-3. **Send to Someone's WhatsApp** -- enter phone number + voucher amount, opens WhatsApp-style share
-4. **Send to Someone's Telephone (SMS)** -- enter phone number + voucher amount, sends via SMS
+## Problem
+1. When a player clicks "Skip Prize, Keep Playing" (or "Continue to Next Session"), subsequent sessions (2nd to 7th+) are NOT debiting the player 50% of the original stake as required.
+2. Statistics don't show "Total Staked" alongside Points, Accrued Wins, and Sessions.
+3. Admin cannot set/edit the "Continue Playing Stake %" percentage.
 
 ## Changes
 
-### 1. Update Step Type and State (BuyVouchersPage.tsx)
-- Extend the `Step` type to include 4 new steps: `"sendEmail"`, `"sendMobiChat"`, `"sendWhatsApp"`, `"sendSMS"`
-- Add state for each channel's form fields (email address, phone number, selected amount, etc.)
-- Add handlers for navigating to each channel and processing the "send"
+### 1. Add Admin Setting: `continuePlayingStakePercent` (platformSettingsData.ts)
+- Add new `PlatformContinueStakeSettings` interface with `continuePlayingStakePercent` (default 50%), min 10%, max 100%.
+- Add getter `getContinuePlayingStakePercent()` and setter `setContinuePlayingStakePercent()`.
 
-### 2. Add 4 New Channel Cards to the Distribute Step (BuyVouchersPage.tsx)
-Insert between "Mobigate Friends" and "Use Remaining for Myself" in `renderDistributeStep`:
-- **Email** card with Mail icon (blue)
-- **Mobi-Chat** card with MessageCircle icon (primary)
-- **WhatsApp** card with MessageCircle icon (green)
-- **SMS** card with Phone icon (orange)
+### 2. Add Admin Slider to QuizSettingsCard.tsx
+- Add a new slider section for "Continue Playing Stake %" between existing settings.
+- Range: 10%-100%, step 5%, default 50%.
+- Description: "Percentage of original stake charged each time a player continues to the next session."
+- Wire into the save handler.
 
-Each card navigates to its respective step.
+### 3. Fix InteractiveQuizPlayDialog.tsx (Standard Interactive Quiz)
+- Add `totalStaked` state, initialized to `season.entryFee` (the first session stake) when the game opens.
+- In `handleSkipPrizeContinuePlaying`: calculate the continuation fee as `season.entryFee * (continuePlayingStakePercent / 100)`, add it to `totalStaked`, and show a toast confirming the debit.
+- In the result phase stats card (the 3-column grid showing Points / Accrued Wins / Sessions): change to a 4-column or 2x2 grid adding "Total Staked" with the running total formatted in Mobi.
 
-### 3. Create Send-via-Channel Render Functions (BuyVouchersPage.tsx)
-Each channel renders a full-screen mobile form with:
-- Sticky header with back button and channel name
-- Balance banner (same as existing distribute step)
-- **Recipient input** (email field / Mobigate user search / phone field)
-- **Amount input** with quick-amount buttons (M100, M500, M1000, M5000)
-- **Voucher PIN preview** area showing the PIN(s) that will be sent
-- A note: "Recipient will need to manually recharge this PIN"
-- **Send button** (disabled until valid recipient + amount > 0)
+### 4. Fix InteractiveSessionDialog.tsx (Session-based Quiz)
+- Add `totalStaked` state, initialized to `sessionFee` when the first session starts.
+- In `handleContinueToNext`: calculate the continuation fee as `sessionFee * (continuePlayingStakePercent / 100)`, add it to `totalStaked`, and show a toast confirming the debit.
+- Add "Total Staked" to the lobby stats grid (currently 3-column: Played/Won/Lost) -- make it a 4-column or add a row.
+- Add "Total Staked" to the session_result stats section as well.
+- Include `totalStaked` in the saved session data so it persists across save/resume.
 
-After sending:
-- Loading spinner (3s simulated)
-- Success screen showing: channel icon, recipient info, amount sent, and a reminder that "Recipient must recharge the PIN manually using the Redeem Voucher feature"
-- "Continue" button returns to the distribute step with updated balance
-
-### 4. Manual Recharge Note
-Each channel's success screen includes a clearly visible info box:
-- "The voucher PIN has been sent. The recipient must enter it manually in the 'Redeem Voucher' section to credit their wallet."
+### 5. Update Save/Resume to include totalStaked
+- Both dialogs' `savedSession` state will include `totalStaked`.
+- Resume restores it; the save confirmation screen displays it.
 
 ## Technical Details
 
-### File: `src/pages/BuyVouchersPage.tsx`
-- Step type becomes: `"vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers" | "sendEmail" | "sendMobiChat" | "sendWhatsApp" | "sendSMS" | "redeemPin" | "redeemProcessing" | "redeemSuccess"`
-- New state variables: `channelRecipient` (string), `channelAmount` (number), `channelSending` (boolean), `channelSent` (boolean)
-- Each channel re-uses the same simulated send flow: set loading, wait 3-4s, show success, deduct from `remainingMobi`, add to `transfers`
-- Mock PIN generation: 16-digit random numeric string displayed in the success screen
-- For Mobi-Chat: reuse existing `mockFriends` data for user selection
-- For WhatsApp/SMS: phone number input with `inputMode="tel"`
-- For Email: email input with `inputMode="email"`
-- Import `Mail`, `Phone`, `MessageCircle` icons from lucide-react (most already imported)
-- Back navigation from any channel step returns to `"distribute"`
-- All forms follow mobile-first 360px design with touch-manipulation, active:scale, and proper input sizing
+### platformSettingsData.ts
+```text
+New interface: PlatformContinueStakeSettings
+  continuePlayingStakePercent: 50 (default)
+  continuePlayingStakePercentMin: 10
+  continuePlayingStakePercentMax: 100
+
+New exports:
+  platformContinueStakeSettings (constant)
+  getContinuePlayingStakePercent(): number
+  setContinuePlayingStakePercent(value: number): void
+```
+
+### InteractiveQuizPlayDialog.tsx
+- New state: `const [totalStaked, setTotalStaked] = useState(season.entryFee)`
+- `handleSkipPrizeContinuePlaying` updated:
+  ```text
+  const continueFee = Math.round(season.entryFee * getContinuePlayingStakePercent() / 100)
+  setTotalStaked(prev => prev + continueFee)
+  toast: "Debited {continueFee} for next session"
+  resetAllState()
+  ```
+- Result stats grid updated from 3 cols to 2x2 grid with Total Staked added.
+- Save/resume includes totalStaked.
+
+### InteractiveSessionDialog.tsx
+- New state: `const [totalStaked, setTotalStaked] = useState(0)` (set to sessionFee on first play)
+- `handleStartSession`: if first play, set totalStaked to sessionFee.
+- `handleContinueToNext` updated:
+  ```text
+  const continueFee = Math.round(sessionFee * getContinuePlayingStakePercent() / 100)
+  setTotalStaked(prev => prev + continueFee)
+  toast: "Debited {continueFee} for next session"
+  ```
+- Lobby and result stats grids updated to show Total Staked.
+- savedSession type extended with `totalStaked`.
+
+### QuizSettingsCard.tsx
+- New local state: `continueStake` initialized from `getContinuePlayingStakePercent()`.
+- New slider section with Zap icon, range 10-100%, step 5%.
+- `handleSave` calls `setContinuePlayingStakePercent(continueStake)`.
+- `hasChanges` checks include the new setting.
+
+## Files Modified
+1. `src/data/platformSettingsData.ts` -- new setting
+2. `src/components/mobigate/QuizSettingsCard.tsx` -- admin slider
+3. `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- debit logic + stats
+4. `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- debit logic + stats
