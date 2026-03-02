@@ -1,42 +1,48 @@
 
-## Add Conditional Input Fields to Business Type Selections
+# Sub-Merchant Access Gate for "Get Vouchers & Bundles"
 
-### Overview
-Add mandatory extra input fields that appear when specific business types are selected in the sub-merchant application form. Also update the reapply data to include these new fields.
+## Overview
+When a Sub-Merchant taps "Get Vouchers & Bundles" on the Merchant Home page, instead of navigating directly to the buy-vouchers page, a **login/verification drawer** will appear requiring Sub-Merchant credentials before granting access.
 
-### Business Type Field Mapping
-- **Retail Shop** -- additional "Shop Address" text input (mandatory)
-- **Mobi Kiosk** -- no additional field
-- **Online Store** -- additional "Website / Store URL" text input (mandatory)
-- **Mobi Shop** -- additional "Mobi Shop Web Address" text input (mandatory)
-- **Mobile Agent** -- no additional field
+## Changes
 
-### Changes
+### 1. Add Sub-Merchant ID-Code fields to mock data
+**File: `src/data/subMerchantData.ts`**
+- Add `idCode`, `phone`, `email`, and `country` fields to the `SubMerchant` interface
+- Populate existing mock sub-merchants with realistic ID-Codes (e.g., "SM02753900101"), phone numbers, emails, and location data (city/state/country)
 
-#### 1. `src/pages/SubMerchantApplicationPage.tsx`
+### 2. Create the Access Gate Drawer component
+**New file: `src/components/merchant/SubMerchantAccessGateDrawer.tsx`**
 
-**Form state**: Add three new fields to the form state:
-- `retailShopAddress: string`
-- `onlineStoreUrl: string`
-- `mobiShopUrl: string`
+A mobile-first bottom-sheet drawer with the following flow:
 
-Pre-fill these from `reapplyData` if available.
+**Login Form:**
+- **Access Code (Sub-Merchant ID-Code)** input field -- typing a valid code auto-fills Telephone, Email, and City/State/Country fields below
+- **Telephone Number** input field -- typing a valid phone auto-fills the ID-Code, Email, and location fields
+- **Email** input (optional)
+- **Country / State** display (auto-populated, e.g., "Awka, Anambra, Nigeria")
+- **"Proceed"** button -- navigates to the buy-vouchers transaction page for that merchant
 
-**Validation**: Update `isValid` to require:
-- `retailShopAddress` is filled when "retail_shop" is selected
-- `onlineStoreUrl` is filled when "online_store" is selected
-- `mobiShopUrl` is filled when "mobi_shop" is selected
+**Auto-fill behavior:**
+- Entering a correct ID-Code instantly looks up the sub-merchant and populates phone, email, and location
+- Entering a correct phone number instantly looks up the sub-merchant and populates ID-Code, email, and location
+- A confirmation card appears showing the matched Sub-Merchant's name and details
 
-**UI**: After each business type checkbox that requires an extra field, conditionally render an Input below it (inside the same label/container or directly after). The input appears only when that business type is checked.
+**Validation:**
+- If no match is found, show an inline error: "No Sub-Merchant found with this ID-Code/Phone"
+- "Proceed" button is disabled until a valid sub-merchant is confirmed
 
-#### 2. `src/pages/SubMerchantApplicationStatus.tsx`
+### 3. Wire the drawer into MerchantHomePage
+**File: `src/pages/MerchantHomePage.tsx`**
+- Add state for the access gate drawer (`showAccessGate`)
+- Change the "Get Vouchers & Bundles" button's `onClick` to open the drawer instead of navigating directly
+- On successful "Proceed", navigate to `/buy-vouchers?merchant=...`
 
-**Reapply data**: Add mock values for the new fields in the `previousData` object:
-- `retailShopAddress: "45 Market Road, Port Harcourt"`
-- `onlineStoreUrl: ""` (not applicable since mock has retail_shop and mobi_kiosk)
-- `mobiShopUrl: ""` (not applicable)
+## Technical Details
 
-### Technical Details
-- Extra input fields use the same styling as existing inputs (`h-11 rounded-xl text-sm`)
-- Fields slide in below their parent checkbox with a small top margin
-- Each conditional input has a descriptive placeholder (e.g., "Enter your shop address", "Enter website or store URL", "Enter Mobi Shop web address")
+- The `SubMerchant` interface gains: `idCode: string`, `phone: string`, `email: string`, `country: string`
+- Mock ID-Codes follow format: `SM` + 11 digits (e.g., `SM02753900101`)
+- Auto-lookup uses a simple `.find()` against `mockSubMerchants` array, matching on `idCode` or `phone`
+- The drawer uses the existing `Drawer`/`DrawerContent` component with `92vh` height for mobile consistency
+- All inputs use `inputMode` attributes for optimal mobile keyboards (`numeric` for phone, `email` for email)
+- The component is purely UI -- no backend calls
