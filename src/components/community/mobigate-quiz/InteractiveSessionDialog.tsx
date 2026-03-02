@@ -320,7 +320,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                         </div>
                         <Progress value={pointsProgress} className="h-2 bg-amber-100 [&>div]:bg-amber-500" />
                         {hasReachedGameShow && (
-                          <Badge className="bg-amber-500 text-white border-0 text-[10px]">🏆 Game Show Entry Unlocked!</Badge>
+                          <Badge className="bg-amber-500 text-white border-0 text-xs">🏆 Game Show Entry Unlocked!</Badge>
                         )}
                       </CardContent>
                     </Card>
@@ -353,7 +353,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                             <span className="text-sm font-medium text-green-700">Accrued Winnings</span>
                             <span className="font-bold text-green-600">{formatMobiAmount(accumulatedWinnings)}</span>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">({formatLocalAmount(accumulatedWinnings, "NGN")})</p>
+                          <p className="text-xs text-muted-foreground">({formatLocalAmount(accumulatedWinnings, "NGN")})</p>
                         </CardContent>
                       </Card>
                     )}
@@ -365,7 +365,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                           <span className="text-sm text-muted-foreground">Session Fee</span>
                           <span className="font-bold">{formatMobiAmount(sessionFee)}</span>
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           ({formatLocalAmount(sessionFee, "NGN")}) per session
                         </p>
                       </CardContent>
@@ -377,8 +377,8 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                         <p className="text-xs font-semibold flex items-center gap-1">
                           <Shield className="h-3.5 w-3.5" /> Scoring & Rules
                         </p>
-                        <div className="space-y-1.5 text-[10px] text-muted-foreground">
-                          <p className="font-medium text-foreground text-[11px]">Mixed Mode (10 Obj + 5 Written):</p>
+                        <div className="space-y-1.5 text-xs text-muted-foreground">
+                          <p className="font-medium text-foreground text-sm">Mixed Mode (10 Obj + 5 Written):</p>
                           <p className="flex items-start gap-1.5">
                             <span className="shrink-0 text-green-500">🌟</span>
                             100% correct = +3 Points, 500% prize
@@ -392,7 +392,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                             80%+ correct = +1 Point, 20% prize
                           </p>
                           <hr className="my-1.5 border-border" />
-                          <p className="font-medium text-foreground text-[11px]">Objectives Only (15 Obj):</p>
+                          <p className="font-medium text-foreground text-sm">Objectives Only (15 Obj):</p>
                           <p className="flex items-start gap-1.5">
                             <span className="shrink-0 text-green-500">🌟</span>
                             15/15 correct = +3 Points, 350% prize
@@ -533,7 +533,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                         <span className="text-sm font-semibold text-green-700">Instant Prize</span>
                       </div>
                       <p className="text-2xl font-bold text-green-600">{formatMobiAmount(currentWinnings)}</p>
-                      <p className="text-[10px] text-muted-foreground">({formatLocalAmount(currentWinnings, "NGN")})</p>
+                      <p className="text-xs text-muted-foreground">({formatLocalAmount(currentWinnings, "NGN")})</p>
                     </CardContent>
                   </Card>
                 )}
@@ -546,7 +546,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                         <Shield className="h-4 w-4 text-red-500" />
                         <span className="text-xs font-bold text-red-700">Full Reset Applied</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">All points and winnings have been reset to zero. You must start fresh.</p>
+                      <p className="text-xs text-muted-foreground">All points and winnings have been reset to zero. You must start fresh.</p>
                     </CardContent>
                   </Card>
                 )}
@@ -575,7 +575,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                 <Card className="border-border">
                   <CardContent className="p-3">
                     <Progress value={pointsProgress} className="h-2 bg-muted [&>div]:bg-amber-500" />
-                    <p className="text-[9px] text-center text-muted-foreground mt-1">{sessionPoints}/{GAME_SHOW_ENTRY_POINTS} points to Game Show</p>
+                    <p className="text-xs text-center text-muted-foreground mt-1">{sessionPoints}/{GAME_SHOW_ENTRY_POINTS} points to Game Show</p>
                   </CardContent>
                 </Card>
 
@@ -665,7 +665,7 @@ export function InteractiveSessionDialog({ open, onOpenChange, season }: Interac
                   onClick={handleContinueToNext}
                 >
                   <Zap className="h-4 w-4 mr-1.5 shrink-0" />
-                  <span>Continue to Next Session (prize dissolved)</span>
+                  <span>Continue to Next Session</span>
                 </Button>
                 {currentWinnings > 0 && (
                   <Button

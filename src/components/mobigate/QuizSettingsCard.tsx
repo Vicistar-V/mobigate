@@ -15,18 +15,21 @@ import {
   PenLine,
   Wallet,
   Zap,
+  Database,
 } from "lucide-react";
 import {
   platformQuizSettings,
   platformQuestionViewSettings,
   platformSolvencySettings,
   platformContinueStakeSettings,
+  platformQuestionBankDistribution,
   setObjectiveTimePerQuestion,
   setNonObjectiveTimePerQuestion,
   setPartialWinPercentage,
   setQuestionViewFee,
   setMerchantSolvencyPercent,
   setContinuePlayingStakePercent,
+  setQuestionBankDistribution,
 } from "@/data/platformSettingsData";
 import { formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 
@@ -38,7 +41,13 @@ export function QuizSettingsCard() {
   const [viewFee, setViewFee] = useState(platformQuestionViewSettings.questionViewFee);
   const [solvencyPercent, setSolvencyPercent] = useState(platformSolvencySettings.merchantSolvencyPercent);
   const [continueStake, setContinueStake] = useState(platformContinueStakeSettings.continuePlayingStakePercent);
+  const [bankMobigate, setBankMobigate] = useState(platformQuestionBankDistribution.mobigatePercent);
+  const [bankMerchantOwn, setBankMerchantOwn] = useState(platformQuestionBankDistribution.merchantOwnPercent);
+  const [bankOtherMerchants, setBankOtherMerchants] = useState(platformQuestionBankDistribution.otherMerchantsPercent);
   const [isSaving, setIsSaving] = useState(false);
+
+  const bankTotal = bankMobigate + bankMerchantOwn + bankOtherMerchants;
+  const bankValid = bankTotal === 100;
 
   const hasChanges =
     objTime !== platformQuizSettings.objectiveTimePerQuestion ||
@@ -46,9 +55,16 @@ export function QuizSettingsCard() {
     winPercentage !== platformQuizSettings.partialWinPercentage ||
     viewFee !== platformQuestionViewSettings.questionViewFee ||
     solvencyPercent !== platformSolvencySettings.merchantSolvencyPercent ||
-    continueStake !== platformContinueStakeSettings.continuePlayingStakePercent;
+    continueStake !== platformContinueStakeSettings.continuePlayingStakePercent ||
+    bankMobigate !== platformQuestionBankDistribution.mobigatePercent ||
+    bankMerchantOwn !== platformQuestionBankDistribution.merchantOwnPercent ||
+    bankOtherMerchants !== platformQuestionBankDistribution.otherMerchantsPercent;
 
   const handleSave = async () => {
+    if (!bankValid) {
+      toast({ title: "⚠️ Invalid Distribution", description: "Question bank percentages must total 100%.", variant: "destructive" });
+      return;
+    }
     setIsSaving(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -58,10 +74,11 @@ export function QuizSettingsCard() {
     setQuestionViewFee(viewFee);
     setMerchantSolvencyPercent(solvencyPercent);
     setContinuePlayingStakePercent(continueStake);
+    setQuestionBankDistribution(bankMobigate, bankMerchantOwn, bankOtherMerchants);
 
     toast({
       title: "Quiz Settings Updated",
-      description: `Objective: ${objTime}s, Non-Objective: ${nonObjTime}s, Partial Win: ${winPercentage}%, View Fee: ${formatMobiAmount(viewFee)}, Solvency: ${solvencyPercent}%, Continue Stake: ${continueStake}%. Changes apply platform-wide.`,
+      description: `All settings saved. Question Bank: ${bankMobigate}% Central / ${bankMerchantOwn}% Merchant / ${bankOtherMerchants}% Others. Changes apply platform-wide.`,
     });
     setIsSaving(false);
   };
@@ -321,6 +338,76 @@ export function QuizSettingsCard() {
             <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               Percentage of original stake charged each time a player continues to the next session (clicks "Skip Prize, Keep Playing").
+            </p>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Question Bank Distribution */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Database className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Question Bank Distribution</span>
+            </div>
+            <Badge variant={bankValid ? "secondary" : "destructive"} className="text-xs font-bold px-2 py-0.5">
+              {bankTotal}%
+            </Badge>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Mobigate Central Bank</span>
+                <span className="text-sm font-bold">{bankMobigate}%</span>
+              </div>
+              <Slider
+                value={[bankMobigate]}
+                onValueChange={(v) => setBankMobigate(v[0])}
+                min={0} max={100} step={5}
+                className="w-full touch-manipulation"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Merchant's Own Bank</span>
+                <span className="text-sm font-bold">{bankMerchantOwn}%</span>
+              </div>
+              <Slider
+                value={[bankMerchantOwn]}
+                onValueChange={(v) => setBankMerchantOwn(v[0])}
+                min={0} max={100} step={5}
+                className="w-full touch-manipulation"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Other Merchants' Banks</span>
+                <span className="text-sm font-bold">{bankOtherMerchants}%</span>
+              </div>
+              <Slider
+                value={[bankOtherMerchants]}
+                onValueChange={(v) => setBankOtherMerchants(v[0])}
+                min={0} max={100} step={5}
+                className="w-full touch-manipulation"
+              />
+            </div>
+          </div>
+
+          {!bankValid && (
+            <div className="flex items-start gap-2 p-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200 rounded-lg">
+              <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-red-700 dark:text-red-300">
+                Total must equal 100%. Currently: {bankTotal}% ({bankTotal > 100 ? `${bankTotal - 100}% over` : `${100 - bankTotal}% short`})
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg">
+            <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground">
+              Controls how questions are sourced during gameplay. Central = Mobigate-curated questions, Merchant = the quiz host's custom questions, Others = questions from other merchants' banks.
             </p>
           </div>
         </div>
