@@ -1,48 +1,60 @@
 
-# Sub-Merchant Access Gate for "Get Vouchers & Bundles"
+# Add Distribution Channels with Manual Recharge PIN Flow
 
 ## Overview
-When a Sub-Merchant taps "Get Vouchers & Bundles" on the Merchant Home page, instead of navigating directly to the buy-vouchers page, a **login/verification drawer** will appear requiring Sub-Merchant credentials before granting access.
+Add 4 new distribution channels to the "Distribute Vouchers" page (step 7). Each channel sends voucher PINs to recipients via a different method, and recipients must manually recharge the PIN themselves. Each channel gets its own input form drawer and a simulated send flow.
+
+## New Distribution Channels
+1. **Send to Someone's Email** -- enter recipient email + voucher amount, "send" the PIN
+2. **Send to Someone's Mobi-Chat** -- search/select a Mobigate user + voucher amount
+3. **Send to Someone's WhatsApp** -- enter phone number + voucher amount, opens WhatsApp-style share
+4. **Send to Someone's Telephone (SMS)** -- enter phone number + voucher amount, sends via SMS
 
 ## Changes
 
-### 1. Add Sub-Merchant ID-Code fields to mock data
-**File: `src/data/subMerchantData.ts`**
-- Add `idCode`, `phone`, `email`, and `country` fields to the `SubMerchant` interface
-- Populate existing mock sub-merchants with realistic ID-Codes (e.g., "SM02753900101"), phone numbers, emails, and location data (city/state/country)
+### 1. Update Step Type and State (BuyVouchersPage.tsx)
+- Extend the `Step` type to include 4 new steps: `"sendEmail"`, `"sendMobiChat"`, `"sendWhatsApp"`, `"sendSMS"`
+- Add state for each channel's form fields (email address, phone number, selected amount, etc.)
+- Add handlers for navigating to each channel and processing the "send"
 
-### 2. Create the Access Gate Drawer component
-**New file: `src/components/merchant/SubMerchantAccessGateDrawer.tsx`**
+### 2. Add 4 New Channel Cards to the Distribute Step (BuyVouchersPage.tsx)
+Insert between "Mobigate Friends" and "Use Remaining for Myself" in `renderDistributeStep`:
+- **Email** card with Mail icon (blue)
+- **Mobi-Chat** card with MessageCircle icon (primary)
+- **WhatsApp** card with MessageCircle icon (green)
+- **SMS** card with Phone icon (orange)
 
-A mobile-first bottom-sheet drawer with the following flow:
+Each card navigates to its respective step.
 
-**Login Form:**
-- **Access Code (Sub-Merchant ID-Code)** input field -- typing a valid code auto-fills Telephone, Email, and City/State/Country fields below
-- **Telephone Number** input field -- typing a valid phone auto-fills the ID-Code, Email, and location fields
-- **Email** input (optional)
-- **Country / State** display (auto-populated, e.g., "Awka, Anambra, Nigeria")
-- **"Proceed"** button -- navigates to the buy-vouchers transaction page for that merchant
+### 3. Create Send-via-Channel Render Functions (BuyVouchersPage.tsx)
+Each channel renders a full-screen mobile form with:
+- Sticky header with back button and channel name
+- Balance banner (same as existing distribute step)
+- **Recipient input** (email field / Mobigate user search / phone field)
+- **Amount input** with quick-amount buttons (M100, M500, M1000, M5000)
+- **Voucher PIN preview** area showing the PIN(s) that will be sent
+- A note: "Recipient will need to manually recharge this PIN"
+- **Send button** (disabled until valid recipient + amount > 0)
 
-**Auto-fill behavior:**
-- Entering a correct ID-Code instantly looks up the sub-merchant and populates phone, email, and location
-- Entering a correct phone number instantly looks up the sub-merchant and populates ID-Code, email, and location
-- A confirmation card appears showing the matched Sub-Merchant's name and details
+After sending:
+- Loading spinner (3s simulated)
+- Success screen showing: channel icon, recipient info, amount sent, and a reminder that "Recipient must recharge the PIN manually using the Redeem Voucher feature"
+- "Continue" button returns to the distribute step with updated balance
 
-**Validation:**
-- If no match is found, show an inline error: "No Sub-Merchant found with this ID-Code/Phone"
-- "Proceed" button is disabled until a valid sub-merchant is confirmed
-
-### 3. Wire the drawer into MerchantHomePage
-**File: `src/pages/MerchantHomePage.tsx`**
-- Add state for the access gate drawer (`showAccessGate`)
-- Change the "Get Vouchers & Bundles" button's `onClick` to open the drawer instead of navigating directly
-- On successful "Proceed", navigate to `/buy-vouchers?merchant=...`
+### 4. Manual Recharge Note
+Each channel's success screen includes a clearly visible info box:
+- "The voucher PIN has been sent. The recipient must enter it manually in the 'Redeem Voucher' section to credit their wallet."
 
 ## Technical Details
 
-- The `SubMerchant` interface gains: `idCode: string`, `phone: string`, `email: string`, `country: string`
-- Mock ID-Codes follow format: `SM` + 11 digits (e.g., `SM02753900101`)
-- Auto-lookup uses a simple `.find()` against `mockSubMerchants` array, matching on `idCode` or `phone`
-- The drawer uses the existing `Drawer`/`DrawerContent` component with `92vh` height for mobile consistency
-- All inputs use `inputMode` attributes for optimal mobile keyboards (`numeric` for phone, `email` for email)
-- The component is purely UI -- no backend calls
+### File: `src/pages/BuyVouchersPage.tsx`
+- Step type becomes: `"vouchers" | "countries" | "merchants" | "payment" | "processing" | "success" | "distribute" | "sendToUsers" | "sendEmail" | "sendMobiChat" | "sendWhatsApp" | "sendSMS" | "redeemPin" | "redeemProcessing" | "redeemSuccess"`
+- New state variables: `channelRecipient` (string), `channelAmount` (number), `channelSending` (boolean), `channelSent` (boolean)
+- Each channel re-uses the same simulated send flow: set loading, wait 3-4s, show success, deduct from `remainingMobi`, add to `transfers`
+- Mock PIN generation: 16-digit random numeric string displayed in the success screen
+- For Mobi-Chat: reuse existing `mockFriends` data for user selection
+- For WhatsApp/SMS: phone number input with `inputMode="tel"`
+- For Email: email input with `inputMode="email"`
+- Import `Mail`, `Phone`, `MessageCircle` icons from lucide-react (most already imported)
+- Back navigation from any channel step returns to `"distribute"`
+- All forms follow mobile-first 360px design with touch-manipulation, active:scale, and proper input sizing
