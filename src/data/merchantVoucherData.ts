@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 export type VoucherCardStatus = "available" | "sold_unused" | "used" | "invalidated";
-export type SoldVia = "physical" | "mobigate_digital" | null;
+export type SoldVia = "physical" | "mobigate_digital" | "offline" | null;
 export type GenerationType = "new" | "replacement";
 
 export interface VoucherCard {
