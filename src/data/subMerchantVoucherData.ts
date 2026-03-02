@@ -226,6 +226,96 @@ export const initialSubMerchantTransactions: MerchantWalletTransaction[] = [
 
 export const initialSubMerchantWalletBalance = 1850000;
 
+// ─── Offline Wallet Data ───
+// Tracks vouchers sold offline at physical shops where sub-merchants
+// collected money directly. Separate from the main wallet (settlements/reconciliation).
+
+export interface OfflineWalletTransaction {
+  id: string;
+  type: "offline_sale";
+  amount: number;
+  mobiEquivalent: number;
+  currency: string;
+  reference: string;
+  createdAt: Date;
+  description: string;
+  batchId: string | null;
+  denomination: number;
+  cardsSold: number;
+}
+
+export const initialOfflineWalletTransactions: OfflineWalletTransaction[] = [
+  {
+    id: "off-txn-1",
+    type: "offline_sale",
+    amount: 50000,
+    mobiEquivalent: 50000,
+    currency: "NGN",
+    reference: "OFF-SALE-001",
+    createdAt: new Date(Date.now() - 8 * 86400000),
+    description: "Sold M500 × 10 cards at Ikeja shop",
+    batchId: null,
+    denomination: 500,
+    cardsSold: 10,
+  },
+  {
+    id: "off-txn-2",
+    type: "offline_sale",
+    amount: 100000,
+    mobiEquivalent: 100000,
+    currency: "NGN",
+    reference: "OFF-SALE-002",
+    createdAt: new Date(Date.now() - 6 * 86400000),
+    description: "Sold M1,000 × 10 cards at Surulere kiosk",
+    batchId: null,
+    denomination: 1000,
+    cardsSold: 10,
+  },
+  {
+    id: "off-txn-3",
+    type: "offline_sale",
+    amount: 25000,
+    mobiEquivalent: 25000,
+    currency: "NGN",
+    reference: "OFF-SALE-003",
+    createdAt: new Date(Date.now() - 4 * 86400000),
+    description: "Sold M500 × 5 cards at Yaba market",
+    batchId: null,
+    denomination: 500,
+    cardsSold: 5,
+  },
+  {
+    id: "off-txn-4",
+    type: "offline_sale",
+    amount: 200000,
+    mobiEquivalent: 200000,
+    currency: "NGN",
+    reference: "OFF-SALE-004",
+    createdAt: new Date(Date.now() - 2 * 86400000),
+    description: "Sold M2,000 × 10 cards at Lekki outlet",
+    batchId: null,
+    denomination: 2000,
+    cardsSold: 10,
+  },
+  {
+    id: "off-txn-5",
+    type: "offline_sale",
+    amount: 15000,
+    mobiEquivalent: 15000,
+    currency: "NGN",
+    reference: "OFF-SALE-005",
+    createdAt: new Date(Date.now() - 1 * 86400000),
+    description: "Sold M100 × 15 cards at Agege stand",
+    batchId: null,
+    denomination: 100,
+    cardsSold: 15,
+  },
+];
+
+export const initialOfflineWalletBalance = 390000; // ₦390,000 total offline sales collected
+export const initialOfflineTotalCardsSold = 50;
+export const initialOfflineTotalTransactions = 5;
+
 // Sub-merchant discount settings
 export let subMerchantDiscountRate = 3; // percentage
 
