@@ -1,76 +1,59 @@
-# Fix: Tiny Text, Button Text Cutoff, and Add Create Questions Button
 
-## Issues Identified (from screenshots)
+# Add Minimum Total Order Value for Bulk Discount Eligibility
 
-1. **Interactive Session Dialog - Scoring & Rules text too tiny** (lines 380-425): Multiple `text-[10px]` and `text-[11px]` instances in the lobby's "Scoring & Rules" card need upgrading to `text-xs` minimum.
-2. **Interactive Session Dialog - Other tiny text**: `text-[10px]` on the local currency amount lines (line 356, 368, 536), Game Show badge (line 323), progress text (line 578).
-3. **Interactive Quiz Play Dialog - Tiny text throughout**: `text-[10px]` on header subtitle (line 459), badge (line 469), score breakdown labels (lines 792, 797), stats labels (lines 861, 865, 869, 873), progress text (line 878), badge (line 785), and redemption warning text (lines 829-833). Also `text-[9px]` on stats labels.
-4. **Interactive Quiz Play Dialog - Written progress text**: `text-[10px]` on line 752.
-5. **Session Complete button text cutoff**: "Continue to Next Session (prize dissolved)" is too long for mobile. Shorten to "Continue to Next Session" with a subtitle or shorter parenthetical.
-6. **Merchant Questions tab - Missing "Create Questions" button**: The QuestionIntegrationTab in MerchantPage.tsx needs a "Create Questions" button above the question list, allowing merchants to create their own questions.
+## Problem
+Currently, a user can buy 10 units of M100 (total M1,000) and unlock a bulk discount. This doesn't make business sense -- discounts should only apply to genuinely large orders.
 
-## Plan
+## Solution
+Add a **minimum total order value of M50,000** to unlock discounts, in addition to the existing minimum quantity of 10.
 
-### File 1: `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx`
+Both conditions must be met:
+1. Quantity >= 10 per denomination
+2. Total order value >= M50,000
 
-- **Line 323**: Change `text-[10px]` to `text-xs` on Game Show badge.
-- **Line 356**: Change `text-[10px]` to `text-xs` on local amount.
-- **Line 368**: Change `text-[10px]` to `text-xs` on local amount.
-- **Lines 380-425 (Scoring & Rules)**: Upgrade all `text-[10px]` to `text-xs` and `text-[11px]` to `text-sm` for the scoring rules section.
-- **Line 536**: Change `text-[10px]` to `text-xs` on local amount under instant prize.
-- **Line 549**: Change `text-[10px]` to `text-xs` on reset description.
-- **Line 578**: Change `text-[9px]` to `text-xs` on progress text.
-- **Line 668**: Shorten "Continue to Next Session (prize dissolved)" to "Continue to Next Session" -- move "(prize dissolved)" info to a separate line or remove since the toast already explains it.
+## Files to Modify
 
-### File 2: `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx`
+### 1. `src/data/platformSettingsData.ts`
+- Add a `minOrderValueForDiscount` setting (default: 50000) to the platform settings
+- Export a constant `MIN_DISCOUNT_ORDER_VALUE = 50000`
 
-- **Line 364**: Change `text-[10px]` to `text-xs` on saved confirmation subtitle.
-- **Line 459**: Change `text-[10px]` to `text-xs` on header subtitle.
-- **Line 469**: Change `text-[10px]` to `text-xs` on badge.
-- **Line 752**: Change `text-[10px]` to `text-xs` on written question progress.
-- **Line 785**: Change `text-[10px]` to `text-xs` on mode badge.
-- **Lines 792, 797**: Change `text-[10px]` to `text-xs` on score breakdown labels.
-- **Lines 829-833**: Change `text-[10px]` to `text-xs` on redemption warning items.
-- **Lines 861, 865, 869, 873**: Change `text-[9px]` to `text-xs` on accumulated stats labels.
-- **Line 878**: Change `text-[9px]` to `text-xs` on progress text.
+### 2. `src/data/merchantVoucherData.ts`
+- Update `calculateBulkDiscount()` to accept an optional `totalOrderValue` parameter
+- When total order value is below M50,000, force discount to 0%
 
-### File 3: `src/pages/MerchantPage.tsx`
+### 3. `src/pages/BuyVouchersPage.tsx` (Consumer Buy Vouchers)
+- Update the "Discount Unlocked!" badge logic: only show when qty >= 10 AND total cart value >= M50,000
+- Update discount eligibility messages to mention both conditions
+- Update the merchant list discount calculations to check total order value
+- Update the payment summary discount calculations
 
-- Add a "Create Questions" button in the `QuestionIntegrationTab` component, placed between the sub-tabs and the integration counter (around line 1519).
-- The button will open a dialog/sheet with the `CreateQuizQuestionForm` component (already exists at `src/components/mobigate/CreateQuizQuestionForm.tsx`).
-- Add state for `showCreateForm` boolean toggle.
-- When a question is created, add it to the available pool and show a success toast.
+### 4. `src/pages/MerchantVoucherGenerate.tsx` (Merchant Voucher Generation)
+- Update discount display to check `denomination * bundleCount * 100 >= 50000` before showing discount
+- Update the tier hint to mention minimum order value if not yet met
+
+### 5. `src/components/mobigate/VoucherDiscountSettingsCard.tsx`
+- Add a display line showing the minimum order value threshold (M50,000)
 
 ## Technical Details
 
-### Typography fixes
+### New constant in `platformSettingsData.ts`
+```typescript
+export const MIN_DISCOUNT_ORDER_VALUE = 50000; // M50,000 minimum
+```
 
-All instances of `text-[10px]`, `text-[9px]`, and `text-[11px]` will be replaced:
+### Updated discount check pattern
+```typescript
+// Before: only quantity check
+const isDiscountEligible = quantity >= 10;
 
-- `text-[9px]` and `text-[10px]` become `text-xs` (12px)
-- `text-[11px]` becomes `text-sm` (14px) for section headers, or `text-xs` for body text
+// After: quantity + total value check
+const isDiscountEligible = quantity >= 10 && totalOrderMobi >= MIN_DISCOUNT_ORDER_VALUE;
+```
 
-### Button text fix
+### Consumer-facing messages
+- When qty < 10: "Min 10 per denomination for discount"
+- When qty >= 10 but total < M50,000: "Total order must be at least M50,000 for discount"
+- When both met: "Discount Unlocked!" (existing badge)
 
-The "Continue to Next Session (prize dissolved)" button in InteractiveSessionDialog.tsx (line 668) will be shortened. The parenthetical text will be removed from the button label since the dissolution is already communicated via the toast notification.
-
-### Create Questions button
-
-- Import `CreateQuizQuestionForm` and add `Dialog` wrapper in `QuestionIntegrationTab`.
-- Add a `+ Create Question` button with a `PlusCircle` icon next to the sub-tabs or below them.
-- Created questions will be added to a local state array and rendered alongside the existing available questions.
-- The form's `quizType` prop will be set to `"interactive"` since this is for merchant quizzes.
-
-## Files Modified
-
-1. `src/components/community/mobigate-quiz/InteractiveSessionDialog.tsx` -- fix tiny text + button text
-2. `src/components/community/mobigate-quiz/InteractiveQuizPlayDialog.tsx` -- fix tiny text
-3. `src/pages/MerchantPage.tsx` -- add Create Questions button + dialog
-
-&nbsp;
-
-Add: 'Create Quiz Questions' button, to enable Quiz Merchants add their custom Questions to their Quiz Game Sessions to backup the Mobigate Central Questions Bank. While Users Play Games on each Merchants' Quizzes, the System will supply like Questions from various available Questions Banks (Mobigate Central Questions Bank - 60%; the particular Merchant's Questions Bank - 30%; then, Other Merchants' respective Questions Banks - 10%)(Mobigate Admin will Set/Edit these).
-
-&nbsp;
-
-Implement the plan completely take your time and carefully implement every single thing and integrate all completely no need to rush and report to me just take your loooong time and make everything perfectly
+### Merchant generation
+- The subtotal check uses `denomination * bundleCount * cardsPerBundle` which is the total Mobi value of the batch
