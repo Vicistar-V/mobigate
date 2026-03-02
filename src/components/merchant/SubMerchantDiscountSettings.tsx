@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Percent, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -64,6 +65,30 @@ export function SubMerchantDiscountSettings() {
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0.1%</span>
               <span className="font-semibold text-foreground">≤ 5.0% max</span>
+            </div>
+
+            {/* Manual Input */}
+            <div className="flex items-center gap-2 pt-1">
+              <label className="text-xs font-medium text-muted-foreground whitespace-nowrap">Enter manually:</label>
+              <div className="relative flex-1 max-w-[120px]">
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  value={rate.toFixed(1)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9.]/g, "");
+                    const num = parseFloat(val);
+                    if (!isNaN(num)) {
+                      const clamped = Math.min(5.0, Math.max(0.1, Math.round(num * 10) / 10));
+                      setRate(clamped);
+                    } else if (val === "" || val === "0") {
+                      setRate(0.1);
+                    }
+                  }}
+                  className="h-9 text-sm font-mono font-semibold text-center rounded-lg pr-6"
+                />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-semibold">%</span>
+              </div>
             </div>
           </div>
 
