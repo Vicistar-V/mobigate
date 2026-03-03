@@ -1,35 +1,25 @@
 
 
-## Plan: Order Summary Enhancements + Print/Reprint for Sold Bundles
+## Plan: Add Regeneration Fee to Confirm Dialog + Platform Setting
 
-### Issue 1: Order Summary Missing Key Financial Lines
-The user's screenshot shows the Order Summary (Step 3 in SubMerchantBuyVouchers) is missing important pricing lines. Currently it shows: Denomination, Bundles, Total Cards, Price per Bundle, Total Cost. It needs to also show:
+### What the user wants
+The regeneration confirm dialog (shown in screenshot) needs an additional line informing the user about a **Regeneration Fee** (e.g., M100 / ₦100.00) before they proceed. This fee amount should be configurable by Mobigate Admin via a platform setting.
 
-- **Total Bundles Retail Value** — the full face value of all voucher cards (denomination x total cards), showing what the vouchers are actually worth
-- **Merchant's Discount** — the discount percentage and amount saved
-- **Total Cost** (renamed from current usage to clarify it's the discounted amount to pay)
+### Changes
 
-**File: `src/pages/SubMerchantBuyVouchers.tsx`**
+**1. Add Regeneration Fee setting to `src/data/platformSettingsData.ts`**
+- Add a new `PlatformRegenerationFeeSettings` interface and exported constant with `regenerationFee: 100`, min/max bounds, and getter/setter functions (`getRegenerationFee()`, `setRegenerationFee()`).
 
-Changes to Step 3 (summary) and Step 5 (receipt):
-- Compute `totalRetailValue` = sum of (denomination x bundleCount x 100) for each selection
-- Compute `totalDiscount` = totalRetailValue - totalCost
-- Add line: "Total Voucher Retail Value" showing ₦X (the face value)
-- Add line: "Merchant's Discount (X%)" showing -₦Y in green
-- Rename "Total Cost" to "Amount to Pay"
-- Apply same additions to the success receipt
+**2. Update Regeneration Confirm Dialog in `src/pages/MerchantVoucherBatchDetail.tsx`**
+- Import `getRegenerationFee` from platformSettingsData.
+- In the `AlertDialogDescription`, after the existing text about regenerating cards, add a new paragraph:
+  > "This action will charge you a Regeneration Fee of **M100 (₦100.00)**. Click 'Regenerate' below to continue, otherwise cancel."
+- The fee amount is dynamically read from `getRegenerationFee()` and formatted with both Mobi and Naira notation.
 
-### Issue 2: Print/Reprint Button for Sold Bundles
-The user's second screenshot shows they want a "Print/Reprint" action for sold cards in expanded bundles — not just for available cards. Currently `Print Bundle (N)` only appears when `bundleAvailable > 0` (available cards).
+**3. Update Regeneration Confirm Dialog in `src/pages/SubMerchantVoucherBatchDetail.tsx`**
+- Same changes as above — add the regeneration fee info text to the sub-merchant's regeneration confirm dialog.
 
-**File: `src/pages/SubMerchantVoucherBatchDetail.tsx`**
-
-- Add a "Print/Reprint (N)" button next to the existing "Print Bundle" button in the expanded bundle view
-- This button counts `sold_unused` cards (sold but not yet used) and allows reprinting them
-- Count: `bundle.cards.filter(c => c.status === "sold_unused").length`
-- The print action reuses the existing `VoucherPrintDrawer` or triggers `window.print()` for those specific cards
-
-### Summary of Changes
-1. **SubMerchantBuyVouchers.tsx** — Add Total Voucher Retail Value, Merchant's Discount, and Amount to Pay lines to both order summary and receipt
-2. **SubMerchantVoucherBatchDetail.tsx** — Add Print/Reprint button for sold bundles in expanded bundle view
+### Summary
+- 3 files modified: `platformSettingsData.ts`, `MerchantVoucherBatchDetail.tsx`, `SubMerchantVoucherBatchDetail.tsx`
+- Fee defaults to M100 (₦100.00), configurable via getter/setter in platform settings
 
