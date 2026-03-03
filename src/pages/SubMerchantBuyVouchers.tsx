@@ -82,6 +82,9 @@ export default function SubMerchantBuyVouchers() {
   }, [selections]);
 
   const totalCost = selectedMerchant ? calcTotalForMerchant(selectedMerchant) : 0;
+  const totalRetailValue = selections.reduce((sum, sel) => sum + sel.denomination * sel.bundleCount * 100, 0);
+  const totalDiscount = totalRetailValue - totalCost;
+  const discountRate = selectedMerchant?.discountRate || 0;
 
   const handleBack = () => {
     if (step === "merchant") setStep("select");
@@ -153,7 +156,10 @@ export default function SubMerchantBuyVouchers() {
       <div class="receipt-row"><span class="label">Total Bundles</span><span class="val">${totalBundles}</span></div>
       <div class="receipt-row"><span class="label">Total Cards</span><span class="val">${formatNum(totalCards)}</span></div>
       <div class="receipt-row"><span class="label">Batch Number</span><span class="val">${receiptData.batchNumber}</span></div>
-      <div class="receipt-total">TOTAL: ₦${formatNum(totalCost)}</div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="label">Total Voucher Retail Value</span><span class="val">₦${formatNum(totalRetailValue)}</span></div>
+      <div class="receipt-row"><span class="label">Merchant's Discount (${discountRate.toFixed(1)}%)</span><span class="val" style="color:green">-₦${formatNum(totalDiscount)}</span></div>
+      <div class="receipt-total">AMOUNT PAID: ₦${formatNum(totalCost)}</div>
       <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(initialSubMerchantWalletBalance - totalCost)}</span></div>
       <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
     `;
@@ -425,8 +431,16 @@ export default function SubMerchantBuyVouchers() {
                 <span className="text-muted-foreground">Total Cards</span>
                 <span className="font-bold text-foreground">{formatNum(totalCards)}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Voucher Retail Value</span>
+                <span className="font-bold text-foreground">₦{formatNum(totalRetailValue)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Merchant's Discount ({discountRate.toFixed(1)}%)</span>
+                <span className="font-bold text-emerald-600">-₦{formatNum(totalDiscount)}</span>
+              </div>
               <div className="border-t border-border/50 pt-2 flex justify-between">
-                <span className="font-bold text-foreground">Total Cost</span>
+                <span className="font-bold text-foreground">Amount to Pay</span>
                 <span className="font-bold text-lg text-foreground">₦{formatNum(totalCost)}</span>
               </div>
             </div>
@@ -536,9 +550,17 @@ export default function SubMerchantBuyVouchers() {
               <span className="text-muted-foreground">Total Cards</span>
               <span className="font-bold text-foreground">{formatNum(totalCards)}</span>
             </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Total Voucher Retail Value</span>
+              <span className="font-bold text-foreground">₦{formatNum(totalRetailValue)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Merchant's Discount ({discountRate.toFixed(1)}%)</span>
+              <span className="font-bold text-emerald-600">-₦{formatNum(totalDiscount)}</span>
+            </div>
 
             <div className="border-t border-border/50 pt-2 flex justify-between">
-              <span className="font-bold text-foreground">Total Paid</span>
+              <span className="font-bold text-foreground">Amount Paid</span>
               <span className="font-black text-lg text-foreground">₦{formatNum(totalCost)}</span>
             </div>
             <div className="flex justify-between text-sm">
