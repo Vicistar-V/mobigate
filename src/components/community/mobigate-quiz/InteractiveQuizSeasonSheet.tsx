@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Zap, Users, Trophy, Radio, Gift, ArrowRight } from "lucide-react";
+import { Zap, Users, Trophy, Radio, Gift, ArrowRight, Handshake } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslati
 import { useToast } from "@/hooks/use-toast";
 import { InteractiveQuizPlayDialog } from "./InteractiveQuizPlayDialog";
 import { LiveScoreboardDrawer } from "./LiveScoreboardDrawer";
+import { ViewSponsorsDrawer } from "./ViewSponsorsDrawer";
 
 interface InteractiveQuizSeasonSheetProps {
   open: boolean;
@@ -24,6 +25,7 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
   const [selectedSeason, setSelectedSeason] = useState<QuizSeason | null>(null);
   const [showPlay, setShowPlay] = useState(false);
   const [showScoreboard, setShowScoreboard] = useState(false);
+  const [sponsorsSeason, setSponsorsSeason] = useState<QuizSeason | null>(null);
 
   const handleJoin = () => {
     if (!selectedSeason) return;
@@ -181,6 +183,18 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
                       })}
                     </div>
                     <p className="text-xs text-muted-foreground text-center">Last 3 levels are Live Shows 📺</p>
+
+                    {/* View Official Sponsors */}
+                    {season.sponsors && season.sponsors.length > 0 && (
+                      <Button
+                        variant="outline"
+                        className="w-full h-9 text-xs font-semibold gap-2 touch-manipulation active:scale-[0.97]"
+                        onClick={(e) => { e.stopPropagation(); setSponsorsSeason(season); }}
+                      >
+                        <Handshake className="h-3.5 w-3.5 text-primary" />
+                        View Official Sponsors ({season.sponsors.length})
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -208,6 +222,12 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
         />
       )}
       <LiveScoreboardDrawer open={showScoreboard} onOpenChange={setShowScoreboard} />
+      <ViewSponsorsDrawer
+        open={!!sponsorsSeason}
+        onOpenChange={(v) => { if (!v) setSponsorsSeason(null); }}
+        sponsors={sponsorsSeason?.sponsors || []}
+        seasonName={sponsorsSeason?.name}
+      />
     </>
   );
 }

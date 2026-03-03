@@ -54,6 +54,7 @@ import {
   Facebook,
   Store,
   Shield,
+  Handshake,
 } from "lucide-react";
 import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
 import {
@@ -81,6 +82,7 @@ import {
   type SelectionProcess,
   type TVShowRound,
   type SeasonWinner,
+  type SeasonSponsor,
 } from "@/data/mobigateInteractiveQuizData";
 import {
   INITIAL_ADMIN_QUESTIONS,
@@ -99,6 +101,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CreateQuizQuestionForm } from "@/components/mobigate/CreateQuizQuestionForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
+import { ManageSponsorsSheet } from "@/components/community/mobigate-quiz/ManageSponsorsSheet";
 
 // Simulate "my merchant" = first approved merchant
 const myMerchant = mockMerchants.find((m) => m.applicationStatus === "approved")!;
@@ -305,6 +308,8 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
   // Waiver state
   const [waiverRequested, setWaiverRequested] = useState(false);
   const [waiverContext, setWaiverContext] = useState("");
+  // Sponsors state
+  const [manageSponsorsSeason, setManageSponsorsSeason] = useState<QuizSeason | null>(null);
   // Create form state
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<"Short" | "Medium" | "Complete">("Short");
@@ -1031,6 +1036,9 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
                     <Button size="sm" variant="default" className="h-9 text-xs gap-1 flex-1 bg-gradient-to-r from-primary to-primary/80 touch-manipulation active:scale-[0.97]" onClick={() => { setBoostSeasonId(season.id); setBoostStep('menu'); setSelectedFriends([]); setStorePromoMessage(""); }}>
                       <Megaphone className="h-3 w-3" /> Boost Show
                     </Button>
+                    <Button size="sm" variant="outline" className="h-9 text-xs gap-1 flex-1 touch-manipulation active:scale-[0.97]" onClick={() => setManageSponsorsSeason(season)}>
+                      <Handshake className="h-3 w-3" /> Sponsors
+                    </Button>
                     <Button size="sm" variant="destructive" className="h-9 text-xs gap-1 touch-manipulation active:scale-[0.97]" onClick={() => deleteSeason(season.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -1307,6 +1315,22 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
           </Card>
         );
       })}
+
+      {/* Manage Sponsors Sheet */}
+      <ManageSponsorsSheet
+        open={!!manageSponsorsSeason}
+        onOpenChange={(v) => { if (!v) setManageSponsorsSeason(null); }}
+        sponsors={manageSponsorsSeason?.sponsors || []}
+        onSponsorsChange={(newSponsors) => {
+          if (manageSponsorsSeason) {
+            setSeasons((prev) => prev.map((s) =>
+              s.id === manageSponsorsSeason.id ? { ...s, sponsors: newSponsors } : s
+            ));
+            setManageSponsorsSeason({ ...manageSponsorsSeason, sponsors: newSponsors });
+          }
+        }}
+        seasonName={manageSponsorsSeason?.name}
+      />
     </div>
   );
 }
