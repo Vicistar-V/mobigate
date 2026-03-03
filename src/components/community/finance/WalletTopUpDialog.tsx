@@ -35,6 +35,7 @@ import { VoucherDenominationSelector } from "./VoucherDenominationSelector";
 import { MerchantSelectionStep } from "./MerchantSelectionStep";
 import { SelectedVoucher, calculateVoucherTotals } from "@/data/rechargeVouchersData";
 import { MerchantCountry, MobiMerchant, calculateDiscountedAmount } from "@/data/mobiMerchantsData";
+import { MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
 
 interface WalletTopUpDialogProps {
   open: boolean;
@@ -53,11 +54,27 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const isMobile = useIsMobile();
 
   const totals = calculateVoucherTotals(selectedVouchers);
-  
-  // Calculate discounted amount if merchant selected
-  const discountInfo = selectedMerchant 
-    ? calculateDiscountedAmount(totals.totalNgn, selectedMerchant.discountPercent)
-    : { discounted: totals.totalNgn, savings: 0 };
+  const meetsMinOrderValue = totals.totalMobi >= MIN_DISCOUNT_ORDER_VALUE;
+  const hasEligibleQuantity = selectedVouchers.some((sv) => sv.quantity >= 10);
+
+  const itemBreakdown = selectedVouchers.map((sv) => {
+    const lineTotal = sv.voucher.ngnPrice * sv.quantity;
+    const isDiscountEligible = !!selectedMerchant && sv.quantity >= 10 && meetsMinOrderValue;
+    const savings = isDiscountEligible
+      ? calculateDiscountedAmount(lineTotal, selectedMerchant.discountPercent).savings
+      : 0;
+    return { ...sv, lineTotal, savings, discounted: lineTotal - savings, isDiscountEligible };
+  });
+
+  const totalRegular = itemBreakdown.reduce((sum, item) => sum + item.lineTotal, 0);
+  const totalSavings = itemBreakdown.reduce((sum, item) => sum + item.savings, 0);
+  const discountInfo = { discounted: totalRegular - totalSavings, savings: totalSavings };
+  const hasBulkDiscount =
+    !!selectedMerchant &&
+    selectedMerchant.discountPercent > 0 &&
+    hasEligibleQuantity &&
+    meetsMinOrderValue &&
+    totalSavings > 0;
 
   const handleContinueToMerchants = () => {
     if (selectedVouchers.length === 0) {
@@ -188,6 +205,9 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
   const renderMerchantsStep = () => (
     <MerchantSelectionStep
       totalAmount={totals.totalNgn}
+      totalMobi={totals.totalMobi}
+      hasEligibleQuantity={hasEligibleQuantity}
+      meetsMinOrderValue={meetsMinOrderValue}
       onSelectMerchant={handleSelectMerchant}
       onBack={handleBack}
     />
@@ -210,7 +230,7 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
               </div>
               
               {/* Discount Info */}
-              {selectedMerchant && selectedMerchant.discountPercent > 0 && (
+              {hasBulkDiscount && (
                 <>
                   <div className="flex justify-between text-sm pt-2 border-t">
                     <span className="text-muted-foreground">Original Amount</span>
@@ -221,13 +241,21 @@ export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground flex items-center gap-1">
                       <BadgePercent className="h-3.5 w-3.5 text-green-600" />
-                      Discount ({selectedMerchant.discountPercent}%)
+                      Discount ({selectedMerchant?.discountPercent}%)
                     </span>
                     <span className="text-green-600 font-medium">
                       -₦{discountInfo.savings.toLocaleString()}
                     </span>
                   </div>
                 </>
+              )}
+
+              {selectedMerchant && selectedMerchant.discountPercent > 0 && !hasBulkDiscount && (
+                <p className="text-xs text-amber-600 pt-2 border-t">
+                  {!hasEligibleQuantity
+                    ? "Bulk discount starts when at least one denomination has 10+ units."
+                    : `Total order must be at least M${MIN_DISCOUNT_ORDER_VALUE.toLocaleString()} to unlock discount.`}
+                </p>
               )}
               
               <div className="flex justify-between pt-2 border-t">

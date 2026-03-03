@@ -20,9 +20,13 @@ import {
   getOtherCountries,
   calculateDiscountedAmount,
 } from "@/data/mobiMerchantsData";
+import { MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
 
 interface MerchantSelectionStepProps {
   totalAmount: number;
+  totalMobi: number;
+  hasEligibleQuantity: boolean;
+  meetsMinOrderValue: boolean;
   onSelectMerchant: (country: MerchantCountry, merchant: MobiMerchant) => void;
   onBack: () => void;
 }
@@ -31,6 +35,9 @@ type SubStep = "countries" | "merchants";
 
 export function MerchantSelectionStep({
   totalAmount,
+  totalMobi,
+  hasEligibleQuantity,
+  meetsMinOrderValue,
   onSelectMerchant,
   onBack,
 }: MerchantSelectionStepProps) {
@@ -179,15 +186,25 @@ export function MerchantSelectionStep({
           {/* Merchant List */}
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Choose Merchant</h4>
-            
+            {!hasEligibleQuantity && (
+              <p className="text-xs text-amber-600">
+                No bulk discount yet: set at least one denomination to 10+ units.
+              </p>
+            )}
+            {hasEligibleQuantity && !meetsMinOrderValue && (
+              <p className="text-xs text-amber-600">
+                No bulk discount yet: total order must be ≥ M{MIN_DISCOUNT_ORDER_VALUE.toLocaleString()} (current M{totalMobi.toLocaleString()}).
+              </p>
+            )}
+
             {selectedCountry?.merchants
               .filter((m) => m.isActive)
               .sort((a, b) => b.discountPercent - a.discountPercent)
               .map((merchant) => {
-                const { discounted, savings } = calculateDiscountedAmount(
-                  totalAmount,
-                  merchant.discountPercent
-                );
+                const hasBulkDiscount = hasEligibleQuantity && meetsMinOrderValue;
+                const { savings } = hasBulkDiscount
+                  ? calculateDiscountedAmount(totalAmount, merchant.discountPercent)
+                  : { savings: 0 };
 
                 return (
                   <Card
@@ -217,16 +234,24 @@ export function MerchantSelectionStep({
                         </div>
                         {/* Discount Info */}
                         <div className="flex items-center gap-2 pt-1">
-                          <Badge 
-                            variant="secondary" 
-                            className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 text-xs"
-                          >
-                            <BadgePercent className="h-3 w-3 mr-1" />
-                            {merchant.discountPercent}% OFF
-                          </Badge>
-                          <span className="text-xs text-green-600 dark:text-green-400">
-                            Save ₦{savings.toLocaleString()}
-                          </span>
+                          {hasBulkDiscount ? (
+                            <>
+                              <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 text-xs"
+                              >
+                                <BadgePercent className="h-3 w-3 mr-1" />
+                                {merchant.discountPercent}% OFF
+                              </Badge>
+                              <span className="text-xs text-green-600 dark:text-green-400">
+                                Save ₦{savings.toLocaleString()}
+                              </span>
+                            </>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">
+                              No Discount
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
