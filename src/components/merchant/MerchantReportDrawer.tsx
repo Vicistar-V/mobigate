@@ -45,47 +45,47 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// ─── Report Categories ───
+// ─── Report Categories (Platform Standard) ───
 const reportCategories = [
   {
-    value: "fraud",
-    label: "Fraud / Scam",
-    description: "Suspected fraudulent activity or scam operations",
+    value: "scam-fraud",
+    label: "Scam / Fraud",
+    description: "Suspected scam, fraudulent activity, or financial deception",
     icon: ShieldAlert,
     color: "text-red-500",
   },
   {
-    value: "misleading",
-    label: "Misleading Information",
-    description: "False or misleading product/service claims",
-    icon: MessageSquareWarning,
-    color: "text-amber-500",
-  },
-  {
-    value: "counterfeit",
-    label: "Counterfeit Products",
-    description: "Selling fake or counterfeit vouchers/products",
-    icon: PackageX,
+    value: "assault-bullying",
+    label: "Assault / Bullying",
+    description: "Threatening behaviour, intimidation, or bullying conduct",
+    icon: UserX,
     color: "text-orange-500",
   },
   {
-    value: "financial",
-    label: "Financial Irregularity",
-    description: "Pricing issues, hidden charges, or payment problems",
-    icon: BanknoteIcon,
+    value: "harassment-threat",
+    label: "Harassment / Threat",
+    description: "Harassment, threats of violence, or intimidation",
+    icon: MessageSquareWarning,
+    color: "text-amber-600",
+  },
+  {
+    value: "deception-falsehood",
+    label: "Deception / Falsehood",
+    description: "False claims, misleading information, or impersonation",
+    icon: PackageX,
     color: "text-purple-500",
   },
   {
-    value: "impersonation",
-    label: "Impersonation",
-    description: "Pretending to be another merchant or brand",
-    icon: UserX,
+    value: "social-abuse",
+    label: "Social Abuse",
+    description: "Abuse of platform features, spam, or inappropriate content",
+    icon: BanknoteIcon,
     color: "text-blue-500",
   },
   {
-    value: "other",
-    label: "Other",
-    description: "Other concerns not listed above",
+    value: "other-offenses",
+    label: "Other Offenses",
+    description: "Other concerns or violations not listed above",
     icon: Flag,
     color: "text-muted-foreground",
   },
@@ -104,35 +104,35 @@ interface ReportTemplate {
 const reportTemplates: ReportTemplate[] = [
   {
     id: "t1",
-    name: "Voucher Not Received",
-    category: "financial",
-    description: "Payment was made but voucher codes were never delivered",
+    name: "Voucher Scam Report",
+    category: "scam-fraud",
+    description: "Payment was made but voucher codes were never delivered or are fake",
     prefillText:
-      "I completed a payment for vouchers on [DATE] (Transaction Ref: [REF]) but have not received the voucher codes. The amount charged was [AMOUNT]. I have waited [X] hours/days and the vouchers are still not in my account.",
+      "I completed a payment for vouchers on [DATE] (Transaction Ref: [REF]) but have not received valid voucher codes. The amount charged was [AMOUNT]. I believe this is a scam because [REASON].",
     popularity: 142,
   },
   {
     id: "t2",
-    name: "Invalid Voucher Codes",
-    category: "counterfeit",
-    description: "Voucher codes received are invalid or already used",
+    name: "Threatening Behaviour",
+    category: "harassment-threat",
+    description: "Merchant threatened or harassed me during a transaction dispute",
     prefillText:
-      "I purchased vouchers from this merchant on [DATE] and received codes that are invalid/already redeemed. Batch reference: [REF]. I tried redeeming [X] vouchers and none of them worked. This appears to be fraudulent activity.",
+      "During a dispute about [ISSUE] on [DATE], this merchant sent threatening messages including [DESCRIBE THREATS]. I felt unsafe and believe this behaviour violates platform rules.",
     popularity: 98,
   },
   {
     id: "t3",
-    name: "Overcharging / Hidden Fees",
-    category: "financial",
-    description: "Merchant charged more than the advertised price",
+    name: "False Discount Claims",
+    category: "deception-falsehood",
+    description: "Advertised discounts are false or exaggerated",
     prefillText:
-      "This merchant advertised a discount of [X]% but I was charged [AMOUNT] instead of the expected [AMOUNT]. The pricing displayed on the platform does not match the actual charge. Transaction reference: [REF].",
-    popularity: 76,
+      "This merchant advertises [X]% discount on vouchers but the actual discount is significantly lower at [Y]%. The advertised price of [AMOUNT] does not reflect the actual purchase price of [AMOUNT]. This is deceptive to customers.",
+    popularity: 89,
   },
   {
     id: "t4",
     name: "Fake Merchant Profile",
-    category: "impersonation",
+    category: "deception-falsehood",
     description: "This merchant is impersonating a legitimate business",
     prefillText:
       "I believe this merchant profile is impersonating [REAL MERCHANT NAME]. The logo, name, and description appear to be copied from the legitimate business. The real merchant operates at [LOCATION] while this profile seems fraudulent.",
@@ -140,21 +140,21 @@ const reportTemplates: ReportTemplate[] = [
   },
   {
     id: "t5",
-    name: "Misleading Discount Claims",
-    category: "misleading",
-    description: "Advertised discounts are false or exaggerated",
+    name: "Spam / Platform Abuse",
+    category: "social-abuse",
+    description: "Merchant is spamming, manipulating reviews, or abusing platform features",
     prefillText:
-      "This merchant advertises [X]% discount on vouchers but the actual discount is significantly lower at [Y]%. The advertised price of [AMOUNT] does not reflect the actual purchase price of [AMOUNT]. This is misleading to customers.",
-    popularity: 89,
+      "This merchant is abusing the platform by [DESCRIBE ABUSE e.g. fake reviews, spam messages, manipulating ratings]. I have observed this on [DATE(S)] and it affects [HOW IT AFFECTS OTHER USERS].",
+    popularity: 63,
   },
   {
     id: "t6",
-    name: "Suspicious Activity",
-    category: "fraud",
-    description: "General suspicious behavior from this merchant",
+    name: "Bullying / Intimidation",
+    category: "assault-bullying",
+    description: "Merchant engaged in bullying or intimidating behaviour",
     prefillText:
-      "I would like to report suspicious activity from this merchant. Specifically: [DESCRIBE WHAT YOU OBSERVED]. This occurred on [DATE]. I believe this needs investigation because [REASON].",
-    popularity: 63,
+      "This merchant engaged in bullying/intimidating behaviour on [DATE]. Specifically: [DESCRIBE WHAT HAPPENED]. This made me feel [IMPACT] and I believe action should be taken.",
+    popularity: 41,
   },
 ];
 
@@ -173,17 +173,17 @@ interface PreviousReport {
 const mockPreviousReports: PreviousReport[] = [
   {
     id: "mr1",
-    category: "financial",
+    category: "scam-fraud",
     description:
       "Payment was made for M5,000 vouchers but only M2,000 worth of codes were delivered. Transaction ref: TXN-20240115-4829.",
     submittedAt: "2024-01-15T10:30:00",
     status: "investigating",
     reference: "RPT-MRC-2024-001",
-    templateUsed: "Voucher Not Received",
+    templateUsed: "Voucher Scam Report",
   },
   {
     id: "mr2",
-    category: "misleading",
+    category: "deception-falsehood",
     description:
       "Merchant advertised 15% discount but the actual discount applied was only 3%. The advertised price of ₦4,250 per M5,000 voucher does not match the charge of ₦4,850.",
     submittedAt: "2023-12-20T16:45:00",
@@ -191,18 +191,18 @@ const mockPreviousReports: PreviousReport[] = [
     reference: "RPT-MRC-2023-089",
     resolution:
       "Investigation confirmed pricing discrepancy. Merchant has been issued a warning and required to update pricing information. Refund of ₦600 has been processed to the reporter.",
-    templateUsed: "Misleading Discount Claims",
+    templateUsed: "False Discount Claims",
   },
   {
     id: "mr3",
-    category: "fraud",
+    category: "harassment-threat",
     description:
-      "Received voucher codes that were already redeemed by someone else. 8 out of 10 codes purchased were invalid.",
+      "Merchant sent threatening messages after I raised a complaint about invalid voucher codes. Screenshots attached.",
     submittedAt: "2023-11-05T09:15:00",
     status: "dismissed",
     reference: "RPT-MRC-2023-072",
     resolution:
-      "After investigation, the voucher codes were found to be valid at the time of purchase. The codes may have been compromised after delivery due to a security issue on the buyer's device.",
+      "After investigation, the messages were determined to be a misunderstanding. Both parties have been counselled on proper communication.",
   },
 ];
 
