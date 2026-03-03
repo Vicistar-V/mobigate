@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, Store, FileText, ShoppingBag, Eye, ArrowDownRight, Settings, Wifi, WifiOff, X, UserCheck } from "lucide-react";
+import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, Store, FileText, ShoppingBag, Eye, ArrowDownRight, Settings, Wifi, WifiOff, X, UserCheck, Bell, RotateCcw, CheckCircle2, Clock, XCircle, MapPin, CalendarDays, Receipt, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -10,6 +10,7 @@ import {
   initialOfflineWalletBalance, initialOfflineWalletTransactions,
   initialOfflineTotalCardsSold, initialOfflineTotalTransactions,
   type OfflineWalletTransaction,
+  type MerchantApplicationRequest,
 } from "@/data/subMerchantVoucherData";
 import { getBatchStatusCounts, formatNum, type VoucherBatch } from "@/data/merchantVoucherData";
 import { SubMerchantDiscountSettings } from "@/components/merchant/SubMerchantDiscountSettings";
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
 
 /** Get sold breakdown: online vs offline for a batch */
 function getSoldBreakdown(batch: VoucherBatch) {
@@ -40,6 +42,7 @@ export default function SubMerchantVoucherManagement() {
   const [offlineTransactions] = useState(initialOfflineWalletTransactions);
   const [showOfflineDrawer, setShowOfflineDrawer] = useState(false);
   const [showCreditDrawer, setShowCreditDrawer] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<MerchantApplicationRequest | null>(null);
   // Settings state
   const [autoTagOffline, setAutoTagOffline] = useState(true);
   const [offlineNotifications, setOfflineNotifications] = useState(true);
@@ -438,19 +441,26 @@ export default function SubMerchantVoucherManagement() {
           <TabsContent value="applications">
             <div className="space-y-2.5">
               {mockMerchantApplications.map(app => (
-                <div key={app.id} className="rounded-xl border border-border/50 bg-card p-4">
+                <div
+                  key={app.id}
+                  onClick={() => setSelectedApp(app)}
+                  className="rounded-xl border border-border/50 bg-card p-4 cursor-pointer active:scale-[0.97] transition-transform touch-manipulation"
+                >
                   <div className="flex items-start justify-between mb-1">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-foreground">{app.merchantName}</p>
                       <p className="text-xs text-muted-foreground">{app.merchantCity}</p>
                     </div>
-                    <Badge className={`text-xs h-5 px-2 ${
-                      app.status === "accepted" ? "bg-emerald-500/15 text-emerald-600" :
-                      app.status === "pending" ? "bg-amber-500/15 text-amber-600" :
-                      "bg-destructive/15 text-destructive"
-                    } capitalize`}>
-                      {app.status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`text-xs h-5 px-2 ${
+                        app.status === "accepted" ? "bg-emerald-500/15 text-emerald-600" :
+                        app.status === "pending" ? "bg-amber-500/15 text-amber-600" :
+                        "bg-destructive/15 text-destructive"
+                      } capitalize`}>
+                        {app.status === "accepted" ? "Accepted" : app.status === "pending" ? "Pending" : "Rejected"}
+                      </Badge>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </div>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
                     <span>{app.dateSubmitted.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</span>
@@ -464,6 +474,174 @@ export default function SubMerchantVoucherManagement() {
                 </div>
               )}
             </div>
+
+            {/* Application Detail Drawer */}
+            <Drawer open={!!selectedApp} onOpenChange={(v) => { if (!v) setSelectedApp(null); }}>
+              <DrawerContent className="max-h-[92vh]">
+                {selectedApp && (() => {
+                  const statusIcon = selectedApp.status === "accepted" ? CheckCircle2 : selectedApp.status === "pending" ? Clock : XCircle;
+                  const StatusIcon = statusIcon;
+                  const statusColor = selectedApp.status === "accepted" ? "text-emerald-600" : selectedApp.status === "pending" ? "text-amber-600" : "text-destructive";
+                  const statusBg = selectedApp.status === "accepted" ? "bg-emerald-500/15" : selectedApp.status === "pending" ? "bg-amber-500/15" : "bg-destructive/15";
+
+                  return (
+                    <>
+                      <DrawerHeader className="text-left pb-2">
+                        <DrawerTitle className="text-base">{selectedApp.merchantName}</DrawerTitle>
+                        <p className="text-xs text-muted-foreground">{selectedApp.merchantCity}</p>
+                      </DrawerHeader>
+
+                      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-6 space-y-4">
+                        {/* Status Badge */}
+                        <div className="flex flex-col items-center text-center py-4">
+                          <div className={`h-16 w-16 rounded-full ${statusBg} flex items-center justify-center mb-3`}>
+                            <StatusIcon className={`h-8 w-8 ${statusColor}`} />
+                          </div>
+                          <Badge variant="outline" className={`${statusBg} ${statusColor} border-0 text-sm px-4 py-1 capitalize`}>
+                            {selectedApp.status === "accepted" ? "Accepted" : selectedApp.status === "pending" ? "Pending Review" : "Rejected"}
+                          </Badge>
+                        </div>
+
+                        {/* Details Card */}
+                        <Card className="rounded-xl">
+                          <CardContent className="p-4 space-y-2.5">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> Submitted</span>
+                              <span className="font-medium">{selectedApp.dateSubmitted.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Location</span>
+                              <span className="font-medium">{selectedApp.merchantCity}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground flex items-center gap-1.5"><Receipt className="h-3.5 w-3.5" /> Application Fee</span>
+                              <span className="font-medium">₦{formatNum(selectedApp.applicationFee)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Reference</span>
+                              <span className="font-medium font-mono text-xs">SM-{selectedApp.id.toUpperCase()}</span>
+                            </div>
+
+                            {/* Status-specific details */}
+                            {selectedApp.status === "pending" && (
+                              <div className="pt-2 border-t">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Est. Review Time</span>
+                                  <span className="font-medium text-amber-600">7-14 business days</span>
+                                </div>
+                              </div>
+                            )}
+
+                            {selectedApp.status === "accepted" && selectedApp.approvedDate && (
+                              <div className="pt-2 border-t space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Approved Date</span>
+                                  <span className="font-medium text-emerald-600">{selectedApp.approvedDate.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</span>
+                                </div>
+                                {selectedApp.discountRate && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Discount Rate</span>
+                                    <span className="font-bold text-emerald-600">{selectedApp.discountRate}%</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {selectedApp.status === "rejected" && selectedApp.rejectionReason && (
+                              <div className="pt-2 border-t">
+                                <p className="text-xs text-muted-foreground mb-1 font-semibold">Rejection Reason</p>
+                                <p className="text-sm text-foreground leading-relaxed">{selectedApp.rejectionReason}</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        {/* Action Buttons */}
+                        <div className="space-y-2.5 pt-1">
+                          {selectedApp.status === "pending" && (
+                            <>
+                              <Button
+                                className="w-full h-12 rounded-xl text-sm font-semibold gap-2 touch-manipulation active:scale-[0.97]"
+                                variant="outline"
+                                onClick={() => {
+                                  toast({ title: "📨 Reminder Sent", description: `A reminder has been sent to ${selectedApp.merchantName} to review your application.` });
+                                }}
+                              >
+                                <Bell className="h-4 w-4" />
+                                Send Reminder to {selectedApp.merchantName}
+                              </Button>
+                              <div className="rounded-xl bg-muted/50 border border-border/30 p-3">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-foreground">ℹ️ Note:</span> Your application is being reviewed by <span className="font-semibold">{selectedApp.merchantName}</span>. You'll be notified once they take action. You can send a reminder if it's been more than 7 days.
+                                </p>
+                              </div>
+                            </>
+                          )}
+
+                          {selectedApp.status === "accepted" && (
+                            <>
+                              <Button
+                                className="w-full h-12 rounded-xl text-sm font-semibold gap-2 touch-manipulation active:scale-[0.97]"
+                                onClick={() => {
+                                  setSelectedApp(null);
+                                  navigate(`/merchant-home/${selectedApp.merchantId || "pm-001"}`);
+                                }}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                Visit Merchant Store
+                              </Button>
+                              <Button
+                                className="w-full h-12 rounded-xl text-sm font-semibold gap-2 touch-manipulation active:scale-[0.97]"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedApp(null);
+                                  navigate("/sub-merchant-buy-vouchers");
+                                }}
+                              >
+                                <Store className="h-4 w-4" />
+                                Buy Vouchers from This Merchant
+                              </Button>
+                              <div className="rounded-xl bg-emerald-500/5 border border-emerald-200/30 p-3">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-emerald-700">✅ Active Partnership:</span> You're approved as a retail merchant under <span className="font-semibold">{selectedApp.merchantName}</span>. You can purchase vouchers at a discounted rate{selectedApp.discountRate ? ` of ${selectedApp.discountRate}%` : ""}.
+                                </p>
+                              </div>
+                            </>
+                          )}
+
+                          {selectedApp.status === "rejected" && (
+                            <>
+                              <Button
+                                className="w-full h-12 rounded-xl text-sm font-semibold gap-2 touch-manipulation active:scale-[0.97]"
+                                onClick={() => {
+                                  setSelectedApp(null);
+                                  navigate(`/apply-sub-merchant/${selectedApp.merchantId || "pm-004"}`, {
+                                    state: {
+                                      prefill: {
+                                        merchantName: selectedApp.merchantName,
+                                        merchantCity: selectedApp.merchantCity,
+                                      },
+                                    },
+                                  });
+                                }}
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                                Re-apply to {selectedApp.merchantName}
+                              </Button>
+                              <div className="rounded-xl bg-destructive/5 border border-destructive/20 p-3">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-destructive">❌ Application Declined:</span> Review the rejection reason above and address the issues before re-applying. Your previous application fee is non-refundable.
+                                </p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </DrawerContent>
+            </Drawer>
           </TabsContent>
 
           {/* Settings Tab */}
