@@ -159,7 +159,7 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
 
   return (
     <Drawer open={open} onOpenChange={(v) => { if (!v) handleClose(); else onOpenChange(v); }}>
-      <DrawerContent className="max-h-[92vh]">
+      <DrawerContent className="max-h-[92vh] min-h-[70vh]">
         <DrawerHeader className="pb-2">
           <div className="flex items-center gap-2">
             {step !== "lookup" && step !== "guest-register" && (
