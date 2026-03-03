@@ -1,15 +1,15 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Check, Store, ChevronRight, CreditCard, CheckCircle2, Package, Printer, Receipt } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Check, Store, ChevronRight, CreditCard, CheckCircle2, Package, Printer, Receipt, Trash2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { mockParentMerchants, ParentMerchant, MerchantStock, initialSubMerchantWalletBalance } from "@/data/subMerchantVoucherData";
 import { formatNum, generateBatchNumber } from "@/data/merchantVoucherData";
 
-type Step = "denomination" | "bundles" | "merchant" | "summary" | "processing" | "success";
+type Step = "select" | "merchant" | "summary" | "processing" | "success";
 
-interface SelectedItem {
+interface SelectedDenom {
   denomination: number;
   bundleCount: number;
 }
@@ -19,9 +19,8 @@ const PROCESSING_MESSAGES = ["Connecting to merchant...", "Processing order...",
 export default function SubMerchantBuyVouchers() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [step, setStep] = useState<Step>("denomination");
-  const [selectedDenom, setSelectedDenom] = useState<number | null>(null);
-  const [bundleCount, setBundleCount] = useState(1);
+  const [step, setStep] = useState<Step>("select");
+  const [selections, setSelections] = useState<SelectedDenom[]>([]);
   const [selectedMerchant, setSelectedMerchant] = useState<ParentMerchant | null>(null);
   const [processingMsg, setProcessingMsg] = useState(0);
   const [receiptData] = useState(() => ({
@@ -36,24 +35,56 @@ export default function SubMerchantBuyVouchers() {
     return [...denoms].sort((a, b) => a - b);
   }, []);
 
+  const isSelected = (d: number) => selections.some(s => s.denomination === d);
+  const getSelection = (d: number) => selections.find(s => s.denomination === d);
+
+  const toggleDenom = (d: number) => {
+    if (isSelected(d)) {
+      setSelections(prev => prev.filter(s => s.denomination !== d));
+    } else {
+      setSelections(prev => [...prev, { denomination: d, bundleCount: 1 }]);
+    }
+  };
+
+  const updateBundleCount = (d: number, delta: number) => {
+    setSelections(prev => prev.map(s =>
+      s.denomination === d ? { ...s, bundleCount: Math.max(1, s.bundleCount + delta) } : s
+    ));
+  };
+
+  const setBundleCountDirect = (d: number, val: number) => {
+    setSelections(prev => prev.map(s =>
+      s.denomination === d ? { ...s, bundleCount: val } : s
+    ));
+  };
+
+  const totalBundles = selections.reduce((sum, s) => sum + s.bundleCount, 0);
+  const totalCards = totalBundles * 100;
+
+  // Merchants that have ALL selected denominations in stock with enough bundles
   const merchantsWithStock = useMemo(() => {
-    if (!selectedDenom) return [];
-    return mockParentMerchants.filter(pm =>
-      pm.status === "active" && pm.availableStock.some(s => s.denomination === selectedDenom && s.availableBundles > 0)
-    );
-  }, [selectedDenom]);
+    if (selections.length === 0) return [];
+    return mockParentMerchants.filter(pm => {
+      if (pm.status !== "active") return false;
+      return selections.every(sel => {
+        const stock = pm.availableStock.find(s => s.denomination === sel.denomination);
+        return stock && stock.availableBundles >= sel.bundleCount;
+      });
+    });
+  }, [selections]);
 
-  const selectedStock = useMemo(() => {
-    if (!selectedMerchant || !selectedDenom) return null;
-    return selectedMerchant.availableStock.find(s => s.denomination === selectedDenom) || null;
-  }, [selectedMerchant, selectedDenom]);
+  // Calculate total cost for a given merchant
+  const calcTotalForMerchant = useCallback((merchant: ParentMerchant) => {
+    return selections.reduce((sum, sel) => {
+      const stock = merchant.availableStock.find(s => s.denomination === sel.denomination);
+      return sum + (stock ? stock.pricePerBundle * sel.bundleCount : 0);
+    }, 0);
+  }, [selections]);
 
-  const totalCost = selectedStock ? selectedStock.pricePerBundle * bundleCount : 0;
-  const totalCards = bundleCount * 100;
+  const totalCost = selectedMerchant ? calcTotalForMerchant(selectedMerchant) : 0;
 
   const handleBack = () => {
-    if (step === "bundles") setStep("denomination");
-    else if (step === "merchant") setStep("bundles");
+    if (step === "merchant") setStep("select");
     else if (step === "summary") setStep("merchant");
     else navigate(-1);
     window.scrollTo(0, 0);
@@ -80,6 +111,13 @@ export default function SubMerchantBuyVouchers() {
   }, [step]);
 
   const handlePrintReceipt = useCallback(() => {
+    const denomRows = selections.map(sel => {
+      const stock = selectedMerchant?.availableStock.find(s => s.denomination === sel.denomination);
+      return `
+        <div class="receipt-row"><span class="label">M${formatNum(sel.denomination)} × ${sel.bundleCount} bundle${sel.bundleCount !== 1 ? "s" : ""}</span><span class="val">₦${formatNum((stock?.pricePerBundle || 0) * sel.bundleCount)}</span></div>
+      `;
+    }).join("");
+
     const printDiv = document.createElement("div");
     printDiv.id = "receipt-print-area";
     printDiv.innerHTML = `
@@ -109,12 +147,12 @@ export default function SubMerchantBuyVouchers() {
       <div class="receipt-row"><span class="label">Time</span><span class="val">${receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}</span></div>
       <div class="receipt-divider"></div>
       <div class="receipt-row"><span class="label">Purchased From</span><span class="val">${selectedMerchant?.name || ""}</span></div>
-      <div class="receipt-row"><span class="label">Denomination</span><span class="val">M${formatNum(selectedDenom || 0)}</span></div>
-      <div class="receipt-row"><span class="label">Bundles</span><span class="val">${bundleCount}</span></div>
+      <div class="receipt-divider"></div>
+      ${denomRows}
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="label">Total Bundles</span><span class="val">${totalBundles}</span></div>
       <div class="receipt-row"><span class="label">Total Cards</span><span class="val">${formatNum(totalCards)}</span></div>
       <div class="receipt-row"><span class="label">Batch Number</span><span class="val">${receiptData.batchNumber}</span></div>
-      <div class="receipt-divider"></div>
-      <div class="receipt-row"><span class="label">Price/Bundle</span><span class="val">₦${formatNum(selectedStock?.pricePerBundle || 0)}</span></div>
       <div class="receipt-total">TOTAL: ₦${formatNum(totalCost)}</div>
       <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(initialSubMerchantWalletBalance - totalCost)}</span></div>
       <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
@@ -125,99 +163,141 @@ export default function SubMerchantBuyVouchers() {
     window.addEventListener("afterprint", cleanup);
     printDiv.style.display = "block";
     setTimeout(() => window.print(), 100);
-  }, [selectedDenom, selectedMerchant, bundleCount, totalCards, totalCost, selectedStock, receiptData]);
+  }, [selections, selectedMerchant, totalBundles, totalCards, totalCost, receiptData]);
 
-  // Step 1: Select denomination
-  if (step === "denomination") {
+  // Step 1: Select denominations + bundle counts
+  if (step === "select") {
     return (
-      <div className="bg-background min-h-screen pb-6">
+      <div className="bg-background min-h-screen pb-32">
         <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-base font-bold text-foreground">Buy from Merchant</h1>
-            <p className="text-xs text-muted-foreground">Step 1: Select denomination</p>
+            <p className="text-xs text-muted-foreground">Select denominations & quantities</p>
           </div>
+          {selections.length > 0 && (
+            <Badge className="bg-primary/15 text-primary text-xs font-bold">
+              {selections.length} selected
+            </Badge>
+          )}
         </div>
+
         <div className="px-4 pt-4">
-          <p className="text-sm text-foreground mb-3">Choose the voucher denomination you want to purchase:</p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {availableDenoms.map(d => (
-              <div
-                key={d}
-                onClick={() => { setSelectedDenom(d); setStep("bundles"); setBundleCount(1); window.scrollTo(0, 0); }}
-                className="rounded-xl border-2 border-border/50 bg-card p-4 text-center active:scale-[0.96] transition-transform touch-manipulation cursor-pointer hover:border-primary/30"
-              >
-                <p className="text-xs text-muted-foreground mb-0.5">Mobi</p>
-                <p className="text-lg font-black text-foreground">M{formatNum(d)}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">≈ ₦{formatNum(d)}</p>
+          <p className="text-sm text-foreground mb-3">
+            Tap to select denominations, then set bundle count for each:
+          </p>
+
+          <div className="space-y-2.5">
+            {availableDenoms.map(d => {
+              const selected = isSelected(d);
+              const sel = getSelection(d);
+              return (
+                <div
+                  key={d}
+                  className={`rounded-xl border-2 transition-all touch-manipulation ${
+                    selected
+                      ? "border-primary bg-primary/5"
+                      : "border-border/50 bg-card"
+                  }`}
+                >
+                  {/* Denomination row - tappable */}
+                  <div
+                    onClick={() => toggleDenom(d)}
+                    className="flex items-center justify-between p-3.5 cursor-pointer active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        selected ? "bg-primary border-primary" : "border-muted-foreground/30"
+                      }`}>
+                        {selected && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+                      </div>
+                      <div>
+                        <p className="text-base font-black text-foreground">M{formatNum(d)}</p>
+                        <p className="text-xs text-muted-foreground">≈ ₦{formatNum(d)}</p>
+                      </div>
+                    </div>
+                    {selected && sel && (
+                      <Badge variant="secondary" className="text-xs font-bold">
+                        {sel.bundleCount} bundle{sel.bundleCount !== 1 ? "s" : ""}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Bundle count controls - only when selected */}
+                  {selected && sel && (
+                    <div className="border-t border-border/30 px-3.5 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); updateBundleCount(d, -1); }}
+                          className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation"
+                        >
+                          <Minus className="h-4 w-4 text-foreground" />
+                        </button>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          value={sel.bundleCount === 0 ? '' : sel.bundleCount}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            const raw = e.target.value;
+                            if (raw === '') { setBundleCountDirect(d, 0); return; }
+                            const val = parseInt(raw);
+                            if (!isNaN(val) && val >= 0) setBundleCountDirect(d, val);
+                          }}
+                          onBlur={() => { if ((sel.bundleCount || 0) < 1) setBundleCountDirect(d, 1); }}
+                          className="w-14 text-xl font-black text-foreground text-center bg-transparent border-b-2 border-primary/40 focus:border-primary outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          style={{ MozAppearance: 'textfield' } as React.CSSProperties}
+                        />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); updateBundleCount(d, 1); }}
+                          className="h-9 w-9 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation"
+                        >
+                          <Plus className="h-4 w-4 text-primary-foreground" />
+                        </button>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">{formatNum(sel.bundleCount * 100)} cards</p>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleDenom(d); }}
+                        className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center active:scale-90 touch-manipulation ml-2"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Summary footer */}
+        {selections.length > 0 && (
+          <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="text-xs text-muted-foreground">
+                <span className="font-bold text-foreground">{selections.length}</span> denomination{selections.length !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{totalBundles}</span> bundle{totalBundles !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{formatNum(totalCards)}</span> cards
               </div>
-            ))}
+            </div>
+            <Button
+              onClick={() => { setStep("merchant"); window.scrollTo(0, 0); }}
+              className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Choose Merchant <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
           </div>
-        </div>
+        )}
       </div>
     );
   }
 
-  // Step 2: Select bundle count
-  if (step === "bundles") {
-    return (
-      <div className="bg-background min-h-screen pb-32">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
-          <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
-            <ArrowLeft className="h-5 w-5 text-foreground" />
-          </button>
-          <div>
-            <h1 className="text-base font-bold text-foreground">M{formatNum(selectedDenom!)} Vouchers</h1>
-            <p className="text-xs text-muted-foreground">Step 2: How many bundles?</p>
-          </div>
-        </div>
-        <div className="px-4 pt-6 flex flex-col items-center">
-          <p className="text-sm text-muted-foreground mb-4">Each bundle contains 100 cards</p>
-          <div className="flex items-center gap-6 mb-6">
-            <button onClick={() => setBundleCount(Math.max(1, bundleCount - 1))} className="h-12 w-12 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
-              <Minus className="h-5 w-5 text-foreground" />
-            </button>
-            <div className="text-center">
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={bundleCount === 0 ? '' : bundleCount}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  if (raw === '') { setBundleCount(0); return; }
-                  const val = parseInt(raw);
-                  if (!isNaN(val) && val >= 0) setBundleCount(val);
-                }}
-                onBlur={() => { if (bundleCount < 1) setBundleCount(1); }}
-                className="w-20 text-4xl font-black text-foreground text-center bg-transparent border-b-2 border-primary/40 focus:border-primary outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                style={{ MozAppearance: 'textfield' }}
-              />
-              <p className="text-xs text-muted-foreground mt-1">bundle{bundleCount !== 1 ? "s" : ""}</p>
-            </div>
-            <button onClick={() => setBundleCount(bundleCount + 1)} className="h-12 w-12 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation">
-              <Plus className="h-5 w-5 text-primary-foreground" />
-            </button>
-          </div>
-          <div className="rounded-xl bg-muted/50 p-4 w-full space-y-1">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Cards</span>
-              <span className="font-bold text-foreground">{formatNum(bundleCount * 100)}</span>
-            </div>
-          </div>
-        </div>
-        <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
-          <Button onClick={() => { setStep("merchant"); window.scrollTo(0, 0); }} className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]">
-            Select Merchant <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 3: Select merchant
+  // Step 2: Select merchant
   if (step === "merchant") {
     return (
       <div className="bg-background min-h-screen pb-6">
@@ -227,23 +307,38 @@ export default function SubMerchantBuyVouchers() {
           </button>
           <div>
             <h1 className="text-base font-bold text-foreground">Select Merchant</h1>
-            <p className="text-xs text-muted-foreground">M{formatNum(selectedDenom!)} × {bundleCount} bundle{bundleCount !== 1 ? "s" : ""}</p>
+            <p className="text-xs text-muted-foreground">
+              {selections.length} denomination{selections.length !== 1 ? "s" : ""} · {totalBundles} bundle{totalBundles !== 1 ? "s" : ""}
+            </p>
           </div>
         </div>
-        <div className="px-4 pt-3 space-y-2.5">
+
+        {/* Order summary badges */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="flex flex-wrap gap-1.5">
+            {selections.map(sel => (
+              <Badge key={sel.denomination} variant="secondary" className="text-xs font-bold">
+                M{formatNum(sel.denomination)} × {sel.bundleCount}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="px-4 space-y-2.5">
           {merchantsWithStock.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-sm text-muted-foreground">No merchants have M{formatNum(selectedDenom!)} in stock</p>
+              <Store className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No merchants can fulfill this entire order</p>
+              <p className="text-xs text-muted-foreground mt-1">Try reducing bundle counts or removing a denomination</p>
             </div>
           )}
           {merchantsWithStock.map(pm => {
-            const stock = pm.availableStock.find(s => s.denomination === selectedDenom)!;
-            const canFulfill = stock.availableBundles >= bundleCount;
+            const merchantTotal = calcTotalForMerchant(pm);
             return (
               <div
                 key={pm.id}
-                onClick={() => { if (canFulfill) { setSelectedMerchant(pm); setStep("summary"); window.scrollTo(0, 0); } }}
-                className={`rounded-xl border border-border/50 bg-card p-4 transition-transform touch-manipulation cursor-pointer ${canFulfill ? "active:scale-[0.97]" : "opacity-50"}`}
+                onClick={() => { setSelectedMerchant(pm); setStep("summary"); window.scrollTo(0, 0); }}
+                className="rounded-xl border border-border/50 bg-card p-4 transition-transform touch-manipulation cursor-pointer active:scale-[0.97]"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -252,11 +347,22 @@ export default function SubMerchantBuyVouchers() {
                   </div>
                   <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold">{pm.discountRate}% OFF</Badge>
                 </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{stock.availableBundles} bundles available</span>
-                  <span>₦{formatNum(stock.pricePerBundle)}/bundle</span>
+                {/* Per-denom stock info */}
+                <div className="space-y-1 mb-2">
+                  {selections.map(sel => {
+                    const stock = pm.availableStock.find(s => s.denomination === sel.denomination);
+                    return (
+                      <div key={sel.denomination} className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>M{formatNum(sel.denomination)}: {stock?.availableBundles || 0} avail</span>
+                        <span>₦{formatNum((stock?.pricePerBundle || 0) * sel.bundleCount)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-                {!canFulfill && <p className="text-xs text-destructive mt-1">Not enough stock for {bundleCount} bundles</p>}
+                <div className="border-t border-border/30 pt-2 flex justify-between">
+                  <span className="text-xs font-bold text-foreground">Total</span>
+                  <span className="text-sm font-black text-foreground">₦{formatNum(merchantTotal)}</span>
+                </div>
               </div>
             );
           })}
@@ -265,7 +371,7 @@ export default function SubMerchantBuyVouchers() {
     );
   }
 
-  // Step 4: Order summary
+  // Step 3: Order summary
   if (step === "summary") {
     return (
       <div className="bg-background min-h-screen pb-32">
@@ -279,6 +385,7 @@ export default function SubMerchantBuyVouchers() {
           </div>
         </div>
         <div className="px-4 pt-4 space-y-4">
+          {/* Merchant info */}
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Store className="h-5 w-5 text-primary" />
@@ -289,26 +396,39 @@ export default function SubMerchantBuyVouchers() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border/50 bg-card p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Denomination</span>
-              <span className="font-bold text-foreground">M{formatNum(selectedDenom!)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Bundles</span>
-              <span className="font-bold text-foreground">{bundleCount}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total Cards</span>
-              <span className="font-bold text-foreground">{formatNum(totalCards)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Price per Bundle</span>
-              <span className="font-bold text-foreground">₦{formatNum(selectedStock?.pricePerBundle || 0)}</span>
-            </div>
-            <div className="border-t border-border/50 pt-2 flex justify-between">
-              <span className="font-bold text-foreground">Total Cost</span>
-              <span className="font-bold text-lg text-foreground">₦{formatNum(totalCost)}</span>
+          {/* Line items */}
+          <div className="rounded-xl border border-border/50 bg-card p-4 space-y-3">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order Items</p>
+            {selections.map(sel => {
+              const stock = selectedMerchant?.availableStock.find(s => s.denomination === sel.denomination);
+              const lineTotal = (stock?.pricePerBundle || 0) * sel.bundleCount;
+              return (
+                <div key={sel.denomination} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
+                  <div>
+                    <p className="text-sm font-bold text-foreground">M{formatNum(sel.denomination)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {sel.bundleCount} bundle{sel.bundleCount !== 1 ? "s" : ""} · {formatNum(sel.bundleCount * 100)} cards
+                    </p>
+                    <p className="text-xs text-muted-foreground">₦{formatNum(stock?.pricePerBundle || 0)}/bundle</p>
+                  </div>
+                  <p className="text-sm font-bold text-foreground">₦{formatNum(lineTotal)}</p>
+                </div>
+              );
+            })}
+
+            <div className="border-t border-border/50 pt-3 space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Bundles</span>
+                <span className="font-bold text-foreground">{totalBundles}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Cards</span>
+                <span className="font-bold text-foreground">{formatNum(totalCards)}</span>
+              </div>
+              <div className="border-t border-border/50 pt-2 flex justify-between">
+                <span className="font-bold text-foreground">Total Cost</span>
+                <span className="font-bold text-lg text-foreground">₦{formatNum(totalCost)}</span>
+              </div>
             </div>
           </div>
 
@@ -326,7 +446,7 @@ export default function SubMerchantBuyVouchers() {
     );
   }
 
-  // Step 5: Processing
+  // Step 4: Processing
   if (step === "processing") {
     return (
       <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
@@ -348,10 +468,9 @@ export default function SubMerchantBuyVouchers() {
     );
   }
 
-  // Step 6: Success with Receipt
+  // Step 5: Success with Receipt
   return (
     <div className="bg-background min-h-screen pb-6">
-      {/* Success Header */}
       <div className="flex flex-col items-center pt-8 pb-4 px-6">
         <div className="relative w-20 h-20 mb-4">
           <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: "2s" }} />
@@ -364,7 +483,6 @@ export default function SubMerchantBuyVouchers() {
         <p className="text-sm text-muted-foreground">From {selectedMerchant?.name}</p>
       </div>
 
-      {/* Receipt Card */}
       <div className="mx-4">
         <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
           <div className="bg-muted/40 px-4 py-3 border-b border-border/30 text-center">
@@ -394,25 +512,31 @@ export default function SubMerchantBuyVouchers() {
 
             <div className="border-t border-dashed border-border/50 my-1" />
 
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Items</p>
+            {selections.map(sel => {
+              const stock = selectedMerchant?.availableStock.find(s => s.denomination === sel.denomination);
+              const lineTotal = (stock?.pricePerBundle || 0) * sel.bundleCount;
+              return (
+                <div key={sel.denomination} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    M{formatNum(sel.denomination)} × {sel.bundleCount} bundle{sel.bundleCount !== 1 ? "s" : ""}
+                  </span>
+                  <span className="font-bold text-foreground">₦{formatNum(lineTotal)}</span>
+                </div>
+              );
+            })}
+
+            <div className="border-t border-dashed border-border/50 my-1" />
+
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Denomination</span>
-              <span className="font-bold text-foreground">M{formatNum(selectedDenom!)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Bundles</span>
-              <span className="font-bold text-foreground">{bundleCount}</span>
+              <span className="text-muted-foreground">Total Bundles</span>
+              <span className="font-bold text-foreground">{totalBundles}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Cards</span>
               <span className="font-bold text-foreground">{formatNum(totalCards)}</span>
             </div>
 
-            <div className="border-t border-dashed border-border/50 my-1" />
-
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Price per Bundle</span>
-              <span className="font-semibold text-foreground">₦{formatNum(selectedStock?.pricePerBundle || 0)}</span>
-            </div>
             <div className="border-t border-border/50 pt-2 flex justify-between">
               <span className="font-bold text-foreground">Total Paid</span>
               <span className="font-black text-lg text-foreground">₦{formatNum(totalCost)}</span>
@@ -425,7 +549,6 @@ export default function SubMerchantBuyVouchers() {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="mx-4 mt-4 space-y-3">
         <Button
           onClick={handlePrintReceipt}
