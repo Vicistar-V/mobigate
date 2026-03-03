@@ -39,6 +39,8 @@ export default function SubMerchantVoucherBatchDetail() {
   const batchInvalidatable = batch ? getInvalidatableCards(batch.bundles.flatMap(b => b.cards)) : [];
   const regenCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "invalidated" && !c.regenerated).length : 0;
   const availableCardCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "available").length : 0;
+  const soldCardCount = batch ? batch.bundles.flatMap(b => b.cards).filter(c => c.status === "sold_unused").length : 0;
+  const hasPrintedBefore = soldCardCount > 0;
 
   const toggleBundle = (id: string) => {
     setExpandedBundles(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
@@ -222,7 +224,7 @@ export default function SubMerchantVoucherBatchDetail() {
           {availableCardCount > 0 && (
             <Button onClick={() => setPrintDrawerOpen(true)} variant="outline"
               className="flex-1 h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97]">
-              <Printer className="h-4 w-4 mr-2" /> Print Cards ({availableCardCount})
+              <Printer className="h-4 w-4 mr-2" /> {hasPrintedBefore ? "Reprint" : "Print"} Cards ({availableCardCount})
             </Button>
           )}
           {batchInvalidatable.length > 0 && (

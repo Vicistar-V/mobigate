@@ -74,9 +74,19 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     printContainer.id = "voucher-print-area";
     printContainer.innerHTML = `
       <style>
+        @media screen {
+          #voucher-print-area { display: none !important; }
+        }
         @media print {
-          body > *:not(#voucher-print-area) { display: none !important; }
-          #voucher-print-area { display: block !important; position: static !important; left: auto !important; }
+          body > *:not(#voucher-print-area) { display: none !important; visibility: hidden !important; }
+          #voucher-print-area {
+            display: block !important;
+            visibility: visible !important;
+            position: static !important;
+            left: auto !important;
+            top: auto !important;
+            width: 100% !important;
+          }
         }
         #voucher-print-area {
           font-family: 'Courier New', monospace;
@@ -136,9 +146,6 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
       </div>
     `;
 
-    printContainer.style.position = "absolute";
-    printContainer.style.left = "-9999px";
-    printContainer.style.top = "0";
     document.body.appendChild(printContainer);
 
     const onAfterPrint = () => {
