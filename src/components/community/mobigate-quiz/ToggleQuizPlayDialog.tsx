@@ -252,14 +252,32 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                       <Shield className="h-5 w-5 text-teal-600" />
                       <h3 className="font-bold text-sm">How Toggle Quiz Works</h3>
                     </div>
-                    <ul className="text-sm text-muted-foreground space-y-2 leading-relaxed">
-                      <li className="flex gap-2"><span className="text-teal-500 font-bold">1.</span> Answer ALL questions correctly (100%) to win a session</li>
-                      <li className="flex gap-2"><span className="text-teal-500 font-bold">2.</span> After winning, choose: <strong>Take Prize</strong> or <strong>Toggle</strong> to next session</li>
-                      <li className="flex gap-2"><span className="text-teal-500 font-bold">3.</span> Toggling <strong>cancels previous winnings</strong> — only the new prize matters</li>
-                      <li className="flex gap-2"><span className="text-teal-500 font-bold">4.</span> Stake of <strong>{formatMobiAmount(STAKE_AMOUNT)}</strong> is charged each session</li>
-                      <li className="flex gap-2"><span className="text-teal-500 font-bold">5.</span> Fail any session = <strong>lose everything</strong></li>
-                      <li className="flex gap-2"><span className="text-amber-500 font-bold">★</span> Complete all 7 sessions = <strong>Mobi Celebrity Badge!</strong></li>
-                    </ul>
+                    <ol className="text-sm text-muted-foreground space-y-3 leading-relaxed">
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-teal-500 font-bold shrink-0">1.</span>
+                        <span>Answer ALL questions correctly <strong>(100%)</strong> to win a session.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-teal-500 font-bold shrink-0">2.</span>
+                        <span>After winning, choose:<br /><strong>Take Prize</strong> — collect your winnings, or<br /><strong>Toggle</strong> — advance to the next session.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-teal-500 font-bold shrink-0">3.</span>
+                        <span>Toggling <strong>cancels previous winnings</strong>.<br />Only the new session's prize matters.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-teal-500 font-bold shrink-0">4.</span>
+                        <span>Stake of <strong>{formatMobiAmount(STAKE_AMOUNT)}</strong> is charged each session.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-teal-500 font-bold shrink-0">5.</span>
+                        <span>Fail any session = <strong>lose everything</strong>.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-amber-500 font-bold shrink-0">★</span>
+                        <span>Complete all 7 sessions = <strong>Mobi Celebrity Badge!</strong></span>
+                      </li>
+                    </ol>
                   </CardContent>
                 </Card>
 
