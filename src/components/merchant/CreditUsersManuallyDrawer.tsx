@@ -10,9 +10,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Search, User, Phone, Mail, Hash, CheckCircle2, Loader2,
   ArrowRight, Zap, UserPlus, ShieldCheck, ChevronLeft, Smartphone,
+  Share2, MessageSquare, Send,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { formatNum } from "@/data/merchantVoucherData";
+import { formatNum, generatePin } from "@/data/merchantVoucherData";
+import { shareViaNative } from "@/lib/shareUtils";
 
 // ─── Mock user database ───
 interface MockUser {
@@ -51,6 +53,10 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
   const [customAmount, setCustomAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Transaction details
+  const [txnId, setTxnId] = useState("");
+  const [voucherPin, setVoucherPin] = useState("");
+
   // Guest registration
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
@@ -66,6 +72,8 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
     setCustomAmount("");
     setIsSearching(false);
     setIsProcessing(false);
+    setTxnId("");
+    setVoucherPin("");
     setGuestName("");
     setGuestPhone("");
     setGuestEmail("");
@@ -147,6 +155,12 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
     if (!foundUser || !finalAmount || finalAmount < 100) return;
     setIsProcessing(true);
 
+    // Generate transaction details
+    const generatedTxnId = `TXN-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9999).toString().padStart(4, "0")}`;
+    const generatedPin = generatePin();
+    setTxnId(generatedTxnId);
+    setVoucherPin(generatedPin);
+
     // Simulate multi-step processing
     await new Promise(r => setTimeout(r, 800));
     setStep("confirm");
@@ -155,6 +169,45 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
     setStep("success");
     setIsProcessing(false);
     toast({ title: "Recharge Successful!", description: `M${formatNum(finalAmount)} credited to ${foundUser.name}` });
+  };
+
+  const buildReceiptText = () => {
+    if (!foundUser) return "";
+    return [
+      "═══ RECHARGE RECEIPT ═══",
+      "",
+      `Recipient: ${foundUser.name}`,
+      `User ID: ${foundUser.id}`,
+      `Phone: ${foundUser.phone}`,
+      `Type: ${foundUser.type === "guest" ? "Guest User" : "Registered User"}`,
+      "",
+      `Voucher PIN: ${voucherPin}`,
+      `Transaction ID: ${txnId}`,
+      "",
+      `Amount Credited: M${formatNum(finalAmount)} (₦${formatNum(finalAmount)})`,
+      "",
+      "Tagged: Sold Offline",
+      `Date: ${new Date().toLocaleString("en-NG")}`,
+      "",
+      "— Mobigate Merchant Services —",
+    ].join("\n");
+  };
+
+  const handleShareReceipt = async () => {
+    const text = buildReceiptText();
+    const title = `Recharge Receipt — M${formatNum(finalAmount)}`;
+
+    // Try native share first (best for mobile)
+    const shared = await shareViaNative(title, text, window.location.origin);
+    if (!shared) {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(text);
+        toast({ title: "Receipt Copied", description: "Receipt text copied to clipboard. Paste it in WhatsApp, SMS, or Email." });
+      } catch {
+        toast({ title: "Share unavailable", description: "Could not share receipt on this device.", variant: "destructive" });
+      }
+    }
   };
 
   return (
@@ -553,6 +606,19 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
                       {foundUser.type === "guest" ? "Guest User" : "Registered User"}
                     </Badge>
                   </div>
+
+                  {/* Voucher PIN */}
+                  <div className="border-t border-border/30 pt-3 flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Voucher PIN</span>
+                    <span className="font-mono font-black text-foreground tracking-widest text-sm">{voucherPin}</span>
+                  </div>
+
+                  {/* Transaction ID */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Transaction ID</span>
+                    <span className="font-mono font-semibold text-foreground text-xs">{txnId}</span>
+                  </div>
+
                   <div className="border-t border-border/30 pt-3 flex justify-between">
                     <span className="text-sm font-semibold text-foreground">Amount Credited</span>
                     <div className="text-right">
@@ -566,6 +632,16 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
               <Badge className="bg-amber-500/15 text-amber-600 text-xs px-3 h-6">
                 Tagged: Sold Offline
               </Badge>
+
+              {/* Share/Forward Receipt */}
+              <Button
+                onClick={handleShareReceipt}
+                variant="outline"
+                className="w-full h-11 rounded-xl text-sm font-bold touch-manipulation active:scale-[0.97] gap-2 border-primary/30 text-primary"
+              >
+                <Share2 className="h-4 w-4" />
+                Share Receipt with Buyer
+              </Button>
 
               <div className="flex gap-2 w-full">
                 <Button
