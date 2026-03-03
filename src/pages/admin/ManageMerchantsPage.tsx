@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home,
   Ticket, Gamepad2, Eye, TrendingUp, BarChart3, Package, CreditCard, Users, Trophy,
-  ShieldCheck, ShieldBan, ShieldAlert, AlertTriangle,
+  ShieldCheck, ShieldBan, ShieldAlert, AlertTriangle, Gift,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MerchantApplicationsAdmin } from "@/components/mobigate/MerchantApplicationsAdmin";
 import { VoucherDiscountSettingsCard } from "@/components/mobigate/VoucherDiscountSettingsCard";
+import { AwardBonusVoucherPackDrawer } from "@/components/admin/AwardBonusVoucherPackDrawer";
 import {
   allLocationMerchants,
   getUniqueCountries,
@@ -378,6 +379,7 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
     : "active";
   const [merchantStatus, setMerchantStatus] = useState<"active" | "suspended" | "banned">(initialStatus);
   const [confirmAction, setConfirmAction] = useState<"suspend" | "ban" | "activate" | null>(null);
+  const [showBonusDrawer, setShowBonusDrawer] = useState(false);
 
   if (!merchant) return null;
 
@@ -406,6 +408,7 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
   };
 
   return (
+    <>
     <Drawer open={!!merchant} onOpenChange={(open) => { if (!open) { onClose(); setConfirmAction(null); } }}>
       <DrawerContent className="max-h-[92vh]">
         <DrawerHeader className="pb-2">
@@ -576,6 +579,14 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
 
           {/* Actions */}
           <Button
+            variant="outline"
+            className="w-full h-12 mt-2 touch-manipulation active:scale-[0.97] border-amber-300 text-amber-700 hover:bg-amber-50"
+            onClick={() => setShowBonusDrawer(true)}
+          >
+            <Gift className="h-4 w-4 mr-2" />
+            Award Bonus Voucher Pack
+          </Button>
+          <Button
             className="w-full h-12 mt-2 touch-manipulation active:scale-[0.97]"
             onClick={() => { onClose(); navigate("/merchant-home/m1"); }}
           >
@@ -585,6 +596,13 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
         </DrawerBody>
       </DrawerContent>
     </Drawer>
+    <AwardBonusVoucherPackDrawer
+      open={showBonusDrawer}
+      onOpenChange={setShowBonusDrawer}
+      merchantName={merchant.name}
+      merchantId={merchant.id}
+    />
+  </>
   );
 }
 
