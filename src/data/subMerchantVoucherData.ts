@@ -21,11 +21,15 @@ export interface MerchantStock {
 
 export interface MerchantApplicationRequest {
   id: string;
+  merchantId?: string;
   merchantName: string;
   merchantCity: string;
   dateSubmitted: Date;
   status: "pending" | "accepted" | "rejected";
   applicationFee: number;
+  rejectionReason?: string;
+  approvedDate?: Date;
+  discountRate?: number;
 }
 
 // Parent merchants the sub-merchant is signed up with
@@ -101,10 +105,10 @@ export const mockParentMerchants: ParentMerchant[] = [
 
 // Merchant application requests made by the sub-merchant
 export const mockMerchantApplications: MerchantApplicationRequest[] = [
-  { id: "ma-001", merchantName: "9ja Mobi Deals", merchantCity: "Enugu", dateSubmitted: new Date(Date.now() - 5 * 86400000), status: "pending", applicationFee: 5000 },
-  { id: "ma-002", merchantName: "Mobi-Express Lagos", merchantCity: "Lagos", dateSubmitted: new Date(Date.now() - 95 * 86400000), status: "accepted", applicationFee: 5000 },
-  { id: "ma-003", merchantName: "PayFast Benin", merchantCity: "Benin City", dateSubmitted: new Date(Date.now() - 20 * 86400000), status: "rejected", applicationFee: 5000 },
-  { id: "ma-004", merchantName: "MobiKing Owerri", merchantCity: "Owerri", dateSubmitted: new Date(Date.now() - 2 * 86400000), status: "pending", applicationFee: 8000 },
+  { id: "ma-001", merchantId: "pm-003", merchantName: "9ja Mobi Deals", merchantCity: "Enugu", dateSubmitted: new Date(Date.now() - 5 * 86400000), status: "pending", applicationFee: 5000 },
+  { id: "ma-002", merchantId: "pm-001", merchantName: "Mobi-Express Lagos", merchantCity: "Lagos", dateSubmitted: new Date(Date.now() - 95 * 86400000), status: "accepted", applicationFee: 5000, approvedDate: new Date(Date.now() - 80 * 86400000), discountRate: 15 },
+  { id: "ma-003", merchantId: "pm-004", merchantName: "PayFast Benin", merchantCity: "Benin City", dateSubmitted: new Date(Date.now() - 20 * 86400000), status: "rejected", applicationFee: 5000, rejectionReason: "Incomplete documentation. Please provide a valid business registration certificate and proof of address." },
+  { id: "ma-004", merchantId: "pm-005", merchantName: "MobiKing Owerri", merchantCity: "Owerri", dateSubmitted: new Date(Date.now() - 2 * 86400000), status: "pending", applicationFee: 8000 },
 ];
 
 // Sub-merchant's own batches (purchased from merchants)
