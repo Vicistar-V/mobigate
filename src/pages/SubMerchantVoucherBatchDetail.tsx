@@ -279,13 +279,22 @@ export default function SubMerchantVoucherBatchDetail() {
                 </div>
                 {isExpanded && (
                   <div className="border-t border-border/30">
-                    <div className="px-3 py-2.5 border-b border-border/30 flex items-center gap-3">
+                    <div className="px-3 py-2.5 border-b border-border/30 flex items-center gap-3 flex-wrap">
                       {bundleAvailable > 0 && (
                         <button onClick={(e) => { e.stopPropagation(); setPrintDrawerOpen(true); }}
                           className="text-xs text-primary font-semibold touch-manipulation flex items-center gap-1.5 h-8">
                           <Printer className="h-3.5 w-3.5" /> Print Bundle ({bundleAvailable})
                         </button>
                       )}
+                      {(() => {
+                        const soldUnusedCount = bundle.cards.filter(c => c.status === "sold_unused").length;
+                        return soldUnusedCount > 0 ? (
+                          <button onClick={(e) => { e.stopPropagation(); setPrintDrawerOpen(true); }}
+                            className="text-xs text-amber-600 font-semibold touch-manipulation flex items-center gap-1.5 h-8">
+                            <Printer className="h-3.5 w-3.5" /> Print/Reprint ({soldUnusedCount})
+                          </button>
+                        ) : null;
+                      })()}
                       {bundleInvalidatable.length > 0 && (
                         <button onClick={(e) => { e.stopPropagation(); setInvalidateTarget({ type: "bundle", bundleId: bundle.id }); }}
                           className="text-xs text-destructive font-semibold touch-manipulation flex items-center gap-1.5 h-8">
