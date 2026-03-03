@@ -1,59 +1,54 @@
 
-# Add Minimum Total Order Value for Bulk Discount Eligibility
 
-## Problem
-Currently, a user can buy 10 units of M100 (total M1,000) and unlock a bulk discount. This doesn't make business sense -- discounts should only apply to genuinely large orders.
+## Plan: Add "View Official Sponsors" to Quiz Games
 
-## Solution
-Add a **minimum total order value of M50,000** to unlock discounts, in addition to the existing minimum quantity of 10.
+### Overview
+Add a sponsors system where merchants can add official sponsors to their quiz seasons (brand name, logo, website/WhatsApp/email/phone), and players can view those sponsors from any game show they access.
 
-Both conditions must be met:
-1. Quantity >= 10 per denomination
-2. Total order value >= M50,000
+### Data Layer
 
-## Files to Modify
+**1. New `SeasonSponsor` interface in `src/data/mobigateInteractiveQuizData.ts`**
+- Fields: `id`, `brandName`, `logoUrl`, `websiteUrl?`, `whatsAppNumber?`, `email?`, `phoneNumber?`
+- Add `sponsors?: SeasonSponsor[]` to the `QuizSeason` interface
+- Add mock sponsor data to 2-3 existing `mockSeasons` entries
 
-### 1. `src/data/platformSettingsData.ts`
-- Add a `minOrderValueForDiscount` setting (default: 50000) to the platform settings
-- Export a constant `MIN_DISCOUNT_ORDER_VALUE = 50000`
+### New Component
 
-### 2. `src/data/merchantVoucherData.ts`
-- Update `calculateBulkDiscount()` to accept an optional `totalOrderValue` parameter
-- When total order value is below M50,000, force discount to 0%
+**2. Create `src/components/community/mobigate-quiz/ViewSponsorsDrawer.tsx`**
+- A mobile drawer (92vh) displaying the list of sponsors for a given season
+- Each sponsor card shows: logo (Avatar fallback if none), brand name, and contact action buttons (Website opens new tab, WhatsApp generates link, Email mailto, Phone tel link)
+- Only shows buttons for contact methods the merchant has provided
+- Empty state if no sponsors
 
-### 3. `src/pages/BuyVouchersPage.tsx` (Consumer Buy Vouchers)
-- Update the "Discount Unlocked!" badge logic: only show when qty >= 10 AND total cart value >= M50,000
-- Update discount eligibility messages to mention both conditions
-- Update the merchant list discount calculations to check total order value
-- Update the payment summary discount calculations
+**3. Create `src/components/community/mobigate-quiz/ManageSponsorsSheet.tsx`**
+- A mobile drawer for merchants to add/edit/remove sponsors during season creation or management
+- Form fields: Brand Name (required), Logo URL, Website URL, WhatsApp Number, Email, Phone Number
+- List of added sponsors with edit/delete actions
+- Validation: at least brand name required
 
-### 4. `src/pages/MerchantVoucherGenerate.tsx` (Merchant Voucher Generation)
-- Update discount display to check `denomination * bundleCount * 100 >= 50000` before showing discount
-- Update the tier hint to mention minimum order value if not yet met
+### Integration Points (where "View Official Sponsors" button appears)
 
-### 5. `src/components/mobigate/VoucherDiscountSettingsCard.tsx`
-- Add a display line showing the minimum order value threshold (M50,000)
+**4. Player-facing: `src/pages/MerchantDetailPage.tsx`**
+- Add a "View Official Sponsors" button on each season card (between the Play button and SeasonDetailsReveal)
+- Opens `ViewSponsorsDrawer` with that season's sponsors
+- Only visible if `season.sponsors?.length > 0`
 
-## Technical Details
+**5. Player-facing: `src/components/community/mobigate-quiz/SeasonDetailsReveal.tsx`**
+- Add a "View Official Sponsors" button inside the expanded details area
+- Same drawer behavior
 
-### New constant in `platformSettingsData.ts`
-```typescript
-export const MIN_DISCOUNT_ORDER_VALUE = 50000; // M50,000 minimum
-```
+**6. Player-facing: `src/components/community/mobigate-quiz/InteractiveQuizSeasonSheet.tsx`**
+- Add sponsors button on each season card in the season picker drawer
 
-### Updated discount check pattern
-```typescript
-// Before: only quantity check
-const isDiscountEligible = quantity >= 10;
+**7. Merchant admin: `src/pages/MerchantPage.tsx` (SeasonsTab)**
+- Add a "View Official Sponsors" button in the season action buttons area (alongside Suspend/Extend/Boost)
+- Opens `ManageSponsorsSheet` where merchants can add/edit/remove sponsors
+- Also add sponsor fields in the "Create New Season" form
 
-// After: quantity + total value check
-const isDiscountEligible = quantity >= 10 && totalOrderMobi >= MIN_DISCOUNT_ORDER_VALUE;
-```
+### Technical Details
 
-### Consumer-facing messages
-- When qty < 10: "Min 10 per denomination for discount"
-- When qty >= 10 but total < M50,000: "Total order must be at least M50,000 for discount"
-- When both met: "Discount Unlocked!" (existing badge)
+- Sponsor contact links use: `window.open(url, '_blank')` for websites, WhatsApp link generator, `mailto:` for email, `tel:` for phone
+- All drawers use the standard 92vh mobile pattern with `overflow-y-auto touch-auto`
+- Sponsor logos render in Avatar components with brand-name initials as fallback
+- Button styling: outline variant with a `Handshake` or `Building2` icon from lucide-react
 
-### Merchant generation
-- The subtotal check uses `denomination * bundleCount * cardsPerBundle` which is the total Mobi value of the batch
