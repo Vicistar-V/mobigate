@@ -23,6 +23,7 @@ import {
   Gamepad2,
   Play,
   ChevronDown,
+  Handshake,
 } from "lucide-react";
 import { mockMerchants, mockSeasons, type QuizSeason } from "@/data/mobigateInteractiveQuizData";
 import { format } from "date-fns";
@@ -30,6 +31,7 @@ import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveScoreboardDrawer";
 import { InteractiveQuizPlayDialog } from "@/components/community/mobigate-quiz/InteractiveQuizPlayDialog";
 import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz/HighlightedWinnersCarousel";
+import { ViewSponsorsDrawer } from "@/components/community/mobigate-quiz/ViewSponsorsDrawer";
 
 function getSeasonTypeColor(type: string) {
   switch (type) {
@@ -46,6 +48,7 @@ export default function MerchantDetailPage() {
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<QuizSeason | null>(null);
   const [showPlay, setShowPlay] = useState(false);
+  const [sponsorsSeason, setSponsorsSeason] = useState<QuizSeason | null>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   const scrollToSettings = () => {
@@ -227,22 +230,42 @@ export default function MerchantDetailPage() {
                   </div>
 
                   {/* Play button — prominent at top */}
-                  <Button
-                    className="w-full h-12 text-sm font-bold gap-2 touch-manipulation active:scale-[0.97] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl"
-                    onClick={() => handlePlaySeason(season)}
-                  >
-                    <Play className="h-5 w-5" />
-                    Play Quiz — {formatLocalAmount(season.entryFee, "NGN")}
-                  </Button>
-                </div>
+                    <Button
+                      className="w-full h-12 text-sm font-bold gap-2 touch-manipulation active:scale-[0.97] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl"
+                      onClick={() => handlePlaySeason(season)}
+                    >
+                      <Play className="h-5 w-5" />
+                      Play Quiz — {formatLocalAmount(season.entryFee, "NGN")}
+                    </Button>
 
-                {/* Partially visible details with reveal */}
-                <SeasonDetailsReveal season={season} />
+                    {/* View Official Sponsors */}
+                    {season.sponsors && season.sponsors.length > 0 && (
+                      <Button
+                        variant="outline"
+                        className="w-full h-10 text-xs font-semibold gap-2 touch-manipulation active:scale-[0.97]"
+                        onClick={() => setSponsorsSeason(season)}
+                      >
+                        <Handshake className="h-4 w-4 text-primary" />
+                        View Official Sponsors ({season.sponsors.length})
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Partially visible details with reveal */}
+                  <SeasonDetailsReveal season={season} />
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
+
+      {/* Sponsors Drawer */}
+      <ViewSponsorsDrawer
+        open={!!sponsorsSeason}
+        onOpenChange={(v) => { if (!v) setSponsorsSeason(null); }}
+        sponsors={sponsorsSeason?.sponsors || []}
+        seasonName={sponsorsSeason?.name}
+      />
 
       {/* Live Scoreboard */}
       <LiveScoreboardDrawer open={showScoreboard} onOpenChange={setShowScoreboard} />

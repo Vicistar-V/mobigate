@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { ChevronDown, Trophy, Crown, Medal, Gift, Ticket, Tv } from "lucide-react";
+import { ChevronDown, Trophy, Crown, Medal, Gift, Ticket, Tv, Handshake } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import type { QuizSeason } from "@/data/mobigateInteractiveQuizData";
+import { ViewSponsorsDrawer } from "./ViewSponsorsDrawer";
 
 interface SeasonDetailsRevealProps {
   season: QuizSeason;
@@ -10,6 +12,7 @@ interface SeasonDetailsRevealProps {
 
 export function SeasonDetailsReveal({ season }: SeasonDetailsRevealProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showSponsors, setShowSponsors] = useState(false);
 
   return (
     <div className="relative">
@@ -106,6 +109,20 @@ export function SeasonDetailsReveal({ season }: SeasonDetailsRevealProps) {
           </div>
           <Progress value={(season.currentLevel / season.selectionLevels) * 100} className="h-2" />
         </div>
+
+        {/* View Official Sponsors inside expanded */}
+        {season.sponsors && season.sponsors.length > 0 && (
+          <div className="px-3 pb-3">
+            <Button
+              variant="outline"
+              className="w-full h-9 text-xs font-semibold gap-2 touch-manipulation active:scale-[0.97]"
+              onClick={(e) => { e.stopPropagation(); setShowSponsors(true); }}
+            >
+              <Handshake className="h-3.5 w-3.5 text-primary" />
+              View Official Sponsors ({season.sponsors.length})
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Gradient fade overlay when collapsed */}
@@ -123,6 +140,14 @@ export function SeasonDetailsReveal({ season }: SeasonDetailsRevealProps) {
           className={`h-3.5 w-3.5 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
         />
       </button>
+
+      {/* Sponsors Drawer */}
+      <ViewSponsorsDrawer
+        open={showSponsors}
+        onOpenChange={setShowSponsors}
+        sponsors={season.sponsors || []}
+        seasonName={season.name}
+      />
     </div>
   );
 }

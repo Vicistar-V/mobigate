@@ -117,6 +117,16 @@ export interface QuizMerchant {
   waiverApproved: boolean;
 }
 
+export interface SeasonSponsor {
+  id: string;
+  brandName: string;
+  logoUrl?: string;
+  websiteUrl?: string;
+  whatsAppNumber?: string;
+  email?: string;
+  phoneNumber?: string;
+}
+
 export interface QuizSeason {
   id: string;
   merchantId: string;
@@ -150,6 +160,8 @@ export interface QuizSeason {
   consolationPrizeCount: number;
   totalWinningPrizes: number;
   quizStatus: "draft" | "active" | "suspended" | "awaiting_approval";
+  // Official Sponsors
+  sponsors?: SeasonSponsor[];
 }
 
 export interface MerchantQuestion {
@@ -257,6 +269,11 @@ export const mockSeasons: QuizSeason[] = [
     firstPrize: 6000000, secondPrize: 3000000, thirdPrize: 1500000,
     consolationPrizePerPlayer: 500000, consolationPrizeCount: 12,
     totalWinningPrizes: 16500000, quizStatus: "active",
+    sponsors: [
+      { id: "sp1", brandName: "MTN Nigeria", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/New-mtn-logo.svg/120px-New-mtn-logo.svg.png", websiteUrl: "https://www.mtn.ng", whatsAppNumber: "+2348031234567", email: "info@mtn.ng" },
+      { id: "sp2", brandName: "Dangote Group", logoUrl: "https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/Dangote_Group_Logo.svg/120px-Dangote_Group_Logo.svg.png", websiteUrl: "https://www.dangote.com", phoneNumber: "+2341234567890" },
+      { id: "sp3", brandName: "Access Bank", websiteUrl: "https://www.accessbankplc.com", email: "support@accessbankplc.com", whatsAppNumber: "+2348028765432" },
+    ],
     selectionProcesses: [
       { round: 1, entriesSelected: 10000, entryFee: 200 },
       { round: 2, entriesSelected: 5000, entryFee: 500 },
@@ -277,6 +294,10 @@ export const mockSeasons: QuizSeason[] = [
     firstPrize: 8000000, secondPrize: 4000000, thirdPrize: 2000000,
     consolationPrizePerPlayer: 500000, consolationPrizeCount: 12,
     totalWinningPrizes: 20000000, quizStatus: "active",
+    sponsors: [
+      { id: "sp4", brandName: "Globacom", websiteUrl: "https://www.gloworld.com", whatsAppNumber: "+2348051234567" },
+      { id: "sp5", brandName: "Nigerian Breweries", websiteUrl: "https://www.nbplc.com", email: "info@nbplc.com", phoneNumber: "+2341098765432" },
+    ],
     selectionProcesses: [
       { round: 1, entriesSelected: 25000, entryFee: 500 },
       { round: 2, entriesSelected: 12000, entryFee: 750 },
