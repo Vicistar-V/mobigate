@@ -162,7 +162,7 @@ export function SubMerchantAccessGateDrawer({ open, onOpenChange, merchantName }
             </Label>
             <Input
               id="gate-phone"
-              placeholder="e.g. 08031234567"
+              placeholder="e.g. +234 803 123 4567"
               value={phone}
               onChange={e => lookupByPhone(e.target.value.replace(/\D/g, ""))}
               className="h-12 text-base"
