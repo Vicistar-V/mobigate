@@ -20,6 +20,7 @@ import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz
 import { shareViaNative, copyToClipboard } from "@/lib/shareUtils";
 import { format } from "date-fns";
 import { SubMerchantAccessGateDrawer } from "@/components/merchant/SubMerchantAccessGateDrawer";
+import { MerchantReportDrawer } from "@/components/merchant/MerchantReportDrawer";
 
 const linkIcons: Record<string, any> = {
   globe: Globe, facebook: Facebook, twitter: Twitter,
@@ -70,6 +71,7 @@ export default function MerchantHomePage() {
   const [eventDrawerOpen, setEventDrawerOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<{ date: string; label: string; type: string; seasonId?: string } | null>(null);
   const [showAccessGate, setShowAccessGate] = useState(false);
+  const [showReportDrawer, setShowReportDrawer] = useState(false);
 
   const galleryMediaItems: MediaItem[] = useMemo(() =>
     (homeData?.gallery ?? []).map(g => ({
@@ -119,7 +121,7 @@ export default function MerchantHomePage() {
   };
 
   const handleReport = () => {
-    toast({ title: "Report Submitted", description: "Thank you for your feedback." });
+    setShowReportDrawer(true);
   };
 
   const handleShare = async () => {
@@ -622,6 +624,12 @@ export default function MerchantHomePage() {
         open={showAccessGate}
         onOpenChange={setShowAccessGate}
         merchantName={merchant.name}
+      />
+      <MerchantReportDrawer
+        open={showReportDrawer}
+        onOpenChange={setShowReportDrawer}
+        merchantName={merchant.name}
+        merchantLogo={merchant.logo}
       />
     </div>
   );
