@@ -684,7 +684,7 @@ export default function BuyVouchersPage() {
                       <p className="font-bold text-sm text-foreground truncate">{merchant.name}</p>
                       {merchant.isVerified && <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
                       {merchant.isSubMerchant && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-primary/30 text-primary shrink-0">Sub-Merchant</Badge>
+                        <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none shrink-0">Sub‑Merchant</span>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
@@ -765,10 +765,10 @@ export default function BuyVouchersPage() {
               <Ticket className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <p className="font-bold text-sm text-foreground">{selectedMerchant.name}</p>
                 {selectedMerchant.isSubMerchant && (
-                  <Badge variant="outline" className="text-[10px] px-1.5 h-4 border-primary/30 text-primary">Sub-Merchant</Badge>
+                  <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none">Sub‑Merchant</span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% Discount</p>
