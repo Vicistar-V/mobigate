@@ -263,9 +263,9 @@ export default function MerchantVoucherBatchDetail() {
                 batchStatusFilter === s.key ? `ring-2 ${s.ring} border-transparent` : "border-border/50"
               }`}
             >
-              <p className={`text-xl font-black ${s.color}`}>{s.count}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-              <p className="text-[10px] text-muted-foreground/70">bundles</p>
+              <p className={`text-2xl font-black ${s.color}`}>{s.count}</p>
+              <p className="text-sm font-medium text-muted-foreground">{s.label}</p>
+              <p className="text-xs text-muted-foreground/70">bundles</p>
             </button>
           ))}
         </div>
