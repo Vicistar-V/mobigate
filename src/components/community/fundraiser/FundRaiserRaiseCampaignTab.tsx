@@ -185,7 +185,7 @@ export const FundRaiserRaiseCampaignTab = () => {
                 onChange={(e) =>
                   setPersonalDetails({ ...personalDetails, telephone: e.target.value })
                 }
-                placeholder="Phone number"
+                placeholder="+234 XXX XXX XXXX"
               />
             </div>
           </div>

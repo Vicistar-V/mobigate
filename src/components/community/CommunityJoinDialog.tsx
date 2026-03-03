@@ -127,7 +127,7 @@ export function CommunityJoinDialog({
         <Input
           id="join-phone"
           type="tel"
-          placeholder="Enter your phone number"
+          placeholder="+234 XXX XXX XXXX"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="h-11"

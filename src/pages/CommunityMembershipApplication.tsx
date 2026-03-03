@@ -264,7 +264,7 @@ const CommunityMembershipApplication = () => {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="Enter your phone number"
+                  placeholder="+234 XXX XXX XXXX"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                 />

@@ -26,8 +26,8 @@ const generatePin = () => {
 const CHANNEL_CONFIG: Record<ChannelType, { label: string; icon: typeof Mail; color: string; bgColor: string; placeholder: string; inputMode: "email" | "tel" | "text"; recipientLabel: string; buttonColor: string }> = {
   email: { label: "Send via Email", icon: Mail, color: "text-blue-600", bgColor: "bg-blue-500/10", placeholder: "recipient@email.com", inputMode: "email", recipientLabel: "Email", buttonColor: "bg-blue-600 hover:bg-blue-700" },
   mobiChat: { label: "Send via Mobi-Chat", icon: MessageCircle, color: "text-primary", bgColor: "bg-primary/10", placeholder: "Search Mobigate user...", inputMode: "text", recipientLabel: "Mobi-Chat", buttonColor: "" },
-  whatsApp: { label: "Send via WhatsApp", icon: MessageCircle, color: "text-emerald-600", bgColor: "bg-emerald-500/10", placeholder: "+234 800 000 0000", inputMode: "tel", recipientLabel: "WhatsApp", buttonColor: "bg-emerald-600 hover:bg-emerald-700" },
-  sms: { label: "Send via SMS", icon: Phone, color: "text-orange-600", bgColor: "bg-orange-500/10", placeholder: "+234 800 000 0000", inputMode: "tel", recipientLabel: "SMS", buttonColor: "bg-orange-600 hover:bg-orange-700" },
+  whatsApp: { label: "Send via WhatsApp", icon: MessageCircle, color: "text-emerald-600", bgColor: "bg-emerald-500/10", placeholder: "+234 XXX XXX XXXX", inputMode: "tel", recipientLabel: "WhatsApp", buttonColor: "bg-emerald-600 hover:bg-emerald-700" },
+  sms: { label: "Send via SMS", icon: Phone, color: "text-orange-600", bgColor: "bg-orange-500/10", placeholder: "+234 XXX XXX XXXX", inputMode: "tel", recipientLabel: "SMS", buttonColor: "bg-orange-600 hover:bg-orange-700" },
 };
 
 interface RecipientAllocation {

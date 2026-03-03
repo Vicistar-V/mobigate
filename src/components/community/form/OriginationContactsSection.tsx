@@ -94,7 +94,7 @@ export function OriginationContactsSection({
           <Input
             id="telephone"
             type="tel"
-            placeholder="Enter phone number"
+            placeholder="+234 XXX XXX XXXX"
             value={formData.telephone}
             onChange={(e) => updateField("telephone", e.target.value)}
           />
