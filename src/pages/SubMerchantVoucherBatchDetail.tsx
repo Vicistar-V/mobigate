@@ -15,6 +15,8 @@ import {
   getBatchBundleCounts, classifyBundle,
 } from "@/data/merchantVoucherData";
 import { useToast } from "@/hooks/use-toast";
+import { getRegenerationFee } from "@/data/platformSettingsData";
+import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { VoucherPrintDrawer } from "@/components/merchant/VoucherExportDrawer";
 
 type InvalidateTarget = { type: "batch" } | { type: "bundle"; bundleId: string };
@@ -382,8 +384,13 @@ export default function SubMerchantVoucherBatchDetail() {
             <AlertDialogTitle className="flex items-center gap-2 text-base">
               <RefreshCw className="h-5 w-5 text-amber-600" /> Regenerate Cards
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm">
-              This will regenerate <strong>{regenCount}</strong> invalidated card{regenCount !== 1 ? "s" : ""} in this batch with new serial numbers and PINs. Non-invalidated cards will remain unchanged.
+            <AlertDialogDescription className="text-sm space-y-2">
+              <span className="block">
+                This will regenerate <strong>{regenCount}</strong> invalidated card{regenCount !== 1 ? "s" : ""} in this batch with new serial numbers and PINs. Non-invalidated cards will remain unchanged.
+              </span>
+              <span className="block text-amber-700 font-medium">
+                This action will charge you a Regeneration Fee of <strong>{formatMobiAmount(getRegenerationFee())} ({formatLocalAmount(getRegenerationFee(), "NGN")})</strong>. Click 'Regenerate' below to continue, otherwise cancel.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

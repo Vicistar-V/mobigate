@@ -356,3 +356,33 @@ export function setContinuePlayingStakePercent(newPercent: number): void {
     platformContinueStakeSettings.lastUpdatedAt = new Date();
   }
 }
+
+// ============= REGENERATION FEE SETTINGS =============
+
+export interface PlatformRegenerationFeeSettings {
+  regenerationFee: number;
+  regenerationFeeMin: number;
+  regenerationFeeMax: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformRegenerationFeeSettings: PlatformRegenerationFeeSettings = {
+  regenerationFee: 100,
+  regenerationFeeMin: 10,
+  regenerationFeeMax: 10000,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getRegenerationFee(): number {
+  return platformRegenerationFeeSettings.regenerationFee;
+}
+
+export function setRegenerationFee(newFee: number): void {
+  if (newFee >= platformRegenerationFeeSettings.regenerationFeeMin &&
+      newFee <= platformRegenerationFeeSettings.regenerationFeeMax) {
+    platformRegenerationFeeSettings.regenerationFee = newFee;
+    platformRegenerationFeeSettings.lastUpdatedAt = new Date();
+  }
+}
