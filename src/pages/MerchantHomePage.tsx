@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { mockMerchants, mockSeasons, type QuizSeason } from "@/data/mobigateInteractiveQuizData";
 import { getMerchantHomeData, formatCount, type MerchantGalleryItem } from "@/data/merchantHomeData";
 import { allLocationMerchants } from "@/data/nigerianLocationsData";
+import { merchantCountries } from "@/data/mobiMerchantsData";
 import { MediaGalleryViewer, type MediaItem } from "@/components/MediaGalleryViewer";
 import { CommentDialog } from "@/components/CommentDialog";
 import { ShareDialog } from "@/components/ShareDialog";
@@ -42,7 +43,10 @@ export default function MerchantHomePage() {
   const quizMerchant = mockMerchants.find(m => m.id === merchantId);
   const locationMerchant = allLocationMerchants.find(m => m.id === merchantId);
   
-  // Build a unified merchant object
+  // Check if this merchant is a sub/retail merchant — only major merchants can accept sub-merchant applications
+  const allMobiMerchants = merchantCountries.flatMap(c => c.merchants);
+  const mobiMerchantMatch = allMobiMerchants.find(m => m.id === merchantId);
+  const isMajorMerchant = !mobiMerchantMatch?.isSubMerchant;
   const merchant = quizMerchant 
     ? quizMerchant 
     : locationMerchant 
@@ -247,22 +251,24 @@ export default function MerchantHomePage() {
           </button>
         </div>
 
-        {/* Apply as Sub-Merchant CTA */}
-        <div className="mt-3 px-2">
-          <button
-            onClick={() => navigate(`/apply-sub-merchant/${merchantId}`)}
-            className="w-full rounded-2xl p-3 border-2 border-primary/30 bg-primary/5 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation"
-          >
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Store className="h-5 w-5 text-primary" />
-            </div>
-            <div className="flex-1 text-left min-w-0">
-              <p className="font-bold text-sm text-foreground">Apply as <span className="whitespace-nowrap">Sub-Merchant</span></p>
-              <p className="text-xs text-muted-foreground mt-0.5">Become a retailer for this merchant</p>
-            </div>
-            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-          </button>
-        </div>
+        {/* Apply as Sub-Merchant CTA — only shown for major merchants */}
+        {isMajorMerchant && (
+          <div className="mt-3 px-2">
+            <button
+              onClick={() => navigate(`/apply-sub-merchant/${merchantId}`)}
+              className="w-full rounded-2xl p-3 border-2 border-primary/30 bg-primary/5 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation"
+            >
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Store className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <p className="font-bold text-sm text-foreground">Apply as <span className="whitespace-nowrap">Sub-Merchant</span></p>
+                <p className="text-xs text-muted-foreground mt-0.5">Become a retailer for this merchant</p>
+              </div>
+              <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+            </button>
+          </div>
+        )}
 
         {homeData?.about && (
           <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{homeData.about}</p>
