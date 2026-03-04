@@ -29,6 +29,11 @@ import {
   Hash,
   FileText,
   ArrowRight,
+  Gavel,
+  Ban,
+  ShieldOff,
+  Trash2,
+  ChevronDown,
 } from "lucide-react";
 
 // ─── Category definitions ───
@@ -40,6 +45,26 @@ const reportCategories = [
   { value: "social-abuse", label: "Social Abuse", icon: AlertTriangle, color: "text-pink-500", bg: "bg-pink-500/10", border: "border-pink-500/30", badge: "bg-pink-500/15 text-pink-700 border-pink-300" },
   { value: "other", label: "Other Offenses", icon: Flag, color: "text-slate-500", bg: "bg-slate-500/10", border: "border-slate-500/30", badge: "bg-slate-500/15 text-slate-700 border-slate-300" },
 ];
+
+type PenaltyType = "warning" | "suspend" | "ban" | "deactivate";
+
+const penaltyDurations = [
+  { value: "30d", label: "30 Days" },
+  { value: "60d", label: "60 Days" },
+  { value: "90d", label: "90 Days" },
+  { value: "120d", label: "120 Days" },
+  { value: "6m", label: "6 Months" },
+  { value: "12m", label: "12 Months" },
+  { value: "18m", label: "18 Months" },
+  { value: "24m", label: "24 Months" },
+];
+
+const penaltyConfig: Record<PenaltyType, { label: string; description: string; icon: React.ElementType; color: string; bg: string; border: string; requiresDuration: boolean }> = {
+  warning: { label: "Send Warning ⚠️", description: "Send an official warning to the merchant", icon: AlertTriangle, color: "text-amber-700", bg: "bg-amber-500/10", border: "border-amber-400", requiresDuration: false },
+  suspend: { label: "Suspend Merchant", description: "Suspend merchant account only (user's Mobigate account stays active)", icon: ShieldOff, color: "text-orange-700", bg: "bg-orange-500/10", border: "border-orange-400", requiresDuration: true },
+  ban: { label: "Ban on Mobigate", description: "Ban the user entirely from Mobigate platform", icon: Ban, color: "text-red-700", bg: "bg-red-500/10", border: "border-red-400", requiresDuration: true },
+  deactivate: { label: "Deactivate Permanently", description: "Permanently deactivate the account — irreversible", icon: Trash2, color: "text-red-900", bg: "bg-red-600/10", border: "border-red-600", requiresDuration: false },
+};
 
 type ComplaintStatus = "pending" | "investigating" | "resolved" | "dismissed";
 
@@ -160,6 +185,12 @@ export function AdminComplaintsTab() {
   const [processing, setProcessing] = useState(false);
   const [actionReason, setActionReason] = useState("");
   const [showReasonFor, setShowReasonFor] = useState<"resolve" | "dismiss" | null>(null);
+  const [showPenalty, setShowPenalty] = useState(false);
+  const [selectedPenalty, setSelectedPenalty] = useState<PenaltyType | null>(null);
+  const [penaltyDuration, setPenaltyDuration] = useState("");
+  const [penaltyReason, setPenaltyReason] = useState("");
+  const [penaltyProcessing, setPenaltyProcessing] = useState(false);
+  const [confirmDeactivate, setConfirmDeactivate] = useState(false);
 
   const getCat = (val: string) => reportCategories.find((c) => c.value === val);
 
@@ -221,7 +252,58 @@ export function AdminComplaintsTab() {
     }, 2000);
   };
 
+  const handlePenalty = (complaintId: string) => {
+    if (!selectedPenalty) return;
+    const penalty = penaltyConfig[selectedPenalty];
+    if (penalty.requiresDuration && !penaltyDuration) return;
+    if (selectedPenalty === "deactivate" && !confirmDeactivate) return;
+    if (!penaltyReason.trim() && selectedPenalty !== "warning") return;
+
+    setPenaltyProcessing(true);
+    setTimeout(() => {
+      const durationLabel = penaltyDuration ? penaltyDurations.find(d => d.value === penaltyDuration)?.label : "";
+      const penaltyLabel =
+        selectedPenalty === "warning" ? "Official warning sent" :
+        selectedPenalty === "suspend" ? `Merchant suspended for ${durationLabel}` :
+        selectedPenalty === "ban" ? `Banned from Mobigate for ${durationLabel}` :
+        "Account permanently deactivated";
+
+      setComplaints((prev) =>
+        prev.map((c) => {
+          if (c.id !== complaintId) return c;
+          const now = new Date().toISOString().split("T")[0];
+          return {
+            ...c,
+            lastUpdated: now,
+            timeline: [...c.timeline, { date: now, action: `Penalty applied — ${penaltyLabel}${penaltyReason ? `: ${penaltyReason}` : ""}`, by: "You (Admin)" }],
+          };
+        })
+      );
+
+      setPenaltyProcessing(false);
+      setShowPenalty(false);
+      setSelectedPenalty(null);
+      setPenaltyDuration("");
+      setPenaltyReason("");
+      setConfirmDeactivate(false);
+
+      toast({
+        title: selectedPenalty === "warning" ? "⚠️ Warning Sent" : selectedPenalty === "suspend" ? "🔒 Merchant Suspended" : selectedPenalty === "ban" ? "🚫 User Banned" : "💀 Account Deactivated",
+        description: penaltyLabel,
+      });
+    }, 2000);
+  };
+
   const pendingCount = stats.pending + stats.investigating;
+
+  const resetPenaltyState = () => {
+    setShowPenalty(false);
+    setSelectedPenalty(null);
+    setPenaltyDuration("");
+    setPenaltyReason("");
+    setPenaltyProcessing(false);
+    setConfirmDeactivate(false);
+  };
 
   return (
     <div className="space-y-3 pb-6">
@@ -370,7 +452,7 @@ export function AdminComplaintsTab() {
       )}
 
       {/* ─── Complaint Detail Drawer ─── */}
-      <Drawer open={!!selectedComplaint} onOpenChange={(open) => { if (!open) { setSelectedComplaint(null); setShowReasonFor(null); setActionReason(""); } }}>
+      <Drawer open={!!selectedComplaint} onOpenChange={(open) => { if (!open) { setSelectedComplaint(null); setShowReasonFor(null); setActionReason(""); resetPenaltyState(); } }}>
         <DrawerContent className="max-h-[92vh]">
           <div className="flex flex-col h-full max-h-[92vh]">
             <DrawerHeader className="pb-2 border-b border-border shrink-0">
@@ -489,7 +571,7 @@ export function AdminComplaintsTab() {
                     </div>
 
                     {/* Reason textarea for resolve/dismiss */}
-                    {showReasonFor && (
+                    {showReasonFor && !showPenalty && (
                       <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
                         <p className="text-sm font-medium">
                           {showReasonFor === "resolve" ? "Resolution Notes" : "Dismissal Reason"}
@@ -502,67 +584,222 @@ export function AdminComplaintsTab() {
                         />
                       </div>
                     )}
+
+                    {/* ─── Penalty Panel ─── */}
+                    {showPenalty && (
+                      <div className="rounded-xl border-2 border-red-400/50 bg-red-500/5 p-3 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Gavel className="h-4 w-4 text-red-600 shrink-0" />
+                          <p className="text-sm font-bold text-red-700">Penalise Merchant</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Select penalty type for <strong>{current.merchantName}</strong></p>
+
+                        {/* Penalty type selection */}
+                        <div className="space-y-2">
+                          {(Object.entries(penaltyConfig) as [PenaltyType, typeof penaltyConfig[PenaltyType]][]).map(([key, config]) => {
+                            const Icon = config.icon;
+                            const isSelected = selectedPenalty === key;
+                            return (
+                              <button
+                                key={key}
+                                onClick={() => { setSelectedPenalty(key); setPenaltyDuration(""); setConfirmDeactivate(false); }}
+                                className={`w-full text-left p-3 rounded-xl border-2 transition-all touch-manipulation ${
+                                  isSelected
+                                    ? `${config.bg} ${config.border} ring-1 ring-offset-1`
+                                    : "bg-muted/30 border-border hover:bg-muted/50"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <Icon className={`h-5 w-5 shrink-0 ${isSelected ? config.color : "text-muted-foreground"}`} />
+                                  <div className="flex-1 min-w-0">
+                                    <p className={`text-sm font-semibold ${isSelected ? config.color : ""}`}>{config.label}</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">{config.description}</p>
+                                  </div>
+                                  <div className={`h-5 w-5 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                                    isSelected ? `${config.border} ${config.bg}` : "border-muted-foreground/30"
+                                  }`}>
+                                    {isSelected && <div className={`h-2.5 w-2.5 rounded-full ${config.border.replace("border-", "bg-")}`} />}
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Duration selector for suspend/ban */}
+                        {selectedPenalty && penaltyConfig[selectedPenalty].requiresDuration && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {selectedPenalty === "suspend" ? "Suspension" : "Ban"} Duration
+                            </p>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {penaltyDurations.map((d) => (
+                                <button
+                                  key={d.value}
+                                  onClick={() => setPenaltyDuration(d.value)}
+                                  className={`h-10 px-3 rounded-lg text-sm font-medium touch-manipulation transition-colors border ${
+                                    penaltyDuration === d.value
+                                      ? selectedPenalty === "suspend"
+                                        ? "bg-orange-500/15 text-orange-700 border-orange-400"
+                                        : "bg-red-500/15 text-red-700 border-red-400"
+                                      : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
+                                  }`}
+                                >
+                                  {d.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Reason for penalty */}
+                        {selectedPenalty && selectedPenalty !== "warning" && (
+                          <div className="space-y-1.5">
+                            <p className="text-xs font-medium text-muted-foreground">Reason for penalty</p>
+                            <Textarea
+                              value={penaltyReason}
+                              onChange={(e) => setPenaltyReason(e.target.value)}
+                              placeholder="Explain the reason for this penalty action..."
+                              className="min-h-[70px] touch-manipulation"
+                            />
+                          </div>
+                        )}
+
+                        {/* Deactivate confirmation */}
+                        {selectedPenalty === "deactivate" && (
+                          <div className="rounded-lg bg-red-600/10 border border-red-500 p-3 space-y-2">
+                            <p className="text-xs font-bold text-red-800">⚠️ This action is PERMANENT and IRREVERSIBLE</p>
+                            <p className="text-xs text-red-700">The merchant's account and all associated data will be permanently deactivated.</p>
+                            <button
+                              onClick={() => setConfirmDeactivate(!confirmDeactivate)}
+                              className="flex items-center gap-2 h-10 touch-manipulation"
+                            >
+                              <div className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                confirmDeactivate ? "bg-red-600 border-red-600" : "border-red-400"
+                              }`}>
+                                {confirmDeactivate && <CheckCircle className="h-3 w-3 text-white" />}
+                              </div>
+                              <span className="text-sm text-red-700 font-medium">I understand this cannot be undone</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* ─── Bottom Action Buttons ─── */}
                   <div className="shrink-0 border-t border-border p-4 bg-background space-y-2">
-                    {current.status === "pending" && !showReasonFor && (
-                      <Button
-                        className="w-full h-11 touch-manipulation"
-                        onClick={() => handleAction(current.id, "investigate")}
-                        disabled={processing}
-                      >
-                        {processing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
-                        Start Investigation
-                      </Button>
+                    {/* Investigation / Resolve / Dismiss — only when penalty panel is NOT open */}
+                    {!showPenalty && (
+                      <>
+                        {current.status === "pending" && !showReasonFor && (
+                          <Button
+                            className="w-full h-11 touch-manipulation"
+                            onClick={() => handleAction(current.id, "investigate")}
+                            disabled={processing}
+                          >
+                            {processing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
+                            Start Investigation
+                          </Button>
+                        )}
+
+                        {(current.status === "pending" || current.status === "investigating") && !showReasonFor && (
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              className="flex-1 h-11 touch-manipulation text-emerald-700 border-emerald-300 hover:bg-emerald-500/10"
+                              onClick={() => setShowReasonFor("resolve")}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1.5" />
+                              Resolve
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="flex-1 h-11 touch-manipulation text-slate-600 border-slate-300 hover:bg-slate-500/10"
+                              onClick={() => setShowReasonFor("dismiss")}
+                            >
+                              <XCircle className="h-4 w-4 mr-1.5" />
+                              Dismiss
+                            </Button>
+                          </div>
+                        )}
+
+                        {showReasonFor && (
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              className="flex-1 h-11 touch-manipulation"
+                              onClick={() => { setShowReasonFor(null); setActionReason(""); }}
+                              disabled={processing}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              className={`flex-1 h-11 touch-manipulation ${
+                                showReasonFor === "resolve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-600 hover:bg-slate-700"
+                              }`}
+                              onClick={() => handleAction(current.id, showReasonFor, actionReason)}
+                              disabled={!actionReason.trim() || processing}
+                            >
+                              {processing ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : showReasonFor === "resolve" ? (
+                                <CheckCircle className="h-4 w-4 mr-1.5" />
+                              ) : (
+                                <XCircle className="h-4 w-4 mr-1.5" />
+                              )}
+                              Confirm {showReasonFor === "resolve" ? "Resolve" : "Dismiss"}
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Penalise button — available for investigating/resolved cases */}
+                        {(current.status === "investigating" || current.status === "resolved") && !showReasonFor && (
+                          <Button
+                            variant="outline"
+                            className="w-full h-11 touch-manipulation text-red-700 border-red-300 hover:bg-red-500/10"
+                            onClick={() => setShowPenalty(true)}
+                          >
+                            <Gavel className="h-4 w-4 mr-2" />
+                            Penalise Merchant
+                          </Button>
+                        )}
+                      </>
                     )}
 
-                    {(current.status === "pending" || current.status === "investigating") && !showReasonFor && (
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          className="flex-1 h-11 touch-manipulation text-emerald-700 border-emerald-300 hover:bg-emerald-500/10"
-                          onClick={() => setShowReasonFor("resolve")}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1.5" />
-                          Resolve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="flex-1 h-11 touch-manipulation text-slate-600 border-slate-300 hover:bg-slate-500/10"
-                          onClick={() => setShowReasonFor("dismiss")}
-                        >
-                          <XCircle className="h-4 w-4 mr-1.5" />
-                          Dismiss
-                        </Button>
-                      </div>
-                    )}
-
-                    {showReasonFor && (
+                    {/* Penalty action buttons */}
+                    {showPenalty && (
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
                           className="flex-1 h-11 touch-manipulation"
-                          onClick={() => { setShowReasonFor(null); setActionReason(""); }}
-                          disabled={processing}
+                          onClick={resetPenaltyState}
+                          disabled={penaltyProcessing}
                         >
                           Cancel
                         </Button>
                         <Button
                           className={`flex-1 h-11 touch-manipulation ${
-                            showReasonFor === "resolve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-600 hover:bg-slate-700"
+                            selectedPenalty === "deactivate" ? "bg-red-700 hover:bg-red-800" :
+                            selectedPenalty === "ban" ? "bg-red-600 hover:bg-red-700" :
+                            selectedPenalty === "suspend" ? "bg-orange-600 hover:bg-orange-700" :
+                            "bg-amber-600 hover:bg-amber-700"
                           }`}
-                          onClick={() => handleAction(current.id, showReasonFor, actionReason)}
-                          disabled={!actionReason.trim() || processing}
+                          onClick={() => handlePenalty(current.id)}
+                          disabled={
+                            !selectedPenalty ||
+                            (penaltyConfig[selectedPenalty!]?.requiresDuration && !penaltyDuration) ||
+                            (selectedPenalty !== "warning" && !penaltyReason.trim()) ||
+                            (selectedPenalty === "deactivate" && !confirmDeactivate) ||
+                            penaltyProcessing
+                          }
                         >
-                          {processing ? (
+                          {penaltyProcessing ? (
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : showReasonFor === "resolve" ? (
-                            <CheckCircle className="h-4 w-4 mr-1.5" />
                           ) : (
-                            <XCircle className="h-4 w-4 mr-1.5" />
+                            <Gavel className="h-4 w-4 mr-1.5" />
                           )}
-                          Confirm {showReasonFor === "resolve" ? "Resolve" : "Dismiss"}
+                          Apply Penalty
                         </Button>
                       </div>
                     )}
