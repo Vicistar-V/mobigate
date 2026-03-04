@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { mockParentMerchants, ParentMerchant, MerchantStock, initialSubMerchantWalletBalance } from "@/data/subMerchantVoucherData";
 import { formatNum, generateBatchNumber } from "@/data/merchantVoucherData";
+import { MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
 
 type Step = "select" | "merchant" | "summary" | "processing" | "success";
 
@@ -60,6 +61,8 @@ export default function SubMerchantBuyVouchers() {
 
   const totalBundles = selections.reduce((sum, s) => sum + s.bundleCount, 0);
   const totalCards = totalBundles * 100;
+  const totalRetailValue = selections.reduce((sum, sel) => sum + sel.denomination * sel.bundleCount * 100, 0);
+  const meetsMinOrderValue = totalRetailValue >= MIN_DISCOUNT_ORDER_VALUE;
 
   // Merchants that have ALL selected denominations in stock with enough bundles
   const merchantsWithStock = useMemo(() => {
@@ -73,18 +76,18 @@ export default function SubMerchantBuyVouchers() {
     });
   }, [selections]);
 
-  // Calculate total cost for a given merchant
+  // Calculate total cost for a given merchant (applies discount only if meetsMinOrderValue)
   const calcTotalForMerchant = useCallback((merchant: ParentMerchant) => {
+    if (!meetsMinOrderValue) return totalRetailValue;
     return selections.reduce((sum, sel) => {
       const stock = merchant.availableStock.find(s => s.denomination === sel.denomination);
       return sum + (stock ? stock.pricePerBundle * sel.bundleCount : 0);
     }, 0);
-  }, [selections]);
+  }, [selections, meetsMinOrderValue, totalRetailValue]);
 
   const totalCost = selectedMerchant ? calcTotalForMerchant(selectedMerchant) : 0;
-  const totalRetailValue = selections.reduce((sum, sel) => sum + sel.denomination * sel.bundleCount * 100, 0);
   const totalDiscount = totalRetailValue - totalCost;
-  const discountRate = selectedMerchant?.discountRate || 0;
+  const discountRate = meetsMinOrderValue ? (selectedMerchant?.discountRate || 0) : 0;
 
   const handleBack = () => {
     if (step === "merchant") setStep("select");
@@ -158,7 +161,7 @@ export default function SubMerchantBuyVouchers() {
       <div class="receipt-row"><span class="label">Batch Number</span><span class="val">${receiptData.batchNumber}</span></div>
       <div class="receipt-divider"></div>
       <div class="receipt-row"><span class="label">Total Voucher Retail Value</span><span class="val">₦${formatNum(totalRetailValue)}</span></div>
-      <div class="receipt-row"><span class="label">Merchant's Discount (${discountRate.toFixed(1)}%)</span><span class="val" style="color:green">-₦${formatNum(totalDiscount)}</span></div>
+      ${meetsMinOrderValue && discountRate > 0 ? `<div class="receipt-row"><span class="label">Merchant's Discount (${discountRate.toFixed(1)}%)</span><span class="val" style="color:green">-₦${formatNum(totalDiscount)}</span></div>` : ''}
       <div class="receipt-total">AMOUNT PAID: ₦${formatNum(totalCost)}</div>
       <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(initialSubMerchantWalletBalance - totalCost)}</span></div>
       <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
@@ -338,6 +341,13 @@ export default function SubMerchantBuyVouchers() {
               <p className="text-xs text-muted-foreground mt-1">Try reducing bundle counts or removing a denomination</p>
             </div>
           )}
+          {merchantsWithStock.length > 0 && !meetsMinOrderValue && (
+            <div className="rounded-xl border border-amber-200/60 bg-amber-50/50 dark:bg-amber-950/20 p-3 mb-2">
+              <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                No bulk discount yet: total order must be ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} (current M{formatNum(totalRetailValue)}).
+              </p>
+            </div>
+          )}
           {merchantsWithStock.map(pm => {
             const merchantTotal = calcTotalForMerchant(pm);
             return (
@@ -351,16 +361,23 @@ export default function SubMerchantBuyVouchers() {
                     <p className="text-sm font-bold text-foreground">{pm.name}</p>
                     <p className="text-xs text-muted-foreground">{pm.city}, {pm.state}</p>
                   </div>
-                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold">{pm.discountRate}% OFF</Badge>
+                  {meetsMinOrderValue ? (
+                    <Badge className="bg-emerald-500/15 text-emerald-600 text-xs font-bold">{pm.discountRate}% OFF</Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-xs font-medium">No Discount</Badge>
+                  )}
                 </div>
                 {/* Per-denom stock info */}
                 <div className="space-y-1 mb-2">
                   {selections.map(sel => {
                     const stock = pm.availableStock.find(s => s.denomination === sel.denomination);
+                    const linePrice = meetsMinOrderValue
+                      ? (stock?.pricePerBundle || 0) * sel.bundleCount
+                      : sel.denomination * sel.bundleCount * 100;
                     return (
                       <div key={sel.denomination} className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>M{formatNum(sel.denomination)}: {stock?.availableBundles || 0} avail</span>
-                        <span>₦{formatNum((stock?.pricePerBundle || 0) * sel.bundleCount)}</span>
+                        <span>₦{formatNum(linePrice)}</span>
                       </div>
                     );
                   })}
@@ -398,7 +415,9 @@ export default function SubMerchantBuyVouchers() {
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">{selectedMerchant?.name}</p>
-              <p className="text-xs text-muted-foreground">{selectedMerchant?.discountRate}% Discount Rate</p>
+              <p className="text-xs text-muted-foreground">
+                {meetsMinOrderValue ? `${selectedMerchant?.discountRate}% Discount Rate` : "No Discount (below M50,000 minimum)"}
+              </p>
             </div>
           </div>
 
@@ -407,7 +426,9 @@ export default function SubMerchantBuyVouchers() {
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order Items</p>
             {selections.map(sel => {
               const stock = selectedMerchant?.availableStock.find(s => s.denomination === sel.denomination);
-              const lineTotal = (stock?.pricePerBundle || 0) * sel.bundleCount;
+              const lineRetail = sel.denomination * sel.bundleCount * 100;
+              const lineDiscounted = (stock?.pricePerBundle || 0) * sel.bundleCount;
+              const lineTotal = meetsMinOrderValue ? lineDiscounted : lineRetail;
               return (
                 <div key={sel.denomination} className="flex items-center justify-between py-2 border-b border-border/20 last:border-0">
                   <div>
@@ -415,7 +436,6 @@ export default function SubMerchantBuyVouchers() {
                     <p className="text-xs text-muted-foreground">
                       {sel.bundleCount} bundle{sel.bundleCount !== 1 ? "s" : ""} · {formatNum(sel.bundleCount * 100)} cards
                     </p>
-                    <p className="text-xs text-muted-foreground">₦{formatNum(stock?.pricePerBundle || 0)}/bundle</p>
                   </div>
                   <p className="text-sm font-bold text-foreground">₦{formatNum(lineTotal)}</p>
                 </div>
@@ -435,10 +455,18 @@ export default function SubMerchantBuyVouchers() {
                 <span className="text-muted-foreground">Total Voucher Retail Value</span>
                 <span className="font-bold text-foreground">₦{formatNum(totalRetailValue)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Merchant's Discount ({discountRate.toFixed(1)}%)</span>
-                <span className="font-bold text-emerald-600">-₦{formatNum(totalDiscount)}</span>
-              </div>
+              {meetsMinOrderValue && discountRate > 0 ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Merchant's Discount ({discountRate.toFixed(1)}%)</span>
+                  <span className="font-bold text-emerald-600">-₦{formatNum(totalDiscount)}</span>
+                </div>
+              ) : (
+                <div className="rounded-lg bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/40 p-2">
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    No discount — minimum order value of M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} not met.
+                  </p>
+                </div>
+              )}
               <div className="border-t border-border/50 pt-2 flex justify-between">
                 <span className="font-bold text-foreground">Amount to Pay</span>
                 <span className="font-bold text-lg text-foreground">₦{formatNum(totalCost)}</span>
@@ -554,10 +582,12 @@ export default function SubMerchantBuyVouchers() {
               <span className="text-muted-foreground">Total Voucher Retail Value</span>
               <span className="font-bold text-foreground">₦{formatNum(totalRetailValue)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Merchant's Discount ({discountRate.toFixed(1)}%)</span>
-              <span className="font-bold text-emerald-600">-₦{formatNum(totalDiscount)}</span>
-            </div>
+            {meetsMinOrderValue && discountRate > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Merchant's Discount ({discountRate.toFixed(1)}%)</span>
+                <span className="font-bold text-emerald-600">-₦{formatNum(totalDiscount)}</span>
+              </div>
+            )}
 
             <div className="border-t border-border/50 pt-2 flex justify-between">
               <span className="font-bold text-foreground">Amount Paid</span>
