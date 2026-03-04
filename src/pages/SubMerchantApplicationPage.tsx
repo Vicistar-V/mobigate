@@ -47,6 +47,8 @@ export default function SubMerchantApplicationPage() {
     retailShopAddress: reapplyData?.retailShopAddress || "",
     onlineStoreUrl: reapplyData?.onlineStoreUrl || "",
     mobiShopUrl: reapplyData?.mobiShopUrl || "",
+    hasPreviousApplication: reapplyData ? "yes" : "no" as "no" | "yes",
+    previousApplicationDetails: reapplyData?.previousApplicationDetails || "",
     agreeTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -305,6 +307,38 @@ export default function SubMerchantApplicationPage() {
             />
           </div>
 
+          {/* Previous Application */}
+          <div>
+            <Label className="text-xs font-semibold text-foreground mb-2 block">Any Previous Application?</Label>
+            <div className="flex gap-2">
+              {(["no", "yes"] as const).map(opt => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    updateField("hasPreviousApplication", opt);
+                    if (opt === "no") updateField("previousApplicationDetails", "");
+                  }}
+                  className={`flex-1 h-11 rounded-xl text-sm font-semibold border-2 transition-colors touch-manipulation active:scale-[0.97] ${
+                    form.hasPreviousApplication === opt
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground"
+                  }`}
+                >
+                  {opt === "no" ? "No" : "Yes"}
+                </button>
+              ))}
+            </div>
+            {form.hasPreviousApplication === "yes" && (
+              <Textarea
+                value={form.previousApplicationDetails}
+                onChange={e => updateField("previousApplicationDetails", e.target.value)}
+                placeholder="Please provide details of your previous application (e.g. merchant name, date, reference number, outcome)..."
+                className="min-h-[80px] rounded-xl text-sm mt-2"
+              />
+            )}
+          </div>
+
           <div className="flex items-start gap-3 pt-2">
             <Checkbox
               id="terms"
@@ -313,7 +347,7 @@ export default function SubMerchantApplicationPage() {
               className="mt-0.5"
             />
             <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-              I agree to the Sub-Merchant Terms and Conditions and understand that the ₦5,000 Application Fee is non-refundable.
+              I agree to the Sub‑Merchant Terms and Conditions and understand that the ₦5,000 Application Fee is non‑refundable.
             </label>
           </div>
         </div>
