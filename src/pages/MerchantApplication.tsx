@@ -237,9 +237,9 @@ export default function MerchantApplication() {
               </div>
 
               <div className="bg-background rounded-lg p-3 space-y-2 border text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Reference</span>
-                  <span className="font-mono font-bold">{refNumber}</span>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Reference</span>
+                  <span className="font-mono font-bold text-sm break-all">{refNumber}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type</span>
