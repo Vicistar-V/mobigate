@@ -35,7 +35,7 @@ export function ScholarshipQuizSetupSheet({ open, onOpenChange }: ScholarshipQui
 
   return (
     <>
-      <Drawer open={open && !showPlay} onOpenChange={onOpenChange}>
+      <Drawer open={open && !showPlay} onOpenChange={(v) => { if (!showPlay) onOpenChange(v); }}>
         <DrawerContent className="max-h-[92vh]">
           <DrawerHeader className="text-left pb-2">
             <DrawerTitle className="flex items-center gap-2">

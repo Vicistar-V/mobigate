@@ -41,7 +41,7 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
 
   return (
     <>
-      <Drawer open={open && !showPlay} onOpenChange={onOpenChange}>
+      <Drawer open={open && !showPlay} onOpenChange={(v) => { if (!showPlay) onOpenChange(v); }}>
         <DrawerContent className="max-h-[92vh]">
           <DrawerHeader className="text-left pb-2">
             <DrawerTitle className="flex items-center gap-2">
