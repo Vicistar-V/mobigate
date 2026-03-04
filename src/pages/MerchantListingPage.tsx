@@ -325,58 +325,66 @@ function MerchantCard({
       className={`p-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 ${borderClass}`}
       onClick={onClick}
     >
+      {/* Row 1: Avatar + Name + Verified */}
       <div className="flex items-center gap-3">
-        <Avatar className="h-12 w-12 shrink-0 border-2 border-primary/20">
+        <Avatar className="h-11 w-11 shrink-0 border-2 border-primary/20">
           <AvatarImage src={merchant.logo} alt={merchant.name} />
           <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">{merchant.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <p className="text-sm font-semibold truncate">{merchant.name}</p>
-            {merchant.isVerified && <CheckCircle className="h-4 w-4 text-blue-500 shrink-0" />}
+          <div className="flex items-start gap-1.5">
+            <p className="text-sm font-semibold leading-snug break-words">{merchant.name}</p>
+            {merchant.isVerified && <CheckCircle className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />}
           </div>
-          <p className="text-xs text-muted-foreground">{merchant.category}</p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <div className="flex items-center gap-0.5">
-              <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-              <span className="text-xs font-medium">{merchant.rating}</span>
-            </div>
-            {merchant.discountPercent > 0 && (
-              <Badge variant="secondary" className="text-xs h-5 px-1.5">
-                {merchant.discountPercent}% {merchantType === "retail" ? "off" : "discount"}
-              </Badge>
-            )}
-            <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-              <MapPin className="h-3 w-3" />
-              {merchant.cityName && <>{merchant.cityName}, </>}
-              {merchant.stateName && <>{merchant.stateName}, </>}
-              {merchant.countryFlag}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 mt-1.5">
-            {/* Type badge */}
-            <Badge
-              variant="outline"
-              className={`text-xs h-5 px-1.5 ${
-                merchantType === "retail"
-                  ? "bg-emerald-500/10 text-emerald-700 border-emerald-200"
-                  : "bg-blue-500/10 text-blue-700 border-blue-200"
-              }`}
-            >
-              {merchantType === "retail" ? "🏪 Retail" : "🏢 Bulk"}
-            </Badge>
-            {hasQuiz && (
-              <Badge className="text-xs h-5 px-1.5 bg-amber-500/15 text-amber-700 border-amber-300 hover:bg-amber-500/20" variant="outline">
-                🎮 Quiz
-              </Badge>
-            )}
-            {hasVoucher && (
-              <Badge className="text-xs h-5 px-1.5 bg-emerald-500/15 text-emerald-700 border-emerald-300 hover:bg-emerald-500/20" variant="outline">
-                🎟️ Voucher
-              </Badge>
-            )}
-          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">{merchant.category}</p>
         </div>
+      </div>
+
+      {/* Row 2: Location — full width below avatar row */}
+      <div className="flex items-center gap-1 mt-2 pl-0.5">
+        <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+        <span className="text-xs text-muted-foreground leading-snug">
+          {[merchant.cityName, merchant.stateName, `${merchant.countryFlag} ${merchant.countryName}`].filter(Boolean).join(", ")}
+        </span>
+      </div>
+
+      {/* Row 3: Badges — wrapped */}
+      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+        {/* Type badge */}
+        <Badge
+          variant="outline"
+          className={`text-xs h-5 px-1.5 ${
+            merchantType === "retail"
+              ? "bg-emerald-500/10 text-emerald-700 border-emerald-200"
+              : "bg-blue-500/10 text-blue-700 border-blue-200"
+          }`}
+        >
+          {merchantType === "retail" ? "🏪 Retail" : "🏢 Bulk"}
+        </Badge>
+
+        {/* Rating */}
+        <Badge variant="secondary" className="text-xs h-5 px-1.5 gap-0.5">
+          <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+          {merchant.rating}
+        </Badge>
+
+        {/* Discount */}
+        {merchant.discountPercent > 0 && (
+          <Badge variant="secondary" className="text-xs h-5 px-1.5">
+            {merchant.discountPercent}% {merchantType === "retail" ? "off" : "discount"}
+          </Badge>
+        )}
+
+        {hasQuiz && (
+          <Badge className="text-xs h-5 px-1.5 bg-amber-500/15 text-amber-700 border-amber-300" variant="outline">
+            🎮 Quiz
+          </Badge>
+        )}
+        {hasVoucher && (
+          <Badge className="text-xs h-5 px-1.5 bg-emerald-500/15 text-emerald-700 border-emerald-300" variant="outline">
+            🎟️ Voucher
+          </Badge>
+        )}
       </div>
     </Card>
   );
