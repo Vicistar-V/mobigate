@@ -304,67 +304,81 @@ function AdminMerchantCard({ merchant, onClick }: { merchant: LocationMerchant; 
   const vStats = getMerchantVoucherStats(merchant.id);
   const status = getMerchantStatus(merchant.id);
 
-  const statusBadge = status === "active" ? null : (
-    <Badge variant="outline" className={`text-xs h-5 px-1.5 ${
-      status === "suspended" ? "text-amber-600 border-amber-300 bg-amber-500/10" : "text-red-600 border-red-300 bg-red-500/10"
-    }`}>
-      {status === "suspended" ? "⚠️ Suspended" : "🚫 Banned"}
-    </Badge>
-  );
-
   return (
     <Card
-      className={`p-3 cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 ${
-        status === "banned" ? "border-l-red-500/60 opacity-75" :
+      className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 ${
+        status === "banned" ? "border-l-red-500/60 opacity-70" :
         status === "suspended" ? "border-l-amber-500/60" :
         "border-l-primary/60"
       }`}
       onClick={onClick}
     >
-      <div className="flex items-center gap-3">
-        <Avatar className="h-12 w-12 shrink-0 border-2 border-primary/20">
-          <AvatarImage src={merchant.logo} alt={merchant.name} />
-          <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
-            {merchant.name.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <p className="text-sm font-semibold truncate">{merchant.name}</p>
-            {merchant.isVerified && <CheckCircle className="h-4 w-4 text-blue-500 shrink-0" />}
-            {statusBadge}
-          </div>
-          <p className="text-xs text-muted-foreground">{merchant.category}</p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <div className="flex items-center gap-0.5">
-              <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-              <span className="text-xs font-medium">{merchant.rating}</span>
+      <CardContent className="p-3">
+        {/* Row 1: Avatar + Name/Category + Status */}
+        <div className="flex items-start gap-3">
+          <Avatar className="h-11 w-11 shrink-0 border-2 border-primary/20 mt-0.5">
+            <AvatarImage src={merchant.logo} alt={merchant.name} />
+            <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+              {merchant.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-bold truncate">{merchant.name}</p>
+              {merchant.isVerified && <CheckCircle className="h-3.5 w-3.5 text-blue-500 shrink-0" />}
             </div>
-            {merchant.discountPercent > 0 && (
-              <Badge variant="secondary" className="text-xs h-5 px-1.5">{merchant.discountPercent}% off</Badge>
-            )}
-            <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-              <MapPin className="h-3 w-3" />
-              {merchant.countryFlag} {merchant.stateName || merchant.countryName}
-            </span>
+            <p className="text-xs text-muted-foreground mt-0.5">{merchant.category}</p>
           </div>
-          {/* Admin stats row */}
-          <div className="flex items-center gap-3 mt-1.5">
+          {/* Status badge — right-aligned, never truncated */}
+          {status !== "active" && (
+            <Badge
+              variant="outline"
+              className={`text-xs h-6 px-2 shrink-0 whitespace-nowrap ${
+                status === "suspended"
+                  ? "text-amber-700 border-amber-300 bg-amber-500/10"
+                  : "text-red-700 border-red-300 bg-red-500/10"
+              }`}
+            >
+              {status === "suspended" ? "⚠️ Suspended" : "🚫 Banned"}
+            </Badge>
+          )}
+        </div>
+
+        {/* Row 2: Meta chips — rating, discount, location */}
+        <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+          <div className="flex items-center gap-1">
+            <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
+            <span className="text-xs font-semibold">{merchant.rating}</span>
+          </div>
+          {merchant.discountPercent > 0 && (
+            <Badge variant="secondary" className="text-xs h-5 px-1.5 font-semibold">
+              {merchant.discountPercent}% off
+            </Badge>
+          )}
+          <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+            <MapPin className="h-3 w-3 shrink-0" />
+            {merchant.countryFlag} {merchant.stateName || merchant.countryName}
+          </span>
+        </div>
+
+        {/* Row 3: Activity indicators */}
+        {(hasVoucher || hasQuiz) && (
+          <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/50">
             {hasVoucher && (
-              <span className="text-xs text-emerald-600 flex items-center gap-0.5">
-                <Ticket className="h-3 w-3" />
+              <span className="text-xs font-medium text-emerald-600 flex items-center gap-1">
+                <Ticket className="h-3.5 w-3.5 shrink-0" />
                 {vStats.cardsSold} Sold
               </span>
             )}
             {hasQuiz && (
-              <span className="text-xs text-amber-600 flex items-center gap-0.5">
-                <Gamepad2 className="h-3 w-3" />
+              <span className="text-xs font-medium text-amber-600 flex items-center gap-1">
+                <Gamepad2 className="h-3.5 w-3.5 shrink-0" />
                 Quiz active
               </span>
             )}
           </div>
-        </div>
-      </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
