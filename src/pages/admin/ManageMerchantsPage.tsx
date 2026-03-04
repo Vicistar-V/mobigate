@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import {
@@ -380,6 +380,14 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
   const [merchantStatus, setMerchantStatus] = useState<"active" | "suspended" | "banned">(initialStatus);
   const [confirmAction, setConfirmAction] = useState<"suspend" | "ban" | "activate" | null>(null);
   const [showBonusDrawer, setShowBonusDrawer] = useState(false);
+
+  // Reset status when a different merchant is opened
+  React.useEffect(() => {
+    if (merchant) {
+      setMerchantStatus(initialStatus);
+      setConfirmAction(null);
+    }
+  }, [merchant?.id]);
 
   if (!merchant) return null;
 
