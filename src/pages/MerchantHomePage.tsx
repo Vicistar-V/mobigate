@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink, Ticket, Store } from "lucide-react";
+import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink, Ticket, Store, Gift } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import { shareViaNative, copyToClipboard } from "@/lib/shareUtils";
 import { format } from "date-fns";
 import { SubMerchantAccessGateDrawer } from "@/components/merchant/SubMerchantAccessGateDrawer";
 import { MerchantReportDrawer } from "@/components/merchant/MerchantReportDrawer";
+import { RetailMerchantQuizBrowseDrawer } from "@/components/merchant/RetailMerchantQuizBrowseDrawer";
 
 const linkIcons: Record<string, any> = {
   globe: Globe, facebook: Facebook, twitter: Twitter,
@@ -80,6 +81,18 @@ export default function MerchantHomePage() {
   const [selectedEvent, setSelectedEvent] = useState<{ date: string; label: string; type: string; seasonId?: string } | null>(null);
   const [showAccessGate, setShowAccessGate] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
+  const [showQuizBrowseDrawer, setShowQuizBrowseDrawer] = useState(false);
+
+  // For retail merchants, aggregate shows from all bulk merchants
+  const allBulkMerchantSeasons = useMemo(() => {
+    if (isMajorMerchant) return [];
+    return mockSeasons
+      .filter(s => s.quizStatus === "active" && (s.status === "open" || s.status === "in_progress" || s.isLive))
+      .map(s => {
+        const sourceMerchant = mockMerchants.find(m => m.id === s.merchantId);
+        return { ...s, sourceMerchantName: sourceMerchant?.name ?? "Unknown", sourceMerchantId: s.merchantId };
+      });
+  }, [isMajorMerchant]);
 
   const galleryMediaItems: MediaItem[] = useMemo(() =>
     (homeData?.gallery ?? []).map(g => ({
@@ -152,10 +165,20 @@ export default function MerchantHomePage() {
   };
 
   const quickActions = [
-    { icon: Gamepad2, label: "Play Quiz", color: "from-orange-500 to-amber-500", onClick: () => navigate(`/mobi-quiz-games/merchant/${merchantId}`) },
+    {
+      icon: Gamepad2, label: "Play Quiz", color: "from-orange-500 to-amber-500",
+      onClick: () => isMajorMerchant
+        ? navigate(`/mobi-quiz-games/merchant/${merchantId}`)
+        : setShowQuizBrowseDrawer(true),
+    },
     { icon: ImageIcon, label: "Gallery", color: "from-pink-500 to-rose-500", onClick: () => document.getElementById("gallery-section")?.scrollIntoView({ behavior: "smooth" }) },
     { icon: CalendarDays, label: "Events", color: "from-violet-500 to-purple-500", onClick: () => document.getElementById("events-section")?.scrollIntoView({ behavior: "smooth" }) },
-    { icon: Tv, label: "Shows", color: "from-cyan-500 to-blue-500", onClick: () => document.getElementById("shows-section")?.scrollIntoView({ behavior: "smooth" }) },
+    {
+      icon: Tv, label: "Shows", color: "from-cyan-500 to-blue-500",
+      onClick: () => isMajorMerchant
+        ? document.getElementById("shows-section")?.scrollIntoView({ behavior: "smooth" })
+        : setShowQuizBrowseDrawer(true),
+    },
     { icon: Zap, label: "Live", color: "from-red-500 to-pink-500", onClick: () => setScoreboardOpen(true) },
     { icon: Mail, label: "Contact", color: "from-emerald-500 to-green-500", onClick: () => document.getElementById("links-section")?.scrollIntoView({ behavior: "smooth" }) },
   ];
@@ -307,6 +330,21 @@ export default function MerchantHomePage() {
         </div>
       </div>
 
+      {/* Referral Reward Banner — only for retail merchants */}
+      {!isMajorMerchant && (
+        <div className="mx-4 mb-1 flex items-start gap-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+          <Gift className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+              🎁 This retailer earns 1% rewards
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              On activities you start from this page
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Live Video Card */}
       {upcomingSeasons.some(s => s.isLive) && (
         <div className="px-4 pb-3">
@@ -437,39 +475,79 @@ export default function MerchantHomePage() {
         </DrawerContent>
       </Drawer>
 
-      {/* Upcoming Shows */}
-      {upcomingSeasons.length > 0 && (
-        <section id="shows-section" className="py-3 px-4">
-          <h2 className="text-base font-bold flex items-center gap-2 mb-3">
-            <Tv className="h-4 w-4 text-blue-500" /> Upcoming & Live Shows
-          </h2>
-          <div className="space-y-3">
-            {upcomingSeasons.map(season => (
-              <Card
-                key={season.id}
-                className="p-4 cursor-pointer active:scale-[0.98] transition-transform border-l-4 border-l-primary touch-manipulation"
-                onClick={() => navigate(`/mobi-quiz-games/merchant/${merchantId}`)}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      {getSeasonStatusBadge(season)}
-                      <Badge variant="outline" className="text-xs">{season.type}</Badge>
+      {/* Upcoming Shows — context-aware */}
+      {isMajorMerchant ? (
+        upcomingSeasons.length > 0 && (
+          <section id="shows-section" className="py-3 px-4">
+            <h2 className="text-base font-bold flex items-center gap-2 mb-3">
+              <Tv className="h-4 w-4 text-blue-500" /> Upcoming & Live Shows
+            </h2>
+            <div className="space-y-3">
+              {upcomingSeasons.map(season => (
+                <Card
+                  key={season.id}
+                  className="p-4 cursor-pointer active:scale-[0.98] transition-transform border-l-4 border-l-primary touch-manipulation"
+                  onClick={() => navigate(`/mobi-quiz-games/merchant/${merchantId}`)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {getSeasonStatusBadge(season)}
+                        <Badge variant="outline" className="text-xs">{season.type}</Badge>
+                      </div>
+                      <p className="font-semibold text-sm">{season.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
+                      </p>
                     </div>
-                    <p className="font-semibold text-sm">{season.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
-                    </p>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-primary">₦{(season.totalWinningPrizes / 1000000).toFixed(1)}M</p>
+                      <p className="text-xs text-muted-foreground">{formatCount(season.totalParticipants)} players</p>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-primary">₦{(season.totalWinningPrizes / 1000000).toFixed(1)}M</p>
-                    <p className="text-xs text-muted-foreground">{formatCount(season.totalParticipants)} players</p>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )
+      ) : (
+        allBulkMerchantSeasons.length > 0 && (
+          <section id="shows-section" className="py-3 px-4">
+            <h2 className="text-base font-bold flex items-center gap-2 mb-3">
+              <Tv className="h-4 w-4 text-blue-500" /> Upcoming & Live Shows
+            </h2>
+            <p className="text-xs text-muted-foreground mb-3">From top quiz merchants</p>
+            <div className="space-y-3">
+              {allBulkMerchantSeasons.map(season => (
+                <Card
+                  key={season.id}
+                  className="p-4 cursor-pointer active:scale-[0.98] transition-transform border-l-4 border-l-amber-500 touch-manipulation"
+                  onClick={() => navigate(`/mobi-quiz-games/merchant/${season.sourceMerchantId}?ref=${merchantId}`)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {getSeasonStatusBadge(season)}
+                        <Badge variant="outline" className="text-xs">{season.type}</Badge>
+                      </div>
+                      <p className="font-semibold text-sm">{season.name}</p>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-0.5">
+                        by {season.sourceMerchantName}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-primary">₦{(season.totalWinningPrizes / 1000000).toFixed(1)}M</p>
+                      <p className="text-xs text-muted-foreground">{formatCount(season.totalParticipants)} players</p>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )
       )}
 
       {/* Past Shows */}
@@ -651,6 +729,14 @@ export default function MerchantHomePage() {
         merchantName={merchant.name}
         merchantLogo={merchant.logo}
       />
+      {!isMajorMerchant && (
+        <RetailMerchantQuizBrowseDrawer
+          open={showQuizBrowseDrawer}
+          onOpenChange={setShowQuizBrowseDrawer}
+          retailMerchantId={merchantId ?? ""}
+          retailMerchantName={merchant.name}
+        />
+      )}
     </div>
   );
 }
