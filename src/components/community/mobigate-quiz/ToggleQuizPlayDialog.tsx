@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-import { X, Repeat, Trophy, AlertTriangle, Star, Timer, ArrowRight, ChevronRight, Award, Zap, Shield } from "lucide-react";
+import { X, Repeat, Trophy, AlertTriangle, Star, Timer, ArrowRight, ChevronRight, Award, Zap, Shield, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
@@ -472,12 +472,27 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                   </CardContent>
                 </Card>
 
-                <Button
-                  className="w-full h-12 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold touch-manipulation"
-                  onClick={handleExit}
-                >
-                  Exit Game
-                </Button>
+                <div className="space-y-2.5">
+                  <Button
+                    className="w-full h-12 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold touch-manipulation active:scale-[0.97]"
+                    onClick={() => {
+                      setSessionIndex(0);
+                      setTotalStakeCharged(0);
+                      startSession(0);
+                      toast({ title: "🔥 Let's Go!", description: `Stake of ${formatMobiAmount(STAKE_AMOUNT)} charged. You got this!` });
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Play Again to Win — {formatMobiAmount(STAKE_AMOUNT)}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 border-red-300 text-red-600 font-bold touch-manipulation active:scale-[0.97]"
+                    onClick={handleExit}
+                  >
+                    Exit Game
+                  </Button>
+                </div>
               </div>
             )}
 
