@@ -314,30 +314,31 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
 
   // ─── MAIN FORM ───
   return (
-    <div className="bg-background min-h-screen pb-28">
+    <div className="bg-background min-h-screen pb-28 overflow-x-hidden w-full max-w-full">
       {/* Sticky header */}
       <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={onBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+        <div className="px-5 py-3 flex items-center gap-3">
+          <button onClick={onBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h1 className="text-base font-bold text-foreground">{config.label}</h1>
             <p className="text-xs text-muted-foreground">Send PINs to multiple recipients</p>
           </div>
         </div>
+
         {/* Balance banner */}
-        <div className="px-4 pb-3">
-          <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 flex items-center justify-between">
-            <div>
+        <div className="px-5 pb-3">
+          <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 flex items-center justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-xs font-medium text-muted-foreground">Available to Share</p>
-              <p className="text-xl font-bold text-foreground">M{formatNum(remainingMobi)}</p>
+              <p className="text-2xl font-black text-foreground tracking-tight">M{formatNum(remainingMobi)}</p>
             </div>
-            <div className="text-right">
+            <div className="text-right shrink-0">
               {totalAllocated > 0 ? (
                 <>
                   <p className="text-xs text-muted-foreground">Allocating</p>
-                  <p className="text-sm font-bold text-primary">M{formatNum(totalAllocated)}</p>
+                  <p className="text-base font-bold text-primary">M{formatNum(totalAllocated)}</p>
                 </>
               ) : (
                 <p className="text-xs text-muted-foreground">≈ ₦{formatNum(remainingMobi)}</p>
@@ -347,11 +348,11 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
         </div>
       </div>
 
-      <div className="px-4 pt-4 space-y-4">
+      <div className="px-5 pt-5 space-y-5 w-full max-w-full">
         {/* Channel icon */}
-        <div className="flex flex-col items-center mb-1">
-          <div className={`h-14 w-14 rounded-2xl ${config.bgColor} flex items-center justify-center mb-2`}>
-            <Icon className={`h-7 w-7 ${config.color}`} />
+        <div className="flex flex-col items-center">
+          <div className={`h-16 w-16 rounded-2xl ${config.bgColor} flex items-center justify-center shadow-sm`}>
+            <Icon className={`h-8 w-8 ${config.color}`} />
           </div>
         </div>
 
@@ -365,7 +366,7 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Users className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1 text-left">
+              <div className="flex-1 text-left min-w-0">
                 <p className="text-sm font-bold text-foreground">
                   {selectedUsers.length > 0
                     ? `${selectedUsers.length} recipient${selectedUsers.length > 1 ? "s" : ""} selected`
@@ -390,11 +391,11 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
 
         {/* ─── CONTACT CHANNELS: Add recipient input ─── */}
         {!isMobiChat && (
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+          <div className="w-full max-w-full">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5 block">
               Add Recipients
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full">
               <input
                 type={channel === "email" ? "email" : "tel"}
                 inputMode={config.inputMode}
@@ -402,12 +403,12 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
                 onChange={e => setNewContact(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addContact(); } }}
                 placeholder={config.placeholder}
-                className="flex-1 h-12 rounded-xl border-2 border-border/50 bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                className="flex-1 min-w-0 h-12 rounded-xl border-2 border-border/50 bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
               />
               <Button
                 onClick={addContact}
                 disabled={!newContact.trim()}
-                className={`h-12 px-4 rounded-xl shrink-0 ${config.buttonColor}`}
+                className={`h-12 w-12 rounded-xl shrink-0 ${config.buttonColor}`}
               >
                 <Plus className="h-5 w-5" />
               </Button>
@@ -420,15 +421,15 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
 
             {/* Added recipients chips */}
             {contactRecipients.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-2 mt-3">
                 {contactRecipients.map(r => (
-                  <Badge key={r.id} variant="secondary" className="pl-2.5 pr-1 py-1 text-xs font-medium gap-1">
-                    {r.contact.length > 22 ? r.contact.slice(0, 22) + "…" : r.contact}
+                  <Badge key={r.id} variant="secondary" className="pl-3 pr-1.5 py-1.5 text-xs font-semibold gap-1.5 max-w-full">
+                    <span className="truncate">{r.contact}</span>
                     <button
                       onClick={() => removeContact(r.id)}
-                      className="h-4 w-4 rounded-full bg-foreground/10 flex items-center justify-center ml-0.5 touch-manipulation"
+                      className="h-5 w-5 rounded-full bg-foreground/10 flex items-center justify-center shrink-0 touch-manipulation"
                     >
-                      <X className="h-2.5 w-2.5" />
+                      <X className="h-3 w-3" />
                     </button>
                   </Badge>
                 ))}
@@ -439,17 +440,17 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
 
         {/* ─── ALLOCATION SECTION (shared) ─── */}
         {recipientCount > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
+          <div className="space-y-3 w-full max-w-full">
+            <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Allocate Amounts
               </p>
               {recipientCount >= 2 && (
                 <button
                   onClick={splitEvenly}
-                  className="flex items-center gap-1 text-xs font-semibold text-primary touch-manipulation active:opacity-70"
+                  className="flex items-center gap-1.5 text-xs font-bold text-primary touch-manipulation active:opacity-70"
                 >
-                  <Sparkles className="h-3 w-3" />
+                  <Sparkles className="h-3.5 w-3.5" />
                   Split Evenly
                 </button>
               )}
@@ -461,38 +462,40 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
               const maxForThis = remainingMobi - otherAllocated;
               const userQuickAmounts = quickAmounts.filter(a => a <= maxForThis);
               return (
-                <div key={user.id} className="rounded-xl border border-border/50 bg-card p-3">
+                <div key={user.id} className="rounded-xl border border-border/50 bg-card p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <Avatar className="h-9 w-9">
+                    <Avatar className="h-10 w-10 shrink-0">
                       <AvatarImage src={user.profileImage} />
-                      <AvatarFallback><span className="text-xs">{user.name[0]}</span></AvatarFallback>
+                      <AvatarFallback><span className="text-xs font-bold">{user.name[0]}</span></AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{user.username}</p>
+                      <p className="text-xs text-muted-foreground">{user.username}</p>
                     </div>
-                    <button onClick={() => removeUser(user.id)} className="h-7 w-7 rounded-full bg-destructive/10 flex items-center justify-center touch-manipulation active:scale-90 shrink-0">
-                      <X className="h-3.5 w-3.5 text-destructive" />
+                    <button onClick={() => removeUser(user.id)} className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center touch-manipulation active:scale-90 shrink-0">
+                      <X className="h-4 w-4 text-destructive" />
                     </button>
                   </div>
-                  <div className="flex gap-1.5 mb-2 flex-wrap">
-                    {userQuickAmounts.map(amt => (
-                      <button key={amt} onClick={() => setUserAmount(user.id, amt)}
-                        className={`h-7 px-3 rounded-lg text-[10px] font-bold touch-manipulation active:scale-90 transition-all ${userAmount === amt ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
-                        M{formatNum(amt)}
-                      </button>
-                    ))}
-                  </div>
+                  {userQuickAmounts.length > 0 && (
+                    <div className="flex gap-1.5 mb-3 flex-wrap">
+                      {userQuickAmounts.map(amt => (
+                        <button key={amt} onClick={() => setUserAmount(user.id, amt)}
+                          className={`h-8 px-3 rounded-lg text-xs font-bold touch-manipulation active:scale-90 transition-all ${userAmount === amt ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-foreground"}`}>
+                          M{formatNum(amt)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setUserAmount(user.id, Math.max(0, userAmount - 100))} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
+                    <button onClick={() => setUserAmount(user.id, Math.max(0, userAmount - 100))} className="h-10 w-10 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
                       <Minus className="h-4 w-4 text-foreground" />
                     </button>
-                    <div className="flex-1 flex items-center gap-2 rounded-xl border border-border/50 bg-background px-3 h-9">
-                      <span className="text-sm font-bold text-primary">M</span>
+                    <div className="flex-1 min-w-0 flex items-center gap-2 rounded-xl border-2 border-border/50 bg-background px-3 h-10">
+                      <span className="text-sm font-bold text-primary shrink-0">M</span>
                       <input type="number" inputMode="numeric" value={userAmount || ""} onChange={e => setUserAmount(user.id, parseInt(e.target.value) || 0)} placeholder="0"
-                        className="flex-1 text-sm font-bold bg-transparent text-foreground focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                        className="flex-1 min-w-0 text-sm font-bold bg-transparent text-foreground focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                     </div>
-                    <button onClick={() => setUserAmount(user.id, userAmount + 100)} className="h-9 w-9 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
+                    <button onClick={() => setUserAmount(user.id, userAmount + 100)} className="h-10 w-10 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
                       <Plus className="h-4 w-4 text-primary-foreground" />
                     </button>
                   </div>
@@ -506,36 +509,38 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
               const maxForThis = remainingMobi - otherAllocated;
               const rQuickAmounts = quickAmounts.filter(a => a <= maxForThis);
               return (
-                <div key={id} className="rounded-xl border border-border/50 bg-card p-3">
+                <div key={id} className="rounded-xl border border-border/50 bg-card p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className={`h-9 w-9 rounded-full ${config.bgColor} flex items-center justify-center shrink-0`}>
-                      <Icon className={`h-4 w-4 ${config.color}`} />
+                    <div className={`h-10 w-10 rounded-full ${config.bgColor} flex items-center justify-center shrink-0`}>
+                      <Icon className={`h-5 w-5 ${config.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{contact}</p>
+                      <p className="text-sm font-bold text-foreground truncate">{contact}</p>
                     </div>
-                    <button onClick={() => removeContact(id)} className="h-7 w-7 rounded-full bg-destructive/10 flex items-center justify-center touch-manipulation active:scale-90 shrink-0">
-                      <X className="h-3.5 w-3.5 text-destructive" />
+                    <button onClick={() => removeContact(id)} className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center touch-manipulation active:scale-90 shrink-0">
+                      <X className="h-4 w-4 text-destructive" />
                     </button>
                   </div>
-                  <div className="flex gap-1.5 mb-2 flex-wrap">
-                    {rQuickAmounts.map(amt => (
-                      <button key={amt} onClick={() => setContactAmount(id, amt)}
-                        className={`h-7 px-3 rounded-lg text-[10px] font-bold touch-manipulation active:scale-90 transition-all ${rAmount === amt ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
-                        M{formatNum(amt)}
-                      </button>
-                    ))}
-                  </div>
+                  {rQuickAmounts.length > 0 && (
+                    <div className="flex gap-1.5 mb-3 flex-wrap">
+                      {rQuickAmounts.map(amt => (
+                        <button key={amt} onClick={() => setContactAmount(id, amt)}
+                          className={`h-8 px-3 rounded-lg text-xs font-bold touch-manipulation active:scale-90 transition-all ${rAmount === amt ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-foreground"}`}>
+                          M{formatNum(amt)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setContactAmount(id, Math.max(0, rAmount - 100))} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
+                    <button onClick={() => setContactAmount(id, Math.max(0, rAmount - 100))} className="h-10 w-10 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
                       <Minus className="h-4 w-4 text-foreground" />
                     </button>
-                    <div className="flex-1 flex items-center gap-2 rounded-xl border border-border/50 bg-background px-3 h-9">
-                      <span className="text-sm font-bold text-primary">M</span>
+                    <div className="flex-1 min-w-0 flex items-center gap-2 rounded-xl border-2 border-border/50 bg-background px-3 h-10">
+                      <span className="text-sm font-bold text-primary shrink-0">M</span>
                       <input type="number" inputMode="numeric" value={rAmount || ""} onChange={e => setContactAmount(id, parseInt(e.target.value) || 0)} placeholder="0"
-                        className="flex-1 text-sm font-bold bg-transparent text-foreground focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                        className="flex-1 min-w-0 text-sm font-bold bg-transparent text-foreground focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                     </div>
-                    <button onClick={() => setContactAmount(id, rAmount + 100)} className="h-9 w-9 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
+                    <button onClick={() => setContactAmount(id, rAmount + 100)} className="h-10 w-10 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
                       <Plus className="h-4 w-4 text-primary-foreground" />
                     </button>
                   </div>
@@ -544,14 +549,14 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
             })}
 
             {/* Summary */}
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-              <div className="flex items-center justify-between text-sm mb-1">
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <div className="flex items-center justify-between text-sm mb-1.5">
                 <span className="text-muted-foreground">Total Allocating</span>
                 <span className="font-bold text-foreground">M{formatNum(totalAllocated)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Remaining</span>
-                <span className={`font-semibold ${availableForAllocation < 0 ? "text-destructive" : "text-emerald-600"}`}>
+                <span className={`font-bold ${availableForAllocation < 0 ? "text-destructive" : "text-emerald-600"}`}>
                   M{formatNum(availableForAllocation)}
                 </span>
               </div>
@@ -559,17 +564,17 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
 
             {/* PIN info */}
             {canSend && (
-              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 animate-fade-in">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Info className="h-4 w-4 text-primary" />
-                  <p className="text-xs font-semibold text-foreground">Unique PINs</p>
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 animate-fade-in">
+                <div className="flex items-center gap-2 mb-2">
+                  <Info className="h-4 w-4 text-primary shrink-0" />
+                  <p className="text-xs font-bold text-foreground">Unique PINs</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Each recipient will receive a <span className="font-semibold text-foreground">unique 16-digit PIN</span> worth their allocated amount.
                 </p>
-                <div className="mt-1.5 pt-1.5 border-t border-primary/10">
-                  <p className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
-                    <Info className="h-3 w-3" />
+                <div className="mt-2 pt-2 border-t border-primary/10">
+                  <p className="text-xs text-amber-600 font-semibold flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 shrink-0" />
                     Recipients must manually recharge their PINs
                   </p>
                 </div>
@@ -580,11 +585,11 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
       </div>
 
       {/* Sticky send button */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-5 py-3 safe-area-bottom">
         <Button
           onClick={handleSend}
           disabled={!canSend}
-          className={`w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97] ${config.buttonColor}`}
+          className={`w-full h-12 text-sm font-bold rounded-xl touch-manipulation active:scale-[0.97] ${config.buttonColor}`}
         >
           <Send className="h-4 w-4 mr-2" />
           Send M{formatNum(totalAllocated)} to {recipientCount} recipient{recipientCount !== 1 ? "s" : ""}
