@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, Trophy, Users, Zap, Play, TrendingUp, History, ChevronRight, Wallet, BadgeCheck, Gamepad2, Target } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Trophy, Users, Zap, Play, TrendingUp, History, ChevronRight, Wallet, BadgeCheck, Gamepad2, Target, Gift } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobigateQuizHub } from "@/components/community/mobigate-quiz/MobigateQuizHub";
 import { mockMerchants, mockSeasons } from "@/data/mobigateInteractiveQuizData";
+import { allLocationMerchants } from "@/data/nigerianLocationsData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 const approvedMerchants = mockMerchants.filter((m) => m.applicationStatus === "approved");
@@ -24,6 +25,13 @@ const quizStats = {
 export default function MobiQuizGames() {
   const [showQuizHub, setShowQuizHub] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refMerchantId = searchParams.get("ref");
+
+  // Look up referring retail merchant name
+  const referringMerchant = refMerchantId
+    ? allLocationMerchants.find(m => m.id === refMerchantId)
+    : null;
 
   const getMerchantActiveSeasons = (merchantId: string) =>
     mockSeasons.filter((s) => s.merchantId === merchantId && s.quizStatus === "active");
@@ -78,6 +86,21 @@ export default function MobiQuizGames() {
 
       {/* Main Content */}
       <div className="flex-1 container px-4 py-4 space-y-4 pb-24">
+        {/* Referral Banner */}
+        {referringMerchant && (
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <Gift className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                Playing via {referringMerchant.name}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                They earn 1% reward on activities you do here
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Start Playing CTA */}
         <Card className="border-amber-500/30 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 overflow-hidden">
           <CardContent className="p-4 space-y-3">
