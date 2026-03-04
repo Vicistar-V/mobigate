@@ -611,14 +611,14 @@ export function MerchantReportDrawer({
 
   // ─── Main Content ───
   const content = (
-    <div className="flex flex-col h-full">
-      {/* Merchant Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b bg-destructive/5 shrink-0">
-        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
+    <div className="flex flex-col h-full min-h-0">
+      {/* Merchant Header — compact */}
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-destructive/5 shrink-0">
+        <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
           {merchantLogo ? (
             <img src={merchantLogo} alt={merchantName} className="h-full w-full object-cover" />
           ) : (
-            <Flag className="h-5 w-5 text-muted-foreground" />
+            <Flag className="h-4 w-4 text-muted-foreground" />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -629,33 +629,33 @@ export function MerchantReportDrawer({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex flex-col flex-1 min-h-0">
-        <TabsList className="w-full rounded-none border-b bg-background h-11 shrink-0">
-          <TabsTrigger value="new" className="flex-1 text-xs data-[state=active]:shadow-none">
+        <TabsList className="w-full rounded-none border-b bg-background h-10 shrink-0 px-1">
+          <TabsTrigger value="new" className="flex-1 text-xs data-[state=active]:shadow-none h-8">
             <Send className="h-3.5 w-3.5 mr-1" />
             New Report
           </TabsTrigger>
-          <TabsTrigger value="templates" className="flex-1 text-xs data-[state=active]:shadow-none">
+          <TabsTrigger value="templates" className="flex-1 text-xs data-[state=active]:shadow-none h-8">
             <LayoutTemplate className="h-3.5 w-3.5 mr-1" />
             Templates
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex-1 text-xs data-[state=active]:shadow-none">
+          <TabsTrigger value="history" className="flex-1 text-xs data-[state=active]:shadow-none h-8">
             <Clock className="h-3.5 w-3.5 mr-1" />
             History
             {mockPreviousReports.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-[10px]">
+              <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-xs">
                 {mockPreviousReports.length}
               </Badge>
             )}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="new" className="flex-1 min-h-0 m-0 overflow-hidden">
+        <TabsContent value="new" className="flex-1 min-h-0 m-0 flex flex-col">
           {renderNewReportForm()}
         </TabsContent>
-        <TabsContent value="templates" className="flex-1 min-h-0 m-0 overflow-hidden">
+        <TabsContent value="templates" className="flex-1 min-h-0 m-0 flex flex-col">
           {renderTemplates()}
         </TabsContent>
-        <TabsContent value="history" className="flex-1 min-h-0 m-0 overflow-hidden flex flex-col">
+        <TabsContent value="history" className="flex-1 min-h-0 m-0 flex flex-col">
           {renderHistory()}
         </TabsContent>
       </Tabs>
@@ -677,7 +677,7 @@ export function MerchantReportDrawer({
               </Button>
             </DrawerClose>
           </DrawerHeader>
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col">
             {content}
           </div>
         </DrawerContent>
