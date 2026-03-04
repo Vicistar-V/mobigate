@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ArrowLeft, Mail, MessageCircle, Phone, Send, CheckCircle2, Info, Copy, Check, Plus, Minus, Users, X, Sparkles } from "lucide-react";
+import { ArrowLeft, Mail, MessageCircle, Phone, Send, CheckCircle2, Info, Copy, Check, Plus, Minus, Users, X, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { MobigateUserSearch, MobigateUser } from "@/components/profile/MobigateUserSearch";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 
 export type ChannelType = "email" | "mobiChat" | "whatsApp" | "sms";
 
@@ -41,11 +42,19 @@ interface ContactRecipient {
   amount: number;
 }
 
+// Mock sender profile data
+const MOCK_SENDER = {
+  name: "Adewale Ogundimu",
+  username: "@adewale_ogundimu",
+  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+  mobiId: "MOBI-2847391",
+};
+
 export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendComplete }: SendViaChannelStepProps) {
   const { toast } = useToast();
+  const currentUserId = useCurrentUserId();
   const config = CHANNEL_CONFIG[channel];
   const Icon = config.icon;
-
   // Common state
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -217,7 +226,33 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
           </p>
         </div>
 
-        {/* Per-recipient breakdown */}
+        {/* Sender Identity */}
+        <div className="px-4 mb-4">
+          <div className="rounded-xl border border-border/50 bg-card p-3 animate-fade-in">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sent By</p>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-11 w-11 border-2 border-primary/20">
+                <AvatarImage src={MOCK_SENDER.avatar} />
+                <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">{MOCK_SENDER.name[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">{MOCK_SENDER.name}</p>
+                <p className="text-xs text-muted-foreground">{MOCK_SENDER.username}</p>
+                <p className="text-[10px] text-muted-foreground/70 font-mono">{MOCK_SENDER.mobiId}</p>
+              </div>
+              <div className="shrink-0">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* VOUCHER PIN SENT label */}
+        <div className="px-4 mb-1">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Voucher PIN{sentResults.length > 1 ? "s" : ""} Sent</p>
+        </div>
         <div className="px-4 space-y-3 mb-6">
           {sentResults.map(({ user, contact, amount: amt, pin }, idx) => (
             <div key={user?.id || contact || idx} className="rounded-xl border border-border/50 bg-card p-3 animate-fade-in">
