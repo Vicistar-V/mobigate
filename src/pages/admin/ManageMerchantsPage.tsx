@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home,
   Ticket, Gamepad2, Eye, TrendingUp, BarChart3, Package, CreditCard, Users, Trophy,
-  ShieldCheck, ShieldBan, ShieldAlert, AlertTriangle, Gift,
+  ShieldCheck, ShieldBan, ShieldAlert, AlertTriangle, Gift, Flag,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MerchantApplicationsAdmin } from "@/components/mobigate/MerchantApplicationsAdmin";
 import { VoucherDiscountSettingsCard } from "@/components/mobigate/VoucherDiscountSettingsCard";
 import { AwardBonusVoucherPackDrawer } from "@/components/admin/AwardBonusVoucherPackDrawer";
+import { AdminComplaintsTab, getComplaintsPendingCount } from "@/components/admin/AdminComplaintsTab";
 import {
   allLocationMerchants,
   getUniqueCountries,
@@ -133,6 +134,11 @@ export default function ManageMerchantsPage() {
                 <Users className="h-4 w-4 mr-1" />
                 Applications
                 <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-xs px-1">4</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="complaints" className="text-xs py-2.5 px-3 relative">
+                <Flag className="h-4 w-4 mr-1" />
+                Complaints
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-xs px-1">{getComplaintsPendingCount()}</Badge>
               </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2.5 px-3">
                 <CreditCard className="h-4 w-4 mr-1" />
@@ -270,6 +276,11 @@ export default function ManageMerchantsPage() {
                 <MerchantApplicationsAdmin />
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          {/* Complaints Tab */}
+          <TabsContent value="complaints" className="mt-0">
+            <AdminComplaintsTab />
           </TabsContent>
 
           {/* Settings Tab */}
