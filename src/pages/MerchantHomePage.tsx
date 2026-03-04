@@ -46,7 +46,11 @@ export default function MerchantHomePage() {
   // Check if this merchant is a sub/retail merchant — only major merchants can accept sub-merchant applications
   const allMobiMerchants = merchantCountries.flatMap(c => c.merchants);
   const mobiMerchantMatch = allMobiMerchants.find(m => m.id === merchantId);
-  const isMajorMerchant = !mobiMerchantMatch?.isSubMerchant;
+  const isMajorMerchant = locationMerchant
+    ? locationMerchant.merchantType === "bulk"
+    : mobiMerchantMatch
+      ? !mobiMerchantMatch.isSubMerchant
+      : true; // fallback for quiz-only merchants
   const merchant = quizMerchant 
     ? quizMerchant 
     : locationMerchant 
@@ -228,10 +232,16 @@ export default function MerchantHomePage() {
           </Button>
         </div>
 
-        {/* Voucher CTA */}
+        {/* Voucher CTA — context-aware: major merchants show access gate, sub-merchants go directly to buy */}
         <div className="mt-4 px-2">
           <button
-            onClick={() => setShowAccessGate(true)}
+            onClick={() => {
+              if (isMajorMerchant) {
+                setShowAccessGate(true);
+              } else {
+                navigate(`/buy-vouchers?merchant=${encodeURIComponent(merchant?.name ?? "")}`);
+              }
+            }}
             className="w-full relative overflow-hidden rounded-2xl p-3.5 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-lg active:scale-[0.97] transition-transform touch-manipulation"
           >
             <div className="absolute inset-0 opacity-10">
@@ -243,8 +253,12 @@ export default function MerchantHomePage() {
                 <Ticket className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1 text-left min-w-0">
-                <p className="font-bold text-sm">Get Vouchers & Bundles</p>
-                <p className="text-xs text-white/80 mt-0.5">Save up to 20% on Mobi top-ups</p>
+                <p className="font-bold text-sm">
+                  {isMajorMerchant ? "Get Vouchers & Bundles" : "Buy Vouchers"}
+                </p>
+                <p className="text-xs text-white/80 mt-0.5">
+                  {isMajorMerchant ? "Save up to 20% on Mobi top-ups" : "Purchase vouchers from this merchant"}
+                </p>
               </div>
               <ExternalLink className="h-4 w-4 text-white/60 shrink-0" />
             </div>
