@@ -280,7 +280,7 @@ export default function MerchantHomePage() {
                   {isMajorMerchant ? "Get Vouchers & Bundles" : "Buy Vouchers"}
                 </p>
                 <p className="text-xs text-white/80 mt-0.5">
-                  {isMajorMerchant ? "Save up to 20% on Mobi top-ups" : "Purchase vouchers from this merchant"}
+                  {isMajorMerchant ? "Save up to 20% on Mobi top-ups" : "Purchase vouchers from this retailer"}
                 </p>
               </div>
               <ExternalLink className="h-4 w-4 text-white/60 shrink-0" />
