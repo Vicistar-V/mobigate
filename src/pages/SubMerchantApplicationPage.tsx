@@ -139,6 +139,16 @@ export default function SubMerchantApplicationPage() {
           </div>
         </div>
 
+        {/* Choose Another Merchant */}
+        <Button
+          variant="outline"
+          onClick={() => navigate("/merchant-browse", { state: { returnTo: "sub-merchant-application", formData: form } })}
+          className="w-full h-11 rounded-xl text-sm font-semibold border-primary/30 text-primary touch-manipulation active:scale-[0.97]"
+        >
+          <Store className="h-4 w-4 mr-2" />
+          Choose another Merchant
+        </Button>
+
         {/* Application Fee Notice */}
         <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 flex items-start gap-2.5">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
