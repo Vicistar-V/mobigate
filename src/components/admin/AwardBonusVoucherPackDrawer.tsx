@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
   Drawer,
   DrawerClose,
@@ -34,6 +35,8 @@ import {
   Sparkles,
   Info,
   ShieldCheck,
+  Lock,
+  UserCheck,
 } from "lucide-react";
 
 // ─── Bonus Voucher Pack Definitions ───
@@ -99,10 +102,21 @@ export function AwardBonusVoucherPackDrawer({
   merchantId,
 }: AwardBonusVoucherPackDrawerProps) {
   const { toast } = useToast();
-  const [step, setStep] = useState<"select" | "confirm" | "success" | "history">("select");
+  const [step, setStep] = useState<"auth" | "select" | "confirm" | "success" | "history">("auth");
   const [selectedPack, setSelectedPack] = useState<BonusVoucherPack | null>(null);
   const [isAwarding, setIsAwarding] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  // Admin authorization state (2 of 3 required)
+  const [adminPasswords, setAdminPasswords] = useState({ admin1: "", admin2: "", admin3: "" });
+  const [adminVerified, setAdminVerified] = useState({ admin1: false, admin2: false, admin3: false });
+  const [authError, setAuthError] = useState("");
+
+  const verifiedCount = useMemo(() => 
+    [adminVerified.admin1, adminVerified.admin2, adminVerified.admin3].filter(Boolean).length,
+    [adminVerified]
+  );
+  const isAuthPassed = verifiedCount >= 2;
 
   const handleSelectPack = (pack: BonusVoucherPack) => {
     setSelectedPack(pack);
@@ -126,10 +140,13 @@ export function AwardBonusVoucherPackDrawer({
   };
 
   const resetAndClose = () => {
-    setStep("select");
+    setStep("auth");
     setSelectedPack(null);
     setIsAwarding(false);
     setShowCancelConfirm(false);
+    setAdminPasswords({ admin1: "", admin2: "", admin3: "" });
+    setAdminVerified({ admin1: false, admin2: false, admin3: false });
+    setAuthError("");
     onOpenChange(false);
   };
 
@@ -139,6 +156,24 @@ export function AwardBonusVoucherPackDrawer({
       setSelectedPack(null);
     } else if (step === "history") {
       setStep("select");
+    } else if (step === "select") {
+      setStep("auth");
+    }
+  };
+
+  const handleVerifyAdmin = (key: "admin1" | "admin2" | "admin3") => {
+    const pw = adminPasswords[key];
+    if (!pw.trim()) return;
+    // Simulated: accept any non-empty password
+    setAdminVerified((prev) => ({ ...prev, [key]: true }));
+    setAuthError("");
+  };
+
+  const handleAuthProceed = () => {
+    if (isAuthPassed) {
+      setStep("select");
+    } else {
+      setAuthError("At least 2 of 3 admins must authorize to proceed.");
     }
   };
 
@@ -464,9 +499,141 @@ export function AwardBonusVoucherPackDrawer({
     </div>
   );
 
+  // ─── Step: Admin Authorization ───
+  const adminSlots: { key: "admin1" | "admin2" | "admin3"; label: string; role: string }[] = [
+    { key: "admin1", label: "Admin-1", role: "Super Admin" },
+    { key: "admin2", label: "Admin-2", role: "Finance Admin" },
+    { key: "admin3", label: "Admin-3", role: "Operations Admin" },
+  ];
+
+  const renderAuthStep = () => (
+    <div className="flex flex-col h-full">
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-5">
+          {/* Header */}
+          <div className="text-center py-3">
+            <div className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
+              <Lock className="h-8 w-8 text-amber-600" />
+            </div>
+            <p className="text-lg font-bold text-foreground">Admin Authorization</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              At least <strong>2 of 3</strong> admins must authorize
+            </p>
+          </div>
+
+          {/* Authorization progress */}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className={`h-2 w-12 rounded-full transition-colors ${
+                  i < verifiedCount ? "bg-emerald-500" : "bg-muted"
+                }`}
+              />
+            ))}
+            <span className="text-xs font-semibold text-muted-foreground ml-2">{verifiedCount}/2 required</span>
+          </div>
+
+          {/* Admin password fields */}
+          <div className="space-y-3">
+            {adminSlots.map(({ key, label, role }) => (
+              <Card
+                key={key}
+                className={`border transition-colors ${
+                  adminVerified[key]
+                    ? "border-emerald-300 bg-emerald-500/5"
+                    : "border-border"
+                }`}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {adminVerified[key] ? (
+                        <UserCheck className="h-4 w-4 text-emerald-600" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <div>
+                        <p className="text-sm font-semibold">{label}</p>
+                        <p className="text-xs text-muted-foreground">{role}</p>
+                      </div>
+                    </div>
+                    {adminVerified[key] && (
+                      <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-300 text-xs">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    )}
+                  </div>
+                  {!adminVerified[key] && (
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        type="password"
+                        placeholder={`Enter ${label} password`}
+                        value={adminPasswords[key]}
+                        onChange={(e) =>
+                          setAdminPasswords((prev) => ({ ...prev, [key]: e.target.value }))
+                        }
+                        className="h-10 text-sm touch-manipulation"
+                        onKeyDown={(e) => { if (e.key === "Enter") handleVerifyAdmin(key); }}
+                      />
+                      <Button
+                        size="sm"
+                        className="h-10 px-4 shrink-0 touch-manipulation active:scale-[0.97]"
+                        disabled={!adminPasswords[key].trim()}
+                        onClick={() => handleVerifyAdmin(key)}
+                      >
+                        Verify
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Info notice */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-3 flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+              <p className="text-xs text-blue-700/80 leading-relaxed">
+                Bonus Voucher Pack awards require multi-admin authorization for security. 
+                Any <strong>2 of 3</strong> designated admins must enter their passwords to proceed.
+              </p>
+            </CardContent>
+          </Card>
+
+          {authError && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+              <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
+              <p className="text-xs text-red-600 font-medium">{authError}</p>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Action */}
+      <div className="p-4 border-t shrink-0">
+        <Button
+          onClick={handleAuthProceed}
+          disabled={!isAuthPassed}
+          className={`w-full h-12 text-sm font-semibold touch-manipulation active:scale-[0.97] ${
+            isAuthPassed
+              ? "bg-emerald-600 hover:bg-emerald-700"
+              : ""
+          }`}
+        >
+          <ShieldCheck className="h-4 w-4 mr-2" />
+          {isAuthPassed ? "Proceed to Award Bonus" : `${verifiedCount}/2 Admins Verified`}
+        </Button>
+      </div>
+    </div>
+  );
+
   // ─── Main Content Router ───
   const renderContent = () => {
     switch (step) {
+      case "auth": return renderAuthStep();
       case "select": return renderSelectStep();
       case "confirm": return renderConfirmStep();
       case "success": return renderSuccessStep();
@@ -476,6 +643,7 @@ export function AwardBonusVoucherPackDrawer({
 
   const getTitle = () => {
     switch (step) {
+      case "auth": return "Admin Authorization";
       case "select": return "Award Bonus Voucher Pack";
       case "confirm": return "Confirm Award";
       case "success": return "Award Complete";

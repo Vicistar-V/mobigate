@@ -588,12 +588,22 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
           {/* Actions */}
           <Button
             variant="outline"
-            className="w-full h-12 mt-2 touch-manipulation active:scale-[0.97] border-amber-300 text-amber-700 hover:bg-amber-50"
+            className={`w-full h-12 mt-2 touch-manipulation border-amber-300 text-amber-700 ${
+              merchantStatus !== "active"
+                ? "opacity-40 cursor-not-allowed"
+                : "hover:bg-amber-50 active:scale-[0.97]"
+            }`}
+            disabled={merchantStatus !== "active"}
             onClick={() => setShowBonusDrawer(true)}
           >
             <Gift className="h-4 w-4 mr-2" />
             Award Bonus Voucher Pack
           </Button>
+          {merchantStatus !== "active" && (
+            <p className="text-xs text-center text-muted-foreground mt-1">
+              Bonus awards are unavailable for {merchantStatus} merchants
+            </p>
+          )}
           <Button
             className="w-full h-12 mt-2 touch-manipulation active:scale-[0.97]"
             onClick={() => { onClose(); navigate("/merchant-home/m1"); }}
