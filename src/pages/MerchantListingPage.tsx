@@ -160,7 +160,7 @@ export default function MerchantListingPage() {
                 {config.badgeLabel}
               </Badge>
               <span className="text-xs text-muted-foreground">
-                {filteredMerchants.length} merchant{filteredMerchants.length !== 1 ? "s" : ""}
+                {filteredMerchants.length} {merchantType === "retail" ? "retail" : "bulk"} merchant{filteredMerchants.length !== 1 ? "s" : ""} found
               </span>
             </div>
           )}
