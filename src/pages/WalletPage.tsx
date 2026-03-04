@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Wallet, ArrowUpRight, ArrowDownLeft, Plus, ChevronRight, ChevronLeft,
   Search, Filter, ArrowUpDown, Clock, CheckCircle2,
-  XCircle, AlertCircle, Coins, Banknote, Loader2, Sparkles, ShieldCheck
+  XCircle, AlertCircle, Coins, Banknote, Loader2, Sparkles, ShieldCheck,
+  CreditCard, Building2, Ticket, MoreHorizontal, ArrowLeft, Copy, Eye, EyeOff, Hash
 } from "lucide-react";
 import { formatNumberFull } from "@/lib/financialDisplay";
 import { cn } from "@/lib/utils";
@@ -65,7 +66,24 @@ const QUICK_FUND_AMOUNTS = [5000, 10000, 25000, 50000, 100000];
 
 type FilterType = "all" | "credit" | "debit";
 type SortType = "newest" | "oldest" | "highest" | "lowest";
-type FundStep = "input" | "processing" | "success";
+type FundStep = "input" | "gateway" | "gateway-form" | "processing" | "success";
+type PaymentGateway = "card" | "bank" | "voucher" | "other";
+
+interface GatewayInfo {
+  id: PaymentGateway;
+  label: string;
+  subtitle: string;
+  icon: any;
+  accentBg: string;
+  accentText: string;
+}
+
+const PAYMENT_GATEWAYS: GatewayInfo[] = [
+  { id: "card", label: "Credit / Debit Card", subtitle: "Visa, Mastercard, Verve", icon: CreditCard, accentBg: "bg-blue-500/10", accentText: "text-blue-600" },
+  { id: "bank", label: "Online Banking Transfer", subtitle: "Direct bank transfer", icon: Building2, accentBg: "bg-indigo-500/10", accentText: "text-indigo-600" },
+  { id: "voucher", label: "Mobi Voucher PIN", subtitle: "Local currency equivalence credited", icon: Ticket, accentBg: "bg-emerald-500/10", accentText: "text-emerald-600" },
+  { id: "other", label: "Other Methods", subtitle: "USSD, QR Code, Mobile Money", icon: MoreHorizontal, accentBg: "bg-amber-500/10", accentText: "text-amber-600" },
+];
 
 const statusConfig = {
   completed: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10", label: "Completed" },
@@ -106,6 +124,25 @@ export default function WalletPage() {
   const [fundAmount, setFundAmount] = useState(0);
   const [fundCustom, setFundCustom] = useState("");
   const [processingMsg, setProcessingMsg] = useState("");
+  const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
+
+  // Gateway form fields
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [showCvv, setShowCvv] = useState(false);
+  const [bankName, setBankName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
+  const [bankVerified, setBankVerified] = useState(false);
+  const [bankVerifying, setBankVerifying] = useState(false);
+  const [voucherPin, setVoucherPin] = useState("");
+  const [voucherValidating, setVoucherValidating] = useState(false);
+  const [voucherValid, setVoucherValid] = useState(false);
+  const [voucherDenomination, setVoucherDenomination] = useState(0);
+  const [otherMethod, setOtherMethod] = useState<"ussd" | "qr" | "mobile-money" | null>(null);
+  const [ussdCode, setUssdCode] = useState("");
 
   // Transaction state
   const [filter, setFilter] = useState<FilterType>("all");
@@ -114,13 +151,63 @@ export default function WalletPage() {
   const [selectedTx, setSelectedTx] = useState<WalletTransaction | null>(null);
   const [showFilterSheet, setShowFilterSheet] = useState(false);
 
-  // Fund local wallet processing
-  const handleFundLocal = useCallback(() => {
-    if (fundAmount <= 0) return;
+  // Select gateway and go to form
+  const handleSelectGateway = (gw: PaymentGateway) => {
+    setSelectedGateway(gw);
+    setFundStep("gateway-form");
+  };
+
+  // Bank verification simulation
+  const handleVerifyBank = useCallback(() => {
+    if (!bankAccountNumber || bankAccountNumber.length < 10) return;
+    setBankVerifying(true);
+    setBankAccountName("");
+    const msgs = ["Connecting to bank...", "Verifying account number...", "Retrieving account details..."];
+    let i = 0;
+    setProcessingMsg(msgs[0]);
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setProcessingMsg(msgs[i]);
+      else {
+        clearInterval(interval);
+        setBankVerifying(false);
+        setBankVerified(true);
+        setBankAccountName("ADEWALE OLUMIDE JOHNSON");
+        setProcessingMsg("");
+      }
+    }, 800);
+  }, [bankAccountNumber]);
+
+  // Voucher PIN validation simulation
+  const handleValidateVoucher = useCallback(() => {
+    if (voucherPin.length < 12) return;
+    setVoucherValidating(true);
+    setVoucherValid(false);
+    const msgs = ["Validating voucher PIN...", "Checking denomination...", "Confirming availability..."];
+    let i = 0;
+    setProcessingMsg(msgs[0]);
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setProcessingMsg(msgs[i]);
+      else {
+        clearInterval(interval);
+        setVoucherValidating(false);
+        setVoucherValid(true);
+        const denom = [1000, 2000, 5000, 10000, 20000][Math.floor(Math.random() * 5)];
+        setVoucherDenomination(denom);
+        setFundAmount(denom);
+        setProcessingMsg("");
+      }
+    }, 700);
+  }, [voucherPin]);
+
+  // Process payment
+  const handleProcessPayment = useCallback(() => {
     setFundStep("processing");
+    const gatewayLabel = PAYMENT_GATEWAYS.find(g => g.id === selectedGateway)?.label || "Payment";
     const msgs = [
-      "Initializing secure payment channel...",
-      "Verifying funding source...",
+      `Connecting to ${gatewayLabel}...`,
+      "Authenticating transaction...",
       "Processing your deposit...",
       "Crediting your Local Wallet...",
     ];
@@ -128,21 +215,43 @@ export default function WalletPage() {
     setProcessingMsg(msgs[0]);
     const interval = setInterval(() => {
       i++;
-      if (i < msgs.length) {
-        setProcessingMsg(msgs[i]);
-      } else {
+      if (i < msgs.length) setProcessingMsg(msgs[i]);
+      else {
         clearInterval(interval);
         setFundStep("success");
       }
     }, 900);
-  }, [fundAmount]);
+  }, [selectedGateway]);
+
+  // Check if gateway form is valid
+  const isGatewayFormValid = useCallback(() => {
+    if (!selectedGateway) return false;
+    switch (selectedGateway) {
+      case "card": return cardNumber.replace(/\s/g, "").length >= 16 && cardExpiry.length >= 5 && cardCvv.length >= 3 && cardName.length >= 3;
+      case "bank": return bankVerified && bankAccountNumber.length >= 10;
+      case "voucher": return voucherValid && voucherDenomination > 0;
+      case "other": return otherMethod !== null;
+      default: return false;
+    }
+  }, [selectedGateway, cardNumber, cardExpiry, cardCvv, cardName, bankVerified, bankAccountNumber, voucherValid, voucherDenomination, otherMethod]);
 
   const resetFundDrawer = () => {
     setFundStep("input");
     setFundAmount(0);
     setFundCustom("");
     setProcessingMsg("");
+    setSelectedGateway(null);
+    setCardNumber(""); setCardExpiry(""); setCardCvv(""); setCardName(""); setShowCvv(false);
+    setBankName(""); setBankAccountNumber(""); setBankAccountName(""); setBankVerified(false); setBankVerifying(false);
+    setVoucherPin(""); setVoucherValidating(false); setVoucherValid(false); setVoucherDenomination(0);
+    setOtherMethod(null); setUssdCode("");
     setFundDrawerOpen(false);
+  };
+
+  const handleFundBack = () => {
+    if (fundStep === "gateway-form") { setFundStep("gateway"); setSelectedGateway(null); }
+    else if (fundStep === "gateway") setFundStep("input");
+    else resetFundDrawer();
   };
 
   // Filtered & sorted transactions
@@ -415,29 +524,45 @@ export default function WalletPage() {
 
       {/* ── Fund Local Wallet Drawer ── */}
       <Drawer open={fundDrawerOpen} onOpenChange={open => { if (!open) resetFundDrawer(); }}>
-        <DrawerContent className="max-h-[92vh]">
-          <div className="overflow-y-auto touch-auto overscroll-contain">
-            <DrawerHeader className="pb-2">
-              <DrawerTitle className="text-base font-bold">Fund Local Wallet</DrawerTitle>
-            </DrawerHeader>
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <div className="shrink-0 px-4 pt-3 pb-2 border-b border-border/30">
+            <div className="flex items-center gap-3">
+              {fundStep !== "input" && fundStep !== "processing" && fundStep !== "success" && (
+                <button onClick={handleFundBack} className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center touch-manipulation active:scale-95">
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
+              <div className="flex-1">
+                <p className="text-base font-bold text-foreground">Fund Local Wallet</p>
+                <p className="text-xs text-muted-foreground">
+                  {fundStep === "input" && "Enter amount to fund"}
+                  {fundStep === "gateway" && "Choose payment method"}
+                  {fundStep === "gateway-form" && PAYMENT_GATEWAYS.find(g => g.id === selectedGateway)?.label}
+                  {fundStep === "processing" && "Processing payment..."}
+                  {fundStep === "success" && "Payment complete"}
+                </p>
+              </div>
+              {fundAmount > 0 && fundStep !== "success" && (
+                <Badge variant="secondary" className="text-xs font-bold shrink-0">₦{formatNumberFull(fundAmount, 0)}</Badge>
+              )}
+            </div>
+          </div>
 
-            <div className="px-4 pb-6">
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+            <div className="px-4 py-4">
+              {/* ── STEP 1: Amount Input ── */}
               {fundStep === "input" && (
                 <div className="space-y-5">
-                  {/* Current balance */}
                   <div className="bg-emerald-500/10 rounded-2xl p-4 text-center">
                     <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium uppercase tracking-wide">Current Balance</p>
-                    <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
-                      ₦{formatNumberFull(LOCAL_WALLET.balance)}
-                    </p>
+                    <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">₦{formatNumberFull(LOCAL_WALLET.balance)}</p>
                   </div>
 
-                  {/* Amount input */}
                   <div>
                     <label className="text-xs font-semibold text-foreground mb-2 block">Enter Amount (₦)</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted-foreground">₦</span>
-                      <Input
+                      <input
                         type="text"
                         inputMode="numeric"
                         placeholder="0"
@@ -447,17 +572,14 @@ export default function WalletPage() {
                           setFundCustom(val);
                           setFundAmount(Number(val) || 0);
                         }}
-                        className="pl-9 h-14 text-2xl font-black rounded-xl text-center"
+                        className="w-full pl-9 h-14 text-2xl font-black rounded-xl text-center bg-card border-2 border-border/60 focus:border-primary transition-all focus:outline-none"
                       />
                     </div>
                     {fundAmount > 0 && (
-                      <p className="text-xs text-muted-foreground text-center mt-1">
-                        ≈ M{formatNumberFull(fundAmount)}
-                      </p>
+                      <p className="text-xs text-muted-foreground text-center mt-1">≈ M{formatNumberFull(fundAmount)}</p>
                     )}
                   </div>
 
-                  {/* Quick picks */}
                   <div>
                     <p className="text-xs font-medium text-muted-foreground mb-2">Quick Select</p>
                     <div className="grid grid-cols-3 gap-2">
@@ -467,9 +589,7 @@ export default function WalletPage() {
                           onClick={() => { setFundAmount(amt); setFundCustom(amt.toString()); }}
                           className={cn(
                             "py-2.5 rounded-xl text-sm font-bold transition-all touch-manipulation active:scale-[0.97]",
-                            fundAmount === amt
-                              ? "bg-primary text-primary-foreground ring-2 ring-primary/30"
-                              : "bg-muted/40 text-foreground hover:bg-muted/60"
+                            fundAmount === amt ? "bg-primary text-primary-foreground ring-2 ring-primary/30" : "bg-muted/40 text-foreground"
                           )}
                         >
                           ₦{formatNumberFull(amt, 0)}
@@ -481,14 +601,365 @@ export default function WalletPage() {
                   <Button
                     className="w-full h-12 rounded-xl font-bold text-sm touch-manipulation active:scale-[0.97]"
                     disabled={fundAmount <= 0}
-                    onClick={handleFundLocal}
+                    onClick={() => setFundStep("gateway")}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Fund ₦{formatNumberFull(fundAmount, 0)}
+                    Choose Payment Method
+                    <ChevronRight className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
               )}
 
+              {/* ── STEP 2: Payment Gateway Selection ── */}
+              {fundStep === "gateway" && (
+                <div className="space-y-3">
+                  <div className="bg-muted/30 rounded-xl p-3 flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Funding Amount</span>
+                    <span className="text-sm font-black text-foreground">₦{formatNumberFull(fundAmount)}</span>
+                  </div>
+
+                  <p className="text-xs font-semibold text-foreground">Select Payment Gateway</p>
+
+                  <div className="space-y-2">
+                    {PAYMENT_GATEWAYS.map(gw => {
+                      const Icon = gw.icon;
+                      return (
+                        <button
+                          key={gw.id}
+                          onClick={() => handleSelectGateway(gw.id)}
+                          className="w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all touch-manipulation active:scale-[0.98]"
+                        >
+                          <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", gw.accentBg)}>
+                            <Icon className={cn("h-5 w-5", gw.accentText)} />
+                          </div>
+                          <div className="flex-1 text-left min-w-0">
+                            <p className="text-sm font-semibold text-foreground">{gw.label}</p>
+                            <p className="text-xs text-muted-foreground">{gw.subtitle}</p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ── STEP 3: Gateway-Specific Forms ── */}
+              {fundStep === "gateway-form" && selectedGateway === "card" && (
+                <div className="space-y-4">
+                  <div className="bg-blue-500/10 rounded-xl p-3 flex items-center gap-3">
+                    <CreditCard className="h-5 w-5 text-blue-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-foreground">Card Payment</p>
+                      <p className="text-xs text-muted-foreground">Enter your card details securely</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold text-foreground mb-1.5 block">Cardholder Name</label>
+                      <input
+                        type="text"
+                        placeholder="Full name on card"
+                        value={cardName}
+                        onChange={e => setCardName(e.target.value)}
+                        className="w-full h-12 px-3 rounded-xl bg-card border-2 border-border/60 text-sm focus:border-primary focus:outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-foreground mb-1.5 block">Card Number</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="0000 0000 0000 0000"
+                        value={cardNumber}
+                        maxLength={19}
+                        onChange={e => {
+                          const raw = e.target.value.replace(/\D/g, "");
+                          const formatted = raw.replace(/(\d{4})(?=\d)/g, "$1 ");
+                          setCardNumber(formatted);
+                        }}
+                        className="w-full h-12 px-3 rounded-xl bg-card border-2 border-border/60 text-sm font-mono focus:border-primary focus:outline-none transition-all"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-foreground mb-1.5 block">Expiry</label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="MM/YY"
+                          value={cardExpiry}
+                          maxLength={5}
+                          onChange={e => {
+                            let raw = e.target.value.replace(/\D/g, "");
+                            if (raw.length > 2) raw = raw.slice(0, 2) + "/" + raw.slice(2);
+                            setCardExpiry(raw);
+                          }}
+                          className="w-full h-12 px-3 rounded-xl bg-card border-2 border-border/60 text-sm font-mono text-center focus:border-primary focus:outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-foreground mb-1.5 block">CVV</label>
+                        <div className="relative">
+                          <input
+                            type={showCvv ? "text" : "password"}
+                            inputMode="numeric"
+                            placeholder="•••"
+                            value={cardCvv}
+                            maxLength={4}
+                            onChange={e => setCardCvv(e.target.value.replace(/\D/g, ""))}
+                            className="w-full h-12 px-3 pr-10 rounded-xl bg-card border-2 border-border/60 text-sm font-mono text-center focus:border-primary focus:outline-none transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCvv(!showCvv)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 touch-manipulation"
+                          >
+                            {showCvv ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full h-12 rounded-xl font-bold text-sm touch-manipulation active:scale-[0.97]"
+                    disabled={!isGatewayFormValid()}
+                    onClick={handleProcessPayment}
+                  >
+                    Pay ₦{formatNumberFull(fundAmount)}
+                  </Button>
+                </div>
+              )}
+
+              {fundStep === "gateway-form" && selectedGateway === "bank" && (
+                <div className="space-y-4">
+                  <div className="bg-indigo-500/10 rounded-xl p-3 flex items-center gap-3">
+                    <Building2 className="h-5 w-5 text-indigo-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-foreground">Online Banking Transfer</p>
+                      <p className="text-xs text-muted-foreground">Transfer from your bank account</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold text-foreground mb-1.5 block">Select Bank</label>
+                      <Select value={bankName} onValueChange={v => { setBankName(v); setBankVerified(false); setBankAccountName(""); }}>
+                        <SelectTrigger className="h-12 rounded-xl">
+                          <SelectValue placeholder="Choose your bank" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["Access Bank", "First Bank", "GTBank", "UBA", "Zenith Bank", "Stanbic IBTC", "Fidelity Bank", "Union Bank", "Wema Bank", "Sterling Bank"].map(b => (
+                            <SelectItem key={b} value={b}>{b}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-foreground mb-1.5 block">Bank Account Number</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="0123456789"
+                        maxLength={10}
+                        value={bankAccountNumber}
+                        onChange={e => { setBankAccountNumber(e.target.value.replace(/\D/g, "")); setBankVerified(false); setBankAccountName(""); }}
+                        className="w-full h-12 px-3 rounded-xl bg-card border-2 border-border/60 text-sm font-mono focus:border-primary focus:outline-none transition-all"
+                      />
+                    </div>
+
+                    {bankAccountNumber.length >= 10 && bankName && !bankVerified && !bankVerifying && (
+                      <Button variant="outline" className="w-full h-10 rounded-xl text-sm touch-manipulation" onClick={handleVerifyBank}>
+                        Verify Bank Account
+                      </Button>
+                    )}
+
+                    {bankVerifying && (
+                      <div className="flex items-center gap-3 p-3 bg-amber-500/10 rounded-xl">
+                        <Loader2 className="h-4 w-4 animate-spin text-amber-600 shrink-0" />
+                        <p className="text-xs text-amber-700 animate-pulse">{processingMsg}</p>
+                      </div>
+                    )}
+
+                    {bankVerified && bankAccountName && (
+                      <div className="flex items-center gap-3 p-3 bg-emerald-500/10 rounded-xl">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Bank Account Name</p>
+                          <p className="text-sm font-bold text-foreground">{bankAccountName}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    className="w-full h-12 rounded-xl font-bold text-sm touch-manipulation active:scale-[0.97]"
+                    disabled={!isGatewayFormValid()}
+                    onClick={handleProcessPayment}
+                  >
+                    Transfer ₦{formatNumberFull(fundAmount)}
+                  </Button>
+                </div>
+              )}
+
+              {fundStep === "gateway-form" && selectedGateway === "voucher" && (
+                <div className="space-y-4">
+                  <div className="bg-emerald-500/10 rounded-xl p-3 flex items-center gap-3">
+                    <Ticket className="h-5 w-5 text-emerald-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-foreground">Mobi Voucher PIN</p>
+                      <p className="text-xs text-muted-foreground">Enter your voucher PIN to credit local currency equivalence</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold text-foreground mb-1.5 block">Voucher PIN (12-16 digits)</label>
+                      <div className="relative">
+                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="Enter voucher PIN"
+                          maxLength={16}
+                          value={voucherPin}
+                          onChange={e => { setVoucherPin(e.target.value.replace(/\D/g, "")); setVoucherValid(false); setVoucherDenomination(0); }}
+                          className="w-full h-12 pl-10 pr-3 rounded-xl bg-card border-2 border-border/60 text-sm font-mono tracking-widest focus:border-primary focus:outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {voucherPin.length >= 12 && !voucherValid && !voucherValidating && (
+                      <Button variant="outline" className="w-full h-10 rounded-xl text-sm touch-manipulation" onClick={handleValidateVoucher}>
+                        Validate Voucher
+                      </Button>
+                    )}
+
+                    {voucherValidating && (
+                      <div className="flex items-center gap-3 p-3 bg-amber-500/10 rounded-xl">
+                        <Loader2 className="h-4 w-4 animate-spin text-amber-600 shrink-0" />
+                        <p className="text-xs text-amber-700 animate-pulse">{processingMsg}</p>
+                      </div>
+                    )}
+
+                    {voucherValid && (
+                      <div className="bg-emerald-500/10 rounded-xl p-4 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                          <p className="text-sm font-bold text-emerald-700">Voucher Valid!</p>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">Denomination</span>
+                          <span className="text-sm font-bold text-foreground">M{formatNumberFull(voucherDenomination)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs text-muted-foreground">Local Currency Equivalence</span>
+                          <span className="text-sm font-bold text-emerald-700">₦{formatNumberFull(voucherDenomination)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Button
+                    className="w-full h-12 rounded-xl font-bold text-sm touch-manipulation active:scale-[0.97]"
+                    disabled={!isGatewayFormValid()}
+                    onClick={handleProcessPayment}
+                  >
+                    Redeem Voucher
+                  </Button>
+                </div>
+              )}
+
+              {fundStep === "gateway-form" && selectedGateway === "other" && (
+                <div className="space-y-4">
+                  <div className="bg-amber-500/10 rounded-xl p-3 flex items-center gap-3">
+                    <MoreHorizontal className="h-5 w-5 text-amber-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-foreground">Other Payment Methods</p>
+                      <p className="text-xs text-muted-foreground">Choose an alternative payment method</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {([
+                      { id: "ussd" as const, label: "USSD Transfer", desc: "Dial USSD code from your phone", icon: "📱" },
+                      { id: "qr" as const, label: "QR Code Payment", desc: "Scan with your banking app", icon: "📷" },
+                      { id: "mobile-money" as const, label: "Mobile Money", desc: "Pay via mobile money wallet", icon: "💳" },
+                    ]).map(method => (
+                      <button
+                        key={method.id}
+                        onClick={() => {
+                          setOtherMethod(method.id);
+                          if (method.id === "ussd") setUssdCode("*737*2*" + fundAmount + "#");
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98]",
+                          otherMethod === method.id ? "border-primary bg-primary/5" : "border-border/50 bg-card"
+                        )}
+                      >
+                        <span className="text-xl">{method.icon}</span>
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-semibold text-foreground">{method.label}</p>
+                          <p className="text-xs text-muted-foreground">{method.desc}</p>
+                        </div>
+                        {otherMethod === method.id && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+
+                  {otherMethod === "ussd" && (
+                    <div className="bg-muted/30 rounded-xl p-4 text-center space-y-2">
+                      <p className="text-xs text-muted-foreground">Dial this code on your phone</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <p className="text-lg font-mono font-black text-foreground">{ussdCode}</p>
+                        <button
+                          onClick={() => { navigator.clipboard?.writeText(ussdCode); toast({ title: "Copied!", description: "USSD code copied to clipboard" }); }}
+                          className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center touch-manipulation"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Complete the transfer, then tap confirm below</p>
+                    </div>
+                  )}
+
+                  {otherMethod === "qr" && (
+                    <div className="bg-muted/30 rounded-xl p-6 text-center space-y-3">
+                      <div className="h-40 w-40 mx-auto bg-white rounded-xl border-2 border-border flex items-center justify-center">
+                        <div className="grid grid-cols-5 gap-1">
+                          {Array.from({ length: 25 }).map((_, i) => (
+                            <div key={i} className={cn("h-5 w-5 rounded-sm", Math.random() > 0.4 ? "bg-foreground" : "bg-transparent")} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Scan with your banking app to pay ₦{formatNumberFull(fundAmount)}</p>
+                    </div>
+                  )}
+
+                  {otherMethod === "mobile-money" && (
+                    <div className="bg-muted/30 rounded-xl p-4 space-y-2">
+                      <p className="text-xs text-muted-foreground">A payment prompt has been sent to your registered mobile money number.</p>
+                      <p className="text-sm font-bold text-foreground text-center">+234 ••• ••• 4521</p>
+                      <p className="text-xs text-muted-foreground text-center">Approve the ₦{formatNumberFull(fundAmount)} payment on your device</p>
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full h-12 rounded-xl font-bold text-sm touch-manipulation active:scale-[0.97]"
+                    disabled={!isGatewayFormValid()}
+                    onClick={handleProcessPayment}
+                  >
+                    {otherMethod === "ussd" ? "I've Completed the Transfer" :
+                     otherMethod === "qr" ? "I've Scanned & Paid" :
+                     otherMethod === "mobile-money" ? "Confirm Payment" :
+                     "Continue"}
+                  </Button>
+                </div>
+              )}
+
+              {/* ── STEP 4: Processing ── */}
               {fundStep === "processing" && (
                 <div className="flex flex-col items-center justify-center py-12 space-y-6">
                   <div className="relative">
@@ -504,19 +975,15 @@ export default function WalletPage() {
                     <p className="text-xs text-muted-foreground animate-pulse">{processingMsg}</p>
                     <p className="text-lg font-black text-primary mt-3">₦{formatNumberFull(fundAmount)}</p>
                   </div>
-                  {/* Progress dots */}
                   <div className="flex gap-1.5">
                     {[0, 1, 2, 3].map(i => (
-                      <div
-                        key={i}
-                        className="h-2 w-2 rounded-full bg-primary animate-bounce"
-                        style={{ animationDelay: `${i * 150}ms` }}
-                      />
+                      <div key={i} className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
                     ))}
                   </div>
                 </div>
               )}
 
+              {/* ── STEP 5: Success ── */}
               {fundStep === "success" && (
                 <div className="flex flex-col items-center justify-center py-8 space-y-5">
                   <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
@@ -531,6 +998,10 @@ export default function WalletPage() {
                     <div className="flex justify-between">
                       <span className="text-xs text-muted-foreground">Amount</span>
                       <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">+₦{formatNumberFull(fundAmount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-muted-foreground">Payment Method</span>
+                      <span className="text-xs font-semibold text-foreground">{PAYMENT_GATEWAYS.find(g => g.id === selectedGateway)?.label}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-xs text-muted-foreground">New Balance</span>
