@@ -8,9 +8,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Printer, Package, ListChecks } from "lucide-react";
+import { Printer, Package, ListChecks, Check } from "lucide-react";
 import { VoucherBatch, formatNum } from "@/data/merchantVoucherData";
 
 interface VoucherPrintDrawerProps {
@@ -69,7 +67,6 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     if (selectedCards.length === 0) return;
     setIsPrinting(true);
 
-    // Create print container
     const printContainer = document.createElement("div");
     printContainer.id = "voucher-print-area";
     printContainer.innerHTML = `
@@ -158,100 +155,95 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     };
 
     window.addEventListener("afterprint", onAfterPrint);
-
-    // Trigger print after brief render
-    setTimeout(() => {
-      window.print();
-    }, 200);
+    setTimeout(() => { window.print(); }, 200);
   }, [selectedCards, selectedCardIds, batch, onOpenChange, onPrintComplete]);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[92vh]">
-        <DrawerHeader className="pb-2 border-b">
-          <DrawerTitle className="flex items-center gap-2 text-base">
-            <Printer className="h-5 w-5 text-primary" />
-            Print Voucher Cards
-          </DrawerTitle>
-          <DrawerDescription className="text-sm">
+      <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="shrink-0 px-3 pt-3 pb-2 border-b border-border/30">
+          <div className="flex items-center gap-2 mb-1">
+            <Printer className="h-4 w-4 text-primary shrink-0" />
+            <p className="text-sm font-bold text-foreground">Print Voucher Cards</p>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Select bundles to print. Cards will be printed with full PINs on A4 paper via your browser's print dialog.
-          </DrawerDescription>
-        </DrawerHeader>
+          </p>
+        </div>
 
-        <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-          <div className="p-4 space-y-3">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+          <div className="px-3 py-3 space-y-2">
             {/* Select All */}
             <button
               onClick={selectAll}
-              className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 touch-manipulation active:scale-[0.98] ${
+              className={`w-full flex items-center gap-2.5 p-3 rounded-xl border-2 touch-manipulation active:scale-[0.98] transition-all ${
                 allSelected
                   ? "border-primary bg-primary/5"
-                  : "border-border/50 bg-card"
+                  : "border-border/40 bg-card"
               }`}
             >
-              <div className={`h-5 w-5 rounded border-2 flex items-center justify-center shrink-0 ${
-                allSelected ? "bg-primary border-primary" : "border-muted-foreground/40"
+              <div className={`h-5 w-5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                allSelected ? "bg-primary border-primary" : "border-2 border-muted-foreground/40"
               }`}>
-                {allSelected && (
-                  <svg className="h-3 w-3 text-primary-foreground" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M2 6l3 3 5-5" />
-                  </svg>
-                )}
+                {allSelected && <Check className="h-3 w-3 text-primary-foreground" />}
               </div>
-              <div className="flex-1 text-left">
-                <p className="text-sm font-semibold text-foreground">
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-sm font-bold text-foreground">
                   {allSelected ? "Deselect All" : "Select All Available"}
                 </p>
-                <p className="text-xs text-muted-foreground">{totalAvailable} cards across {bundlesWithAvailable.length} bundles</p>
+                <p className="text-xs text-muted-foreground">
+                  {totalAvailable} cards across {bundlesWithAvailable.length} bundle{bundlesWithAvailable.length !== 1 ? "s" : ""}
+                </p>
               </div>
-              <ListChecks className="h-5 w-5 text-muted-foreground shrink-0" />
             </button>
 
             {/* Bundle list */}
-            <div className="space-y-2">
-              {bundlesWithAvailable.map(bundle => {
-                const isSelected = selectedBundles.has(bundle.id);
-                return (
-                  <button
-                    key={bundle.id}
-                    onClick={() => toggleBundle(bundle.id)}
-                    className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 touch-manipulation active:scale-[0.98] ${
-                      isSelected ? "border-primary bg-primary/5" : "border-border/50 bg-card"
-                    }`}
-                  >
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleBundle(bundle.id)}
-                      className="pointer-events-none"
-                    />
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Package className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="flex-1 text-left min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">{bundle.serialPrefix}</p>
-                      <p className="text-xs text-muted-foreground">{bundle.availableCount} Available cards</p>
-                    </div>
-                    <Badge className="bg-emerald-500/15 text-emerald-600 text-xs h-5 px-2">{bundle.availableCount}</Badge>
-                  </button>
-                );
-              })}
-            </div>
+            {bundlesWithAvailable.map(bundle => {
+              const isSelected = selectedBundles.has(bundle.id);
+              return (
+                <button
+                  key={bundle.id}
+                  onClick={() => toggleBundle(bundle.id)}
+                  className={`w-full flex items-center gap-2.5 p-3 rounded-xl border-2 touch-manipulation active:scale-[0.98] transition-all ${
+                    isSelected ? "border-primary bg-primary/5" : "border-border/40 bg-card"
+                  }`}
+                >
+                  <div className={`h-5 w-5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                    isSelected ? "bg-primary border-primary" : "border-2 border-muted-foreground/40"
+                  }`}>
+                    {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Package className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-sm font-bold text-foreground truncate">{bundle.serialPrefix}</p>
+                    <p className="text-xs text-muted-foreground">{bundle.availableCount} Available cards</p>
+                  </div>
+                  <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-200 text-xs h-5 px-1.5 shrink-0">
+                    {bundle.availableCount}
+                  </Badge>
+                </button>
+              );
+            })}
 
             {bundlesWithAvailable.length === 0 && (
-              <div className="text-center py-8">
+              <div className="text-center py-10">
+                <Package className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">No Available cards to print</p>
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t bg-background sticky bottom-0">
+        {/* Sticky Footer */}
+        <div className="shrink-0 px-3 py-3 border-t border-border/30 bg-card/95 backdrop-blur-sm safe-area-bottom">
           <Button
             onClick={handlePrint}
             disabled={selectedCardIds.length === 0 || isPrinting}
-            className="w-full h-12 rounded-xl text-sm font-semibold touch-manipulation active:scale-[0.97]"
-            size="lg"
+            className="w-full h-12 rounded-xl text-sm font-bold touch-manipulation active:scale-[0.97]"
           >
             {isPrinting ? (
               <>
@@ -261,7 +253,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             ) : (
               <>
                 <Printer className="h-4 w-4 mr-2" />
-                Print {selectedCardIds.length} Cards
+                Print {selectedCardIds.length} Card{selectedCardIds.length !== 1 ? "s" : ""}
               </>
             )}
           </Button>
