@@ -126,6 +126,16 @@ export default function WalletPage() {
   const [processingMsg, setProcessingMsg] = useState("");
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
 
+  // Fund Mobi wallet drawer
+  const [fundMobiDrawerOpen, setFundMobiDrawerOpen] = useState(false);
+  type MobiFundStep = "options" | "voucher" | "processing" | "success";
+  const [mobiFundStep, setMobiFundStep] = useState<MobiFundStep>("options");
+  const [mobiVoucherPin, setMobiVoucherPin] = useState("");
+  const [mobiVoucherValidating, setMobiVoucherValidating] = useState(false);
+  const [mobiVoucherValid, setMobiVoucherValid] = useState(false);
+  const [mobiVoucherDenomination, setMobiVoucherDenomination] = useState(0);
+  const [mobiProcessingMsg, setMobiProcessingMsg] = useState("");
+
   // Gateway form fields
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -199,7 +209,59 @@ export default function WalletPage() {
         setProcessingMsg("");
       }
     }, 700);
-  }, [voucherPin]);
+    }, [voucherPin]);
+
+  // Mobi Voucher PIN validation simulation
+  const handleValidateMobiVoucher = useCallback(() => {
+    if (mobiVoucherPin.length < 12) return;
+    setMobiVoucherValidating(true);
+    setMobiVoucherValid(false);
+    const msgs = ["Validating voucher PIN...", "Checking Mobi denomination...", "Confirming availability..."];
+    let i = 0;
+    setMobiProcessingMsg(msgs[0]);
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setMobiProcessingMsg(msgs[i]);
+      else {
+        clearInterval(interval);
+        setMobiVoucherValidating(false);
+        setMobiVoucherValid(true);
+        const denom = [1000, 2000, 5000, 10000, 20000][Math.floor(Math.random() * 5)];
+        setMobiVoucherDenomination(denom);
+        setMobiProcessingMsg("");
+      }
+    }, 700);
+  }, [mobiVoucherPin]);
+
+  // Process Mobi voucher redemption
+  const handleProcessMobiVoucher = useCallback(() => {
+    setMobiFundStep("processing");
+    const msgs = [
+      "Connecting to Mobi Network...",
+      "Authenticating voucher...",
+      "Crediting your Mobi Wallet...",
+    ];
+    let i = 0;
+    setMobiProcessingMsg(msgs[0]);
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setMobiProcessingMsg(msgs[i]);
+      else {
+        clearInterval(interval);
+        setMobiFundStep("success");
+      }
+    }, 900);
+  }, []);
+
+  const resetMobiFundDrawer = () => {
+    setMobiFundStep("options");
+    setMobiVoucherPin("");
+    setMobiVoucherValidating(false);
+    setMobiVoucherValid(false);
+    setMobiVoucherDenomination(0);
+    setMobiProcessingMsg("");
+    setFundMobiDrawerOpen(false);
+  };
 
   // Process payment
   const handleProcessPayment = useCallback(() => {
@@ -279,7 +341,7 @@ export default function WalletPage() {
   const totalDebit = filteredTxns.filter(t => t.type === "debit").reduce((s, t) => s + t.amount, 0);
 
   const wallets = [
-    { ...MOBI_WALLET, label: "Mobi Wallet", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => navigate("/buy-vouchers?source=fund-wallet"), fundLabel: "Fund Mobi Wallet" },
+    { ...MOBI_WALLET, label: "Mobi Wallet", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => setFundMobiDrawerOpen(true), fundLabel: "Fund Mobi Wallet" },
     { ...LOCAL_WALLET, label: "Local Currency Wallet", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setFundDrawerOpen(true), fundLabel: "Fund Local Wallet" },
   ];
   const currentWallet = wallets[activeWallet];
@@ -1019,6 +1081,239 @@ export default function WalletPage() {
                   </Button>
                 </div>
               )}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* ── Fund Mobi Wallet Drawer ── */}
+      <Drawer open={fundMobiDrawerOpen} onOpenChange={open => { if (!open) resetMobiFundDrawer(); }}>
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <div className="shrink-0 px-5 pt-3 pb-2 border-b border-border/30">
+            <div className="flex items-center gap-3">
+              {mobiFundStep === "voucher" && (
+                <button onClick={() => { setMobiFundStep("options"); setMobiVoucherPin(""); setMobiVoucherValid(false); setMobiVoucherDenomination(0); }} className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center touch-manipulation active:scale-95 shrink-0">
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
+              <div className="flex-1">
+                <p className="text-base font-bold text-foreground">Fund Mobi Wallet</p>
+                <p className="text-xs text-muted-foreground">
+                  {mobiFundStep === "options" && "Choose how to fund your Mobi Wallet"}
+                  {mobiFundStep === "voucher" && "Enter Voucher PIN to credit Mobi units"}
+                  {mobiFundStep === "processing" && "Processing redemption..."}
+                  {mobiFundStep === "success" && "Mobi Wallet credited!"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+            <div className="px-5 py-5">
+
+              {/* ── OPTIONS ── */}
+              {mobiFundStep === "options" && (
+                <div className="space-y-5">
+                  <div className="bg-indigo-500/10 rounded-2xl p-4 text-center">
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">Current Mobi Balance</p>
+                    <p className="text-2xl font-black text-indigo-700 dark:text-indigo-300 mt-1 font-mono">M{formatNumberFull(MOBI_WALLET.balance)}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Funding Options</p>
+
+                    {/* Buy Vouchers */}
+                    <button
+                      onClick={() => { resetMobiFundDrawer(); navigate("/buy-vouchers?source=fund-wallet"); }}
+                      className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all touch-manipulation active:scale-[0.98]"
+                    >
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <Coins className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="text-sm font-bold text-foreground">Buy Mobi Vouchers</p>
+                        <p className="text-xs text-muted-foreground">Purchase from accredited merchants</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                    </button>
+
+                    {/* Redeem Voucher PIN */}
+                    <button
+                      onClick={() => setMobiFundStep("voucher")}
+                      className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all touch-manipulation active:scale-[0.98]"
+                    >
+                      <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                        <Ticket className="h-6 w-6 text-amber-600" />
+                      </div>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="text-sm font-bold text-foreground">Redeem Voucher PIN</p>
+                        <p className="text-xs text-muted-foreground">Enter a 16-digit PIN to credit Mobi units</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                    </button>
+
+                    {/* Retailer Services */}
+                    <button
+                      onClick={() => {
+                        toast({ title: "Retailer Services", description: "Visit a nearby Mobigate Retail Merchant to fund your wallet in-person." });
+                      }}
+                      className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all touch-manipulation active:scale-[0.98]"
+                    >
+                      <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                        <Building2 className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="text-sm font-bold text-foreground">Retailer Services</p>
+                        <p className="text-xs text-muted-foreground">Fund via a Retail Merchant near you</p>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                    <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Voucher PINs redeemed here credit the <span className="font-semibold text-foreground">Mobi value (in Mobi units)</span> directly to your Mobi Wallet.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── VOUCHER PIN ENTRY ── */}
+              {mobiFundStep === "voucher" && (
+                <div className="space-y-5">
+                  <div className="bg-amber-500/10 rounded-xl p-3.5 flex items-center gap-3">
+                    <Ticket className="h-5 w-5 text-amber-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-foreground">Redeem Voucher PIN</p>
+                      <p className="text-xs text-muted-foreground">Credit Mobi value directly to your wallet</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-foreground mb-2 block">Voucher PIN (12-16 digits)</label>
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Enter 16-digit voucher PIN"
+                        maxLength={16}
+                        value={mobiVoucherPin}
+                        onChange={e => { setMobiVoucherPin(e.target.value.replace(/\D/g, "")); setMobiVoucherValid(false); setMobiVoucherDenomination(0); }}
+                        onPointerDown={e => e.stopPropagation()}
+                        className="w-full h-14 pl-10 pr-3 rounded-xl bg-card border-2 border-border/60 text-base font-mono tracking-[0.2em] text-center focus:border-primary focus:outline-none transition-all"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1.5 text-center">
+                      {mobiVoucherPin.length}/16 digits entered
+                    </p>
+                  </div>
+
+                  {mobiVoucherPin.length >= 12 && !mobiVoucherValid && !mobiVoucherValidating && (
+                    <Button variant="outline" className="w-full h-11 rounded-xl text-sm font-semibold touch-manipulation active:scale-[0.97]" onClick={handleValidateMobiVoucher}>
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Validate Voucher
+                    </Button>
+                  )}
+
+                  {mobiVoucherValidating && (
+                    <div className="flex items-center gap-3 p-3.5 bg-amber-500/10 rounded-xl">
+                      <Loader2 className="h-4 w-4 animate-spin text-amber-600 shrink-0" />
+                      <p className="text-xs text-amber-700 dark:text-amber-400 animate-pulse font-medium">{mobiProcessingMsg}</p>
+                    </div>
+                  )}
+
+                  {mobiVoucherValid && (
+                    <div className="space-y-3">
+                      <div className="bg-emerald-500/10 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Voucher Valid!</p>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-emerald-500/20">
+                          <span className="text-xs text-muted-foreground">Mobi Value</span>
+                          <span className="text-lg font-black text-foreground">M{formatNumberFull(mobiVoucherDenomination)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-muted-foreground">Local Equivalence</span>
+                          <span className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNumberFull(mobiVoucherDenomination)}</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        className="w-full h-12 rounded-xl font-bold text-sm bg-gradient-to-r from-indigo-600 to-blue-600 text-white touch-manipulation active:scale-[0.97]"
+                        onClick={handleProcessMobiVoucher}
+                      >
+                        <Coins className="h-4 w-4 mr-2" />
+                        Credit M{formatNumberFull(mobiVoucherDenomination)} to Mobi Wallet
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── PROCESSING ── */}
+              {mobiFundStep === "processing" && (
+                <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                  <div className="relative">
+                    <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center animate-pulse">
+                      <Coins className="h-10 w-10 text-white" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                      <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" />
+                    </div>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <p className="text-sm font-bold text-foreground">Crediting Mobi Wallet</p>
+                    <p className="text-xs text-muted-foreground animate-pulse">{mobiProcessingMsg}</p>
+                    <p className="text-lg font-black text-primary mt-3">M{formatNumberFull(mobiVoucherDenomination)}</p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {[0, 1, 2, 3].map(i => (
+                      <div key={i} className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── SUCCESS ── */}
+              {mobiFundStep === "success" && (
+                <div className="flex flex-col items-center justify-center py-8 space-y-5">
+                  <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                    <ShieldCheck className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-lg font-black text-foreground">Mobi Wallet Credited!</p>
+                    <p className="text-xs text-muted-foreground">Your voucher has been redeemed successfully</p>
+                  </div>
+
+                  <div className="w-full bg-emerald-500/10 rounded-2xl p-4 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-xs text-muted-foreground">Mobi Credited</span>
+                      <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">+M{formatNumberFull(mobiVoucherDenomination)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-muted-foreground">Method</span>
+                      <span className="text-xs font-semibold text-foreground">Voucher PIN Redemption</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-muted-foreground">New Balance</span>
+                      <span className="text-sm font-bold text-foreground">M{formatNumberFull(MOBI_WALLET.balance + mobiVoucherDenomination)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-muted-foreground">Reference</span>
+                      <span className="text-xs font-mono font-semibold text-foreground">TXN-{Date.now().toString().slice(-8)}</span>
+                    </div>
+                  </div>
+
+                  <Button className="w-full h-11 rounded-xl font-bold touch-manipulation active:scale-[0.97]" onClick={resetMobiFundDrawer}>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Done
+                  </Button>
+                </div>
+              )}
+
             </div>
           </div>
         </DrawerContent>
