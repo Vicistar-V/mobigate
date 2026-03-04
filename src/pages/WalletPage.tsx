@@ -665,8 +665,8 @@ export default function WalletPage() {
                     disabled={fundAmount <= 0}
                     onClick={() => setFundStep("gateway")}
                   >
-                    Choose Payment Method
-                    <ChevronRight className="h-4 w-4 ml-2" />
+                    <Plus className="h-4 w-4 mr-2" />
+                    Fund ₦{formatNumberFull(fundAmount, 0)}
                   </Button>
                 </div>
               )}
