@@ -599,7 +599,7 @@ export default function SubMerchantVoucherManagement() {
                                 }}
                               >
                                 <Store className="h-4 w-4" />
-                                Buy Vouchers from This Merchant
+                                Buy Vouchers from this Merchant
                               </Button>
                               <div className="rounded-xl bg-emerald-500/5 border border-emerald-200/30 p-3">
                                 <p className="text-xs text-muted-foreground leading-relaxed">

@@ -232,10 +232,13 @@ export default function IndividualMerchantApplication() {
                 </Badge>
               </div>
               <div className="bg-background rounded-lg p-3 space-y-2 border text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Reference</span><span className="font-mono font-bold">{refNumber}</span></div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">Reference</span>
+                  <span className="font-mono font-bold text-sm break-all">{refNumber}</span>
+                </div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Type</span><Badge variant="secondary" className="text-xs h-5">Individual</Badge></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{firstName} {middleName} {lastName}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{email}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium text-right break-all min-w-0">{email}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Fee Paid</span><span className="font-medium text-primary">{formatMobi(50000)}</span></div>
               </div>
               <p className="text-sm text-center text-muted-foreground">You will be notified once your application has been reviewed.</p>
