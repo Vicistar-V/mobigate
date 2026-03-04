@@ -62,8 +62,8 @@ export default function ManageSubMerchants() {
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
         <div className="flex-1">
-          <h1 className="text-base font-bold text-foreground">Manage Sub-Merchants</h1>
-          <p className="text-xs text-muted-foreground">{mockSubMerchants.length} sub-merchants registered</p>
+          <h1 className="text-base font-bold text-foreground">Manage Retail Merchants</h1>
+          <p className="text-xs text-muted-foreground">{mockSubMerchants.length} retail merchants registered</p>
         </div>
       </div>
 
@@ -90,7 +90,7 @@ export default function ManageSubMerchants() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search sub-merchants..."
+                placeholder="Search retail merchants..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full h-10 pl-9 pr-9 rounded-xl bg-muted/50 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -128,7 +128,7 @@ export default function ManageSubMerchants() {
               ))}
               {filteredMerchants.length === 0 && (
                 <div className="text-center py-12">
-                  <p className="text-sm text-muted-foreground">No sub-merchants found</p>
+                  <p className="text-sm text-muted-foreground">No retail merchants found</p>
                 </div>
               )}
             </div>
@@ -228,7 +228,7 @@ export default function ManageSubMerchants() {
             <div className="rounded-xl border border-border/50 bg-card p-4 space-y-4">
               <div>
                 <p className="text-sm font-bold text-foreground mb-1">Application Fee</p>
-                <p className="text-xs text-muted-foreground mb-3">Set the fee sub-merchants pay to apply for your network (in Naira)</p>
+                <p className="text-xs text-muted-foreground mb-3">Set the fee retail merchants pay to apply for your network (in Naira)</p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-foreground">₦</span>
                   <Input
@@ -264,7 +264,7 @@ export default function ManageSubMerchants() {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
               {confirmAction?.action === "approve"
-                ? `${confirmAction?.app.applicantName} will be added as a sub-merchant in your network.`
+                ? `${confirmAction?.app.applicantName} will be added as a retail merchant in your network.`
                 : `${confirmAction?.app.applicantName}'s application will be rejected.`
               }
             </AlertDialogDescription>

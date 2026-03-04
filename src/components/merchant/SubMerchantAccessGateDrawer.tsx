@@ -55,7 +55,7 @@ export function SubMerchantAccessGateDrawer({ open, onOpenChange, merchantName }
       } else {
         setMatched(null);
         if (code.length >= 10) {
-          setError("No Sub-Merchant found with this ID-Code");
+          setError("No Retail Merchant found with this ID-Code");
         }
       }
     } else {
@@ -85,7 +85,7 @@ export function SubMerchantAccessGateDrawer({ open, onOpenChange, merchantName }
       } else {
         setMatched(null);
         if (p.length >= 11) {
-          setError("No Sub-Merchant found with this Phone Number");
+          setError("No Retail Merchant found with this Phone Number");
         }
       }
     } else {
@@ -121,10 +121,10 @@ export function SubMerchantAccessGateDrawer({ open, onOpenChange, merchantName }
         <DrawerHeader className="shrink-0 pb-2">
           <DrawerTitle className="flex items-center gap-2 text-base">
             <Shield className="h-5 w-5 text-primary" />
-            Sub-Merchant Access
+            Retail Merchant Access
           </DrawerTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Enter your Sub-Merchant credentials to access voucher bundles
+            Enter your Retail Merchant credentials to access voucher bundles
           </p>
         </DrawerHeader>
 
@@ -133,7 +133,7 @@ export function SubMerchantAccessGateDrawer({ open, onOpenChange, merchantName }
           <div className="space-y-1.5">
             <Label htmlFor="gate-idcode" className="text-sm font-medium flex items-center gap-1.5">
               <KeyRound className="h-3.5 w-3.5 text-primary" />
-              Access Code (Sub-Merchant ID-Code)
+              Access Code (Retail Merchant ID-Code)
             </Label>
             <Input
               id="gate-idcode"

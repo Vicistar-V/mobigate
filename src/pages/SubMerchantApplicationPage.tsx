@@ -81,7 +81,7 @@ export default function SubMerchantApplicationPage() {
       setSubmitted(true);
       toast({
         title: "Application Submitted!",
-        description: `Your sub-merchant application for ${merchant.name} has been submitted for review.`,
+        description: `Your retail merchant application for ${merchant.name} has been submitted for review.`,
       });
     }, 2000);
   };
@@ -101,7 +101,7 @@ export default function SubMerchantApplicationPage() {
           </div>
           <h2 className="text-xl font-bold text-foreground mb-2">Application Submitted!</h2>
           <p className="text-sm text-muted-foreground mb-2">
-            Your application to become a Sub-Merchant under <span className="font-semibold text-foreground">{merchant.name}</span> has been submitted.
+            Your application to become a Retail Merchant under <span className="font-semibold text-foreground">{merchant.name}</span> has been submitted.
           </p>
           <p className="text-xs text-muted-foreground mb-8">
             You'll be notified once your application is reviewed. This usually takes 7-14 business days.
@@ -121,7 +121,7 @@ export default function SubMerchantApplicationPage() {
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
         <div className="flex-1">
-          <h1 className="text-base font-bold text-foreground">Apply as Sub-Merchant</h1>
+          <h1 className="text-base font-bold text-foreground">Apply as Retail Merchant</h1>
           <p className="text-xs text-muted-foreground">Join {merchant.name}'s network</p>
         </div>
       </div>

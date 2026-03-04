@@ -276,7 +276,7 @@ export default function MerchantHomePage() {
                 <Store className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1 text-left min-w-0">
-                <p className="font-bold text-sm text-foreground">Apply as <span className="whitespace-nowrap">Sub-Merchant</span></p>
+                <p className="font-bold text-sm text-foreground">Apply as <span className="whitespace-nowrap">Retail Merchant</span></p>
                 <p className="text-xs text-muted-foreground mt-0.5">Become a retailer for this merchant</p>
               </div>
               <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
