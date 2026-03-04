@@ -300,8 +300,8 @@ export function MerchantReportDrawer({
 
   // ─── New Report Form ───
   const renderNewReportForm = () => (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
         <div className="p-4 space-y-5">
           {/* Warning Notice */}
           <Card className="border-destructive/30 bg-destructive/5">
@@ -348,7 +348,7 @@ export function MerchantReportDrawer({
                 return (
                   <div
                     key={cat.value}
-                    className={`flex items-start space-x-3 p-2.5 rounded-lg border transition-colors ${
+                    className={`flex items-start space-x-3 p-2.5 rounded-lg border transition-colors touch-manipulation ${
                       selectedCategory === cat.value
                         ? "border-primary/40 bg-primary/5"
                         : "border-transparent"
@@ -375,7 +375,7 @@ export function MerchantReportDrawer({
               placeholder="Describe what happened in detail. Include dates, amounts, transaction references, and any evidence you have..."
               value={reportDescription}
               onChange={(e) => setReportDescription(e.target.value)}
-              className="min-h-[140px] resize-none text-sm"
+              className="min-h-[140px] resize-none text-sm touch-manipulation"
             />
             <div className="flex justify-between">
               <p className="text-xs text-muted-foreground">
@@ -396,14 +396,14 @@ export function MerchantReportDrawer({
             <Switch checked={isAnonymous} onCheckedChange={setIsAnonymous} />
           </div>
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Submit Button */}
-      <div className="p-4 border-t shrink-0">
+      {/* Submit Button — pinned to bottom */}
+      <div className="p-4 border-t shrink-0 bg-background">
         <Button
           onClick={handleSubmitReport}
           disabled={isSubmitting || !selectedCategory || reportDescription.length < 20}
-          className="w-full h-12 text-sm font-semibold"
+          className="w-full h-12 text-sm font-semibold touch-manipulation active:scale-[0.97]"
           variant="destructive"
         >
           <Send className="h-4 w-4 mr-2" />
@@ -415,7 +415,7 @@ export function MerchantReportDrawer({
 
   // ─── Templates Tab ───
   const renderTemplates = () => (
-    <ScrollArea className="flex-1">
+    <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="h-4 w-4 text-primary" />
@@ -439,12 +439,12 @@ export function MerchantReportDrawer({
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 bg-muted`}>
+                      <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 bg-muted">
                         <Icon className={`h-4 w-4 ${catObj?.color ?? "text-muted-foreground"}`} />
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-sm truncate">{template.name}</p>
-                        <Badge variant="outline" className="text-[10px] mt-0.5 capitalize">
+                        <Badge variant="outline" className="text-xs mt-0.5 capitalize">
                           {catObj?.label ?? template.category}
                         </Badge>
                       </div>
@@ -455,7 +455,7 @@ export function MerchantReportDrawer({
                     {template.description}
                   </p>
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-muted-foreground/70">
+                    <span className="text-xs text-muted-foreground/70">
                       Used {template.popularity} times
                     </span>
                     <Button variant="ghost" size="sm" className="h-7 text-xs text-primary px-2">
@@ -467,7 +467,7 @@ export function MerchantReportDrawer({
             );
           })}
       </div>
-    </ScrollArea>
+    </div>
   );
 
   // ─── Report Detail View ───
@@ -485,7 +485,7 @@ export function MerchantReportDrawer({
           </Button>
           <span className="font-semibold text-sm">Report Details</span>
         </div>
-        <ScrollArea className="flex-1">
+        <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
           <div className="p-4 space-y-4">
             {/* Status & Reference */}
             <div className="flex items-center justify-between">
@@ -535,7 +535,7 @@ export function MerchantReportDrawer({
               </Card>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </div>
     );
   };
@@ -545,7 +545,7 @@ export function MerchantReportDrawer({
     if (viewingReport) return renderReportDetail();
 
     return (
-      <ScrollArea className="flex-1">
+      <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
         <div className="p-4 space-y-3">
           {/* Summary Stats */}
           <div className="grid grid-cols-4 gap-2 mb-4">
@@ -559,7 +559,7 @@ export function MerchantReportDrawer({
             ).map((stat) => (
               <div key={stat.label} className="text-center p-2 bg-muted/30 rounded-lg">
                 <p className={`text-lg font-bold ${stat.color}`}>{stat.count}</p>
-                <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -584,7 +584,7 @@ export function MerchantReportDrawer({
                       <Badge variant="outline" className="text-xs capitalize">
                         {getCategoryLabel(report.category)}
                       </Badge>
-                      <Badge className={`${statusConfig.bg} text-[10px] gap-1`}>
+                      <Badge className={`${statusConfig.bg} text-xs gap-1`}>
                         <StatusIcon className="h-3 w-3" />
                         {statusConfig.label}
                       </Badge>
@@ -597,7 +597,7 @@ export function MerchantReportDrawer({
                         <Calendar className="h-3 w-3" />
                         {formatDate(report.submittedAt)}
                       </span>
-                      <span className="font-mono text-[10px]">{report.reference}</span>
+                      <span className="font-mono text-xs">{report.reference}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -605,7 +605,7 @@ export function MerchantReportDrawer({
             })
           )}
         </div>
-      </ScrollArea>
+      </div>
     );
   };
 
