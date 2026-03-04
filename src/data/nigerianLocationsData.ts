@@ -225,6 +225,7 @@ export interface LocationMerchant {
   countryId: string;
   countryName: string;
   countryFlag: string;
+  merchantType: "retail" | "bulk";
   stateId?: string;
   stateName?: string;
   lgaId?: string;
@@ -235,43 +236,53 @@ export interface LocationMerchant {
 
 // Combine all merchants with location info
 export const allLocationMerchants: LocationMerchant[] = [
-  // Nigeria - Lagos
-  { id: "ng-001", name: "Mobi-Express Lagos", logo: "/placeholder.svg", category: "Fintech", rating: 4.8, isVerified: true, isActive: true, discountPercent: 5, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "eti-osa", lgaName: "Eti-Osa", cityId: "lekki", cityName: "Lekki" },
-  { id: "ng-010", name: "TechVentures Nigeria", logo: "/placeholder.svg", category: "Technology", rating: 4.9, isVerified: true, isActive: true, discountPercent: 8, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "ikeja", lgaName: "Ikeja", cityId: "ikeja-city", cityName: "Ikeja" },
-  { id: "ng-011", name: "Lagos Digital Hub", logo: "/placeholder.svg", category: "E-Commerce", rating: 4.6, isVerified: true, isActive: true, discountPercent: 10, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "surulere", lgaName: "Surulere", cityId: "surulere-city", cityName: "Surulere" },
-  { id: "ng-012", name: "Island Mobi Market", logo: "/placeholder.svg", category: "Retail", rating: 4.5, isVerified: true, isActive: true, discountPercent: 6, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "lagos-island", lgaName: "Lagos Island", cityId: "marina", cityName: "Marina" },
-  // Nigeria - Abuja
-  { id: "ng-002", name: "QuickPay Solutions", logo: "/placeholder.svg", category: "Payments", rating: 4.5, isVerified: true, isActive: true, discountPercent: 3, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "abuja", stateName: "FCT Abuja", lgaId: "abuja-municipal", lgaName: "Abuja Municipal", cityId: "wuse", cityName: "Wuse" },
-  { id: "ng-013", name: "Abuja Premium Store", logo: "/placeholder.svg", category: "Luxury", rating: 4.7, isVerified: true, isActive: true, discountPercent: 4, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "abuja", stateName: "FCT Abuja", lgaId: "abuja-municipal", lgaName: "Abuja Municipal", cityId: "maitama", cityName: "Maitama" },
-  // Nigeria - Rivers
-  { id: "ng-003", name: "VoucherHub Nigeria", logo: "/placeholder.svg", category: "Vouchers", rating: 4.7, isVerified: true, isActive: true, discountPercent: 8, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "rivers", stateName: "Rivers", lgaId: "ph-city", lgaName: "Port Harcourt City", cityId: "ph-main", cityName: "Port Harcourt" },
-  // Nigeria - Kano
-  { id: "ng-004", name: "Naira2Mobi Store", logo: "/placeholder.svg", category: "Mobile Top-up", rating: 4.3, isVerified: true, isActive: true, discountPercent: 10, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "kano", stateName: "Kano", lgaId: "kano-municipal", lgaName: "Kano Municipal", cityId: "kano-city", cityName: "Kano City" },
-  // Nigeria - Oyo
-  { id: "ng-005", name: "FastCredit Ibadan", logo: "/placeholder.svg", category: "Finance", rating: 4.6, isVerified: true, isActive: true, discountPercent: 7, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "oyo", stateName: "Oyo", lgaId: "ibadan-north", lgaName: "Ibadan North", cityId: "bodija", cityName: "Bodija" },
-  // Nigeria - Enugu
-  { id: "ng-006", name: "9ja Mobi Deals", logo: "/placeholder.svg", category: "Deals", rating: 4.4, isVerified: true, isActive: true, discountPercent: 12, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "enugu", stateName: "Enugu", lgaId: "enugu-north", lgaName: "Enugu North", cityId: "ogui", cityName: "Ogui" },
-  // Nigeria - Edo
-  { id: "ng-007", name: "PayFast Benin", logo: "/placeholder.svg", category: "Payments", rating: 4.2, isVerified: true, isActive: true, discountPercent: 6, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "edo", stateName: "Edo", lgaId: "oredo", lgaName: "Oredo", cityId: "benin-city", cityName: "Benin City" },
-  // Nigeria - Imo
-  { id: "ng-008", name: "MobiKing Owerri", logo: "/placeholder.svg", category: "Mobile", rating: 4.9, isVerified: true, isActive: true, discountPercent: 15, countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "imo", stateName: "Imo", lgaId: "owerri-municipal", lgaName: "Owerri Municipal", cityId: "owerri-city", cityName: "Owerri" },
-  // Ghana
-  { id: "gh-001", name: "Accra Mobi Hub", logo: "/placeholder.svg", category: "Fintech", rating: 4.6, isVerified: true, isActive: true, discountPercent: 4, countryId: "gh", countryName: "Ghana", countryFlag: "🇬🇭" },
-  { id: "gh-002", name: "CediExchange", logo: "/placeholder.svg", category: "Exchange", rating: 4.4, isVerified: true, isActive: true, discountPercent: 6, countryId: "gh", countryName: "Ghana", countryFlag: "🇬🇭" },
-  { id: "gh-003", name: "GhanaPay Solutions", logo: "/placeholder.svg", category: "Payments", rating: 4.5, isVerified: true, isActive: true, discountPercent: 8, countryId: "gh", countryName: "Ghana", countryFlag: "🇬🇭" },
-  // Kenya
-  { id: "ke-001", name: "Nairobi Mobi Shop", logo: "/placeholder.svg", category: "Mobile", rating: 4.7, isVerified: true, isActive: true, discountPercent: 5, countryId: "ke", countryName: "Kenya", countryFlag: "🇰🇪" },
-  { id: "ke-002", name: "Safari Vouchers", logo: "/placeholder.svg", category: "Vouchers", rating: 4.5, isVerified: true, isActive: true, discountPercent: 9, countryId: "ke", countryName: "Kenya", countryFlag: "🇰🇪" },
-  // South Africa
-  { id: "za-001", name: "Joburg Mobi Center", logo: "/placeholder.svg", category: "Retail", rating: 4.8, isVerified: true, isActive: true, discountPercent: 4, countryId: "za", countryName: "South Africa", countryFlag: "🇿🇦" },
-  { id: "za-002", name: "Cape Vouchers", logo: "/placeholder.svg", category: "Vouchers", rating: 4.6, isVerified: true, isActive: true, discountPercent: 6, countryId: "za", countryName: "South Africa", countryFlag: "🇿🇦" },
-  // UK
-  { id: "uk-001", name: "London Mobi Exchange", logo: "/placeholder.svg", category: "Exchange", rating: 4.9, isVerified: true, isActive: true, discountPercent: 3, countryId: "uk", countryName: "United Kingdom", countryFlag: "🇬🇧" },
-  // USA
-  { id: "us-001", name: "NYC Mobi Store", logo: "/placeholder.svg", category: "Mobile", rating: 4.8, isVerified: true, isActive: true, discountPercent: 2, countryId: "us", countryName: "United States", countryFlag: "🇺🇸" },
-  { id: "us-002", name: "LA Digital Vouchers", logo: "/placeholder.svg", category: "Digital", rating: 4.6, isVerified: true, isActive: true, discountPercent: 4, countryId: "us", countryName: "United States", countryFlag: "🇺🇸" },
-  // UAE
-  { id: "ae-001", name: "Dubai Mobi Gold", logo: "/placeholder.svg", category: "Luxury", rating: 4.9, isVerified: true, isActive: true, discountPercent: 8, countryId: "ae", countryName: "United Arab Emirates", countryFlag: "🇦🇪" },
+  // Nigeria - Lagos (Bulk)
+  { id: "ng-001", name: "Mobi-Express Lagos", logo: "/placeholder.svg", category: "Fintech", rating: 4.8, isVerified: true, isActive: true, discountPercent: 5, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "eti-osa", lgaName: "Eti-Osa", cityId: "lekki", cityName: "Lekki" },
+  { id: "ng-010", name: "TechVentures Nigeria", logo: "/placeholder.svg", category: "Technology", rating: 4.9, isVerified: true, isActive: true, discountPercent: 8, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "ikeja", lgaName: "Ikeja", cityId: "ikeja-city", cityName: "Ikeja" },
+  // Nigeria - Lagos (Retail)
+  { id: "ng-011", name: "Lagos Digital Hub", logo: "/placeholder.svg", category: "E-Commerce", rating: 4.6, isVerified: true, isActive: true, discountPercent: 3, merchantType: "retail", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "surulere", lgaName: "Surulere", cityId: "surulere-city", cityName: "Surulere" },
+  { id: "ng-012", name: "Island Mobi Market", logo: "/placeholder.svg", category: "Retail", rating: 4.5, isVerified: true, isActive: true, discountPercent: 2, merchantType: "retail", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "lagos-island", lgaName: "Lagos Island", cityId: "marina", cityName: "Marina" },
+  { id: "ng-r-001", name: "Adewale Mini Store", logo: "/placeholder.svg", category: "Retail", rating: 4.1, isVerified: true, isActive: true, discountPercent: 1.5, merchantType: "retail", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "lagos", stateName: "Lagos", lgaId: "ikeja", lgaName: "Ikeja", cityId: "ikeja-city", cityName: "Ikeja" },
+  // Nigeria - Abuja (Bulk)
+  { id: "ng-002", name: "QuickPay Solutions", logo: "/placeholder.svg", category: "Payments", rating: 4.5, isVerified: true, isActive: true, discountPercent: 3, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "abuja", stateName: "FCT Abuja", lgaId: "abuja-municipal", lgaName: "Abuja Municipal", cityId: "wuse", cityName: "Wuse" },
+  // Nigeria - Abuja (Retail)
+  { id: "ng-013", name: "Abuja Premium Store", logo: "/placeholder.svg", category: "Luxury", rating: 4.7, isVerified: true, isActive: true, discountPercent: 2.5, merchantType: "retail", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "abuja", stateName: "FCT Abuja", lgaId: "abuja-municipal", lgaName: "Abuja Municipal", cityId: "maitama", cityName: "Maitama" },
+  { id: "ng-r-002", name: "ChiChi Voucher Hub", logo: "/placeholder.svg", category: "Retail", rating: 4.0, isVerified: true, isActive: true, discountPercent: 2, merchantType: "retail", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "abuja", stateName: "FCT Abuja", lgaId: "abuja-municipal", lgaName: "Abuja Municipal", cityId: "wuse", cityName: "Wuse" },
+  // Nigeria - Rivers (Bulk)
+  { id: "ng-003", name: "VoucherHub Nigeria", logo: "/placeholder.svg", category: "Vouchers", rating: 4.7, isVerified: true, isActive: true, discountPercent: 8, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "rivers", stateName: "Rivers", lgaId: "ph-city", lgaName: "Port Harcourt City", cityId: "ph-main", cityName: "Port Harcourt" },
+  // Nigeria - Kano (Bulk)
+  { id: "ng-004", name: "Naira2Mobi Store", logo: "/placeholder.svg", category: "Mobile Top-up", rating: 4.3, isVerified: true, isActive: true, discountPercent: 10, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "kano", stateName: "Kano", lgaId: "kano-municipal", lgaName: "Kano Municipal", cityId: "kano-city", cityName: "Kano City" },
+  // Nigeria - Kano (Retail)
+  { id: "ng-r-003", name: "Fatima Mobi Corner", logo: "/placeholder.svg", category: "Retail", rating: 3.9, isVerified: true, isActive: true, discountPercent: 1.8, merchantType: "retail", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "kano", stateName: "Kano", lgaId: "kano-municipal", lgaName: "Kano Municipal", cityId: "kano-city", cityName: "Kano City" },
+  // Nigeria - Oyo (Bulk)
+  { id: "ng-005", name: "FastCredit Ibadan", logo: "/placeholder.svg", category: "Finance", rating: 4.6, isVerified: true, isActive: true, discountPercent: 7, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "oyo", stateName: "Oyo", lgaId: "ibadan-north", lgaName: "Ibadan North", cityId: "bodija", cityName: "Bodija" },
+  // Nigeria - Enugu (Bulk)
+  { id: "ng-006", name: "9ja Mobi Deals", logo: "/placeholder.svg", category: "Deals", rating: 4.4, isVerified: true, isActive: true, discountPercent: 12, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "enugu", stateName: "Enugu", lgaId: "enugu-north", lgaName: "Enugu North", cityId: "ogui", cityName: "Ogui" },
+  // Nigeria - Edo (Bulk)
+  { id: "ng-007", name: "PayFast Benin", logo: "/placeholder.svg", category: "Payments", rating: 4.2, isVerified: true, isActive: true, discountPercent: 6, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "edo", stateName: "Edo", lgaId: "oredo", lgaName: "Oredo", cityId: "benin-city", cityName: "Benin City" },
+  // Nigeria - Imo (Bulk)
+  { id: "ng-008", name: "MobiKing Owerri", logo: "/placeholder.svg", category: "Mobile", rating: 4.9, isVerified: true, isActive: true, discountPercent: 15, merchantType: "bulk", countryId: "ng", countryName: "Nigeria", countryFlag: "🇳🇬", stateId: "imo", stateName: "Imo", lgaId: "owerri-municipal", lgaName: "Owerri Municipal", cityId: "owerri-city", cityName: "Owerri" },
+  // Ghana (Bulk)
+  { id: "gh-001", name: "Accra Mobi Hub", logo: "/placeholder.svg", category: "Fintech", rating: 4.6, isVerified: true, isActive: true, discountPercent: 4, merchantType: "bulk", countryId: "gh", countryName: "Ghana", countryFlag: "🇬🇭" },
+  { id: "gh-002", name: "CediExchange", logo: "/placeholder.svg", category: "Exchange", rating: 4.4, isVerified: true, isActive: true, discountPercent: 6, merchantType: "bulk", countryId: "gh", countryName: "Ghana", countryFlag: "🇬🇭" },
+  // Ghana (Retail)
+  { id: "gh-003", name: "GhanaPay Solutions", logo: "/placeholder.svg", category: "Payments", rating: 4.5, isVerified: true, isActive: true, discountPercent: 3, merchantType: "retail", countryId: "gh", countryName: "Ghana", countryFlag: "🇬🇭" },
+  // Kenya (Bulk)
+  { id: "ke-001", name: "Nairobi Mobi Shop", logo: "/placeholder.svg", category: "Mobile", rating: 4.7, isVerified: true, isActive: true, discountPercent: 5, merchantType: "bulk", countryId: "ke", countryName: "Kenya", countryFlag: "🇰🇪" },
+  // Kenya (Retail)
+  { id: "ke-002", name: "Safari Vouchers", logo: "/placeholder.svg", category: "Vouchers", rating: 4.5, isVerified: true, isActive: true, discountPercent: 2.5, merchantType: "retail", countryId: "ke", countryName: "Kenya", countryFlag: "🇰🇪" },
+  // South Africa (Bulk)
+  { id: "za-001", name: "Joburg Mobi Center", logo: "/placeholder.svg", category: "Retail", rating: 4.8, isVerified: true, isActive: true, discountPercent: 4, merchantType: "bulk", countryId: "za", countryName: "South Africa", countryFlag: "🇿🇦" },
+  // South Africa (Retail)
+  { id: "za-002", name: "Cape Vouchers", logo: "/placeholder.svg", category: "Vouchers", rating: 4.6, isVerified: true, isActive: true, discountPercent: 2, merchantType: "retail", countryId: "za", countryName: "South Africa", countryFlag: "🇿🇦" },
+  // UK (Bulk)
+  { id: "uk-001", name: "London Mobi Exchange", logo: "/placeholder.svg", category: "Exchange", rating: 4.9, isVerified: true, isActive: true, discountPercent: 3, merchantType: "bulk", countryId: "uk", countryName: "United Kingdom", countryFlag: "🇬🇧" },
+  // USA (Bulk)
+  { id: "us-001", name: "NYC Mobi Store", logo: "/placeholder.svg", category: "Mobile", rating: 4.8, isVerified: true, isActive: true, discountPercent: 2, merchantType: "bulk", countryId: "us", countryName: "United States", countryFlag: "🇺🇸" },
+  // USA (Retail)
+  { id: "us-002", name: "LA Digital Vouchers", logo: "/placeholder.svg", category: "Digital", rating: 4.6, isVerified: true, isActive: true, discountPercent: 1.5, merchantType: "retail", countryId: "us", countryName: "United States", countryFlag: "🇺🇸" },
+  // UAE (Bulk)
+  { id: "ae-001", name: "Dubai Mobi Gold", logo: "/placeholder.svg", category: "Luxury", rating: 4.9, isVerified: true, isActive: true, discountPercent: 8, merchantType: "bulk", countryId: "ae", countryName: "United Arab Emirates", countryFlag: "🇦🇪" },
 ];
 
 // Helper to get unique countries from merchants
