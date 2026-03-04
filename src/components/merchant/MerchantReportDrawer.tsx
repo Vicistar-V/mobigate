@@ -628,7 +628,7 @@ export function MerchantReportDrawer({
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex flex-col flex-1 min-h-0">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
         <TabsList className="w-full rounded-none border-b bg-background h-10 shrink-0 px-1">
           <TabsTrigger value="new" className="flex-1 text-xs data-[state=active]:shadow-none h-8">
             <Send className="h-3.5 w-3.5 mr-1" />
@@ -649,13 +649,13 @@ export function MerchantReportDrawer({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="new" className="flex-1 min-h-0 m-0 flex flex-col">
+        <TabsContent value="new" className="flex-1 min-h-0 m-0 flex flex-col overflow-hidden data-[state=inactive]:hidden">
           {renderNewReportForm()}
         </TabsContent>
-        <TabsContent value="templates" className="flex-1 min-h-0 m-0 flex flex-col">
+        <TabsContent value="templates" className="flex-1 min-h-0 m-0 flex flex-col overflow-hidden data-[state=inactive]:hidden">
           {renderTemplates()}
         </TabsContent>
-        <TabsContent value="history" className="flex-1 min-h-0 m-0 flex flex-col">
+        <TabsContent value="history" className="flex-1 min-h-0 m-0 flex flex-col overflow-hidden data-[state=inactive]:hidden">
           {renderHistory()}
         </TabsContent>
       </Tabs>
