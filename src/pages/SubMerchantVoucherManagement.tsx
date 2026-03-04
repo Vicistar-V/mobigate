@@ -80,7 +80,7 @@ export default function SubMerchantVoucherManagement() {
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
         <div className="flex-1">
-          <h1 className="text-base font-bold text-foreground">Sub-Merchant Vouchers</h1>
+          <h1 className="text-base font-bold text-foreground">Retail Merchant Vouchers</h1>
           <p className="text-xs text-muted-foreground">Buy & manage your voucher inventory</p>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function SubMerchantVoucherManagement() {
               <div className="relative">
                 <div className="flex items-center gap-2 mb-1">
                   <Wallet className="h-4 w-4 text-white/70" />
-                  <p className="text-xs text-white/70 font-medium">Sub-Merchant Wallet (₦)</p>
+                  <p className="text-xs text-white/70 font-medium">Retail Merchant Wallet (₦)</p>
                 </div>
                 <p className="text-2xl font-black mb-3">₦{formatNum(walletBalance)}</p>
                 <Button

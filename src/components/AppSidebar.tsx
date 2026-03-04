@@ -191,19 +191,19 @@ const menuItems: MenuItem[] = [{
       url: "/merchant-voucher-management",
     },
     {
-      title: "Manage Sub-Merchants",
+      title: "Manage Retail Merchants",
       url: "/merchant-sub-merchants",
     },
     {
-      title: "Sub-Merchant Voucher Management",
+      title: "Retail Merchant Vouchers",
       url: "/sub-merchant-voucher-management",
     },
     {
-      title: "Apply as Sub-Merchant",
+      title: "Apply as Retail Merchant",
       url: "/merchants?mode=apply",
     },
     {
-      title: "Sub-Merchant Application Status",
+      title: "Retail Merchant Application Status",
       url: "/sub-merchant-application-status",
     }
   ]

@@ -89,7 +89,7 @@ const SubMerchantApplicationStatus = () => {
   const handleReminder = (merchantName: string) => {
     toast({
       title: "Reminder Sent",
-      description: `A reminder has been sent to ${merchantName} to review your Sub-Merchant application.`,
+      description: `A reminder has been sent to ${merchantName} to review your Retail Merchant application.`,
     });
   };
 
@@ -113,7 +113,7 @@ const SubMerchantApplicationStatus = () => {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-bold">Sub-Merchant Applications</h1>
+            <h1 className="text-lg font-bold">Retail Merchant Applications</h1>
             <p className="text-xs text-muted-foreground">{mockApplications.length} applications submitted</p>
           </div>
         </div>
@@ -203,7 +203,7 @@ const SubMerchantApplicationStatus = () => {
                         onClick={() => navigate("/sub-merchant-voucher-management")}
                         className="w-full h-11 rounded-xl touch-manipulation active:scale-[0.97] text-sm font-semibold"
                       >
-                        Go to Sub-Merchant Dashboard
+                        Go to Retail Merchant Dashboard
                       </Button>
                     )}
                     {app.status === "pending" && (

@@ -502,7 +502,7 @@ export default function BuyVouchersPage() {
                 <span className="text-3xl">{local.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-foreground">{local.name}</p>
-                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} sub-merchants</p>
+                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} {merchantParam ? "retail merchants" : "merchants"}</p>
                 </div>
                 <Badge className="bg-primary/10 text-primary text-xs">Local</Badge>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -516,7 +516,7 @@ export default function BuyVouchersPage() {
                 <span className="text-2xl">{country.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{country.name}</p>
-                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} sub-merchants</p>
+                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} {merchantParam ? "retail merchants" : "merchants"}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -566,7 +566,7 @@ export default function BuyVouchersPage() {
             </button>
             <div className="flex-1">
               <h1 className="text-base font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
-              <p className="text-xs text-muted-foreground">Select a sub-merchant</p>
+              <p className="text-xs text-muted-foreground">{merchantParam ? "Select a retail merchant" : "Select a merchant"}</p>
             </div>
           </div>
           <div className="px-4 pb-3">
@@ -684,7 +684,7 @@ export default function BuyVouchersPage() {
                       <p className="font-bold text-sm text-foreground truncate">{merchant.name}</p>
                       {merchant.isVerified && <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
                       {merchant.isSubMerchant && (
-                        <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none shrink-0">Sub‑Merchant</span>
+                        <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none shrink-0">Retail</span>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
@@ -768,7 +768,7 @@ export default function BuyVouchersPage() {
               <div className="flex items-center gap-1.5 flex-wrap">
                 <p className="font-bold text-sm text-foreground">{selectedMerchant.name}</p>
                 {selectedMerchant.isSubMerchant && (
-                  <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none">Sub‑Merchant</span>
+                  <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none">Retail Merchant</span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% Discount</p>

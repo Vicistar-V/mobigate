@@ -95,7 +95,7 @@ export function SubMerchantDiscountSettings() {
           <div className="flex gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              This is the discount you offer to end-users who purchase vouchers through you. Sub-merchants can set discounts between <span className="font-semibold text-foreground">0.1%</span> and <span className="font-semibold text-foreground">5.0%</span> maximum. A higher discount attracts more customers.
+              This is the discount you offer to end-users who purchase vouchers through you. Retail merchants can set discounts between <span className="font-semibold text-foreground">0.1%</span> and <span className="font-semibold text-foreground">5.0%</span> maximum. A higher discount attracts more customers.
             </p>
           </div>
 

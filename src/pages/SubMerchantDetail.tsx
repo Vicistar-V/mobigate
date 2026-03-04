@@ -15,7 +15,7 @@ export default function SubMerchantDetail() {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center px-6">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-4">Sub-merchant not found</p>
+          <p className="text-sm text-muted-foreground mb-4">Retail merchant not found</p>
           <Button onClick={() => navigate(-1)} variant="outline">Go Back</Button>
         </div>
       </div>
