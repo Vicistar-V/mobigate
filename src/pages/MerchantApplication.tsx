@@ -115,6 +115,8 @@ export default function MerchantApplication() {
     }
   };
 
+  const totalFee = waiverMode ? 100000 : 50000;
+
   const handleSubmit = () => {
     if (!acceptedPolicies) {
       toast({ title: "Accept Terms", description: "You must agree to the terms before submitting.", variant: "destructive" });
@@ -131,7 +133,10 @@ export default function MerchantApplication() {
     const ref = generateTransactionReference("MERCH-CORP");
     setRefNumber(ref);
     setSubmitted(true);
-    toast({ title: "Application Submitted!", description: `Fee: ${formatMobi(50000)}. Ref: ${ref}` });
+    const feeDesc = waiverMode
+      ? `Application Fee: ${formatMobi(50000)} + Waiver Fee: ${formatMobi(50000)} = ${formatMobi(totalFee)}`
+      : `Fee: ${formatMobi(50000)}`;
+    toast({ title: waiverMode ? "Application + Waiver Submitted!" : "Application Submitted!", description: `${feeDesc}. Ref: ${ref}` });
     localStorage.removeItem("mobigate-corp-merchant-draft");
   };
 
@@ -230,9 +235,11 @@ export default function MerchantApplication() {
                   <Clock className="h-7 w-7 text-amber-600" />
                 </div>
                 <h2 className="font-bold text-base">Application Under Review</h2>
-                <p className="text-sm text-muted-foreground">Your corporate merchant application is being reviewed</p>
+                <p className="text-sm text-muted-foreground">
+                  Your corporate merchant application{waiverMode ? " (with waiver request)" : ""} is being reviewed
+                </p>
                 <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400 text-sm">
-                  Estimated: 14–21 business days
+                  {waiverMode ? "Status: Awaiting Approval" : "Estimated: 14–21 business days"}
                 </Badge>
               </div>
 
@@ -254,10 +261,34 @@ export default function MerchantApplication() {
                   <span className="font-medium">{merchantName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Fee Paid</span>
+                  <span className="text-muted-foreground">Application Fee</span>
                   <span className="font-medium text-primary">{formatMobi(50000)}</span>
                 </div>
+                {waiverMode && (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Waiver Fee</span>
+                      <span className="font-medium text-orange-600">{formatMobi(50000)}</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2">
+                      <span className="font-semibold text-muted-foreground">Total Charged</span>
+                      <span className="font-bold text-primary">{formatMobi(totalFee)}</span>
+                    </div>
+                  </>
+                )}
+                {!waiverMode && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Charged</span>
+                    <span className="font-bold text-primary">{formatMobi(50000)}</span>
+                  </div>
+                )}
               </div>
+              {waiverMode && waiverContext && (
+                <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-orange-700 mb-1">Waiver Reason</p>
+                  <p className="text-xs text-muted-foreground">{waiverContext}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -320,76 +351,8 @@ export default function MerchantApplication() {
           </Card>
         </Collapsible>
 
-        {/* ─── WAIVER TOGGLE ─── */}
-        <Card className={`border-orange-500/30 ${waiverMode ? "bg-orange-500/5" : ""}`}>
-          <CardContent className="p-3 space-y-3">
-            <button
-              onClick={() => setWaiverMode(!waiverMode)}
-              className="w-full flex items-center justify-between touch-manipulation active:scale-[0.98]"
-            >
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
-                <div className="text-left">
-                  <p className="text-sm font-bold">Request a Waiver</p>
-                  <p className="text-xs text-muted-foreground">Non-refundable fee of {formatMobi(50000)}</p>
-                </div>
-              </div>
-              {waiverMode ? (
-                <ToggleRight className="h-6 w-6 text-orange-600 shrink-0" />
-              ) : (
-                <ToggleLeft className="h-6 w-6 text-muted-foreground shrink-0" />
-              )}
-            </button>
 
-            {waiverMode && !waiverRequested && (
-              <div className="space-y-3 border-t border-orange-500/20 pt-3">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  If you cannot meet the standard application requirements, you can request an Exclusive Waiver. 
-                  A non-refundable fee of <span className="font-bold text-foreground">{formatMobi(50000)}</span> (≈ {formatLocalAmount(50000, "NGN")}) will be charged on your Mobi Wallet. 
-                  Your application will be created as <span className="font-semibold">"Awaiting Approval"</span>.
-                </p>
-                <Textarea
-                  placeholder="Optional: explain your situation (e.g. 'Documents arriving next week')"
-                  value={waiverContext}
-                  onChange={(e) => setWaiverContext(e.target.value)}
-                  className="min-h-[60px] text-xs"
-                />
-                <Button
-                  variant="outline"
-                  className="w-full h-10 text-xs font-bold gap-2 border-orange-500/40 text-orange-700 hover:bg-orange-500/10"
-                  onClick={() => {
-                    setWaiverRequested(true);
-                    toast({
-                      title: "📋 Waiver Request Submitted",
-                      description: `Fee of ${formatMobi(50000)} deducted from your Mobi Wallet. Your application is now awaiting approval.`,
-                    });
-                  }}
-                >
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  Request Waiver — {formatMobi(50000)}
-                </Button>
-              </div>
-            )}
-
-            {waiverMode && waiverRequested && (
-              <div className="border-t border-emerald-500/20 pt-3">
-                <div className="flex items-start gap-2.5 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/30">
-                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-emerald-700">Waiver Submitted</p>
-                    <p className="text-xs text-muted-foreground">
-                      Your application will be flagged as <span className="font-bold">"Awaiting Approval"</span>. An admin will review your waiver request.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* ─── FORM SECTIONS (hidden when waiver mode is active) ─── */}
-        {!waiverMode && (
-          <>
+        {/* ─── FORM SECTIONS ─── */}
         {/* ===== CREATE ACCOUNT ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
@@ -646,44 +609,64 @@ export default function MerchantApplication() {
           </CardContent>
         </Card>
 
+        {/* ─── WAIVER REQUEST (optional, inline) ─── */}
+        <Card className={`border-orange-500/30 ${waiverMode ? "bg-orange-500/5" : ""}`}>
+          <CardContent className="p-3 space-y-3">
+            <button
+              onClick={() => setWaiverMode(!waiverMode)}
+              className="w-full flex items-center justify-between touch-manipulation active:scale-[0.98]"
+            >
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
+                <div className="text-left">
+                  <p className="text-sm font-bold">Request a Waiver</p>
+                  <p className="text-xs text-muted-foreground">Additional non-refundable fee of {formatMobi(50000)}</p>
+                </div>
+              </div>
+              {waiverMode ? <ToggleRight className="h-6 w-6 text-orange-600 shrink-0" /> : <ToggleLeft className="h-6 w-6 text-muted-foreground shrink-0" />}
+            </button>
+            {waiverMode && (
+              <div className="space-y-3 border-t border-orange-500/20 pt-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  A non-refundable fee of <span className="font-bold text-foreground">{formatMobi(50000)}</span> (≈ {formatLocalAmount(50000, "NGN")}) will be charged
+                  in addition to the application fee. Your application will be flagged as <span className="font-semibold">"Awaiting Approval"</span>.
+                </p>
+                <Textarea placeholder="Optional: explain your situation" value={waiverContext} onChange={(e) => setWaiverContext(e.target.value)} className="min-h-[60px] text-xs" />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* ===== TERMS & SUBMIT ===== */}
         <Card>
           <CardContent className="p-4 space-y-4">
             <div className="flex items-start gap-2.5 p-3 bg-muted/30 rounded-lg border">
-              <Checkbox
-                id="accept-policies"
-                checked={acceptedPolicies}
-                onCheckedChange={(checked) => setAcceptedPolicies(checked === true)}
-                className="mt-0.5"
-              />
+              <Checkbox id="accept-policies" checked={acceptedPolicies} onCheckedChange={(checked) => setAcceptedPolicies(checked === true)} className="mt-0.5" />
               <Label htmlFor="accept-policies" className="text-[11px] leading-relaxed cursor-pointer">
-                You must read and agree to the{" "}
-                <span className="text-primary font-semibold underline">Terms and Conditions</span>{" "}
-                of MOBIGATE Application usage and management policy, or else cancel the application and exit.
-                Check the checkbox to agree and continue with your application. Application fee:{" "}
-                <span className="font-bold text-primary">{formatMobi(50000)}</span>{" "}
-                <span className="text-muted-foreground">(≈ {formatLocalAmount(50000, "NGN")})</span>
+                You must read and agree to the <span className="text-primary font-semibold underline">Terms and Conditions</span> of MOBIGATE Application usage and management policy.
+                {waiverMode
+                  ? <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span> + Waiver fee: <span className="font-bold text-orange-600">{formatMobi(50000)}</span> = <span className="font-bold text-primary">{formatMobi(totalFee)}</span></>
+                  : <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span></>
+                }
               </Label>
             </div>
-
+            {waiverMode && (
+              <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3 space-y-1.5">
+                <div className="flex justify-between text-xs"><span className="text-muted-foreground">Application Fee</span><span className="font-medium">{formatMobi(50000)}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-muted-foreground">Waiver Request Fee</span><span className="font-medium text-orange-600">{formatMobi(50000)}</span></div>
+                <div className="flex justify-between text-sm border-t border-orange-500/20 pt-1.5"><span className="font-semibold">Total</span><span className="font-bold text-primary">{formatMobi(totalFee)}</span></div>
+              </div>
+            )}
             <div className="flex gap-2">
-              <Button variant="outline" onClick={saveDraft} className="flex-1 gap-2" size="lg">
-                <Save className="h-4 w-4" />
-                Save Draft
-              </Button>
-              <Button variant="outline" onClick={clearDraft} className="gap-2 text-destructive hover:text-destructive" size="lg">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <Button variant="outline" onClick={saveDraft} className="flex-1 gap-2" size="lg"><Save className="h-4 w-4" />Save Draft</Button>
+              <Button variant="outline" onClick={clearDraft} className="gap-2 text-destructive hover:text-destructive" size="lg"><Trash2 className="h-4 w-4" /></Button>
             </div>
-
             <Button onClick={handleSubmit} className="w-full gap-2" size="lg" disabled={!acceptedPolicies}>
               <Store className="h-4 w-4" />
-              Submit Application — {formatMobi(50000)}
+              {waiverMode ? `Submit Application + Waiver — ${formatMobi(totalFee)}` : `Submit Application — ${formatMobi(50000)}`}
             </Button>
           </CardContent>
         </Card>
-          </>
-        )}
       </div>
     </div>
   );
