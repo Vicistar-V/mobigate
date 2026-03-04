@@ -29,7 +29,7 @@ const mockApplications: SubMerchantApp[] = [
     refNo: "MG-SUB-2026-0118",
     dateSubmitted: "20 Feb 2026",
     status: "pending",
-    estimatedReview: "7-14 business days",
+    estimatedReview: "14 business days",
   },
   {
     id: "2",
@@ -49,7 +49,7 @@ const mockApplications: SubMerchantApp[] = [
     refNo: "MG-SUB-2026-0071",
     dateSubmitted: "5 Feb 2026",
     status: "rejected",
-    rejectionReason: "Your application was not approved because your location is not acceptable at the moment.",
+    rejectionReason: "Your application was declined due to incomplete documentation. Please provide a valid business registration certificate and proof of address, then re-apply.",
     estimatedReview: "",
   },
 ];
@@ -185,14 +185,14 @@ const SubMerchantApplicationStatus = () => {
                       </div>
                       {app.status === "pending" && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Estimated Review</span>
+                          <span className="text-muted-foreground">Est. Review Time</span>
                           <span className="font-medium text-sky-600">{app.estimatedReview}</span>
                         </div>
                       )}
                       {app.status === "rejected" && app.rejectionReason && (
                         <div className="pt-2 border-t border-border/30">
-                          <p className="text-xs text-muted-foreground mb-1">Rejection Reason</p>
-                          <p className="text-sm text-foreground">{app.rejectionReason}</p>
+                          <p className="text-xs font-semibold text-red-600 mb-1">Reason for Decline</p>
+                          <p className="text-sm text-foreground leading-relaxed">{app.rejectionReason}</p>
                         </div>
                       )}
                     </div>
@@ -207,43 +207,62 @@ const SubMerchantApplicationStatus = () => {
                       </Button>
                     )}
                     {app.status === "pending" && (
-                      <Button
-                        onClick={() => handleReminder(app.merchantName)}
-                        variant="outline"
-                        className="w-full h-12 rounded-xl touch-manipulation active:scale-[0.97] text-xs font-semibold gap-2 border-sky-500/30 text-sky-700 hover:bg-sky-500/10 flex items-center justify-center"
-                      >
-                        <Bell className="h-4 w-4 shrink-0" />
-                        <span className="truncate">Send Reminder to {app.merchantName}</span>
-                      </Button>
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => handleReminder(app.merchantName)}
+                          variant="outline"
+                          className="w-full h-12 rounded-xl touch-manipulation active:scale-[0.97] text-xs font-semibold gap-2 border-sky-500/30 text-sky-700 hover:bg-sky-500/10 flex items-center justify-center"
+                        >
+                          <Bell className="h-4 w-4 shrink-0" />
+                          <span className="truncate">Send Reminder to {app.merchantName}</span>
+                        </Button>
+                        <div className="rounded-xl bg-sky-500/5 border border-sky-500/20 p-3">
+                          <div className="flex gap-2">
+                            <span className="text-sky-600 shrink-0">ℹ️</span>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              <span className="font-bold text-foreground">Note:</span> Your application is being reviewed by <span className="font-bold text-foreground">{app.merchantName}</span>. You'll be notified once they take action. You can send a reminder if it's been more than 14 days.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     )}
                     {app.status === "rejected" && (
-                      <Button
-                        onClick={() => navigate(`/apply-sub-merchant/${app.merchantId}`, {
-                          state: {
-                            reapply: true,
-                            previousData: {
-                              fullName: "Chinedu Okonkwo",
-                              businessName: "QuickStop Retail",
-                              phone: "+234 803 456 7890",
-                              email: "chinedu@quickstop.ng",
-                              city: "Port Harcourt",
-                              state: "Rivers",
-                              businessTypes: ["retail_shop", "mobi_kiosk"],
-                              description: "A retail shop and Mobi kiosk operating in Port Harcourt's main market area, serving over 200 customers daily.",
-                              yearsInBusiness: "4_to_7",
-                              retailShopAddress: "45 Market Road, Port Harcourt",
-                              onlineStoreUrl: "",
-                              mobiShopUrl: "",
-                              merchantName: app.merchantName,
-                              merchantCategory: "Retail",
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => navigate(`/apply-sub-merchant/${app.merchantId}`, {
+                            state: {
+                              reapply: true,
+                              previousData: {
+                                fullName: "Chinedu Okonkwo",
+                                businessName: "QuickStop Retail",
+                                phone: "+234 803 456 7890",
+                                email: "chinedu@quickstop.ng",
+                                city: "Port Harcourt",
+                                state: "Rivers",
+                                businessTypes: ["retail_shop", "mobi_kiosk"],
+                                description: "A retail shop and Mobi kiosk operating in Port Harcourt's main market area, serving over 200 customers daily.",
+                                yearsInBusiness: "4_to_7",
+                                retailShopAddress: "45 Market Road, Port Harcourt",
+                                onlineStoreUrl: "",
+                                mobiShopUrl: "",
+                                merchantName: app.merchantName,
+                                merchantCategory: "Retail",
+                              }
                             }
-                          }
-                        })}
-                        variant="outline"
-                        className="w-full h-11 rounded-xl touch-manipulation active:scale-[0.97] text-sm font-semibold border-red-500/30 text-red-700 hover:bg-red-500/10"
-                      >
-                        Re-apply as Sub-Merchant
-                      </Button>
+                          })}
+                          className="w-full h-11 rounded-xl touch-manipulation active:scale-[0.97] text-sm font-semibold"
+                        >
+                          Re‑apply to {app.merchantName}
+                        </Button>
+                        <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-3">
+                          <div className="flex gap-2">
+                            <span className="text-red-600 shrink-0">✕</span>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              <span className="font-bold text-red-600">Application Declined:</span> Review the reason(s) for decline above and address the issues before re‑applying. Your previous application details are retrievable.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}

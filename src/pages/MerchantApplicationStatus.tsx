@@ -105,15 +105,15 @@ const MerchantApplicationStatus = () => {
             </div>
             {status === "pending" && (
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Estimated Review</span>
-                <span className="font-medium text-amber-600">14-21 business days</span>
+                <span className="text-muted-foreground">Est. Review Time</span>
+                <span className="font-medium text-amber-600">14 business days</span>
               </div>
             )}
             {status === "rejected" && (
               <div className="pt-2 border-t border-border/50">
-                <p className="text-sm text-muted-foreground mb-1">Rejection Reason</p>
-                <p className="text-sm text-foreground">
-                  Incomplete business documentation. Please provide a valid business registration certificate and resubmit.
+                <p className="text-sm font-semibold text-red-600 mb-1">Reason for Decline</p>
+                <p className="text-sm text-foreground leading-relaxed">
+                  Incomplete business documentation. Please provide a valid business registration certificate and proof of address, then re-apply.
                 </p>
               </div>
             )}
@@ -131,14 +131,24 @@ const MerchantApplicationStatus = () => {
             </Button>
           )}
           {status === "pending" && (
-            <Button
-              onClick={handleReminder}
-              variant="outline"
-              className="w-full h-12 rounded-xl touch-manipulation active:scale-[0.97] text-base font-semibold gap-2"
-            >
-              <Bell className="h-5 w-5" />
-              Send Reminder to Mobigate
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={handleReminder}
+                variant="outline"
+                className="w-full h-12 rounded-xl touch-manipulation active:scale-[0.97] text-base font-semibold gap-2"
+              >
+                <Bell className="h-5 w-5" />
+                Send Reminder to Mobigate
+              </Button>
+              <div className="rounded-xl bg-amber-500/5 border border-amber-500/20 p-3">
+                <div className="flex gap-2">
+                  <span className="text-amber-600 shrink-0">ℹ️</span>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    <span className="font-bold text-foreground">Note:</span> Your application is being reviewed by <span className="font-bold text-foreground">Mobigate</span>. You'll be notified once they take action. You can send a reminder if it's been more than 14 days.
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
           {status === "rejected" && (
             <>
@@ -155,6 +165,14 @@ const MerchantApplicationStatus = () => {
               >
                 Re-apply as Corporate
               </Button>
+              <div className="rounded-xl bg-red-500/5 border border-red-500/20 p-3">
+                <div className="flex gap-2">
+                  <span className="text-red-600 shrink-0">✕</span>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    <span className="font-bold text-red-600">Application Declined:</span> Review the reason(s) for decline above and address the issues before re‑applying. Your previous application details are retrievable.
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </div>
