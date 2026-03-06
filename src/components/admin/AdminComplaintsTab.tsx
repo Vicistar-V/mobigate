@@ -348,24 +348,24 @@ export function AdminComplaintsTab() {
     <div className="space-y-3 pb-6">
       {/* ─── Summary Stats ─── */}
       <div className="grid grid-cols-5 gap-1.5">
-        <div className="rounded-xl bg-muted/50 border border-border p-2 text-center">
-          <p className="text-lg font-bold">{stats.total}</p>
+        <div className="rounded-xl bg-muted/50 border border-border px-2 py-3 text-center">
+          <p className="text-lg font-bold leading-none mb-1">{stats.total}</p>
           <p className="text-[11px] text-muted-foreground">Total</p>
         </div>
-        <div className="rounded-xl bg-amber-500/10 border border-amber-300/50 p-2 text-center">
-          <p className="text-lg font-bold text-amber-700">{stats.pending}</p>
+        <div className="rounded-xl bg-amber-500/10 border border-amber-300/50 px-2 py-3 text-center">
+          <p className="text-lg font-bold text-amber-700 leading-none mb-1">{stats.pending}</p>
           <p className="text-[11px] text-amber-600">Pending</p>
         </div>
-        <div className="rounded-xl bg-blue-500/10 border border-blue-300/50 p-2 text-center">
-          <p className="text-lg font-bold text-blue-700">{stats.investigating}</p>
+        <div className="rounded-xl bg-blue-500/10 border border-blue-300/50 px-2 py-3 text-center">
+          <p className="text-lg font-bold text-blue-700 leading-none mb-1">{stats.investigating}</p>
           <p className="text-[11px] text-blue-600">Active</p>
         </div>
-        <div className="rounded-xl bg-emerald-500/10 border border-emerald-300/50 p-2 text-center">
-          <p className="text-lg font-bold text-emerald-700">{stats.resolved}</p>
+        <div className="rounded-xl bg-emerald-500/10 border border-emerald-300/50 px-2 py-3 text-center">
+          <p className="text-lg font-bold text-emerald-700 leading-none mb-1">{stats.resolved}</p>
           <p className="text-[11px] text-emerald-600">Resolved</p>
         </div>
-        <div className="rounded-xl bg-red-500/10 border border-red-300/50 p-2 text-center">
-          <p className="text-lg font-bold text-red-700">{stats.penalised}</p>
+        <div className="rounded-xl bg-red-500/10 border border-red-300/50 px-2 py-3 text-center">
+          <p className="text-lg font-bold text-red-700 leading-none mb-1">{stats.penalised}</p>
           <p className="text-[11px] text-red-600">Penalised</p>
         </div>
       </div>
