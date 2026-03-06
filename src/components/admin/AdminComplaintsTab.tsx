@@ -66,7 +66,7 @@ const penaltyConfig: Record<PenaltyType, { label: string; description: string; i
   deactivate: { label: "Deactivate Permanently", description: "Permanently deactivate the account — irreversible", icon: Trash2, color: "text-red-900", bg: "bg-red-600/10", border: "border-red-600", requiresDuration: false },
 };
 
-type ComplaintStatus = "pending" | "investigating" | "resolved" | "dismissed";
+type ComplaintStatus = "pending" | "investigating" | "resolved" | "dismissed" | "penalised";
 
 interface Complaint {
   id: string;
