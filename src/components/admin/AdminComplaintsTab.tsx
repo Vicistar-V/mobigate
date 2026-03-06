@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Drawer,
   DrawerContent,
@@ -199,6 +200,7 @@ export function AdminComplaintsTab() {
   const [complaints, setComplaints] = useState<Complaint[]>(initialComplaints);
   const [statusFilter, setStatusFilter] = useState<"all" | ComplaintStatus>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState<"newest" | "oldest" | string>("newest");
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [processing, setProcessing] = useState(false);
   const [actionReason, setActionReason] = useState("");
@@ -225,11 +227,23 @@ export function AdminComplaintsTab() {
   };
 
   // Filtered list
-  const filtered = complaints.filter((c) => {
-    if (statusFilter !== "all" && c.status !== statusFilter) return false;
-    if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
-    return true;
-  });
+  const filtered = complaints
+    .filter((c) => {
+      if (statusFilter !== "all" && c.status !== statusFilter) return false;
+      if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
+      // Date-specific filter
+      if (dateFilter !== "newest" && dateFilter !== "oldest") {
+        if (c.submittedDate !== dateFilter) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (dateFilter === "oldest") return a.submittedDate.localeCompare(b.submittedDate);
+      return b.submittedDate.localeCompare(a.submittedDate);
+    });
+
+  // Unique dates for the date filter
+  const uniqueDates = [...new Set(complaints.map((c) => c.submittedDate))].sort((a, b) => b.localeCompare(a));
 
   // Actions
   const handleAction = (id: string, action: "investigate" | "resolve" | "dismiss", reason?: string) => {
@@ -370,59 +384,49 @@ export function AdminComplaintsTab() {
         </div>
       </div>
 
-      {/* ─── Status Filters ─── */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
-        {[
-          { key: "all", label: `All (${stats.total})` },
-          { key: "pending", label: `Pending (${stats.pending})` },
-          { key: "investigating", label: `Active (${stats.investigating})` },
-          { key: "resolved", label: `Resolved (${stats.resolved})` },
-          { key: "penalised", label: `Penalised (${stats.penalised})` },
-          { key: "dismissed", label: `Dismissed (${stats.dismissed})` },
-        ].map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setStatusFilter(f.key as any)}
-            className={`h-9 px-3 rounded-full text-xs font-medium whitespace-nowrap shrink-0 touch-manipulation transition-colors border ${
-              statusFilter === f.key
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {/* ─── Filter Dropdowns ─── */}
+      <div className="flex gap-2">
+        {/* Status filter */}
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+          <SelectTrigger className="h-10 flex-1 text-sm touch-manipulation">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent className="z-[100]">
+            <SelectItem value="all">All ({stats.total})</SelectItem>
+            <SelectItem value="pending">Pending ({stats.pending})</SelectItem>
+            <SelectItem value="investigating">Active ({stats.investigating})</SelectItem>
+            <SelectItem value="resolved">Resolved ({stats.resolved})</SelectItem>
+            <SelectItem value="penalised">Penalised ({stats.penalised})</SelectItem>
+            <SelectItem value="dismissed">Dismissed ({stats.dismissed})</SelectItem>
+          </SelectContent>
+        </Select>
 
-      {/* ─── Category Filters ─── */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ WebkitOverflowScrolling: "touch" }}>
-        <button
-          onClick={() => setCategoryFilter("all")}
-          className={`h-8 px-3 rounded-full text-xs font-medium whitespace-nowrap shrink-0 touch-manipulation transition-colors border ${
-            categoryFilter === "all"
-              ? "bg-primary/10 text-primary border-primary/30"
-              : "bg-muted/30 text-muted-foreground border-border/50"
-          }`}
-        >
-          All Types
-        </button>
-        {reportCategories.map((cat) => {
-          const Icon = cat.icon;
-          return (
-            <button
-              key={cat.value}
-              onClick={() => setCategoryFilter(cat.value)}
-              className={`h-8 px-2.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 touch-manipulation transition-colors border flex items-center gap-1 ${
-                categoryFilter === cat.value
-                  ? `${cat.bg} ${cat.color} ${cat.border}`
-                  : "bg-muted/30 text-muted-foreground border-border/50"
-              }`}
-            >
-              <Icon className="h-3 w-3 shrink-0" />
-              {cat.label.split(" / ")[0]}
-            </button>
-          );
-        })}
+        {/* Category filter */}
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="h-10 flex-1 text-sm touch-manipulation">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent className="z-[100]">
+            <SelectItem value="all">All Types</SelectItem>
+            {reportCategories.map((cat) => (
+              <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Date filter */}
+        <Select value={dateFilter} onValueChange={(v) => setDateFilter(v)}>
+          <SelectTrigger className="h-10 flex-1 text-sm touch-manipulation">
+            <SelectValue placeholder="Date" />
+          </SelectTrigger>
+          <SelectContent className="z-[100]">
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            {uniqueDates.map((d) => (
+              <SelectItem key={d} value={d}>{d}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* ─── Results Count ─── */}
