@@ -10,6 +10,7 @@ import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState } from "react";
+import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId } from "@/hooks/useWindowData";
 
 export const GreetingSection = () => {
