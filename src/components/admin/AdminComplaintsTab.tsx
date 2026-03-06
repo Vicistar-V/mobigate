@@ -10,6 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import {
   ShieldAlert,
   UserX,
@@ -207,6 +208,8 @@ export function AdminComplaintsTab() {
   const [penaltyReason, setPenaltyReason] = useState("");
   const [penaltyProcessing, setPenaltyProcessing] = useState(false);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
+  const [showDeactivationAuth, setShowDeactivationAuth] = useState(false);
+  const [pendingDeactivationComplaintId, setPendingDeactivationComplaintId] = useState<string | null>(null);
 
   const getCat = (val: string) => reportCategories.find((c) => c.value === val);
 
@@ -276,6 +279,17 @@ export function AdminComplaintsTab() {
     if (selectedPenalty === "deactivate" && !confirmDeactivate) return;
     if (!penaltyReason.trim() && selectedPenalty !== "warning") return;
 
+    // Deactivation requires 4-admin multi-sig authorization
+    if (selectedPenalty === "deactivate") {
+      setPendingDeactivationComplaintId(complaintId);
+      setShowDeactivationAuth(true);
+      return;
+    }
+
+    executePenalty(complaintId);
+  };
+
+  const executePenalty = (complaintId: string) => {
     setPenaltyProcessing(true);
     setTimeout(() => {
       const durationLabel = penaltyDuration ? penaltyDurations.find(d => d.value === penaltyDuration)?.label : "";
@@ -309,6 +323,13 @@ export function AdminComplaintsTab() {
         description: penaltyLabel,
       });
     }, 2000);
+  };
+
+  const handleDeactivationAuthorized = () => {
+    if (pendingDeactivationComplaintId) {
+      executePenalty(pendingDeactivationComplaintId);
+      setPendingDeactivationComplaintId(null);
+    }
   };
 
   const pendingCount = stats.pending + stats.investigating;
@@ -832,6 +853,44 @@ export function AdminComplaintsTab() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* ─── 4-Admin Authorization for Account Deactivation ─── */}
+      <ModuleAuthorizationDrawer
+        open={showDeactivationAuth}
+        onOpenChange={(open) => {
+          setShowDeactivationAuth(open);
+          if (!open) setPendingDeactivationComplaintId(null);
+        }}
+        module="account_deactivation"
+        actionTitle="Deactivate Account Permanently"
+        actionDescription="4-admin authorization required — 3 of 4 admins must approve this irreversible action"
+        actionDetails={
+          pendingDeactivationComplaintId && selectedComplaint ? (
+            <div className="space-y-2 p-3 rounded-lg bg-red-500/10 border border-red-300">
+              <div className="flex items-center gap-2">
+                <Trash2 className="h-4 w-4 text-red-700 shrink-0" />
+                <p className="text-sm font-bold text-red-800">Permanent Account Deactivation</p>
+              </div>
+              <p className="text-xs text-red-700">
+                Merchant: <span className="font-semibold">{selectedComplaint.merchantName}</span>
+              </p>
+              <p className="text-xs text-red-700">
+                Case: <span className="font-mono">{selectedComplaint.refNumber}</span>
+              </p>
+              {penaltyReason && (
+                <p className="text-xs text-red-600 mt-1">
+                  Reason: {penaltyReason}
+                </p>
+              )}
+              <div className="mt-2 p-2 rounded bg-red-600/10 border border-red-400">
+                <p className="text-xs font-bold text-red-800">⚠️ This action is PERMANENT and IRREVERSIBLE</p>
+                <p className="text-xs text-red-700 mt-1">The merchant's account and all associated data will be permanently deactivated.</p>
+              </div>
+            </div>
+          ) : undefined
+        }
+        onAuthorized={handleDeactivationAuthorized}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Shield, Users, Wallet, Vote, FileText, Crown, Settings, Lock, LucideIcon } from "lucide-react";
+import { Shield, Users, Wallet, Vote, FileText, Crown, Settings, Lock, LucideIcon, Trash2 } from "lucide-react";
 import { AuthorizationModule } from "@/types/adminAuthorization";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -19,6 +19,7 @@ const MODULE_ICON_COLORS: Record<AuthorizationModule, string> = {
   content: "text-purple-600",
   leadership: "text-indigo-600",
   settings: "text-gray-600",
+  account_deactivation: "text-red-700",
 };
 
 // Pre-configured action templates for common administrative actions
@@ -322,6 +323,15 @@ export const MODULE_ACTION_CONFIGS: Record<AuthorizationModule, Record<string, A
       iconColorClass: "text-red-600",
     },
   },
+  account_deactivation: {
+    deactivate_account: {
+      title: "Deactivate Account Permanently",
+      description: "4-admin authorization required — permanent and irreversible account deactivation",
+      icon: <Trash2 className="h-5 w-5 text-red-700" />,
+      iconComponent: Trash2,
+      iconColorClass: "text-red-700",
+    },
+  },
 };
 
 // Helper to get action config
@@ -346,6 +356,7 @@ export function getModuleBackgroundClass(module: AuthorizationModule): string {
     content: "bg-purple-500/10",
     leadership: "bg-indigo-500/10",
     settings: "bg-gray-500/10",
+    account_deactivation: "bg-red-500/10",
   };
   return bgMap[module];
 }
