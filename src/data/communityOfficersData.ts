@@ -139,6 +139,7 @@ export function getOfficersForModule(
     content: ["secretary", "publicity_secretary", "president", "assistant_secretary"],
     leadership: ["president", "secretary", "publicity_secretary", "director_of_socials", "legal_adviser"],
     settings: ["president", "secretary", "legal_adviser", "vice_president", "assistant_secretary"],
+    account_deactivation: ["president", "secretary", "legal_adviser", "treasurer", "vice_president", "assistant_secretary"],
   };
 
   const roles = rolesByModule[module] || [];

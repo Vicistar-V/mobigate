@@ -17,7 +17,8 @@ export type AuthorizationModule =
   | "elections"   // Election management
   | "content"     // Content publishing
   | "leadership"  // Leadership changes
-  | "settings";   // Community settings
+  | "settings"    // Community settings
+  | "account_deactivation"; // Permanent account deactivation (4-admin, 3 required)
 
 // Officer availability status
 export type OfficerAvailability = "available" | "unavailable" | "acting";
@@ -198,6 +199,20 @@ export const MODULE_AUTHORIZATION_RULES: Record<AuthorizationModule, ModuleAutho
     requiredSignatories: 3,
     requiredRoles: ["president", "secretary", "legal_adviser"],
     alternativeRoles: [],
+    auxiliaryRoles: ["vice_president", "assistant_secretary"],
+    canProceedWithoutPresident: false,
+    requiresLegalAdviserIfActing: true,
+  },
+
+  // ACCOUNT DEACTIVATION: 4 admins required, 3 must authorize
+  // President + Secretary + Legal Adviser + Treasurer (any 3 of 4)
+  account_deactivation: {
+    module: "account_deactivation",
+    displayName: "Account Deactivation",
+    description: "Permanent and irreversible account deactivation — requires 4-admin authorization (3 of 4 must approve)",
+    requiredSignatories: 3,
+    requiredRoles: [],
+    alternativeRoles: [["president", "secretary", "legal_adviser", "treasurer"]],
     auxiliaryRoles: ["vice_president", "assistant_secretary"],
     canProceedWithoutPresident: false,
     requiresLegalAdviserIfActing: true,
