@@ -209,9 +209,9 @@ export const platformVoucherDiscountSettings: PlatformVoucherDiscountSettings = 
   incrementRate: 0.5,
   incrementRateMin: 0.25,
   incrementRateMax: 2,
-  maxDiscount: 25,
+  maxDiscount: 10,
   maxDiscountMin: 5,
-  maxDiscountMax: 20,
+  maxDiscountMax: 10,
   lastUpdatedAt: new Date(),
   lastUpdatedBy: "Mobigate Admin",
 };
