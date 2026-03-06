@@ -84,7 +84,10 @@ export const GreetingSection = () => {
           </Avatar>
           <div className="flex-1 space-y-2">
             <p className="text-lg text-destructive font-semibold">{profile.greeting}</p>
-            <h2 className="text-3xl font-bold">{profile.fullName}</h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-3xl font-bold">{profile.fullName}</h2>
+              <UserTagBadges userId={currentUserId} />
+            </div>
             <p className="text-base text-muted-foreground">{profile.timestamp}</p>
           </div>
         </div>
