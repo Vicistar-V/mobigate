@@ -279,6 +279,17 @@ export function AdminComplaintsTab() {
     if (selectedPenalty === "deactivate" && !confirmDeactivate) return;
     if (!penaltyReason.trim() && selectedPenalty !== "warning") return;
 
+    // Deactivation requires 4-admin multi-sig authorization
+    if (selectedPenalty === "deactivate") {
+      setPendingDeactivationComplaintId(complaintId);
+      setShowDeactivationAuth(true);
+      return;
+    }
+
+    executePenalty(complaintId);
+  };
+
+  const executePenalty = (complaintId: string) => {
     setPenaltyProcessing(true);
     setTimeout(() => {
       const durationLabel = penaltyDuration ? penaltyDurations.find(d => d.value === penaltyDuration)?.label : "";
