@@ -325,6 +325,13 @@ export function AdminComplaintsTab() {
     }, 2000);
   };
 
+  const handleDeactivationAuthorized = () => {
+    if (pendingDeactivationComplaintId) {
+      executePenalty(pendingDeactivationComplaintId);
+      setPendingDeactivationComplaintId(null);
+    }
+  };
+
   const pendingCount = stats.pending + stats.investigating;
 
   const resetPenaltyState = () => {
