@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { UserTagBadges } from "@/components/UserTagBadges";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -463,7 +464,10 @@ export function AdminComplaintsTab() {
                   </div>
 
                   {/* Row 2: Merchant name */}
-                  <p className="text-sm font-bold mb-1">vs. {complaint.merchantName}</p>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <p className="text-sm font-bold">vs. {complaint.merchantName}</p>
+                    <UserTagBadges userId={complaint.merchantId} showAdminControls />
+                  </div>
 
                   {/* Row 3: Description truncated */}
                   <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{complaint.description}</p>
@@ -533,7 +537,10 @@ export function AdminComplaintsTab() {
                     {/* Merchant */}
                     <div className="rounded-xl bg-muted/50 border border-border p-3">
                       <p className="text-xs text-muted-foreground mb-1">Reported Merchant</p>
-                      <p className="text-sm font-bold">{current.merchantName}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-bold">{current.merchantName}</p>
+                        <UserTagBadges userId={current.merchantId} showAdminControls />
+                      </div>
                     </div>
 
                     {/* Description */}

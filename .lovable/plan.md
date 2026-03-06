@@ -1,47 +1,42 @@
 
 
-# Plan: Implement "Penalised" and "Reported" Tags on User/Merchant Headers
+## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
 
-## What We're Building
+### What We're Building
 
-A tagging system that shows **"Penalised (12x)"** and **"Reported (10x)"** badges next to user/merchant names across the platform. These tags:
-- Show the total count of penalties or reports
-- Auto-hide if no new offences/reports in 12 months
-- Can be manually hidden by admin
-- Re-appear (including old hidden ones) if new reports/penalties occur
-- Are never permanently deleted
+A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
 
-## Technical Approach
+### Tab Layout
 
-### 1. Create a Tag Data System (`src/data/userTags.ts`)
-- Define a `UserTag` interface with fields: `userId`, `type` ("penalised" | "reported"), `count`, `entries[]` (each with date, description, hidden flag), `manuallyHidden`, `lastOffenceDate`
-- Implement helper functions:
-  - `getVisibleTags(userId)` — returns tags where `manuallyHidden` is false AND (`lastOffenceDate` is within 12 months OR there are recent entries)
-  - `hideTag(userId, type)` — sets `manuallyHidden = true`
-  - `addOffence(userId, type)` — increments count, unhides all previous entries, sets `manuallyHidden = false`
-- Provide mock data for several users/merchants
+```text
+[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
+```
 
-### 2. Create a Reusable `UserTagBadges` Component (`src/components/UserTagBadges.tsx`)
-- Mobile-first, inline badges that sit next to a user's name
-- "Penalised (12x)" in red, "Reported (10x)" in amber/orange
-- Compact pill-style badges using existing `Badge` component
-- Tapping a badge opens a bottom drawer showing full offence/report history with dates
-- Normal readable text size (text-xs minimum)
+The Complaints tab will show:
+1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
+2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
+3. **Complaint cards list** — Each card shows:
+   - Category badge + status badge (color-coded)
+   - Merchant name the complaint is against
+   - Truncated description
+   - Reporter info (or "Anonymous")
+   - Submission date + reference number
+   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
+4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
 
-### 3. Integrate Tags Into Key Locations
-- **GreetingCard.tsx** (line ~87): Add `<UserTagBadges userId={currentUserId} />` below the `fullName` heading
-- **AdminComplaintsTab.tsx**: Show tags next to `merchantName` in complaint cards and the detail drawer
-- **Profile pages**: Add tags next to user display names where they appear in headers
+### Files to Modify/Create
 
-### 4. Admin Tag Management
-- In the complaint detail drawer, add a "Hide Tag" button that lets admin manually hide a tag for a merchant
-- Show a subtle indicator when a tag is manually hidden (admin-only visibility)
+| File | Action |
+|------|--------|
+| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
+| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
 
-### Files to Create
-- `src/data/userTags.ts` — tag data model, mock data, helper functions
-- `src/components/UserTagBadges.tsx` — reusable tag badge component with history drawer
+### Technical Details
 
-### Files to Modify
-- `src/components/GreetingCard.tsx` — add tags next to user name
-- `src/components/admin/AdminComplaintsTab.tsx` — add tags next to merchant names in cards and detail drawer
+- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
+- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
+- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
+- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
+- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
+- All touch targets h-11 minimum, no font size reductions, mobile-only focus
 
