@@ -239,7 +239,12 @@ export function MerchantApplicationsAdmin() {
                     {app.type === "individual" ? <User className="h-4 w-4 text-primary" /> : <Building2 className="h-4 w-4 text-primary" />}
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">{app.applicantName}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); window.open(`/profile/${app.id}`, '_blank'); }}
+                      className="font-semibold text-sm text-primary underline underline-offset-2 touch-manipulation active:scale-[0.97] transition-transform text-left"
+                    >
+                      {app.applicantName}
+                    </button>
                     <p className="text-xs text-muted-foreground font-mono">{app.storeName} • {app.merchantCode}</p>
                   </div>
                 </div>
