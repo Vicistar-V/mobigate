@@ -408,12 +408,12 @@ export function AdminComplaintsTab() {
               >
                 <CardContent className="p-3">
                   {/* Row 1: Category + Status badges */}
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <Badge variant="outline" className={`text-xs h-6 px-2 ${cat?.badge || ""} flex items-center gap-1`}>
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <Badge variant="outline" className={`text-xs h-6 px-2 whitespace-nowrap ${cat?.badge || ""} flex items-center gap-1`}>
                       <CatIcon className="h-3 w-3 shrink-0" />
                       {cat?.label || "Other"}
                     </Badge>
-                    <Badge variant="outline" className={`text-xs h-6 px-2 ${st.bg} ${st.color} border flex items-center gap-1`}>
+                    <Badge variant="outline" className={`text-xs h-6 px-2 whitespace-nowrap ${st.bg} ${st.color} border flex items-center gap-1`}>
                       <StIcon className="h-3 w-3 shrink-0" />
                       {st.label}
                     </Badge>
