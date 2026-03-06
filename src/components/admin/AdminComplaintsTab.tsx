@@ -10,6 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import {
   ShieldAlert,
   UserX,
@@ -207,6 +208,8 @@ export function AdminComplaintsTab() {
   const [penaltyReason, setPenaltyReason] = useState("");
   const [penaltyProcessing, setPenaltyProcessing] = useState(false);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
+  const [showDeactivationAuth, setShowDeactivationAuth] = useState(false);
+  const [pendingDeactivationComplaintId, setPendingDeactivationComplaintId] = useState<string | null>(null);
 
   const getCat = (val: string) => reportCategories.find((c) => c.value === val);
 
