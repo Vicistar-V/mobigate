@@ -200,6 +200,7 @@ export function AdminComplaintsTab() {
   const [complaints, setComplaints] = useState<Complaint[]>(initialComplaints);
   const [statusFilter, setStatusFilter] = useState<"all" | ComplaintStatus>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState<"newest" | "oldest" | string>("newest");
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [processing, setProcessing] = useState(false);
   const [actionReason, setActionReason] = useState("");
