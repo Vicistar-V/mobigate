@@ -524,7 +524,7 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
                     }`}
                     onClick={() => handleStatusChange(confirmAction)}
                   >
-                    Confirm {confirmAction === "activate" ? "Activate" : confirmAction === "suspend" ? "Suspend" : "Ban"}
+                    Confirm {confirmAction === "activate" ? (merchantStatus === "banned" || initialStatus === "banned" ? "Reactivate" : "Activate") : confirmAction === "suspend" ? "Suspend" : "Ban"}
                   </Button>
                 </div>
               </div>
@@ -540,7 +540,7 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
                     onClick={() => setConfirmAction("activate")}
                   >
                     <ShieldCheck className="h-3.5 w-3.5 mr-1" />
-                    Activate
+                    {merchantStatus === "banned" ? "Reactivate" : "Activate"}
                   </Button>
                 )}
                 {merchantStatus !== "suspended" && (
