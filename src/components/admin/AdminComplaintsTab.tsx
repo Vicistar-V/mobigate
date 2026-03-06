@@ -167,12 +167,28 @@ const initialComplaints: Complaint[] = [
     submittedDate: "2026-03-03", lastUpdated: "2026-03-03",
     timeline: [{ date: "2026-03-03", action: "Report submitted", by: "Anonymous" }],
   },
+  {
+    id: "c8", refNumber: "RPT-2026-0008", merchantName: "NaijaDeals Hub", merchantId: "m8",
+    category: "scam-fraud", status: "penalised",
+    description: "Merchant collected payment for bulk vouchers but never delivered them. Multiple victims reported identical scam pattern over 3 weeks.",
+    reporterName: "Emeka Nwosu", reporterEmail: "emeka.n@email.com", isAnonymous: false,
+    submittedDate: "2026-02-10", lastUpdated: "2026-02-28",
+    resolutionNotes: "Merchant account suspended for 90 days. Official warning issued.",
+    resolutionDate: "2026-02-28",
+    timeline: [
+      { date: "2026-02-10", action: "Report submitted", by: "Emeka Nwosu" },
+      { date: "2026-02-12", action: "Investigation started", by: "Admin Chidi" },
+      { date: "2026-02-25", action: "Investigation concluded — fraud confirmed", by: "Admin Chidi" },
+      { date: "2026-02-28", action: "Penalty applied — Merchant suspended for 90 Days", by: "You (Admin)" },
+    ],
+  },
 ];
 
 const statusConfig: Record<ComplaintStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   pending: { label: "Pending", color: "text-amber-700", bg: "bg-amber-500/15 border-amber-300", icon: Clock },
   investigating: { label: "Investigating", color: "text-blue-700", bg: "bg-blue-500/15 border-blue-300", icon: Search },
   resolved: { label: "Resolved", color: "text-emerald-700", bg: "bg-emerald-500/15 border-emerald-300", icon: CheckCircle },
+  penalised: { label: "Penalised", color: "text-red-700", bg: "bg-red-500/15 border-red-300", icon: Gavel },
   dismissed: { label: "Dismissed", color: "text-slate-600", bg: "bg-slate-500/15 border-slate-300", icon: XCircle },
 };
 
@@ -200,6 +216,7 @@ export function AdminComplaintsTab() {
     pending: complaints.filter((c) => c.status === "pending").length,
     investigating: complaints.filter((c) => c.status === "investigating").length,
     resolved: complaints.filter((c) => c.status === "resolved").length,
+    penalised: complaints.filter((c) => c.status === "penalised").length,
     dismissed: complaints.filter((c) => c.status === "dismissed").length,
   };
 
@@ -308,22 +325,26 @@ export function AdminComplaintsTab() {
   return (
     <div className="space-y-3 pb-6">
       {/* ─── Summary Stats ─── */}
-      <div className="grid grid-cols-4 gap-2">
-        <div className="rounded-xl bg-muted/50 border border-border p-2.5 text-center">
+      <div className="grid grid-cols-5 gap-1.5">
+        <div className="rounded-xl bg-muted/50 border border-border p-2 text-center">
           <p className="text-lg font-bold">{stats.total}</p>
-          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-[11px] text-muted-foreground">Total</p>
         </div>
-        <div className="rounded-xl bg-amber-500/10 border border-amber-300/50 p-2.5 text-center">
+        <div className="rounded-xl bg-amber-500/10 border border-amber-300/50 p-2 text-center">
           <p className="text-lg font-bold text-amber-700">{stats.pending}</p>
-          <p className="text-xs text-amber-600">Pending</p>
+          <p className="text-[11px] text-amber-600">Pending</p>
         </div>
-        <div className="rounded-xl bg-blue-500/10 border border-blue-300/50 p-2.5 text-center">
+        <div className="rounded-xl bg-blue-500/10 border border-blue-300/50 p-2 text-center">
           <p className="text-lg font-bold text-blue-700">{stats.investigating}</p>
-          <p className="text-xs text-blue-600">Active</p>
+          <p className="text-[11px] text-blue-600">Active</p>
         </div>
-        <div className="rounded-xl bg-emerald-500/10 border border-emerald-300/50 p-2.5 text-center">
+        <div className="rounded-xl bg-emerald-500/10 border border-emerald-300/50 p-2 text-center">
           <p className="text-lg font-bold text-emerald-700">{stats.resolved}</p>
-          <p className="text-xs text-emerald-600">Resolved</p>
+          <p className="text-[11px] text-emerald-600">Resolved</p>
+        </div>
+        <div className="rounded-xl bg-red-500/10 border border-red-300/50 p-2 text-center">
+          <p className="text-lg font-bold text-red-700">{stats.penalised}</p>
+          <p className="text-[11px] text-red-600">Penalised</p>
         </div>
       </div>
 
@@ -334,6 +355,7 @@ export function AdminComplaintsTab() {
           { key: "pending", label: `Pending (${stats.pending})` },
           { key: "investigating", label: `Active (${stats.investigating})` },
           { key: "resolved", label: `Resolved (${stats.resolved})` },
+          { key: "penalised", label: `Penalised (${stats.penalised})` },
           { key: "dismissed", label: `Dismissed (${stats.dismissed})` },
         ].map((f) => (
           <button
