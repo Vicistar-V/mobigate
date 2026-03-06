@@ -227,11 +227,23 @@ export function AdminComplaintsTab() {
   };
 
   // Filtered list
-  const filtered = complaints.filter((c) => {
-    if (statusFilter !== "all" && c.status !== statusFilter) return false;
-    if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
-    return true;
-  });
+  const filtered = complaints
+    .filter((c) => {
+      if (statusFilter !== "all" && c.status !== statusFilter) return false;
+      if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
+      // Date-specific filter
+      if (dateFilter !== "newest" && dateFilter !== "oldest") {
+        if (c.submittedDate !== dateFilter) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (dateFilter === "oldest") return a.submittedDate.localeCompare(b.submittedDate);
+      return b.submittedDate.localeCompare(a.submittedDate);
+    });
+
+  // Unique dates for the date filter
+  const uniqueDates = [...new Set(complaints.map((c) => c.submittedDate))].sort((a, b) => b.localeCompare(a));
 
   // Actions
   const handleAction = (id: string, action: "investigate" | "resolve" | "dismiss", reason?: string) => {
