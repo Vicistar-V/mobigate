@@ -556,10 +556,14 @@ export function AdminComplaintsTab() {
                         <p className="text-sm text-muted-foreground italic">Anonymous report</p>
                       ) : (
                         <>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className="text-sm">{current.reporterName}</span>
-                          </div>
+                          <button
+                            onClick={() => window.open(`/profile/${current.merchantId}`, '_blank')}
+                            className="flex items-center gap-2 touch-manipulation active:scale-[0.97] transition-transform w-full text-left rounded-lg p-2 -m-2 hover:bg-muted/50"
+                          >
+                            <User className="h-4 w-4 text-primary shrink-0" />
+                            <span className="text-sm font-medium text-primary underline underline-offset-2">{current.reporterName}</span>
+                            <ChevronRight className="h-4 w-4 text-primary shrink-0 ml-auto" />
+                          </button>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">{current.reporterEmail}</span>
                           </div>
