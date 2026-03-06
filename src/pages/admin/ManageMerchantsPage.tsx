@@ -630,6 +630,14 @@ function MerchantDetailDrawer({ merchant, onClose }: { merchant: LocationMerchan
             </p>
           )}
           <Button
+            variant="outline"
+            className="w-full h-12 mt-2 touch-manipulation border-primary/30 text-primary hover:bg-primary/5 active:scale-[0.97]"
+            onClick={() => { onClose(); navigate(`/mobigate-admin/merchants/${merchant.id}/retailers`); }}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            View Merchant's Retailers (85)
+          </Button>
+          <Button
             className="w-full h-12 mt-2 touch-manipulation active:scale-[0.97]"
             onClick={() => { onClose(); navigate("/merchant-home/m1"); }}
           >
