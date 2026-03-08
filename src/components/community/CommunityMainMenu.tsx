@@ -1187,9 +1187,9 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4 h-9 transition-colors duration-200"
-                  onClick={() => handleMenuClick("Subscribe for Voucher Bundles")}
+                  onClick={() => handleMenuClick("Buy Vouchers")}
                 >
-                  Subscribe for Voucher Bundles
+                  Buy Vouchers
                 </Button>
               </AccordionContent>
             </AccordionItem>
