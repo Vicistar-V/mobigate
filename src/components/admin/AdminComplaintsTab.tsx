@@ -767,31 +767,50 @@ export function AdminComplaintsTab() {
                           })}
                         </div>
 
-                        {/* Duration selector for suspend/ban */}
-                        {selectedPenalty && penaltyConfig[selectedPenalty].requiresDuration && (
-                          <div className="space-y-2">
-                            <p className="text-xs font-medium text-muted-foreground">
-                              {selectedPenalty === "suspend" ? "Suspension" : "Ban"} Duration
-                            </p>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              {penaltyDurations.map((d) => (
-                                <button
-                                  key={d.value}
-                                  onClick={() => setPenaltyDuration(d.value)}
-                                  className={`h-10 px-3 rounded-lg text-sm font-medium touch-manipulation transition-colors border ${
-                                    penaltyDuration === d.value
-                                      ? selectedPenalty === "suspend"
-                                        ? "bg-orange-500/15 text-orange-700 border-orange-400"
-                                        : "bg-red-500/15 text-red-700 border-red-400"
-                                      : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
-                                  }`}
-                                >
-                                  {d.label}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                         {selectedPenalty && penaltyConfig[selectedPenalty].requiresDuration && (() => {
+                           const prevCount = selectedPenalty === "suspend"
+                             ? getSuspensionCount(current.merchantId)
+                             : getBanCount(current.merchantId);
+                           const recommendedDuration = getDefaultDurationForNth(prevCount + 1);
+                           const ordinalLabel = prevCount === 0 ? "1st" : prevCount === 1 ? "2nd" : prevCount === 2 ? "3rd" : `${prevCount + 1}th`;
+                           return (
+                             <div className="space-y-2">
+                               <div className="flex items-center justify-between">
+                                 <p className="text-xs font-medium text-muted-foreground">
+                                   {selectedPenalty === "suspend" ? "Suspension" : "Ban"} Duration
+                                 </p>
+                                 <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+                                   {ordinalLabel} {selectedPenalty === "suspend" ? "suspension" : "ban"}
+                                 </span>
+                               </div>
+                               <div className="grid grid-cols-2 gap-1.5">
+                                 {penaltyDurations.map((d) => {
+                                   const isRecommended = d.value === recommendedDuration;
+                                   return (
+                                     <button
+                                       key={d.value}
+                                       onClick={() => setPenaltyDuration(d.value)}
+                                       className={`relative h-10 px-3 rounded-lg text-sm font-medium touch-manipulation transition-colors border ${
+                                         penaltyDuration === d.value
+                                           ? selectedPenalty === "suspend"
+                                             ? "bg-orange-500/15 text-orange-700 border-orange-400"
+                                             : "bg-red-500/15 text-red-700 border-red-400"
+                                           : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
+                                       }`}
+                                     >
+                                       {d.label}
+                                       {isRecommended && (
+                                         <span className="absolute -top-2 right-1 text-[9px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full leading-none">
+                                           Default
+                                         </span>
+                                       )}
+                                     </button>
+                                   );
+                                 })}
+                               </div>
+                             </div>
+                           );
+                         })()}
 
                         {/* Reason for penalty */}
                         {selectedPenalty && selectedPenalty !== "warning" && (
