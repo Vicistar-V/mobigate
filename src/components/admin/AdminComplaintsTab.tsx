@@ -714,7 +714,20 @@ export function AdminComplaintsTab() {
                             return (
                               <button
                                 key={key}
-                                onClick={() => { setSelectedPenalty(key); setPenaltyDuration(""); setConfirmDeactivate(false); }}
+                                onClick={() => {
+                                  setSelectedPenalty(key);
+                                  setConfirmDeactivate(false);
+                                  // Auto-select duration based on penalty history
+                                  if (key === "suspend") {
+                                    const prevCount = getSuspensionCount(current.merchantId);
+                                    setPenaltyDuration(getDefaultDurationForNth(prevCount + 1));
+                                  } else if (key === "ban") {
+                                    const prevCount = getBanCount(current.merchantId);
+                                    setPenaltyDuration(getDefaultDurationForNth(prevCount + 1));
+                                  } else {
+                                    setPenaltyDuration("");
+                                  }
+                                }}
                                 className={`w-full text-left p-3 rounded-xl border-2 transition-all touch-manipulation ${
                                   isSelected
                                     ? `${config.bg} ${config.border} ring-1 ring-offset-1`
