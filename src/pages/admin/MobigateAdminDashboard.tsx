@@ -158,6 +158,10 @@ export default function MobigateAdminDashboard() {
                 <Store className="h-4 w-4 mr-1" />
                 Merchants
               </TabsTrigger>
+              <TabsTrigger value="communities" className="text-xs py-2 px-3" onClick={() => navigate("/mobigate-admin/communities")}>
+                <Building2 className="h-4 w-4 mr-1" />
+                Communities
+              </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2 px-3">
                 <Settings className="h-4 w-4 mr-1" />
                 Settings
