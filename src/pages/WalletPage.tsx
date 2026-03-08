@@ -153,6 +153,7 @@ export default function WalletPage() {
   const [voucherDenomination, setVoucherDenomination] = useState(0);
   const [otherMethod, setOtherMethod] = useState<"ussd" | "qr" | "mobile-money" | null>(null);
   const [ussdCode, setUssdCode] = useState("");
+  const [ussdBank, setUssdBank] = useState("");
 
   // Transaction state
   const [filter, setFilter] = useState<FilterType>("all");
@@ -306,7 +307,7 @@ export default function WalletPage() {
     setCardNumber(""); setCardExpiry(""); setCardCvv(""); setCardName(""); setShowCvv(false);
     setBankName(""); setBankAccountNumber(""); setBankAccountName(""); setBankVerified(false); setBankVerifying(false);
     setVoucherPin(""); setVoucherValidating(false); setVoucherValid(false); setVoucherDenomination(0);
-    setOtherMethod(null); setUssdCode("");
+    setOtherMethod(null); setUssdCode(""); setUssdBank("");
     setFundDrawerOpen(false);
   };
 
@@ -954,7 +955,8 @@ export default function WalletPage() {
                         key={method.id}
                         onClick={() => {
                           setOtherMethod(method.id);
-                          if (method.id === "ussd") setUssdCode("*737*2*" + fundAmount + "#");
+                          setUssdBank("");
+                          setUssdCode("");
                         }}
                         className={cn(
                           "w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98]",
@@ -971,21 +973,75 @@ export default function WalletPage() {
                     ))}
                   </div>
 
-                  {otherMethod === "ussd" && (
-                    <div className="bg-muted/30 rounded-xl p-4 text-center space-y-2">
-                      <p className="text-xs text-muted-foreground">Dial this code on your phone</p>
-                      <div className="flex items-center justify-center gap-2">
-                        <p className="text-lg font-mono font-black text-foreground">{ussdCode}</p>
-                        <button
-                          onClick={() => { navigator.clipboard?.writeText(ussdCode); toast({ title: "Copied!", description: "USSD code copied to clipboard" }); }}
-                          className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center touch-manipulation"
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                        </button>
+                  {otherMethod === "ussd" && (() => {
+                    const USSD_BANKS = [
+                      { name: "GTBank", code: "*737*2*{amount}#" },
+                      { name: "Access Bank", code: "*901*1*{amount}#" },
+                      { name: "First Bank", code: "*894*{amount}#" },
+                      { name: "UBA", code: "*919*1*{amount}#" },
+                      { name: "Zenith Bank", code: "*966*{amount}#" },
+                      { name: "Stanbic IBTC", code: "*909*1*{amount}#" },
+                      { name: "Sterling Bank", code: "*822*1*{amount}#" },
+                      { name: "Unity Bank", code: "*7799*1*{amount}#" },
+                      { name: "Fidelity Bank", code: "*770*1*{amount}#" },
+                      { name: "Polaris Bank", code: "*833*1*{amount}#" },
+                      { name: "Wema Bank", code: "*945*1*{amount}#" },
+                      { name: "Keystone Bank", code: "*7111*1*{amount}#" },
+                      { name: "Union Bank", code: "*826*1*{amount}#" },
+                      { name: "Ecobank", code: "*326*1*{amount}#" },
+                      { name: "FCMB", code: "*329*1*{amount}#" },
+                      { name: "Heritage Bank", code: "*745*1*{amount}#" },
+                    ];
+                    return (
+                      <div className="space-y-3">
+                        {/* Bank selector */}
+                        <div className="space-y-1.5">
+                          <p className="text-xs font-medium text-muted-foreground">Select Your Bank</p>
+                          <Select
+                            value={ussdBank}
+                            onValueChange={(val) => {
+                              setUssdBank(val);
+                              const bank = USSD_BANKS.find(b => b.name === val);
+                              if (bank) {
+                                setUssdCode(bank.code.replace("{amount}", String(fundAmount)));
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="h-11 rounded-xl bg-card border-border/50 text-sm">
+                              <SelectValue placeholder="Choose your bank..." />
+                            </SelectTrigger>
+                            <SelectContent className="z-[200]">
+                              {USSD_BANKS.map(bank => (
+                                <SelectItem key={bank.name} value={bank.name}>
+                                  {bank.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* USSD code display — only shows after bank selection */}
+                        {ussdBank && ussdCode && (
+                          <div className="bg-muted/30 rounded-xl p-4 text-center space-y-2 animate-fade-in">
+                            <p className="text-xs text-muted-foreground">Dial this code on your phone</p>
+                            <div className="flex items-center justify-center gap-2">
+                              <p className="text-lg font-mono font-black text-foreground">{ussdCode}</p>
+                              <button
+                                onClick={() => { navigator.clipboard?.writeText(ussdCode); toast({ title: "Copied!", description: "USSD code copied to clipboard" }); }}
+                                className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center touch-manipulation"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                              {ussdBank} · ₦{formatNumberFull(fundAmount)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Complete the transfer, then tap confirm below</p>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground">Complete the transfer, then tap confirm below</p>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {otherMethod === "qr" && (
                     <div className="bg-muted/30 rounded-xl p-6 text-center space-y-3">
