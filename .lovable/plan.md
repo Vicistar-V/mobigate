@@ -1,42 +1,32 @@
 
 
-## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
+## Plan: Fix Deactivation Authorization Drawer Stacking Issue
 
-### What We're Building
+### Problem
+When admin selects "Deactivate Permanently" and clicks "Apply Penalty" inside the complaint detail drawer, a **second drawer** (`ModuleAuthorizationDrawer`) opens on top of the first. This causes visual corruption — the authorization content renders over a black/broken background because two drawers are stacked (both using vaul's Drawer component which manipulates body/overlay).
 
-A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
+### Root Cause
+Two `Drawer` components are open simultaneously:
+1. **Complaint Detail Drawer** (lines 525-876) — remains open
+2. **ModuleAuthorizationDrawer** (lines 878-914) — opens on top
 
-### Tab Layout
+Vaul drawers don't nest cleanly on mobile, causing the black overlay and broken rendering.
 
-```text
-[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
-```
+### Solution: Inline the Authorization Panel
+Instead of opening a second drawer, **replace the complaint drawer's content** with the authorization panel when deactivation is triggered. This keeps everything inside a single drawer.
 
-The Complaints tab will show:
-1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
-2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
-3. **Complaint cards list** — Each card shows:
-   - Category badge + status badge (color-coded)
-   - Merchant name the complaint is against
-   - Truncated description
-   - Reporter info (or "Anonymous")
-   - Submission date + reference number
-   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
-4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
+### Files to Modify
 
-### Files to Modify/Create
-
-| File | Action |
+| File | Change |
 |------|--------|
-| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
-| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
+| `src/components/admin/AdminComplaintsTab.tsx` | Replace `ModuleAuthorizationDrawer` usage with inline `ModuleAuthorizationPanel` rendered inside the existing complaint drawer when `showDeactivationAuth` is true |
 
-### Technical Details
+### Technical Approach
 
-- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
-- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
-- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
-- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
-- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
-- All touch targets h-11 minimum, no font size reductions, mobile-only focus
+1. **Import `ModuleAuthorizationPanel`** directly (instead of the Drawer wrapper)
+2. **When `showDeactivationAuth` is true**, the complaint drawer renders the `ModuleAuthorizationPanel` instead of the complaint details + penalty form
+3. **When auth completes or is cancelled**, switch back to the complaint view
+4. **Remove the separate `ModuleAuthorizationDrawer`** component usage at the bottom
+
+This is a single-file change — swap the drawer-within-a-drawer pattern for a view-switching pattern inside one drawer.
 
