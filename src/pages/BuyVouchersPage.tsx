@@ -560,53 +560,33 @@ export default function BuyVouchersPage() {
     return (
       <div className="bg-background pb-6">
         <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
-          <div className="px-4 py-3 flex items-center gap-3">
-            <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
-              <ArrowLeft className="h-5 w-5 text-foreground" />
+          <div className="px-4 py-2 flex items-center gap-3">
+            <button onClick={handleBack} className="h-8 w-8 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
+              <ArrowLeft className="h-4 w-4 text-foreground" />
             </button>
-            <div className="flex-1">
-              <h1 className="text-base font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
-              <p className="text-xs text-muted-foreground">{merchantParam ? "Select a retail merchant" : "Select a merchant"}</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sm font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
+              <p className="text-[11px] text-muted-foreground">{merchantParam ? "Select a retail merchant" : "Select a merchant"}</p>
+            </div>
+            {/* Inline compact order summary */}
+            <div className="shrink-0 text-right bg-primary/10 rounded-lg px-2.5 py-1.5 border border-primary/20">
+              <p className="text-[10px] text-muted-foreground leading-tight">Order · {totalItems} voucher{totalItems !== 1 ? "s" : ""}</p>
+              <p className="text-sm font-bold text-foreground leading-tight">M{formatNum(totalMobi)}</p>
             </div>
           </div>
-          <div className="px-4 pb-3">
-            <div className="rounded-xl bg-primary/10 border border-primary/20 p-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground">Your Mobi Order</p>
-                  <p className="text-xl font-bold text-foreground">M{formatNum(totalMobi)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">{totalItems} voucher{totalItems !== 1 ? "s" : ""}</p>
-                  <p className="text-sm font-semibold text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
-                </div>
-              </div>
-              {/* Discount eligibility breakdown */}
-              {(() => {
-                const eligibleItems = cartItems.filter(i => i.quantity >= 10);
-                const totalCartItems = cartItems.length;
-                const meetsMinOrder = totalMobi >= MIN_DISCOUNT_ORDER_VALUE;
-                if (eligibleItems.length === 0) {
-                  return (
-                    <p className="text-xs text-amber-600 mt-1.5 pt-1.5 border-t border-primary/10">
-                      No items qualify for Bulk Discount yet (min 10 per denomination)
-                    </p>
-                  );
-                }
-                if (!meetsMinOrder) {
-                  return (
-                    <p className="text-xs text-amber-600 mt-1.5 pt-1.5 border-t border-primary/10">
-                      Total order must be ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} for discount (currently M{formatNum(totalMobi)})
-                    </p>
-                  );
-                }
-                return (
-                  <p className="text-xs text-emerald-600 font-medium mt-1.5 pt-1.5 border-t border-primary/10">
-                    ✓ {eligibleItems.length} of {totalCartItems} item{totalCartItems !== 1 ? "s" : ""} qualify for discount
-                  </p>
-                );
-              })()}
-            </div>
+          {/* Discount eligibility one-liner */}
+          <div className="px-4 pb-1.5">
+            {(() => {
+              const eligibleItems = cartItems.filter(i => i.quantity >= 10);
+              const meetsMinOrder = totalMobi >= MIN_DISCOUNT_ORDER_VALUE;
+              if (eligibleItems.length === 0) {
+                return <p className="text-[11px] text-amber-600">No items qualify for Bulk Discount yet (min 10 per denomination)</p>;
+              }
+              if (!meetsMinOrder) {
+                return <p className="text-[11px] text-amber-600">Min M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} for discount (currently M{formatNum(totalMobi)})</p>;
+              }
+              return <p className="text-[11px] text-emerald-600 font-medium">✓ {eligibleItems.length}/{cartItems.length} items qualify for discount</p>;
+            })()}
           </div>
           {/* Filter row */}
           <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
