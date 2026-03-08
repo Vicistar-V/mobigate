@@ -922,43 +922,6 @@ export function AdminComplaintsTab() {
         </DrawerContent>
       </Drawer>
 
-      {/* ─── 4-Admin Authorization for Account Deactivation ─── */}
-      <ModuleAuthorizationDrawer
-        open={showDeactivationAuth}
-        onOpenChange={(open) => {
-          setShowDeactivationAuth(open);
-          if (!open) setPendingDeactivationComplaintId(null);
-        }}
-        module="account_deactivation"
-        actionTitle="Deactivate Account Permanently"
-        actionDescription="4-admin authorization required — 3 of 4 admins must approve this irreversible action"
-        actionDetails={
-          pendingDeactivationComplaintId && selectedComplaint ? (
-            <div className="space-y-2 p-3 rounded-lg bg-red-500/10 border border-red-300">
-              <div className="flex items-center gap-2">
-                <Trash2 className="h-4 w-4 text-red-700 shrink-0" />
-                <p className="text-sm font-bold text-red-800">Permanent Account Deactivation</p>
-              </div>
-              <p className="text-xs text-red-700">
-                Merchant: <span className="font-semibold">{selectedComplaint.merchantName}</span>
-              </p>
-              <p className="text-xs text-red-700">
-                Case: <span className="font-mono">{selectedComplaint.refNumber}</span>
-              </p>
-              {penaltyReason && (
-                <p className="text-xs text-red-600 mt-1">
-                  Reason: {penaltyReason}
-                </p>
-              )}
-              <div className="mt-2 p-2 rounded bg-red-600/10 border border-red-400">
-                <p className="text-xs font-bold text-red-800">⚠️ This action is PERMANENT and IRREVERSIBLE</p>
-                <p className="text-xs text-red-700 mt-1">The merchant's account and all associated data will be permanently deactivated.</p>
-              </div>
-            </div>
-          ) : undefined
-        }
-        onAuthorized={handleDeactivationAuthorized}
-      />
     </div>
   );
 }
