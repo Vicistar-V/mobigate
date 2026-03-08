@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { UserTagBadges } from "@/components/UserTagBadges";
+import { getSuspensionCount, getBanCount, getDefaultDurationForNth, addOffence } from "@/data/userTags";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -307,13 +308,29 @@ export function AdminComplaintsTab() {
 
   const executePenalty = (complaintId: string) => {
     setPenaltyProcessing(true);
+    const complaint = complaints.find(c => c.id === complaintId);
     setTimeout(() => {
       const durationLabel = penaltyDuration ? penaltyDurations.find(d => d.value === penaltyDuration)?.label : "";
       const penaltyLabel =
         selectedPenalty === "warning" ? "Official warning sent" :
-        selectedPenalty === "suspend" ? `Merchant suspended for ${durationLabel}` :
+        selectedPenalty === "suspend" ? `Suspended for ${durationLabel}` :
         selectedPenalty === "ban" ? `Banned from Mobigate for ${durationLabel}` :
         "Account permanently deactivated";
+
+      // Record penalty in the tag system
+      if (complaint) {
+        const subType = selectedPenalty === "warning" ? "warning" as const :
+          selectedPenalty === "suspend" ? "suspended" as const :
+          selectedPenalty === "ban" ? "banned" as const : "deactivated" as const;
+        addOffence(
+          complaint.merchantId,
+          "penalised",
+          `${penaltyLabel}${penaltyReason ? ` — ${penaltyReason}` : ""}`,
+          "You (Admin)",
+          subType,
+          durationLabel || undefined
+        );
+      }
 
       setComplaints((prev) =>
         prev.map((c) => {
@@ -713,7 +730,20 @@ export function AdminComplaintsTab() {
                             return (
                               <button
                                 key={key}
-                                onClick={() => { setSelectedPenalty(key); setPenaltyDuration(""); setConfirmDeactivate(false); }}
+                                onClick={() => {
+                                  setSelectedPenalty(key);
+                                  setConfirmDeactivate(false);
+                                  // Auto-select duration based on penalty history
+                                  if (key === "suspend") {
+                                    const prevCount = getSuspensionCount(current.merchantId);
+                                    setPenaltyDuration(getDefaultDurationForNth(prevCount + 1));
+                                  } else if (key === "ban") {
+                                    const prevCount = getBanCount(current.merchantId);
+                                    setPenaltyDuration(getDefaultDurationForNth(prevCount + 1));
+                                  } else {
+                                    setPenaltyDuration("");
+                                  }
+                                }}
                                 className={`w-full text-left p-3 rounded-xl border-2 transition-all touch-manipulation ${
                                   isSelected
                                     ? `${config.bg} ${config.border} ring-1 ring-offset-1`
@@ -737,31 +767,50 @@ export function AdminComplaintsTab() {
                           })}
                         </div>
 
-                        {/* Duration selector for suspend/ban */}
-                        {selectedPenalty && penaltyConfig[selectedPenalty].requiresDuration && (
-                          <div className="space-y-2">
-                            <p className="text-xs font-medium text-muted-foreground">
-                              {selectedPenalty === "suspend" ? "Suspension" : "Ban"} Duration
-                            </p>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              {penaltyDurations.map((d) => (
-                                <button
-                                  key={d.value}
-                                  onClick={() => setPenaltyDuration(d.value)}
-                                  className={`h-10 px-3 rounded-lg text-sm font-medium touch-manipulation transition-colors border ${
-                                    penaltyDuration === d.value
-                                      ? selectedPenalty === "suspend"
-                                        ? "bg-orange-500/15 text-orange-700 border-orange-400"
-                                        : "bg-red-500/15 text-red-700 border-red-400"
-                                      : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
-                                  }`}
-                                >
-                                  {d.label}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                         {selectedPenalty && penaltyConfig[selectedPenalty].requiresDuration && (() => {
+                           const prevCount = selectedPenalty === "suspend"
+                             ? getSuspensionCount(current.merchantId)
+                             : getBanCount(current.merchantId);
+                           const recommendedDuration = getDefaultDurationForNth(prevCount + 1);
+                           const ordinalLabel = prevCount === 0 ? "1st" : prevCount === 1 ? "2nd" : prevCount === 2 ? "3rd" : `${prevCount + 1}th`;
+                           return (
+                             <div className="space-y-2">
+                               <div className="flex items-center justify-between">
+                                 <p className="text-xs font-medium text-muted-foreground">
+                                   {selectedPenalty === "suspend" ? "Suspension" : "Ban"} Duration
+                                 </p>
+                                 <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+                                   {ordinalLabel} {selectedPenalty === "suspend" ? "suspension" : "ban"}
+                                 </span>
+                               </div>
+                               <div className="grid grid-cols-2 gap-1.5">
+                                 {penaltyDurations.map((d) => {
+                                   const isRecommended = d.value === recommendedDuration;
+                                   return (
+                                     <button
+                                       key={d.value}
+                                       onClick={() => setPenaltyDuration(d.value)}
+                                       className={`relative h-10 px-3 rounded-lg text-sm font-medium touch-manipulation transition-colors border ${
+                                         penaltyDuration === d.value
+                                           ? selectedPenalty === "suspend"
+                                             ? "bg-orange-500/15 text-orange-700 border-orange-400"
+                                             : "bg-red-500/15 text-red-700 border-red-400"
+                                           : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
+                                       }`}
+                                     >
+                                       {d.label}
+                                       {isRecommended && (
+                                         <span className="absolute -top-2 right-1 text-[9px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full leading-none">
+                                           Default
+                                         </span>
+                                       )}
+                                     </button>
+                                   );
+                                 })}
+                               </div>
+                             </div>
+                           );
+                         })()}
 
                         {/* Reason for penalty */}
                         {selectedPenalty && selectedPenalty !== "warning" && (
