@@ -110,6 +110,7 @@ const App = () => {
                   <Route path="/community/:communityId/admin/content" element={<ContentModerationPage />} />
                   <Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
                   <Route path="/mobigate-admin/merchants" element={<ManageMerchantsPage />} />
+                  <Route path="/mobigate-admin/communities" element={<ManageCommunitiesPage />} />
 
                   {/* Quiz type-scoped routes */}
                   <Route path="/mobigate-admin/quiz/:quizType/categories" element={<QuizCategoriesPage />} />
