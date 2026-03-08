@@ -349,12 +349,6 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
       </div>
 
       <div className="px-5 pt-5 space-y-5 w-full max-w-full">
-        {/* Channel icon */}
-        <div className="flex flex-col items-center">
-          <div className={`h-16 w-16 rounded-2xl ${config.bgColor} flex items-center justify-center shadow-sm`}>
-            <Icon className={`h-8 w-8 ${config.color}`} />
-          </div>
-        </div>
 
         {/* ─── MOBI-CHAT: User search button ─── */}
         {isMobiChat && (
