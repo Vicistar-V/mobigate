@@ -6,7 +6,8 @@ import {
   ShieldCheck, ShieldAlert, ShieldBan, AlertTriangle, Vote, Wallet, FileText,
   Calendar, Hash, Clock, ChevronRight, Loader2, User, ArrowRight, Gavel,
   Ban, ShieldOff, Trash2, Settings, CreditCard, Globe, TrendingUp,
-  UserX, MessageSquareWarning, PackageX, ChevronDown,
+  UserX, MessageSquareWarning, PackageX, ChevronDown, Lock, Unlock,
+  ArrowUpDown, XCircle,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -20,9 +21,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ModuleAuthorizationDrawer } from "@/components/admin/authorization/ModuleAuthorizationDrawer";
 
 // ─── Mock community data for admin ───
-type CommunityStatus = "active" | "inactive" | "suspended" | "flagged";
+type CommunityStatus = "active" | "inactive" | "suspended" | "flagged" | "deactivated";
 type CommunityType = "Town Union" | "Club" | "Association" | "Society" | "Group";
 
 interface AdminCommunity {
@@ -42,19 +46,20 @@ interface AdminCommunity {
   electionsHeld: number;
   lastElectionDate?: string;
   isVerified: boolean;
+  offenceCount?: number;
 }
 
 const mockCommunities: AdminCommunity[] = [
-  { id: "c1", name: "Umuahia Progressive Union", type: "Town Union", status: "active", memberCount: 1245, location: "Lagos, Nigeria", createdDate: "2024-03-15", leaderName: "Chief Emeka Obi", leaderTitle: "President", duesCollected: 4500000, walletBalance: 2800000, hasConstitution: true, electionsHeld: 3, lastElectionDate: "2025-11-20", isVerified: true },
-  { id: "c2", name: "Lagos Igbo Community", type: "Association", status: "active", memberCount: 2890, location: "Lagos, Nigeria", createdDate: "2023-08-10", leaderName: "Dr. Chika Nwosu", leaderTitle: "Chairman", duesCollected: 8200000, walletBalance: 5100000, hasConstitution: true, electionsHeld: 2, lastElectionDate: "2025-09-14", isVerified: true },
-  { id: "c3", name: "Abuja Professional Network", type: "Club", status: "active", memberCount: 567, location: "Abuja, Nigeria", createdDate: "2025-01-20", leaderName: "Engr. Tunde Bakare", leaderTitle: "Coordinator", duesCollected: 1200000, walletBalance: 890000, hasConstitution: true, electionsHeld: 1, lastElectionDate: "2025-06-10", isVerified: true },
-  { id: "c4", name: "Delta State Association", type: "Association", status: "flagged", memberCount: 1890, location: "Warri, Nigeria", createdDate: "2024-05-22", leaderName: "Barr. Oghenero Uvie", leaderTitle: "President", duesCollected: 3400000, walletBalance: 450000, hasConstitution: false, electionsHeld: 4, lastElectionDate: "2025-12-01", isVerified: false },
-  { id: "c5", name: "Enugu Sports Club", type: "Club", status: "active", memberCount: 340, location: "Enugu, Nigeria", createdDate: "2025-04-10", leaderName: "Coach Ifeanyi Eze", leaderTitle: "Chairman", duesCollected: 600000, walletBalance: 420000, hasConstitution: true, electionsHeld: 1, isVerified: true },
-  { id: "c6", name: "Owerri Women's Society", type: "Society", status: "suspended", memberCount: 780, location: "Owerri, Nigeria", createdDate: "2024-11-05", leaderName: "Mrs. Ada Okoro", leaderTitle: "Chairwoman", duesCollected: 1800000, walletBalance: 200000, hasConstitution: true, electionsHeld: 2, lastElectionDate: "2025-07-18", isVerified: false },
-  { id: "c7", name: "Port Harcourt Youth Group", type: "Group", status: "active", memberCount: 1120, location: "Port Harcourt, Nigeria", createdDate: "2024-07-30", leaderName: "Comrade Felix Amadi", leaderTitle: "President", duesCollected: 2100000, walletBalance: 1500000, hasConstitution: true, electionsHeld: 2, lastElectionDate: "2026-01-15", isVerified: true },
-  { id: "c8", name: "Calabar Cultural Heritage", type: "Town Union", status: "inactive", memberCount: 210, location: "Calabar, Nigeria", createdDate: "2025-06-18", leaderName: "Chief Effiom Bassey", leaderTitle: "Chief Patron", duesCollected: 350000, walletBalance: 180000, hasConstitution: false, electionsHeld: 0, isVerified: false },
-  { id: "c9", name: "Kano Traders Association", type: "Association", status: "active", memberCount: 3200, location: "Kano, Nigeria", createdDate: "2023-12-01", leaderName: "Alhaji Musa Danladi", leaderTitle: "Chairman", duesCollected: 9800000, walletBalance: 6200000, hasConstitution: true, electionsHeld: 3, lastElectionDate: "2025-10-05", isVerified: true },
-  { id: "c10", name: "Ibadan Scholars Forum", type: "Society", status: "active", memberCount: 450, location: "Ibadan, Nigeria", createdDate: "2025-02-14", leaderName: "Prof. Adeyemi Sola", leaderTitle: "Director", duesCollected: 750000, walletBalance: 600000, hasConstitution: true, electionsHeld: 1, isVerified: true },
+  { id: "c1", name: "Umuahia Progressive Union", type: "Town Union", status: "active", memberCount: 1245, location: "Lagos, Nigeria", createdDate: "2024-03-15", leaderName: "Chief Emeka Obi", leaderTitle: "President", duesCollected: 4500000, walletBalance: 2800000, hasConstitution: true, electionsHeld: 3, lastElectionDate: "2025-11-20", isVerified: true, offenceCount: 0 },
+  { id: "c2", name: "Lagos Igbo Community", type: "Association", status: "active", memberCount: 2890, location: "Lagos, Nigeria", createdDate: "2023-08-10", leaderName: "Dr. Chika Nwosu", leaderTitle: "Chairman", duesCollected: 8200000, walletBalance: 5100000, hasConstitution: true, electionsHeld: 2, lastElectionDate: "2025-09-14", isVerified: true, offenceCount: 0 },
+  { id: "c3", name: "Abuja Professional Network", type: "Club", status: "active", memberCount: 567, location: "Abuja, Nigeria", createdDate: "2025-01-20", leaderName: "Engr. Tunde Bakare", leaderTitle: "Coordinator", duesCollected: 1200000, walletBalance: 890000, hasConstitution: true, electionsHeld: 1, lastElectionDate: "2025-06-10", isVerified: true, offenceCount: 1 },
+  { id: "c4", name: "Delta State Association", type: "Association", status: "flagged", memberCount: 1890, location: "Warri, Nigeria", createdDate: "2024-05-22", leaderName: "Barr. Oghenero Uvie", leaderTitle: "President", duesCollected: 3400000, walletBalance: 450000, hasConstitution: false, electionsHeld: 4, lastElectionDate: "2025-12-01", isVerified: false, offenceCount: 2 },
+  { id: "c5", name: "Enugu Sports Club", type: "Club", status: "active", memberCount: 340, location: "Enugu, Nigeria", createdDate: "2025-04-10", leaderName: "Coach Ifeanyi Eze", leaderTitle: "Chairman", duesCollected: 600000, walletBalance: 420000, hasConstitution: true, electionsHeld: 1, isVerified: true, offenceCount: 0 },
+  { id: "c6", name: "Owerri Women's Society", type: "Society", status: "suspended", memberCount: 780, location: "Owerri, Nigeria", createdDate: "2024-11-05", leaderName: "Mrs. Ada Okoro", leaderTitle: "Chairwoman", duesCollected: 1800000, walletBalance: 200000, hasConstitution: true, electionsHeld: 2, lastElectionDate: "2025-07-18", isVerified: false, offenceCount: 3 },
+  { id: "c7", name: "Port Harcourt Youth Group", type: "Group", status: "active", memberCount: 1120, location: "Port Harcourt, Nigeria", createdDate: "2024-07-30", leaderName: "Comrade Felix Amadi", leaderTitle: "President", duesCollected: 2100000, walletBalance: 1500000, hasConstitution: true, electionsHeld: 2, lastElectionDate: "2026-01-15", isVerified: true, offenceCount: 0 },
+  { id: "c8", name: "Calabar Cultural Heritage", type: "Town Union", status: "inactive", memberCount: 210, location: "Calabar, Nigeria", createdDate: "2025-06-18", leaderName: "Chief Effiom Bassey", leaderTitle: "Chief Patron", duesCollected: 350000, walletBalance: 180000, hasConstitution: false, electionsHeld: 0, isVerified: false, offenceCount: 0 },
+  { id: "c9", name: "Kano Traders Association", type: "Association", status: "active", memberCount: 3200, location: "Kano, Nigeria", createdDate: "2023-12-01", leaderName: "Alhaji Musa Danladi", leaderTitle: "Chairman", duesCollected: 9800000, walletBalance: 6200000, hasConstitution: true, electionsHeld: 3, lastElectionDate: "2025-10-05", isVerified: true, offenceCount: 1 },
+  { id: "c10", name: "Ibadan Scholars Forum", type: "Society", status: "active", memberCount: 450, location: "Ibadan, Nigeria", createdDate: "2025-02-14", leaderName: "Prof. Adeyemi Sola", leaderTitle: "Director", duesCollected: 750000, walletBalance: 600000, hasConstitution: true, electionsHeld: 1, isVerified: true, offenceCount: 0 },
 ];
 
 // ─── Mock applications ───
@@ -113,15 +118,40 @@ const initialComplaints: CommunityComplaint[] = [
   { id: "cc5", refNumber: "CRP-2026-0005", communityName: "Delta State Association", communityId: "c4", category: "misrepresentation", status: "penalised", description: "Community leadership falsely represented membership numbers to qualify for premium features.", reporterName: "Mr. Ese Oghene", isAnonymous: false, submittedDate: "2026-01-15", lastUpdated: "2026-02-01", resolutionNotes: "Verified — membership inflated by 40%. Community flagged and premium access revoked.", timeline: [{ date: "2026-01-15", action: "Complaint submitted", by: "System" }, { date: "2026-01-20", action: "Investigation opened", by: "Admin-3" }, { date: "2026-02-01", action: "Penalised — community flagged", by: "Admin-1" }] },
 ];
 
+// ─── Penalty system ───
+type PenaltyLevel = "warning" | "suspend" | "ban" | "deactivate";
+
+const PENALTY_LEVELS: { value: PenaltyLevel; label: string; icon: React.ElementType; color: string; description: string }[] = [
+  { value: "warning", label: "Warning", icon: AlertTriangle, color: "text-amber-600", description: "Issue a formal warning to the community leadership." },
+  { value: "suspend", label: "Suspend", icon: ShieldAlert, color: "text-orange-600", description: "Temporarily restrict the community from all activities." },
+  { value: "ban", label: "Ban", icon: Ban, color: "text-red-600", description: "Platform-wide ban — community cannot operate on any level." },
+  { value: "deactivate", label: "Deactivate Permanently", icon: XCircle, color: "text-red-700", description: "Permanently remove the community. This action is irreversible." },
+];
+
+function getProgressiveDuration(offenceCount: number): { days: number; label: string } {
+  const durations = [
+    { days: 30, label: "30 days" },
+    { days: 60, label: "60 days" },
+    { days: 90, label: "90 days" },
+    { days: 120, label: "120 days" },
+    { days: 180, label: "6 months" },
+    { days: 365, label: "12 months" },
+    { days: 540, label: "18 months" },
+    { days: 730, label: "24 months" },
+  ];
+  const index = Math.min(offenceCount, durations.length - 1);
+  return durations[index];
+}
+
 // ─── Settings data ───
 interface CommunityPlatformSettings {
   creationFee: number;
   minimumMembers: number;
-  electionMinInterval: number; // months
+  electionMinInterval: number;
   maxInactivityDays: number;
   requiredConstitution: boolean;
   financialReportingRequired: boolean;
-  auditTriggerThreshold: number; // wallet amount
+  auditTriggerThreshold: number;
   suspensionMaxDays: number;
 }
 
@@ -143,6 +173,7 @@ function getStatusConfig(status: CommunityStatus) {
     inactive: { label: "Inactive", icon: Clock, color: "text-slate-500", bg: "bg-slate-500/10", border: "border-slate-500/30" },
     suspended: { label: "Suspended", icon: ShieldAlert, color: "text-amber-600", bg: "bg-amber-500/10", border: "border-amber-500/30" },
     flagged: { label: "Flagged", icon: Flag, color: "text-red-600", bg: "bg-red-500/10", border: "border-red-500/30" },
+    deactivated: { label: "Deactivated", icon: XCircle, color: "text-red-700", bg: "bg-red-600/10", border: "border-red-600/30" },
   };
   return configs[status];
 }
@@ -292,6 +323,7 @@ function AllCommunitiesTab() {
             <SelectItem value="inactive">⏸ Inactive</SelectItem>
             <SelectItem value="suspended">⚠️ Suspended</SelectItem>
             <SelectItem value="flagged">🚩 Flagged</SelectItem>
+            <SelectItem value="deactivated">🚫 Deactivated</SelectItem>
           </SelectContent>
         </Select>
 
@@ -352,6 +384,7 @@ function CommunityCard({ community, onClick }: { community: AdminCommunity; onCl
       className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-transform touch-manipulation border-l-4 ${
         community.status === "suspended" ? "border-l-amber-500/60" :
         community.status === "flagged" ? "border-l-red-500/60" :
+        community.status === "deactivated" ? "border-l-red-700/60 opacity-60" :
         community.status === "inactive" ? "border-l-slate-400/60 opacity-70" :
         "border-l-primary/60"
       }`}
@@ -375,9 +408,10 @@ function CommunityCard({ community, onClick }: { community: AdminCommunity; onCl
             <Badge variant="outline" className={`text-xs h-6 px-2 shrink-0 whitespace-nowrap ${
               community.status === "suspended" ? "text-amber-700 border-amber-300 bg-amber-500/10" :
               community.status === "flagged" ? "text-red-700 border-red-300 bg-red-500/10" :
+              community.status === "deactivated" ? "text-red-800 border-red-400 bg-red-600/10" :
               "text-slate-600 border-slate-300 bg-slate-500/10"
             }`}>
-              {community.status === "suspended" ? "⚠️ Suspended" : community.status === "flagged" ? "🚩 Flagged" : "⏸ Inactive"}
+              {community.status === "suspended" ? "⚠️ Suspended" : community.status === "flagged" ? "🚩 Flagged" : community.status === "deactivated" ? "🚫 Deactivated" : "⏸ Inactive"}
             </Badge>
           )}
         </div>
@@ -417,11 +451,15 @@ function CommunityDetailDrawer({ community, onClose }: { community: AdminCommuni
   const navigate = useNavigate();
   const [communityStatus, setCommunityStatus] = useState<CommunityStatus>("active");
   const [confirmAction, setConfirmAction] = useState<"suspend" | "flag" | "activate" | null>(null);
+  const [deactivateConfirmed, setDeactivateConfirmed] = useState(false);
+  const [showDeactivateAuth, setShowDeactivateAuth] = useState(false);
 
   React.useEffect(() => {
     if (community) {
       setCommunityStatus(community.status);
       setConfirmAction(null);
+      setDeactivateConfirmed(false);
+      setShowDeactivateAuth(false);
     }
   }, [community?.id]);
 
@@ -440,156 +478,234 @@ function CommunityDetailDrawer({ community, onClose }: { community: AdminCommuni
     });
   };
 
+  const handleDeactivateAuthorized = () => {
+    setCommunityStatus("deactivated");
+    setShowDeactivateAuth(false);
+    setDeactivateConfirmed(false);
+    toast({
+      title: "Community Permanently Deactivated",
+      description: `${community.name} has been permanently deactivated. This action is irreversible.`,
+      variant: "destructive",
+    });
+  };
+
   return (
-    <Drawer open={!!community} onOpenChange={(open) => { if (!open) { onClose(); setConfirmAction(null); } }}>
-      <DrawerContent className="max-h-[92vh]">
-        <DrawerHeader className="pb-2">
-          <DrawerTitle className="text-base">Community Details</DrawerTitle>
-        </DrawerHeader>
-        <DrawerBody className="overflow-y-auto touch-auto overscroll-contain px-4 pb-8">
-          {/* Profile Header */}
-          <div className="flex items-center gap-3 mb-4">
-            <Avatar className="h-16 w-16 border-2 border-primary/20">
-              <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
-                {community.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <p className="text-base font-bold truncate">{community.name}</p>
-                {community.isVerified && <CheckCircle className="h-4 w-4 text-blue-500 shrink-0" />}
-              </div>
-              <Badge variant="outline" className={`text-xs mt-1 ${getTypeColor(community.type)}`}>{community.type}</Badge>
-              <div className="flex items-center gap-1 mt-1">
-                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{community.location}</span>
+    <>
+      <Drawer open={!!community} onOpenChange={(open) => { if (!open) { onClose(); setConfirmAction(null); setDeactivateConfirmed(false); } }}>
+        <DrawerContent className="max-h-[92vh]">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-base">Community Details</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody className="overflow-y-auto touch-auto overscroll-contain px-4 pb-8">
+            {/* Profile Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-16 w-16 border-2 border-primary/20">
+                <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+                  {community.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-base font-bold truncate">{community.name}</p>
+                  {community.isVerified && <CheckCircle className="h-4 w-4 text-blue-500 shrink-0" />}
+                </div>
+                <Badge variant="outline" className={`text-xs mt-1 ${getTypeColor(community.type)}`}>{community.type}</Badge>
+                <div className="flex items-center gap-1 mt-1">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">{community.location}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-2 mb-5">
-            <StatCard label="Members" value={community.memberCount.toLocaleString()} icon={<Users className="h-4 w-4 text-blue-500" />} />
-            <StatCard label="Elections Held" value={community.electionsHeld.toString()} icon={<Vote className="h-4 w-4 text-purple-500" />} />
-            <StatCard label="Dues Collected" value={formatCurrency(community.duesCollected)} icon={<Wallet className="h-4 w-4 text-emerald-500" />} highlight />
-            <StatCard label="Wallet Balance" value={formatCurrency(community.walletBalance)} icon={<CreditCard className="h-4 w-4 text-amber-500" />} />
-          </div>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-2 mb-5">
+              <StatCard label="Members" value={community.memberCount.toLocaleString()} icon={<Users className="h-4 w-4 text-blue-500" />} />
+              <StatCard label="Elections Held" value={community.electionsHeld.toString()} icon={<Vote className="h-4 w-4 text-purple-500" />} />
+              <StatCard label="Dues Collected" value={formatCurrency(community.duesCollected)} icon={<Wallet className="h-4 w-4 text-emerald-500" />} highlight />
+              <StatCard label="Wallet Balance" value={formatCurrency(community.walletBalance)} icon={<CreditCard className="h-4 w-4 text-amber-500" />} />
+            </div>
 
-          {/* Leadership */}
-          <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
-            <p className="text-xs text-muted-foreground mb-1">Leadership</p>
-            <p className="text-sm font-bold">{community.leaderName}</p>
-            <p className="text-xs text-muted-foreground">{community.leaderTitle}</p>
-            {community.lastElectionDate && (
-              <p className="text-xs text-muted-foreground mt-1">Last election: {community.lastElectionDate}</p>
+            {/* Leadership */}
+            <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
+              <p className="text-xs text-muted-foreground mb-1">Leadership</p>
+              <p className="text-sm font-bold">{community.leaderName}</p>
+              <p className="text-xs text-muted-foreground">{community.leaderTitle}</p>
+              {community.lastElectionDate && (
+                <p className="text-xs text-muted-foreground mt-1">Last election: {community.lastElectionDate}</p>
+              )}
+            </div>
+
+            {/* Compliance */}
+            <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
+              <p className="text-xs text-muted-foreground mb-2">Compliance Status</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Constitution Uploaded</span>
+                  {community.hasConstitution ? (
+                    <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-300 text-xs">✅ Yes</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-red-600 border-red-300 text-xs">❌ No</Badge>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Verified</span>
+                  {community.isVerified ? (
+                    <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-300 text-xs">✅ Verified</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-amber-600 border-amber-300 text-xs">⏳ Unverified</Badge>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Created</span>
+                  <span className="text-sm text-muted-foreground">{community.createdDate}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Management */}
+            {communityStatus !== "deactivated" && (
+              <div className={`rounded-xl border p-3 mb-5 ${statusCfg.bg} ${statusCfg.border}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <StatusIcon className={`h-5 w-5 ${statusCfg.color}`} />
+                    <div>
+                      <p className="text-sm font-bold">Account Status</p>
+                      <p className={`text-xs font-semibold ${statusCfg.color}`}>{statusCfg.label}</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className={`text-xs ${statusCfg.color} border-current`}>{statusCfg.label}</Badge>
+                </div>
+
+                {confirmAction && (
+                  <div className="rounded-lg bg-background border border-border p-3 mb-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-amber-500" />
+                      <p className="text-sm font-semibold">
+                        {confirmAction === "activate" ? "Reactivate" : confirmAction === "suspend" ? "Suspend" : "Flag"} {community.name}?
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {confirmAction === "flag"
+                        ? "This community will be flagged for review. Members will be notified."
+                        : confirmAction === "suspend"
+                        ? "The community will be temporarily restricted from all activities."
+                        : "The community will regain full access to all platform features."}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="flex-1 h-10 text-xs touch-manipulation" onClick={() => setConfirmAction(null)}>Cancel</Button>
+                      <Button
+                        size="sm"
+                        className={`flex-1 h-10 text-xs touch-manipulation ${
+                          confirmAction === "flag" ? "bg-red-600 hover:bg-red-700 text-white" :
+                          confirmAction === "suspend" ? "bg-amber-600 hover:bg-amber-700 text-white" :
+                          "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        }`}
+                        onClick={() => handleStatusChange(confirmAction)}
+                      >
+                        Confirm {confirmAction === "activate" ? "Reactivate" : confirmAction === "suspend" ? "Suspend" : "Flag"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {!confirmAction && (
+                  <div className="flex gap-2">
+                    {communityStatus !== "active" && (
+                      <Button size="sm" className="flex-1 h-10 text-xs bg-emerald-600 hover:bg-emerald-700 text-white touch-manipulation active:scale-[0.97]" onClick={() => setConfirmAction("activate")}>
+                        <ShieldCheck className="h-3.5 w-3.5 mr-1" /> Reactivate
+                      </Button>
+                    )}
+                    {communityStatus !== "suspended" && (
+                      <Button size="sm" variant="outline" className="flex-1 h-10 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 touch-manipulation active:scale-[0.97]" onClick={() => setConfirmAction("suspend")}>
+                        <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Suspend
+                      </Button>
+                    )}
+                    {communityStatus !== "flagged" && (
+                      <Button size="sm" variant="outline" className="flex-1 h-10 text-xs text-red-600 border-red-300 hover:bg-red-50 touch-manipulation active:scale-[0.97]" onClick={() => setConfirmAction("flag")}>
+                        <Flag className="h-3.5 w-3.5 mr-1" /> Flag
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
-          </div>
 
-          {/* Compliance */}
-          <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
-            <p className="text-xs text-muted-foreground mb-2">Compliance Status</p>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Constitution Uploaded</span>
-                {community.hasConstitution ? (
-                  <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-300 text-xs">✅ Yes</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-red-600 border-red-300 text-xs">❌ No</Badge>
-                )}
+            {/* Deactivated banner */}
+            {communityStatus === "deactivated" && (
+              <div className="rounded-xl border border-red-600/30 bg-red-600/10 p-4 mb-5 text-center">
+                <XCircle className="h-8 w-8 text-red-700 mx-auto mb-2" />
+                <p className="text-sm font-bold text-red-700">Permanently Deactivated</p>
+                <p className="text-xs text-red-600 mt-1">This community has been permanently removed from the platform.</p>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Verified</span>
-                {community.isVerified ? (
-                  <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-300 text-xs">✅ Verified</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-amber-600 border-amber-300 text-xs">⏳ Unverified</Badge>
-                )}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Created</span>
-                <span className="text-sm text-muted-foreground">{community.createdDate}</span>
-              </div>
-            </div>
-          </div>
+            )}
 
-          {/* Status Management */}
-          <div className={`rounded-xl border p-3 mb-5 ${statusCfg.bg} ${statusCfg.border}`}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <StatusIcon className={`h-5 w-5 ${statusCfg.color}`} />
-                <div>
-                  <p className="text-sm font-bold">Account Status</p>
-                  <p className={`text-xs font-semibold ${statusCfg.color}`}>{statusCfg.label}</p>
-                </div>
-              </div>
-              <Badge variant="outline" className={`text-xs ${statusCfg.color} border-current`}>{statusCfg.label}</Badge>
-            </div>
+            {/* View Admin Dashboard */}
+            <Button
+              variant="outline"
+              className="w-full h-12 mt-2 touch-manipulation border-primary/30 text-primary hover:bg-primary/5 active:scale-[0.97]"
+              onClick={() => { onClose(); navigate(`/community/${community.id}/admin`); }}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              View Community Admin Dashboard
+            </Button>
 
-            {confirmAction && (
-              <div className="rounded-lg bg-background border border-border p-3 mb-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                  <p className="text-sm font-semibold">
-                    {confirmAction === "activate" ? "Reactivate" : confirmAction === "suspend" ? "Suspend" : "Flag"} {community.name}?
-                  </p>
-                </div>
-                <p className="text-xs text-muted-foreground mb-3">
-                  {confirmAction === "flag"
-                    ? "This community will be flagged for review. Members will be notified."
-                    : confirmAction === "suspend"
-                    ? "The community will be temporarily restricted from all activities."
-                    : "The community will regain full access to all platform features."}
+            {/* Deactivate Permanently - only when not already deactivated */}
+            {communityStatus !== "deactivated" && (
+              <div className="mt-6 pt-4 border-t border-red-300/50">
+                <p className="text-xs text-red-600 font-semibold mb-2 flex items-center gap-1">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  Danger Zone
                 </p>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1 h-10 text-xs touch-manipulation" onClick={() => setConfirmAction(null)}>Cancel</Button>
+                <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-3">
+                  <p className="text-sm font-bold text-red-700 mb-1">Deactivate Community Permanently</p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    This action is irreversible. The community will be permanently removed from the platform. All data, members, and finances will be frozen.
+                  </p>
+                  <div className="flex items-start gap-2 mb-3" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      id="confirm-deactivate-community"
+                      checked={deactivateConfirmed}
+                      onCheckedChange={(checked) => setDeactivateConfirmed(checked === true)}
+                      className="mt-0.5"
+                    />
+                    <label htmlFor="confirm-deactivate-community" className="text-xs text-muted-foreground cursor-pointer">
+                      I understand this action is irreversible and want to proceed with permanent deactivation.
+                    </label>
+                  </div>
                   <Button
                     size="sm"
-                    className={`flex-1 h-10 text-xs touch-manipulation ${
-                      confirmAction === "flag" ? "bg-red-600 hover:bg-red-700 text-white" :
-                      confirmAction === "suspend" ? "bg-amber-600 hover:bg-amber-700 text-white" :
-                      "bg-emerald-600 hover:bg-emerald-700 text-white"
-                    }`}
-                    onClick={() => handleStatusChange(confirmAction)}
+                    className="w-full h-11 bg-red-600 hover:bg-red-700 text-white touch-manipulation active:scale-[0.97]"
+                    disabled={!deactivateConfirmed}
+                    onClick={() => setShowDeactivateAuth(true)}
                   >
-                    Confirm {confirmAction === "activate" ? "Reactivate" : confirmAction === "suspend" ? "Suspend" : "Flag"}
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Deactivate Permanently
                   </Button>
                 </div>
               </div>
             )}
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
 
-            {!confirmAction && (
-              <div className="flex gap-2">
-                {communityStatus !== "active" && (
-                  <Button size="sm" className="flex-1 h-10 text-xs bg-emerald-600 hover:bg-emerald-700 text-white touch-manipulation active:scale-[0.97]" onClick={() => setConfirmAction("activate")}>
-                    <ShieldCheck className="h-3.5 w-3.5 mr-1" /> Reactivate
-                  </Button>
-                )}
-                {communityStatus !== "suspended" && (
-                  <Button size="sm" variant="outline" className="flex-1 h-10 text-xs text-amber-600 border-amber-300 hover:bg-amber-50 touch-manipulation active:scale-[0.97]" onClick={() => setConfirmAction("suspend")}>
-                    <ShieldAlert className="h-3.5 w-3.5 mr-1" /> Suspend
-                  </Button>
-                )}
-                {communityStatus !== "flagged" && (
-                  <Button size="sm" variant="outline" className="flex-1 h-10 text-xs text-red-600 border-red-300 hover:bg-red-50 touch-manipulation active:scale-[0.97]" onClick={() => setConfirmAction("flag")}>
-                    <Flag className="h-3.5 w-3.5 mr-1" /> Flag
-                  </Button>
-                )}
-              </div>
-            )}
+      {/* 4-admin auth for permanent deactivation */}
+      <ModuleAuthorizationDrawer
+        open={showDeactivateAuth}
+        onOpenChange={setShowDeactivateAuth}
+        module="account_deactivation"
+        actionTitle="Permanently Deactivate Community"
+        actionDescription={`Authorize permanent deactivation of "${community.name}". This is irreversible.`}
+        actionDetails={
+          <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 space-y-1.5">
+            <p className="text-xs font-semibold text-red-700">Community: {community.name}</p>
+            <p className="text-xs text-muted-foreground">Type: {community.type}</p>
+            <p className="text-xs text-muted-foreground">Members: {community.memberCount.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Wallet: {formatCurrency(community.walletBalance)}</p>
           </div>
-
-          {/* View Admin Dashboard */}
-          <Button
-            variant="outline"
-            className="w-full h-12 mt-2 touch-manipulation border-primary/30 text-primary hover:bg-primary/5 active:scale-[0.97]"
-            onClick={() => { onClose(); navigate(`/community/${community.id}/admin`); }}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            View Community Admin Dashboard
-          </Button>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+        }
+        onAuthorized={handleDeactivateAuthorized}
+      />
+    </>
   );
 }
 
@@ -710,14 +826,20 @@ function ComplaintsTab() {
   const [complaints, setComplaints] = useState(initialComplaints);
   const [statusFilter, setStatusFilter] = useState<"all" | ComplaintStatus>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [dateSort, setDateSort] = useState<"newest" | "oldest">("newest");
   const [selectedComplaint, setSelectedComplaint] = useState<CommunityComplaint | null>(null);
 
   const filtered = useMemo(() => {
     let list = [...complaints];
     if (statusFilter !== "all") list = list.filter(c => c.status === statusFilter);
     if (categoryFilter !== "all") list = list.filter(c => c.category === categoryFilter);
+    list.sort((a, b) => {
+      const da = new Date(a.submittedDate).getTime();
+      const db = new Date(b.submittedDate).getTime();
+      return dateSort === "newest" ? db - da : da - db;
+    });
     return list;
-  }, [complaints, statusFilter, categoryFilter]);
+  }, [complaints, statusFilter, categoryFilter, dateSort]);
 
   const stats = {
     total: complaints.length,
@@ -738,6 +860,25 @@ function ComplaintsTab() {
     } : c));
     setSelectedComplaint(null);
     toast({ title: "Complaint Updated", description: `Status changed to ${newStatus}.` });
+  };
+
+  const handlePenalise = (id: string, penaltyLevel: PenaltyLevel, duration: string, reason: string) => {
+    const levelLabel = PENALTY_LEVELS.find(l => l.value === penaltyLevel)?.label || penaltyLevel;
+    const timelineAction = penaltyLevel === "deactivate"
+      ? `Penalised — Community permanently deactivated. Reason: ${reason}`
+      : penaltyLevel === "warning"
+      ? `Penalised — Warning issued. Reason: ${reason}`
+      : `Penalised — ${levelLabel} for ${duration}. Reason: ${reason}`;
+
+    setComplaints(prev => prev.map(c => c.id === id ? {
+      ...c,
+      status: "penalised" as ComplaintStatus,
+      lastUpdated: new Date().toISOString().split("T")[0],
+      resolutionNotes: `${levelLabel}${penaltyLevel !== "warning" && penaltyLevel !== "deactivate" ? ` (${duration})` : ""}: ${reason}`,
+      timeline: [...c.timeline, { date: new Date().toISOString().split("T")[0], action: timelineAction, by: "Admin-1" }],
+    } : c));
+    setSelectedComplaint(null);
+    toast({ title: "Community Penalised", description: `${levelLabel} applied to the community.` });
   };
 
   return (
@@ -797,6 +938,17 @@ function ComplaintsTab() {
             ))}
           </SelectContent>
         </Select>
+
+        <Select value={dateSort} onValueChange={(v) => setDateSort(v as "newest" | "oldest")}>
+          <SelectTrigger className="h-9 w-auto min-w-[100px] max-w-[140px] rounded-full text-xs shrink-0 touch-manipulation border-primary/30 bg-primary/5">
+            <ArrowUpDown className="h-3.5 w-3.5 mr-1 shrink-0" />
+            <SelectValue placeholder="Date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Complaint cards */}
@@ -852,22 +1004,48 @@ function ComplaintsTab() {
         complaint={selectedComplaint}
         onClose={() => setSelectedComplaint(null)}
         onStatusChange={handleStatusChange}
+        onPenalise={handlePenalise}
       />
     </>
   );
 }
 
-function ComplaintDetailDrawer({ complaint, onClose, onStatusChange }: {
+function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise }: {
   complaint: CommunityComplaint | null;
   onClose: () => void;
   onStatusChange: (id: string, status: ComplaintStatus, note?: string) => void;
+  onPenalise: (id: string, level: PenaltyLevel, duration: string, reason: string) => void;
 }) {
+  const { toast } = useToast();
   const [resolutionNote, setResolutionNote] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [showPenalise, setShowPenalise] = useState(false);
+  const [penaltyLevel, setPenaltyLevel] = useState<PenaltyLevel>("warning");
+  const [penaltyReason, setPenaltyReason] = useState("");
+  const [penaltyDurationOverride, setPenaltyDurationOverride] = useState<string | null>(null);
+  const [deactivateConfirmed, setDeactivateConfirmed] = useState(false);
+  const [showDeactivateAuth, setShowDeactivateAuth] = useState(false);
+
+  React.useEffect(() => {
+    if (complaint) {
+      setResolutionNote("");
+      setShowPenalise(false);
+      setPenaltyLevel("warning");
+      setPenaltyReason("");
+      setPenaltyDurationOverride(null);
+      setDeactivateConfirmed(false);
+      setShowDeactivateAuth(false);
+    }
+  }, [complaint?.id]);
 
   if (!complaint) return null;
 
   const cat = communityReportCategories.find(c => c.value === complaint.category);
+
+  // Find related community's offence count
+  const relatedCommunity = mockCommunities.find(c => c.id === complaint.communityId);
+  const offenceCount = relatedCommunity?.offenceCount || 0;
+  const suggestedDuration = getProgressiveDuration(offenceCount);
 
   const handleAction = (status: ComplaintStatus) => {
     if ((status === "resolved" || status === "dismissed") && !resolutionNote.trim()) {
@@ -881,159 +1059,411 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange }: {
     }, 2000);
   };
 
+  const handleApplyPenalty = () => {
+    if (!penaltyReason.trim()) {
+      toast({ title: "Reason Required", description: "Please provide a reason for the penalty.", variant: "destructive" });
+      return;
+    }
+    if (penaltyLevel === "deactivate") {
+      if (!deactivateConfirmed) {
+        toast({ title: "Confirmation Required", description: "Please confirm permanent deactivation.", variant: "destructive" });
+        return;
+      }
+      setShowDeactivateAuth(true);
+      return;
+    }
+    const duration = penaltyLevel === "warning" ? "N/A" : (penaltyDurationOverride || suggestedDuration.label);
+    onPenalise(complaint.id, penaltyLevel, duration, penaltyReason);
+  };
+
+  const handleDeactivateAuthorized = () => {
+    onPenalise(complaint.id, "deactivate", "Permanent", penaltyReason);
+    setShowDeactivateAuth(false);
+  };
+
+  const isActionable = complaint.status === "pending" || complaint.status === "investigating";
+
   return (
-    <Drawer open={!!complaint} onOpenChange={(open) => { if (!open) { onClose(); setResolutionNote(""); } }}>
-      <DrawerContent className="max-h-[92vh]">
-        <DrawerHeader className="pb-2">
-          <DrawerTitle className="text-base">Complaint Details</DrawerTitle>
-        </DrawerHeader>
-        <DrawerBody className="overflow-y-auto touch-auto overscroll-contain px-4 pb-8">
-          {/* Ref + badges */}
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <Badge variant="outline" className="text-xs font-mono">{complaint.refNumber}</Badge>
-            {cat && <Badge variant="outline" className={`text-xs ${cat.badge}`}>{cat.label}</Badge>}
-          </div>
+    <>
+      <Drawer open={!!complaint} onOpenChange={(open) => { if (!open) { onClose(); setResolutionNote(""); setShowPenalise(false); } }}>
+        <DrawerContent className="max-h-[92vh]">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-base">
+              {showPenalise ? "Penalise Community" : "Complaint Details"}
+            </DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody className="overflow-y-auto touch-auto overscroll-contain px-4 pb-8">
+            {!showPenalise ? (
+              <>
+                {/* Ref + badges */}
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <Badge variant="outline" className="text-xs font-mono">{complaint.refNumber}</Badge>
+                  {cat && <Badge variant="outline" className={`text-xs ${cat.badge}`}>{cat.label}</Badge>}
+                </div>
 
-          {/* Community */}
-          <p className="text-base font-bold mb-1">{complaint.communityName}</p>
-          <p className="text-sm text-muted-foreground mb-4">{complaint.description}</p>
+                {/* Community */}
+                <p className="text-base font-bold mb-1">{complaint.communityName}</p>
+                <p className="text-sm text-muted-foreground mb-4">{complaint.description}</p>
 
-          {/* Reporter */}
-          <div className="rounded-xl border border-border bg-muted/30 p-3 mb-4">
-            <p className="text-xs text-muted-foreground mb-1">Reported By</p>
-            <p className="text-sm font-medium">{complaint.isAnonymous ? "Anonymous Reporter" : complaint.reporterName}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Submitted: {complaint.submittedDate}</p>
-          </div>
+                {/* Reporter */}
+                <div className="rounded-xl border border-border bg-muted/30 p-3 mb-4">
+                  <p className="text-xs text-muted-foreground mb-1">Reported By</p>
+                  <p className="text-sm font-medium">{complaint.isAnonymous ? "Anonymous Reporter" : complaint.reporterName}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Submitted: {complaint.submittedDate}</p>
+                </div>
 
-          {/* Resolution notes */}
-          {complaint.resolutionNotes && (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 mb-4">
-              <p className="text-xs text-emerald-700 font-medium mb-1">Resolution Notes</p>
-              <p className="text-sm">{complaint.resolutionNotes}</p>
-            </div>
-          )}
+                {/* Resolution notes */}
+                {complaint.resolutionNotes && (
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 mb-4">
+                    <p className="text-xs text-emerald-700 font-medium mb-1">Resolution Notes</p>
+                    <p className="text-sm">{complaint.resolutionNotes}</p>
+                  </div>
+                )}
 
-          {/* Timeline */}
-          <div className="mb-5">
-            <p className="text-sm font-bold mb-2">Timeline</p>
-            <div className="space-y-2">
-              {complaint.timeline.map((entry, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-sm">{entry.action}</p>
-                    <p className="text-xs text-muted-foreground">{entry.date} • {entry.by}</p>
+                {/* Timeline */}
+                <div className="mb-5">
+                  <p className="text-sm font-bold mb-2">Timeline</p>
+                  <div className="space-y-2">
+                    {complaint.timeline.map((entry, i) => (
+                      <div key={i} className="flex gap-3 items-start">
+                        <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
+                        <div>
+                          <p className="text-sm">{entry.action}</p>
+                          <p className="text-xs text-muted-foreground">{entry.date} • {entry.by}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Actions — only for non-final statuses */}
-          {(complaint.status === "pending" || complaint.status === "investigating") && (
-            <div className="space-y-3 pt-3 border-t border-border">
-              <Textarea
-                placeholder="Resolution notes (required for resolve/dismiss)..."
-                value={resolutionNote}
-                onChange={(e) => setResolutionNote(e.target.value)}
-                className="min-h-[60px] text-sm"
-              />
-              <div className="flex gap-2">
-                {complaint.status === "pending" && (
-                  <Button
-                    size="sm"
-                    className="flex-1 h-11 text-xs bg-blue-600 hover:bg-blue-700 text-white touch-manipulation"
-                    disabled={processing}
-                    onClick={() => handleAction("investigating")}
-                  >
-                    {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : "🔍 Investigate"}
-                  </Button>
+                {/* Actions — only for non-final statuses */}
+                {isActionable && (
+                  <div className="space-y-3 pt-3 border-t border-border">
+                    <Textarea
+                      placeholder="Resolution notes (required for resolve/dismiss)..."
+                      value={resolutionNote}
+                      onChange={(e) => setResolutionNote(e.target.value)}
+                      className="min-h-[60px] text-sm"
+                    />
+                    <div className="flex gap-2">
+                      {complaint.status === "pending" && (
+                        <Button
+                          size="sm"
+                          className="flex-1 h-11 text-xs bg-blue-600 hover:bg-blue-700 text-white touch-manipulation"
+                          disabled={processing}
+                          onClick={() => handleAction("investigating")}
+                        >
+                          {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : "🔍 Investigate"}
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        className="flex-1 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white touch-manipulation"
+                        disabled={processing || !resolutionNote.trim()}
+                        onClick={() => handleAction("resolved")}
+                      >
+                        {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : "✅ Resolve"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 h-11 text-xs text-slate-600 border-slate-300 touch-manipulation"
+                        disabled={processing || !resolutionNote.trim()}
+                        onClick={() => handleAction("dismissed")}
+                      >
+                        {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : "❌ Dismiss"}
+                      </Button>
+                    </div>
+
+                    {/* Penalise button */}
+                    <Button
+                      size="sm"
+                      className="w-full h-11 text-xs bg-red-600 hover:bg-red-700 text-white touch-manipulation active:scale-[0.97] mt-2"
+                      onClick={() => setShowPenalise(true)}
+                    >
+                      <Gavel className="h-4 w-4 mr-2" />
+                      Penalise Community
+                    </Button>
+                  </div>
                 )}
+              </>
+            ) : (
+              /* ═══ PENALISE VIEW (inline switch) ═══ */
+              <div className="space-y-4">
+                {/* Back button */}
                 <Button
+                  variant="ghost"
                   size="sm"
-                  className="flex-1 h-11 text-xs bg-emerald-600 hover:bg-emerald-700 text-white touch-manipulation"
-                  disabled={processing || !resolutionNote.trim()}
-                  onClick={() => handleAction("resolved")}
+                  className="h-8 text-xs px-2 -ml-1 touch-manipulation"
+                  onClick={() => setShowPenalise(false)}
                 >
-                  {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : "✅ Resolve"}
+                  ← Back to Details
                 </Button>
+
+                {/* Community info */}
+                <div className="rounded-xl border border-border bg-muted/30 p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Community</p>
+                  <p className="text-sm font-bold">{complaint.communityName}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Ref: {complaint.refNumber}</p>
+                  {offenceCount > 0 && (
+                    <Badge variant="outline" className="text-xs mt-1.5 text-amber-700 border-amber-300 bg-amber-500/10">
+                      {offenceCount} prior offence{offenceCount !== 1 ? "s" : ""}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Penalty levels */}
+                <div>
+                  <p className="text-sm font-bold mb-2">Penalty Level</p>
+                  <div className="space-y-2">
+                    {PENALTY_LEVELS.map((level) => {
+                      const Icon = level.icon;
+                      const isSelected = penaltyLevel === level.value;
+                      return (
+                        <div
+                          key={level.value}
+                          className={`rounded-xl border p-3 cursor-pointer transition-all touch-manipulation active:scale-[0.98] ${
+                            isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/30" : "border-border bg-muted/20 hover:bg-muted/40"
+                          }`}
+                          onClick={() => { setPenaltyLevel(level.value); setDeactivateConfirmed(false); setPenaltyDurationOverride(null); }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Icon className={`h-4 w-4 ${level.color}`} />
+                            <p className={`text-sm font-semibold ${level.color}`}>{level.label}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 ml-6">{level.description}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Duration (for suspend/ban) */}
+                {(penaltyLevel === "suspend" || penaltyLevel === "ban") && (
+                  <div className="rounded-xl border border-border bg-muted/30 p-3">
+                    <p className="text-sm font-semibold mb-2">Duration</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted-foreground">Suggested (based on history):</span>
+                      <Badge variant="secondary" className="text-xs font-bold">{suggestedDuration.label}</Badge>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-muted-foreground shrink-0">Override:</span>
+                      <Select value={penaltyDurationOverride || ""} onValueChange={(v) => setPenaltyDurationOverride(v || null)}>
+                        <SelectTrigger className="h-9 text-xs flex-1 touch-manipulation">
+                          <SelectValue placeholder="Use suggested" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="30 days">30 days</SelectItem>
+                          <SelectItem value="60 days">60 days</SelectItem>
+                          <SelectItem value="90 days">90 days</SelectItem>
+                          <SelectItem value="120 days">120 days</SelectItem>
+                          <SelectItem value="6 months">6 months</SelectItem>
+                          <SelectItem value="12 months">12 months</SelectItem>
+                          <SelectItem value="18 months">18 months</SelectItem>
+                          <SelectItem value="24 months">24 months</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Deactivate confirmation */}
+                {penaltyLevel === "deactivate" && (
+                  <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-3">
+                    <div className="flex items-start gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        id="confirm-penalty-deactivate"
+                        checked={deactivateConfirmed}
+                        onCheckedChange={(checked) => setDeactivateConfirmed(checked === true)}
+                        className="mt-0.5"
+                      />
+                      <label htmlFor="confirm-penalty-deactivate" className="text-xs text-red-700 cursor-pointer">
+                        I understand this will permanently deactivate "{complaint.communityName}" and this action is irreversible. This requires 4-admin authorization.
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reason */}
+                <div>
+                  <p className="text-sm font-semibold mb-1.5">Reason</p>
+                  <Textarea
+                    placeholder="Provide a detailed reason for this penalty..."
+                    value={penaltyReason}
+                    onChange={(e) => setPenaltyReason(e.target.value)}
+                    className="min-h-[80px] text-sm"
+                  />
+                </div>
+
+                {/* Apply button */}
                 <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1 h-11 text-xs text-slate-600 border-slate-300 touch-manipulation"
-                  disabled={processing || !resolutionNote.trim()}
-                  onClick={() => handleAction("dismissed")}
+                  className={`w-full h-12 text-sm touch-manipulation active:scale-[0.97] ${
+                    penaltyLevel === "deactivate" ? "bg-red-700 hover:bg-red-800 text-white" :
+                    penaltyLevel === "ban" ? "bg-red-600 hover:bg-red-700 text-white" :
+                    penaltyLevel === "suspend" ? "bg-orange-600 hover:bg-orange-700 text-white" :
+                    "bg-amber-600 hover:bg-amber-700 text-white"
+                  }`}
+                  disabled={!penaltyReason.trim() || (penaltyLevel === "deactivate" && !deactivateConfirmed)}
+                  onClick={handleApplyPenalty}
                 >
-                  {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : "❌ Dismiss"}
+                  <Gavel className="h-4 w-4 mr-2" />
+                  {penaltyLevel === "deactivate" ? "Proceed to Authorization" : `Apply ${PENALTY_LEVELS.find(l => l.value === penaltyLevel)?.label}`}
                 </Button>
               </div>
-            </div>
-          )}
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+            )}
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
+      {/* 4-admin auth for deactivate via penalty */}
+      <ModuleAuthorizationDrawer
+        open={showDeactivateAuth}
+        onOpenChange={setShowDeactivateAuth}
+        module="account_deactivation"
+        actionTitle="Permanently Deactivate Community"
+        actionDescription={`Authorize permanent deactivation of "${complaint.communityName}" as penalty for complaint ${complaint.refNumber}.`}
+        actionDetails={
+          <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 space-y-1.5">
+            <p className="text-xs font-semibold text-red-700">Penalty: Permanent Deactivation</p>
+            <p className="text-xs text-muted-foreground">Community: {complaint.communityName}</p>
+            <p className="text-xs text-muted-foreground">Complaint: {complaint.refNumber}</p>
+            <p className="text-xs text-muted-foreground">Reason: {penaltyReason}</p>
+          </div>
+        }
+        onAuthorized={handleDeactivateAuthorized}
+      />
+    </>
   );
 }
 
 // ═══════════════════════════════════════════
-// TAB 4: SETTINGS
+// TAB 4: SETTINGS (Editable)
 // ═══════════════════════════════════════════
 function SettingsTab() {
+  const { toast } = useToast();
+  const [settings, setSettings] = useState<CommunityPlatformSettings>({ ...defaultSettings });
+  const [savedSettings, setSavedSettings] = useState<CommunityPlatformSettings>({ ...defaultSettings });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const hasChanges = JSON.stringify(settings) !== JSON.stringify(savedSettings);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await new Promise(r => setTimeout(r, 1500));
+    setSavedSettings({ ...settings });
+    setIsSaving(false);
+    toast({ title: "Settings Updated ✅", description: "Community platform settings have been saved." });
+  };
+
   return (
     <ScrollArea className="h-[calc(100vh-220px)]">
-      <div className="pb-6 space-y-6">
-        <SettingsSection
+      <div className="pb-6 space-y-4">
+        {/* Section 1: Community Creation */}
+        <EditableSettingsSection
           title="Community Creation"
           description="Fees and requirements for new communities"
           icon={<Building2 className="h-5 w-5 text-primary shrink-0" />}
-          items={[
-            { label: "Creation Fee", value: formatCurrency(defaultSettings.creationFee), description: "One-time fee to register a new community" },
-            { label: "Minimum Members", value: defaultSettings.minimumMembers.toString(), description: "Required members before community goes active" },
-            { label: "Constitution Required", value: defaultSettings.requiredConstitution ? "Yes" : "No", description: "Whether communities must upload a constitution" },
+          fields={[
+            { key: "creationFee", label: "Creation Fee", format: "currency", step: 5000, min: 0, max: 500000 },
+            { key: "minimumMembers", label: "Minimum Members", format: "number", step: 1, min: 2, max: 100 },
           ]}
+          toggleFields={[
+            { key: "requiredConstitution", label: "Constitution Required", description: "Communities must upload a constitution" },
+          ]}
+          settings={settings}
+          onUpdate={(key, value) => setSettings(prev => ({ ...prev, [key]: value }))}
         />
 
-        <SettingsSection
+        {/* Section 2: Election Regulations */}
+        <EditableSettingsSection
           title="Election Regulations"
           description="Platform rules for community elections"
           icon={<Vote className="h-5 w-5 text-primary shrink-0" />}
-          items={[
-            { label: "Minimum Interval", value: `${defaultSettings.electionMinInterval} months`, description: "Minimum gap between elections" },
+          fields={[
+            { key: "electionMinInterval", label: "Min Interval (months)", format: "number", step: 1, min: 3, max: 48 },
           ]}
+          settings={settings}
+          onUpdate={(key, value) => setSettings(prev => ({ ...prev, [key]: value }))}
         />
 
-        <SettingsSection
+        {/* Section 3: Financial Compliance */}
+        <EditableSettingsSection
           title="Financial Compliance"
           description="Reporting requirements and audit triggers"
           icon={<Wallet className="h-5 w-5 text-primary shrink-0" />}
-          items={[
-            { label: "Financial Reporting", value: defaultSettings.financialReportingRequired ? "Required" : "Optional", description: "Whether communities must submit financial reports" },
-            { label: "Audit Trigger", value: formatCurrency(defaultSettings.auditTriggerThreshold), description: "Wallet balance that triggers automatic audit review" },
+          fields={[
+            { key: "auditTriggerThreshold", label: "Audit Trigger Threshold", format: "currency", step: 500000, min: 1000000, max: 50000000 },
           ]}
+          toggleFields={[
+            { key: "financialReportingRequired", label: "Financial Reporting Required", description: "Communities must submit periodic financial reports" },
+          ]}
+          settings={settings}
+          onUpdate={(key, value) => setSettings(prev => ({ ...prev, [key]: value }))}
         />
 
-        <SettingsSection
+        {/* Section 4: Suspension & Deactivation */}
+        <EditableSettingsSection
           title="Suspension & Deactivation"
           description="Rules for community penalties"
           icon={<ShieldAlert className="h-5 w-5 text-primary shrink-0" />}
-          items={[
-            { label: "Max Inactivity", value: `${defaultSettings.maxInactivityDays} days`, description: "Days before auto-marking as inactive" },
-            { label: "Max Suspension", value: `${defaultSettings.suspensionMaxDays} days`, description: "Maximum suspension duration" },
+          fields={[
+            { key: "maxInactivityDays", label: "Max Inactivity (days)", format: "number", step: 30, min: 30, max: 730 },
+            { key: "suspensionMaxDays", label: "Max Suspension (days)", format: "number", step: 30, min: 30, max: 730 },
           ]}
+          settings={settings}
+          onUpdate={(key, value) => setSettings(prev => ({ ...prev, [key]: value }))}
         />
+
+        {/* Save button */}
+        {hasChanges && (
+          <Button
+            className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground touch-manipulation active:scale-[0.97]"
+            disabled={isSaving}
+            onClick={handleSave}
+          >
+            {isSaving ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : "Update Community Settings"}
+          </Button>
+        )}
+        {!hasChanges && (
+          <p className="text-xs text-center text-muted-foreground py-2">All settings are up to date.</p>
+        )}
       </div>
     </ScrollArea>
   );
 }
 
-function SettingsSection({ title, description, icon, items }: {
+interface FieldConfig {
+  key: string;
+  label: string;
+  format: "currency" | "number";
+  step: number;
+  min: number;
+  max: number;
+}
+
+interface ToggleFieldConfig {
+  key: string;
+  label: string;
+  description: string;
+}
+
+function EditableSettingsSection({ title, description, icon, fields = [], toggleFields = [], settings, onUpdate }: {
   title: string;
   description: string;
   icon: React.ReactNode;
-  items: { label: string; value: string; description: string }[];
+  fields?: FieldConfig[];
+  toggleFields?: ToggleFieldConfig[];
+  settings: CommunityPlatformSettings;
+  onUpdate: (key: string, value: any) => void;
 }) {
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
+  const [locks, setLocks] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    fields.forEach(f => { initial[f.key] = true; });
+    toggleFields?.forEach(f => { initial[f.key] = true; });
+    return initial;
+  });
 
   const handleUnlock = () => {
     if (password.trim()) {
@@ -1041,8 +1471,16 @@ function SettingsSection({ title, description, icon, items }: {
     }
   };
 
+  const toggleLock = (key: string) => {
+    setLocks(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const formatValue = (value: number, format: "currency" | "number") => {
+    return format === "currency" ? formatCurrency(value) : value.toLocaleString();
+  };
+
   return (
-    <Collapsible onOpenChange={(open) => { if (!open) { setUnlocked(false); setPassword(""); } }}>
+    <Collapsible onOpenChange={(open) => { if (!open) { setUnlocked(false); setPassword(""); setLocks(prev => { const r: Record<string, boolean> = {}; Object.keys(prev).forEach(k => r[k] = true); return r; }); } }}>
       <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
         {icon}
         <div className="flex-1">
@@ -1058,7 +1496,7 @@ function SettingsSection({ title, description, icon, items }: {
       <CollapsibleContent>
         {!unlocked ? (
           <div className="p-3 mt-2 rounded-lg border border-border bg-muted/30">
-            <p className="text-xs text-muted-foreground mb-2">Enter admin password to view settings</p>
+            <p className="text-xs text-muted-foreground mb-2">Enter admin password to view & edit settings</p>
             <div className="flex gap-2">
               <Input
                 type="password"
@@ -1073,15 +1511,91 @@ function SettingsSection({ title, description, icon, items }: {
           </div>
         ) : (
           <div className="mt-2 space-y-2">
-            {items.map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
-                <div>
-                  <p className="text-sm font-medium">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
+            {/* Number fields */}
+            {fields.map((field) => {
+              const value = (settings as any)[field.key] as number;
+              const isLocked = locks[field.key];
+              return (
+                <div key={field.key} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30 gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{field.label}</p>
+                    {isLocked && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {formatValue(value, field.format)} • Range: {formatValue(field.min, field.format)} – {formatValue(field.max, field.format)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isLocked ? (
+                      <Badge variant="secondary" className="text-sm font-bold">{formatValue(value, field.format)}</Badge>
+                    ) : (
+                      <Input
+                        type="number"
+                        value={value}
+                        step={field.step}
+                        min={field.min}
+                        max={field.max}
+                        onChange={(e) => {
+                          let v = Number(e.target.value);
+                          if (v < field.min) v = field.min;
+                          if (v > field.max) v = field.max;
+                          onUpdate(field.key, v);
+                        }}
+                        onBlur={(e) => {
+                          let v = Number(e.target.value);
+                          if (v < field.min) v = field.min;
+                          if (v > field.max) v = field.max;
+                          onUpdate(field.key, v);
+                        }}
+                        className="h-9 w-28 text-sm text-right touch-manipulation"
+                      />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 shrink-0 touch-manipulation"
+                      onClick={() => toggleLock(field.key)}
+                    >
+                      {isLocked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : <Unlock className="h-3.5 w-3.5 text-primary" />}
+                    </Button>
+                  </div>
                 </div>
-                <Badge variant="secondary" className="text-sm font-bold shrink-0">{item.value}</Badge>
-              </div>
-            ))}
+              );
+            })}
+
+            {/* Toggle fields */}
+            {toggleFields?.map((field) => {
+              const value = (settings as any)[field.key] as boolean;
+              const isLocked = locks[field.key];
+              return (
+                <div key={field.key} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30 gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{field.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{field.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isLocked ? (
+                      <Badge variant={value ? "default" : "outline"} className={`text-xs ${value ? "bg-emerald-500/15 text-emerald-700 border-emerald-300" : "text-slate-600"}`}>
+                        {value ? "Yes" : "No"}
+                      </Badge>
+                    ) : (
+                      <Switch
+                        checked={value}
+                        onCheckedChange={(checked) => onUpdate(field.key, checked)}
+                      />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 shrink-0 touch-manipulation"
+                      onClick={() => toggleLock(field.key)}
+                    >
+                      {isLocked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : <Unlock className="h-3.5 w-3.5 text-primary" />}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </CollapsibleContent>
