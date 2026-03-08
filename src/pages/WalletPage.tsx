@@ -955,7 +955,8 @@ export default function WalletPage() {
                         key={method.id}
                         onClick={() => {
                           setOtherMethod(method.id);
-                          if (method.id === "ussd") setUssdCode("*737*2*" + fundAmount + "#");
+                          setUssdBank("");
+                          setUssdCode("");
                         }}
                         className={cn(
                           "w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98]",
