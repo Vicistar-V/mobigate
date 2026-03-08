@@ -1,24 +1,42 @@
 
 
-## Plan: Replace Community Voucher Bundles with Merchant Buy Vouchers Flow
+## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
 
-### Problem
-The "Subscribe for Voucher Bundles" menu item in the Community Menu opens an outdated `VoucherBundlesDialog` that shows NGN-based bundles (Basic/Standard/Premium). This is a separate, inconsistent recharge mechanism compared to the Mobi-denomination-based Buy Vouchers flow used in the Merchant area.
+### What We're Building
 
-### Solution
-Replace the dialog-based voucher bundles with navigation to the existing `/buy-vouchers` page, which uses the unified denomination selector, merchant selection, and discount system already built for the Merchant area.
+A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
 
-### Changes
+### Tab Layout
 
-**1. Update `src/components/community/CommunityMainMenu.tsx`**
-- Remove the `showVoucherBundles` state and `VoucherBundlesDialog` import/render
-- Change the "Subscribe for Voucher Bundles" action to navigate to `/buy-vouchers` instead of opening the old dialog
-- Add `useNavigate` hook usage for this navigation
+```text
+[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
+```
 
-**2. Optionally clean up unused files**
-- `src/components/community/VoucherBundlesDialog.tsx` — no longer needed
-- `src/data/voucherBundlesData.ts` — no longer needed (contains the old NGN bundles, partner merchants, and terms data)
+The Complaints tab will show:
+1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
+2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
+3. **Complaint cards list** — Each card shows:
+   - Category badge + status badge (color-coded)
+   - Merchant name the complaint is against
+   - Truncated description
+   - Reporter info (or "Anonymous")
+   - Submission date + reference number
+   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
+4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
 
-### Result
-Tapping "Subscribe for Voucher Bundles" (or renamed to "Buy Vouchers" for consistency) in the Community Menu will navigate to the same `/buy-vouchers` page used across the Merchant area, ensuring a uniform recharge mechanism app-wide.
+### Files to Modify/Create
+
+| File | Action |
+|------|--------|
+| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
+| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
+
+### Technical Details
+
+- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
+- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
+- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
+- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
+- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
+- All touch targets h-11 minimum, no font size reductions, mobile-only focus
 

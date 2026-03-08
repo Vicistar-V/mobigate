@@ -31,7 +31,7 @@ import { ManageCommunityResourcesDialog } from "./ManageCommunityResourcesDialog
 import { ManageMembershipRequestsDialog } from "./ManageMembershipRequestsDialog";
 import { ManageCommunityGalleryDialog } from "./ManageCommunityGalleryDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
-import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
+
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
 import { CommunityQuizDialog } from "./CommunityQuizDialog";
@@ -86,7 +86,7 @@ export function CommunityMainMenu({
   const [showConstitution, setShowConstitution] = useState(false);
   const [showResources, setShowResources] = useState(false);
   const [showQuizCreation, setShowQuizCreation] = useState(false);
-  const [showVoucherBundles, setShowVoucherBundles] = useState(false);
+  
   const [showJoinCommunity, setShowJoinCommunity] = useState(false);
   const [showManageLeadership, setShowManageLeadership] = useState(false);
   const [showManageResources, setShowManageResources] = useState(false);
@@ -207,8 +207,8 @@ export function CommunityMainMenu({
       setOpen(false);
       return;
     }
-    if (action === "Subscribe for Voucher Bundles") {
-      setShowVoucherBundles(true);
+    if (action === "Buy Vouchers") {
+      navigate('/buy-vouchers');
       setOpen(false);
       return;
     }
@@ -1187,9 +1187,9 @@ export function CommunityMainMenu({
                 <Button
                   variant="ghost"
                   className="w-full justify-start pl-4 h-9 transition-colors duration-200"
-                  onClick={() => handleMenuClick("Subscribe for Voucher Bundles")}
+                  onClick={() => handleMenuClick("Buy Vouchers")}
                 >
-                  Subscribe for Voucher Bundles
+                  Buy Vouchers
                 </Button>
               </AccordionContent>
             </AccordionItem>
@@ -1299,7 +1299,7 @@ export function CommunityMainMenu({
 
       {/* Mobi-Merchant Dialogs */}
       <QuizCreationDialog open={showQuizCreation} onOpenChange={setShowQuizCreation} />
-      <VoucherBundlesDialog open={showVoucherBundles} onOpenChange={setShowVoucherBundles} />
+      
 
       {/* Membership Application Drawer */}
       <MembershipApplicationDrawer 
