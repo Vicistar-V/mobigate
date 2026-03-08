@@ -209,7 +209,7 @@ export default function MerchantHomePage() {
           {merchant.isVerified && <CheckCircle className="h-5 w-5 text-blue-500 shrink-0" />}
         </div>
         <p className="text-sm text-muted-foreground mt-0.5">{merchant.category}</p>
-        <div className="flex items-center justify-center gap-6 mt-3">
+        <div className="flex items-center justify-center gap-4 mt-3 flex-wrap">
           <div className="text-center">
             <p className="text-base font-bold">{formatCount(followerCount)}</p>
             <p className="text-xs text-muted-foreground">Followers</p>
@@ -221,6 +221,14 @@ export default function MerchantHomePage() {
           <div className="text-center">
             <p className="text-base font-bold">{seasons.length}</p>
             <p className="text-xs text-muted-foreground">Shows</p>
+          </div>
+          <div className="text-center">
+            <p className="text-base font-bold">58</p>
+            <p className="text-xs text-muted-foreground">Comments</p>
+          </div>
+          <div className="text-center">
+            <p className="text-base font-bold">5</p>
+            <p className="text-xs text-muted-foreground">Reports</p>
           </div>
         </div>
 
