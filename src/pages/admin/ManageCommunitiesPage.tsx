@@ -1004,7 +1004,7 @@ function SettingsTab() {
 
         <SettingsSection
           title="Financial Compliance"
-          description: "Reporting requirements and audit triggers"
+          description="Reporting requirements and audit triggers"
           icon={<Wallet className="h-5 w-5 text-primary shrink-0" />}
           items={[
             { label: "Financial Reporting", value: defaultSettings.financialReportingRequired ? "Required" : "Optional", description: "Whether communities must submit financial reports" },
