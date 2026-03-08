@@ -3,12 +3,15 @@
 // can be manually hidden by admin, and reappear (with full history) on new offences.
 
 export type TagType = "penalised" | "reported";
+export type PenaltySubType = "warning" | "suspended" | "banned" | "deactivated";
 
 export interface TagEntry {
   id: string;
   date: string;
   description: string;
   by: string;
+  penaltySubType?: PenaltySubType;
+  duration?: string; // e.g. "30 Days", "6 Months"
 }
 
 export interface UserTag {
@@ -18,6 +21,56 @@ export interface UserTag {
   entries: TagEntry[];
   manuallyHidden: boolean;
   lastOffenceDate: string;
+}
+
+// Duration progression mapping: nth offence → default duration value
+const DURATION_PROGRESSION: { value: string; label: string }[] = [
+  { value: "30d", label: "30 Days" },
+  { value: "60d", label: "60 Days" },
+  { value: "90d", label: "90 Days" },
+  { value: "120d", label: "120 Days" },
+  { value: "6m", label: "6 Months" },
+  { value: "12m", label: "12 Months" },
+  { value: "18m", label: "18 Months" },
+  { value: "24m", label: "24 Months" },
+];
+
+/** Get the default duration for the nth suspension or ban (1-indexed). */
+export function getDefaultDurationForNth(n: number): string {
+  const idx = Math.min(n - 1, DURATION_PROGRESSION.length - 1);
+  return DURATION_PROGRESSION[Math.max(0, idx)].value;
+}
+
+/** Count how many times a user has been suspended. */
+export function getSuspensionCount(userId: string): number {
+  const tag = tagsStore.find((t) => t.userId === userId && t.type === "penalised");
+  if (!tag) return 0;
+  return tag.entries.filter((e) => e.penaltySubType === "suspended").length;
+}
+
+/** Count how many times a user has been banned. */
+export function getBanCount(userId: string): number {
+  const tag = tagsStore.find((t) => t.userId === userId && t.type === "penalised");
+  if (!tag) return 0;
+  return tag.entries.filter((e) => e.penaltySubType === "banned").length;
+}
+
+/** Get penalty breakdown for display: grouped by sub-type with details. */
+export function getPenaltyBreakdown(userId: string): { subType: PenaltySubType; entries: TagEntry[] }[] {
+  const tag = tagsStore.find((t) => t.userId === userId && t.type === "penalised");
+  if (!tag) return [];
+  
+  const groups: Record<string, TagEntry[]> = {};
+  for (const entry of tag.entries) {
+    const st = entry.penaltySubType || "warning";
+    if (!groups[st]) groups[st] = [];
+    groups[st].push(entry);
+  }
+  
+  const order: PenaltySubType[] = ["warning", "suspended", "banned", "deactivated"];
+  return order
+    .filter((st) => groups[st]?.length)
+    .map((st) => ({ subType: st, entries: groups[st] }));
 }
 
 // ─── Mock data ───
@@ -42,18 +95,18 @@ const mockTags: UserTag[] = [
     userId: "m1", type: "penalised", count: 12,
     manuallyHidden: false, lastOffenceDate: "2026-02-28",
     entries: [
-      { id: "p1", date: "2024-03-15", description: "Official warning — first complaint", by: "Admin Chidi" },
-      { id: "p2", date: "2024-05-20", description: "Official warning — repeated complaints", by: "Admin Funke" },
-      { id: "p3", date: "2024-07-10", description: "Suspended 30 days — fraud pattern", by: "Admin Chidi" },
-      { id: "p4", date: "2024-09-25", description: "Official warning — misleading ads", by: "Admin Funke" },
-      { id: "p5", date: "2024-11-30", description: "Suspended 60 days — counterfeit goods", by: "Admin Chidi" },
-      { id: "p6", date: "2025-02-14", description: "Official warning — customer harassment", by: "Admin Funke" },
-      { id: "p7", date: "2025-04-20", description: "Suspended 90 days — repeat fraud", by: "Admin Chidi" },
-      { id: "p8", date: "2025-07-15", description: "Official warning — false advertising", by: "Admin Funke" },
-      { id: "p9", date: "2025-09-10", description: "Suspended 30 days — non-delivery", by: "Admin Chidi" },
-      { id: "p10", date: "2025-11-05", description: "Official warning — pricing manipulation", by: "Admin Funke" },
-      { id: "p11", date: "2026-01-20", description: "Suspended 60 days — bait-and-switch", by: "Admin Chidi" },
-      { id: "p12", date: "2026-02-28", description: "Suspended 90 days — counterfeit devices", by: "Admin Chidi" },
+      { id: "p1", date: "2024-03-15", description: "Official warning — first complaint", by: "Admin Chidi", penaltySubType: "warning" },
+      { id: "p2", date: "2024-05-20", description: "Official warning — repeated complaints", by: "Admin Funke", penaltySubType: "warning" },
+      { id: "p3", date: "2024-07-10", description: "Suspended for 30 Days — fraud pattern", by: "Admin Chidi", penaltySubType: "suspended", duration: "30 Days" },
+      { id: "p4", date: "2024-09-25", description: "Official warning — misleading ads", by: "Admin Funke", penaltySubType: "warning" },
+      { id: "p5", date: "2024-11-30", description: "Suspended for 60 Days — counterfeit goods", by: "Admin Chidi", penaltySubType: "suspended", duration: "60 Days" },
+      { id: "p6", date: "2025-02-14", description: "Official warning — customer harassment", by: "Admin Funke", penaltySubType: "warning" },
+      { id: "p7", date: "2025-04-20", description: "Suspended for 90 Days — repeat fraud", by: "Admin Chidi", penaltySubType: "suspended", duration: "90 Days" },
+      { id: "p8", date: "2025-07-15", description: "Official warning — false advertising", by: "Admin Funke", penaltySubType: "warning" },
+      { id: "p9", date: "2025-09-10", description: "Suspended for 120 Days — non-delivery", by: "Admin Chidi", penaltySubType: "suspended", duration: "120 Days" },
+      { id: "p10", date: "2025-11-05", description: "Official warning — pricing manipulation", by: "Admin Funke", penaltySubType: "warning" },
+      { id: "p11", date: "2026-01-20", description: "Suspended for 6 Months — bait-and-switch", by: "Admin Chidi", penaltySubType: "suspended", duration: "6 Months" },
+      { id: "p12", date: "2026-02-28", description: "Suspended for 12 Months — counterfeit devices", by: "Admin Chidi", penaltySubType: "suspended", duration: "12 Months" },
     ],
   },
   {
@@ -70,8 +123,8 @@ const mockTags: UserTag[] = [
     userId: "m2", type: "penalised", count: 2,
     manuallyHidden: false, lastOffenceDate: "2026-01-10",
     entries: [
-      { id: "p13", date: "2025-12-01", description: "Official warning — deceptive labelling", by: "Admin Funke" },
-      { id: "p14", date: "2026-01-10", description: "Suspended 30 days — repeat deception", by: "Admin Chidi" },
+      { id: "p13", date: "2025-12-01", description: "Official warning — deceptive labelling", by: "Admin Funke", penaltySubType: "warning" },
+      { id: "p14", date: "2026-01-10", description: "Suspended for 30 Days — repeat deception", by: "Admin Chidi", penaltySubType: "suspended", duration: "30 Days" },
     ],
   },
   {
@@ -95,7 +148,7 @@ const mockTags: UserTag[] = [
     userId: "m4", type: "penalised", count: 1,
     manuallyHidden: false, lastOffenceDate: "2026-02-25",
     entries: [
-      { id: "p15", date: "2026-02-25", description: "Official warning — staff suspended, ₦15k credit issued", by: "Admin Funke" },
+      { id: "p15", date: "2026-02-25", description: "Official warning — staff suspended, ₦15k credit issued", by: "Admin Funke", penaltySubType: "warning" },
     ],
   },
   {
@@ -113,9 +166,9 @@ const mockTags: UserTag[] = [
     userId: "m8", type: "penalised", count: 3,
     manuallyHidden: false, lastOffenceDate: "2026-02-28",
     entries: [
-      { id: "p16", date: "2025-09-01", description: "Official warning — first fraud complaint", by: "Admin Chidi" },
-      { id: "p17", date: "2025-11-15", description: "Suspended 60 days — repeat fraud", by: "Admin Funke" },
-      { id: "p18", date: "2026-02-28", description: "Suspended 90 days — confirmed fraud pattern", by: "Admin Chidi" },
+      { id: "p16", date: "2025-09-01", description: "Official warning — first fraud complaint", by: "Admin Chidi", penaltySubType: "warning" },
+      { id: "p17", date: "2025-11-15", description: "Suspended for 60 Days — repeat fraud", by: "Admin Funke", penaltySubType: "suspended", duration: "60 Days" },
+      { id: "p18", date: "2026-02-28", description: "Suspended for 90 Days — confirmed fraud pattern", by: "Admin Chidi", penaltySubType: "suspended", duration: "90 Days" },
     ],
   },
   // User with manually hidden tags (old offences, >12 months ago with no new ones)
@@ -173,18 +226,18 @@ export function unhideTag(userId: string, type: TagType): void {
 }
 
 /** Add a new offence — unhides everything and adds entry. */
-export function addOffence(userId: string, type: TagType, description: string, by: string): void {
+export function addOffence(userId: string, type: TagType, description: string, by: string, penaltySubType?: PenaltySubType, duration?: string): void {
   const now = new Date().toISOString().split("T")[0];
   const existing = tagsStore.find((t) => t.userId === userId && t.type === type);
   if (existing) {
     existing.count += 1;
     existing.manuallyHidden = false; // Force reappear
     existing.lastOffenceDate = now;
-    existing.entries.push({ id: `auto-${Date.now()}`, date: now, description, by });
+    existing.entries.push({ id: `auto-${Date.now()}`, date: now, description, by, penaltySubType, duration });
   } else {
     tagsStore.push({
       userId, type, count: 1, manuallyHidden: false, lastOffenceDate: now,
-      entries: [{ id: `auto-${Date.now()}`, date: now, description, by }],
+      entries: [{ id: `auto-${Date.now()}`, date: now, description, by, penaltySubType, duration }],
     });
   }
 }
