@@ -12,7 +12,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
+import { ModuleAuthorizationPanel } from "./authorization/ModuleAuthorizationPanel";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ShieldAlert,
   UserX,
