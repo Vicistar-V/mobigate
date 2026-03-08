@@ -53,7 +53,8 @@ const mockApplications: MockApplication[] = [
     eligibility: [
       { label: "Verified 180+ days", met: true },
       { label: "1,000+ invited friends", met: true },
-      { label: "5,000 friends & followers", met: true },
+      { label: "5,000+ friends", met: true },
+      { label: "5,000+ followers", met: true },
       { label: "100+ e-Library contents", met: false },
       { label: "Followed 500+ creators", met: true },
     ],
@@ -85,7 +86,8 @@ const mockApplications: MockApplication[] = [
     eligibility: [
       { label: "Verified 180+ days", met: true },
       { label: "1,000+ invited friends", met: true },
-      { label: "5,000 friends & followers", met: true },
+      { label: "5,000+ friends", met: true },
+      { label: "5,000+ followers", met: true },
       { label: "100+ e-Library contents", met: true },
       { label: "Followed 500+ creators", met: true },
     ],
@@ -107,7 +109,8 @@ const mockApplications: MockApplication[] = [
     eligibility: [
       { label: "Verified 180+ days", met: true },
       { label: "1,000+ invited friends", met: false },
-      { label: "5,000 friends & followers", met: false },
+      { label: "5,000+ friends", met: false },
+      { label: "5,000+ followers", met: false },
       { label: "100+ e-Library contents", met: false },
       { label: "Followed 500+ creators", met: true },
     ],
@@ -134,7 +137,8 @@ const mockApplications: MockApplication[] = [
     eligibility: [
       { label: "Verified 180+ days", met: true },
       { label: "1,000+ invited friends", met: true },
-      { label: "5,000 friends & followers", met: true },
+      { label: "5,000+ friends", met: true },
+      { label: "5,000+ followers", met: true },
       { label: "100+ e-Library contents", met: true },
       { label: "Followed 500+ creators", met: false },
     ],
