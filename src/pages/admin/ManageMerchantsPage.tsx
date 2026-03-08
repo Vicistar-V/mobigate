@@ -17,6 +17,8 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MerchantApplicationsAdmin } from "@/components/mobigate/MerchantApplicationsAdmin";
 import { VoucherDiscountSettingsCard } from "@/components/mobigate/VoucherDiscountSettingsCard";
+import { MerchantAppFeeSettingsCard } from "@/components/mobigate/MerchantAppFeeSettingsCard";
+import { EligibilitySettingsCard } from "@/components/mobigate/EligibilitySettingsCard";
 import { AwardBonusVoucherPackDrawer } from "@/components/admin/AwardBonusVoucherPackDrawer";
 import { AdminComplaintsTab, getComplaintsPendingCount } from "@/components/admin/AdminComplaintsTab";
 import {
