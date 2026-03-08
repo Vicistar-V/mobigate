@@ -1319,7 +1319,7 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise 
       <ModuleAuthorizationDrawer
         open={showDeactivateAuth}
         onOpenChange={setShowDeactivateAuth}
-        module="community-management"
+        module="account_deactivation"
         actionTitle="Permanently Deactivate Community"
         actionDescription={`Authorize permanent deactivation of "${complaint.communityName}" as penalty for complaint ${complaint.refNumber}.`}
         actionDetails={
