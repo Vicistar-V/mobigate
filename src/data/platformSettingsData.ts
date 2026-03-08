@@ -179,7 +179,13 @@ export function setMerchantSolvencyPercent(newPercent: number): void {
 }
 
 // ─── Minimum Order Value for Discount Eligibility ───
-export const MIN_DISCOUNT_ORDER_VALUE = 50000; // M50,000 minimum total order value
+export let MIN_DISCOUNT_ORDER_VALUE = 50000; // M50,000 minimum total order value
+
+export function setMinDiscountOrderValue(value: number): void {
+  if (value >= 10000 && value <= 500000) {
+    MIN_DISCOUNT_ORDER_VALUE = value;
+  }
+}
 
 // ─── Platform Voucher Discount Settings (Tiered) ───
 export interface PlatformVoucherDiscountSettings {
