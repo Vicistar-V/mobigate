@@ -307,7 +307,7 @@ export default function WalletPage() {
     setCardNumber(""); setCardExpiry(""); setCardCvv(""); setCardName(""); setShowCvv(false);
     setBankName(""); setBankAccountNumber(""); setBankAccountName(""); setBankVerified(false); setBankVerifying(false);
     setVoucherPin(""); setVoucherValidating(false); setVoucherValid(false); setVoucherDenomination(0);
-    setOtherMethod(null); setUssdCode("");
+    setOtherMethod(null); setUssdCode(""); setUssdBank("");
     setFundDrawerOpen(false);
   };
 
