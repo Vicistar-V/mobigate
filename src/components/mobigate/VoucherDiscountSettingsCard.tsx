@@ -298,12 +298,40 @@ export function VoucherDiscountSettingsCard() {
             </div>
           </div>
 
-          {/* Min order value note */}
-          <div className="flex gap-2 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
-            <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Minimum total order value of <strong>M{MIN_DISCOUNT_ORDER_VALUE.toLocaleString()}</strong> required to unlock any discount tier.
-            </p>
+          {/* Min order value — editable */}
+          <div className="rounded-lg bg-amber-500/5 border border-amber-500/10 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-amber-600 shrink-0" />
+                <span className="text-xs font-medium text-foreground">Min Order Value for Discount</span>
+              </div>
+              {isAuthenticated && (
+                <button onClick={() => toggleLock("minOrderValue")} className="p-1 rounded touch-manipulation active:scale-90">
+                  {locks.minOrderValue ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : <Unlock className="h-3.5 w-3.5 text-emerald-600" />}
+                </button>
+              )}
+            </div>
+            {!locks.minOrderValue && isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground font-medium">M</span>
+                <Input
+                  type="number"
+                  value={minOrderValue}
+                  onChange={e => {
+                    const v = Math.max(10000, Math.min(500000, Number(e.target.value) || 10000));
+                    setMinOrderValueLocal(v);
+                  }}
+                  className="h-9 text-sm font-bold flex-1"
+                  min={10000}
+                  max={500000}
+                  step={5000}
+                />
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Minimum total order value of <strong>M{minOrderValue.toLocaleString()}</strong> required to unlock any discount tier.
+              </p>
+            )}
           </div>
 
           {/* Info note */}
