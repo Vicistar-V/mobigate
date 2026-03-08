@@ -1299,7 +1299,7 @@ export function CommunityMainMenu({
 
       {/* Mobi-Merchant Dialogs */}
       <QuizCreationDialog open={showQuizCreation} onOpenChange={setShowQuizCreation} />
-      <VoucherBundlesDialog open={showVoucherBundles} onOpenChange={setShowVoucherBundles} />
+      
 
       {/* Membership Application Drawer */}
       <MembershipApplicationDrawer 
