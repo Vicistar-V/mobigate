@@ -207,8 +207,8 @@ export function CommunityMainMenu({
       setOpen(false);
       return;
     }
-    if (action === "Subscribe for Voucher Bundles") {
-      setShowVoucherBundles(true);
+    if (action === "Buy Vouchers") {
+      navigate('/buy-vouchers');
       setOpen(false);
       return;
     }
