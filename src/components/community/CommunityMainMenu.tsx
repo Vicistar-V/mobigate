@@ -31,7 +31,7 @@ import { ManageCommunityResourcesDialog } from "./ManageCommunityResourcesDialog
 import { ManageMembershipRequestsDialog } from "./ManageMembershipRequestsDialog";
 import { ManageCommunityGalleryDialog } from "./ManageCommunityGalleryDialog";
 import { QuizCreationDialog } from "./QuizCreationDialog";
-import { VoucherBundlesDialog } from "./VoucherBundlesDialog";
+
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
 import { CommunityQuizDialog } from "./CommunityQuizDialog";
