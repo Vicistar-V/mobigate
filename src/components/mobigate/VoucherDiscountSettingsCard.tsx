@@ -98,6 +98,7 @@ export function VoucherDiscountSettingsCard() {
     setBaseRate(baseRate);
     setIncrementRate(incrementRate);
     setMaxDiscount(maxDiscountVal);
+    setMinDiscountOrderValue(minOrderValue);
     setIsSaving(false);
     toast({
       title: "Discount Tiers Updated",
