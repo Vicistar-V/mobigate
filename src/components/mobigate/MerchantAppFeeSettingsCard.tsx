@@ -67,7 +67,7 @@ export function MerchantAppFeeSettingsCard() {
     });
   };
 
-  const formatM = (v: number) => `M${v.toLocaleString()}`;
+  const formatM = (v: number) => `M${v.toLocaleString('en-US')}`;
 
   return (
     <div className="space-y-2">
