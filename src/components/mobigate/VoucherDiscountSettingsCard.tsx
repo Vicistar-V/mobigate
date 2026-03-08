@@ -38,6 +38,7 @@ export function VoucherDiscountSettingsCard() {
   const [baseRate, setBaseRateLocal] = useState(s.baseRate);
   const [incrementRate, setIncrementRateLocal] = useState(s.incrementRate);
   const [maxDiscountVal, setMaxDiscountLocal] = useState(s.maxDiscount);
+  const [minOrderValue, setMinOrderValueLocal] = useState(MIN_DISCOUNT_ORDER_VALUE);
   const [isSaving, setIsSaving] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
