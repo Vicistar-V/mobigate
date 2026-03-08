@@ -16,7 +16,12 @@ export function useUserProfile(): UserProfile {
       fullName: 'NKEMJKA PETER IPREC',
       avatar: profilePhoto,
       email: 'peter@mobigate.com',
-      greeting: 'Good Evening',
+      greeting: (() => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return 'Good Morning';
+        if (hour >= 12 && hour < 17) return 'Good Afternoon';
+        return 'Good Evening';
+      })(),
       timestamp: new Date().toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
