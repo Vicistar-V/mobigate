@@ -187,13 +187,18 @@ export function EligibilitySettingsCard() {
                         type="number"
                         value={values[field.key]}
                         onChange={e => {
-                          const v = Math.max(min, Math.min(max, Number(e.target.value) || min));
+                          const raw = e.target.value;
+                          if (raw === "") return;
+                          setValues(prev => ({ ...prev, [field.key]: Number(raw) }));
+                        }}
+                        onBlur={() => {
+                          const v = Math.max(min, Math.min(max, values[field.key]));
                           setValues(prev => ({ ...prev, [field.key]: v }));
                         }}
                         className="h-11 text-sm font-bold flex-1"
                         min={min}
                         max={max}
-                        step={field.step}
+                        step={1}
                       />
                     </div>
                   ) : (
