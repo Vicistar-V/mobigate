@@ -589,7 +589,7 @@ export default function BuyVouchersPage() {
             })()}
           </div>
           {/* Filter row */}
-          <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div className="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
             <Select value={merchantSort} onValueChange={(v: typeof merchantSort) => setMerchantSort(v)}>
               <SelectTrigger className="h-8 rounded-full text-xs font-medium min-w-[120px] max-w-[48%] shrink-0 px-3">
                 <SelectValue placeholder="Sort" />
