@@ -539,13 +539,19 @@ export function AdminComplaintsTab() {
                     </div>
 
                     {/* Merchant */}
-                    <div className="rounded-xl bg-muted/50 border border-border p-3">
+                    <button
+                      onClick={() => window.open(`/merchant/${current.merchantId}`, '_blank')}
+                      className="rounded-xl bg-muted/50 border border-border p-3 w-full text-left touch-manipulation active:scale-[0.98] transition-transform"
+                    >
                       <p className="text-xs text-muted-foreground mb-1">Reported Merchant</p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold">{current.merchantName}</p>
+                        <p className="text-sm font-bold text-primary underline underline-offset-2">{current.merchantName}</p>
+                        <ChevronRight className="h-4 w-4 text-primary shrink-0 ml-auto" />
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-1.5">
                         <UserTagBadges userId={current.merchantId} showAdminControls />
                       </div>
-                    </div>
+                    </button>
 
                     {/* Description */}
                     <div>
