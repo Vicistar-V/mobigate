@@ -392,3 +392,126 @@ export function setRegenerationFee(newFee: number): void {
     platformRegenerationFeeSettings.lastUpdatedAt = new Date();
   }
 }
+
+// ─── Merchant Application Fee Settings ───
+export interface PlatformMerchantAppFeeSettings {
+  applicationFee: number;
+  applicationFeeMin: number;
+  applicationFeeMax: number;
+  waiverFee: number;
+  waiverFeeMin: number;
+  waiverFeeMax: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformMerchantAppFeeSettings: PlatformMerchantAppFeeSettings = {
+  applicationFee: 50000,
+  applicationFeeMin: 10000,
+  applicationFeeMax: 500000,
+  waiverFee: 50000,
+  waiverFeeMin: 10000,
+  waiverFeeMax: 500000,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getApplicationFee(): number {
+  return platformMerchantAppFeeSettings.applicationFee;
+}
+
+export function setApplicationFee(value: number): void {
+  if (value >= platformMerchantAppFeeSettings.applicationFeeMin &&
+      value <= platformMerchantAppFeeSettings.applicationFeeMax) {
+    platformMerchantAppFeeSettings.applicationFee = value;
+    platformMerchantAppFeeSettings.lastUpdatedAt = new Date();
+  }
+}
+
+export function getWaiverFee(): number {
+  return platformMerchantAppFeeSettings.waiverFee;
+}
+
+export function setWaiverFee(value: number): void {
+  if (value >= platformMerchantAppFeeSettings.waiverFeeMin &&
+      value <= platformMerchantAppFeeSettings.waiverFeeMax) {
+    platformMerchantAppFeeSettings.waiverFee = value;
+    platformMerchantAppFeeSettings.lastUpdatedAt = new Date();
+  }
+}
+
+// ─── Merchant Eligibility Threshold Settings ───
+export interface PlatformEligibilitySettings {
+  verifiedDays: number;
+  verifiedDaysMin: number;
+  verifiedDaysMax: number;
+  invitedFriends: number;
+  invitedFriendsMin: number;
+  invitedFriendsMax: number;
+  friends: number;
+  friendsMin: number;
+  friendsMax: number;
+  followers: number;
+  followersMin: number;
+  followersMax: number;
+  eLibraryContents: number;
+  eLibraryContentsMin: number;
+  eLibraryContentsMax: number;
+  contentLikes: number;
+  contentLikesMin: number;
+  contentLikesMax: number;
+  usersFollowed: number;
+  usersFollowedMin: number;
+  usersFollowedMax: number;
+  registrationFee: number;
+  registrationFeeMin: number;
+  registrationFeeMax: number;
+  imvsdAmount: number;
+  imvsdAmountMin: number;
+  imvsdAmountMax: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformEligibilitySettings: PlatformEligibilitySettings = {
+  verifiedDays: 180,
+  verifiedDaysMin: 30,
+  verifiedDaysMax: 365,
+  invitedFriends: 1000,
+  invitedFriendsMin: 100,
+  invitedFriendsMax: 10000,
+  friends: 5000,
+  friendsMin: 500,
+  friendsMax: 50000,
+  followers: 5000,
+  followersMin: 500,
+  followersMax: 50000,
+  eLibraryContents: 100,
+  eLibraryContentsMin: 10,
+  eLibraryContentsMax: 1000,
+  contentLikes: 5000,
+  contentLikesMin: 500,
+  contentLikesMax: 50000,
+  usersFollowed: 500,
+  usersFollowedMin: 50,
+  usersFollowedMax: 5000,
+  registrationFee: 1000000,
+  registrationFeeMin: 100000,
+  registrationFeeMax: 10000000,
+  imvsdAmount: 1000000,
+  imvsdAmountMin: 100000,
+  imvsdAmountMax: 10000000,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function setEligibilitySetting(key: keyof PlatformEligibilitySettings, value: number): void {
+  const minKey = `${key}Min` as keyof PlatformEligibilitySettings;
+  const maxKey = `${key}Max` as keyof PlatformEligibilitySettings;
+  const min = platformEligibilitySettings[minKey];
+  const max = platformEligibilitySettings[maxKey];
+  if (typeof min === "number" && typeof max === "number" && value >= min && value <= max) {
+    (platformEligibilitySettings as any)[key] = value;
+    platformEligibilitySettings.lastUpdatedAt = new Date();
+  }
+}

@@ -288,15 +288,42 @@ export default function ManageMerchantsPage() {
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-0">
             <ScrollArea className="h-[calc(100vh-220px)]">
-              <div className="pb-6 space-y-4">
-                <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                  <CreditCard className="h-5 w-5 text-primary shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium">Voucher Settings</p>
-                    <p className="text-xs text-muted-foreground">Configure voucher discount rates</p>
+              <div className="pb-6 space-y-6">
+                {/* 1. Voucher Settings */}
+                <div>
+                  <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20 mb-3">
+                    <CreditCard className="h-5 w-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Voucher Settings</p>
+                      <p className="text-xs text-muted-foreground">Configure voucher bulk purchase discounts</p>
+                    </div>
                   </div>
+                  <VoucherDiscountSettingsCard />
                 </div>
-                <VoucherDiscountSettingsCard />
+
+                {/* 2. Merchant Application Fees */}
+                <div>
+                  <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20 mb-3">
+                    <CreditCard className="h-5 w-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Application Fees</p>
+                      <p className="text-xs text-muted-foreground">Configure merchant application & waiver fees</p>
+                    </div>
+                  </div>
+                  <MerchantAppFeeSettingsCard />
+                </div>
+
+                {/* 3. Eligibility Settings */}
+                <div>
+                  <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20 mb-3">
+                    <Shield className="h-5 w-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Eligibility Settings</p>
+                      <p className="text-xs text-muted-foreground">Configure merchant eligibility thresholds</p>
+                    </div>
+                  </div>
+                  <EligibilitySettingsCard />
+                </div>
               </div>
             </ScrollArea>
           </TabsContent>
