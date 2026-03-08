@@ -308,13 +308,29 @@ export function AdminComplaintsTab() {
 
   const executePenalty = (complaintId: string) => {
     setPenaltyProcessing(true);
+    const complaint = complaints.find(c => c.id === complaintId);
     setTimeout(() => {
       const durationLabel = penaltyDuration ? penaltyDurations.find(d => d.value === penaltyDuration)?.label : "";
       const penaltyLabel =
         selectedPenalty === "warning" ? "Official warning sent" :
-        selectedPenalty === "suspend" ? `Merchant suspended for ${durationLabel}` :
+        selectedPenalty === "suspend" ? `Suspended for ${durationLabel}` :
         selectedPenalty === "ban" ? `Banned from Mobigate for ${durationLabel}` :
         "Account permanently deactivated";
+
+      // Record penalty in the tag system
+      if (complaint) {
+        const subType = selectedPenalty === "warning" ? "warning" as const :
+          selectedPenalty === "suspend" ? "suspended" as const :
+          selectedPenalty === "ban" ? "banned" as const : "deactivated" as const;
+        addOffence(
+          complaint.merchantId,
+          "penalised",
+          `${penaltyLabel}${penaltyReason ? ` — ${penaltyReason}` : ""}`,
+          "You (Admin)",
+          subType,
+          durationLabel || undefined
+        );
+      }
 
       setComplaints((prev) =>
         prev.map((c) => {
