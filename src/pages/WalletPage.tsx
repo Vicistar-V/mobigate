@@ -153,6 +153,7 @@ export default function WalletPage() {
   const [voucherDenomination, setVoucherDenomination] = useState(0);
   const [otherMethod, setOtherMethod] = useState<"ussd" | "qr" | "mobile-money" | null>(null);
   const [ussdCode, setUssdCode] = useState("");
+  const [ussdBank, setUssdBank] = useState("");
 
   // Transaction state
   const [filter, setFilter] = useState<FilterType>("all");
