@@ -692,7 +692,7 @@ function CommunityDetailDrawer({ community, onClose }: { community: AdminCommuni
       <ModuleAuthorizationDrawer
         open={showDeactivateAuth}
         onOpenChange={setShowDeactivateAuth}
-        module="community-management"
+        module="account_deactivation"
         actionTitle="Permanently Deactivate Community"
         actionDescription={`Authorize permanent deactivation of "${community.name}". This is irreversible.`}
         actionDetails={
