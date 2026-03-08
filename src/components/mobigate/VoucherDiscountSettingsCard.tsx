@@ -12,6 +12,7 @@ import {
   setIncrementRate,
   setMaxDiscount,
   MIN_DISCOUNT_ORDER_VALUE,
+  setMinDiscountOrderValue,
 } from "@/data/platformSettingsData";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
