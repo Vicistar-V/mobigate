@@ -86,7 +86,8 @@ export function VoucherDiscountSettingsCard() {
     tierSize !== s.tierSize ||
     baseRate !== s.baseRate ||
     incrementRate !== s.incrementRate ||
-    maxDiscountVal !== s.maxDiscount;
+    maxDiscountVal !== s.maxDiscount ||
+    minOrderValue !== MIN_DISCOUNT_ORDER_VALUE;
 
   const preview = computePreview(tierSize, baseRate, incrementRate, maxDiscountVal);
 
