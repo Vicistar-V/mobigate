@@ -1,42 +1,66 @@
 
 
-## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
+## Plan: Add "Manage Communities" to Mobigate Admin
 
-### What We're Building
+### Context
+The Mobigate Admin dashboard currently has tabs for Overview, Elections, Revenue, Quiz, Adverts, Merchants, and Settings. There is no "Communities" management section, even though communities are a core entity on the platform. Community admins manage membership, content, finances, elections, meetings, leadership, and settings at the individual community level, but the platform (Mobigate) admin has no oversight or regulatory controls over communities.
 
-A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
+### What Community Admin Currently Handles
+From the `CommunityAdminDashboard`, each community admin manages:
+1. **Membership** -- approve/reject requests, view all members, block/suspend
+2. **Content** -- moderate news, events, gallery, resources
+3. **Finances** -- financial overview, audit, obligations, defaulting members
+4. **Elections** -- campaigns, results, accreditation, clearances, voting config
+5. **Meetings** -- upcoming/past meetings, attendance, resolutions, conflicts, roll call
+6. **Leadership** -- executives, ad-hoc committees, election results, change history
+7. **Settings** -- constitution, privacy, notifications, democratic governance
 
-### Tab Layout
+### What Mobigate Admin Should Regulate
+The platform admin needs a higher-level oversight view -- not duplicating community admin functions, but regulating and monitoring communities:
 
-```text
-[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
-```
+### Proposed "Manage Communities" Page (`/mobigate-admin/communities`)
+A dedicated page (similar to `ManageMerchantsPage`) with tabs:
 
-The Complaints tab will show:
-1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
-2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
-3. **Complaint cards list** — Each card shows:
-   - Category badge + status badge (color-coded)
-   - Merchant name the complaint is against
-   - Truncated description
-   - Reporter info (or "Anonymous")
-   - Submission date + reference number
-   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
-4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
+**Tab 1: All Communities**
+- Searchable, filterable list of all communities (by type, status, location)
+- Each community card shows: name, type, member count, status (Active/Inactive/Suspended/Flagged), creation date
+- Clicking opens a detail drawer with:
+  - Community overview (stats, leadership, type)
+  - Quick actions: Suspend, Flag, Deactivate (password-gated with 4-admin auth)
+  - Link to "View Community Admin Dashboard" (read-only)
+  - Financial summary (dues collected, wallet balance)
+  - Compliance status (constitution uploaded, elections held)
 
-### Files to Modify/Create
+**Tab 2: Applications / New Communities**
+- Pending community creation requests (if moderation is enabled)
+- Approve/reject with reason
 
-| File | Action |
-|------|--------|
-| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
-| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
+**Tab 3: Complaints**
+- Reports filed against communities (similar to Merchant Complaints tab)
+- Filter by status, category, date
+- Stats grid: Total, Pending, Resolved, Escalated, Penalised
 
-### Technical Details
+**Tab 4: Settings**
+- Platform-wide community rules (password-gated):
+  - **Community Creation Fees** -- fee to create a community
+  - **Minimum Members** -- threshold before a community goes active
+  - **Election Regulations** -- platform rules for community elections
+  - **Content Policies** -- what communities can/cannot post
+  - **Financial Compliance** -- reporting requirements, audit triggers
+  - **Community Suspension/Deactivation Rules**
 
-- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
-- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
-- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
-- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
-- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
-- All touch targets h-11 minimum, no font size reductions, mobile-only focus
+### Implementation
+
+**Files to create:**
+1. `src/pages/admin/ManageCommunitiesPage.tsx` -- Main page with 4 tabs (All Communities, Applications, Complaints, Settings), following the exact same pattern as `ManageMerchantsPage.tsx`
+2. Mock data for communities list, applications, complaints embedded in the page
+
+**Files to modify:**
+1. `src/pages/admin/MobigateAdminDashboard.tsx` -- Add "Communities" tab trigger that navigates to `/mobigate-admin/communities` (same pattern as the Merchants tab)
+2. `src/App.tsx` -- Add route: `/mobigate-admin/communities` -> `ManageCommunitiesPage`
+
+### UI Pattern
+- Follows the established Mobigate admin patterns: `Header` at top, tabs navigation, drawer-based detail views, password-gated settings sections
+- Mobile-first with touch-friendly cards and compact layouts
+- Uses existing community mock data from `communityData.ts` plus new mock data for platform-level stats
 
