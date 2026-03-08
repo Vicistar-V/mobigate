@@ -86,7 +86,7 @@ export function CommunityMainMenu({
   const [showConstitution, setShowConstitution] = useState(false);
   const [showResources, setShowResources] = useState(false);
   const [showQuizCreation, setShowQuizCreation] = useState(false);
-  const [showVoucherBundles, setShowVoucherBundles] = useState(false);
+  
   const [showJoinCommunity, setShowJoinCommunity] = useState(false);
   const [showManageLeadership, setShowManageLeadership] = useState(false);
   const [showManageResources, setShowManageResources] = useState(false);
