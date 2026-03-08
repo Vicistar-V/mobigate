@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home,
   Ticket, Gamepad2, Eye, TrendingUp, BarChart3, Package, CreditCard, Users, Trophy,
-  ShieldCheck, ShieldBan, ShieldAlert, AlertTriangle, Gift, Flag,
+  ShieldCheck, ShieldBan, ShieldAlert, AlertTriangle, Gift, Flag, Shield,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
