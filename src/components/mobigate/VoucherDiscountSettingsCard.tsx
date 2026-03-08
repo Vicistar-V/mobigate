@@ -47,7 +47,7 @@ export function VoucherDiscountSettingsCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [shake, setShake] = useState(false);
-  const [locks, setLocks] = useState({ tierSize: true, baseRate: true, incrementRate: true, maxDiscount: true });
+  const [locks, setLocks] = useState({ tierSize: true, baseRate: true, incrementRate: true, maxDiscount: true, minOrderValue: true });
   const passwordRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
