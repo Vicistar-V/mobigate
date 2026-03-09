@@ -162,6 +162,10 @@ export default function MobigateAdminDashboard() {
                 <Building2 className="h-4 w-4 mr-1" />
                 Communities
               </TabsTrigger>
+              <TabsTrigger value="users" className="text-xs py-2 px-3" onClick={() => navigate("/mobigate-admin/users")}>
+                <Users className="h-4 w-4 mr-1" />
+                Users
+              </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2 px-3">
                 <Settings className="h-4 w-4 mr-1" />
                 Settings

@@ -112,6 +112,7 @@ const App = () => {
                   <Route path="/mobigate-admin" element={<MobigateAdminDashboard />} />
                   <Route path="/mobigate-admin/merchants" element={<ManageMerchantsPage />} />
                   <Route path="/mobigate-admin/communities" element={<ManageCommunitiesPage />} />
+                  <Route path="/mobigate-admin/users" element={<ManageUsersPage />} />
 
                   {/* Quiz type-scoped routes */}
                   <Route path="/mobigate-admin/quiz/:quizType/categories" element={<QuizCategoriesPage />} />
