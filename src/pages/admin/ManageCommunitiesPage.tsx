@@ -1017,6 +1017,7 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise 
   onPenalise: (id: string, level: PenaltyLevel, duration: string, reason: string) => void;
 }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [resolutionNote, setResolutionNote] = useState("");
   const [processing, setProcessing] = useState(false);
   const [showPenalise, setShowPenalise] = useState(false);
@@ -1102,13 +1103,23 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise 
                 </div>
 
                 {/* Community */}
-                <p className="text-base font-bold mb-1">{complaint.communityName}</p>
+                <p
+                  className="text-base font-bold mb-1 text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation"
+                  onClick={() => { onClose(); navigate("/community"); }}
+                >
+                  {complaint.communityName}
+                </p>
                 <p className="text-sm text-muted-foreground mb-4">{complaint.description}</p>
 
                 {/* Reporter */}
                 <div className="rounded-xl border border-border bg-muted/30 p-3 mb-4">
                   <p className="text-xs text-muted-foreground mb-1">Reported By</p>
-                  <p className="text-sm font-medium">{complaint.isAnonymous ? "Anonymous Reporter" : complaint.reporterName}</p>
+                  <p
+                    className={`text-sm font-medium ${!complaint.isAnonymous ? "text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation" : ""}`}
+                    onClick={() => { if (!complaint.isAnonymous) { onClose(); navigate("/profile/member-1"); } }}
+                  >
+                    {complaint.isAnonymous ? "Anonymous Reporter" : complaint.reporterName}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-0.5">Submitted: {complaint.submittedDate}</p>
                 </div>
 
