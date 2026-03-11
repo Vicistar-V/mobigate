@@ -349,7 +349,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
             <Lock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
               <strong>Multi-Signature Required:</strong> Most settings require authorization from 
-              President + Secretary + Legal Adviser before being submitted for member approval.
+              President + Secretary + Legal Adviser before being submitted for members' approval.
             </p>
           </div>
           <div className="flex items-start gap-2">

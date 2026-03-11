@@ -211,7 +211,7 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
                     </li>
                     <li className="flex items-start gap-1.5">
                       <ChevronRight className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                      <span>Admins cannot change settings without member approval</span>
+                      <span>Admins cannot change settings without members' approval</span>
                     </li>
                   </ul>
                 </div>

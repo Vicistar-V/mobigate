@@ -84,7 +84,7 @@ export interface MemberInfo {
 }
 
 /**
- * An admin-proposed setting change awaiting member approval
+ * An admin-proposed setting change awaiting members' approval
  */
 export interface AdminSettingProposal {
   proposalId: string;

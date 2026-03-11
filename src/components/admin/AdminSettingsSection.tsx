@@ -262,7 +262,7 @@ export function AdminSettingsSection({
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-3 w-3 text-amber-600 mt-0.5 shrink-0" />
                   <span className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
-                    All changes must receive 60% member approval
+                    All changes must receive 60% members' approval
                   </span>
                 </div>
               </div>

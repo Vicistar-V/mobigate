@@ -208,7 +208,7 @@ export function CommunitySettingsAdminView({ onViewMemberVotes }: CommunitySetti
           <div className="flex items-start gap-2">
             <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-[11px] text-muted-foreground">
-              Any setting changes you make will be submitted for member approval. The change will
+              Any setting changes you make will be submitted for members' approval. The change will
               only take effect once {DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}% of valid
               members approve it. Members can also recommend alternative values.
             </p>
