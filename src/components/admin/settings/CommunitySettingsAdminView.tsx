@@ -45,7 +45,7 @@ export function CommunitySettingsAdminView({ onViewMemberVotes }: CommunitySetti
               </p>
               <ul className="text-xs text-amber-700 dark:text-amber-300 space-y-0.5">
                 <li>
-                  • Setting changes require <strong>{DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}%</strong> member approval
+                  • Setting changes require <strong>{DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}%</strong> members' approval
                 </li>
                 <li>
                   • Member recommendations with <strong>{DEMOCRATIC_SETTINGS_CONFIG.RECOMMENDATION_THRESHOLD}%</strong> support override admin settings
