@@ -1116,7 +1116,7 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise 
                   <p className="text-xs text-muted-foreground mb-1">Reported By</p>
                   <p
                     className={`text-sm font-medium ${!complaint.isAnonymous ? "text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation" : ""}`}
-                    onClick={() => { if (!complaint.isAnonymous) { onOpenChange(false); navigate("/profile/member-1"); } }}
+                    onClick={() => { if (!complaint.isAnonymous) { onClose(); navigate("/profile/member-1"); } }}
                   >
                     {complaint.isAnonymous ? "Anonymous Reporter" : complaint.reporterName}
                   </p>
