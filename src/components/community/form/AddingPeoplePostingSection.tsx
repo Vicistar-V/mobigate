@@ -2,12 +2,50 @@ import { CommunityFormData, AccessLevel } from "@/types/communityForm";
 import { accessLevelOptions } from "@/data/communityFormOptions";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface AddingPeoplePostingSectionProps {
   formData: CommunityFormData;
   updateField: <K extends keyof CommunityFormData>(field: K, value: CommunityFormData[K]) => void;
   errors: Partial<Record<keyof CommunityFormData, string>>;
+}
+
+interface AccessSelectWithCustomProps {
+  id: string;
+  label: string;
+  value: AccessLevel;
+  onChange: (value: AccessLevel) => void;
+  customValue: string;
+  onCustomChange: (value: string) => void;
+}
+
+function AccessSelectWithCustom({ id, label, value, onChange, customValue, onCustomChange }: AccessSelectWithCustomProps) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Select value={value} onValueChange={(v) => onChange(v as AccessLevel)}>
+        <SelectTrigger id={id}>
+          <SelectValue placeholder="Select access level" />
+        </SelectTrigger>
+        <SelectContent>
+          {accessLevelOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {value === "specified-admin" && (
+        <Input
+          placeholder="Enter admin number(s), e.g. 1, 3, 5"
+          value={customValue}
+          onChange={(e) => onCustomChange(e.target.value)}
+          className="mt-1.5 text-sm"
+        />
+      )}
+    </div>
+  );
 }
 
 export function AddingPeoplePostingSection({
@@ -22,7 +60,6 @@ export function AddingPeoplePostingSection({
     formData.whoCanPost === "specified-admin" ||
     formData.whoCanEditPauseDeleteApprove === "specified-admin";
 
-  // Toggle admin selection
   const toggleAdmin = (adminNum: number) => {
     const currentSelection = formData.specifiedAdminNumbers || [];
     if (currentSelection.includes(adminNum)) {
@@ -34,111 +71,74 @@ export function AddingPeoplePostingSection({
 
   const specifiedAdminNumbers = formData.specifiedAdminNumbers || [];
 
+  // Custom input values per field (stored as comma-separated in specifiedAdminNumbers)
+  const getCustomValueForField = () => {
+    return specifiedAdminNumbers.sort((a, b) => a - b).join(", ");
+  };
+
+  const handleCustomInput = (input: string) => {
+    const nums = input
+      .split(/[,\s]+/)
+      .map(s => parseInt(s.trim(), 10))
+      .filter(n => !isNaN(n) && n >= 1 && n <= 20);
+    updateField("specifiedAdminNumbers", [...new Set(nums)]);
+  };
+
   return (
     <div className="space-y-5">
       {/* Adding People */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium">Adding People</h3>
 
-        <div className="space-y-2">
-          <Label htmlFor="who-can-add">Who Can Add Members</Label>
-          <Select
-            value={formData.whoCanAdd}
-            onValueChange={(value) => updateField("whoCanAdd", value as AccessLevel)}
-          >
-            <SelectTrigger id="who-can-add">
-              <SelectValue placeholder="Select access level" />
-            </SelectTrigger>
-            <SelectContent>
-              {accessLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <AccessSelectWithCustom
+          id="who-can-add"
+          label="Who Can Add Members"
+          value={formData.whoCanAdd}
+          onChange={(v) => updateField("whoCanAdd", v)}
+          customValue={getCustomValueForField()}
+          onCustomChange={handleCustomInput}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="who-can-approve">Who Can Approve New Members</Label>
-          <Select
-            value={formData.whoCanApproveNewMembers}
-            onValueChange={(value) => updateField("whoCanApproveNewMembers", value as AccessLevel)}
-          >
-            <SelectTrigger id="who-can-approve">
-              <SelectValue placeholder="Select access level" />
-            </SelectTrigger>
-            <SelectContent>
-              {accessLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <AccessSelectWithCustom
+          id="who-can-approve"
+          label="Who Can Approve New Members"
+          value={formData.whoCanApproveNewMembers}
+          onChange={(v) => updateField("whoCanApproveNewMembers", v)}
+          customValue={getCustomValueForField()}
+          onCustomChange={handleCustomInput}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="who-can-remove">Who Can Remove/Suspend/Block Members</Label>
-          <Select
-            value={formData.whoCanRemoveSuspendBlock}
-            onValueChange={(value) => updateField("whoCanRemoveSuspendBlock", value as AccessLevel)}
-          >
-            <SelectTrigger id="who-can-remove">
-              <SelectValue placeholder="Select access level" />
-            </SelectTrigger>
-            <SelectContent>
-              {accessLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <AccessSelectWithCustom
+          id="who-can-remove"
+          label="Who Can Remove/Suspend/Block Members"
+          value={formData.whoCanRemoveSuspendBlock}
+          onChange={(v) => updateField("whoCanRemoveSuspendBlock", v)}
+          customValue={getCustomValueForField()}
+          onCustomChange={handleCustomInput}
+        />
       </div>
 
       {/* Posting on Community */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium">Posting on Community</h3>
 
-        <div className="space-y-2">
-          <Label htmlFor="who-can-post">Who Can Post</Label>
-          <Select
-            value={formData.whoCanPost}
-            onValueChange={(value) => updateField("whoCanPost", value as AccessLevel)}
-          >
-            <SelectTrigger id="who-can-post">
-              <SelectValue placeholder="Select access level" />
-            </SelectTrigger>
-            <SelectContent>
-              {accessLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <AccessSelectWithCustom
+          id="who-can-post"
+          label="Who Can Post"
+          value={formData.whoCanPost}
+          onChange={(v) => updateField("whoCanPost", v)}
+          customValue={getCustomValueForField()}
+          onCustomChange={handleCustomInput}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="who-can-edit">Who Can Edit/Pause/Delete/Approve Posts</Label>
-          <Select
-            value={formData.whoCanEditPauseDeleteApprove}
-            onValueChange={(value) => updateField("whoCanEditPauseDeleteApprove", value as AccessLevel)}
-          >
-            <SelectTrigger id="who-can-edit">
-              <SelectValue placeholder="Select access level" />
-            </SelectTrigger>
-            <SelectContent>
-              {accessLevelOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <AccessSelectWithCustom
+          id="who-can-edit"
+          label="Who Can Edit/Pause/Delete/Approve Posts"
+          value={formData.whoCanEditPauseDeleteApprove}
+          onChange={(v) => updateField("whoCanEditPauseDeleteApprove", v)}
+          customValue={getCustomValueForField()}
+          onCustomChange={handleCustomInput}
+        />
       </div>
 
       {/* Multi-Select Admin Buttons */}
