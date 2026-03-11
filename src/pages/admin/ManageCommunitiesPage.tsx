@@ -1105,7 +1105,7 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise 
                 {/* Community */}
                 <p
                   className="text-base font-bold mb-1 text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation"
-                  onClick={() => { onOpenChange(false); navigate("/community"); }}
+                  onClick={() => { onClose(); navigate("/community"); }}
                 >
                   {complaint.communityName}
                 </p>
