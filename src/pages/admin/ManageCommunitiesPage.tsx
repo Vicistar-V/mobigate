@@ -1392,7 +1392,7 @@ function SettingsTab() {
           description="Reporting requirements and audit triggers"
           icon={<Wallet className="h-5 w-5 text-primary shrink-0" />}
           fields={[
-            { key: "auditTriggerThreshold", label: "Audit Trigger Threshold", format: "currency", step: 500000, min: 1000000, max: 50000000 },
+            { key: "auditTriggerThreshold", label: "Audit Trigger Threshold", format: "currency", step: 500000, min: 1000000, max: 500000000 },
           ]}
           toggleFields={[
             { key: "financialReportingRequired", label: "Financial Reporting Required", description: "Communities must submit periodic financial reports" },
