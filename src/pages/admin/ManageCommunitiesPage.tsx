@@ -1017,6 +1017,7 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise 
   onPenalise: (id: string, level: PenaltyLevel, duration: string, reason: string) => void;
 }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [resolutionNote, setResolutionNote] = useState("");
   const [processing, setProcessing] = useState(false);
   const [showPenalise, setShowPenalise] = useState(false);
