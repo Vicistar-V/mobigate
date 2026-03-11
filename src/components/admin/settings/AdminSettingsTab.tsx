@@ -245,7 +245,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
                 Democratic Governance Active
               </p>
               <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 break-words leading-relaxed">
-                All setting changes require {DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}% member approval. 
+                All setting changes require {DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}% members' approval. 
                 Members can also recommend alternative values.
               </p>
             </div>
