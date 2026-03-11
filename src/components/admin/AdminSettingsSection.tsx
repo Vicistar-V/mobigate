@@ -223,7 +223,7 @@ export function AdminSettingsSection({
                     <Vote className="h-4 w-4 text-emerald-600 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">Democratic Governance</p>
-                      <p className="text-xs text-muted-foreground">60% member approval required</p>
+                      <p className="text-xs text-muted-foreground">60% members' approval required</p>
                     </div>
                   </div>
                   <button className="text-xs text-primary hover:underline" onClick={onDemocraticPrivacy}>
