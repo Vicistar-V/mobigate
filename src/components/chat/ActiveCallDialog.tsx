@@ -52,7 +52,7 @@ export const ActiveCallDialog = ({
 
   // Call duration timer
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval>;
     if (callStatus === "connected") {
       timer = setInterval(() => {
         setCallDuration(prev => prev + 1);
