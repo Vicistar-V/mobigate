@@ -146,7 +146,7 @@ export function SettingsDetailSheet({
                   Pending Change Awaiting Approval
                 </p>
                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 break-words">
-                  A proposed change to this setting is currently awaiting 60% member approval.
+                  A proposed change to this setting is currently awaiting 60% members' approval.
                 </p>
               </div>
             </div>
@@ -276,7 +276,7 @@ export function SettingsDetailSheet({
                 Democratic Approval Required
               </p>
               <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 break-words">
-                Changes require 60% member approval. Members can also submit alternative recommendations.
+                Changes require 60% members' approval. Members can also submit alternative recommendations.
               </p>
             </div>
           </div>

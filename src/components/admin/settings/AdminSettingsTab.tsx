@@ -162,7 +162,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
   const handleProposalSubmit = (settingId: string, newValue: string, reason?: string) => {
     toast({
       title: "Change Proposed",
-      description: "Your proposed setting change has been submitted for member approval."
+      description: "Your proposed setting change has been submitted for members' approval."
     });
   };
 
@@ -245,7 +245,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
                 Democratic Governance Active
               </p>
               <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 break-words leading-relaxed">
-                All setting changes require {DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}% member approval. 
+                All setting changes require {DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}% members' approval. 
                 Members can also recommend alternative values.
               </p>
             </div>
@@ -349,7 +349,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
             <Lock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
               <strong>Multi-Signature Required:</strong> Most settings require authorization from 
-              President + Secretary + Legal Adviser before being submitted for member approval.
+              President + Secretary + Legal Adviser before being submitted for members' approval.
             </p>
           </div>
           <div className="flex items-start gap-2">

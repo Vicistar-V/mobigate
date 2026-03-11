@@ -45,7 +45,7 @@ export function CommunitySettingsAdminView({ onViewMemberVotes }: CommunitySetti
               </p>
               <ul className="text-xs text-amber-700 dark:text-amber-300 space-y-0.5">
                 <li>
-                  • Setting changes require <strong>{DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}%</strong> member approval
+                  • Setting changes require <strong>{DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}%</strong> members' approval
                 </li>
                 <li>
                   • Member recommendations with <strong>{DEMOCRATIC_SETTINGS_CONFIG.RECOMMENDATION_THRESHOLD}%</strong> support override admin settings
@@ -208,7 +208,7 @@ export function CommunitySettingsAdminView({ onViewMemberVotes }: CommunitySetti
           <div className="flex items-start gap-2">
             <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-[11px] text-muted-foreground">
-              Any setting changes you make will be submitted for member approval. The change will
+              Any setting changes you make will be submitted for members' approval. The change will
               only take effect once {DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}% of valid
               members approve it. Members can also recommend alternative values.
             </p>

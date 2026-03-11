@@ -223,7 +223,7 @@ export function AdminSettingsSection({
                     <Vote className="h-4 w-4 text-emerald-600 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">Democratic Governance</p>
-                      <p className="text-xs text-muted-foreground">60% member approval required</p>
+                      <p className="text-xs text-muted-foreground">60% members' approval required</p>
                     </div>
                   </div>
                   <button className="text-xs text-primary hover:underline" onClick={onDemocraticPrivacy}>
@@ -262,7 +262,7 @@ export function AdminSettingsSection({
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-3 w-3 text-amber-600 mt-0.5 shrink-0" />
                   <span className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
-                    All changes must receive 60% member approval
+                    All changes must receive 60% members' approval
                   </span>
                 </div>
               </div>
