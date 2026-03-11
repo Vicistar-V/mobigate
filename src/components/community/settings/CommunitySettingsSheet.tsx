@@ -196,7 +196,7 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
                     <li className="flex items-start gap-1.5">
                       <ChevronRight className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>
-                        <strong>{DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}%</strong> member approval required for changes
+                        <strong>{DEMOCRATIC_SETTINGS_CONFIG.APPROVAL_THRESHOLD}%</strong> members' approval required for changes
                       </span>
                     </li>
                     <li className="flex items-start gap-1.5">
