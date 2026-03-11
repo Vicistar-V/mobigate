@@ -162,7 +162,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
   const handleProposalSubmit = (settingId: string, newValue: string, reason?: string) => {
     toast({
       title: "Change Proposed",
-      description: "Your proposed setting change has been submitted for member approval."
+      description: "Your proposed setting change has been submitted for members' approval."
     });
   };
 
