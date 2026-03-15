@@ -529,13 +529,67 @@ function CommunityDetailDrawer({ community, onClose }: { community: AdminCommuni
 
             {/* Leadership */}
             <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
-              <p className="text-xs text-muted-foreground mb-1">Leadership</p>
-              <p className="text-sm font-bold">{community.leaderName}</p>
-              <p className="text-xs text-muted-foreground">{community.leaderTitle}</p>
+              <p className="text-xs text-muted-foreground mb-2">Leadership</p>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 shrink-0 border border-primary/20">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(community.leaderName)}`} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">{community.leaderName.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-sm font-bold text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation"
+                    onClick={() => { onClose(); navigate(`/profile/leader-${community.id}`); }}
+                  >
+                    {community.leaderName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{community.leaderTitle}</p>
+                </div>
+                {(community.executives?.length || 0) > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs font-semibold rounded-lg touch-manipulation active:scale-[0.97] shrink-0"
+                    onClick={() => setShowExecs(true)}
+                  >
+                    Others
+                  </Button>
+                )}
+              </div>
               {community.lastElectionDate && (
-                <p className="text-xs text-muted-foreground mt-1">Last election: {community.lastElectionDate}</p>
+                <p className="text-xs text-muted-foreground mt-2 ml-13">Last election: {community.lastElectionDate}</p>
               )}
             </div>
+
+            {/* Executives Drawer */}
+            <Drawer open={showExecs} onOpenChange={setShowExecs}>
+              <DrawerContent className="max-h-[92vh]">
+                <DrawerHeader className="pb-2 border-b border-border">
+                  <DrawerTitle className="text-base font-bold">Executive Leadership</DrawerTitle>
+                </DrawerHeader>
+                <DrawerBody className="overflow-y-auto touch-auto px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-3">{community.name}</p>
+                  <div className="space-y-2">
+                    {(community.executives || []).map((exec) => (
+                      <div
+                        key={exec.id}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card touch-manipulation active:scale-[0.98] cursor-pointer transition-transform"
+                        onClick={() => { setShowExecs(false); onClose(); navigate(`/profile/${exec.id}`); }}
+                      >
+                        <Avatar className="h-10 w-10 shrink-0 border border-primary/20">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(exec.name)}`} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">{exec.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground">{exec.name}</p>
+                          <p className="text-xs text-muted-foreground">{exec.position}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
 
             {/* Compliance */}
             <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
