@@ -753,8 +753,10 @@ export default function BuyVouchersPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <p className="font-bold text-sm text-foreground">{selectedMerchant.name}</p>
-                {selectedMerchant.isSubMerchant && (
-                  <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none">Retail Merchant</span>
+                {merchantType && (
+                  <span className={`whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border font-medium leading-none ${merchantType === "bulk" ? "border-amber-500/30 text-amber-600" : "border-primary/30 text-primary"}`}>
+                    {merchantType === "bulk" ? "Bulk Merchant" : "Retail Merchant"}
+                  </span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% Discount</p>
