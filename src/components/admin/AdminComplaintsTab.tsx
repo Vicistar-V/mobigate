@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserTagBadges } from "@/components/UserTagBadges";
 import { getSuspensionCount, getBanCount, getDefaultDurationForNth, addOffence } from "@/data/userTags";
 import { useToast } from "@/hooks/use-toast";
