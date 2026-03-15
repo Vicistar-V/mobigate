@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home, Package, ShoppingBag, Warehouse, Users } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +63,8 @@ const typeConfig: Record<MerchantType, {
 export default function MerchantListingPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pendingFormData = (location.state as { formData?: Record<string, unknown> } | null)?.formData;
 
   const applyMode = searchParams.get("mode") === "apply";
   const merchantType: MerchantType = (searchParams.get("type") as MerchantType) || "bulk";
@@ -287,7 +289,24 @@ export default function MerchantListingPage() {
                 merchantType={merchantType}
                 borderClass={config.borderClass}
                 discountLabel={config.discountLabel}
-                onClick={() => navigate(applyMode ? `/apply-sub-merchant/${merchant.id}?name=${encodeURIComponent(merchant.name)}&category=${encodeURIComponent(merchant.category)}` : `/merchant-home/${merchant.id}`)}
+                onClick={() => navigate(
+                  applyMode
+                    ? `/apply-sub-merchant/${merchant.id}?name=${encodeURIComponent(merchant.name)}&category=${encodeURIComponent(merchant.category)}`
+                    : `/merchant-home/${merchant.id}`,
+                  applyMode
+                    ? {
+                        state: pendingFormData
+                          ? {
+                              previousData: {
+                                ...pendingFormData,
+                                merchantName: merchant.name,
+                                merchantCategory: merchant.category,
+                              },
+                            }
+                          : undefined,
+                      }
+                    : undefined
+                )}
               />
             ))
           )}

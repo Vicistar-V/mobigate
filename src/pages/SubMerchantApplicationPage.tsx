@@ -150,7 +150,7 @@ export default function SubMerchantApplicationPage() {
         {/* Choose Another Merchant */}
         <Button
           variant="outline"
-          onClick={() => navigate("/merchant-browse", { state: { returnTo: "sub-merchant-application", formData: form } })}
+          onClick={() => navigate("/merchants?mode=apply&type=retail", { state: { returnTo: "sub-merchant-application", formData: form } })}
           className="w-full h-11 rounded-xl text-sm font-semibold border-primary/30 text-primary touch-manipulation active:scale-[0.97]"
         >
           <Store className="h-4 w-4 mr-2" />
