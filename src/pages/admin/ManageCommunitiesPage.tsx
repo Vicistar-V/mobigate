@@ -47,6 +47,7 @@ interface AdminCommunity {
   lastElectionDate?: string;
   isVerified: boolean;
   offenceCount?: number;
+  executives?: { id: string; name: string; position: string }[];
 }
 
 const mockCommunities: AdminCommunity[] = [
