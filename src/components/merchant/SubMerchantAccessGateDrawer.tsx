@@ -112,7 +112,7 @@ export function SubMerchantAccessGateDrawer({ open, onOpenChange, merchantName }
   const handleProceed = () => {
     if (!matched) return;
     onOpenChange(false);
-    navigate(`/buy-vouchers?merchant=${encodeURIComponent(merchantName)}`);
+    navigate(`/buy-vouchers?merchant=${encodeURIComponent(merchantName)}&type=bulk`);
   };
 
   return (

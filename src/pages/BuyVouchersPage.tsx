@@ -46,6 +46,7 @@ export default function BuyVouchersPage() {
   const [searchParams] = useSearchParams();
   const isFundWallet = searchParams.get("source") === "fund-wallet";
   const merchantParam = searchParams.get("merchant");
+  const merchantType = searchParams.get("type") as "bulk" | "retail" | null;
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("vouchers");
@@ -63,7 +64,12 @@ export default function BuyVouchersPage() {
     if (merchantParam) {
       const local = getLocalCountry();
       if (local) {
-        const firstActive = local.merchants.find(m => m.isActive);
+        const firstActive = local.merchants.find(m => {
+          if (!m.isActive) return false;
+          if (merchantType === "bulk") return !m.isSubMerchant;
+          if (merchantType === "retail") return m.isSubMerchant;
+          return true;
+        });
         if (firstActive) {
           setSelectedCountry(local);
           setSelectedMerchant(firstActive);
@@ -71,7 +77,7 @@ export default function BuyVouchersPage() {
         }
       }
     }
-  }, [merchantParam]);
+  }, [merchantParam, merchantType]);
 
   // Post-payment state
   const [remainingMobi, setRemainingMobi] = useState(0);
@@ -468,7 +474,7 @@ export default function BuyVouchersPage() {
           <p className="text-sm text-muted-foreground">≈ ₦{formatNum(totalMobi)}</p>
         </div>
         <Button onClick={goToCountries} disabled={totalItems === 0} className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]">
-          {merchantParam ? "Continue to Retail Merchants" : "Continue to Select Merchant"} <ChevronRight className="h-4 w-4 ml-1" />
+          {merchantParam ? (merchantType === "bulk" ? "Continue to Bulk Merchants" : "Continue to Retail Merchants") : "Continue to Select Merchant"} <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
     </div>
@@ -502,7 +508,7 @@ export default function BuyVouchersPage() {
                 <span className="text-3xl">{local.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-foreground">{local.name}</p>
-                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} {merchantParam ? "retail merchants" : "merchants"}</p>
+                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} {merchantParam ? (merchantType === "bulk" ? "bulk merchants" : "retail merchants") : "merchants"}</p>
                 </div>
                 <Badge className="bg-primary/10 text-primary text-xs">Local</Badge>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -516,7 +522,7 @@ export default function BuyVouchersPage() {
                 <span className="text-2xl">{country.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{country.name}</p>
-                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} {merchantParam ? "retail merchants" : "merchants"}</p>
+                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} {merchantParam ? (merchantType === "bulk" ? "bulk merchants" : "retail merchants") : "merchants"}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -566,7 +572,7 @@ export default function BuyVouchersPage() {
             </button>
             <div className="flex-1 min-w-0">
               <h1 className="text-sm font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
-              <p className="text-[11px] text-muted-foreground">{merchantParam ? "Select a retail merchant" : "Select a merchant"}</p>
+              <p className="text-[11px] text-muted-foreground">{merchantParam ? (merchantType === "bulk" ? "Select a bulk merchant" : "Select a retail merchant") : "Select a merchant"}</p>
             </div>
             {/* Inline compact order summary */}
             <div className="shrink-0 text-right bg-primary/10 rounded-lg px-2.5 py-1.5 border border-primary/20">
@@ -747,8 +753,10 @@ export default function BuyVouchersPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <p className="font-bold text-sm text-foreground">{selectedMerchant.name}</p>
-                {selectedMerchant.isSubMerchant && (
-                  <span className="whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border border-primary/30 text-primary font-medium leading-none">Retail Merchant</span>
+                {merchantType && (
+                  <span className={`whitespace-nowrap text-[11px] px-1.5 py-0.5 rounded-full border font-medium leading-none ${merchantType === "bulk" ? "border-amber-500/30 text-amber-600" : "border-primary/30 text-primary"}`}>
+                    {merchantType === "bulk" ? "Bulk Merchant" : "Retail Merchant"}
+                  </span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{selectedCountry.flag} {selectedCountry.name} • {selectedMerchant.discountPercent}% Discount</p>

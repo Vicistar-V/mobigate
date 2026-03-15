@@ -270,7 +270,7 @@ export default function MerchantHomePage() {
               if (isMajorMerchant) {
                 setShowAccessGate(true);
               } else {
-                navigate(`/buy-vouchers?merchant=${encodeURIComponent(merchant?.name ?? "")}`);
+                navigate(`/buy-vouchers?merchant=${encodeURIComponent(merchant?.name ?? "")}&type=retail`);
               }
             }}
             className="w-full relative overflow-hidden rounded-2xl p-3.5 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-lg active:scale-[0.97] transition-transform touch-manipulation"
