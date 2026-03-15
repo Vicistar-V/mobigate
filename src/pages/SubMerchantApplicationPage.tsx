@@ -279,7 +279,7 @@ export default function SubMerchantApplicationPage() {
                         value={form.mobiShopUrl}
                         onChange={e => updateField("mobiShopUrl", e.target.value)}
                         placeholder="Enter Mobi Shop web address *"
-                        className="h-11 rounded-xl text-sm ml-8"
+                        className="h-11 rounded-xl text-sm ml-6"
                       />
                     )}
                   </div>
