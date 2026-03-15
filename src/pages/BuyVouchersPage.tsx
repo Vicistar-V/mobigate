@@ -522,7 +522,7 @@ export default function BuyVouchersPage() {
                 <span className="text-2xl">{country.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{country.name}</p>
-                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} {merchantParam ? "retail merchants" : "merchants"}</p>
+                  <p className="text-xs text-muted-foreground">{country.currencySymbol} {country.currencyCode} • {country.merchants.length} {merchantParam ? (merchantType === "bulk" ? "bulk merchants" : "retail merchants") : "merchants"}</p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
