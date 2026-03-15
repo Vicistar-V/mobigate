@@ -608,12 +608,16 @@ export function AdminComplaintsTab() {
                       onClick={() => window.open(`/merchant/${current.merchantId}`, '_blank')}
                       className="rounded-xl bg-muted/50 border border-border p-3 w-full text-left touch-manipulation active:scale-[0.98] transition-transform"
                     >
-                      <p className="text-xs text-muted-foreground mb-1">Reported Merchant</p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold text-primary underline underline-offset-2">{current.merchantName}</p>
-                        <ChevronRight className="h-4 w-4 text-primary shrink-0 ml-auto" />
+                      <p className="text-xs text-muted-foreground mb-1.5">Reported Merchant</p>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9 shrink-0 border border-primary/20">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.merchantName)}`} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{current.merchantName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <p className="text-sm font-bold text-primary underline underline-offset-2 flex-1 min-w-0">{current.merchantName}</p>
+                        <ChevronRight className="h-4 w-4 text-primary shrink-0" />
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap mt-1.5">
+                      <div className="flex items-center gap-2 flex-wrap mt-1.5 ml-12">
                         <UserTagBadges userId={current.merchantId} showAdminControls />
                       </div>
                     </button>
