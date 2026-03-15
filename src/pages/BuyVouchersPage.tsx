@@ -46,6 +46,7 @@ export default function BuyVouchersPage() {
   const [searchParams] = useSearchParams();
   const isFundWallet = searchParams.get("source") === "fund-wallet";
   const merchantParam = searchParams.get("merchant");
+  const merchantType = searchParams.get("type") as "bulk" | "retail" | null;
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("vouchers");
