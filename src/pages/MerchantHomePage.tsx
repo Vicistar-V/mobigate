@@ -300,7 +300,7 @@ export default function MerchantHomePage() {
         {isMajorMerchant && (
           <div className="mt-3 px-2">
             <button
-              onClick={() => navigate(`/apply-sub-merchant/${merchantId}`)}
+              onClick={() => navigate(`/apply-sub-merchant/${merchantId}?name=${encodeURIComponent(merchant?.name || "")}&category=${encodeURIComponent(merchant?.category || "General")}`)}
               className="w-full rounded-2xl p-3 border-2 border-primary/30 bg-primary/5 flex items-center gap-3 active:scale-[0.97] transition-transform touch-manipulation"
             >
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">

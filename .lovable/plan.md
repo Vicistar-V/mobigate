@@ -1,33 +1,42 @@
 
 
-## Plan: Fix Merchant Name Not Captured in Re-apply Flow
+## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
 
-### Problem
-When re-applying after a rejected application, the merchant name shows as generic "Merchant" / "General" because:
+### What We're Building
 
-1. **Merchant ID mismatch**: The `merchantId` values in mock applications (e.g., "quickmart", "techhub") don't exist in any merchant data source (`mockMerchants`, `allLocationMerchants`, `merchantCountries`), so all lookups fail.
-2. **Inconsistent state keys**: `SubMerchantVoucherManagement.tsx` passes navigation state as `{ prefill: { merchantName, merchantCity } }` but `SubMerchantApplicationPage.tsx` only reads `(location.state as any)?.previousData` -- so `prefill` data is ignored entirely.
-3. **Fragile fallback**: The fallback `reapplyData?.merchantName || "Merchant"` only works if `previousData` was passed, which doesn't happen from every navigation source.
+A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
 
-### Solution
+### Tab Layout
 
-**File: `src/pages/SubMerchantApplicationPage.tsx`**
-- Read BOTH `previousData` and `prefill` from location state
-- Add merchant name/category as URL search params (`?name=QuickMart+Ltd&category=Retail`) as a durable fallback that survives page refreshes
-- Update the merchant resolution chain: data sources → `previousData` → `prefill` → URL search params → "Merchant" default
+```text
+[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
+```
 
-**File: `src/pages/SubMerchantApplicationStatus.tsx`**
-- Append `?name=${encodeURIComponent(app.merchantName)}&category=Retail` to the re-apply navigation URL
+The Complaints tab will show:
+1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
+2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
+3. **Complaint cards list** — Each card shows:
+   - Category badge + status badge (color-coded)
+   - Merchant name the complaint is against
+   - Truncated description
+   - Reporter info (or "Anonymous")
+   - Submission date + reference number
+   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
+4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
 
-**File: `src/pages/SubMerchantVoucherManagement.tsx`**
-- Append merchant name/category as URL search params to the re-apply navigation URL
-- Standardize state key from `prefill` to `previousData` for consistency
+### Files to Modify/Create
 
-**File: `src/pages/MerchantHomePage.tsx`**
-- Append merchant name to the apply URL search params
+| File | Action |
+|------|--------|
+| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
+| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
 
-**File: `src/pages/MerchantListingPage.tsx`**
-- Append merchant name to the apply URL search params
+### Technical Details
 
-This ensures the merchant name is always available regardless of how the user arrives at the application page.
+- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
+- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
+- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
+- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
+- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
+- All touch targets h-11 minimum, no font size reductions, mobile-only focus
 
