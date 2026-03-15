@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserTagBadges } from "@/components/UserTagBadges";
 import { getSuspensionCount, getBanCount, getDefaultDurationForNth, addOffence } from "@/data/userTags";
 import { useToast } from "@/hooks/use-toast";
@@ -607,12 +608,16 @@ export function AdminComplaintsTab() {
                       onClick={() => window.open(`/merchant/${current.merchantId}`, '_blank')}
                       className="rounded-xl bg-muted/50 border border-border p-3 w-full text-left touch-manipulation active:scale-[0.98] transition-transform"
                     >
-                      <p className="text-xs text-muted-foreground mb-1">Reported Merchant</p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold text-primary underline underline-offset-2">{current.merchantName}</p>
-                        <ChevronRight className="h-4 w-4 text-primary shrink-0 ml-auto" />
+                      <p className="text-xs text-muted-foreground mb-1.5">Reported Merchant</p>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9 shrink-0 border border-primary/20">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.merchantName)}`} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{current.merchantName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <p className="text-sm font-bold text-primary underline underline-offset-2 flex-1 min-w-0">{current.merchantName}</p>
+                        <ChevronRight className="h-4 w-4 text-primary shrink-0" />
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap mt-1.5">
+                      <div className="flex items-center gap-2 flex-wrap mt-1.5 ml-12">
                         <UserTagBadges userId={current.merchantId} showAdminControls />
                       </div>
                     </button>
@@ -627,20 +632,28 @@ export function AdminComplaintsTab() {
                     <div className="rounded-xl bg-muted/50 border border-border p-3 space-y-2">
                       <p className="text-xs font-medium text-muted-foreground">Reporter</p>
                       {current.isAnonymous ? (
-                        <p className="text-sm text-muted-foreground italic">Anonymous report</p>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9 shrink-0 border border-border">
+                            <AvatarFallback className="bg-muted text-muted-foreground text-xs">?</AvatarFallback>
+                          </Avatar>
+                          <p className="text-sm text-muted-foreground italic">Anonymous report</p>
+                        </div>
                       ) : (
                         <>
                           <button
                             onClick={() => window.open(`/profile/${current.merchantId}`, '_blank')}
-                            className="flex items-center gap-2 touch-manipulation active:scale-[0.97] transition-transform w-full text-left rounded-lg p-2 -m-2 hover:bg-muted/50"
+                            className="flex items-center gap-3 touch-manipulation active:scale-[0.97] transition-transform w-full text-left rounded-lg p-2 -m-2 hover:bg-muted/50"
                           >
-                            <User className="h-4 w-4 text-primary shrink-0" />
-                            <span className="text-sm font-medium text-primary underline underline-offset-2">{current.reporterName}</span>
-                            <ChevronRight className="h-4 w-4 text-primary shrink-0 ml-auto" />
+                            <Avatar className="h-9 w-9 shrink-0 border border-primary/20">
+                              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(current.reporterName)}`} />
+                              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{current.reporterName.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm font-medium text-primary underline underline-offset-2">{current.reporterName}</span>
+                              <p className="text-xs text-muted-foreground mt-0.5">{current.reporterEmail}</p>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-primary shrink-0" />
                           </button>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">{current.reporterEmail}</span>
-                          </div>
                         </>
                       )}
                     </div>

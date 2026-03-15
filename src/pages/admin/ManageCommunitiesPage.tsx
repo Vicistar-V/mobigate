@@ -1103,24 +1103,44 @@ function ComplaintDetailDrawer({ complaint, onClose, onStatusChange, onPenalise 
                 </div>
 
                 {/* Community */}
-                <p
-                  className="text-base font-bold mb-1 text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation"
+                <div
+                  className="flex items-center gap-3 cursor-pointer active:opacity-70 touch-manipulation mb-4"
                   onClick={() => { onClose(); navigate("/community"); }}
                 >
-                  {complaint.communityName}
-                </p>
+                  <Avatar className="h-10 w-10 shrink-0 border border-primary/20">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(complaint.communityName)}`} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">{complaint.communityName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-bold text-primary underline underline-offset-2">{complaint.communityName}</p>
+                  </div>
+                </div>
                 <p className="text-sm text-muted-foreground mb-4">{complaint.description}</p>
 
                 {/* Reporter */}
                 <div className="rounded-xl border border-border bg-muted/30 p-3 mb-4">
-                  <p className="text-xs text-muted-foreground mb-1">Reported By</p>
-                  <p
-                    className={`text-sm font-medium ${!complaint.isAnonymous ? "text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation" : ""}`}
-                    onClick={() => { if (!complaint.isAnonymous) { onClose(); navigate("/profile/member-1"); } }}
-                  >
-                    {complaint.isAnonymous ? "Anonymous Reporter" : complaint.reporterName}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Submitted: {complaint.submittedDate}</p>
+                  <p className="text-xs text-muted-foreground mb-1.5">Reported By</p>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9 shrink-0 border border-border">
+                      {complaint.isAnonymous ? (
+                        <AvatarFallback className="bg-muted text-muted-foreground text-xs">?</AvatarFallback>
+                      ) : (
+                        <>
+                          <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(complaint.reporterName)}`} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{complaint.reporterName.charAt(0)}</AvatarFallback>
+                        </>
+                      )}
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-sm font-medium ${!complaint.isAnonymous ? "text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation" : "text-muted-foreground italic"}`}
+                        onClick={() => { if (!complaint.isAnonymous) { onClose(); navigate("/profile/member-1"); } }}
+                      >
+                        {complaint.isAnonymous ? "Anonymous Reporter" : complaint.reporterName}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Submitted: {complaint.submittedDate}</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Resolution notes */}
