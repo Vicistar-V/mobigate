@@ -234,6 +234,7 @@ export default function MerchantVoucherGenerate() {
               <div>
                 <input
                   type="number"
+                  inputMode="numeric"
                   min={1}
                   value={bundleCount}
                   onChange={(e) => {
