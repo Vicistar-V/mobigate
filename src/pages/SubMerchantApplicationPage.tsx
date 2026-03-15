@@ -95,7 +95,7 @@ export default function SubMerchantApplicationPage() {
   if (submitted) {
     return (
       <div className="bg-background min-h-screen flex flex-col">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-5 py-3 flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
@@ -121,18 +121,18 @@ export default function SubMerchantApplicationPage() {
   }
 
   return (
-    <div className="bg-background min-h-screen pb-8">
-      <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+    <div className="bg-background min-h-screen pb-8 w-full overflow-x-hidden">
+      <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-5 py-3 flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0 active:scale-90 touch-manipulation">
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <h1 className="text-base font-bold text-foreground">Apply as Retail Merchant</h1>
-          <p className="text-xs text-muted-foreground">Join {merchant.name}'s network</p>
+          <p className="text-xs text-muted-foreground truncate">Join {merchant.name}'s network</p>
         </div>
       </div>
 
-      <div className="px-4 pt-4 space-y-4">
+      <div className="px-5 pt-4 space-y-4">
         {/* Merchant Info Card */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center gap-3">
           <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -263,7 +263,7 @@ export default function SubMerchantApplicationPage() {
                         value={form.retailShopAddress}
                         onChange={e => updateField("retailShopAddress", e.target.value)}
                         placeholder="Enter your shop address *"
-                        className="h-11 rounded-xl text-sm ml-8"
+                        className="h-11 rounded-xl text-sm ml-6"
                       />
                     )}
                     {selected && opt.value === "online_store" && (
@@ -271,7 +271,7 @@ export default function SubMerchantApplicationPage() {
                         value={form.onlineStoreUrl}
                         onChange={e => updateField("onlineStoreUrl", e.target.value)}
                         placeholder="Enter website or store URL *"
-                        className="h-11 rounded-xl text-sm ml-8"
+                        className="h-11 rounded-xl text-sm ml-6"
                       />
                     )}
                     {selected && opt.value === "mobi_shop" && (
@@ -279,7 +279,7 @@ export default function SubMerchantApplicationPage() {
                         value={form.mobiShopUrl}
                         onChange={e => updateField("mobiShopUrl", e.target.value)}
                         placeholder="Enter Mobi Shop web address *"
-                        className="h-11 rounded-xl text-sm ml-8"
+                        className="h-11 rounded-xl text-sm ml-6"
                       />
                     )}
                   </div>
