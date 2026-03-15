@@ -508,7 +508,7 @@ export default function BuyVouchersPage() {
                 <span className="text-3xl">{local.flag}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-foreground">{local.name}</p>
-                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} {merchantParam ? "retail merchants" : "merchants"}</p>
+                  <p className="text-xs text-muted-foreground">{local.currencySymbol} {local.currencyCode} • {local.merchants.length} {merchantParam ? (merchantType === "bulk" ? "bulk merchants" : "retail merchants") : "merchants"}</p>
                 </div>
                 <Badge className="bg-primary/10 text-primary text-xs">Local</Badge>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
