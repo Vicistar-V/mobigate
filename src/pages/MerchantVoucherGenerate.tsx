@@ -232,7 +232,17 @@ export default function MerchantVoucherGenerate() {
                 <Minus className="h-5 w-5 text-foreground" />
               </button>
               <div>
-                <p className="text-4xl font-black text-foreground">{bundleCount}</p>
+                <input
+                  type="number"
+                  min={1}
+                  value={bundleCount}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val) && val >= 1) setBundleCount(val);
+                    else if (e.target.value === "") setBundleCount(1);
+                  }}
+                  className="text-4xl font-black text-foreground bg-transparent text-center w-24 outline-none border-b-2 border-primary/30 focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
                 <p className="text-xs text-muted-foreground">bundle{bundleCount !== 1 ? "s" : ""}</p>
               </div>
               <button
