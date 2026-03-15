@@ -263,7 +263,7 @@ export default function SubMerchantApplicationPage() {
                         value={form.retailShopAddress}
                         onChange={e => updateField("retailShopAddress", e.target.value)}
                         placeholder="Enter your shop address *"
-                        className="h-11 rounded-xl text-sm ml-8"
+                        className="h-11 rounded-xl text-sm ml-6"
                       />
                     )}
                     {selected && opt.value === "online_store" && (
