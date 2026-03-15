@@ -64,7 +64,12 @@ export default function BuyVouchersPage() {
     if (merchantParam) {
       const local = getLocalCountry();
       if (local) {
-        const firstActive = local.merchants.find(m => m.isActive);
+        const firstActive = local.merchants.find(m => {
+          if (!m.isActive) return false;
+          if (merchantType === "bulk") return !m.isSubMerchant;
+          if (merchantType === "retail") return m.isSubMerchant;
+          return true;
+        });
         if (firstActive) {
           setSelectedCountry(local);
           setSelectedMerchant(firstActive);
@@ -72,7 +77,7 @@ export default function BuyVouchersPage() {
         }
       }
     }
-  }, [merchantParam]);
+  }, [merchantParam, merchantType]);
 
   // Post-payment state
   const [remainingMobi, setRemainingMobi] = useState(0);
