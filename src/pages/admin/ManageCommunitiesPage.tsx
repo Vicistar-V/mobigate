@@ -454,6 +454,7 @@ function CommunityDetailDrawer({ community, onClose }: { community: AdminCommuni
   const [confirmAction, setConfirmAction] = useState<"suspend" | "flag" | "activate" | null>(null);
   const [deactivateConfirmed, setDeactivateConfirmed] = useState(false);
   const [showDeactivateAuth, setShowDeactivateAuth] = useState(false);
+  const [showExecs, setShowExecs] = useState(false);
 
   React.useEffect(() => {
     if (community) {
