@@ -271,7 +271,7 @@ export default function SubMerchantApplicationPage() {
                         value={form.onlineStoreUrl}
                         onChange={e => updateField("onlineStoreUrl", e.target.value)}
                         placeholder="Enter website or store URL *"
-                        className="h-11 rounded-xl text-sm ml-8"
+                        className="h-11 rounded-xl text-sm ml-6"
                       />
                     )}
                     {selected && opt.value === "mobi_shop" && (
