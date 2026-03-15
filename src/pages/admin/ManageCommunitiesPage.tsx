@@ -47,10 +47,11 @@ interface AdminCommunity {
   lastElectionDate?: string;
   isVerified: boolean;
   offenceCount?: number;
+  executives?: { id: string; name: string; position: string }[];
 }
 
 const mockCommunities: AdminCommunity[] = [
-  { id: "c1", name: "Umuahia Progressive Union", type: "Town Union", status: "active", memberCount: 1245, location: "Lagos, Nigeria", createdDate: "2024-03-15", leaderName: "Chief Emeka Obi", leaderTitle: "President", duesCollected: 4500000, walletBalance: 2800000, hasConstitution: true, electionsHeld: 3, lastElectionDate: "2025-11-20", isVerified: true, offenceCount: 0 },
+  { id: "c1", name: "Umuahia Progressive Union", type: "Town Union", status: "active", memberCount: 1245, location: "Lagos, Nigeria", createdDate: "2024-03-15", leaderName: "Chief Emeka Obi", leaderTitle: "President", duesCollected: 4500000, walletBalance: 2800000, hasConstitution: true, electionsHeld: 3, lastElectionDate: "2025-11-20", isVerified: true, offenceCount: 0, executives: [{ id: "exec-1", name: "Chief Emeka Obi", position: "President" }, { id: "exec-2", name: "Dr. Amaka Eze", position: "Vice President" }, { id: "exec-3", name: "Barr. Ngozi Okonkwo", position: "Secretary" }, { id: "exec-4", name: "Mr. Chidi Nnaji", position: "Treasurer" }, { id: "exec-5", name: "Mrs. Ifeoma Udeh", position: "Financial Secretary" }, { id: "exec-6", name: "Engr. Obinna Kalu", position: "PRO" }] },
   { id: "c2", name: "Lagos Igbo Community", type: "Association", status: "active", memberCount: 2890, location: "Lagos, Nigeria", createdDate: "2023-08-10", leaderName: "Dr. Chika Nwosu", leaderTitle: "Chairman", duesCollected: 8200000, walletBalance: 5100000, hasConstitution: true, electionsHeld: 2, lastElectionDate: "2025-09-14", isVerified: true, offenceCount: 0 },
   { id: "c3", name: "Abuja Professional Network", type: "Club", status: "active", memberCount: 567, location: "Abuja, Nigeria", createdDate: "2025-01-20", leaderName: "Engr. Tunde Bakare", leaderTitle: "Coordinator", duesCollected: 1200000, walletBalance: 890000, hasConstitution: true, electionsHeld: 1, lastElectionDate: "2025-06-10", isVerified: true, offenceCount: 1 },
   { id: "c4", name: "Delta State Association", type: "Association", status: "flagged", memberCount: 1890, location: "Warri, Nigeria", createdDate: "2024-05-22", leaderName: "Barr. Oghenero Uvie", leaderTitle: "President", duesCollected: 3400000, walletBalance: 450000, hasConstitution: false, electionsHeld: 4, lastElectionDate: "2025-12-01", isVerified: false, offenceCount: 2 },
@@ -453,6 +454,7 @@ function CommunityDetailDrawer({ community, onClose }: { community: AdminCommuni
   const [confirmAction, setConfirmAction] = useState<"suspend" | "flag" | "activate" | null>(null);
   const [deactivateConfirmed, setDeactivateConfirmed] = useState(false);
   const [showDeactivateAuth, setShowDeactivateAuth] = useState(false);
+  const [showExecs, setShowExecs] = useState(false);
 
   React.useEffect(() => {
     if (community) {
@@ -527,13 +529,67 @@ function CommunityDetailDrawer({ community, onClose }: { community: AdminCommuni
 
             {/* Leadership */}
             <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
-              <p className="text-xs text-muted-foreground mb-1">Leadership</p>
-              <p className="text-sm font-bold">{community.leaderName}</p>
-              <p className="text-xs text-muted-foreground">{community.leaderTitle}</p>
+              <p className="text-xs text-muted-foreground mb-2">Leadership</p>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 shrink-0 border border-primary/20">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(community.leaderName)}`} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">{community.leaderName.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-sm font-bold text-primary underline underline-offset-2 cursor-pointer active:opacity-70 touch-manipulation"
+                    onClick={() => { onClose(); navigate(`/profile/leader-${community.id}`); }}
+                  >
+                    {community.leaderName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{community.leaderTitle}</p>
+                </div>
+                {(community.executives?.length || 0) > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs font-semibold rounded-lg touch-manipulation active:scale-[0.97] shrink-0"
+                    onClick={() => setShowExecs(true)}
+                  >
+                    Others
+                  </Button>
+                )}
+              </div>
               {community.lastElectionDate && (
-                <p className="text-xs text-muted-foreground mt-1">Last election: {community.lastElectionDate}</p>
+                <p className="text-xs text-muted-foreground mt-2 ml-13">Last election: {community.lastElectionDate}</p>
               )}
             </div>
+
+            {/* Executives Drawer */}
+            <Drawer open={showExecs} onOpenChange={setShowExecs}>
+              <DrawerContent className="max-h-[92vh]">
+                <DrawerHeader className="pb-2 border-b border-border">
+                  <DrawerTitle className="text-base font-bold">Executive Leadership</DrawerTitle>
+                </DrawerHeader>
+                <DrawerBody className="overflow-y-auto touch-auto px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-3">{community.name}</p>
+                  <div className="space-y-2">
+                    {(community.executives || []).map((exec) => (
+                      <div
+                        key={exec.id}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card touch-manipulation active:scale-[0.98] cursor-pointer transition-transform"
+                        onClick={() => { setShowExecs(false); onClose(); navigate(`/profile/${exec.id}`); }}
+                      >
+                        <Avatar className="h-10 w-10 shrink-0 border border-primary/20">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(exec.name)}`} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">{exec.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground">{exec.name}</p>
+                          <p className="text-xs text-muted-foreground">{exec.position}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
 
             {/* Compliance */}
             <div className="rounded-xl border border-border bg-muted/30 p-3 mb-5">
