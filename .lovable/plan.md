@@ -1,42 +1,33 @@
 
 
-## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
+## Plan: Fix Bulk vs Retail Merchant Flow Mislabeling
 
-### What We're Building
+### Problem
+When starting a voucher purchase from a **Major (Bulk) Merchant's** dashboard via the access gate, the flow navigates to `/buy-vouchers?merchant=MerchantName`. The code treats `merchantParam` as meaning "retail merchant flow," causing:
 
-A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
+1. **CTA button** says "Continue to Retail Merchants" — should say "Continue to Bulk Merchants"
+2. **Order Summary badge** shows "Retail Merchant" — should show "Bulk Merchant" for bulk merchants
+3. **Country/merchant labels** say "retail merchants" — should be context-aware
+4. **Auto-select logic** picks the first active local merchant blindly, ignoring the merchant type context
 
-### Tab Layout
+### Root Cause
+The access gate (`SubMerchantAccessGateDrawer`) navigates with `?merchant=NAME` but doesn't indicate merchant **type**. `BuyVouchersPage` uses `merchantParam` as a boolean flag assuming it always means "retail," which is incorrect for the bulk merchant flow.
 
-```text
-[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
-```
+### Solution
 
-The Complaints tab will show:
-1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
-2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
-3. **Complaint cards list** — Each card shows:
-   - Category badge + status badge (color-coded)
-   - Merchant name the complaint is against
-   - Truncated description
-   - Reporter info (or "Anonymous")
-   - Submission date + reference number
-   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
-4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
+**File: `src/components/merchant/SubMerchantAccessGateDrawer.tsx`**
+- Add `&type=bulk` to the navigation URL so the buy page knows the source is a bulk merchant
 
-### Files to Modify/Create
+**File: `src/pages/MerchantHomePage.tsx`**
+- For the retail (non-major) merchant direct navigation, add `&type=retail` to the URL
 
-| File | Action |
-|------|--------|
-| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
-| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
+**File: `src/pages/BuyVouchersPage.tsx`**
+- Read new `type` query param (`bulk` | `retail`)
+- Update CTA: `"Continue to Bulk Merchants"` vs `"Continue to Retail Merchants"` vs `"Continue to Select Merchant"`
+- Update country step labels: `"bulk merchants"` vs `"retail merchants"` vs `"merchants"`
+- Update merchant selection header: `"Select a bulk merchant"` vs `"Select a retail merchant"` vs `"Select a merchant"`
+- Update order summary badge: Show `"Bulk Merchant"` or `"Retail Merchant"` based on `type` param (not `isSubMerchant`)
+- Auto-select logic: filter merchants by `isSubMerchant` matching the type param
 
-### Technical Details
-
-- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
-- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
-- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
-- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
-- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
-- All touch targets h-11 minimum, no font size reductions, mobile-only focus
+### No new files needed. Three files modified.
 
