@@ -177,7 +177,7 @@ export default function SubMerchantBuyVouchers() {
   // Step 1: Select denominations + bundle counts
   if (step === "select") {
     return (
-      <div className="bg-background min-h-screen pb-32">
+      <div className="bg-background min-h-screen pb-44">
         <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -285,14 +285,28 @@ export default function SubMerchantBuyVouchers() {
           </div>
         </div>
 
-        {/* Summary footer */}
+        {/* Summary footer with live running total */}
         {selections.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="text-xs text-muted-foreground">
-                <span className="font-bold text-foreground">{selections.length}</span> denomination{selections.length !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{totalBundles}</span> bundle{totalBundles !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{formatNum(totalCards)}</span> cards
-              </div>
+          <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-4 safe-area-bottom">
+            {/* Running total - prominent */}
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-bold text-foreground">Total Voucher Value</p>
+              <p className="text-lg font-black text-primary">M{formatNum(totalRetailValue)}</p>
             </div>
+            {/* Breakdown stats */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs text-muted-foreground">
+                <span className="font-bold text-foreground">{selections.length}</span> denom{selections.length !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{totalBundles}</span> bundle{totalBundles !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{formatNum(totalCards)}</span> cards
+              </div>
+              <p className="text-xs text-muted-foreground">≈ ₦{formatNum(totalRetailValue)}</p>
+            </div>
+            {!meetsMinOrderValue && (
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 mb-2.5">
+                <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                  Min M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} for discount eligibility
+                </p>
+              </div>
+            )}
             <Button
               onClick={() => { setStep("merchant"); window.scrollTo(0, 0); }}
               className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]"
