@@ -57,13 +57,13 @@ export function SubMerchantDiscountSettings() {
             <Slider
               value={[rate * 10]}
               onValueChange={([v]) => setRate(v / 10)}
-              min={1}
+              min={0}
               max={50}
               step={1}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0.1%</span>
+              <span>0%</span>
               <span className="font-semibold text-foreground">≤ 5.0% max</span>
             </div>
 
