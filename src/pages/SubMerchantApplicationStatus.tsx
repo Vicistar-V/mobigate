@@ -229,7 +229,7 @@ const SubMerchantApplicationStatus = () => {
                     {app.status === "rejected" && (
                       <div className="space-y-2">
                         <Button
-                          onClick={() => navigate(`/apply-sub-merchant/${app.merchantId}`, {
+                          onClick={() => navigate(`/apply-sub-merchant/${app.merchantId}?name=${encodeURIComponent(app.merchantName)}&category=Retail`, {
                             state: {
                               reapply: true,
                               previousData: {

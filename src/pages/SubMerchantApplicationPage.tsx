@@ -18,7 +18,9 @@ export default function SubMerchantApplicationPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const reapplyData = (location.state as any)?.previousData;
+  const prefillData = (location.state as any)?.prefill;
 
   // Find merchant info from all data sources
   const quizMerchant = mockMerchants.find(m => m.id === merchantId);
@@ -26,13 +28,17 @@ export default function SubMerchantApplicationPage() {
   const allMerchants = merchantCountries.flatMap(c => c.merchants);
   const mobiMerchant = allMerchants.find(m => m.id === merchantId);
 
+  // Resolution chain: data sources → previousData → prefill → URL params → defaults
+  const fallbackName = reapplyData?.merchantName || prefillData?.merchantName || searchParams.get("name") || "Merchant";
+  const fallbackCategory = reapplyData?.merchantCategory || prefillData?.merchantCategory || searchParams.get("category") || "General";
+
   const merchant = quizMerchant
     ? { id: quizMerchant.id, name: quizMerchant.name, category: quizMerchant.category }
     : locationMerchant
       ? { id: locationMerchant.id, name: locationMerchant.name, category: locationMerchant.category }
       : mobiMerchant
         ? { id: mobiMerchant.id, name: mobiMerchant.name, category: "General" }
-        : { id: merchantId || "unknown", name: reapplyData?.merchantName || "Merchant", category: reapplyData?.merchantCategory || "General" };
+        : { id: merchantId || "unknown", name: fallbackName, category: fallbackCategory };
 
   const [form, setForm] = useState({
     fullName: reapplyData?.fullName || "",

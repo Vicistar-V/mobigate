@@ -615,9 +615,9 @@ export default function SubMerchantVoucherManagement() {
                                 className="w-full h-12 rounded-xl text-sm font-semibold gap-2 touch-manipulation active:scale-[0.97]"
                                 onClick={() => {
                                   setSelectedApp(null);
-                                  navigate(`/apply-sub-merchant/${selectedApp.merchantId || "pm-004"}`, {
+                                  navigate(`/apply-sub-merchant/${selectedApp.merchantId || "pm-004"}?name=${encodeURIComponent(selectedApp.merchantName)}&category=Retail`, {
                                     state: {
-                                      prefill: {
+                                      previousData: {
                                         merchantName: selectedApp.merchantName,
                                         merchantCity: selectedApp.merchantCity,
                                       },

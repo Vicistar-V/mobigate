@@ -287,7 +287,7 @@ export default function MerchantListingPage() {
                 merchantType={merchantType}
                 borderClass={config.borderClass}
                 discountLabel={config.discountLabel}
-                onClick={() => navigate(applyMode ? `/apply-sub-merchant/${merchant.id}` : `/merchant-home/${merchant.id}`)}
+                onClick={() => navigate(applyMode ? `/apply-sub-merchant/${merchant.id}?name=${encodeURIComponent(merchant.name)}&category=${encodeURIComponent(merchant.category)}` : `/merchant-home/${merchant.id}`)}
               />
             ))
           )}
