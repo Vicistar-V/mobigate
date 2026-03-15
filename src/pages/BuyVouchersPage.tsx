@@ -572,7 +572,7 @@ export default function BuyVouchersPage() {
             </button>
             <div className="flex-1 min-w-0">
               <h1 className="text-sm font-bold text-foreground">{selectedCountry.flag} {selectedCountry.name}</h1>
-              <p className="text-[11px] text-muted-foreground">{merchantParam ? "Select a retail merchant" : "Select a merchant"}</p>
+              <p className="text-[11px] text-muted-foreground">{merchantParam ? (merchantType === "bulk" ? "Select a bulk merchant" : "Select a retail merchant") : "Select a merchant"}</p>
             </div>
             {/* Inline compact order summary */}
             <div className="shrink-0 text-right bg-primary/10 rounded-lg px-2.5 py-1.5 border border-primary/20">
