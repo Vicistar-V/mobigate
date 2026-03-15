@@ -86,7 +86,7 @@ export function MerchantSelectionStep({
                 <Store className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground">
                   <strong>Mobi-Merchants</strong> are accredited shops that sell Mobi Vouchers. 
-                  Each merchant offers unique <strong>discount rates</strong> (0.1% - 10.0%).
+                  Each merchant offers unique <strong>discount rates</strong> (0% - 10.0%).
                 </p>
               </div>
             </div>

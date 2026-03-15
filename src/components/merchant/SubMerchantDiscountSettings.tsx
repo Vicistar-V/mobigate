@@ -57,13 +57,13 @@ export function SubMerchantDiscountSettings() {
             <Slider
               value={[rate * 10]}
               onValueChange={([v]) => setRate(v / 10)}
-              min={1}
+              min={0}
               max={50}
               step={1}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0.1%</span>
+              <span>0%</span>
               <span className="font-semibold text-foreground">≤ 5.0% max</span>
             </div>
 
@@ -79,10 +79,10 @@ export function SubMerchantDiscountSettings() {
                     const val = e.target.value.replace(/[^0-9.]/g, "");
                     const num = parseFloat(val);
                     if (!isNaN(num)) {
-                      const clamped = Math.min(5.0, Math.max(0.1, Math.round(num * 10) / 10));
+                      const clamped = Math.min(5.0, Math.max(0, Math.round(num * 10) / 10));
                       setRate(clamped);
-                    } else if (val === "" || val === "0") {
-                      setRate(0.1);
+                    } else if (val === "") {
+                      setRate(0);
                     }
                   }}
                   className="h-9 text-sm font-mono font-semibold text-center rounded-lg pr-6"
@@ -95,7 +95,7 @@ export function SubMerchantDiscountSettings() {
           <div className="flex gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              This is the discount you offer to end-users who purchase vouchers through you. Retail merchants can set discounts between <span className="font-semibold text-foreground">0.1%</span> and <span className="font-semibold text-foreground">5.0%</span> maximum. A higher discount attracts more customers.
+              This is the discount you offer to end-users who purchase vouchers through you. Retail merchants can set discounts between <span className="font-semibold text-foreground">0%</span> and <span className="font-semibold text-foreground">5.0%</span> maximum. A higher discount attracts more customers.
             </p>
           </div>
 
