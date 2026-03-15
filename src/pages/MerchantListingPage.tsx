@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home, Package, ShoppingBag, Warehouse, Users } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
@@ -15,54 +15,13 @@ import {
   type LocationMerchant,
 } from "@/data/nigerianLocationsData";
 
-type ViewMode = "country" | "state" | "lga" | "city";
-type MerchantType = "retail" | "bulk";
-
-const viewModeConfig: Record<ViewMode, { label: string; icon: any; description: string }> = {
-  country: { label: "By Country", icon: Globe, description: "Browse merchants grouped by country" },
-  state: { label: "By State", icon: Building2, description: "Browse merchants in Nigerian states" },
-  lga: { label: "By LGA", icon: Map, description: "Browse merchants by local government area" },
-  city: { label: "By City", icon: Home, description: "Browse merchants by city or town" },
-};
-
-const typeConfig: Record<MerchantType, {
-  title: string;
-  subtitle: string;
-  icon: any;
-  accentClass: string;
-  borderClass: string;
-  badgeLabel: string;
-  emptyTitle: string;
-  emptySubtitle: string;
-  discountLabel: string;
-}> = {
-  retail: {
-    title: "Retail Merchants",
-    subtitle: "Individual & small-scale voucher resellers near you",
-    icon: ShoppingBag,
-    accentClass: "text-emerald-600",
-    borderClass: "border-l-emerald-500/70",
-    badgeLabel: "Retail",
-    emptyTitle: "No retail merchants found",
-    emptySubtitle: "Try broadening your location filters",
-    discountLabel: "Retail Discount",
-  },
-  bulk: {
-    title: "Bulk Merchants",
-    subtitle: "Major distributors & wholesale voucher suppliers",
-    icon: Warehouse,
-    accentClass: "text-primary",
-    borderClass: "border-l-primary/70",
-    badgeLabel: "Bulk",
-    emptyTitle: "No bulk merchants found",
-    emptySubtitle: "Try broadening your location filters",
-    discountLabel: "Bulk Discount",
-  },
-};
+...
 
 export default function MerchantListingPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pendingFormData = (location.state as { formData?: Record<string, unknown> } | null)?.formData;
 
   const applyMode = searchParams.get("mode") === "apply";
   const merchantType: MerchantType = (searchParams.get("type") as MerchantType) || "bulk";
