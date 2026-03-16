@@ -231,9 +231,12 @@ export default function MerchantApplication() {
         if (draft.directors?.length) {
           setDirectors(draft.directors.map((d: any) => ({ name: d.name || "", address: d.address || "", photo: null })));
         }
-        setAddress1(draft.address1 || ""); setAddress2(draft.address2 || ""); setAddress3(draft.address3 || "");
-        setAffiliate1Name(draft.affiliate1Name || ""); setAffiliate1Address(draft.affiliate1Address || "");
-        setAffiliate2Name(draft.affiliate2Name || ""); setAffiliate2Address(draft.affiliate2Address || "");
+        if (draft.addresses?.length) {
+          setAddresses(draft.addresses);
+        }
+        if (draft.affiliates?.length) {
+          setAffiliates(draft.affiliates.map((a: any) => ({ name: a.name || "", address: a.address || "" })));
+        }
         setEmailAddress(draft.emailAddress || ""); setWebsite(draft.website || "");
         setPhone1(draft.phone1 || ""); setPhone2(draft.phone2 || "");
         if (draft.bankAccounts?.length) {
