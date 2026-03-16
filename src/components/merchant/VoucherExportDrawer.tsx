@@ -8,8 +8,10 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Printer, Package, ListChecks, Check } from "lucide-react";
+import { Printer, Package, ListChecks, Check, Download } from "lucide-react";
 import { VoucherBatch, formatNum } from "@/data/merchantVoucherData";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface VoucherPrintDrawerProps {
   open: boolean;
