@@ -205,19 +205,7 @@ export default function MerchantApplication() {
     } catch {}
   }, []);
 
-  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <div className="border-b border-border pb-1 mb-3">
-      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{children}</p>
-    </div>
-  );
-
-  const FieldRow = ({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) => (
-    <div className="space-y-1">
-      <Label className="text-xs font-medium">{label}</Label>
-      {children}
-      {hint && <p className="text-[10px] text-muted-foreground">{hint}</p>}
-    </div>
-  );
+  // SectionTitle and FieldRow moved outside component to prevent re-render focus loss
 
   if (submitted) {
     return (
