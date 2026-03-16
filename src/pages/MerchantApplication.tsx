@@ -137,8 +137,8 @@ export default function MerchantApplication() {
   const [phone2, setPhone2] = useState("");
 
   // Banking (dynamic list)
-  const [bankAccounts, setBankAccounts] = useState<{ acct: string; name: string; branch: string }[]>([
-    { acct: "", name: "", branch: "" },
+  const [bankAccounts, setBankAccounts] = useState<{ acct: string; acctName: string; name: string; branch: string }[]>([
+    { acct: "", acctName: "", name: "", branch: "" },
   ]);
 
   const updateBankAccount = (index: number, field: "acct" | "name" | "branch", value: string) => {
