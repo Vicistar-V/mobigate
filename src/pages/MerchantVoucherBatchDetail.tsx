@@ -227,7 +227,7 @@ export default function MerchantVoucherBatchDetail() {
   }
 
   return (
-    <div className="bg-background min-h-screen pb-6">
+    <div className="bg-background min-h-screen pb-6 overflow-x-hidden">
       {/* Header */}
       <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
         <div className="px-4 py-3 flex items-center gap-3">
@@ -270,18 +270,18 @@ export default function MerchantVoucherBatchDetail() {
           ))}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
+        {/* Action Buttons — stacked for mobile */}
+        <div className="grid grid-cols-2 gap-2">
           {availableCardCount > 0 && (
             <Button onClick={() => setPrintDrawerOpen(true)} variant="outline"
-              className="flex-1 h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97]">
-              <Printer className="h-4 w-4 mr-2" /> Print Cards ({availableCardCount})
+              className="h-11 rounded-xl text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5 touch-manipulation active:scale-[0.97] min-w-0">
+              <Printer className="h-4 w-4 mr-1.5 shrink-0" /> <span className="truncate">Print Cards ({availableCardCount})</span>
             </Button>
           )}
           {batchInvalidatable.length > 0 && (
             <Button onClick={() => setInvalidateTarget({ type: "batch" })} variant="outline"
-              className="flex-1 h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97]">
-              <ShieldAlert className="h-4 w-4 mr-2" /> Invalidate ({batchInvalidatable.length})
+              className="h-11 rounded-xl text-xs font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 touch-manipulation active:scale-[0.97] min-w-0">
+              <ShieldAlert className="h-4 w-4 mr-1.5 shrink-0" /> <span className="truncate">Invalidate ({batchInvalidatable.length})</span>
             </Button>
           )}
         </div>
