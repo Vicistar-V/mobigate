@@ -86,16 +86,39 @@ export default function MerchantApplication() {
     setDirectors(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Other addresses
-  const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
-  const [address3, setAddress3] = useState("");
+  // Other addresses (dynamic list)
+  const [addresses, setAddresses] = useState<string[]>([""]);
 
-  // Affiliates
-  const [affiliate1Name, setAffiliate1Name] = useState("");
-  const [affiliate1Address, setAffiliate1Address] = useState("");
-  const [affiliate2Name, setAffiliate2Name] = useState("");
-  const [affiliate2Address, setAffiliate2Address] = useState("");
+  const updateAddress = (index: number, value: string) => {
+    setAddresses(prev => prev.map((a, i) => i === index ? value : a));
+  };
+
+  const addAddress = () => {
+    setAddresses(prev => [...prev, ""]);
+  };
+
+  const removeAddress = (index: number) => {
+    if (addresses.length <= 1) return;
+    setAddresses(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Affiliates (dynamic list)
+  const [affiliates, setAffiliates] = useState<{ name: string; address: string }[]>([
+    { name: "", address: "" },
+  ]);
+
+  const updateAffiliate = (index: number, field: "name" | "address", value: string) => {
+    setAffiliates(prev => prev.map((a, i) => i === index ? { ...a, [field]: value } : a));
+  };
+
+  const addAffiliate = () => {
+    setAffiliates(prev => [...prev, { name: "", address: "" }]);
+  };
+
+  const removeAffiliate = (index: number) => {
+    if (affiliates.length <= 1) return;
+    setAffiliates(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Contact
   const [emailAddress, setEmailAddress] = useState("");
