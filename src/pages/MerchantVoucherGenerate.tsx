@@ -464,7 +464,7 @@ export default function MerchantVoucherGenerate() {
                   <p className="text-xs text-destructive font-semibold">Insufficient balance</p>
                   <p className="text-xs text-muted-foreground">You need ₦{formatNum(grandTotal - walletBalance)} more</p>
                   <Button
-                    onClick={() => navigate("/merchant-wallet-fund")}
+                    onClick={() => navigate("/merchant-wallet-fund?returnTo=/merchant-voucher-generate")}
                     size="sm"
                     variant="outline"
                     className="mt-2 h-8 text-xs border-destructive/30 text-destructive"

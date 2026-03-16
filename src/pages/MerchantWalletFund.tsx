@@ -101,10 +101,10 @@ export default function MerchantWalletFund() {
           </div>
         </div>
         <Button
-          onClick={() => navigate("/merchant-voucher-management")}
+          onClick={() => navigate(returnTo || "/merchant-voucher-management")}
           className="w-full h-12 rounded-xl text-sm font-semibold bg-primary hover:bg-primary/90 touch-manipulation active:scale-[0.97]"
         >
-          Back to Dashboard
+          {returnTo ? "Continue to Vouchers" : "Back to Dashboard"}
         </Button>
       </div>
     );
