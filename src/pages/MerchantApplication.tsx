@@ -206,8 +206,8 @@ export default function MerchantApplication() {
     setMerchantName(""); setBusinessProfile(""); setDba(""); setRegisteredOffice("");
     setCompanyRegNumber(""); setRegAuthority(""); setCountryOfReg(""); setTin("");
     setDirectors([{ name: "", address: "", photo: null }]);
-    setAddress1(""); setAddress2(""); setAddress3("");
-    setAffiliate1Name(""); setAffiliate1Address(""); setAffiliate2Name(""); setAffiliate2Address("");
+    setAddresses([""]);
+    setAffiliates([{ name: "", address: "" }]);
     setEmailAddress(""); setWebsite(""); setPhone1(""); setPhone2("");
     setBankAccounts([{ acct: "", name: "", branch: "" }]);
     setAcceptedPolicies(false);
