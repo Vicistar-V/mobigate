@@ -138,7 +138,8 @@ export default function IndividualMerchantApplication() {
     setVerifications(updated);
   };
 
-  const isFormValid = firstName && lastName && gender && dobDay && dobMonth && dobYear && nationality && phone1 && email && acceptedPolicies;
+  const hasValidBank = bankEntries.some(b => b.bankName.trim() && b.accountNumber.trim());
+  const isFormValid = firstName && lastName && gender && dobDay && dobMonth && dobYear && nationality && phone1 && email && acceptedPolicies && hasValidBank;
 
   const totalFee = waiverMode ? 100000 : 50000; // Application fee + waiver fee if applicable
 
@@ -447,7 +448,7 @@ export default function IndividualMerchantApplication() {
         {/* ─── BANKING INFORMATION ─── */}
         <Card>
           <CardContent className="p-4 space-y-3">
-            <SectionHeader icon={Landmark} title="Banking Information" />
+            <SectionHeader icon={Landmark} title="Banking Information *" />
             {bankEntries.map((bank, i) => (
               <div key={i} className="space-y-2 p-3 rounded-lg border border-border/60 bg-muted/20 relative">
                 {bankEntries.length > 1 && (
