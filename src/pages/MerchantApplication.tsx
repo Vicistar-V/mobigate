@@ -146,7 +146,7 @@ export default function MerchantApplication() {
   };
 
   const addBankAccount = () => {
-    setBankAccounts(prev => [...prev, { acct: "", name: "", branch: "" }]);
+    setBankAccounts(prev => [...prev, { acct: "", acctName: "", name: "", branch: "" }]);
   };
 
   const removeBankAccount = (index: number) => {
