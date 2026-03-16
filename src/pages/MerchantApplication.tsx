@@ -436,22 +436,22 @@ export default function MerchantApplication() {
                 <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
                   <Card>
                     <CollapsibleTrigger asChild>
-                      <div className="flex items-center justify-between p-3 cursor-pointer touch-manipulation">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <Shield className="h-4 w-4 text-primary shrink-0" />
-                          <span className="text-sm font-semibold">Requirements</span>
+                      <div className="flex items-center justify-between p-4 cursor-pointer touch-manipulation">
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <Shield className="h-5 w-5 text-primary shrink-0" />
+                          <span className="text-base font-semibold">Requirements</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {!requirementsOpen && (
-                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${allMet ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-amber-500/15 text-amber-700 dark:text-amber-400"}`}>
+                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold ${allMet ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-amber-500/15 text-amber-700 dark:text-amber-400"}`}>
                               {allMet ? (
-                                <><CheckCircle className="h-4 w-4" /> All Met</>
+                                <><CheckCircle className="h-5 w-5" /> All Met</>
                               ) : (
-                                <><Clock className="h-4 w-4" /> {metCount}/{eligItems.length} Met</>
+                                <><Clock className="h-5 w-5" /> {metCount}/{eligItems.length} Met</>
                               )}
                             </div>
                           )}
-                          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
+                          <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
                         </div>
                       </div>
                     </CollapsibleTrigger>
