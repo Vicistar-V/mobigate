@@ -1,63 +1,42 @@
 
 
-## Plan: Multi-Denomination Merchant Voucher Generation
+## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
 
-### Problem
-The merchant voucher generation flow (`MerchantVoucherGenerate.tsx`) only allows selecting **one denomination** per generation. The sub-merchant buy flow already supports multi-denomination selection with per-item bundle counts. The merchant flow needs the same capability, with **tiered discounts calculated independently per denomination**.
+### What We're Building
 
-### How It Works Today
-- **Merchant Generate**: Single denomination → bundle count step → summary → process → complete (609 lines, 5-step wizard)
-- **Sub-Merchant Buy**: Multi-denomination with inline bundle counts → merchant selection → summary → process → success
+A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
 
-### Proposed Changes
+### Tab Layout
 
-**File: `src/pages/MerchantVoucherGenerate.tsx`** (full rewrite of flow logic)
-
-1. **Replace single selection with multi-selection state**
-   - Remove `selectedDenom` (single) and `bundleCount` (single)
-   - Add `selections: { denomination: RechargeVoucher; bundleCount: number }[]` array
-   - Add toggle/update/remove helpers (same pattern as `SubMerchantBuyVouchers`)
-
-2. **Merge Steps 1 & 2 into one "Select & Configure" step**
-   - Denomination cards become tappable toggles (multi-select)
-   - When selected, expand inline bundle count controls (+/- stepper + input + remove button) — same UX as sub-merchant
-   - Sticky footer shows live running total (total value, denom count, bundle count, card count)
-   - Min order value warning per denomination or globally as needed
-
-3. **Remove the separate "bundles" step**
-   - Flow becomes: `select` → `summary` → `processing` → `complete` (4 steps)
-
-4. **Per-denomination discount calculation**
-   - Each denomination's discount is computed independently using `calculateBulkDiscount(denom.mobiValue, bundleCount)`
-   - Each denomination's subtotal is checked against `MIN_DISCOUNT_ORDER_VALUE` separately
-   - Summary shows per-line discount rates and amounts
-   - Grand totals aggregate all lines
-
-5. **Update Summary step**
-   - Show each denomination as a line item with its own discount percentage and amount
-   - Show aggregated totals (total bundles, cards, subtotal, total discounts, final total)
-
-6. **Update Complete/Receipt step**
-   - Receipt lists all denominations with per-line costs
-   - Print receipt includes all denomination rows
-
-7. **Update Processing step**
-   - Reference total cards across all denominations
-
-### Discount Logic (per denomination, independent)
 ```text
-For each selected denomination:
-  subtotal = bundleCount × 100 × denomination
-  tieredDiscount = getTieredDiscount(bundleCount)
-  if subtotal >= MIN_DISCOUNT_ORDER_VALUE:
-    apply tieredDiscount.discountPercent
-  else:
-    no discount for this denomination
+[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
 ```
 
-### UX Pattern (matching sub-merchant)
-- Tap denomination card to toggle selection
-- When selected: inline bundle count controls appear below the card
-- Remove button (trash icon) to deselect
-- Sticky footer with live running total and "Review Order" CTA
+The Complaints tab will show:
+1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
+2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
+3. **Complaint cards list** — Each card shows:
+   - Category badge + status badge (color-coded)
+   - Merchant name the complaint is against
+   - Truncated description
+   - Reporter info (or "Anonymous")
+   - Submission date + reference number
+   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
+4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
+
+### Files to Modify/Create
+
+| File | Action |
+|------|--------|
+| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
+| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
+
+### Technical Details
+
+- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
+- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
+- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
+- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
+- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
+- All touch targets h-11 minimum, no font size reductions, mobile-only focus
 

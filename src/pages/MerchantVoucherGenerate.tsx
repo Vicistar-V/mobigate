@@ -1,19 +1,36 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Check, Sparkles, CreditCard, ChevronRight, Wallet, AlertTriangle, Printer, Receipt } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Check, Sparkles, CreditCard, ChevronRight, Wallet, AlertTriangle, Printer, Receipt, Trash2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { rechargeVouchers, RechargeVoucher } from "@/data/rechargeVouchersData";
 import {
   calculateBulkDiscount,
-  getDiscountForBundles,
   initialMerchantWalletBalance,
   formatNum,
   generateBatchNumber,
 } from "@/data/merchantVoucherData";
-import { platformVoucherDiscountSettings, getTieredDiscount, MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
+import { getTieredDiscount, MIN_DISCOUNT_ORDER_VALUE, platformVoucherDiscountSettings } from "@/data/platformSettingsData";
 
-type Step = "denomination" | "bundles" | "summary" | "processing" | "complete";
+type Step = "select" | "summary" | "processing" | "complete";
+
+interface VoucherSelection {
+  denomination: RechargeVoucher;
+  bundleCount: number;
+}
+
+interface LineItemCalc {
+  denomination: RechargeVoucher;
+  bundleCount: number;
+  totalCards: number;
+  subtotal: number;
+  meetsMinOrder: boolean;
+  discountPercent: number;
+  discountAmount: number;
+  total: number;
+  tier: number;
+  tierLabel: string;
+}
 
 const PROCESSING_MESSAGES = [
   "Initializing generation...",
@@ -25,9 +42,8 @@ const PROCESSING_MESSAGES = [
 
 export default function MerchantVoucherGenerate() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("denomination");
-  const [selectedDenom, setSelectedDenom] = useState<RechargeVoucher | null>(null);
-  const [bundleCount, setBundleCount] = useState(1);
+  const [step, setStep] = useState<Step>("select");
+  const [selections, setSelections] = useState<VoucherSelection[]>([]);
   const [processingMsg, setProcessingMsg] = useState(0);
   const [walletBalance] = useState(initialMerchantWalletBalance);
   const [receiptData] = useState(() => ({
@@ -36,17 +52,68 @@ export default function MerchantVoucherGenerate() {
     dateTime: new Date(),
   }));
 
-  const lowTier = rechargeVouchers.filter(v => v.tier === "low");
-  const midTier = rechargeVouchers.filter(v => v.tier === "mid");
-  const highTier = rechargeVouchers.filter(v => v.tier === "high");
+  const lowTier = rechargeVouchers.filter(v => v.tier === "low" && v.isActive);
+  const midTier = rechargeVouchers.filter(v => v.tier === "mid" && v.isActive);
+  const highTier = rechargeVouchers.filter(v => v.tier === "high" && v.isActive);
 
-  const discount = selectedDenom ? calculateBulkDiscount(selectedDenom.mobiValue, bundleCount) : null;
-  const currentTier = getDiscountForBundles(bundleCount);
-  const insufficientBalance = discount ? walletBalance < discount.total : false;
+  // Selection helpers
+  const isSelected = (id: string) => selections.some(s => s.denomination.id === id);
+  const getSelection = (id: string) => selections.find(s => s.denomination.id === id);
+
+  const toggleDenom = (v: RechargeVoucher) => {
+    if (isSelected(v.id)) {
+      setSelections(prev => prev.filter(s => s.denomination.id !== v.id));
+    } else {
+      setSelections(prev => [...prev, { denomination: v, bundleCount: 1 }]);
+    }
+  };
+
+  const updateBundleCount = (id: string, delta: number) => {
+    setSelections(prev => prev.map(s =>
+      s.denomination.id === id ? { ...s, bundleCount: Math.max(1, s.bundleCount + delta) } : s
+    ));
+  };
+
+  const setBundleCountDirect = (id: string, val: number) => {
+    setSelections(prev => prev.map(s =>
+      s.denomination.id === id ? { ...s, bundleCount: val } : s
+    ));
+  };
+
+  // Per-denomination discount calculation
+  const lineItems: LineItemCalc[] = useMemo(() => {
+    return selections.map(sel => {
+      const disc = calculateBulkDiscount(sel.denomination.mobiValue, sel.bundleCount);
+      const subtotal = disc.subtotal;
+      const meetsMinOrder = subtotal >= MIN_DISCOUNT_ORDER_VALUE;
+      const tiered = getTieredDiscount(sel.bundleCount);
+      const discountPercent = meetsMinOrder ? disc.discountPercent : 0;
+      const discountAmount = meetsMinOrder ? disc.discountAmount : 0;
+      const total = meetsMinOrder ? disc.total : subtotal;
+      return {
+        denomination: sel.denomination,
+        bundleCount: sel.bundleCount,
+        totalCards: disc.totalCards,
+        subtotal,
+        meetsMinOrder,
+        discountPercent,
+        discountAmount,
+        total,
+        tier: tiered.tier,
+        tierLabel: tiered.tierLabel,
+      };
+    });
+  }, [selections]);
+
+  const totalBundles = selections.reduce((sum, s) => sum + s.bundleCount, 0);
+  const totalCards = totalBundles * 100;
+  const grandSubtotal = lineItems.reduce((sum, li) => sum + li.subtotal, 0);
+  const grandDiscount = lineItems.reduce((sum, li) => sum + li.discountAmount, 0);
+  const grandTotal = lineItems.reduce((sum, li) => sum + li.total, 0);
+  const insufficientBalance = grandTotal > walletBalance;
 
   const handleBack = () => {
-    if (step === "bundles") setStep("denomination");
-    else if (step === "summary") setStep("bundles");
+    if (step === "summary") setStep("select");
     else navigate(-1);
     window.scrollTo(0, 0);
   };
@@ -71,7 +138,11 @@ export default function MerchantVoucherGenerate() {
   }, [step]);
 
   const handlePrintReceipt = useCallback(() => {
-    if (!selectedDenom || !discount) return;
+    const denomRows = lineItems.map(li => `
+      <div class="receipt-row"><span class="label">M${formatNum(li.denomination.mobiValue)} × ${li.bundleCount} bundle${li.bundleCount !== 1 ? "s" : ""}</span><span class="val">₦${formatNum(li.subtotal)}</span></div>
+      ${li.discountPercent > 0 ? `<div class="receipt-row"><span class="label" style="color:green">  Discount (${li.discountPercent}%)</span><span class="val" style="color:green">-₦${formatNum(li.discountAmount)}</span></div>` : ""}
+    `).join("");
+
     const printDiv = document.createElement("div");
     printDiv.id = "receipt-print-area";
     printDiv.innerHTML = `
@@ -80,12 +151,7 @@ export default function MerchantVoucherGenerate() {
           body > *:not(#receipt-print-area) { display: none !important; }
           #receipt-print-area { display: block !important; }
         }
-        #receipt-print-area {
-          font-family: 'Courier New', monospace;
-          max-width: 80mm;
-          margin: 0 auto;
-          padding: 8mm;
-        }
+        #receipt-print-area { font-family: 'Courier New', monospace; max-width: 80mm; margin: 0 auto; padding: 8mm; }
         .receipt-title { text-align: center; font-size: 14pt; font-weight: 900; margin-bottom: 4mm; border-bottom: 2px dashed #000; padding-bottom: 4mm; }
         .receipt-row { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 2mm; }
         .receipt-row .label { color: #555; }
@@ -101,266 +167,195 @@ export default function MerchantVoucherGenerate() {
       <div class="receipt-row"><span class="label">Time</span><span class="val">${receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}</span></div>
       <div class="receipt-row"><span class="label">Merchant ID</span><span class="val">0001</span></div>
       <div class="receipt-divider"></div>
-      <div class="receipt-row"><span class="label">Denomination</span><span class="val">M${formatNum(selectedDenom.mobiValue)}</span></div>
-      <div class="receipt-row"><span class="label">Bundles</span><span class="val">${bundleCount}</span></div>
-      <div class="receipt-row"><span class="label">Total Cards</span><span class="val">${formatNum(discount.totalCards)}</span></div>
+      ${denomRows}
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="label">Total Bundles</span><span class="val">${totalBundles}</span></div>
+      <div class="receipt-row"><span class="label">Total Cards</span><span class="val">${formatNum(totalCards)}</span></div>
       <div class="receipt-row"><span class="label">Batch Number</span><span class="val">${receiptData.batchNumber}</span></div>
       <div class="receipt-divider"></div>
-      <div class="receipt-row"><span class="label">Subtotal</span><span class="val">₦${formatNum(discount.subtotal)}</span></div>
-      ${discount.discountPercent > 0 ? `<div class="receipt-row"><span class="label">Discount (${discount.discountPercent}%)</span><span class="val">-₦${formatNum(discount.discountAmount)}</span></div>` : ''}
-      <div class="receipt-divider"></div>
-      <div class="receipt-total">TOTAL: ₦${formatNum(discount.total)}</div>
-      <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(walletBalance - discount.total)}</span></div>
+      <div class="receipt-row"><span class="label">Subtotal</span><span class="val">₦${formatNum(grandSubtotal)}</span></div>
+      ${grandDiscount > 0 ? `<div class="receipt-row"><span class="label">Total Discount</span><span class="val" style="color:green">-₦${formatNum(grandDiscount)}</span></div>` : ""}
+      <div class="receipt-total">TOTAL: ₦${formatNum(grandTotal)}</div>
+      <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(walletBalance - grandTotal)}</span></div>
       <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
     `;
     printDiv.style.display = "none";
     document.body.appendChild(printDiv);
-
-    const cleanup = () => {
-      document.body.removeChild(printDiv);
-      window.removeEventListener("afterprint", cleanup);
-    };
+    const cleanup = () => { document.body.removeChild(printDiv); window.removeEventListener("afterprint", cleanup); };
     window.addEventListener("afterprint", cleanup);
     printDiv.style.display = "block";
     setTimeout(() => window.print(), 100);
-  }, [selectedDenom, discount, bundleCount, receiptData, walletBalance]);
+  }, [lineItems, totalBundles, totalCards, grandSubtotal, grandDiscount, grandTotal, receiptData, walletBalance]);
 
-  // ─── Denomination Selection ───
-  const renderDenomCard = (v: RechargeVoucher) => {
-    const isSelected = selectedDenom?.id === v.id;
-    return (
-      <div
-        key={v.id}
-        onClick={() => setSelectedDenom(v)}
-        className={`relative rounded-xl border-2 p-3 transition-all duration-150 touch-manipulation active:scale-[0.96] cursor-pointer ${
-          isSelected ? "border-primary bg-primary/5 shadow-md" : "border-border/50 bg-card hover:border-border"
-        }`}
-      >
-        {v.isPopular && (
-          <div className="absolute -top-2 -right-2">
-            <Badge className="bg-amber-500 text-white text-xs px-1.5 py-0 h-5 gap-0.5">
-              <Sparkles className="h-3 w-3" /> Hot
-            </Badge>
-          </div>
-        )}
-        {isSelected && (
-          <div className="absolute top-1.5 left-1.5 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-            <Check className="h-3 w-3 text-primary-foreground" />
-          </div>
-        )}
-        <div className="text-center pt-1">
-          <p className="text-xs text-muted-foreground mb-0.5">Mobi</p>
-          <p className={`font-bold ${v.mobiValue >= 100000 ? "text-sm" : "text-base"} text-foreground`}>
-            M{formatNum(v.mobiValue)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">≈ ₦{formatNum(v.ngnPrice)}/card</p>
-        </div>
-      </div>
-    );
-  };
+  // ─── Step 1: Select Denominations & Bundle Counts ───
+  if (step === "select") {
+    const renderDenomCard = (v: RechargeVoucher) => {
+      const selected = isSelected(v.id);
+      const sel = getSelection(v.id);
+      const li = selected ? lineItems.find(l => l.denomination.id === v.id) : null;
 
-  const renderTier = (label: string, vouchers: RechargeVoucher[], desc: string) => (
-    <div className="mb-5" key={label}>
-      <div className="flex items-center justify-between mb-2 px-1">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</h3>
-        <span className="text-xs text-muted-foreground">{desc}</span>
-      </div>
-      <div className="grid grid-cols-2 gap-2.5">
-        {vouchers.map(renderDenomCard)}
-      </div>
-    </div>
-  );
-
-  if (step === "denomination") {
-    return (
-      <div className="bg-background min-h-screen pb-28">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
-          <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
-            <ArrowLeft className="h-5 w-5 text-foreground" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-base font-bold text-foreground">Generate Vouchers</h1>
-            <p className="text-xs text-muted-foreground">Step 1: Select denomination</p>
-          </div>
-        </div>
-        <div className="px-4 pt-4">
-          <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 mb-4">
-            <p className="text-xs text-foreground leading-relaxed">
-              Select <strong>one denomination</strong> per generation. Each bundle contains <strong>100 voucher cards</strong>.
-            </p>
-          </div>
-          {renderTier("Standard", lowTier, "M100 – M10,000")}
-          {renderTier("Premium", midTier, "M15,000 – M100,000")}
-          {renderTier("Elite", highTier, "M125,000 – M1,000,000")}
-        </div>
-        <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
-          <Button
-            onClick={() => { setStep("bundles"); setBundleCount(1); window.scrollTo(0, 0); }}
-            disabled={!selectedDenom}
-            className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]"
+      return (
+        <div
+          key={v.id}
+          className={`rounded-xl border-2 transition-all touch-manipulation ${
+            selected ? "border-primary bg-primary/5" : "border-border/50 bg-card"
+          }`}
+        >
+          {/* Denomination row - tappable */}
+          <div
+            onClick={() => toggleDenom(v)}
+            className="flex items-center justify-between p-3.5 cursor-pointer active:scale-[0.98]"
           >
-            {selectedDenom ? `Continue with M${formatNum(selectedDenom.mobiValue)}` : "Select a denomination"}
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── Bundle Count ───
-  if (step === "bundles" && selectedDenom && discount) {
-    return (
-      <div className="bg-background min-h-screen pb-28">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
-          <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
-            <ArrowLeft className="h-5 w-5 text-foreground" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-base font-bold text-foreground">Bundle Count</h1>
-            <p className="text-xs text-muted-foreground">Step 2: M{formatNum(selectedDenom.mobiValue)} per card</p>
-          </div>
-        </div>
-        <div className="px-4 pt-4 space-y-4">
-          {/* Stepper */}
-          <div className="rounded-2xl border-2 border-primary/20 bg-card p-6 text-center">
-            <p className="text-xs text-muted-foreground mb-3">Number of Bundles (100 cards each)</p>
-            <div className="flex items-center justify-center gap-6 mb-4">
-              <button
-                onClick={() => setBundleCount(Math.max(1, bundleCount - 1))}
-                className="h-12 w-12 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation"
-              >
-                <Minus className="h-5 w-5 text-foreground" />
-              </button>
+            <div className="flex items-center gap-3">
+              <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                selected ? "bg-primary border-primary" : "border-muted-foreground/30"
+              }`}>
+                {selected && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
+              </div>
               <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-base font-black text-foreground">M{formatNum(v.mobiValue)}</p>
+                  {v.isPopular && (
+                    <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0 h-4 gap-0.5">
+                      <Sparkles className="h-2.5 w-2.5" /> Hot
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">≈ ₦{formatNum(v.ngnPrice)}/card</p>
+              </div>
+            </div>
+            {selected && sel && (
+              <Badge variant="secondary" className="text-xs font-bold">
+                {sel.bundleCount} bundle{sel.bundleCount !== 1 ? "s" : ""}
+              </Badge>
+            )}
+          </div>
+
+          {/* Bundle count controls - only when selected */}
+          {selected && sel && (
+            <div className="border-t border-border/30 px-3.5 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={(e) => { e.stopPropagation(); updateBundleCount(v.id, -1); }}
+                  className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation"
+                >
+                  <Minus className="h-4 w-4 text-foreground" />
+                </button>
                 <input
                   type="number"
                   inputMode="numeric"
                   min={1}
-                  value={bundleCount}
+                  value={sel.bundleCount === 0 ? '' : sel.bundleCount}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(e) => {
-                    const val = parseInt(e.target.value);
-                    if (!isNaN(val) && val >= 1) setBundleCount(val);
-                    else if (e.target.value === "") setBundleCount(1);
+                    e.stopPropagation();
+                    const raw = e.target.value;
+                    if (raw === '') { setBundleCountDirect(v.id, 0); return; }
+                    const val = parseInt(raw);
+                    if (!isNaN(val) && val >= 0) setBundleCountDirect(v.id, val);
                   }}
-                  className="text-4xl font-black text-foreground bg-transparent text-center w-24 outline-none border-b-2 border-primary/30 focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  onBlur={() => { if ((sel.bundleCount || 0) < 1) setBundleCountDirect(v.id, 1); }}
+                  className="w-14 text-xl font-black text-foreground text-center bg-transparent border-b-2 border-primary/40 focus:border-primary outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  style={{ MozAppearance: 'textfield' } as React.CSSProperties}
                 />
-                <p className="text-xs text-muted-foreground">bundle{bundleCount !== 1 ? "s" : ""}</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); updateBundleCount(v.id, 1); }}
+                  className="h-9 w-9 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation"
+                >
+                  <Plus className="h-4 w-4 text-primary-foreground" />
+                </button>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">{formatNum(sel.bundleCount * 100)} cards</p>
+                {li && li.discountPercent > 0 && (
+                  <p className="text-[10px] text-emerald-600 font-semibold">{li.discountPercent}% off</p>
+                )}
+                {li && !li.meetsMinOrder && sel.bundleCount >= 5 && (
+                  <p className="text-[10px] text-amber-600">Below min order</p>
+                )}
               </div>
               <button
-                onClick={() => setBundleCount(bundleCount + 1)}
-                className="h-12 w-12 rounded-full bg-primary flex items-center justify-center active:scale-90 touch-manipulation"
+                onClick={(e) => { e.stopPropagation(); toggleDenom(v); }}
+                className="h-8 w-8 rounded-full bg-destructive/10 flex items-center justify-center active:scale-90 touch-manipulation ml-2"
               >
-                <Plus className="h-5 w-5 text-primary-foreground" />
+                <Trash2 className="h-3.5 w-3.5 text-destructive" />
               </button>
             </div>
-            {/* Quick picks */}
-            <div className="flex gap-2 justify-center flex-wrap">
-              {[1, 5, 10, 25, 50, 100].map(n => (
-                <button
-                  key={n}
-                  onClick={() => setBundleCount(n)}
-                  className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation active:scale-90 transition-all ${
-                    bundleCount === n ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
+          )}
+        </div>
+      );
+    };
+
+    const renderTier = (label: string, vouchers: RechargeVoucher[], desc: string) => (
+      <div className="mb-5" key={label}>
+        <div className="flex items-center justify-between mb-2 px-1">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</h3>
+          <span className="text-xs text-muted-foreground">{desc}</span>
+        </div>
+        <div className="space-y-2.5">
+          {vouchers.map(renderDenomCard)}
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="bg-background min-h-screen pb-44">
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
+            <ArrowLeft className="h-5 w-5 text-foreground" />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-base font-bold text-foreground">Generate Vouchers</h1>
+            <p className="text-xs text-muted-foreground">Select denominations & quantities</p>
+          </div>
+          {selections.length > 0 && (
+            <Badge className="bg-primary/15 text-primary text-xs font-bold">
+              {selections.length} selected
+            </Badge>
+          )}
+        </div>
+
+        <div className="px-4 pt-4">
+          <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 mb-4">
+            <p className="text-xs text-foreground leading-relaxed">
+              Tap to select <strong>multiple denominations</strong>, then set bundle count for each. Each bundle contains <strong>100 voucher cards</strong>. Discounts apply per denomination when order value meets threshold.
+            </p>
           </div>
 
-          {/* Calculation Summary */}
-          <div className="rounded-xl border border-border/50 bg-card p-4 space-y-2.5">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Cards per bundle</span>
-              <span className="font-semibold text-foreground">100</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total cards</span>
-              <span className="font-bold text-foreground">{formatNum(discount.totalCards)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-semibold text-foreground">₦{formatNum(discount.subtotal)}</span>
-            </div>
-            {(() => {
-              const batchValue = discount.subtotal;
-              const meetsMinOrder = batchValue >= MIN_DISCOUNT_ORDER_VALUE;
-              return discount.discountPercent > 0 && meetsMinOrder ? (
-              <div className="flex justify-between text-sm text-emerald-600">
-                <span>Discount ({discount.discountPercent}%)</span>
-                <span className="font-bold">-₦{formatNum(discount.discountAmount)}</span>
-              </div>
-              ) : batchValue < MIN_DISCOUNT_ORDER_VALUE && bundleCount >= 5 ? (
-                <p className="text-xs text-amber-600">
-                  Batch value M{formatNum(batchValue)} — needs ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} for discount
-                </p>
-              ) : null;
-            })()}
-            <div className="border-t border-border/50 pt-2 flex justify-between">
-              <span className="font-bold text-foreground">Total</span>
-              <span className="font-black text-lg text-foreground">₦{formatNum(discount.total)}</span>
-            </div>
-          </div>
+          {renderTier("Standard", lowTier, "M100 – M10,000")}
+          {renderTier("Premium", midTier, "M15,000 – M100,000")}
+          {renderTier("Elite", highTier, "M125,000 – M1,000,000")}
+        </div>
 
-          {/* Discount info */}
-          <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-            <div className="px-4 py-2.5 border-b border-border/30 bg-muted/30">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Bulk Discount Tier</p>
+        {/* Sticky footer with live running total */}
+        {selections.length > 0 && (
+          <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 pt-3 pb-4 safe-area-bottom">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-bold text-foreground">Total Voucher Value</p>
+              <p className="text-lg font-black text-primary">M{formatNum(grandSubtotal)}</p>
             </div>
-            <div className="px-4 py-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground">Current tier</span>
-                <Badge className="text-xs h-5 bg-primary/10 text-primary">
-                  Tier {currentTier.tier} ({currentTier.tierLabel})
-                </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs text-muted-foreground">
+                <span className="font-bold text-foreground">{selections.length}</span> denom{selections.length !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{totalBundles}</span> bundle{totalBundles !== 1 ? "s" : ""} · <span className="font-bold text-foreground">{formatNum(totalCards)}</span> cards
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground">Your discount ({bundleCount} bundles)</span>
-                <Badge className={`text-xs h-5 ${discount.discountPercent > 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
-                  {discount.discountPercent > 0 ? `${discount.discountPercent}% off` : "No Discount"}
-                </Badge>
-              </div>
-              {(() => {
-                const batchValue = discount.subtotal;
-                const meetsMinOrder = batchValue >= MIN_DISCOUNT_ORDER_VALUE;
-                if (!meetsMinOrder && bundleCount >= 5) {
-                  return (
-                    <p className="text-xs text-amber-600 mt-1">
-                      Batch value M{formatNum(batchValue)} — min M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} needed for discount
-                    </p>
-                  );
-                }
-                const s = platformVoucherDiscountSettings;
-                const nextTierStart = currentTier.tier * s.tierSize + 1;
-                const nextDisc = getTieredDiscount(nextTierStart);
-                if (meetsMinOrder && nextDisc.discountPercent > currentTier.discountPercent) {
-                  const bundlesNeeded = nextTierStart - bundleCount;
-                  return (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Add <strong>{bundlesNeeded}</strong> more bundle{bundlesNeeded !== 1 ? "s" : ""} for <strong>{nextDisc.discountPercent}%</strong> discount
-                    </p>
-                  );
-                }
-                return null;
-              })()}
+              {grandDiscount > 0 && (
+                <p className="text-xs text-emerald-600 font-semibold">-₦{formatNum(grandDiscount)} saved</p>
+              )}
             </div>
+            <Button
+              onClick={() => { setStep("summary"); window.scrollTo(0, 0); }}
+              className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]"
+            >
+              Review Order <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
           </div>
-        </div>
-        <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
-          <Button
-            onClick={() => { setStep("summary"); window.scrollTo(0, 0); }}
-            className="w-full h-12 text-sm font-semibold rounded-xl touch-manipulation active:scale-[0.97]"
-          >
-            Review Order <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
+        )}
       </div>
     );
   }
 
-  // ─── Payment Summary ───
-  if (step === "summary" && selectedDenom && discount) {
+  // ─── Step 2: Order Summary ───
+  if (step === "summary") {
     return (
       <div className="bg-background min-h-screen pb-28">
         <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
@@ -369,56 +364,84 @@ export default function MerchantVoucherGenerate() {
           </button>
           <div>
             <h1 className="text-base font-bold text-foreground">Order Summary</h1>
-            <p className="text-xs text-muted-foreground">Step 3: Review & generate</p>
+            <p className="text-xs text-muted-foreground">Review & generate</p>
           </div>
         </div>
         <div className="px-4 pt-4 space-y-4">
-          {/* Order Details */}
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-black text-primary">M</span>
+          {/* Per-denomination line items */}
+          <div className="space-y-2.5">
+            {lineItems.map(li => (
+              <div key={li.denomination.id} className="rounded-xl border border-border/50 bg-card p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-black text-primary">M</span>
+                    </div>
+                    <div>
+                      <p className="text-base font-black text-foreground">M{formatNum(li.denomination.mobiValue)}</p>
+                      <p className="text-xs text-muted-foreground">{li.bundleCount} bundle{li.bundleCount !== 1 ? "s" : ""} · {formatNum(li.totalCards)} cards</p>
+                    </div>
+                  </div>
+                  {li.discountPercent > 0 ? (
+                    <Badge className="bg-emerald-500/15 text-emerald-600 text-xs">{li.discountPercent}% off</Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-xs">No discount</Badge>
+                  )}
+                </div>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-semibold text-foreground">₦{formatNum(li.subtotal)}</span>
+                  </div>
+                  {li.discountPercent > 0 && (
+                    <div className="flex justify-between text-emerald-600">
+                      <span>Discount ({li.discountPercent}%)</span>
+                      <span className="font-bold">-₦{formatNum(li.discountAmount)}</span>
+                    </div>
+                  )}
+                  {!li.meetsMinOrder && li.bundleCount >= 5 && (
+                    <p className="text-xs text-amber-600">
+                      Value M{formatNum(li.subtotal)} — needs ≥ M{formatNum(MIN_DISCOUNT_ORDER_VALUE)} for discount
+                    </p>
+                  )}
+                  <div className="flex justify-between font-bold">
+                    <span className="text-foreground">Line Total</span>
+                    <span className="text-foreground">₦{formatNum(li.total)}</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-lg font-black text-foreground">M{formatNum(selectedDenom.mobiValue)}</p>
-                <p className="text-xs text-muted-foreground">Voucher denomination</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
+            ))}
+          </div>
+
+          {/* Grand Totals */}
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2.5">
+            <div className="grid grid-cols-3 gap-3 text-center mb-2">
               <div className="rounded-lg bg-background/80 p-2.5">
-                <p className="text-lg font-bold text-foreground">{bundleCount}</p>
+                <p className="text-lg font-bold text-foreground">{totalBundles}</p>
                 <p className="text-xs text-muted-foreground">Bundles</p>
               </div>
               <div className="rounded-lg bg-background/80 p-2.5">
-                <p className="text-lg font-bold text-foreground">{formatNum(discount.totalCards)}</p>
+                <p className="text-lg font-bold text-foreground">{formatNum(totalCards)}</p>
                 <p className="text-xs text-muted-foreground">Cards</p>
               </div>
               <div className="rounded-lg bg-background/80 p-2.5">
-                <p className="text-lg font-bold text-emerald-600">{discount.discountPercent}%</p>
-                <p className="text-xs text-muted-foreground">Discount</p>
+                <p className="text-lg font-bold text-foreground">{selections.length}</p>
+                <p className="text-xs text-muted-foreground">Denoms</p>
               </div>
             </div>
-          </div>
-
-          {/* Cost Breakdown */}
-          <div className="rounded-xl border border-border/50 bg-card p-4 space-y-2.5">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Unit cost per card</span>
-              <span className="font-semibold text-foreground">₦{formatNum(selectedDenom.mobiValue)}</span>
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-semibold text-foreground">₦{formatNum(grandSubtotal)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal ({formatNum(discount.totalCards)} cards)</span>
-              <span className="font-semibold text-foreground">₦{formatNum(discount.subtotal)}</span>
-            </div>
-            {discount.discountPercent > 0 && (
+            {grandDiscount > 0 && (
               <div className="flex justify-between text-sm text-emerald-600">
-                <span>Bulk discount ({discount.discountPercent}%)</span>
-                <span className="font-bold">-₦{formatNum(discount.discountAmount)}</span>
+                <span>Total Discount</span>
+                <span className="font-bold">-₦{formatNum(grandDiscount)}</span>
               </div>
             )}
             <div className="border-t border-border/50 pt-2 flex justify-between">
               <span className="font-bold text-foreground">Total to Pay</span>
-              <span className="font-black text-xl text-foreground">₦{formatNum(discount.total)}</span>
+              <span className="font-black text-xl text-foreground">₦{formatNum(grandTotal)}</span>
             </div>
           </div>
 
@@ -440,7 +463,7 @@ export default function MerchantVoucherGenerate() {
                 <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs text-destructive font-semibold">Insufficient balance</p>
-                  <p className="text-xs text-muted-foreground">You need ₦{formatNum(discount.total - walletBalance)} more</p>
+                  <p className="text-xs text-muted-foreground">You need ₦{formatNum(grandTotal - walletBalance)} more</p>
                   <Button
                     onClick={() => navigate("/merchant-wallet-fund")}
                     size="sm"
@@ -454,6 +477,7 @@ export default function MerchantVoucherGenerate() {
             )}
           </div>
         </div>
+
         <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
           <Button
             onClick={handleGenerate}
@@ -461,7 +485,7 @@ export default function MerchantVoucherGenerate() {
             className="w-full h-12 text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]"
           >
             <CreditCard className="h-4 w-4 mr-2" />
-            Generate & Pay ₦{formatNum(discount.total)}
+            Generate & Pay ₦{formatNum(grandTotal)}
           </Button>
         </div>
       </div>
@@ -480,7 +504,7 @@ export default function MerchantVoucherGenerate() {
           </div>
         </div>
         <p className="text-base font-semibold text-foreground mb-2">{PROCESSING_MESSAGES[processingMsg]}</p>
-        <p className="text-xs text-muted-foreground">Generating {formatNum(discount?.totalCards || 0)} voucher cards</p>
+        <p className="text-xs text-muted-foreground">Generating {formatNum(totalCards)} voucher cards across {selections.length} denomination{selections.length !== 1 ? "s" : ""}</p>
         <div className="flex gap-2 mt-6">
           {PROCESSING_MESSAGES.map((_, i) => (
             <div key={i} className={`h-2 w-2 rounded-full transition-all duration-300 ${i <= processingMsg ? "bg-primary scale-110" : "bg-muted"}`} />
@@ -491,7 +515,7 @@ export default function MerchantVoucherGenerate() {
   }
 
   // ─── Complete with Receipt ───
-  if (step === "complete" && selectedDenom && discount) {
+  if (step === "complete") {
     return (
       <div className="bg-background min-h-screen pb-6">
         {/* Success Header */}
@@ -506,13 +530,12 @@ export default function MerchantVoucherGenerate() {
             </div>
           </div>
           <h2 className="text-lg font-black text-foreground mb-0.5">Generation Complete!</h2>
-          <p className="text-sm text-muted-foreground">Your vouchers are ready</p>
+          <p className="text-sm text-muted-foreground">{formatNum(totalCards)} voucher cards ready across {selections.length} denomination{selections.length !== 1 ? "s" : ""}</p>
         </div>
 
         {/* Receipt Card */}
         <div className="mx-4">
           <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
-            {/* Receipt Header */}
             <div className="bg-muted/40 px-4 py-3 border-b border-border/30 text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <Receipt className="h-4 w-4 text-muted-foreground" />
@@ -535,43 +558,57 @@ export default function MerchantVoucherGenerate() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Batch Number</span>
-                <span className="font-bold text-foreground text-right text-xs font-mono">{receiptData.batchNumber}</span>
+                <span className="font-bold text-foreground text-right text-xs font-mono break-all">{receiptData.batchNumber}</span>
               </div>
 
               <div className="border-t border-dashed border-border/50 my-1" />
 
+              {/* Per-denomination rows */}
+              {lineItems.map(li => (
+                <div key={li.denomination.id} className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-foreground font-semibold">M{formatNum(li.denomination.mobiValue)} × {li.bundleCount}</span>
+                    <span className="font-semibold text-foreground">₦{formatNum(li.subtotal)}</span>
+                  </div>
+                  {li.discountPercent > 0 && (
+                    <div className="flex justify-between text-xs text-emerald-600 pl-2">
+                      <span>Discount ({li.discountPercent}%)</span>
+                      <span className="font-bold">-₦{formatNum(li.discountAmount)}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <div className="border-t border-dashed border-border/50 my-1" />
+
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Denomination</span>
-                <span className="font-bold text-foreground">M{formatNum(selectedDenom.mobiValue)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Bundles</span>
-                <span className="font-bold text-foreground">{bundleCount}</span>
+                <span className="text-muted-foreground">Total Bundles</span>
+                <span className="font-bold text-foreground">{totalBundles}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total Cards</span>
-                <span className="font-bold text-foreground">{formatNum(discount.totalCards)}</span>
+                <span className="font-bold text-foreground">{formatNum(totalCards)}</span>
               </div>
 
               <div className="border-t border-dashed border-border/50 my-1" />
 
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-semibold text-foreground">₦{formatNum(discount.subtotal)}</span>
+                <span className="font-semibold text-foreground">₦{formatNum(grandSubtotal)}</span>
               </div>
-              {discount.discountPercent > 0 && (
+              {grandDiscount > 0 && (
                 <div className="flex justify-between text-sm text-emerald-600">
-                  <span>Discount ({discount.discountPercent}%)</span>
-                  <span className="font-bold">-₦{formatNum(discount.discountAmount)}</span>
+                  <span>Total Discount</span>
+                  <span className="font-bold">-₦{formatNum(grandDiscount)}</span>
                 </div>
               )}
               <div className="border-t border-border/50 pt-2 flex justify-between">
                 <span className="font-bold text-foreground">Total Paid</span>
-                <span className="font-black text-lg text-foreground">₦{formatNum(discount.total)}</span>
+                <span className="font-black text-lg text-foreground">₦{formatNum(grandTotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Wallet Balance</span>
-                <span className="font-semibold text-emerald-600">₦{formatNum(walletBalance - discount.total)}</span>
+                <span className="font-semibold text-emerald-600">₦{formatNum(walletBalance - grandTotal)}</span>
               </div>
             </div>
           </div>
