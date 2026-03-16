@@ -258,9 +258,9 @@ export default function IndividualMerchantApplication() {
                 )}
               </div>
               {waiverMode && waiverContext && (
-                <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3">
+                <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3 overflow-hidden">
                   <p className="text-xs font-semibold text-orange-700 mb-1">Waiver Reason</p>
-                  <p className="text-xs text-muted-foreground">{waiverContext}</p>
+                  <p className="text-xs text-muted-foreground break-words">{waiverContext}</p>
                 </div>
               )}
               <p className="text-sm text-center text-muted-foreground">You will be notified once your application has been reviewed.</p>
