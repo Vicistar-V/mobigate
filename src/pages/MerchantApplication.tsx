@@ -204,11 +204,13 @@ export default function MerchantApplication() {
       affiliates,
       emailAddress, website, phone1, phone2,
       bankAccounts: bankAccounts.map(b => ({ acct: b.acct, name: b.name, branch: b.branch })),
+      currentStep,
+      waiverMode, waiverContext,
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     toast({ title: "Draft Saved", description: "Your progress has been saved. You can resume later." });
-  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, addresses, affiliates, emailAddress, website, phone1, phone2, bankAccounts, toast]);
+  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, addresses, affiliates, emailAddress, website, phone1, phone2, bankAccounts, currentStep, waiverMode, waiverContext, toast]);
 
   const clearDraft = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
