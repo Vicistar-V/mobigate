@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Wallet, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { initialMerchantWalletBalance, formatNum } from "@/data/merchantVoucherData";
@@ -10,6 +10,8 @@ const QUICK_AMOUNTS = [50000, 100000, 500000, 1000000];
 
 export default function MerchantWalletFund() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
   const [step, setStep] = useState<Step>("amount");
   const [amount, setAmount] = useState<number>(0);
   const [customInput, setCustomInput] = useState("");
@@ -99,10 +101,10 @@ export default function MerchantWalletFund() {
           </div>
         </div>
         <Button
-          onClick={() => navigate("/merchant-voucher-management")}
+          onClick={() => navigate(returnTo || "/merchant-voucher-management")}
           className="w-full h-12 rounded-xl text-sm font-semibold bg-primary hover:bg-primary/90 touch-manipulation active:scale-[0.97]"
         >
-          Back to Dashboard
+          {returnTo ? "Continue to Vouchers" : "Back to Dashboard"}
         </Button>
       </div>
     );

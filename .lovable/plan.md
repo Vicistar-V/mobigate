@@ -1,44 +1,42 @@
 
 
-## Plan: Fix "Fund Wallet → Resume Generation" Flow for Merchant & Sub-Merchant
+## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
 
-### Problem
-When a merchant or sub-merchant has insufficient wallet balance during voucher generation/purchase:
-1. **Merchant Generate** (`MerchantVoucherGenerate.tsx`): "Fund Wallet" button navigates to `/merchant-wallet-fund`, but after funding, the success button sends them to `/merchant-voucher-management` (the dashboard) — losing all their selections. They have to start over.
-2. **Sub-Merchant Buy** (`SubMerchantBuyVouchers.tsx`): Shows a toast "Please fund your wallet first" but provides no "Fund Wallet" button at all — dead end.
-3. **MerchantWalletFund.tsx**: Has no awareness of where the user came from. Always redirects to the dashboard on success.
+### What We're Building
 
-### Solution
-Make the wallet funding flow "return-aware" so users resume exactly where they left off after funding.
+A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
 
-### Changes
+### Tab Layout
 
-**1. `src/pages/MerchantWalletFund.tsx`**
-- Accept a `returnTo` query parameter (e.g. `?returnTo=/merchant-voucher-generate`)
-- On success, navigate to `returnTo` if present, otherwise fall back to `/merchant-voucher-management`
-- Change the success button label from "Back to Dashboard" to "Continue" when a return path exists
-
-**2. `src/pages/MerchantVoucherGenerate.tsx`**
-- Change the "Fund Wallet" button on the insufficient balance warning to navigate to `/merchant-wallet-fund?returnTo=/merchant-voucher-generate`
-- This ensures after funding, the user lands back on the generate page (they'll re-select, but at least they're in the right place)
-
-**3. `src/pages/SubMerchantBuyVouchers.tsx`**
-- Add a visible "Fund Wallet" button in the summary step when balance is insufficient (same pattern as merchant generate)
-- Navigate to `/merchant-wallet-fund?returnTo=/sub-merchant-buy-vouchers`
-- Show the insufficient balance warning inline instead of only as a toast
-
-**4. `src/pages/MerchantWalletFund.tsx` — Success screen**
-- Read `returnTo` from URL search params
-- If present: button says "Continue to Vouchers" and navigates to `returnTo`
-- If absent: button says "Back to Dashboard" and navigates to `/merchant-voucher-management`
-
-### Flow After Fix
 ```text
-Generate Vouchers → Insufficient Balance → "Fund Wallet" button
-  → /merchant-wallet-fund?returnTo=/merchant-voucher-generate
-  → Fund amount → Processing → Success
-  → "Continue to Vouchers" button → /merchant-voucher-generate
+[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
 ```
 
-Same pattern for sub-merchant buy flow.
+The Complaints tab will show:
+1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
+2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
+3. **Complaint cards list** — Each card shows:
+   - Category badge + status badge (color-coded)
+   - Merchant name the complaint is against
+   - Truncated description
+   - Reporter info (or "Anonymous")
+   - Submission date + reference number
+   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
+4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
+
+### Files to Modify/Create
+
+| File | Action |
+|------|--------|
+| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
+| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
+
+### Technical Details
+
+- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
+- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
+- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
+- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
+- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
+- All touch targets h-11 minimum, no font size reductions, mobile-only focus
 

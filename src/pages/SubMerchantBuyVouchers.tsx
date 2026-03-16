@@ -99,6 +99,7 @@ export default function SubMerchantBuyVouchers() {
   const handlePay = () => {
     if (totalCost > initialSubMerchantWalletBalance) {
       toast({ title: "Insufficient Balance", description: "Please fund your wallet first" });
+      navigate("/merchant-wallet-fund?returnTo=/sub-merchant-buy-vouchers");
       return;
     }
     setStep("processing");
@@ -487,9 +488,30 @@ export default function SubMerchantBuyVouchers() {
             </div>
           </div>
 
-          <div className="rounded-xl bg-muted/50 p-3 flex items-center gap-2">
+          <div className={`rounded-xl p-3 flex items-center gap-2 ${
+            totalCost > initialSubMerchantWalletBalance ? "bg-destructive/5 border border-destructive/30" : "bg-muted/50"
+          }`}>
             <Package className="h-4 w-4 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">Wallet Balance: ₦{formatNum(initialSubMerchantWalletBalance)}</p>
+            <div className="flex-1">
+              <p className={`text-xs ${totalCost > initialSubMerchantWalletBalance ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
+                Wallet Balance: ₦{formatNum(initialSubMerchantWalletBalance)}
+              </p>
+              {totalCost > initialSubMerchantWalletBalance && (
+                <p className="text-xs text-destructive mt-0.5">
+                  Insufficient — need ₦{formatNum(totalCost - initialSubMerchantWalletBalance)} more
+                </p>
+              )}
+            </div>
+            {totalCost > initialSubMerchantWalletBalance && (
+              <Button
+                onClick={() => navigate("/merchant-wallet-fund?returnTo=/sub-merchant-buy-vouchers")}
+                size="sm"
+                variant="outline"
+                className="h-8 text-xs border-destructive/30 text-destructive shrink-0"
+              >
+                Fund Wallet
+              </Button>
+            )}
           </div>
         </div>
         <div className="fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-3 safe-area-bottom">
