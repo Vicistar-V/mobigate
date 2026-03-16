@@ -254,6 +254,9 @@ export default function MerchantApplication() {
         if (draft.bankAccounts?.length) {
           setBankAccounts(draft.bankAccounts.map((b: any) => ({ acct: b.acct || "", name: b.name || "", branch: b.branch || "" })));
         }
+        if (typeof draft.currentStep === "number") setCurrentStep(draft.currentStep);
+        if (draft.waiverMode) setWaiverMode(true);
+        if (draft.waiverContext) setWaiverContext(draft.waiverContext);
         setHasDraft(true);
         if (draft.savedAt) {
           setDraftDate(new Date(draft.savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }));
