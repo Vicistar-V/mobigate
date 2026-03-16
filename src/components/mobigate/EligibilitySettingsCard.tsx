@@ -28,7 +28,7 @@ const FIELDS: FieldConfig[] = [
   { key: "friends", label: "Friends", icon: Users, step: 500 },
   { key: "followers", label: "Followers", icon: Users, step: 500 },
   { key: "eLibraryContents", label: "E-Library Contents", icon: BookOpen, step: 10 },
-  { key: "contentLikes", label: "Content Likes (min per item)", icon: BookOpen, step: 500 },
+  { key: "contentLikes", label: "Content Likes", icon: BookOpen, step: 500 },
   { key: "usersFollowed", label: "Users Followed", icon: UserPlus, step: 50 },
   { key: "registrationFee", label: "Registration Fee", icon: CreditCard, format: "currency", step: 50000 },
   { key: "imvsdAmount", label: "IMVSD Amount", icon: CreditCard, format: "currency", step: 50000 },
