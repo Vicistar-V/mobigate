@@ -639,11 +639,21 @@ export default function SubMerchantBuyVouchers() {
       <div className="mx-4 mt-4 space-y-3">
         <Button
           onClick={handlePrintReceipt}
+          disabled={isPrintingReceipt}
           variant="outline"
           className="w-full h-12 rounded-xl text-sm font-semibold touch-manipulation active:scale-[0.97]"
         >
-          <Printer className="h-4 w-4 mr-2" />
-          Print Receipt
+          {isPrintingReceipt ? (
+            <>
+              <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+              Generating PDF...
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4 mr-2" />
+              Download Receipt
+            </>
+          )}
         </Button>
         <Button
           onClick={() => navigate("/sub-merchant-voucher-batches")}
