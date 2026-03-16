@@ -366,7 +366,7 @@ export default function IndividualMerchantApplication() {
             {waiverMode && (
               <div className="space-y-3 border-t border-orange-500/20 pt-3">
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  If you cannot meet the standard application requirements, you can request an Exclusive Waiver.
+                  If you do not meet the standard application requirements, you can request an Exclusive Waiver.
                   A non-refundable fee of <span className="font-bold text-foreground">{formatMobi(50000)}</span> (≈ {formatLocalAmount(50000, "NGN")}) will be charged
                   in addition to the application fee. Your application will be flagged as <span className="font-semibold">"Awaiting Approval"</span>.
                 </p>
