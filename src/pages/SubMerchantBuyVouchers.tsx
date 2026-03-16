@@ -99,6 +99,7 @@ export default function SubMerchantBuyVouchers() {
   const handlePay = () => {
     if (totalCost > initialSubMerchantWalletBalance) {
       toast({ title: "Insufficient Balance", description: "Please fund your wallet first" });
+      navigate("/merchant-wallet-fund?returnTo=/sub-merchant-buy-vouchers");
       return;
     }
     setStep("processing");
