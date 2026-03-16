@@ -565,7 +565,7 @@ export default function BuyVouchersPage() {
 
     return (
       <div className="bg-background pb-6">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
           <div className="px-4 py-2 flex items-center gap-3">
             <button onClick={handleBack} className="h-8 w-8 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
               <ArrowLeft className="h-4 w-4 text-foreground" />
