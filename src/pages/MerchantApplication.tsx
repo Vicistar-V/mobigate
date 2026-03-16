@@ -203,7 +203,7 @@ export default function MerchantApplication() {
       addresses,
       affiliates,
       emailAddress, website, phone1, phone2,
-      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, name: b.name, branch: b.branch })),
+      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, acctName: b.acctName, name: b.name, branch: b.branch })),
       currentStep,
       waiverMode, waiverContext,
       savedAt: new Date().toISOString(),
