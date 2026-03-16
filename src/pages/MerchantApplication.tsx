@@ -198,7 +198,7 @@ export default function MerchantApplication() {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     toast({ title: "Draft Saved", description: "Your progress has been saved. You can resume later." });
-  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, address1, address2, address3, affiliate1Name, affiliate1Address, affiliate2Name, affiliate2Address, emailAddress, website, phone1, phone2, bankAccounts, toast]);
+  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, addresses, affiliates, emailAddress, website, phone1, phone2, bankAccounts, toast]);
 
   const clearDraft = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
