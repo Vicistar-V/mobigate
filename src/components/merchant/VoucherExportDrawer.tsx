@@ -71,8 +71,13 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     printContainer.id = "voucher-print-area";
     printContainer.innerHTML = `
       <style>
-        @media screen {
-          #voucher-print-area { display: none !important; }
+        #voucher-print-area {
+          position: fixed;
+          left: -9999px;
+          top: 0;
+          width: 210mm;
+          font-family: 'Courier New', monospace;
+          padding: 12mm;
         }
         @media print {
           body > *:not(#voucher-print-area) { display: none !important; visibility: hidden !important; }
@@ -84,10 +89,6 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             top: auto !important;
             width: 100% !important;
           }
-        }
-        #voucher-print-area {
-          font-family: 'Courier New', monospace;
-          padding: 12mm;
         }
         .print-header {
           text-align: center;

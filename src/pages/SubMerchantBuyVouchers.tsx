@@ -128,15 +128,15 @@ export default function SubMerchantBuyVouchers() {
     printDiv.id = "receipt-print-area";
     printDiv.innerHTML = `
       <style>
-        @media print {
-          body > *:not(#receipt-print-area) { display: none !important; }
-          #receipt-print-area { display: block !important; }
-        }
         #receipt-print-area {
           font-family: 'Courier New', monospace;
           max-width: 80mm;
           margin: 0 auto;
           padding: 8mm;
+        }
+        @media print {
+          body > *:not(#receipt-print-area) { display: none !important; }
+          #receipt-print-area { display: block !important; position: static !important; left: auto !important; }
         }
         .receipt-title { text-align: center; font-size: 14pt; font-weight: 900; margin-bottom: 4mm; border-bottom: 2px dashed #000; padding-bottom: 4mm; }
         .receipt-row { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 2mm; }
