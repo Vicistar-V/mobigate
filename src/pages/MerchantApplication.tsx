@@ -394,7 +394,7 @@ export default function MerchantApplication() {
         </div>
 
         {/* Step Progress Bar */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {STEPS.map((step, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
               <div
@@ -402,8 +402,8 @@ export default function MerchantApplication() {
                   i < currentStep ? "bg-primary" : i === currentStep ? "bg-primary/60" : "bg-muted"
                 }`}
               />
-              <span className={`text-[9px] font-medium transition-colors ${
-                i <= currentStep ? "text-primary" : "text-muted-foreground"
+              <span className={`text-xs font-medium transition-colors ${
+                i === currentStep ? "text-primary font-semibold" : i < currentStep ? "text-primary" : "text-muted-foreground"
               }`}>{step.label}</span>
             </div>
           ))}

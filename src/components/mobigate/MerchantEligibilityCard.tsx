@@ -119,19 +119,19 @@ export function MerchantEligibilityCard({ className }: MerchantEligibilityCardPr
   return (
     <div className={className}>
       {/* Summary bar */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-col gap-1 mb-3">
         <div className="flex items-center gap-2">
           {allMet ? (
-            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-xs gap-1">
-              <CheckCircle2 className="h-3 w-3" /> All Requirements Met
+            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-sm gap-1.5 py-1 px-2.5">
+              <CheckCircle2 className="h-4 w-4" /> All Requirements Met
             </Badge>
           ) : (
-            <Badge variant="outline" className="border-amber-400/60 text-amber-700 dark:text-amber-400 text-xs gap-1">
-              <Clock className="h-3 w-3" /> {metCount}/{items.length} Met
+            <Badge variant="outline" className="border-amber-400/60 text-amber-700 dark:text-amber-400 text-sm gap-1.5 py-1 px-2.5">
+              <Clock className="h-4 w-4" /> {metCount}/{items.length} Met
             </Badge>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">Auto-verified by system</p>
+        <p className="text-xs text-muted-foreground ml-0.5">Auto-verified by system</p>
       </div>
 
       {/* Items */}
