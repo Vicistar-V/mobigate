@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Check, Sparkles, CreditCard, ChevronRight, Wallet, AlertTriangle, Printer, Receipt, Trash2, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Check, Sparkles, CreditCard, ChevronRight, Wallet, AlertTriangle, Printer, Receipt, Trash2, ShoppingCart, Download } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { rechargeVouchers, RechargeVoucher } from "@/data/rechargeVouchersData";
@@ -137,53 +139,58 @@ export default function MerchantVoucherGenerate() {
     return () => timers.forEach(clearTimeout);
   }, [step]);
 
-  const handlePrintReceipt = useCallback(() => {
-    const denomRows = lineItems.map(li => `
-      <div class="receipt-row"><span class="label">M${formatNum(li.denomination.mobiValue)} × ${li.bundleCount} bundle${li.bundleCount !== 1 ? "s" : ""}</span><span class="val">₦${formatNum(li.subtotal)}</span></div>
-      ${li.discountPercent > 0 ? `<div class="receipt-row"><span class="label" style="color:green">  Discount (${li.discountPercent}%)</span><span class="val" style="color:green">-₦${formatNum(li.discountAmount)}</span></div>` : ""}
-    `).join("");
+  const [isPrintingReceipt, setIsPrintingReceipt] = useState(false);
 
-    const printDiv = document.createElement("div");
-    printDiv.id = "receipt-print-area";
-    printDiv.innerHTML = `
-      <style>
-        #receipt-print-area { font-family: 'Courier New', monospace; max-width: 80mm; margin: 0 auto; padding: 8mm; }
-        @media print {
-          body > *:not(#receipt-print-area) { display: none !important; }
-          #receipt-print-area { display: block !important; position: static !important; left: auto !important; }
-        }
-        .receipt-title { text-align: center; font-size: 14pt; font-weight: 900; margin-bottom: 4mm; border-bottom: 2px dashed #000; padding-bottom: 4mm; }
-        .receipt-row { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 2mm; }
-        .receipt-row .label { color: #555; }
-        .receipt-row .val { font-weight: bold; text-align: right; }
-        .receipt-divider { border-top: 1px dashed #999; margin: 3mm 0; }
-        .receipt-total { font-size: 12pt; font-weight: 900; text-align: center; margin: 4mm 0; }
-        .receipt-footer { text-align: center; font-size: 7pt; color: #888; margin-top: 6mm; }
-        @page { size: auto; margin: 10mm; }
-      </style>
-      <div class="receipt-title">VOUCHER GENERATION<br/>RECEIPT</div>
-      <div class="receipt-row"><span class="label">Receipt No</span><span class="val">${receiptData.transactionRef}</span></div>
-      <div class="receipt-row"><span class="label">Date</span><span class="val">${receiptData.dateTime.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
-      <div class="receipt-row"><span class="label">Time</span><span class="val">${receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}</span></div>
-      <div class="receipt-row"><span class="label">Merchant ID</span><span class="val">0001</span></div>
-      <div class="receipt-divider"></div>
-      ${denomRows}
-      <div class="receipt-divider"></div>
-      <div class="receipt-row"><span class="label">Total Bundles</span><span class="val">${totalBundles}</span></div>
-      <div class="receipt-row"><span class="label">Total Cards</span><span class="val">${formatNum(totalCards)}</span></div>
-      <div class="receipt-row"><span class="label">Batch Number</span><span class="val">${receiptData.batchNumber}</span></div>
-      <div class="receipt-divider"></div>
-      <div class="receipt-row"><span class="label">Subtotal</span><span class="val">₦${formatNum(grandSubtotal)}</span></div>
-      ${grandDiscount > 0 ? `<div class="receipt-row"><span class="label">Total Discount</span><span class="val" style="color:green">-₦${formatNum(grandDiscount)}</span></div>` : ""}
-      <div class="receipt-total">TOTAL: ₦${formatNum(grandTotal)}</div>
-      <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(walletBalance - grandTotal)}</span></div>
-      <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
-    `;
-    printDiv.style.cssText = "position:fixed;left:-9999px;top:0;width:80mm;";
-    document.body.appendChild(printDiv);
-    const cleanup = () => { document.body.removeChild(printDiv); window.removeEventListener("afterprint", cleanup); };
-    window.addEventListener("afterprint", cleanup);
-    setTimeout(() => window.print(), 200);
+  const handlePrintReceipt = useCallback(async () => {
+    setIsPrintingReceipt(true);
+    try {
+      const denomRows = lineItems.map(li => `
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">M${formatNum(li.denomination.mobiValue)} × ${li.bundleCount} bundle${li.bundleCount !== 1 ? "s" : ""}</span><span style="font-weight:bold;text-align:right;">₦${formatNum(li.subtotal)}</span></div>
+        ${li.discountPercent > 0 ? `<div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:green;">  Discount (${li.discountPercent}%)</span><span style="font-weight:bold;text-align:right;color:green;">-₦${formatNum(li.discountAmount)}</span></div>` : ""}
+      `).join("");
+
+      const printDiv = document.createElement("div");
+      printDiv.style.cssText = "position:fixed;left:-9999px;top:0;width:320px;background:#fff;padding:16px;font-family:'Courier New',monospace;";
+      printDiv.innerHTML = `
+        <div style="text-align:center;font-size:14pt;font-weight:900;margin-bottom:4mm;border-bottom:2px dashed #000;padding-bottom:4mm;">VOUCHER GENERATION<br/>RECEIPT</div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Receipt No</span><span style="font-weight:bold;">${receiptData.transactionRef}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Date</span><span style="font-weight:bold;">${receiptData.dateTime.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Time</span><span style="font-weight:bold;">${receiptData.dateTime.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Merchant ID</span><span style="font-weight:bold;">0001</span></div>
+        <div style="border-top:1px dashed #999;margin:3mm 0;"></div>
+        ${denomRows}
+        <div style="border-top:1px dashed #999;margin:3mm 0;"></div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Total Bundles</span><span style="font-weight:bold;">${totalBundles}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Total Cards</span><span style="font-weight:bold;">${formatNum(totalCards)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Batch Number</span><span style="font-weight:bold;">${receiptData.batchNumber}</span></div>
+        <div style="border-top:1px dashed #999;margin:3mm 0;"></div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Subtotal</span><span style="font-weight:bold;">₦${formatNum(grandSubtotal)}</span></div>
+        ${grandDiscount > 0 ? `<div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Total Discount</span><span style="font-weight:bold;color:green;">-₦${formatNum(grandDiscount)}</span></div>` : ""}
+        <div style="font-size:12pt;font-weight:900;text-align:center;margin:4mm 0;">TOTAL: ₦${formatNum(grandTotal)}</div>
+        <div style="display:flex;justify-content:space-between;font-size:9pt;margin-bottom:2mm;"><span style="color:#555;">Balance After</span><span style="font-weight:bold;">₦${formatNum(walletBalance - grandTotal)}</span></div>
+        <div style="text-align:center;font-size:7pt;color:#888;margin-top:6mm;">Thank you for your business<br/>Mobi Voucher System</div>
+      `;
+
+      document.body.appendChild(printDiv);
+      await new Promise(r => setTimeout(r, 300));
+
+      const canvas = await html2canvas(printDiv, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 200] });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const padding = 4;
+      const availableWidth = pageWidth - padding * 2;
+      const ratio = availableWidth / canvas.width;
+      const scaledHeight = canvas.height * ratio;
+      pdf.addImage(imgData, "PNG", padding, padding, availableWidth, scaledHeight);
+      pdf.save(`receipt-${receiptData.transactionRef}.pdf`);
+
+      document.body.removeChild(printDiv);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
+      setIsPrintingReceipt(false);
+    }
   }, [lineItems, totalBundles, totalCards, grandSubtotal, grandDiscount, grandTotal, receiptData, walletBalance]);
 
   // ─── Step 1: Select Denominations & Bundle Counts ───
@@ -617,11 +624,21 @@ export default function MerchantVoucherGenerate() {
         <div className="mx-4 mt-4 space-y-3">
           <Button
             onClick={handlePrintReceipt}
+            disabled={isPrintingReceipt}
             variant="outline"
             className="w-full h-12 rounded-xl text-sm font-semibold touch-manipulation active:scale-[0.97]"
           >
-            <Printer className="h-4 w-4 mr-2" />
-            Print Receipt
+            {isPrintingReceipt ? (
+              <>
+                <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Download Receipt
+              </>
+            )}
           </Button>
           <Button
             onClick={() => navigate("/merchant-voucher-batches")}

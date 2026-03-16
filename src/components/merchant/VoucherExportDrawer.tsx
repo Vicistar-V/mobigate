@@ -8,8 +8,10 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Printer, Package, ListChecks, Check } from "lucide-react";
+import { Printer, Package, ListChecks, Check, Download } from "lucide-react";
 import { VoucherBatch, formatNum } from "@/data/merchantVoucherData";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface VoucherPrintDrawerProps {
   open: boolean;
@@ -63,100 +65,73 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     }
   };
 
-  const handlePrint = useCallback(() => {
+  const handlePrint = useCallback(async () => {
     if (selectedCards.length === 0) return;
     setIsPrinting(true);
 
-    const printContainer = document.createElement("div");
-    printContainer.id = "voucher-print-area";
-    printContainer.innerHTML = `
-      <style>
-        #voucher-print-area {
-          position: fixed;
-          left: -9999px;
-          top: 0;
-          width: 210mm;
-          font-family: 'Courier New', monospace;
-          padding: 12mm;
-        }
-        @media print {
-          body > *:not(#voucher-print-area) { display: none !important; visibility: hidden !important; }
-          #voucher-print-area {
-            display: block !important;
-            visibility: visible !important;
-            position: static !important;
-            left: auto !important;
-            top: auto !important;
-            width: 100% !important;
-          }
-        }
-        .print-header {
-          text-align: center;
-          margin-bottom: 8mm;
-          border-bottom: 2px solid #000;
-          padding-bottom: 4mm;
-        }
-        .print-header h1 { font-size: 16pt; margin: 0 0 2mm 0; }
-        .print-header p { font-size: 9pt; margin: 0; color: #555; }
-        .card-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 3mm;
-        }
-        .voucher-card-print {
-          border: 1.5px solid #333;
-          border-radius: 2mm;
-          padding: 3mm;
-          page-break-inside: avoid;
-          font-size: 8pt;
-        }
-        .voucher-card-print .denom {
-          font-size: 12pt;
-          font-weight: 900;
-          text-align: center;
-          border-bottom: 1px solid #ccc;
-          padding-bottom: 1.5mm;
-          margin-bottom: 1.5mm;
-        }
-        .voucher-card-print .field { margin-bottom: 1mm; }
-        .voucher-card-print .label { color: #777; font-size: 6pt; text-transform: uppercase; }
-        .voucher-card-print .value { font-weight: bold; font-size: 8pt; word-break: break-all; }
-        .voucher-card-print .pin-value { font-size: 10pt; font-weight: 900; letter-spacing: 1px; text-align: center; padding: 2mm 0; background: #f5f5f5; border-radius: 1mm; margin: 1.5mm 0; }
-        @page { size: A4; margin: 10mm; }
-        .page-break { page-break-after: always; }
-      </style>
-      <div class="print-header">
-        <h1>VOUCHER CARDS</h1>
-        <p>Batch: ${batch.batchNumber} | Denomination: M${formatNum(batch.denomination)} | Date: ${new Date().toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })} | Cards: ${selectedCards.length}</p>
-      </div>
-      <div class="card-grid">
-        ${selectedCards.map((card, i) => `
-          ${i > 0 && i % 20 === 0 ? '</div><div class="page-break"></div><div class="card-grid">' : ''}
-          <div class="voucher-card-print">
-            <div class="denom">M${formatNum(card.denomination)}</div>
-            <div class="field"><div class="label">Serial</div><div class="value">${card.serialNumber}</div></div>
-            <div class="pin-value">${card.pin}</div>
-            <div class="field"><div class="label">Bundle</div><div class="value">${card.bundleSerialPrefix}</div></div>
-            <div class="field"><div class="label">Generated</div><div class="value">${card.createdAt.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })}</div></div>
-            <div class="field"><div class="label">Batch</div><div class="value" style="font-size:6pt">${batch.batchNumber}</div></div>
-          </div>
-        `).join("")}
-      </div>
-    `;
+    try {
+      const printContainer = document.createElement("div");
+      printContainer.style.cssText = "position:fixed;left:-9999px;top:0;width:800px;background:#fff;padding:24px;";
+      printContainer.innerHTML = `
+        <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #000;padding-bottom:8px;">
+          <h1 style="font-size:18pt;margin:0 0 4px 0;font-family:'Courier New',monospace;">VOUCHER CARDS</h1>
+          <p style="font-size:9pt;margin:0;color:#555;font-family:'Courier New',monospace;">Batch: ${batch.batchNumber} | M${formatNum(batch.denomination)} | ${new Date().toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })} | Cards: ${selectedCards.length}</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          ${selectedCards.map(card => `
+            <div style="border:1.5px solid #333;border-radius:6px;padding:8px;font-family:'Courier New',monospace;font-size:8pt;">
+              <div style="font-size:14pt;font-weight:900;text-align:center;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:4px;">M${formatNum(card.denomination)}</div>
+              <div style="margin-bottom:2px;"><span style="color:#777;font-size:6pt;text-transform:uppercase;">Serial</span><div style="font-weight:bold;word-break:break-all;">${card.serialNumber}</div></div>
+              <div style="font-size:12pt;font-weight:900;letter-spacing:1px;text-align:center;padding:6px 0;background:#f5f5f5;border-radius:4px;margin:4px 0;">${card.pin}</div>
+              <div style="margin-bottom:2px;"><span style="color:#777;font-size:6pt;text-transform:uppercase;">Bundle</span><div style="font-weight:bold;">${card.bundleSerialPrefix}</div></div>
+              <div><span style="color:#777;font-size:6pt;text-transform:uppercase;">Batch</span><div style="font-weight:bold;font-size:6pt;">${batch.batchNumber}</div></div>
+            </div>
+          `).join("")}
+        </div>
+      `;
 
-    document.body.appendChild(printContainer);
+      document.body.appendChild(printContainer);
+      await new Promise(r => setTimeout(r, 300));
 
-    const onAfterPrint = () => {
+      const canvas = await html2canvas(printContainer, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const padding = 10;
+      const availableWidth = pageWidth - padding * 2;
+      const ratio = availableWidth / canvas.width;
+      const scaledHeight = canvas.height * ratio;
+
+      let heightLeft = scaledHeight;
+      let position = padding;
+      pdf.addImage(imgData, "PNG", padding, position, availableWidth, scaledHeight);
+      heightLeft -= (pageHeight - padding * 2);
+
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position = padding - (scaledHeight - heightLeft);
+        pdf.addImage(imgData, "PNG", padding, position, availableWidth, scaledHeight);
+        heightLeft -= (pageHeight - padding * 2);
+      }
+
+      pdf.save(`voucher-cards-${batch.batchNumber}.pdf`);
       document.body.removeChild(printContainer);
-      window.removeEventListener("afterprint", onAfterPrint);
+
       setIsPrinting(false);
       onOpenChange(false);
       onPrintComplete(selectedCardIds);
       setSelectedBundles(new Set());
-    };
-
-    window.addEventListener("afterprint", onAfterPrint);
-    setTimeout(() => { window.print(); }, 200);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      setIsPrinting(false);
+    }
   }, [selectedCards, selectedCardIds, batch, onOpenChange, onPrintComplete]);
 
   return (
@@ -169,7 +144,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             <p className="text-sm font-bold text-foreground">Print Voucher Cards</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Select bundles to print. Cards will be printed with full PINs on A4 paper via your browser's print dialog.
+            Select bundles to print. Cards will be exported as a PDF with full PINs on A4 layout.
           </p>
         </div>
 
@@ -249,12 +224,12 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             {isPrinting ? (
               <>
                 <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                Opening Print Dialog...
+                Generating PDF...
               </>
             ) : (
               <>
-                <Printer className="h-4 w-4 mr-2" />
-                Print {selectedCardIds.length} Card{selectedCardIds.length !== 1 ? "s" : ""} Now
+                <Download className="h-4 w-4 mr-2" />
+                Download {selectedCardIds.length} Card{selectedCardIds.length !== 1 ? "s" : ""} as PDF
               </>
             )}
           </Button>
