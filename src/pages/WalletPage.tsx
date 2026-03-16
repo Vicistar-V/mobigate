@@ -1385,6 +1385,46 @@ export default function WalletPage() {
           </div>
         </DrawerContent>
       </Drawer>
+      {/* Fund Wallet Selection Drawer */}
+      <Drawer open={fundSelectOpen} onOpenChange={setFundSelectOpen}>
+        <DrawerContent className="max-h-[60vh]">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">Fund Your Wallet</DrawerTitle>
+            <p className="text-sm text-muted-foreground text-center">Choose which wallet to fund</p>
+          </DrawerHeader>
+          <div className="px-4 pb-6 flex flex-col gap-3">
+            {/* Mobi Wallet Option */}
+            <button
+              onClick={() => { setFundSelectOpen(false); setTimeout(() => setFundMobiDrawerOpen(true), 200); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Coins className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">Mobi Wallet</p>
+                <p className="text-xs text-muted-foreground">Fund with Mobi-Units (M)</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+
+            {/* Local Currency Wallet Option */}
+            <button
+              onClick={() => { setFundSelectOpen(false); setTimeout(() => setFundDrawerOpen(true), 200); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-accent/50 flex items-center justify-center shrink-0">
+                <Banknote className="h-6 w-6 text-accent-foreground" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">Local Currency Wallet</p>
+                <p className="text-xs text-muted-foreground">Fund with Naira (₦)</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
