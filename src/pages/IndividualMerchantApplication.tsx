@@ -17,7 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-import { MerchantEligibilityCard } from "@/components/mobigate/MerchantEligibilityCard";
+import { MerchantEligibilityCard, getEligibilityItems } from "@/components/mobigate/MerchantEligibilityCard";
 
 const genderOptions = ["Male", "Female"];
 const maritalStatusOptions = ["Single", "Married", "Divorced", "Separated", "Widowed", "Complicated"];

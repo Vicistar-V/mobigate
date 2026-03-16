@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-import { MerchantEligibilityCard } from "@/components/mobigate/MerchantEligibilityCard";
+import { MerchantEligibilityCard, getEligibilityItems } from "@/components/mobigate/MerchantEligibilityCard";
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <div className="border-b border-border pb-1 mb-3">
