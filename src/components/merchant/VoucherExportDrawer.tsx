@@ -162,7 +162,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="shrink-0 px-3 pt-3 pb-2 border-b border-border/30">
+        <div className="shrink-0 px-4 pt-3 pb-2 border-b border-border/30">
           <div className="flex items-center gap-2 mb-1">
             <Printer className="h-4 w-4 text-primary shrink-0" />
             <p className="text-sm font-bold text-foreground">Print Voucher Cards</p>
@@ -173,8 +173,8 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
-          <div className="px-3 py-3 space-y-2">
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain min-h-0">
+          <div className="px-4 py-3 space-y-2">
             {/* Select All */}
             <button
               onClick={selectAll}
@@ -206,7 +206,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
                 <button
                   key={bundle.id}
                   onClick={() => toggleBundle(bundle.id)}
-                  className={`w-full flex items-center gap-2.5 p-3 rounded-xl border-2 touch-manipulation active:scale-[0.98] transition-all ${
+                  className={`w-full flex items-center gap-2 p-3 rounded-xl border-2 touch-manipulation active:scale-[0.98] transition-all ${
                     isSelected ? "border-primary bg-primary/5" : "border-border/40 bg-card"
                   }`}
                 >
@@ -222,7 +222,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
                     <p className="text-sm font-bold text-foreground truncate">{bundle.serialPrefix}</p>
                     <p className="text-xs text-muted-foreground">{bundle.availableCount} Available cards</p>
                   </div>
-                  <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-200 text-xs h-5 px-1.5 shrink-0">
+                  <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-200 text-xs h-5 px-1.5 shrink-0 whitespace-nowrap">
                     {bundle.availableCount}
                   </Badge>
                 </button>
@@ -238,8 +238,8 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
           </div>
         </div>
 
-        {/* Sticky Footer */}
-        <div className="shrink-0 px-3 py-3 border-t border-border/30 bg-card/95 backdrop-blur-sm safe-area-bottom">
+        {/* Sticky Footer - always visible */}
+        <div className="shrink-0 px-4 py-3 border-t border-border/30 bg-card/95 backdrop-blur-sm pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <Button
             onClick={handlePrint}
             disabled={selectedCardIds.length === 0 || isPrinting}
@@ -253,7 +253,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             ) : (
               <>
                 <Printer className="h-4 w-4 mr-2" />
-                Print {selectedCardIds.length} Card{selectedCardIds.length !== 1 ? "s" : ""}
+                Print {selectedCardIds.length} Card{selectedCardIds.length !== 1 ? "s" : ""} Now
               </>
             )}
           </Button>
