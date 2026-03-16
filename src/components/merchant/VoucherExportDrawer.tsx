@@ -144,7 +144,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             <p className="text-sm font-bold text-foreground">Print Voucher Cards</p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Select bundles to print. Cards will be printed with full PINs on A4 paper via your browser's print dialog.
+            Select bundles to print. Cards will be exported as a PDF with full PINs on A4 layout.
           </p>
         </div>
 
