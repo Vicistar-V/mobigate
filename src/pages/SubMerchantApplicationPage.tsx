@@ -192,7 +192,7 @@ export default function SubMerchantApplicationPage() {
             </div>
           </div>
           {mobiMerchant && (
-            <Badge className="bg-emerald-500/15 text-emerald-600 text-xs whitespace-nowrap">0%–10.0% Discount Rate</Badge>
+            <Badge className="bg-emerald-500/15 text-emerald-600 text-xs whitespace-nowrap">0%–10% Discount Rate</Badge>
           )}
           <Button
             variant="outline"
