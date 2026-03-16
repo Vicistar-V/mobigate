@@ -227,7 +227,7 @@ export default function MerchantVoucherBatchDetail() {
   }
 
   return (
-    <div className="bg-background min-h-screen pb-6">
+    <div className="bg-background min-h-screen pb-6 overflow-x-hidden">
       {/* Header */}
       <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
         <div className="px-4 py-3 flex items-center gap-3">
