@@ -117,7 +117,7 @@ const menuItems: MenuItem[] = [{
   icon: Wallet,
   items: [
     { title: "View Wallet", url: "/wallet" },
-    { title: "Fund Your Wallet", url: "/buy-vouchers?source=fund-wallet" },
+    { title: "Fund Your Wallet", url: "/wallet?action=fund" },
   ]
 }, {
   title: "Quiz Games",
