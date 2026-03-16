@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Minus, Plus, Check, Store, ChevronRight, CreditCard, CheckCircle2, Package, Printer, Receipt, Trash2, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Check, Store, ChevronRight, CreditCard, CheckCircle2, Package, Printer, Receipt, Trash2, ShoppingCart, Download } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
