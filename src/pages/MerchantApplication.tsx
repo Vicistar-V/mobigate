@@ -708,6 +708,9 @@ export default function MerchantApplication() {
                     <FieldRow label="Account Number">
                       <Input value={bank.acct} onChange={e => updateBankAccount(index, "acct", e.target.value)} placeholder="Account number" className="text-sm h-9" />
                     </FieldRow>
+                    <FieldRow label="Account Name">
+                      <Input value={bank.acctName} onChange={e => updateBankAccount(index, "acctName", e.target.value)} placeholder="Account holder name" className="text-sm h-9" />
+                    </FieldRow>
                     <FieldRow label="Bank Name">
                       <Input value={bank.name} onChange={e => updateBankAccount(index, "name", e.target.value)} placeholder="Bank name" className="text-sm h-9" />
                     </FieldRow>
