@@ -141,7 +141,7 @@ export default function MerchantApplication() {
     { acct: "", acctName: "", name: "", branch: "" },
   ]);
 
-  const updateBankAccount = (index: number, field: "acct" | "name" | "branch", value: string) => {
+  const updateBankAccount = (index: number, field: "acct" | "acctName" | "name" | "branch", value: string) => {
     setBankAccounts(prev => prev.map((b, i) => i === index ? { ...b, [field]: value } : b));
   };
 
