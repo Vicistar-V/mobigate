@@ -349,14 +349,19 @@ export default function MerchantApplication() {
               <Card>
                 <CollapsibleTrigger asChild>
                   <div className="flex items-center justify-between p-3 cursor-pointer touch-manipulation">
-                    <p className="text-xs font-semibold flex items-center gap-1.5">
-                      <Shield className="h-3.5 w-3.5 text-primary" /> Merchant Application Requirements
-                    </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <Shield className="h-4 w-4 text-primary shrink-0" />
+                      <span className="text-sm font-semibold">Requirements</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
                       {!requirementsOpen && (
-                        <Badge className={`text-[10px] px-1.5 h-5 ${allMet ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}>
-                          {allMet ? "All Met ✓" : `${metCount}/${eligItems.length} Met`}
-                        </Badge>
+                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${allMet ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-amber-500/15 text-amber-700 dark:text-amber-400"}`}>
+                          {allMet ? (
+                            <><CheckCircle className="h-4 w-4" /> All Met</>
+                          ) : (
+                            <><Clock className="h-4 w-4" /> {metCount}/{eligItems.length} Met</>
+                          )}
+                        </div>
                       )}
                       <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
                     </div>
