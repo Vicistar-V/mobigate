@@ -163,6 +163,16 @@ export default function WalletPage() {
   const [selectedTx, setSelectedTx] = useState<WalletTransaction | null>(null);
   const [showFilterSheet, setShowFilterSheet] = useState(false);
 
+  // Fund selection drawer (triggered by ?action=fund)
+  const [fundSelectOpen, setFundSelectOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("action") === "fund") {
+      setFundSelectOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
+
   // Select gateway and go to form
   const handleSelectGateway = (gw: PaymentGateway) => {
     setSelectedGateway(gw);
