@@ -286,9 +286,9 @@ export default function MerchantApplication() {
                 )}
               </div>
               {waiverMode && waiverContext && (
-                <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3">
+                <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3 overflow-hidden">
                   <p className="text-xs font-semibold text-orange-700 mb-1">Waiver Reason</p>
-                  <p className="text-xs text-muted-foreground">{waiverContext}</p>
+                  <p className="text-xs text-muted-foreground break-words">{waiverContext}</p>
                 </div>
               )}
             </CardContent>
