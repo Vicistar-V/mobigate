@@ -224,12 +224,12 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             {isPrinting ? (
               <>
                 <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                Opening Print Dialog...
+                Generating PDF...
               </>
             ) : (
               <>
-                <Printer className="h-4 w-4 mr-2" />
-                Print {selectedCardIds.length} Card{selectedCardIds.length !== 1 ? "s" : ""} Now
+                <Download className="h-4 w-4 mr-2" />
+                Download {selectedCardIds.length} Card{selectedCardIds.length !== 1 ? "s" : ""} as PDF
               </>
             )}
           </Button>
