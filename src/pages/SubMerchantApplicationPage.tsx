@@ -181,28 +181,28 @@ export default function SubMerchantApplicationPage() {
 
       <div className="px-5 pt-4 space-y-4">
         {/* Merchant Info Card */}
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center gap-3">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Store className="h-6 w-6 text-primary" />
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2.5">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Store className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-foreground truncate">{merchant.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{merchant.category}</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm text-foreground">{merchant.name}</p>
-            <p className="text-xs text-muted-foreground">{merchant.category}</p>
-            {mobiMerchant && (
-              <Badge className="bg-emerald-500/15 text-emerald-600 text-xs mt-1">0%–10.0% Discount Rate</Badge>
-            )}
-          </div>
+          {mobiMerchant && (
+            <Badge className="bg-emerald-500/15 text-emerald-600 text-xs whitespace-nowrap">0%–10.0% Discount Rate</Badge>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => navigate("/merchants?mode=apply&type=retail", { state: { returnTo: "sub-merchant-application", formData: form } })}
+            className="w-full h-10 rounded-lg text-xs font-semibold border-primary/30 text-primary touch-manipulation active:scale-[0.97]"
+          >
+            <Store className="h-4 w-4 mr-2" />
+            Choose another Merchant
+          </Button>
         </div>
-
-        {/* Choose Another Merchant */}
-        <Button
-          variant="outline"
-          onClick={() => navigate("/merchants?mode=apply&type=retail", { state: { returnTo: "sub-merchant-application", formData: form } })}
-          className="w-full h-11 rounded-xl text-sm font-semibold border-primary/30 text-primary touch-manipulation active:scale-[0.97]"
-        >
-          <Store className="h-4 w-4 mr-2" />
-          Choose another Merchant
-        </Button>
 
         {/* Application Fee Notice */}
         <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 flex items-start gap-2.5">
