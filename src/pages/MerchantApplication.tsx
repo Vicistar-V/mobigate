@@ -581,42 +581,81 @@ export default function MerchantApplication() {
         <Card>
           <CardContent className="p-4 space-y-3">
             <SectionTitle>Other Business Addresses</SectionTitle>
-            <FieldRow label="[i]">
-              <Input value={address1} onChange={e => setAddress1(e.target.value)} placeholder="Business address 1" className="text-sm h-9" />
-            </FieldRow>
-            <FieldRow label="[ii]">
-              <Input value={address2} onChange={e => setAddress2(e.target.value)} placeholder="Business address 2" className="text-sm h-9" />
-            </FieldRow>
-            <FieldRow label="[iii]">
-              <Input value={address3} onChange={e => setAddress3(e.target.value)} placeholder="Business address 3" className="text-sm h-9" />
-            </FieldRow>
+
+            {addresses.map((addr, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <div className="flex-1">
+                  <FieldRow label={`Address ${index + 1}`}>
+                    <Input value={addr} onChange={e => updateAddress(index, e.target.value)} placeholder="Business address" className="text-sm h-9" />
+                  </FieldRow>
+                </div>
+                {addresses.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 mt-5 text-destructive hover:text-destructive shrink-0"
+                    onClick={() => removeAddress(index)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+            ))}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full text-xs gap-1.5"
+              onClick={addAddress}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Another Address
+            </Button>
           </CardContent>
         </Card>
 
         {/* ===== AFFILIATES ===== */}
         <Card>
           <CardContent className="p-4 space-y-3">
-            <SectionTitle>Affiliate [or Sister-Companies] (if any)</SectionTitle>
+            <SectionTitle>Affiliate / Sister Companies (if any)</SectionTitle>
 
-            <div className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50">
-              <p className="text-xs font-semibold text-muted-foreground">[i]</p>
-              <FieldRow label="Name">
-                <Input value={affiliate1Name} onChange={e => setAffiliate1Name(e.target.value)} placeholder="Company name" className="text-sm h-9" />
-              </FieldRow>
-              <FieldRow label="Address">
-                <Input value={affiliate1Address} onChange={e => setAffiliate1Address(e.target.value)} placeholder="Company address" className="text-sm h-9" />
-              </FieldRow>
-            </div>
+            {affiliates.map((aff, index) => (
+              <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-muted-foreground">Company {index + 1}</p>
+                  {affiliates.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:text-destructive"
+                      onClick={() => removeAffiliate(index)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+                <FieldRow label="Name">
+                  <Input value={aff.name} onChange={e => updateAffiliate(index, "name", e.target.value)} placeholder="Company name" className="text-sm h-9" />
+                </FieldRow>
+                <FieldRow label="Address">
+                  <Input value={aff.address} onChange={e => updateAffiliate(index, "address", e.target.value)} placeholder="Company address" className="text-sm h-9" />
+                </FieldRow>
+              </div>
+            ))}
 
-            <div className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50">
-              <p className="text-xs font-semibold text-muted-foreground">[ii]</p>
-              <FieldRow label="Name">
-                <Input value={affiliate2Name} onChange={e => setAffiliate2Name(e.target.value)} placeholder="Company name" className="text-sm h-9" />
-              </FieldRow>
-              <FieldRow label="Address">
-                <Input value={affiliate2Address} onChange={e => setAffiliate2Address(e.target.value)} placeholder="Company address" className="text-sm h-9" />
-              </FieldRow>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full text-xs gap-1.5"
+              onClick={addAffiliate}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Another Company
+            </Button>
           </CardContent>
         </Card>
 
