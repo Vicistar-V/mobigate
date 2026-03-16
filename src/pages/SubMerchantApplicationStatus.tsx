@@ -104,7 +104,7 @@ const SubMerchantApplicationStatus = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Sticky Header */}
-      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border/50">
+      <div className="sticky top-[var(--header-height)] z-30 bg-background/95 backdrop-blur-sm border-b border-border/50">
         <div className="flex items-center gap-3 px-4 py-3">
           <button
             onClick={() => navigate(-1)}

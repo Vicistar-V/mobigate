@@ -316,7 +316,7 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
   return (
     <div className="bg-background min-h-screen pb-28 overflow-x-hidden w-full max-w-full">
       {/* Sticky header */}
-      <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+      <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
         <div className="px-5 py-3 flex items-center gap-3">
           <button onClick={onBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
             <ArrowLeft className="h-5 w-5 text-foreground" />

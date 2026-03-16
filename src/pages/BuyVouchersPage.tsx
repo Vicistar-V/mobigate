@@ -419,7 +419,7 @@ export default function BuyVouchersPage() {
   // ─── STEP 1: VOUCHER SELECTION ───
   const renderVoucherStep = () => (
     <div className="bg-background pb-32">
-      <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
@@ -486,7 +486,7 @@ export default function BuyVouchersPage() {
     const others = getOtherCountries();
     return (
       <div className="bg-background pb-6">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
@@ -565,7 +565,7 @@ export default function BuyVouchersPage() {
 
     return (
       <div className="bg-background pb-6">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
           <div className="px-4 py-2 flex items-center gap-3">
             <button onClick={handleBack} className="h-8 w-8 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation shrink-0">
               <ArrowLeft className="h-4 w-4 text-foreground" />
@@ -736,7 +736,7 @@ export default function BuyVouchersPage() {
 
     return (
       <div className="bg-background pb-32">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
           <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
@@ -986,7 +986,7 @@ export default function BuyVouchersPage() {
     return (
       <div className="bg-background min-h-screen pb-6">
         {/* Sticky header with balance */}
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
           <div className="px-4 py-3 flex items-center gap-3">
             <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
               <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -1192,7 +1192,7 @@ export default function BuyVouchersPage() {
     return (
       <div className="bg-background min-h-screen pb-28">
         {/* Sticky header */}
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50">
           <div className="px-4 py-3 flex items-center gap-3">
             <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
               <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -1329,7 +1329,7 @@ export default function BuyVouchersPage() {
   // ─── REDEEM PIN STEP ───
   const renderRedeemPinStep = () => (
     <div className="bg-background min-h-screen pb-28">
-      <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-[var(--header-height)] z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center gap-3">
         <button onClick={handleBack} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
