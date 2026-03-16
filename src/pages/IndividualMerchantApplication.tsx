@@ -138,7 +138,8 @@ export default function IndividualMerchantApplication() {
     setVerifications(updated);
   };
 
-  const isFormValid = firstName && lastName && gender && dobDay && dobMonth && dobYear && nationality && phone1 && email && acceptedPolicies;
+  const hasValidBank = bankEntries.some(b => b.bankName.trim() && b.accountNumber.trim());
+  const isFormValid = firstName && lastName && gender && dobDay && dobMonth && dobYear && nationality && phone1 && email && acceptedPolicies && hasValidBank;
 
   const totalFee = waiverMode ? 100000 : 50000; // Application fee + waiver fee if applicable
 

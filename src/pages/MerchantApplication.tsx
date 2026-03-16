@@ -140,6 +140,11 @@ export default function MerchantApplication() {
       toast({ title: "Required Fields", description: "Please fill in store name and merchant name.", variant: "destructive" });
       return;
     }
+    const hasValidBank = bankAccounts.some(b => b.acct.trim() && b.name.trim());
+    if (!hasValidBank) {
+      toast({ title: "Banking Required", description: "Please provide at least one bank account number and bank name.", variant: "destructive" });
+      return;
+    }
     if (password !== confirmPassword || password.length < 4) {
       toast({ title: "Password Error", description: "Passwords must match and be at least 4 characters.", variant: "destructive" });
       return;
