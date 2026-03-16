@@ -627,12 +627,12 @@ export default function IndividualMerchantApplication() {
               </Button>
             </div>
 
-            <Button onClick={handleSubmit} className="w-full gap-2" size="lg" disabled={!acceptedPolicies}>
-              <Store className="h-4 w-4" />
-              {waiverMode
-                ? `Submit Application + Waiver — ${formatMobi(totalFee)}`
-                : `Submit Application — ${formatMobi(50000)}`
-              }
+            <Button onClick={handleSubmit} className="w-full h-auto py-3 flex-col gap-0.5" disabled={!acceptedPolicies}>
+              <span className="flex items-center gap-2 text-sm font-semibold">
+                <Store className="h-4 w-4" />
+                {waiverMode ? 'Submit Application + Waiver' : 'Submit Application'}
+              </span>
+              <span className="text-xs opacity-80">{formatMobi(totalFee)}</span>
             </Button>
           </CardContent>
         </Card>
