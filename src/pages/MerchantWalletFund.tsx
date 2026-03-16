@@ -10,6 +10,8 @@ const QUICK_AMOUNTS = [50000, 100000, 500000, 1000000];
 
 export default function MerchantWalletFund() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
   const [step, setStep] = useState<Step>("amount");
   const [amount, setAmount] = useState<number>(0);
   const [customInput, setCustomInput] = useState("");
