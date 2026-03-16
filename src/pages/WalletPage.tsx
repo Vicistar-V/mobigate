@@ -105,6 +105,7 @@ function formatRelativeDate(date: Date): string {
 
 export default function WalletPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
   // Embla carousel
