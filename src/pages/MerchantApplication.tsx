@@ -45,6 +45,16 @@ export default function MerchantApplication() {
   const [waiverRequested, setWaiverRequested] = useState(false);
   const [waiverContext, setWaiverContext] = useState("");
 
+  // Multi-step wizard
+  const [currentStep, setCurrentStep] = useState(0);
+  const STEPS = [
+    { label: "Account", icon: "account" },
+    { label: "Business", icon: "business" },
+    { label: "Officers", icon: "officers" },
+    { label: "Details", icon: "details" },
+    { label: "Banking", icon: "banking" },
+  ];
+
   // Create Account
   const [storeName, setStoreName] = useState("");
   const [accountEmail, setAccountEmail] = useState("");
@@ -194,11 +204,13 @@ export default function MerchantApplication() {
       affiliates,
       emailAddress, website, phone1, phone2,
       bankAccounts: bankAccounts.map(b => ({ acct: b.acct, name: b.name, branch: b.branch })),
+      currentStep,
+      waiverMode, waiverContext,
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     toast({ title: "Draft Saved", description: "Your progress has been saved. You can resume later." });
-  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, addresses, affiliates, emailAddress, website, phone1, phone2, bankAccounts, toast]);
+  }, [storeName, accountEmail, password, confirmPassword, merchantName, businessProfile, dba, registeredOffice, companyRegNumber, regAuthority, countryOfReg, tin, directors, addresses, affiliates, emailAddress, website, phone1, phone2, bankAccounts, currentStep, waiverMode, waiverContext, toast]);
 
   const clearDraft = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
@@ -242,6 +254,9 @@ export default function MerchantApplication() {
         if (draft.bankAccounts?.length) {
           setBankAccounts(draft.bankAccounts.map((b: any) => ({ acct: b.acct || "", name: b.name || "", branch: b.branch || "" })));
         }
+        if (typeof draft.currentStep === "number") setCurrentStep(draft.currentStep);
+        if (draft.waiverMode) setWaiverMode(true);
+        if (draft.waiverContext) setWaiverContext(draft.waiverContext);
         setHasDraft(true);
         if (draft.savedAt) {
           setDraftDate(new Date(draft.savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }));
@@ -329,13 +344,42 @@ export default function MerchantApplication() {
     );
   }
 
+  const handleSaveAndContinue = () => {
+    // Auto-save draft silently
+    const draft = {
+      storeName, accountEmail, password, confirmPassword,
+      merchantName, businessProfile, dba, registeredOffice,
+      companyRegNumber, regAuthority, countryOfReg, tin,
+      directors: directors.map(d => ({ name: d.name, address: d.address })),
+      addresses, affiliates,
+      emailAddress, website, phone1, phone2,
+      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, name: b.name, branch: b.branch })),
+      currentStep: currentStep + 1,
+      waiverMode, waiverContext,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    setCurrentStep(prev => prev + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    toast({ title: "Progress Saved", description: `Step ${currentStep + 1} of ${STEPS.length} completed.` });
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <Header />
 
       <div className="p-4 max-w-lg mx-auto space-y-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1 -ml-2">
-          <ArrowLeft className="h-4 w-4" /> Back
+        <Button variant="ghost" size="sm" onClick={handleBack} className="gap-1 -ml-2">
+          <ArrowLeft className="h-4 w-4" /> {currentStep > 0 ? "Previous Step" : "Back"}
         </Button>
 
         {/* Title */}
@@ -345,12 +389,28 @@ export default function MerchantApplication() {
           </div>
           <div>
             <h1 className="text-lg font-bold">Corporate Merchant Application</h1>
-            <p className="text-[11px] text-muted-foreground">Apply as a corporate Mobi-Merchant</p>
+            <p className="text-[11px] text-muted-foreground">Step {currentStep + 1} of {STEPS.length} — {STEPS[currentStep].label}</p>
           </div>
         </div>
 
+        {/* Step Progress Bar */}
+        <div className="flex items-center gap-1">
+          {STEPS.map((step, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className={`h-1.5 w-full rounded-full transition-all duration-300 ${
+                  i < currentStep ? "bg-primary" : i === currentStep ? "bg-primary/60" : "bg-muted"
+                }`}
+              />
+              <span className={`text-[9px] font-medium transition-colors ${
+                i <= currentStep ? "text-primary" : "text-muted-foreground"
+              }`}>{step.label}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Draft Resume Banner */}
-        {hasDraft && (
+        {hasDraft && currentStep === 0 && (
           <Card className="border-primary/30 bg-primary/5">
             <CardContent className="p-3 flex items-center gap-3">
               <RotateCcw className="h-4 w-4 text-primary shrink-0" />
@@ -358,409 +418,360 @@ export default function MerchantApplication() {
                 <p className="text-xs font-semibold">Draft Restored</p>
                 {draftDate && <p className="text-xs text-muted-foreground">Last saved: {draftDate}</p>}
               </div>
-              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => { clearDraft(); setHasDraft(false); }}>
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => { clearDraft(); setHasDraft(false); setCurrentStep(0); }}>
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* Merchant Application Requirements */}
-        {(() => {
-          const eligItems = getEligibilityItems();
-          const metCount = eligItems.filter(i => i.met).length;
-          const allMet = metCount === eligItems.length;
-          return (
-            <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
-              <Card>
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between p-3 cursor-pointer touch-manipulation">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <Shield className="h-4 w-4 text-primary shrink-0" />
-                      <span className="text-sm font-semibold">Requirements</span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {!requirementsOpen && (
-                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${allMet ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-amber-500/15 text-amber-700 dark:text-amber-400"}`}>
-                          {allMet ? (
-                            <><CheckCircle className="h-4 w-4" /> All Met</>
-                          ) : (
-                            <><Clock className="h-4 w-4" /> {metCount}/{eligItems.length} Met</>
-                          )}
+        {/* Requirements & Waiver - always visible on step 0 */}
+        {currentStep === 0 && (
+          <>
+            {(() => {
+              const eligItems = getEligibilityItems();
+              const metCount = eligItems.filter(i => i.met).length;
+              const allMet = metCount === eligItems.length;
+              return (
+                <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
+                  <Card>
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between p-3 cursor-pointer touch-manipulation">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Shield className="h-4 w-4 text-primary shrink-0" />
+                          <span className="text-sm font-semibold">Requirements</span>
                         </div>
-                      )}
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
+                        <div className="flex items-center gap-2 shrink-0">
+                          {!requirementsOpen && (
+                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${allMet ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-amber-500/15 text-amber-700 dark:text-amber-400"}`}>
+                              {allMet ? (
+                                <><CheckCircle className="h-4 w-4" /> All Met</>
+                              ) : (
+                                <><Clock className="h-4 w-4" /> {metCount}/{eligItems.length} Met</>
+                              )}
+                            </div>
+                          )}
+                          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
+                        </div>
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <CardContent className="pt-0 pb-3">
+                        <MerchantEligibilityCard />
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
+              );
+            })()}
+
+            <Card className={`border-orange-500/30 ${waiverMode ? "bg-orange-500/5" : ""}`}>
+              <CardContent className="p-3 space-y-3">
+                <button
+                  onClick={() => setWaiverMode(!waiverMode)}
+                  className="w-full flex items-center justify-between touch-manipulation active:scale-[0.98]"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
+                    <div className="text-left">
+                      <p className="text-sm font-bold">Request a Waiver</p>
+                      <p className="text-xs text-muted-foreground">Additional non-refundable fee of {formatMobi(50000)}</p>
                     </div>
                   </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="pt-0 pb-3">
-                    <MerchantEligibilityCard />
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-          );
-        })()}
-
-        {/* ─── WAIVER REQUEST (right below requirements) ─── */}
-        <Card className={`border-orange-500/30 ${waiverMode ? "bg-orange-500/5" : ""}`}>
-          <CardContent className="p-3 space-y-3">
-            <button
-              onClick={() => setWaiverMode(!waiverMode)}
-              className="w-full flex items-center justify-between touch-manipulation active:scale-[0.98]"
-            >
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
-                <div className="text-left">
-                  <p className="text-sm font-bold">Request a Waiver</p>
-                  <p className="text-xs text-muted-foreground">Additional non-refundable fee of {formatMobi(50000)}</p>
-                </div>
-              </div>
-              {waiverMode ? <ToggleRight className="h-6 w-6 text-orange-600 shrink-0" /> : <ToggleLeft className="h-6 w-6 text-muted-foreground shrink-0" />}
-            </button>
-            {waiverMode && (
-              <div className="space-y-3 border-t border-orange-500/20 pt-3">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  If you do not meet the standard application requirements, you can request an Exclusive Waiver.
-                  A non-refundable fee of <span className="font-bold text-foreground">{formatMobi(50000)}</span> (≈ {formatLocalAmount(50000, "NGN")}) will be charged
-                  in addition to the application fee. Your application will be flagged as <span className="font-semibold">"Awaiting Approval"</span>.
-                </p>
-                <Textarea placeholder="Optional: explain your situation" value={waiverContext} onChange={(e) => setWaiverContext(e.target.value)} className="min-h-[60px] text-xs" />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-
-        {/* ─── FORM SECTIONS ─── */}
-        {/* ===== CREATE ACCOUNT ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <SectionTitle>Create Account</SectionTitle>
-
-            <FieldRow label="Username [Store Name]">
-              <Input value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Your store name" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="E-Mail">
-              <Input value={accountEmail} onChange={e => setAccountEmail(e.target.value)} placeholder="email@example.com" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="Password">
-              <div className="relative">
-                <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••" className="text-sm h-9 pr-9" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {waiverMode ? <ToggleRight className="h-6 w-6 text-orange-600 shrink-0" /> : <ToggleLeft className="h-6 w-6 text-muted-foreground shrink-0" />}
                 </button>
-              </div>
-            </FieldRow>
+                {waiverMode && (
+                  <div className="space-y-3 border-t border-orange-500/20 pt-3">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      If you do not meet the standard application requirements, you can request an Exclusive Waiver.
+                      A non-refundable fee of <span className="font-bold text-foreground">{formatMobi(50000)}</span> (≈ {formatLocalAmount(50000, "NGN")}) will be charged
+                      in addition to the application fee. Your application will be flagged as <span className="font-semibold">"Awaiting Approval"</span>.
+                    </p>
+                    <Textarea placeholder="Optional: explain your situation" value={waiverContext} onChange={(e) => setWaiverContext(e.target.value)} className="min-h-[60px] text-xs" />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-            <FieldRow label="Confirm Password">
-              <div className="relative">
-                <Input type={showConfirmPassword ? "text" : "password"} value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="text-sm h-9 pr-9" />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </FieldRow>
-          </CardContent>
-        </Card>
+            {/* Create Account */}
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <SectionTitle>Create Account</SectionTitle>
+                <FieldRow label="Username [Store Name]">
+                  <Input value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Your store name" className="text-sm h-9" />
+                </FieldRow>
+                <FieldRow label="E-Mail">
+                  <Input value={accountEmail} onChange={e => setAccountEmail(e.target.value)} placeholder="email@example.com" className="text-sm h-9" />
+                </FieldRow>
+                <FieldRow label="Password">
+                  <div className="relative">
+                    <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••" className="text-sm h-9 pr-9" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </FieldRow>
+                <FieldRow label="Confirm Password">
+                  <div className="relative">
+                    <Input type={showConfirmPassword ? "text" : "password"} value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" className="text-sm h-9 pr-9" />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </FieldRow>
+              </CardContent>
+            </Card>
+          </>
+        )}
 
-        {/* ===== APPLICATION DATA ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <SectionTitle>Application Data</SectionTitle>
+        {/* Step 1: Application Data */}
+        {currentStep === 1 && (
+          <Card>
+            <CardContent className="p-4 space-y-3">
+              <SectionTitle>Application Data</SectionTitle>
+              <FieldRow label="Merchant's Name [Business Name]">
+                <Input value={merchantName} onChange={e => setMerchantName(e.target.value)} placeholder="Business name" className="text-sm h-9" />
+              </FieldRow>
+              <FieldRow label="Business Profile">
+                <Textarea value={businessProfile} onChange={e => setBusinessProfile(e.target.value)}
+                  placeholder="Describe your business activities" className="text-sm min-h-[60px]" />
+              </FieldRow>
+              <FieldRow label="Doing Business As [DBA]">
+                <Input value={dba} onChange={e => setDba(e.target.value)} placeholder="DBA name" className="text-sm h-9" />
+              </FieldRow>
+              <FieldRow label="Registered Office">
+                <Input value={registeredOffice} onChange={e => setRegisteredOffice(e.target.value)} placeholder="Office address" className="text-sm h-9" />
+              </FieldRow>
+              <FieldRow label="Company Registration Number">
+                <Input value={companyRegNumber} onChange={e => setCompanyRegNumber(e.target.value)} placeholder="e.g. RC-123456" className="text-sm h-9" />
+              </FieldRow>
+              <FieldRow label="Business Category">
+                <Select value={businessCategory} onValueChange={setBusinessCategory}>
+                  <SelectTrigger className="text-sm h-9">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="business_name">Business Name</SelectItem>
+                    <SelectItem value="limited_liability">Limited Liability Company</SelectItem>
+                    <SelectItem value="limited_partnership">Limited Partnership</SelectItem>
+                    <SelectItem value="llp">Limited Liability Partnership</SelectItem>
+                    <SelectItem value="incorporated_trustee">Incorporated Trustee</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FieldRow>
+              <FieldRow label="Registration Authority">
+                <Input value={regAuthority} onChange={e => setRegAuthority(e.target.value)} placeholder="e.g. CAC" className="text-sm h-9" />
+              </FieldRow>
+              <FieldRow label="Country of Registration">
+                <Input value={countryOfReg} onChange={e => setCountryOfReg(e.target.value)} placeholder="e.g. Nigeria" className="text-sm h-9" />
+              </FieldRow>
+              <FieldRow label="Tax Identification Number [TIN]">
+                <Input value={tin} onChange={e => setTin(e.target.value)} placeholder="TIN" className="text-sm h-9" />
+              </FieldRow>
+            </CardContent>
+          </Card>
+        )}
 
-            <FieldRow label="Merchant's Name [Business Name]">
-              <Input value={merchantName} onChange={e => setMerchantName(e.target.value)} placeholder="Business name" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="Business Profile">
-              <Textarea value={businessProfile} onChange={e => setBusinessProfile(e.target.value)}
-                placeholder="Describe your business activities" className="text-sm min-h-[60px]" />
-            </FieldRow>
-
-            <FieldRow label="Doing Business As [DBA]">
-              <Input value={dba} onChange={e => setDba(e.target.value)} placeholder="DBA name" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="Registered Office">
-              <Input value={registeredOffice} onChange={e => setRegisteredOffice(e.target.value)} placeholder="Office address" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="Company Registration Number">
-              <Input value={companyRegNumber} onChange={e => setCompanyRegNumber(e.target.value)} placeholder="e.g. RC-123456" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="Business Category">
-              <Select value={businessCategory} onValueChange={setBusinessCategory}>
-                <SelectTrigger className="text-sm h-9">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="business_name">Business Name</SelectItem>
-                  <SelectItem value="limited_liability">Limited Liability Company</SelectItem>
-                  <SelectItem value="limited_partnership">Limited Partnership</SelectItem>
-                  <SelectItem value="llp">Limited Liability Partnership</SelectItem>
-                  <SelectItem value="incorporated_trustee">Incorporated Trustee</SelectItem>
-                </SelectContent>
-              </Select>
-            </FieldRow>
-
-            <FieldRow label="Registration Authority">
-              <Input value={regAuthority} onChange={e => setRegAuthority(e.target.value)} placeholder="e.g. CAC" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="Country of Registration">
-              <Input value={countryOfReg} onChange={e => setCountryOfReg(e.target.value)} placeholder="e.g. Nigeria" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="Tax Identification Number [TIN]">
-              <Input value={tin} onChange={e => setTin(e.target.value)} placeholder="TIN" className="text-sm h-9" />
-            </FieldRow>
-          </CardContent>
-        </Card>
-
-        {/* ===== PRINCIPAL OFFICERS ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-4">
-            <SectionTitle>Name & Address of Principal Officers</SectionTitle>
-
-            {directors.map((director, index) => (
-              <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-muted-foreground">[Director-{index + 1}]</p>
-                  {directors.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-destructive hover:text-destructive"
-                      onClick={() => removeDirector(index)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
+        {/* Step 2: Principal Officers */}
+        {currentStep === 2 && (
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <SectionTitle>Name & Address of Principal Officers</SectionTitle>
+              {directors.map((director, index) => (
+                <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-muted-foreground">[Director-{index + 1}]</p>
+                    {directors.length > 1 && (
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => removeDirector(index)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                  <Input value={director.name} onChange={e => updateDirector(index, "name", e.target.value)} placeholder="Full name" className="text-sm h-9" />
+                  <Label className="text-xs font-medium">Address</Label>
+                  <Input value={director.address} onChange={e => updateDirector(index, "address", e.target.value)} placeholder="Director's address" className="text-sm h-9" />
+                  <Label className="text-xs font-medium">Passport Photograph</Label>
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-border cursor-pointer text-xs text-muted-foreground hover:bg-muted/30 transition-colors">
+                      <Upload className="h-3.5 w-3.5" />
+                      {director.photo ? "Change Photo" : "Upload"}
+                      <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload(index)} />
+                    </label>
+                    {director.photo && (
+                      <img src={director.photo} alt={`Director ${index + 1}`} className="h-10 w-10 rounded-md object-cover border" />
+                    )}
+                  </div>
                 </div>
-                <Input value={director.name} onChange={e => updateDirector(index, "name", e.target.value)} placeholder="Full name" className="text-sm h-9" />
-                <Label className="text-xs font-medium">Address</Label>
-                <Input value={director.address} onChange={e => updateDirector(index, "address", e.target.value)} placeholder="Director's address" className="text-sm h-9" />
-                <Label className="text-xs font-medium">Passport Photograph</Label>
-                <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-dashed border-border cursor-pointer text-xs text-muted-foreground hover:bg-muted/30 transition-colors">
-                    <Upload className="h-3.5 w-3.5" />
-                    {director.photo ? "Change Photo" : "Upload"}
-                    <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload(index)} />
-                  </label>
-                  {director.photo && (
-                    <img src={director.photo} alt={`Director ${index + 1}`} className="h-10 w-10 rounded-md object-cover border" />
-                  )}
-                </div>
-              </div>
-            ))}
+              ))}
+              <Button type="button" variant="outline" size="sm" className="w-full text-xs gap-1.5" onClick={addDirector}>
+                <Plus className="h-3.5 w-3.5" /> Add Another Director
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full text-xs gap-1.5"
-              onClick={addDirector}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Another Director
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Step 3: Addresses, Affiliates, Contact */}
+        {currentStep === 3 && (
+          <>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <SectionTitle>Other Business Addresses</SectionTitle>
+                {addresses.map((addr, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <div className="flex-1">
+                      <FieldRow label={`Address ${index + 1}`}>
+                        <Input value={addr} onChange={e => updateAddress(index, e.target.value)} placeholder="Business address" className="text-sm h-9" />
+                      </FieldRow>
+                    </div>
+                    {addresses.length > 1 && (
+                      <Button type="button" variant="ghost" size="icon" className="h-9 w-9 mt-5 text-destructive hover:text-destructive shrink-0" onClick={() => removeAddress(index)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" className="w-full text-xs gap-1.5" onClick={addAddress}>
+                  <Plus className="h-3.5 w-3.5" /> Add Another Address
+                </Button>
+              </CardContent>
+            </Card>
 
-        {/* ===== OTHER ADDRESSES ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <SectionTitle>Other Business Addresses</SectionTitle>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <SectionTitle>Affiliate / Sister Companies (if any)</SectionTitle>
+                {affiliates.map((aff, index) => (
+                  <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-muted-foreground">Company {index + 1}</p>
+                      {affiliates.length > 1 && (
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => removeAffiliate(index)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                    <FieldRow label="Name">
+                      <Input value={aff.name} onChange={e => updateAffiliate(index, "name", e.target.value)} placeholder="Company name" className="text-sm h-9" />
+                    </FieldRow>
+                    <FieldRow label="Address">
+                      <Input value={aff.address} onChange={e => updateAffiliate(index, "address", e.target.value)} placeholder="Company address" className="text-sm h-9" />
+                    </FieldRow>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" className="w-full text-xs gap-1.5" onClick={addAffiliate}>
+                  <Plus className="h-3.5 w-3.5" /> Add Another Company
+                </Button>
+              </CardContent>
+            </Card>
 
-            {addresses.map((addr, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <div className="flex-1">
-                  <FieldRow label={`Address ${index + 1}`}>
-                    <Input value={addr} onChange={e => updateAddress(index, e.target.value)} placeholder="Business address" className="text-sm h-9" />
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <SectionTitle>Contact Information</SectionTitle>
+                <FieldRow label="E-Mail Address">
+                  <Input value={emailAddress} onChange={e => setEmailAddress(e.target.value)} placeholder="email@example.com" className="text-sm h-9" />
+                </FieldRow>
+                <FieldRow label="URL / Website">
+                  <Input value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://..." className="text-sm h-9" />
+                </FieldRow>
+                <div className="grid grid-cols-2 gap-2">
+                  <FieldRow label="Telephone [i]">
+                    <Input value={phone1} onChange={e => setPhone1(e.target.value)} placeholder="+234..." className="text-sm h-9" />
+                  </FieldRow>
+                  <FieldRow label="Telephone [ii]">
+                    <Input value={phone2} onChange={e => setPhone2(e.target.value)} placeholder="+234..." className="text-sm h-9" />
                   </FieldRow>
                 </div>
-                {addresses.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 mt-5 text-destructive hover:text-destructive shrink-0"
-                    onClick={() => removeAddress(index)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* Step 4: Banking & Submit */}
+        {currentStep === 4 && (
+          <>
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <SectionTitle>Banking Information *</SectionTitle>
+                {bankAccounts.map((bank, index) => (
+                  <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-muted-foreground">Bank Account [{index + 1}]</p>
+                      {bankAccounts.length > 1 && (
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => removeBankAccount(index)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                    <FieldRow label="Account Number">
+                      <Input value={bank.acct} onChange={e => updateBankAccount(index, "acct", e.target.value)} placeholder="Account number" className="text-sm h-9" />
+                    </FieldRow>
+                    <FieldRow label="Bank Name">
+                      <Input value={bank.name} onChange={e => updateBankAccount(index, "name", e.target.value)} placeholder="Bank name" className="text-sm h-9" />
+                    </FieldRow>
+                    <FieldRow label="Branch Address">
+                      <Input value={bank.branch} onChange={e => updateBankAccount(index, "branch", e.target.value)} placeholder="Branch address" className="text-sm h-9" />
+                    </FieldRow>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" className="w-full text-xs gap-1.5" onClick={addBankAccount}>
+                  <Plus className="h-3.5 w-3.5" /> Add Another Bank Account
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-start gap-2.5 p-3 bg-muted/30 rounded-lg border">
+                  <Checkbox id="accept-policies" checked={acceptedPolicies} onCheckedChange={(checked) => setAcceptedPolicies(checked === true)} className="mt-0.5" />
+                  <Label htmlFor="accept-policies" className="text-[11px] leading-relaxed cursor-pointer">
+                    You must read and agree to the <span className="text-primary font-semibold underline">Terms and Conditions</span> of MOBIGATE Application usage and management policy.
+                    {waiverMode
+                      ? <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span> + Waiver fee: <span className="font-bold text-orange-600">{formatMobi(50000)}</span> = <span className="font-bold text-primary">{formatMobi(totalFee)}</span></>
+                      : <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span></>
+                    }
+                  </Label>
+                </div>
+                {waiverMode && (
+                  <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3 space-y-1.5">
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Application Fee</span><span className="font-medium">{formatMobi(50000)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-muted-foreground">Waiver Request Fee</span><span className="font-medium text-orange-600">{formatMobi(50000)}</span></div>
+                    <div className="flex justify-between text-sm border-t border-orange-500/20 pt-1.5"><span className="font-semibold">Total</span><span className="font-bold text-primary">{formatMobi(totalFee)}</span></div>
+                  </div>
                 )}
-              </div>
-            ))}
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full text-xs gap-1.5"
-              onClick={addAddress}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Another Address
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* ===== AFFILIATES ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <SectionTitle>Affiliate / Sister Companies (if any)</SectionTitle>
-
-            {affiliates.map((aff, index) => (
-              <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-muted-foreground">Company {index + 1}</p>
-                  {affiliates.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-destructive hover:text-destructive"
-                      onClick={() => removeAffiliate(index)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                </div>
-                <FieldRow label="Name">
-                  <Input value={aff.name} onChange={e => updateAffiliate(index, "name", e.target.value)} placeholder="Company name" className="text-sm h-9" />
-                </FieldRow>
-                <FieldRow label="Address">
-                  <Input value={aff.address} onChange={e => updateAffiliate(index, "address", e.target.value)} placeholder="Company address" className="text-sm h-9" />
-                </FieldRow>
-              </div>
-            ))}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full text-xs gap-1.5"
-              onClick={addAffiliate}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Another Company
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* ===== CONTACT ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <SectionTitle>Contact Information</SectionTitle>
-
-            <FieldRow label="E-Mail Address">
-              <Input value={emailAddress} onChange={e => setEmailAddress(e.target.value)} placeholder="email@example.com" className="text-sm h-9" />
-            </FieldRow>
-
-            <FieldRow label="URL / Website">
-              <Input value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://..." className="text-sm h-9" />
-            </FieldRow>
-
-            <div className="grid grid-cols-2 gap-2">
-              <FieldRow label="Telephone [i]">
-                <Input value={phone1} onChange={e => setPhone1(e.target.value)} placeholder="+234..." className="text-sm h-9" />
-              </FieldRow>
-              <FieldRow label="Telephone [ii]">
-                <Input value={phone2} onChange={e => setPhone2(e.target.value)} placeholder="+234..." className="text-sm h-9" />
-              </FieldRow>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ===== BANKING ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-4">
-            <SectionTitle>Banking Information *</SectionTitle>
-
-            {bankAccounts.map((bank, index) => (
-              <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-muted-foreground">Bank Account [{index + 1}]</p>
-                  {bankAccounts.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-destructive hover:text-destructive"
-                      onClick={() => removeBankAccount(index)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                </div>
-                <FieldRow label="Account Number">
-                  <Input value={bank.acct} onChange={e => updateBankAccount(index, "acct", e.target.value)} placeholder="Account number" className="text-sm h-9" />
-                </FieldRow>
-                <FieldRow label="Bank Name">
-                  <Input value={bank.name} onChange={e => updateBankAccount(index, "name", e.target.value)} placeholder="Bank name" className="text-sm h-9" />
-                </FieldRow>
-                <FieldRow label="Branch Address">
-                  <Input value={bank.branch} onChange={e => updateBankAccount(index, "branch", e.target.value)} placeholder="Branch address" className="text-sm h-9" />
-                </FieldRow>
-              </div>
-            ))}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full text-xs gap-1.5"
-              onClick={addBankAccount}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Another Bank Account
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* old waiver removed - moved above */}
-
-        {/* ===== TERMS & SUBMIT ===== */}
-        <Card>
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-start gap-2.5 p-3 bg-muted/30 rounded-lg border">
-              <Checkbox id="accept-policies" checked={acceptedPolicies} onCheckedChange={(checked) => setAcceptedPolicies(checked === true)} className="mt-0.5" />
-              <Label htmlFor="accept-policies" className="text-[11px] leading-relaxed cursor-pointer">
-                You must read and agree to the <span className="text-primary font-semibold underline">Terms and Conditions</span> of MOBIGATE Application usage and management policy.
-                {waiverMode
-                  ? <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span> + Waiver fee: <span className="font-bold text-orange-600">{formatMobi(50000)}</span> = <span className="font-bold text-primary">{formatMobi(totalFee)}</span></>
-                  : <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span></>
-                }
-              </Label>
-            </div>
-            {waiverMode && (
-              <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3 space-y-1.5">
-                <div className="flex justify-between text-xs"><span className="text-muted-foreground">Application Fee</span><span className="font-medium">{formatMobi(50000)}</span></div>
-                <div className="flex justify-between text-xs"><span className="text-muted-foreground">Waiver Request Fee</span><span className="font-medium text-orange-600">{formatMobi(50000)}</span></div>
-                <div className="flex justify-between text-sm border-t border-orange-500/20 pt-1.5"><span className="font-semibold">Total</span><span className="font-bold text-primary">{formatMobi(totalFee)}</span></div>
-              </div>
-            )}
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={saveDraft} className="flex-1 gap-2" size="lg"><Save className="h-4 w-4" />Save Draft</Button>
-              <Button variant="outline" onClick={clearDraft} className="gap-2 text-destructive hover:text-destructive" size="lg"><Trash2 className="h-4 w-4" /></Button>
-            </div>
-            <Button onClick={handleSubmit} className="w-full gap-2" size="lg" disabled={!acceptedPolicies}>
-              <Store className="h-4 w-4" />
-              {waiverMode ? `Submit Application + Waiver — ${formatMobi(totalFee)}` : `Submit Application — ${formatMobi(50000)}`}
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Sticky Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-3 z-50">
+        <div className="max-w-lg mx-auto flex gap-2">
+          {currentStep < STEPS.length - 1 ? (
+            <>
+              <Button variant="outline" onClick={saveDraft} className="gap-1.5" size="lg">
+                <Save className="h-4 w-4" /> Save
+              </Button>
+              <Button onClick={handleSaveAndContinue} className="flex-1 gap-2" size="lg">
+                Save & Continue
+                <ChevronDown className="h-4 w-4 -rotate-90" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={saveDraft} className="gap-1.5" size="lg">
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button onClick={handleSubmit} className="flex-1 h-auto py-3 flex-col" size="lg" disabled={!acceptedPolicies}>
+                <span className="flex items-center gap-2"><Store className="h-4 w-4" /> Submit Application</span>
+                <span className="text-[10px] opacity-80">{waiverMode ? formatMobi(totalFee) : formatMobi(50000)}</span>
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
