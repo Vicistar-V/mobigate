@@ -230,7 +230,7 @@ export default function MerchantVoucherBatchDetail() {
     <div className="bg-background min-h-screen pb-6 overflow-x-hidden">
       {/* Header */}
       <div className="sticky top-[var(--header-height)] z-20 bg-card border-b border-border/50">
-        <div className="px-4 py-2 flex items-center gap-3">
+        <div className="px-4 py-1.5 flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full bg-muted flex items-center justify-center active:scale-90 touch-manipulation">
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
