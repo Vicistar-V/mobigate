@@ -310,23 +310,71 @@ export default function IndividualMerchantApplication() {
         )}
 
         {/* Merchant Application Requirements */}
-        <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
-          <Card>
-            <CollapsibleTrigger asChild>
-              <div className="flex items-center justify-between p-3 cursor-pointer">
-                <p className="text-sm font-semibold flex items-center gap-1.5">
-                  <Shield className="h-4 w-4 text-primary" /> Merchant Application Requirements
-                </p>
-                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
+        {(() => {
+          const eligItems = getEligibilityItems();
+          const metCount = eligItems.filter(i => i.met).length;
+          const allMet = metCount === eligItems.length;
+          return (
+            <Collapsible open={requirementsOpen} onOpenChange={setRequirementsOpen}>
+              <Card>
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between p-3 cursor-pointer touch-manipulation">
+                    <p className="text-sm font-semibold flex items-center gap-1.5">
+                      <Shield className="h-4 w-4 text-primary" /> Application Requirements
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {!requirementsOpen && (
+                        <Badge className={`text-[10px] px-1.5 h-5 ${allMet ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}>
+                          {allMet ? "All Met ✓" : `${metCount}/${eligItems.length} Met`}
+                        </Badge>
+                      )}
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${requirementsOpen ? "rotate-180" : ""}`} />
+                    </div>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0 pb-3">
+                    <MerchantEligibilityCard />
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          );
+        })()}
+
+        {/* ─── WAIVER REQUEST (right below requirements) ─── */}
+        <Card className={`border-orange-500/30 ${waiverMode ? "bg-orange-500/5" : ""}`}>
+          <CardContent className="p-3 space-y-3">
+            <button
+              onClick={() => setWaiverMode(!waiverMode)}
+              className="w-full flex items-center justify-between touch-manipulation active:scale-[0.98]"
+            >
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
+                <div className="text-left">
+                  <p className="text-sm font-bold">Request a Waiver</p>
+                  <p className="text-xs text-muted-foreground">Additional non-refundable fee of {formatMobi(50000)}</p>
+                </div>
               </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="pt-0 pb-3">
-                <MerchantEligibilityCard />
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+              {waiverMode ? <ToggleRight className="h-6 w-6 text-orange-600 shrink-0" /> : <ToggleLeft className="h-6 w-6 text-muted-foreground shrink-0" />}
+            </button>
+            {waiverMode && (
+              <div className="space-y-3 border-t border-orange-500/20 pt-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  If you cannot meet the standard application requirements, you can request an Exclusive Waiver.
+                  A non-refundable fee of <span className="font-bold text-foreground">{formatMobi(50000)}</span> (≈ {formatLocalAmount(50000, "NGN")}) will be charged
+                  in addition to the application fee. Your application will be flagged as <span className="font-semibold">"Awaiting Approval"</span>.
+                </p>
+                <Textarea
+                  placeholder="Optional: explain your situation (e.g. 'Documents arriving next week')"
+                  value={waiverContext}
+                  onChange={(e) => setWaiverContext(e.target.value)}
+                  className="min-h-[60px] text-xs"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
 
         {/* ─── FORM SECTIONS ─── */}
