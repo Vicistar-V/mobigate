@@ -573,7 +573,7 @@ export default function MerchantApplication() {
         {/* ===== BANKING ===== */}
         <Card>
           <CardContent className="p-4 space-y-4">
-            <SectionTitle>Banking Information</SectionTitle>
+            <SectionTitle>Banking Information *</SectionTitle>
 
             {bankAccounts.map((bank, index) => (
               <div key={index} className="space-y-2 p-3 bg-muted/20 rounded-lg border border-border/50 relative">
