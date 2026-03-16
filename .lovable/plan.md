@@ -1,42 +1,26 @@
 
 
-## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
+# Plan: "Fund Your Wallet" → Wallet Page with Fund Selection
 
-### What We're Building
+## What the user wants
+The sidebar's "Fund Your Wallet" link should navigate to the same page as "View Wallet" (`/wallet`), but automatically present a wallet-type selection (Mobi Wallet vs Local Currency Wallet) so the user can choose which to fund.
 
-A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
+## Current behavior
+- "View Wallet" → `/wallet` (WalletPage with dual wallet carousel)
+- "Fund Your Wallet" → `/buy-vouchers?source=fund-wallet` (goes directly to Mobi voucher purchase)
 
-### Tab Layout
+## Changes
 
-```text
-[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
-```
+### 1. Update sidebar link (`src/components/AppSidebar.tsx`)
+Change "Fund Your Wallet" URL from `/buy-vouchers?source=fund-wallet` to `/wallet?action=fund`.
 
-The Complaints tab will show:
-1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
-2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
-3. **Complaint cards list** — Each card shows:
-   - Category badge + status badge (color-coded)
-   - Merchant name the complaint is against
-   - Truncated description
-   - Reporter info (or "Anonymous")
-   - Submission date + reference number
-   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
-4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
+### 2. Update WalletPage (`src/pages/WalletPage.tsx`)
+- Read `action=fund` from URL search params on mount.
+- When `action=fund` is detected, auto-open a "Choose Wallet to Fund" drawer/sheet with two options:
+  - **Mobi Wallet (M)** — opens the existing Mobi fund drawer (`setFundMobiDrawerOpen(true)`)
+  - **Local Currency Wallet (₦)** — opens the existing Local fund drawer (`setFundDrawerOpen(true)`)
+- The selection drawer uses the same mobile-optimized card button pattern already used in the Mobi fund options (icon + label + chevron, touch-manipulation).
+- After selection or dismissal, clear the `action` param from the URL to prevent re-triggering.
 
-### Files to Modify/Create
-
-| File | Action |
-|------|--------|
-| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
-| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
-
-### Technical Details
-
-- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
-- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
-- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
-- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
-- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
-- All touch targets h-11 minimum, no font size reductions, mobile-only focus
+This approach reuses both existing fund drawers entirely — no duplication of funding logic.
 
