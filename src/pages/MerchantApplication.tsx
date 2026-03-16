@@ -252,7 +252,7 @@ export default function MerchantApplication() {
         setEmailAddress(draft.emailAddress || ""); setWebsite(draft.website || "");
         setPhone1(draft.phone1 || ""); setPhone2(draft.phone2 || "");
         if (draft.bankAccounts?.length) {
-          setBankAccounts(draft.bankAccounts.map((b: any) => ({ acct: b.acct || "", name: b.name || "", branch: b.branch || "" })));
+          setBankAccounts(draft.bankAccounts.map((b: any) => ({ acct: b.acct || "", acctName: b.acctName || "", name: b.name || "", branch: b.branch || "" })));
         }
         if (typeof draft.currentStep === "number") setCurrentStep(draft.currentStep);
         if (draft.waiverMode) setWaiverMode(true);
