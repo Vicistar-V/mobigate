@@ -155,7 +155,7 @@ export function MerchantEligibilityCard({ className }: MerchantEligibilityCardPr
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <item.icon className="h-3 w-3 text-muted-foreground shrink-0" />
-                <p className="font-semibold text-xs truncate">{item.label}</p>
+                <p className="font-semibold text-xs break-words leading-snug">{item.label}</p>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
               <div className="flex items-center gap-3 mt-1.5">
