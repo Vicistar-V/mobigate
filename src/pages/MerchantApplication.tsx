@@ -45,6 +45,16 @@ export default function MerchantApplication() {
   const [waiverRequested, setWaiverRequested] = useState(false);
   const [waiverContext, setWaiverContext] = useState("");
 
+  // Multi-step wizard
+  const [currentStep, setCurrentStep] = useState(0);
+  const STEPS = [
+    { label: "Account", icon: "account" },
+    { label: "Business", icon: "business" },
+    { label: "Officers", icon: "officers" },
+    { label: "Details", icon: "details" },
+    { label: "Banking", icon: "banking" },
+  ];
+
   // Create Account
   const [storeName, setStoreName] = useState("");
   const [accountEmail, setAccountEmail] = useState("");
