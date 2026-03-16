@@ -137,16 +137,16 @@ export default function MerchantApplication() {
   const [phone2, setPhone2] = useState("");
 
   // Banking (dynamic list)
-  const [bankAccounts, setBankAccounts] = useState<{ acct: string; name: string; branch: string }[]>([
-    { acct: "", name: "", branch: "" },
+  const [bankAccounts, setBankAccounts] = useState<{ acct: string; acctName: string; name: string; branch: string }[]>([
+    { acct: "", acctName: "", name: "", branch: "" },
   ]);
 
-  const updateBankAccount = (index: number, field: "acct" | "name" | "branch", value: string) => {
+  const updateBankAccount = (index: number, field: "acct" | "acctName" | "name" | "branch", value: string) => {
     setBankAccounts(prev => prev.map((b, i) => i === index ? { ...b, [field]: value } : b));
   };
 
   const addBankAccount = () => {
-    setBankAccounts(prev => [...prev, { acct: "", name: "", branch: "" }]);
+    setBankAccounts(prev => [...prev, { acct: "", acctName: "", name: "", branch: "" }]);
   };
 
   const removeBankAccount = (index: number) => {
@@ -203,7 +203,7 @@ export default function MerchantApplication() {
       addresses,
       affiliates,
       emailAddress, website, phone1, phone2,
-      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, name: b.name, branch: b.branch })),
+      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, acctName: b.acctName, name: b.name, branch: b.branch })),
       currentStep,
       waiverMode, waiverContext,
       savedAt: new Date().toISOString(),
@@ -221,7 +221,7 @@ export default function MerchantApplication() {
     setAddresses([""]);
     setAffiliates([{ name: "", address: "" }]);
     setEmailAddress(""); setWebsite(""); setPhone1(""); setPhone2("");
-    setBankAccounts([{ acct: "", name: "", branch: "" }]);
+    setBankAccounts([{ acct: "", acctName: "", name: "", branch: "" }]);
     setAcceptedPolicies(false);
     toast({ title: "Draft Cleared", description: "All form data has been cleared." });
   }, [toast]);
@@ -252,7 +252,7 @@ export default function MerchantApplication() {
         setEmailAddress(draft.emailAddress || ""); setWebsite(draft.website || "");
         setPhone1(draft.phone1 || ""); setPhone2(draft.phone2 || "");
         if (draft.bankAccounts?.length) {
-          setBankAccounts(draft.bankAccounts.map((b: any) => ({ acct: b.acct || "", name: b.name || "", branch: b.branch || "" })));
+          setBankAccounts(draft.bankAccounts.map((b: any) => ({ acct: b.acct || "", acctName: b.acctName || "", name: b.name || "", branch: b.branch || "" })));
         }
         if (typeof draft.currentStep === "number") setCurrentStep(draft.currentStep);
         if (draft.waiverMode) setWaiverMode(true);
@@ -353,7 +353,7 @@ export default function MerchantApplication() {
       directors: directors.map(d => ({ name: d.name, address: d.address })),
       addresses, affiliates,
       emailAddress, website, phone1, phone2,
-      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, name: b.name, branch: b.branch })),
+      bankAccounts: bankAccounts.map(b => ({ acct: b.acct, acctName: b.acctName, name: b.name, branch: b.branch })),
       currentStep: currentStep + 1,
       waiverMode, waiverContext,
       savedAt: new Date().toISOString(),
@@ -707,6 +707,9 @@ export default function MerchantApplication() {
                     </div>
                     <FieldRow label="Account Number">
                       <Input value={bank.acct} onChange={e => updateBankAccount(index, "acct", e.target.value)} placeholder="Account number" className="text-sm h-9" />
+                    </FieldRow>
+                    <FieldRow label="Account Name">
+                      <Input value={bank.acctName} onChange={e => updateBankAccount(index, "acctName", e.target.value)} placeholder="Account holder name" className="text-sm h-9" />
                     </FieldRow>
                     <FieldRow label="Bank Name">
                       <Input value={bank.name} onChange={e => updateBankAccount(index, "name", e.target.value)} placeholder="Bank name" className="text-sm h-9" />
