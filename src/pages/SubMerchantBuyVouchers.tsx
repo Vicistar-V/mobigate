@@ -166,12 +166,11 @@ export default function SubMerchantBuyVouchers() {
       <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(initialSubMerchantWalletBalance - totalCost)}</span></div>
       <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
     `;
-    printDiv.style.display = "none";
+    printDiv.style.cssText = "position:fixed;left:-9999px;top:0;width:80mm;";
     document.body.appendChild(printDiv);
     const cleanup = () => { document.body.removeChild(printDiv); window.removeEventListener("afterprint", cleanup); };
     window.addEventListener("afterprint", cleanup);
-    printDiv.style.display = "block";
-    setTimeout(() => window.print(), 100);
+    setTimeout(() => window.print(), 200);
   }, [selections, selectedMerchant, totalBundles, totalCards, totalCost, receiptData]);
 
   // Step 1: Select denominations + bundle counts
