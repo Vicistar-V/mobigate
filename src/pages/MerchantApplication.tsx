@@ -221,7 +221,7 @@ export default function MerchantApplication() {
     setAddresses([""]);
     setAffiliates([{ name: "", address: "" }]);
     setEmailAddress(""); setWebsite(""); setPhone1(""); setPhone2("");
-    setBankAccounts([{ acct: "", name: "", branch: "" }]);
+    setBankAccounts([{ acct: "", acctName: "", name: "", branch: "" }]);
     setAcceptedPolicies(false);
     toast({ title: "Draft Cleared", description: "All form data has been cleared." });
   }, [toast]);
