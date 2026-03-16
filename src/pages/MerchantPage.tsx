@@ -1753,7 +1753,7 @@ function WalletTab({ merchant }: { merchant: QuizMerchant }) {
         <CardContent className="p-4 space-y-3">
           <h3 className="text-sm font-bold">Waiver Request</h3>
           <p className="text-xs text-muted-foreground">
-            If you cannot meet the 70% funding requirement, you can request a waiver. A non-refundable fee of {formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")} applies.
+            If you do not meet the 70% funding requirement, you can request a waiver. A non-refundable fee of {formatLocalAmount(WAIVER_REQUEST_FEE, "NGN")} applies.
           </p>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Status:</span>
