@@ -147,11 +147,11 @@ export default function MerchantVoucherGenerate() {
     printDiv.id = "receipt-print-area";
     printDiv.innerHTML = `
       <style>
+        #receipt-print-area { font-family: 'Courier New', monospace; max-width: 80mm; margin: 0 auto; padding: 8mm; }
         @media print {
           body > *:not(#receipt-print-area) { display: none !important; }
-          #receipt-print-area { display: block !important; }
+          #receipt-print-area { display: block !important; position: static !important; left: auto !important; }
         }
-        #receipt-print-area { font-family: 'Courier New', monospace; max-width: 80mm; margin: 0 auto; padding: 8mm; }
         .receipt-title { text-align: center; font-size: 14pt; font-weight: 900; margin-bottom: 4mm; border-bottom: 2px dashed #000; padding-bottom: 4mm; }
         .receipt-row { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 2mm; }
         .receipt-row .label { color: #555; }
@@ -179,12 +179,11 @@ export default function MerchantVoucherGenerate() {
       <div class="receipt-row"><span class="label">Balance After</span><span class="val">₦${formatNum(walletBalance - grandTotal)}</span></div>
       <div class="receipt-footer">Thank you for your business<br/>Mobi Voucher System</div>
     `;
-    printDiv.style.display = "none";
+    printDiv.style.cssText = "position:fixed;left:-9999px;top:0;width:80mm;";
     document.body.appendChild(printDiv);
     const cleanup = () => { document.body.removeChild(printDiv); window.removeEventListener("afterprint", cleanup); };
     window.addEventListener("afterprint", cleanup);
-    printDiv.style.display = "block";
-    setTimeout(() => window.print(), 100);
+    setTimeout(() => window.print(), 200);
   }, [lineItems, totalBundles, totalCards, grandSubtotal, grandDiscount, grandTotal, receiptData, walletBalance]);
 
   // ─── Step 1: Select Denominations & Bundle Counts ───

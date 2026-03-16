@@ -159,5 +159,8 @@ All colors MUST be HSL.
   #voucher-print-area,
   #receipt-print-area {
     display: block !important;
+    position: static !important;
+    left: auto !important;
+    width: 100% !important;
   }
 }
