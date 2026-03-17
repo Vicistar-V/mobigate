@@ -489,7 +489,7 @@ export function AdminBonusAwardsTab() {
                         <span className="text-xs text-muted-foreground">Authorized by</span>
                         <div className="text-right">
                           {selectedAward.authorizedBy.map((admin) => (
-                            <Badge key={admin} variant="outline" className="text-[10px] ml-1 mb-1">
+                            <Badge key={admin} variant="outline" className="text-xs ml-1 mb-1">
                               {admin}
                             </Badge>
                           ))}
