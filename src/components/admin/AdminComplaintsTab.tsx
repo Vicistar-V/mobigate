@@ -84,6 +84,7 @@ interface Complaint {
   description: string;
   reporterName: string;
   reporterEmail: string;
+  reporterId: string;
   isAnonymous: boolean;
   submittedDate: string;
   lastUpdated: string;
