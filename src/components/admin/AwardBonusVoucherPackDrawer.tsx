@@ -386,7 +386,7 @@ export function AwardBonusVoucherPackDrawer({
                 <div>
                   <p className="text-xs font-semibold text-amber-700">This action cannot be undone</p>
                   <p className="text-xs text-amber-700/80 mt-0.5">
-                    Once awarded, the bonus voucher pack value will be immediately available in the merchant's main‑Wallet.
+                    Once awarded, the bonus voucher pack value will be immediately available in the merchant's Voucher Store.
                   </p>
                 </div>
               </CardContent>
