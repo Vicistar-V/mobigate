@@ -101,7 +101,7 @@ const initialComplaints: Complaint[] = [
     id: "c1", refNumber: "RPT-2026-0001", merchantName: "QuickBuy Electronics", merchantId: "m1",
     category: "scam-fraud", status: "pending",
     description: "This merchant charged my card ₦45,000 for a product that was never delivered. Multiple attempts to contact them have been ignored. The tracking number provided was fake and leads to a non-existent shipment.",
-    reporterName: "Adebayo Johnson", reporterEmail: "adebayo.j@email.com", isAnonymous: false,
+    reporterName: "Adebayo Johnson", reporterEmail: "adebayo.j@email.com", reporterId: "u1", isAnonymous: false,
     submittedDate: "2026-03-01", lastUpdated: "2026-03-01",
     timeline: [{ date: "2026-03-01", action: "Report submitted", by: "Adebayo Johnson" }],
   },
