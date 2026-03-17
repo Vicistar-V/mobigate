@@ -285,7 +285,7 @@ export function AdminBonusAwardsTab() {
               <p className="text-xs text-muted-foreground font-medium">Super Admin</p>
             </div>
             <p className="text-base font-black text-foreground">{stats.superAdminCount}</p>
-            <p className="text-[10px] text-muted-foreground">solo approvals</p>
+            <p className="text-xs text-muted-foreground">solo approvals</p>
           </CardContent>
         </Card>
       </div>
