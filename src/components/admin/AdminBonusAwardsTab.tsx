@@ -231,13 +231,13 @@ export function AdminBonusAwardsTab() {
 
   // Compare with previous period
   const prevPeriodValue = useMemo(() => {
-    const cutoff = getTimeFilterDate(timeFilter);
-    if (!cutoff || timeFilter === "all") return null;
-    const duration = Date.now() - cutoff.getTime();
-    const prevCutoff = new Date(cutoff.getTime() - duration);
+    const timeResult = getTimeFilterDate(timeFilter);
+    if (!timeResult || timeFilter === "all" || timeFilter === "over1year") return null;
+    const duration = Date.now() - timeResult.cutoff.getTime();
+    const prevCutoff = new Date(timeResult.cutoff.getTime() - duration);
     const prevAwards = mockBonusAwards.filter((a) => {
       const d = new Date(a.awardedAt);
-      return d >= prevCutoff && d < cutoff;
+      return d >= prevCutoff && d < timeResult.cutoff;
     });
     return prevAwards.reduce((s, a) => s + a.totalValue, 0);
   }, [timeFilter]);
