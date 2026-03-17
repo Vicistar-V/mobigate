@@ -653,7 +653,11 @@ export function AwardBonusVoucherPackDrawer({
 
   return (
     <>
-      <Drawer open={open} onOpenChange={(v) => { if (!v) handleClose(); else onOpenChange(v); }}>
+      <Drawer
+        open={open}
+        repositionInputs={false}
+        onOpenChange={(v) => { if (!v) handleClose(); else onOpenChange(v); }}
+      >
         <DrawerContent className="max-h-[92vh] h-[92vh] flex flex-col">
           <DrawerHeader className="shrink-0 pb-0 relative">
             <DrawerTitle className="text-base font-semibold flex items-center gap-2">

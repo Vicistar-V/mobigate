@@ -4,8 +4,16 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
+const Drawer = ({
+  shouldScaleBackground = true,
+  repositionInputs = false,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+  <DrawerPrimitive.Root
+    shouldScaleBackground={shouldScaleBackground}
+    repositionInputs={repositionInputs}
+    {...props}
+  />
 );
 Drawer.displayName = "Drawer";
 
