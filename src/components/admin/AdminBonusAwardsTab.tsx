@@ -312,6 +312,50 @@ export function AdminBonusAwardsTab() {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Location filters */}
+        <div className="flex gap-2">
+          <Select value={countryFilter} onValueChange={(v) => { setCountryFilter(v); setStateFilter("all"); setCityFilter("all"); }}>
+            <SelectTrigger className="h-9 text-xs flex-1">
+              <Globe className="h-3.5 w-3.5 mr-1 shrink-0" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-xs">All Countries</SelectItem>
+              {countries.map((c) => (
+                <SelectItem key={c.id} value={c.name} className="text-xs">{c.flag} {c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {countryFilter === "Nigeria" && (
+            <Select value={stateFilter} onValueChange={(v) => { setStateFilter(v); setCityFilter("all"); }}>
+              <SelectTrigger className="h-9 text-xs flex-1">
+                <MapPin className="h-3.5 w-3.5 mr-1 shrink-0" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs">All States</SelectItem>
+                {states.map((s) => (
+                  <SelectItem key={s.id} value={s.name} className="text-xs">{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {stateFilter !== "all" && cities.length > 0 && (
+            <Select value={cityFilter} onValueChange={setCityFilter}>
+              <SelectTrigger className="h-9 text-xs flex-1">
+                <MapPin className="h-3.5 w-3.5 mr-1 shrink-0" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs">All Cities</SelectItem>
+                {cities.map((c) => (
+                  <SelectItem key={c.id} value={c.name} className="text-xs">{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
       </div>
 
       {/* Award List */}
