@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -136,6 +137,7 @@ function getTimeFilterDate(filter: TimeFilter): { cutoff: Date; mode: "after" | 
 }
 
 export function AdminBonusAwardsTab() {
+  const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [denomFilter, setDenomFilter] = useState<DenomFilter>("all");
   const [countryFilter, setCountryFilter] = useState("all");
@@ -459,7 +461,7 @@ export function AdminBonusAwardsTab() {
                     <div className="p-3 flex justify-between items-center">
                       <span className="text-xs text-muted-foreground">Merchant</span>
                       <button
-                        onClick={() => window.open(`/merchant/${selectedAward.merchantId}`, '_blank')}
+                        onClick={() => navigate(`/merchant-home/${selectedAward.merchantId}`)}
                         className="text-sm font-semibold text-primary underline underline-offset-2 touch-manipulation"
                       >
                         {selectedAward.merchantName}
