@@ -372,7 +372,7 @@ export function AwardBonusVoucherPackDrawer({
                 <div>
                   <p className="text-xs font-semibold text-blue-700">Credit Destination</p>
                   <p className="text-xs text-blue-700/80 mt-0.5 leading-relaxed">
-                    This bonus will be credited directly to <strong>{merchantName}'s main‑Wallet</strong>. 
+                    This bonus will be credited directly to <strong>{merchantName}'s Voucher Store</strong>. 
                     The value is <strong>tradable only as vouchers</strong> and can only be used for voucher card trading.
                   </p>
                 </div>
