@@ -138,8 +138,19 @@ function getTimeFilterDate(filter: TimeFilter): { cutoff: Date; mode: "after" | 
 export function AdminBonusAwardsTab() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [denomFilter, setDenomFilter] = useState<DenomFilter>("all");
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
+  const [cityFilter, setCityFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAward, setSelectedAward] = useState<BonusAwardRecord | null>(null);
+
+  const countries = useMemo(() => getUniqueCountries(), []);
+  const states = useMemo(() => getNigerianStatesForFilter(), []);
+  const cities = useMemo(() => {
+    if (stateFilter === "all") return [];
+    const stateObj = states.find(s => s.name === stateFilter);
+    return stateObj ? getCitiesForLGA(undefined, stateObj.id) : [];
+  }, [stateFilter, states]);
 
   const filteredAwards = useMemo(() => {
     let list = [...mockBonusAwards];
