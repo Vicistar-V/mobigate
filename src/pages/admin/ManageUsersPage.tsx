@@ -325,7 +325,7 @@ export default function ManageUsersPage() {
             {countries.map((country) => (
               <button
                 key={country.id}
-                onClick={() => setSelectedCountry(country.id)}
+                onClick={() => { setSelectedCountry(country.id); setSelectedState("all"); setSelectedCity("all"); }}
                 className={`snap-start shrink-0 flex flex-col items-center gap-1 rounded-xl border p-3 min-w-[80px] transition-all ${
                   selectedCountry === country.id
                     ? "border-primary bg-primary/10 ring-1 ring-primary"
