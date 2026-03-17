@@ -362,7 +362,41 @@ export default function ManageUsersPage() {
           ))}
         </div>
 
-        {/* Search + Sort */}
+        {/* State & City Filters (Nigeria only) */}
+        {isNigeria && (
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1 -mx-4 px-4">
+            <Select
+              value={selectedState}
+              onValueChange={(v) => { setSelectedState(v); setSelectedCity("all"); }}
+            >
+              <SelectTrigger className="h-9 text-xs min-w-[130px] shrink-0">
+                <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                <SelectValue placeholder="All States" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All States</SelectItem>
+                {nigerianStates.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {selectedState !== "all" && citiesForState.length > 0 && (
+              <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <SelectTrigger className="h-9 text-xs min-w-[130px] shrink-0">
+                  <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder="All Cities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Cities</SelectItem>
+                  {citiesForState.map((c) => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )
         <div className="flex gap-2 mb-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
