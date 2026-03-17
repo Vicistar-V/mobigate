@@ -8,8 +8,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import {
   Gift, Search, Calendar, TrendingUp, Wallet, ChevronRight,
-  Ticket, ArrowUpRight, ArrowDownRight, Filter, Clock, User, ShieldCheck,
+  Ticket, ArrowUpRight, ArrowDownRight, Filter, Clock, User, ShieldCheck, Globe, MapPin,
 } from "lucide-react";
+import { getUniqueCountries, getNigerianStatesForFilter, getCitiesForLGA } from "@/data/nigerianLocationsData";
 
 // ─── Types ───
 interface BonusAwardRecord {
@@ -23,6 +24,9 @@ interface BonusAwardRecord {
   awardedBy: string;
   authorizedBy: string[];
   reason?: string;
+  countryName?: string;
+  stateName?: string;
+  cityName?: string;
 }
 
 // ─── Mock Data ───

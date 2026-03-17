@@ -430,7 +430,7 @@ export function AwardBonusVoucherPackDrawer({
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">Bonus Awarded!</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-[280px]">
-              <strong>{getPackLabel(selectedPack)}</strong> has been successfully credited to <strong>{merchantName}'s main‑Wallet</strong>.
+              <strong>{getPackLabel(selectedPack)}</strong> has been successfully credited to <strong>{merchantName}'s Voucher Store</strong>.
             </p>
 
             <Card className="w-full border-emerald-200 bg-emerald-50 mb-6">
