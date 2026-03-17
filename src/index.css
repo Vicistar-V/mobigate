@@ -152,6 +152,20 @@ All colors MUST be HSL.
   100% { transform: translateX(200%); }
 }
 
+/* Mobile keyboard viewport fix - use dvh where supported */
+@supports (height: 1dvh) {
+  [vaul-drawer] > [data-vaul-drawer-content],
+  [data-vaul-drawer-content] {
+    max-height: 92dvh !important;
+  }
+  [data-vaul-drawer-content][class*="h-[92vh]"] {
+    height: 92dvh !important;
+  }
+  [data-side="bottom"][class*="h-[92vh]"] {
+    height: 92dvh !important;
+  }
+}
+
 /* Print styles */
 @media print {
   body > *:not(#voucher-print-area):not(#receipt-print-area) {
