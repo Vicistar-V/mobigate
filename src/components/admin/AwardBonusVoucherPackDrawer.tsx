@@ -146,8 +146,8 @@ export function AwardBonusVoucherPackDrawer({
     setSelectedPack(null);
     setIsAwarding(false);
     setShowCancelConfirm(false);
-    setAdminPasswords({ admin1: "", admin2: "", admin3: "" });
-    setAdminVerified({ admin1: false, admin2: false, admin3: false });
+    setAdminPasswords({ admin1: "", admin2: "", admin3: "", admin4: "" });
+    setAdminVerified({ admin1: false, admin2: false, admin3: false, admin4: false });
     setAuthError("");
     onOpenChange(false);
   };
