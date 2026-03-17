@@ -497,7 +497,7 @@ export function AdminBonusAwardsTab() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground">Method</span>
-                        <Badge variant="outline" className={`text-[10px] ${
+                        <Badge variant="outline" className={`text-xs ${
                           selectedAward.authorizedBy.includes("Admin-1")
                             ? "border-amber-400 text-amber-700 bg-amber-50"
                             : "border-blue-400 text-blue-700 bg-blue-50"
