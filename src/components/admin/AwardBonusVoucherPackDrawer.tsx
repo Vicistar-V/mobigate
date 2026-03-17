@@ -13,6 +13,11 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,6 +36,7 @@ import {
   AlertTriangle,
   Wallet,
   ChevronRight,
+  ChevronDown,
   ArrowLeft,
   Sparkles,
   Info,
@@ -48,10 +54,22 @@ interface BonusVoucherPack {
 }
 
 const bonusVoucherPacks: BonusVoucherPack[] = [
+  // M200
+  { id: "bp-25-200", units: 25, denomination: 200, totalValue: 5000 },
+  { id: "bp-50-200", units: 50, denomination: 200, totalValue: 10000 },
+  { id: "bp-75-200", units: 75, denomination: 200, totalValue: 15000 },
+  { id: "bp-100-200", units: 100, denomination: 200, totalValue: 20000 },
+  // M500
   { id: "bp-25-500", units: 25, denomination: 500, totalValue: 12500 },
   { id: "bp-50-500", units: 50, denomination: 500, totalValue: 25000 },
   { id: "bp-75-500", units: 75, denomination: 500, totalValue: 37500 },
   { id: "bp-100-500", units: 100, denomination: 500, totalValue: 50000 },
+  // M1,000
+  { id: "bp-25-1000", units: 25, denomination: 1000, totalValue: 25000 },
+  { id: "bp-50-1000", units: 50, denomination: 1000, totalValue: 50000 },
+  { id: "bp-75-1000", units: 75, denomination: 1000, totalValue: 75000 },
+  { id: "bp-100-1000", units: 100, denomination: 1000, totalValue: 100000 },
+  // M5,000
   { id: "bp-25-5000", units: 25, denomination: 5000, totalValue: 125000 },
   { id: "bp-50-5000", units: 50, denomination: 5000, totalValue: 250000 },
   { id: "bp-75-5000", units: 75, denomination: 5000, totalValue: 375000 },
@@ -95,6 +113,13 @@ const mockAwardHistory: AwardHistoryItem[] = [
   },
 ];
 
+const denominationGroups = [
+  { denomination: 200, color: "text-blue-600", bgColor: "bg-blue-500/10", borderColor: "border-blue-300" },
+  { denomination: 500, color: "text-emerald-600", bgColor: "bg-emerald-500/10", borderColor: "border-emerald-300" },
+  { denomination: 1000, color: "text-purple-600", bgColor: "bg-purple-500/10", borderColor: "border-purple-300" },
+  { denomination: 5000, color: "text-amber-600", bgColor: "bg-amber-500/10", borderColor: "border-amber-300" },
+];
+
 export function AwardBonusVoucherPackDrawer({
   open,
   onOpenChange,
@@ -106,6 +131,7 @@ export function AwardBonusVoucherPackDrawer({
   const [selectedPack, setSelectedPack] = useState<BonusVoucherPack | null>(null);
   const [isAwarding, setIsAwarding] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [expandedDenom, setExpandedDenom] = useState<number | null>(null);
 
   // Admin authorization state — 4-admin protocol: Admin-1 solo OR Admins 2+3+4 together
   const [adminPasswords, setAdminPasswords] = useState({ admin1: "", admin2: "", admin3: "", admin4: "" });
@@ -146,6 +172,7 @@ export function AwardBonusVoucherPackDrawer({
     setSelectedPack(null);
     setIsAwarding(false);
     setShowCancelConfirm(false);
+    setExpandedDenom(null);
     setAdminPasswords({ admin1: "", admin2: "", admin3: "", admin4: "" });
     setAdminVerified({ admin1: false, admin2: false, admin3: false, admin4: false });
     setAuthError("");
@@ -166,7 +193,6 @@ export function AwardBonusVoucherPackDrawer({
   const handleVerifyAdmin = (key: "admin1" | "admin2" | "admin3" | "admin4") => {
     const pw = adminPasswords[key];
     if (!pw.trim()) return;
-    // Simulated: accept any non-empty password
     setAdminVerified((prev) => ({ ...prev, [key]: true }));
     setAuthError("");
   };
@@ -185,15 +211,11 @@ export function AwardBonusVoucherPackDrawer({
   const getPackLabel = (pack: BonusVoucherPack) =>
     `Pack of ${pack.units} Units of ${formatMobi(pack.denomination)}`;
 
-  // Group packs by denomination
-  const m500Packs = bonusVoucherPacks.filter((p) => p.denomination === 500);
-  const m5000Packs = bonusVoucherPacks.filter((p) => p.denomination === 5000);
-
   // ─── Step: Select Pack ───
   const renderSelectStep = () => (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-5">
+      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+        <div className="p-4 space-y-4">
           {/* Merchant Recipient Header */}
           <Card className="border-primary/20 bg-primary/5">
             <CardContent className="p-3 flex items-center gap-3">
@@ -222,91 +244,82 @@ export function AwardBonusVoucherPackDrawer({
               <div>
                 <p className="text-xs font-semibold text-amber-700">Important</p>
                 <p className="text-xs text-amber-700/80 mt-0.5 leading-relaxed">
-                  Bonus Voucher Packs are <strong>not tradable</strong> on the Merchant's offers. 
-                  The value is credited directly to the Merchant's <strong>main‑Wallet</strong> and remains as such.
+                  Bonus Voucher Packs are <strong>tradable only as vouchers</strong>. 
+                  The value is credited directly to the Merchant's <strong>main‑Wallet</strong> and can only be traded as voucher cards.
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* M500 Packs */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Ticket className="h-4 w-4 text-primary" />
-              <p className="text-sm font-bold text-foreground">{formatMobi(500)} Denomination</p>
-            </div>
-            <div className="space-y-2">
-              {m500Packs.map((pack) => (
-                <Card
-                  key={pack.id}
-                  className="overflow-hidden active:scale-[0.98] transition-transform touch-manipulation cursor-pointer border-border hover:border-primary/30"
-                  onClick={() => handleSelectPack(pack)}
-                >
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-black text-emerald-600">{pack.units}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">Pack of {pack.units} Units</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {pack.units} × {formatMobi(pack.denomination)} = <span className="font-semibold text-emerald-600">{formatMobi(pack.totalValue)}</span>
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs text-muted-foreground">{formatNaira(pack.totalValue)}</p>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto mt-0.5" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+          {/* Collapsible Denomination Groups */}
+          <div className="space-y-2">
+            {denominationGroups.map((group) => {
+              const packs = bonusVoucherPacks.filter((p) => p.denomination === group.denomination);
+              const isOpen = expandedDenom === group.denomination;
 
-          <Separator />
-
-          {/* M5,000 Packs */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Ticket className="h-4 w-4 text-amber-500" />
-              <p className="text-sm font-bold text-foreground">{formatMobi(5000)} Denomination</p>
-            </div>
-            <div className="space-y-2">
-              {m5000Packs.map((pack) => (
-                <Card
-                  key={pack.id}
-                  className="overflow-hidden active:scale-[0.98] transition-transform touch-manipulation cursor-pointer border-border hover:border-primary/30"
-                  onClick={() => handleSelectPack(pack)}
+              return (
+                <Collapsible
+                  key={group.denomination}
+                  open={isOpen}
+                  onOpenChange={(open) => setExpandedDenom(open ? group.denomination : null)}
                 >
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-black text-amber-600">{pack.units}</span>
+                  <CollapsibleTrigger asChild>
+                    <Card className={`cursor-pointer active:scale-[0.98] transition-all touch-manipulation ${isOpen ? group.borderColor : "border-border"}`}>
+                      <CardContent className="p-3 flex items-center gap-3">
+                        <div className={`h-10 w-10 rounded-xl ${group.bgColor} flex items-center justify-center shrink-0`}>
+                          <Ticket className={`h-5 w-5 ${group.color}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-foreground">{formatMobi(group.denomination)} Denomination</p>
+                          <p className="text-xs text-muted-foreground">{packs.length} pack options available</p>
+                        </div>
+                        <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      </CardContent>
+                    </Card>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="space-y-2 pt-2 pl-2">
+                      {packs.map((pack) => (
+                        <Card
+                          key={pack.id}
+                          className="overflow-hidden active:scale-[0.98] transition-transform touch-manipulation cursor-pointer border-border hover:border-primary/30"
+                          onClick={() => handleSelectPack(pack)}
+                        >
+                          <CardContent className="p-3 flex items-center gap-3">
+                            <div className={`h-10 w-10 rounded-xl ${group.bgColor} flex items-center justify-center shrink-0`}>
+                              <span className={`text-sm font-black ${group.color}`}>{pack.units}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm">Pack of {pack.units} Units</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {pack.units} × {formatMobi(pack.denomination)} = <span className={`font-semibold ${group.color}`}>{formatMobi(pack.totalValue)}</span>
+                              </p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-xs text-muted-foreground">{formatNaira(pack.totalValue)}</p>
+                              <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto mt-0.5" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">Pack of {pack.units} Units</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {pack.units} × {formatMobi(pack.denomination)} = <span className="font-semibold text-amber-600">{formatMobi(pack.totalValue)}</span>
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs text-muted-foreground">{formatNaira(pack.totalValue)}</p>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto mt-0.5" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
           </div>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 
   // ─── Step: Confirm ───
   const renderConfirmStep = () => {
     if (!selectedPack) return null;
+    const group = denominationGroups.find(g => g.denomination === selectedPack.denomination);
     return (
       <div className="flex flex-col h-full">
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
           <div className="p-4 space-y-5">
             {/* Award Summary */}
             <div className="text-center py-4">
@@ -354,7 +367,7 @@ export function AwardBonusVoucherPackDrawer({
                   <p className="text-xs font-semibold text-blue-700">Credit Destination</p>
                   <p className="text-xs text-blue-700/80 mt-0.5 leading-relaxed">
                     This bonus will be credited directly to <strong>{merchantName}'s main‑Wallet</strong>. 
-                    The value is <strong>non‑tradable</strong> and cannot be listed on the merchant's voucher offers.
+                    The value is <strong>tradable only as vouchers</strong> and can only be used for voucher card trading.
                   </p>
                 </div>
               </CardContent>
@@ -373,7 +386,7 @@ export function AwardBonusVoucherPackDrawer({
               </CardContent>
             </Card>
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Action Buttons */}
         <div className="p-4 border-t space-y-2 shrink-0">
@@ -404,28 +417,30 @@ export function AwardBonusVoucherPackDrawer({
     if (!selectedPack) return null;
     return (
       <div className="flex flex-col h-full">
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="h-20 w-20 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
-            <CheckCircle className="h-10 w-10 text-emerald-500" />
-          </div>
-          <h3 className="text-xl font-bold text-foreground mb-2">Bonus Awarded!</h3>
-          <p className="text-sm text-muted-foreground mb-6 max-w-[280px]">
-            <strong>{getPackLabel(selectedPack)}</strong> has been successfully credited to <strong>{merchantName}'s main‑Wallet</strong>.
-          </p>
-
-          <Card className="w-full border-emerald-200 bg-emerald-50 mb-6">
-            <CardContent className="p-4 text-center">
-              <p className="text-xs text-emerald-700 mb-1">Total Value Credited</p>
-              <p className="text-2xl font-black text-emerald-600">{formatMobi(selectedPack.totalValue)}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">({formatNaira(selectedPack.totalValue)})</p>
-            </CardContent>
-          </Card>
-
-          <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg">
-            <ShieldCheck className="h-4 w-4 text-muted-foreground shrink-0" />
-            <p className="text-xs text-muted-foreground text-left">
-              This bonus is non‑tradable and has been logged in the award history.
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+          <div className="flex flex-col items-center p-6 text-center">
+            <div className="h-20 w-20 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
+              <CheckCircle className="h-10 w-10 text-emerald-500" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">Bonus Awarded!</h3>
+            <p className="text-sm text-muted-foreground mb-6 max-w-[280px]">
+              <strong>{getPackLabel(selectedPack)}</strong> has been successfully credited to <strong>{merchantName}'s main‑Wallet</strong>.
             </p>
+
+            <Card className="w-full border-emerald-200 bg-emerald-50 mb-6">
+              <CardContent className="p-4 text-center">
+                <p className="text-xs text-emerald-700 mb-1">Total Value Credited</p>
+                <p className="text-2xl font-black text-emerald-600">{formatMobi(selectedPack.totalValue)}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">({formatNaira(selectedPack.totalValue)})</p>
+              </CardContent>
+            </Card>
+
+            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg w-full">
+              <ShieldCheck className="h-4 w-4 text-muted-foreground shrink-0" />
+              <p className="text-xs text-muted-foreground text-left">
+                This bonus is tradable only as vouchers and has been logged in the award history.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -451,7 +466,7 @@ export function AwardBonusVoucherPackDrawer({
         <span className="font-semibold text-sm">Award History</span>
         <Badge variant="secondary" className="ml-auto text-xs">{mockAwardHistory.length}</Badge>
       </div>
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
         <div className="p-4 space-y-3">
           {mockAwardHistory.length === 0 ? (
             <div className="text-center py-10">
@@ -497,7 +512,7 @@ export function AwardBonusVoucherPackDrawer({
             </>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 
@@ -511,7 +526,7 @@ export function AwardBonusVoucherPackDrawer({
 
   const renderAuthStep = () => (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
         <div className="p-4 space-y-5">
           {/* Header */}
           <div className="text-center py-3">
@@ -618,7 +633,7 @@ export function AwardBonusVoucherPackDrawer({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Action */}
       <div className="p-4 border-t shrink-0">
