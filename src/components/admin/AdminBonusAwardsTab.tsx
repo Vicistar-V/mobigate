@@ -246,7 +246,7 @@ export function AdminBonusAwardsTab() {
           <CardContent className="p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Wallet className="h-3.5 w-3.5 text-primary" />
-              <p className="text-[10px] text-muted-foreground font-medium">Total Value</p>
+              <p className="text-xs text-muted-foreground font-medium">Total Value</p>
             </div>
             <p className="text-base font-black text-primary">{formatMobi(stats.totalValue)}</p>
             <p className="text-[10px] text-muted-foreground">{formatNaira(stats.totalValue)}</p>
