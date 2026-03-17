@@ -324,7 +324,9 @@ export function AdminBonusAwardsTab() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">All Packs</SelectItem>
+              <SelectItem value="200" className="text-xs">M200 Packs</SelectItem>
               <SelectItem value="500" className="text-xs">M500 Packs</SelectItem>
+              <SelectItem value="1000" className="text-xs">M1,000 Packs</SelectItem>
               <SelectItem value="5000" className="text-xs">M5,000 Packs</SelectItem>
             </SelectContent>
           </Select>
