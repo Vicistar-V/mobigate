@@ -520,7 +520,7 @@ export function AwardBonusVoucherPackDrawer({
             </div>
             <p className="text-lg font-bold text-foreground">Admin Authorization</p>
             <p className="text-sm text-muted-foreground mt-1">
-              At least <strong>2 of 3</strong> admins must authorize
+              <strong>Admin-1</strong> can authorize alone, or <strong>Admins 2, 3 & 4</strong> together
             </p>
           </div>
 
