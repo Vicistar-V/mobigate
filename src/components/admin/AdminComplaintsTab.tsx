@@ -129,7 +129,7 @@ const initialComplaints: Complaint[] = [
     id: "c4", refNumber: "RPT-2026-0004", merchantName: "GlamStyle Beauty", merchantId: "m4",
     category: "assault-bullying", status: "resolved",
     description: "Staff member physically pushed me out of the store during a dispute over pricing. Security camera footage should be available.",
-    reporterName: "Ngozi Okafor", reporterEmail: "ngozi.o@email.com", isAnonymous: false,
+    reporterName: "Ngozi Okafor", reporterEmail: "ngozi.o@email.com", reporterId: "u4", isAnonymous: false,
     submittedDate: "2026-02-20", lastUpdated: "2026-02-25",
     resolutionNotes: "Merchant has been warned. Staff member suspended. Merchant agreed to compensate customer with ₦15,000 store credit.",
     resolutionDate: "2026-02-25",
