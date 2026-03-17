@@ -150,8 +150,8 @@ const mockBonusAwards: BonusAwardRecord[] = [
 const formatMobi = (n: number) => `M${n.toLocaleString()}`;
 const formatNaira = (n: number) => `₦${n.toLocaleString()}`;
 
-type TimeFilter = "all" | "today" | "7days" | "30days" | "90days" | "6months" | "1year";
-type DenomFilter = "all" | "200" | "500" | "1000" | "5000";
+type TimeFilter = "all" | "today" | "7days" | "30days" | "90days" | "6months" | "1year" | "over1year";
+type DenomFilter = "all" | "100" | "200" | "500" | "1000" | "5000";
 
 const timeFilterLabels: Record<TimeFilter, string> = {
   all: "All Time",
@@ -161,6 +161,7 @@ const timeFilterLabels: Record<TimeFilter, string> = {
   "90days": "Last 90 Days",
   "6months": "Last 6 Months",
   "1year": "Last Year",
+  over1year: "Over a Year",
 };
 
 function getTimeFilterDate(filter: TimeFilter): Date | null {
