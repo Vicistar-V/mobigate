@@ -642,7 +642,7 @@ export function AdminComplaintsTab() {
                       ) : (
                         <>
                           <button
-                            onClick={() => window.open(`/profile/${current.merchantId}`, '_blank')}
+                            onClick={() => window.open(`/profile/${current.reporterId}`, '_blank')}
                             className="flex items-center gap-3 touch-manipulation active:scale-[0.97] transition-transform w-full text-left rounded-lg p-2 -m-2 hover:bg-muted/50"
                           >
                             <Avatar className="h-9 w-9 shrink-0 border border-primary/20">
