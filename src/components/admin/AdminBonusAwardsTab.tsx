@@ -275,7 +275,7 @@ export function AdminBonusAwardsTab() {
               <p className="text-xs text-muted-foreground font-medium">Merchants</p>
             </div>
             <p className="text-base font-black text-foreground">{stats.uniqueMerchants}</p>
-            <p className="text-[10px] text-muted-foreground">unique recipients</p>
+            <p className="text-xs text-muted-foreground">unique recipients</p>
           </CardContent>
         </Card>
         <Card>
