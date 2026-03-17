@@ -158,7 +158,7 @@ const initialComplaints: Complaint[] = [
     id: "c6", refNumber: "RPT-2026-0006", merchantName: "QuickBuy Electronics", merchantId: "m1",
     category: "scam-fraud", status: "investigating",
     description: "Received a counterfeit phone instead of the original Samsung Galaxy advertised. Serial number check confirms it's a fake device. Merchant refuses refund.",
-    reporterName: "Ibrahim Musa", reporterEmail: "ibrahim.m@email.com", isAnonymous: false,
+    reporterName: "Ibrahim Musa", reporterEmail: "ibrahim.m@email.com", reporterId: "u6", isAnonymous: false,
     submittedDate: "2026-03-02", lastUpdated: "2026-03-03",
     assignedTo: "Admin Funke",
     timeline: [
