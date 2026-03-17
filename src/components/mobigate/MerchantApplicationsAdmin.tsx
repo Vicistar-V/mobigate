@@ -156,6 +156,10 @@ export function MerchantApplicationsAdmin() {
   const [declineReason, setDeclineReason] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [verifyingBank, setVerifyingBank] = useState<Record<string, "idle" | "verifying" | "success">>({});
+  const [approvedBy, setApprovedBy] = useState<Record<string, { name: string; id: string }>>({});
+
+  // Mock admin who is currently logged in
+  const currentAdmin = { name: "Barr. Okechukwu Nnamdi", id: "admin-001" };
 
   const handleVerifyBank = async (appId: string) => {
     setVerifyingBank(prev => ({ ...prev, [appId]: "verifying" }));
@@ -175,6 +179,7 @@ export function MerchantApplicationsAdmin() {
 
   const handleApprove = (id: string, name: string) => {
     setStatuses((prev) => ({ ...prev, [id]: "approved" }));
+    setApprovedBy((prev) => ({ ...prev, [id]: currentAdmin }));
     setDecliningId(null);
     toast({ title: "Application Approved", description: `${name}'s merchant application has been approved.` });
   };
@@ -272,6 +277,21 @@ export function MerchantApplicationsAdmin() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Fee Paid</span>
                   <span className="font-medium text-primary">{formatMobi(app.feePaid)}</span>
+                </div>
+
+                {/* Authorised by */}
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Authorised by</span>
+                  {approvedBy[app.id] ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); window.open(`/profile/${approvedBy[app.id].id}`, '_blank'); }}
+                      className="font-medium text-primary underline underline-offset-2 touch-manipulation active:scale-[0.97] transition-transform"
+                    >
+                      {approvedBy[app.id].name}
+                    </button>
+                  ) : (
+                    <span className="font-medium text-muted-foreground italic">Admin</span>
+                  )}
                 </div>
               </div>
 
