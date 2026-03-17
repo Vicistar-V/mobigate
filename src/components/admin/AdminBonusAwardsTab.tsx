@@ -137,6 +137,7 @@ function getTimeFilterDate(filter: TimeFilter): { cutoff: Date; mode: "after" | 
 }
 
 export function AdminBonusAwardsTab() {
+  const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [denomFilter, setDenomFilter] = useState<DenomFilter>("all");
   const [countryFilter, setCountryFilter] = useState("all");
