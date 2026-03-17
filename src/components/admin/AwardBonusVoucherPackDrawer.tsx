@@ -525,16 +525,21 @@ export function AwardBonusVoucherPackDrawer({
           </div>
 
           {/* Authorization progress */}
-          <div className="flex items-center justify-center gap-2 mb-2">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className={`h-2 w-12 rounded-full transition-colors ${
-                  i < verifiedCount ? "bg-emerald-500" : "bg-muted"
-                }`}
-              />
-            ))}
-            <span className="text-xs font-semibold text-muted-foreground ml-2">{verifiedCount}/2 required</span>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1">
+              {adminSlots.map((admin) => (
+                <div
+                  key={admin.key}
+                  className={`h-2 rounded-full transition-colors ${
+                    admin.isSuperAdmin ? "w-12" : "w-8"
+                  } ${adminVerified[admin.key] ? "bg-emerald-500" : "bg-muted"}`}
+                />
+              ))}
+              <span className="text-xs font-semibold text-muted-foreground ml-2">{verifiedCount}/4 verified</span>
+            </div>
+            {admin1Solo && (
+              <p className="text-xs text-emerald-600 font-medium">✅ Super Admin authorized — proceed when ready</p>
+            )}
           </div>
 
           {/* Admin password fields */}
