@@ -184,7 +184,7 @@ export function NominationFeeSettingsSection() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
         <Coins className="h-5 w-5 text-primary" />
@@ -192,7 +192,7 @@ export function NominationFeeSettingsSection() {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        Configure nomination fees for all elective offices. These fees are automatically 
+        Configure nomination fees for all elective offices. Fees are automatically 
         debited when candidates declare interest.
       </p>
 
@@ -204,31 +204,32 @@ export function NominationFeeSettingsSection() {
 
       {/* Fee List by Category */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 px-3">
           <CardTitle className="text-base">Office-Specific Fees</CardTitle>
         </CardHeader>
         <CardContent className="px-0 pb-0">
           <Accordion type="single" collapsible defaultValue="executive">
             {Object.entries(groupedFees).map(([category, officeList]) => (
               <AccordionItem key={category} value={category} className="border-0">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50">
+                <AccordionTrigger className="px-3 py-3 hover:no-underline hover:bg-muted/50">
                   <div className="flex items-center gap-2">
                     {getCategoryIcon(category)}
                     <span className="capitalize font-medium">{category} Positions</span>
-                    <Badge variant="secondary" className="ml-2 text-xs">
+                    <Badge variant="secondary" className="ml-1 text-xs">
                       {officeList.length}
                     </Badge>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pb-3">
+                <AccordionContent className="px-3 pb-3">
                   <div className="space-y-2">
                     {officeList.map((office) => (
                       <div
                         key={office.officeId}
-                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                        className="rounded-xl border border-border/50 bg-muted/30 p-3"
                       >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
+                        {/* Row 1: Name + Edit */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2 min-w-0">
                             <span className="font-medium text-sm truncate">
                               {office.officeName}
                             </span>
@@ -238,30 +239,32 @@ export function NominationFeeSettingsSection() {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Fee: {formatMobi(office.feeInMobi)} + {formatMobi(office.processingFee)} processing
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            ≈ {formatLocalAmount(office.feeInMobi + office.processingFee, "NGN")}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <div className="text-right">
-                            <span className="font-bold text-primary">
-                              {formatMobi(office.totalFee)}
-                            </span>
-                            <p className="text-xs text-muted-foreground">
-                              ≈ {formatLocalAmount(office.totalFee, "NGN")}
-                            </p>
-                          </div>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-9 w-9 shrink-0 touch-manipulation active:scale-90"
                             onClick={() => setEditingOffice(office)}
                           >
                             <Edit2 className="h-4 w-4" />
                           </Button>
+                        </div>
+                        {/* Row 2: Fee breakdown — stacked */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Nomination Fee</span>
+                            <span className="text-sm font-semibold">{formatMobi(office.feeInMobi)}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Processing (5%)</span>
+                            <span className="text-sm">{formatMobi(office.processingFee)}</span>
+                          </div>
+                          <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                            <span className="text-xs font-semibold">Total</span>
+                            <div className="text-right">
+                              <span className="text-sm font-bold text-primary">{formatMobi(office.totalFee)}</span>
+                              <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(office.totalFee, "NGN")}</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -287,9 +290,9 @@ export function NominationFeeSettingsSection() {
         <div className="text-xs text-muted-foreground">
           <p className="font-medium mb-1">Important Notes:</p>
           <ul className="list-disc list-inside space-y-0.5">
-            <li>Nomination fees go directly to the Community Account</li>
-            <li>Service charges go to Mobigate Platform Revenue</li>
-            <li>Processing fees are included in the total debited amount</li>
+            <li>Nomination fees go to Community Account</li>
+            <li>Service charges go to Mobigate Revenue</li>
+            <li>Processing fees included in total debited</li>
             <li>Changes apply to new declarations only</li>
           </ul>
         </div>
