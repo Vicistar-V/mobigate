@@ -164,16 +164,17 @@ const timeFilterLabels: Record<TimeFilter, string> = {
   over1year: "Over a Year",
 };
 
-function getTimeFilterDate(filter: TimeFilter): Date | null {
+function getTimeFilterDate(filter: TimeFilter): { cutoff: Date; mode: "after" | "before" } | null {
   if (filter === "all") return null;
   const now = new Date();
   switch (filter) {
-    case "today": return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    case "7days": return new Date(now.getTime() - 7 * 86400000);
-    case "30days": return new Date(now.getTime() - 30 * 86400000);
-    case "90days": return new Date(now.getTime() - 90 * 86400000);
-    case "6months": return new Date(now.getTime() - 180 * 86400000);
-    case "1year": return new Date(now.getTime() - 365 * 86400000);
+    case "today": return { cutoff: new Date(now.getFullYear(), now.getMonth(), now.getDate()), mode: "after" };
+    case "7days": return { cutoff: new Date(now.getTime() - 7 * 86400000), mode: "after" };
+    case "30days": return { cutoff: new Date(now.getTime() - 30 * 86400000), mode: "after" };
+    case "90days": return { cutoff: new Date(now.getTime() - 90 * 86400000), mode: "after" };
+    case "6months": return { cutoff: new Date(now.getTime() - 180 * 86400000), mode: "after" };
+    case "1year": return { cutoff: new Date(now.getTime() - 365 * 86400000), mode: "after" };
+    case "over1year": return { cutoff: new Date(now.getTime() - 365 * 86400000), mode: "before" };
     default: return null;
   }
 }
