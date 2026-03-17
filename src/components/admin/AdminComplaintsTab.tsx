@@ -84,6 +84,7 @@ interface Complaint {
   description: string;
   reporterName: string;
   reporterEmail: string;
+  reporterId: string;
   isAnonymous: boolean;
   submittedDate: string;
   lastUpdated: string;
@@ -100,7 +101,7 @@ const initialComplaints: Complaint[] = [
     id: "c1", refNumber: "RPT-2026-0001", merchantName: "QuickBuy Electronics", merchantId: "m1",
     category: "scam-fraud", status: "pending",
     description: "This merchant charged my card ₦45,000 for a product that was never delivered. Multiple attempts to contact them have been ignored. The tracking number provided was fake and leads to a non-existent shipment.",
-    reporterName: "Adebayo Johnson", reporterEmail: "adebayo.j@email.com", isAnonymous: false,
+    reporterName: "Adebayo Johnson", reporterEmail: "adebayo.j@email.com", reporterId: "u1", isAnonymous: false,
     submittedDate: "2026-03-01", lastUpdated: "2026-03-01",
     timeline: [{ date: "2026-03-01", action: "Report submitted", by: "Adebayo Johnson" }],
   },
@@ -108,7 +109,7 @@ const initialComplaints: Complaint[] = [
     id: "c2", refNumber: "RPT-2026-0002", merchantName: "FreshMart Foods", merchantId: "m2",
     category: "deception-falsehood", status: "investigating",
     description: "Merchant advertises organic produce but sells regular items at premium prices. Multiple customers have confirmed this deceptive practice. Product labels don't match actual content.",
-    reporterName: "", reporterEmail: "", isAnonymous: true,
+    reporterName: "", reporterEmail: "", reporterId: "", isAnonymous: true,
     submittedDate: "2026-02-27", lastUpdated: "2026-03-02",
     assignedTo: "Admin Chidi",
     timeline: [
@@ -120,7 +121,7 @@ const initialComplaints: Complaint[] = [
     id: "c3", refNumber: "RPT-2026-0003", merchantName: "TechZone Repairs", merchantId: "m3",
     category: "harassment-threat", status: "pending",
     description: "Merchant staff used abusive language and threatened physical harm when I tried to return a defective product within the warranty period. I have witness testimony.",
-    reporterName: "Chioma Eze", reporterEmail: "chioma.e@email.com", isAnonymous: false,
+    reporterName: "Chioma Eze", reporterEmail: "chioma.e@email.com", reporterId: "u3", isAnonymous: false,
     submittedDate: "2026-02-28", lastUpdated: "2026-02-28",
     timeline: [{ date: "2026-02-28", action: "Report submitted", by: "Chioma Eze" }],
   },
@@ -128,7 +129,7 @@ const initialComplaints: Complaint[] = [
     id: "c4", refNumber: "RPT-2026-0004", merchantName: "GlamStyle Beauty", merchantId: "m4",
     category: "assault-bullying", status: "resolved",
     description: "Staff member physically pushed me out of the store during a dispute over pricing. Security camera footage should be available.",
-    reporterName: "Ngozi Okafor", reporterEmail: "ngozi.o@email.com", isAnonymous: false,
+    reporterName: "Ngozi Okafor", reporterEmail: "ngozi.o@email.com", reporterId: "u4", isAnonymous: false,
     submittedDate: "2026-02-20", lastUpdated: "2026-02-25",
     resolutionNotes: "Merchant has been warned. Staff member suspended. Merchant agreed to compensate customer with ₦15,000 store credit.",
     resolutionDate: "2026-02-25",
@@ -143,7 +144,7 @@ const initialComplaints: Complaint[] = [
     id: "c5", refNumber: "RPT-2026-0005", merchantName: "DataPlug Hub", merchantId: "m5",
     category: "social-abuse", status: "dismissed",
     description: "Merchant posted my personal phone number on their social media page after I left a negative review, encouraging followers to harass me.",
-    reporterName: "Emeka Nwankwo", reporterEmail: "emeka.n@email.com", isAnonymous: false,
+    reporterName: "Emeka Nwankwo", reporterEmail: "emeka.n@email.com", reporterId: "u5", isAnonymous: false,
     submittedDate: "2026-02-15", lastUpdated: "2026-02-18",
     resolutionNotes: "After investigation, the social media post was found to be from a different account not linked to the merchant. Case dismissed due to insufficient evidence.",
     resolutionDate: "2026-02-18",
@@ -157,7 +158,7 @@ const initialComplaints: Complaint[] = [
     id: "c6", refNumber: "RPT-2026-0006", merchantName: "QuickBuy Electronics", merchantId: "m1",
     category: "scam-fraud", status: "investigating",
     description: "Received a counterfeit phone instead of the original Samsung Galaxy advertised. Serial number check confirms it's a fake device. Merchant refuses refund.",
-    reporterName: "Ibrahim Musa", reporterEmail: "ibrahim.m@email.com", isAnonymous: false,
+    reporterName: "Ibrahim Musa", reporterEmail: "ibrahim.m@email.com", reporterId: "u6", isAnonymous: false,
     submittedDate: "2026-03-02", lastUpdated: "2026-03-03",
     assignedTo: "Admin Funke",
     timeline: [
@@ -169,7 +170,7 @@ const initialComplaints: Complaint[] = [
     id: "c7", refNumber: "RPT-2026-0007", merchantName: "FreshMart Foods", merchantId: "m2",
     category: "other", status: "pending",
     description: "Store operates beyond licensed hours and plays extremely loud music that disturbs the neighborhood. Multiple community complaints have been filed.",
-    reporterName: "", reporterEmail: "", isAnonymous: true,
+    reporterName: "", reporterEmail: "", reporterId: "", isAnonymous: true,
     submittedDate: "2026-03-03", lastUpdated: "2026-03-03",
     timeline: [{ date: "2026-03-03", action: "Report submitted", by: "Anonymous" }],
   },
@@ -177,7 +178,7 @@ const initialComplaints: Complaint[] = [
     id: "c8", refNumber: "RPT-2026-0008", merchantName: "NaijaDeals Hub", merchantId: "m8",
     category: "scam-fraud", status: "penalised",
     description: "Merchant collected payment for bulk vouchers but never delivered them. Multiple victims reported identical scam pattern over 3 weeks.",
-    reporterName: "Emeka Nwosu", reporterEmail: "emeka.n@email.com", isAnonymous: false,
+    reporterName: "Emeka Nwosu", reporterEmail: "emeka.n@email.com", reporterId: "u8", isAnonymous: false,
     submittedDate: "2026-02-10", lastUpdated: "2026-02-28",
     resolutionNotes: "Merchant account suspended for 90 days. Official warning issued.",
     resolutionDate: "2026-02-28",
@@ -641,7 +642,7 @@ export function AdminComplaintsTab() {
                       ) : (
                         <>
                           <button
-                            onClick={() => window.open(`/profile/${current.merchantId}`, '_blank')}
+                            onClick={() => window.open(`/profile/${current.reporterId}`, '_blank')}
                             className="flex items-center gap-3 touch-manipulation active:scale-[0.97] transition-transform w-full text-left rounded-lg p-2 -m-2 hover:bg-muted/50"
                           >
                             <Avatar className="h-9 w-9 shrink-0 border border-primary/20">
