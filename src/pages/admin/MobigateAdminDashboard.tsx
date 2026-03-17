@@ -331,6 +331,11 @@ export default function MobigateAdminDashboard() {
             </ScrollArea>
           </TabsContent>
 
+          {/* Exchange Rate Tab */}
+          <TabsContent value="exchange-rate" className="mt-0">
+            <AdminExchangeRateTab />
+          </TabsContent>
+
           {/* Elections Tab - Nomination Fee Settings */}
           <TabsContent value="elections" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
