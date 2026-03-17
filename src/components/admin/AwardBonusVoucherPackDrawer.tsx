@@ -163,7 +163,7 @@ export function AwardBonusVoucherPackDrawer({
     }
   };
 
-  const handleVerifyAdmin = (key: "admin1" | "admin2" | "admin3") => {
+  const handleVerifyAdmin = (key: "admin1" | "admin2" | "admin3" | "admin4") => {
     const pw = adminPasswords[key];
     if (!pw.trim()) return;
     // Simulated: accept any non-empty password
