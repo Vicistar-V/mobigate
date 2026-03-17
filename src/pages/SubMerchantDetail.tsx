@@ -48,11 +48,11 @@ export default function SubMerchantDetail() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />Phone</span>
-              <span className="font-semibold text-foreground">{sm.phone}</span>
+              <a href={`tel:${sm.phone}`} className="font-semibold text-primary underline">{sm.phone}</a>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />Email</span>
-              <span className="font-semibold text-foreground truncate max-w-[200px]">{sm.email}</span>
+              <a href={`mailto:${sm.email}`} className="font-semibold text-primary underline truncate max-w-[200px]">{sm.email}</a>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Location</span>
