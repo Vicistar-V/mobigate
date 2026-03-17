@@ -192,10 +192,23 @@ export default function ManageUsersPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("all");
+  const [selectedState, setSelectedState] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "name">("newest");
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+
+  const isNigeria = selectedCountry === "ng";
+
+  // Nigerian states for filter
+  const nigerianStates = useMemo(() => getNigerianStatesForFilter(), []);
+
+  // Cities for selected state
+  const citiesForState = useMemo(() => {
+    if (!isNigeria || selectedState === "all") return [];
+    return getCitiesForLGA(undefined, selectedState);
+  }, [isNigeria, selectedState]);
 
   // Country user counts
   const countryCounts = useMemo(() => {
@@ -223,6 +236,8 @@ export default function ManageUsersPage() {
   const filteredUsers = useMemo(() => {
     let users = [...mockUsers];
     if (selectedCountry !== "all") users = users.filter((u) => u.countryId === selectedCountry);
+    if (isNigeria && selectedState !== "all") users = users.filter((u) => u.stateId === selectedState);
+    if (isNigeria && selectedCity !== "all") users = users.filter((u) => u.city.toLowerCase() === selectedCity.toLowerCase());
     if (selectedStatus !== "all") users = users.filter((u) => u.status === selectedStatus);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -240,7 +255,7 @@ export default function ManageUsersPage() {
       return a.name.localeCompare(b.name);
     });
     return users;
-  }, [selectedCountry, selectedStatus, searchQuery, sortOrder]);
+  }, [selectedCountry, selectedState, selectedCity, selectedStatus, searchQuery, sortOrder, isNigeria]);
 
   const selectedCountryObj = countries.find((c) => c.id === selectedCountry);
 
