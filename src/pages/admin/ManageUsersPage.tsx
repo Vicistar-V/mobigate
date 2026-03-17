@@ -42,6 +42,8 @@ interface PlatformUser {
   avatar: string;
   countryId: string;
   city: string;
+  stateName?: string;
+  stateId?: string;
   status: UserStatus;
   role: UserRole;
   joinDate: Date;
