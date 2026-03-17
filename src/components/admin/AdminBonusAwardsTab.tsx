@@ -493,7 +493,7 @@ export function AdminBonusAwardsTab() {
                     </div>
                     <div className="p-3 flex justify-between items-center">
                       <span className="text-xs text-muted-foreground">Credited to</span>
-                      <span className="text-sm font-semibold">main‑Wallet</span>
+                      <span className="text-sm font-semibold">Voucher Store</span>
                     </div>
                   </CardContent>
                 </Card>
