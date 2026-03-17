@@ -380,26 +380,28 @@ export default function MobigateAdminDashboard() {
           {/* Revenue Tab */}
           <TabsContent value="revenue" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="space-y-4 pb-6">
+              <div className="space-y-4 pb-6 pr-1">
                 {/* Revenue Overview */}
                 <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <p className="text-xs text-muted-foreground">Total Platform Revenue</p>
-                          <MobiExplainerTooltip size="sm" />
-                        </div>
-                        <p className="text-3xl font-bold text-emerald-600">
-                          {formatMobi(platformStats.platformRevenue)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
-                        </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground">Total Platform Revenue</p>
+                        <MobiExplainerTooltip size="sm" />
                       </div>
-                      <div className="flex items-center gap-1 text-emerald-600">
-                        <TrendingUp className="h-5 w-5" />
-                        <span className="font-bold">+12.5%</span>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-2xl font-bold text-emerald-600">
+                            {formatMobi(platformStats.platformRevenue)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 text-emerald-600">
+                          <TrendingUp className="h-5 w-5" />
+                          <span className="font-bold">+12.5%</span>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -413,15 +415,13 @@ export default function MobigateAdminDashboard() {
                   <CardContent className="space-y-3">
                     {revenueBreakdown.map((item, index) => (
                       <div key={index} className="space-y-1">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">{item.source}</span>
-                          <div className="text-right">
-                            <span className="font-medium">{formatMobi(item.amount)}</span>
-                            <p className="text-xs text-muted-foreground">
-                              ≈ {formatLocalAmount(item.amount, "NGN")}
-                            </p>
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">{item.source}</span>
+                          <span className="text-sm font-medium">{formatMobi(item.amount)}</span>
                         </div>
+                        <p className="text-xs text-muted-foreground text-right">
+                          ≈ {formatLocalAmount(item.amount, "NGN")}
+                        </p>
                         <div className="relative h-2 bg-muted rounded-full overflow-hidden">
                           <div
                             className="absolute left-0 top-0 h-full bg-primary rounded-full"
@@ -436,32 +436,34 @@ export default function MobigateAdminDashboard() {
                   </CardContent>
                 </Card>
 
-                {/* Monthly Trend */}
+                {/* Monthly Trend - restacked for mobile */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base">Monthly Performance</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      <div className="p-3 bg-muted/30 rounded-lg">
-                        <p className="text-xs text-muted-foreground">This Month</p>
+                  <CardContent className="space-y-2">
+                    <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">This Month</p>
+                      <div className="text-right">
                         <p className="font-bold text-emerald-600">{formatMobi(2800000)}</p>
                         <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2800000, "NGN")}</p>
                       </div>
-                      <div className="p-3 bg-muted/30 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Last Month</p>
+                    </div>
+                    <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">Last Month</p>
+                      <div className="text-right">
                         <p className="font-bold">{formatMobi(2490000)}</p>
                         <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2490000, "NGN")}</p>
                       </div>
-                      <div className="p-3 bg-muted/30 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Growth</p>
-                        <p className="font-bold text-emerald-600">+12.5%</p>
-                      </div>
+                    </div>
+                    <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">Growth</p>
+                      <p className="font-bold text-emerald-600">+12.5%</p>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Fee Collections */}
+                {/* Fee Collections - restacked for mobile */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
@@ -469,37 +471,23 @@ export default function MobigateAdminDashboard() {
                       Fee Collections
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">Service Charges</p>
-                        <p className="text-xs text-muted-foreground">From nomination fees</p>
+                  <CardContent className="space-y-2">
+                    {[
+                      { label: "Service Charges", sub: "From nomination fees", value: 4500000 },
+                      { label: "Campaign Royalties", sub: "40% platform share", value: 3200000 },
+                      { label: "Ad Revenue", sub: "Banner & promoted content", value: 2800000 },
+                    ].map((fee) => (
+                      <div key={fee.label} className="p-3 bg-muted/30 rounded-lg space-y-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium text-sm">{fee.label}</p>
+                          <p className="font-bold text-primary">{formatMobi(fee.value)}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-muted-foreground">{fee.sub}</p>
+                          <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(fee.value, "NGN")}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-primary">{formatMobi(4500000)}</p>
-                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(4500000, "NGN")}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">Campaign Royalties</p>
-                        <p className="text-xs text-muted-foreground">40% platform share</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-primary">{formatMobi(3200000)}</p>
-                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(3200000, "NGN")}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                      <div>
-                        <p className="font-medium text-sm">Ad Revenue</p>
-                        <p className="text-xs text-muted-foreground">Banner & promoted content</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-primary">{formatMobi(2800000)}</p>
-                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2800000, "NGN")}</p>
-                      </div>
-                    </div>
+                    ))}
                   </CardContent>
                 </Card>
 
