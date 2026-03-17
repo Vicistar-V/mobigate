@@ -179,6 +179,7 @@ export function MerchantApplicationsAdmin() {
 
   const handleApprove = (id: string, name: string) => {
     setStatuses((prev) => ({ ...prev, [id]: "approved" }));
+    setApprovedBy((prev) => ({ ...prev, [id]: currentAdmin }));
     setDecliningId(null);
     toast({ title: "Application Approved", description: `${name}'s merchant application has been approved.` });
   };
