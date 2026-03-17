@@ -265,7 +265,7 @@ export function AdminBonusAwardsTab() {
               <p className="text-xs text-muted-foreground font-medium">Awards Made</p>
             </div>
             <p className="text-base font-black text-foreground">{stats.count}</p>
-            <p className="text-[10px] text-muted-foreground">{stats.totalUnits} total units</p>
+            <p className="text-xs text-muted-foreground">{stats.totalUnits} total units</p>
           </CardContent>
         </Card>
         <Card>
