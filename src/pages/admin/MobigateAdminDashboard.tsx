@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
+import { AdminExchangeRateTab } from "@/components/admin/AdminExchangeRateTab";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
@@ -137,6 +138,10 @@ export default function MobigateAdminDashboard() {
               <TabsTrigger value="overview" className="text-xs py-2 px-3">
                 <LayoutDashboard className="h-4 w-4 mr-1" />
                 Overview
+              </TabsTrigger>
+              <TabsTrigger value="exchange-rate" className="text-xs py-2 px-3">
+                <Coins className="h-4 w-4 mr-1" />
+                Exchange Rate
               </TabsTrigger>
               <TabsTrigger value="elections" className="text-xs py-2 px-3">
                 <Vote className="h-4 w-4 mr-1" />
@@ -324,6 +329,11 @@ export default function MobigateAdminDashboard() {
                 </Card>
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          {/* Exchange Rate Tab */}
+          <TabsContent value="exchange-rate" className="mt-0">
+            <AdminExchangeRateTab />
           </TabsContent>
 
           {/* Elections Tab - Nomination Fee Settings */}
