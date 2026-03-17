@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { getNigerianStatesForFilter, getCitiesForLGA } from "@/data/nigerianLocationsData";
 
 // Country definitions with flags
 const countries = [
@@ -41,6 +42,8 @@ interface PlatformUser {
   avatar: string;
   countryId: string;
   city: string;
+  stateName?: string;
+  stateId?: string;
   status: UserStatus;
   role: UserRole;
   joinDate: Date;
@@ -53,26 +56,26 @@ interface PlatformUser {
 // Generate realistic mock users
 function generateMockUsers(): PlatformUser[] {
   const nigerianNames = [
-    { name: "Adebayo Ogundimu", username: "adebayo_o", city: "Lagos" },
-    { name: "Chidinma Eze", username: "chidinma_e", city: "Enugu" },
-    { name: "Oluwaseun Adeleke", username: "seun_adeleke", city: "Ibadan" },
-    { name: "Fatima Bello", username: "fatima_b", city: "Kano" },
-    { name: "Emeka Nwosu", username: "emeka_n", city: "Owerri" },
-    { name: "Ngozi Okafor", username: "ngozi_ok", city: "Abuja" },
-    { name: "Yusuf Ibrahim", username: "yusuf_i", city: "Kaduna" },
-    { name: "Aisha Mohammed", username: "aisha_m", city: "Jos" },
-    { name: "Chukwuemeka Ani", username: "chukwu_a", city: "Onitsha" },
-    { name: "Blessing Okoro", username: "blessing_o", city: "Port Harcourt" },
-    { name: "Tunde Bakare", username: "tunde_b", city: "Abeokuta" },
-    { name: "Ifeoma Udeh", username: "ifeoma_u", city: "Nsukka" },
-    { name: "Musa Danjuma", username: "musa_d", city: "Maiduguri" },
-    { name: "Funke Akindele", username: "funke_a", city: "Lagos" },
-    { name: "Obinna Uchenna", username: "obinna_u", city: "Aba" },
-    { name: "Halima Suleiman", username: "halima_s", city: "Sokoto" },
-    { name: "Kelechi Iheanacho", username: "kelechi_i", city: "Owerri" },
-    { name: "Damilola Adesanya", username: "dami_a", city: "Lagos" },
-    { name: "Amaka Nnadi", username: "amaka_n", city: "Awka" },
-    { name: "Saheed Balogun", username: "saheed_b", city: "Ilorin" },
+    { name: "Adebayo Ogundimu", username: "adebayo_o", city: "Lagos", stateId: "lagos", stateName: "Lagos" },
+    { name: "Chidinma Eze", username: "chidinma_e", city: "Enugu", stateId: "enugu", stateName: "Enugu" },
+    { name: "Oluwaseun Adeleke", username: "seun_adeleke", city: "Ibadan", stateId: "oyo", stateName: "Oyo" },
+    { name: "Fatima Bello", username: "fatima_b", city: "Kano", stateId: "kano", stateName: "Kano" },
+    { name: "Emeka Nwosu", username: "emeka_n", city: "Owerri", stateId: "imo", stateName: "Imo" },
+    { name: "Ngozi Okafor", username: "ngozi_ok", city: "Abuja", stateId: "abuja", stateName: "FCT Abuja" },
+    { name: "Yusuf Ibrahim", username: "yusuf_i", city: "Kaduna", stateId: "kano", stateName: "Kano" },
+    { name: "Aisha Mohammed", username: "aisha_m", city: "Jos", stateId: "oyo", stateName: "Oyo" },
+    { name: "Chukwuemeka Ani", username: "chukwu_a", city: "Onitsha", stateId: "enugu", stateName: "Enugu" },
+    { name: "Blessing Okoro", username: "blessing_o", city: "Port Harcourt", stateId: "rivers", stateName: "Rivers" },
+    { name: "Tunde Bakare", username: "tunde_b", city: "Abeokuta", stateId: "oyo", stateName: "Oyo" },
+    { name: "Ifeoma Udeh", username: "ifeoma_u", city: "Nsukka", stateId: "enugu", stateName: "Enugu" },
+    { name: "Musa Danjuma", username: "musa_d", city: "Maiduguri", stateId: "kano", stateName: "Kano" },
+    { name: "Funke Akindele", username: "funke_a", city: "Lagos", stateId: "lagos", stateName: "Lagos" },
+    { name: "Obinna Uchenna", username: "obinna_u", city: "Aba", stateId: "imo", stateName: "Imo" },
+    { name: "Halima Suleiman", username: "halima_s", city: "Sokoto", stateId: "kano", stateName: "Kano" },
+    { name: "Kelechi Iheanacho", username: "kelechi_i", city: "Owerri", stateId: "imo", stateName: "Imo" },
+    { name: "Damilola Adesanya", username: "dami_a", city: "Lagos", stateId: "lagos", stateName: "Lagos" },
+    { name: "Amaka Nnadi", username: "amaka_n", city: "Awka", stateId: "enugu", stateName: "Enugu" },
+    { name: "Saheed Balogun", username: "saheed_b", city: "Ilorin", stateId: "oyo", stateName: "Oyo" },
   ];
 
   const ghanaianNames = [
@@ -152,6 +155,8 @@ function generateMockUsers(): PlatformUser[] {
         avatar: "",
         countryId,
         city: u.city,
+        stateName: (u as any).stateName,
+        stateId: (u as any).stateId,
         status: statuses[hash % statuses.length],
         role: roles[hash % roles.length],
         joinDate: new Date(2024, hash % 12, (hash % 28) + 1),
@@ -187,10 +192,23 @@ export default function ManageUsersPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("all");
+  const [selectedState, setSelectedState] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "name">("newest");
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+
+  const isNigeria = selectedCountry === "ng";
+
+  // Nigerian states for filter
+  const nigerianStates = useMemo(() => getNigerianStatesForFilter(), []);
+
+  // Cities for selected state
+  const citiesForState = useMemo(() => {
+    if (!isNigeria || selectedState === "all") return [];
+    return getCitiesForLGA(undefined, selectedState);
+  }, [isNigeria, selectedState]);
 
   // Country user counts
   const countryCounts = useMemo(() => {
@@ -218,6 +236,8 @@ export default function ManageUsersPage() {
   const filteredUsers = useMemo(() => {
     let users = [...mockUsers];
     if (selectedCountry !== "all") users = users.filter((u) => u.countryId === selectedCountry);
+    if (isNigeria && selectedState !== "all") users = users.filter((u) => u.stateId === selectedState);
+    if (isNigeria && selectedCity !== "all") users = users.filter((u) => u.city.toLowerCase() === selectedCity.toLowerCase());
     if (selectedStatus !== "all") users = users.filter((u) => u.status === selectedStatus);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -235,7 +255,7 @@ export default function ManageUsersPage() {
       return a.name.localeCompare(b.name);
     });
     return users;
-  }, [selectedCountry, selectedStatus, searchQuery, sortOrder]);
+  }, [selectedCountry, selectedState, selectedCity, selectedStatus, searchQuery, sortOrder, isNigeria]);
 
   const selectedCountryObj = countries.find((c) => c.id === selectedCountry);
 
@@ -288,7 +308,7 @@ export default function ManageUsersPage() {
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory">
             {/* All Countries card */}
             <button
-              onClick={() => setSelectedCountry("all")}
+              onClick={() => { setSelectedCountry("all"); setSelectedState("all"); setSelectedCity("all"); }}
               className={`snap-start shrink-0 flex flex-col items-center gap-1 rounded-xl border p-3 min-w-[80px] transition-all ${
                 selectedCountry === "all"
                   ? "border-primary bg-primary/10 ring-1 ring-primary"
@@ -305,7 +325,7 @@ export default function ManageUsersPage() {
             {countries.map((country) => (
               <button
                 key={country.id}
-                onClick={() => setSelectedCountry(country.id)}
+                onClick={() => { setSelectedCountry(country.id); setSelectedState("all"); setSelectedCity("all"); }}
                 className={`snap-start shrink-0 flex flex-col items-center gap-1 rounded-xl border p-3 min-w-[80px] transition-all ${
                   selectedCountry === country.id
                     ? "border-primary bg-primary/10 ring-1 ring-primary"
@@ -341,6 +361,42 @@ export default function ManageUsersPage() {
             </button>
           ))}
         </div>
+
+        {/* State & City Filters (Nigeria only) */}
+        {isNigeria && (
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1 -mx-4 px-4">
+            <Select
+              value={selectedState}
+              onValueChange={(v) => { setSelectedState(v); setSelectedCity("all"); }}
+            >
+              <SelectTrigger className="h-9 text-xs min-w-[130px] shrink-0">
+                <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                <SelectValue placeholder="All States" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All States</SelectItem>
+                {nigerianStates.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {selectedState !== "all" && citiesForState.length > 0 && (
+              <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <SelectTrigger className="h-9 text-xs min-w-[130px] shrink-0">
+                  <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder="All Cities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Cities</SelectItem>
+                  {citiesForState.map((c) => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
 
         {/* Search + Sort */}
         <div className="flex gap-2 mb-4">

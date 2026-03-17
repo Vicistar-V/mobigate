@@ -29,6 +29,7 @@ import {
 import { Header } from "@/components/Header";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
 import { AdminExchangeRateTab } from "@/components/admin/AdminExchangeRateTab";
+import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
@@ -340,49 +341,51 @@ export default function MobigateAdminDashboard() {
           <TabsContent value="elections" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
               <div className="space-y-4 pb-6">
-                {/* Active Elections Stats */}
-                <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Active Elections</p>
-                        <p className="text-3xl font-bold">{platformStats.activeElections}</p>
+                <AdminAuthGate tabLabel="Elections">
+                  {/* Active Elections Stats */}
+                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Active Elections</p>
+                          <p className="text-3xl font-bold">{platformStats.activeElections}</p>
+                        </div>
+                        <Vote className="h-10 w-10 text-primary/50" />
                       </div>
-                      <Vote className="h-10 w-10 text-primary/50" />
-                    </div>
-                    <div className="flex gap-4 mt-3 pt-3 border-t">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Nominations Open</p>
-                        <p className="font-bold">12</p>
+                      <div className="flex gap-4 mt-3 pt-3 border-t">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Nominations Open</p>
+                          <p className="font-bold">12</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">In Voting</p>
+                          <p className="font-bold">8</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Concluded</p>
+                          <p className="font-bold">25</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">In Voting</p>
-                        <p className="font-bold">8</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Concluded</p>
-                        <p className="font-bold">25</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                {/* Mobigate-Only Notice */}
-                <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                  <Shield className="h-5 w-5 text-primary shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium">Mobigate Admin Only</p>
-                    <p className="text-xs text-muted-foreground">
-                      These settings are only accessible to platform administrators
-                    </p>
+                  {/* Mobigate-Only Notice */}
+                  <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                    <Shield className="h-5 w-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Mobigate Admin Only</p>
+                      <p className="text-xs text-muted-foreground">
+                        These settings are only accessible to platform administrators
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Nomination Fee Settings */}
-                <NominationFeeSettingsSection />
+                  {/* Nomination Fee Settings */}
+                  <NominationFeeSettingsSection />
 
-                {/* Campaign Fee Distribution Settings */}
-                <CampaignFeeDistributionSettings />
+                  {/* Campaign Fee Distribution Settings */}
+                  <CampaignFeeDistributionSettings />
+                </AdminAuthGate>
               </div>
             </ScrollArea>
           </TabsContent>
@@ -391,112 +394,114 @@ export default function MobigateAdminDashboard() {
           <TabsContent value="revenue" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
               <div className="space-y-4 pb-6 pr-1">
-                {/* Revenue Overview */}
-                <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
-                  <CardContent className="p-4 space-y-1">
-                    <div className="flex items-center gap-1">
-                      <p className="text-sm text-muted-foreground">Total Platform Revenue</p>
-                      <MobiExplainerTooltip size="sm" />
-                    </div>
-                    <p className="text-2xl font-bold text-emerald-600">
-                      {formatMobi(platformStats.platformRevenue)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
-                    </p>
-                    <div className="flex items-center gap-1 text-emerald-600 pt-1">
-                      <TrendingUp className="h-4 w-4" />
-                      <span className="text-sm font-bold">+12.5% this month</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Revenue Breakdown */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Revenue Breakdown</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {revenueBreakdown.map((item, index) => (
-                      <div key={index} className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">{item.source}</span>
-                          <span className="text-sm font-medium">{formatMobi(item.amount)}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground text-right">
-                          ≈ {formatLocalAmount(item.amount, "NGN")}
-                        </p>
-                        <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="absolute left-0 top-0 h-full bg-primary rounded-full"
-                            style={{ width: `${item.percentage}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-right text-muted-foreground">
-                          {item.percentage}%
-                        </p>
+                <AdminAuthGate tabLabel="Revenue">
+                  {/* Revenue Overview */}
+                  <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
+                    <CardContent className="p-4 space-y-1">
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground">Total Platform Revenue</p>
+                        <MobiExplainerTooltip size="sm" />
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Monthly Trend - restacked for mobile */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Monthly Performance</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">This Month</p>
-                      <div className="text-right">
-                        <p className="font-bold text-emerald-600">{formatMobi(2800000)}</p>
-                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2800000, "NGN")}</p>
+                      <p className="text-2xl font-bold text-emerald-600">
+                        {formatMobi(platformStats.platformRevenue)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
+                      </p>
+                      <div className="flex items-center gap-1 text-emerald-600 pt-1">
+                        <TrendingUp className="h-4 w-4" />
+                        <span className="text-sm font-bold">+12.5% this month</span>
                       </div>
-                    </div>
-                    <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">Last Month</p>
-                      <div className="text-right">
-                        <p className="font-bold">{formatMobi(2490000)}</p>
-                        <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2490000, "NGN")}</p>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">Growth</p>
-                      <p className="font-bold text-emerald-600">+12.5%</p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                {/* Fee Collections - restacked for mobile */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Coins className="h-5 w-5 text-amber-500" />
-                      Fee Collections
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {[
-                      { label: "Service Charges", sub: "From nomination fees", value: 4500000 },
-                      { label: "Campaign Royalties", sub: "40% platform share", value: 3200000 },
-                      { label: "Ad Revenue", sub: "Banner & promoted content", value: 2800000 },
-                    ].map((fee) => (
-                      <div key={fee.label} className="p-3 bg-muted/30 rounded-lg space-y-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium text-sm">{fee.label}</p>
-                          <p className="font-bold text-primary">{formatMobi(fee.value)}</p>
+                  {/* Revenue Breakdown */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Revenue Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {revenueBreakdown.map((item, index) => (
+                        <div key={index} className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">{item.source}</span>
+                            <span className="text-sm font-medium">{formatMobi(item.amount)}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground text-right">
+                            ≈ {formatLocalAmount(item.amount, "NGN")}
+                          </p>
+                          <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="absolute left-0 top-0 h-full bg-primary rounded-full"
+                              style={{ width: `${item.percentage}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-right text-muted-foreground">
+                            {item.percentage}%
+                          </p>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-muted-foreground">{fee.sub}</p>
-                          <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(fee.value, "NGN")}</p>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Monthly Trend */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Monthly Performance</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">This Month</p>
+                        <div className="text-right">
+                          <p className="font-bold text-emerald-600">{formatMobi(2800000)}</p>
+                          <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2800000, "NGN")}</p>
                         </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                      <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">Last Month</p>
+                        <div className="text-right">
+                          <p className="font-bold">{formatMobi(2490000)}</p>
+                          <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(2490000, "NGN")}</p>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-muted/30 rounded-lg flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">Growth</p>
+                        <p className="font-bold text-emerald-600">+12.5%</p>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                {/* Currency Info Banner */}
-                <MobiCurrencyInfoBanner currencyCode="NGN" />
+                  {/* Fee Collections */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Coins className="h-5 w-5 text-amber-500" />
+                        Fee Collections
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {[
+                        { label: "Service Charges", sub: "From nomination fees", value: 4500000 },
+                        { label: "Campaign Royalties", sub: "40% platform share", value: 3200000 },
+                        { label: "Ad Revenue", sub: "Banner & promoted content", value: 2800000 },
+                      ].map((fee) => (
+                        <div key={fee.label} className="p-3 bg-muted/30 rounded-lg space-y-1">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium text-sm">{fee.label}</p>
+                            <p className="font-bold text-primary">{formatMobi(fee.value)}</p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-muted-foreground">{fee.sub}</p>
+                            <p className="text-xs text-muted-foreground">≈ {formatLocalAmount(fee.value, "NGN")}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Currency Info Banner */}
+                  <MobiCurrencyInfoBanner currencyCode="NGN" />
+                </AdminAuthGate>
               </div>
             </ScrollArea>
           </TabsContent>
