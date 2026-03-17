@@ -170,7 +170,7 @@ const initialComplaints: Complaint[] = [
     id: "c7", refNumber: "RPT-2026-0007", merchantName: "FreshMart Foods", merchantId: "m2",
     category: "other", status: "pending",
     description: "Store operates beyond licensed hours and plays extremely loud music that disturbs the neighborhood. Multiple community complaints have been filed.",
-    reporterName: "", reporterEmail: "", isAnonymous: true,
+    reporterName: "", reporterEmail: "", reporterId: "", isAnonymous: true,
     submittedDate: "2026-03-03", lastUpdated: "2026-03-03",
     timeline: [{ date: "2026-03-03", action: "Report submitted", by: "Anonymous" }],
   },
