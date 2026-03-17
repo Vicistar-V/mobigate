@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import {
   Coins,
@@ -17,6 +19,9 @@ import {
   Globe,
   Info,
   X,
+  Link2,
+  Unlink,
+  AlertTriangle,
 } from "lucide-react";
 
 interface CurrencyRate {
@@ -69,6 +74,7 @@ export function AdminExchangeRateTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingCode, setEditingCode] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [cascadeChanges, setCascadeChanges] = useState(true);
   const { toast } = useToast();
 
   const filteredRates = useMemo(() => {
@@ -83,10 +89,13 @@ export function AdminExchangeRateTab() {
   }, [rates, searchQuery]);
 
   const totalCurrencies = rates.length;
+  const baseRate = rates.find(r => r.isBase);
 
   const handleStartEdit = (code: string, currentRate: number) => {
     setEditingCode(code);
     setEditValue(currentRate.toString());
+    // Reset cascade to true when editing base
+    if (code === "NGN") setCascadeChanges(true);
   };
 
   const handleSaveRate = (code: string) => {
@@ -95,16 +104,55 @@ export function AdminExchangeRateTab() {
       toast({ title: "Invalid Rate", description: "Please enter a valid positive number.", variant: "destructive" });
       return;
     }
-    setRates(prev =>
-      prev.map(r =>
-        r.code === code
-          ? { ...r, previousRate: r.ratePerMobi, ratePerMobi: newRate, lastUpdated: new Date().toISOString().split("T")[0] }
-          : r
-      )
-    );
+
+    const today = new Date().toISOString().split("T")[0];
+
+    if (code === "NGN") {
+      const oldBaseRate = baseRate?.ratePerMobi || 1;
+      const ratio = newRate / oldBaseRate;
+
+      if (cascadeChanges) {
+        // Cascade: scale all other currencies proportionally
+        setRates(prev =>
+          prev.map(r => {
+            if (r.code === "NGN") {
+              return { ...r, previousRate: r.ratePerMobi, ratePerMobi: newRate, lastUpdated: today };
+            }
+            const scaledRate = r.ratePerMobi * ratio;
+            return { ...r, previousRate: r.ratePerMobi, ratePerMobi: scaledRate, lastUpdated: today };
+          })
+        );
+        toast({
+          title: "Base Rate Cascaded",
+          description: `NGN updated to ${newRate}. All ${totalCurrencies - 1} currencies scaled proportionally.`,
+        });
+      } else {
+        // Only update NGN
+        setRates(prev =>
+          prev.map(r =>
+            r.code === "NGN"
+              ? { ...r, previousRate: r.ratePerMobi, ratePerMobi: newRate, lastUpdated: today }
+              : r
+          )
+        );
+        toast({
+          title: "Base Rate Updated",
+          description: `NGN updated to ${newRate}. Other currencies unchanged.`,
+        });
+      }
+    } else {
+      setRates(prev =>
+        prev.map(r =>
+          r.code === code
+            ? { ...r, previousRate: r.ratePerMobi, ratePerMobi: newRate, lastUpdated: today }
+            : r
+        )
+      );
+      toast({ title: "Rate Updated", description: `${code} exchange rate updated to ${newRate} per Mobi.` });
+    }
+
     setEditingCode(null);
     setEditValue("");
-    toast({ title: "Rate Updated", description: `${code} exchange rate updated to ${newRate} per Mobi.` });
   };
 
   const handleCancelEdit = () => {
@@ -124,39 +172,130 @@ export function AdminExchangeRateTab() {
   };
 
   const formatRate = (rate: number) => {
+    if (rate < 0.001) return rate.toFixed(6);
     if (rate < 0.01) return rate.toFixed(5);
     if (rate < 1) return rate.toFixed(4);
     return rate.toFixed(2);
   };
 
+  const isEditingBase = editingCode === "NGN";
+
   return (
     <ScrollArea className="h-[calc(100vh-200px)]">
       <div className="space-y-3 pb-6">
-        {/* Base Rate Hero — compact vertical stack */}
-        <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-orange-500/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Coins className="h-5 w-5 text-amber-600" />
-            <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Base Exchange Rate</span>
+        {/* Base Rate Hero — now editable */}
+        <div className={`rounded-xl border bg-gradient-to-br p-4 transition-all ${
+          isEditingBase
+            ? "border-primary/50 from-primary/10 to-primary/5 ring-2 ring-primary/20"
+            : "border-amber-500/30 from-amber-500/15 to-orange-500/10"
+        }`}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Coins className="h-5 w-5 text-amber-600" />
+              <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Base Exchange Rate</span>
+            </div>
+            {!isEditingBase && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-9 w-9 touch-manipulation active:scale-90"
+                onClick={() => handleStartEdit("NGN", baseRate?.ratePerMobi || 1)}
+              >
+                <Pencil className="h-4 w-4 text-amber-600" />
+              </Button>
+            )}
           </div>
-          <p className="text-2xl font-bold text-foreground">
-            1 Mobi <span className="text-muted-foreground font-normal">=</span> <span className="text-amber-600">₦1.00</span>
-          </p>
-          <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1.5">
-            <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-            All currencies derived from this base. 1 Mobi = 1 NGN.
-          </p>
+
+          {isEditingBase ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium whitespace-nowrap">1 Mobi =</span>
+                <Input
+                  type="number"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="flex-1 h-11 text-lg font-bold text-right touch-manipulation"
+                  step="any"
+                  autoFocus
+                />
+                <span className="text-sm font-medium text-amber-600">NGN</span>
+              </div>
+
+              {/* Cascade toggle */}
+              <div className="rounded-lg border border-border/60 bg-background/50 p-3 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {cascadeChanges ? (
+                      <Link2 className="h-4 w-4 text-primary shrink-0" />
+                    ) : (
+                      <Unlink className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                    <Label htmlFor="cascade" className="text-sm font-medium cursor-pointer">
+                      {cascadeChanges ? "Cascade to all currencies" : "Update NGN only"}
+                    </Label>
+                  </div>
+                  <Switch
+                    id="cascade"
+                    checked={cascadeChanges}
+                    onCheckedChange={setCascadeChanges}
+                    className="touch-manipulation"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {cascadeChanges
+                    ? "All other currencies will be proportionally recalculated based on the new base rate."
+                    : "Only the NGN base value changes. Other currency rates stay as they are."}
+                </p>
+                {!cascadeChanges && (
+                  <div className="flex items-start gap-1.5 text-xs text-amber-600">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    <span>This may cause rate inconsistencies across currencies.</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Save / Cancel */}
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 h-11 bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.98]"
+                  onClick={() => handleSaveRate("NGN")}
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  {cascadeChanges ? "Save & Cascade" : "Save NGN Only"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-11 px-4 touch-manipulation active:scale-95"
+                  onClick={handleCancelEdit}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-2xl font-bold text-foreground">
+                1 Mobi <span className="text-muted-foreground font-normal">=</span>{" "}
+                <span className="text-amber-600">₦{formatRate(baseRate?.ratePerMobi || 1)}</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1.5">
+                <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                Tap the pencil to edit. You can cascade changes to all currencies.
+              </p>
+            </>
+          )}
         </div>
 
-        {/* Stats — inline pills instead of cards */}
+        {/* Stats — inline pills */}
         <div className="flex gap-2">
-          <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2">
+          <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2.5">
             <div className="flex items-center gap-1.5">
               <Globe className="h-3.5 w-3.5 text-primary" />
               <span className="text-sm font-bold">{totalCurrencies}</span>
               <span className="text-xs text-muted-foreground">pairs</span>
             </div>
           </div>
-          <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2">
+          <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2.5">
             <div className="flex items-center gap-1.5">
               <RotateCcw className="h-3.5 w-3.5 text-blue-500" />
               <span className="text-sm font-bold">Today</span>
@@ -176,9 +315,11 @@ export function AdminExchangeRateTab() {
           />
         </div>
 
-        {/* Currency List — vertically restacked cards */}
+        {/* Currency List */}
         <div className="space-y-2">
           {filteredRates.map((rate) => {
+            if (rate.isBase) return null; // Base shown in hero above
+
             const changePercent = getChangePercent(rate.ratePerMobi, rate.previousRate);
             const isEditing = editingCode === rate.code;
             const isPositive = rate.ratePerMobi > rate.previousRate;
@@ -187,11 +328,9 @@ export function AdminExchangeRateTab() {
             return (
               <div
                 key={rate.code}
-                className={`rounded-xl border bg-card p-3 ${
-                  rate.isBase ? "border-amber-500/40 bg-amber-500/5" : "border-border/50"
-                }`}
+                className="rounded-xl border border-border/50 bg-card p-3"
               >
-                {/* Row 1: Flag + Code + Name + BASE badge */}
+                {/* Row 1: Flag + Code + Name */}
                 <div className="flex items-center gap-2.5 mb-2">
                   <span className="text-2xl leading-none">{rate.flag}</span>
                   <div className="flex-1 min-w-0">
@@ -199,17 +338,12 @@ export function AdminExchangeRateTab() {
                       <span className="font-bold text-sm">{rate.code}</span>
                       <span className="text-xs text-muted-foreground">—</span>
                       <span className="text-xs text-muted-foreground truncate">{rate.name}</span>
-                      {rate.isBase && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600 ml-auto shrink-0">
-                          BASE
-                        </Badge>
-                      )}
                     </div>
                     <p className="text-xs text-muted-foreground/70">{rate.country}</p>
                   </div>
                 </div>
 
-                {/* Row 2: Rate value + trend + edit button — full width */}
+                {/* Row 2: Rate + trend + edit */}
                 {isEditing ? (
                   <div className="flex items-center gap-2">
                     <Input
@@ -243,34 +377,30 @@ export function AdminExchangeRateTab() {
                       <span className="text-xs text-muted-foreground">per Mobi</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {!rate.isBase && (
-                        <div className="flex items-center gap-1">
-                          {getTrendIcon(rate.ratePerMobi, rate.previousRate)}
-                          <span
-                            className={`text-xs font-medium ${
-                              isPositive ? "text-emerald-500" : isNegative ? "text-red-500" : "text-muted-foreground"
-                            }`}
-                          >
-                            {isPositive ? "+" : ""}{changePercent}%
-                          </span>
-                        </div>
-                      )}
-                      {!rate.isBase && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-9 w-9 touch-manipulation active:scale-90"
-                          onClick={() => handleStartEdit(rate.code, rate.ratePerMobi)}
+                      <div className="flex items-center gap-1">
+                        {getTrendIcon(rate.ratePerMobi, rate.previousRate)}
+                        <span
+                          className={`text-xs font-medium ${
+                            isPositive ? "text-emerald-500" : isNegative ? "text-red-500" : "text-muted-foreground"
+                          }`}
                         >
-                          <Pencil className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      )}
+                          {isPositive ? "+" : ""}{changePercent}%
+                        </span>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9 touch-manipulation active:scale-90"
+                        onClick={() => handleStartEdit(rate.code, rate.ratePerMobi)}
+                      >
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
                     </div>
                   </div>
                 )}
 
-                {/* Row 3: Conversion preview — stacked vertically */}
-                {!rate.isBase && !isEditing && (
+                {/* Row 3: Conversion preview */}
+                {!isEditing && (
                   <div className="mt-2 pt-2 border-t border-border/40 space-y-0.5">
                     <p className="text-xs text-muted-foreground">
                       M1,000 = {rate.code} {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
