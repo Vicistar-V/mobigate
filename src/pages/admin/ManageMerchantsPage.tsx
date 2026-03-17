@@ -290,6 +290,11 @@ export default function ManageMerchantsPage() {
             <AdminComplaintsTab />
           </TabsContent>
 
+          {/* Bonuses Tab */}
+          <TabsContent value="bonuses" className="mt-0">
+            <AdminBonusAwardsTab />
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-0">
             <ScrollArea className="h-[calc(100vh-220px)]">
