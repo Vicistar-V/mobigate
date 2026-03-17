@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockSubMerchants, mockSubMerchantPurchases, formatNum } from "@/data/subMerchantData";
@@ -46,6 +46,14 @@ export default function SubMerchantDetail() {
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Profile</p>
           </div>
           <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />Phone</span>
+              <span className="font-semibold text-foreground">{sm.phone}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />Email</span>
+              <span className="font-semibold text-foreground truncate max-w-[200px]">{sm.email}</span>
+            </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Location</span>
               <span className="font-semibold text-foreground">{sm.city}, {sm.state}</span>
