@@ -238,19 +238,19 @@ export default function MobigateAdminDashboard() {
                     <CardTitle className="text-base">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => setActiveTab("elections")}>
                       <Vote className="h-5 w-5" />
                       <span className="text-xs">Elections</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => navigate("/mobigate-admin/communities")}>
                       <Building2 className="h-5 w-5" />
                       <span className="text-xs">Communities</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => navigate("/mobigate-admin/users")}>
                       <Users className="h-5 w-5" />
                       <span className="text-xs">Users</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1">
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => setActiveTab("settings")}>
                       <Settings className="h-5 w-5" />
                       <span className="text-xs">Settings</span>
                     </Button>
