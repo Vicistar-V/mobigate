@@ -119,6 +119,7 @@ const mockAwardHistory: AwardHistoryItem[] = [
 ];
 
 const denominationGroups = [
+  { denomination: 100, color: "text-rose-600", bgColor: "bg-rose-500/10", borderColor: "border-rose-300" },
   { denomination: 200, color: "text-blue-600", bgColor: "bg-blue-500/10", borderColor: "border-blue-300" },
   { denomination: 500, color: "text-emerald-600", bgColor: "bg-emerald-500/10", borderColor: "border-emerald-300" },
   { denomination: 1000, color: "text-purple-600", bgColor: "bg-purple-500/10", borderColor: "border-purple-300" },
