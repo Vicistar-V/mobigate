@@ -144,7 +144,7 @@ const initialComplaints: Complaint[] = [
     id: "c5", refNumber: "RPT-2026-0005", merchantName: "DataPlug Hub", merchantId: "m5",
     category: "social-abuse", status: "dismissed",
     description: "Merchant posted my personal phone number on their social media page after I left a negative review, encouraging followers to harass me.",
-    reporterName: "Emeka Nwankwo", reporterEmail: "emeka.n@email.com", isAnonymous: false,
+    reporterName: "Emeka Nwankwo", reporterEmail: "emeka.n@email.com", reporterId: "u5", isAnonymous: false,
     submittedDate: "2026-02-15", lastUpdated: "2026-02-18",
     resolutionNotes: "After investigation, the social media post was found to be from a different account not linked to the merchant. Case dismissed due to insufficient evidence.",
     resolutionDate: "2026-02-18",
