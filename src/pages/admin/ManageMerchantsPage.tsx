@@ -20,6 +20,7 @@ import { VoucherDiscountSettingsCard } from "@/components/mobigate/VoucherDiscou
 import { MerchantAppFeeSettingsCard } from "@/components/mobigate/MerchantAppFeeSettingsCard";
 import { EligibilitySettingsCard } from "@/components/mobigate/EligibilitySettingsCard";
 import { AwardBonusVoucherPackDrawer } from "@/components/admin/AwardBonusVoucherPackDrawer";
+import { AdminBonusAwardsTab } from "@/components/admin/AdminBonusAwardsTab";
 import { AdminComplaintsTab, getComplaintsPendingCount } from "@/components/admin/AdminComplaintsTab";
 import {
   allLocationMerchants,
@@ -141,6 +142,10 @@ export default function ManageMerchantsPage() {
                 <Flag className="h-4 w-4 mr-1" />
                 Complaints
                 <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-xs px-1">{getComplaintsPendingCount()}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="bonuses" className="text-xs py-2.5 px-3">
+                <Gift className="h-4 w-4 mr-1" />
+                Bonuses
               </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2.5 px-3">
                 <CreditCard className="h-4 w-4 mr-1" />
@@ -283,6 +288,11 @@ export default function ManageMerchantsPage() {
           {/* Complaints Tab */}
           <TabsContent value="complaints" className="mt-0">
             <AdminComplaintsTab />
+          </TabsContent>
+
+          {/* Bonuses Tab */}
+          <TabsContent value="bonuses" className="mt-0">
+            <AdminBonusAwardsTab />
           </TabsContent>
 
           {/* Settings Tab */}
