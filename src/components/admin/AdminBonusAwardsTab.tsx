@@ -251,7 +251,7 @@ export function AdminBonusAwardsTab() {
             <p className="text-base font-black text-primary">{formatMobi(stats.totalValue)}</p>
             <p className="text-xs text-muted-foreground">{formatNaira(stats.totalValue)}</p>
             {valueChange !== null && (
-              <div className={`flex items-center justify-center gap-0.5 mt-1 text-[10px] font-semibold ${valueChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+              <div className={`flex items-center justify-center gap-0.5 mt-1 text-xs font-semibold ${valueChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                 {valueChange >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                 {Math.abs(valueChange).toFixed(0)}% vs prev period
               </div>
