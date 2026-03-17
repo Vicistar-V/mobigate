@@ -20,6 +20,7 @@ import { VoucherDiscountSettingsCard } from "@/components/mobigate/VoucherDiscou
 import { MerchantAppFeeSettingsCard } from "@/components/mobigate/MerchantAppFeeSettingsCard";
 import { EligibilitySettingsCard } from "@/components/mobigate/EligibilitySettingsCard";
 import { AwardBonusVoucherPackDrawer } from "@/components/admin/AwardBonusVoucherPackDrawer";
+import { AdminBonusAwardsTab } from "@/components/admin/AdminBonusAwardsTab";
 import { AdminComplaintsTab, getComplaintsPendingCount } from "@/components/admin/AdminComplaintsTab";
 import {
   allLocationMerchants,
