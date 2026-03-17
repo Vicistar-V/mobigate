@@ -370,11 +370,11 @@ export function AdminBonusAwardsTab() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                        <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
                           {award.packUnits} × {formatMobi(award.denomination)}
                         </Badge>
                         {award.authorizedBy.includes("Admin-1") && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-amber-400 text-amber-700 bg-amber-50">
+                          <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-amber-400 text-amber-700 bg-amber-50">
                             Super Admin
                           </Badge>
                         )}
