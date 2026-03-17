@@ -168,6 +168,11 @@ export function AdminBonusAwardsTab() {
     // Denomination filter
     if (denomFilter !== "all") list = list.filter((a) => a.denomination === Number(denomFilter));
 
+    // Location filters
+    if (countryFilter !== "all") list = list.filter((a) => a.countryName === countryFilter);
+    if (stateFilter !== "all") list = list.filter((a) => a.stateName === stateFilter);
+    if (cityFilter !== "all") list = list.filter((a) => a.cityName === cityFilter);
+
     // Search
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -180,7 +185,7 @@ export function AdminBonusAwardsTab() {
     }
 
     return list.sort((a, b) => new Date(b.awardedAt).getTime() - new Date(a.awardedAt).getTime());
-  }, [timeFilter, denomFilter, searchQuery]);
+  }, [timeFilter, denomFilter, countryFilter, stateFilter, cityFilter, searchQuery]);
 
   // Stats
   const stats = useMemo(() => {
