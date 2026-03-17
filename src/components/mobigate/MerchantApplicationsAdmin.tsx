@@ -156,6 +156,10 @@ export function MerchantApplicationsAdmin() {
   const [declineReason, setDeclineReason] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [verifyingBank, setVerifyingBank] = useState<Record<string, "idle" | "verifying" | "success">>({});
+  const [approvedBy, setApprovedBy] = useState<Record<string, { name: string; id: string }>>({});
+
+  // Mock admin who is currently logged in
+  const currentAdmin = { name: "Barr. Okechukwu Nnamdi", id: "admin-001" };
 
   const handleVerifyBank = async (appId: string) => {
     setVerifyingBank(prev => ({ ...prev, [appId]: "verifying" }));
