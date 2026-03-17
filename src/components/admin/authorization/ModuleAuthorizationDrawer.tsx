@@ -93,13 +93,13 @@ export function ModuleAuthorizationDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[92vh] px-4 pb-6">
+      <DrawerContent className="max-h-[92dvh] h-auto px-4 pb-6">
         <DrawerHeader className="px-0 pt-4 pb-2">
           <DrawerTitle className="sr-only">{actionTitle}</DrawerTitle>
         </DrawerHeader>
-        <ScrollArea className="flex-1 overflow-y-auto touch-auto">
+        <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
           {content}
-        </ScrollArea>
+        </div>
       </DrawerContent>
     </Drawer>
   );
