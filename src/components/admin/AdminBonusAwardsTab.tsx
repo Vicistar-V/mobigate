@@ -151,7 +151,7 @@ const formatMobi = (n: number) => `M${n.toLocaleString()}`;
 const formatNaira = (n: number) => `₦${n.toLocaleString()}`;
 
 type TimeFilter = "all" | "today" | "7days" | "30days" | "90days" | "6months" | "1year";
-type DenomFilter = "all" | "500" | "5000";
+type DenomFilter = "all" | "200" | "500" | "1000" | "5000";
 
 const timeFilterLabels: Record<TimeFilter, string> = {
   all: "All Time",
@@ -246,12 +246,12 @@ export function AdminBonusAwardsTab() {
           <CardContent className="p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Wallet className="h-3.5 w-3.5 text-primary" />
-              <p className="text-[10px] text-muted-foreground font-medium">Total Value</p>
+              <p className="text-xs text-muted-foreground font-medium">Total Value</p>
             </div>
             <p className="text-base font-black text-primary">{formatMobi(stats.totalValue)}</p>
-            <p className="text-[10px] text-muted-foreground">{formatNaira(stats.totalValue)}</p>
+            <p className="text-xs text-muted-foreground">{formatNaira(stats.totalValue)}</p>
             {valueChange !== null && (
-              <div className={`flex items-center justify-center gap-0.5 mt-1 text-[10px] font-semibold ${valueChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+              <div className={`flex items-center justify-center gap-0.5 mt-1 text-xs font-semibold ${valueChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                 {valueChange >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                 {Math.abs(valueChange).toFixed(0)}% vs prev period
               </div>
@@ -262,30 +262,30 @@ export function AdminBonusAwardsTab() {
           <CardContent className="p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Gift className="h-3.5 w-3.5 text-amber-500" />
-              <p className="text-[10px] text-muted-foreground font-medium">Awards Made</p>
+              <p className="text-xs text-muted-foreground font-medium">Awards Made</p>
             </div>
             <p className="text-base font-black text-foreground">{stats.count}</p>
-            <p className="text-[10px] text-muted-foreground">{stats.totalUnits} total units</p>
+            <p className="text-xs text-muted-foreground">{stats.totalUnits} total units</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <User className="h-3.5 w-3.5 text-emerald-500" />
-              <p className="text-[10px] text-muted-foreground font-medium">Merchants</p>
+              <p className="text-xs text-muted-foreground font-medium">Merchants</p>
             </div>
             <p className="text-base font-black text-foreground">{stats.uniqueMerchants}</p>
-            <p className="text-[10px] text-muted-foreground">unique recipients</p>
+            <p className="text-xs text-muted-foreground">unique recipients</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />
-              <p className="text-[10px] text-muted-foreground font-medium">Super Admin</p>
+              <p className="text-xs text-muted-foreground font-medium">Super Admin</p>
             </div>
             <p className="text-base font-black text-foreground">{stats.superAdminCount}</p>
-            <p className="text-[10px] text-muted-foreground">solo approvals</p>
+            <p className="text-xs text-muted-foreground">solo approvals</p>
           </CardContent>
         </Card>
       </div>
@@ -324,7 +324,9 @@ export function AdminBonusAwardsTab() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">All Packs</SelectItem>
+              <SelectItem value="200" className="text-xs">M200 Packs</SelectItem>
               <SelectItem value="500" className="text-xs">M500 Packs</SelectItem>
+              <SelectItem value="1000" className="text-xs">M1,000 Packs</SelectItem>
               <SelectItem value="5000" className="text-xs">M5,000 Packs</SelectItem>
             </SelectContent>
           </Select>
@@ -368,19 +370,19 @@ export function AdminBonusAwardsTab() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                        <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
                           {award.packUnits} × {formatMobi(award.denomination)}
                         </Badge>
                         {award.authorizedBy.includes("Admin-1") && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-amber-400 text-amber-700 bg-amber-50">
+                          <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-amber-400 text-amber-700 bg-amber-50">
                             Super Admin
                           </Badge>
                         )}
                       </div>
                       <div className="flex items-center justify-between mt-1.5">
-                        <p className="text-[11px] text-muted-foreground truncate mr-2">{award.awardedBy}</p>
-                        <p className="text-[10px] text-muted-foreground shrink-0 flex items-center gap-1">
-                          <Clock className="h-2.5 w-2.5" />
+                      <p className="text-xs text-muted-foreground truncate mr-2">{award.awardedBy}</p>
+                        <p className="text-xs text-muted-foreground shrink-0 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
                           {formatDate(award.awardedAt)}
                         </p>
                       </div>
@@ -487,7 +489,7 @@ export function AdminBonusAwardsTab() {
                         <span className="text-xs text-muted-foreground">Authorized by</span>
                         <div className="text-right">
                           {selectedAward.authorizedBy.map((admin) => (
-                            <Badge key={admin} variant="outline" className="text-[10px] ml-1 mb-1">
+                            <Badge key={admin} variant="outline" className="text-xs ml-1 mb-1">
                               {admin}
                             </Badge>
                           ))}
@@ -495,7 +497,7 @@ export function AdminBonusAwardsTab() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground">Method</span>
-                        <Badge variant="outline" className={`text-[10px] ${
+                        <Badge variant="outline" className={`text-xs ${
                           selectedAward.authorizedBy.includes("Admin-1")
                             ? "border-amber-400 text-amber-700 bg-amber-50"
                             : "border-blue-400 text-blue-700 bg-blue-50"
@@ -522,7 +524,7 @@ export function AdminBonusAwardsTab() {
                   <CardContent className="p-3 flex items-start gap-2">
                     <Wallet className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-700/80 leading-relaxed">
-                      This bonus was credited to <strong>{selectedAward.merchantName}'s main‑Wallet</strong> and is <strong>non‑tradable</strong>.
+                      This bonus was credited to <strong>{selectedAward.merchantName}'s main‑Wallet</strong> and is <strong>tradable only as vouchers</strong>.
                     </p>
                   </CardContent>
                 </Card>
