@@ -139,6 +139,10 @@ export default function MobigateAdminDashboard() {
                 <LayoutDashboard className="h-4 w-4 mr-1" />
                 Overview
               </TabsTrigger>
+              <TabsTrigger value="exchange-rate" className="text-xs py-2 px-3">
+                <Coins className="h-4 w-4 mr-1" />
+                Exchange Rate
+              </TabsTrigger>
               <TabsTrigger value="elections" className="text-xs py-2 px-3">
                 <Vote className="h-4 w-4 mr-1" />
                 Elections
