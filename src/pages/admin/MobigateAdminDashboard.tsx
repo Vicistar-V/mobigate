@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
+import { AdminExchangeRateTab } from "@/components/admin/AdminExchangeRateTab";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
