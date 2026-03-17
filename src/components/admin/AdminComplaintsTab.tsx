@@ -109,7 +109,7 @@ const initialComplaints: Complaint[] = [
     id: "c2", refNumber: "RPT-2026-0002", merchantName: "FreshMart Foods", merchantId: "m2",
     category: "deception-falsehood", status: "investigating",
     description: "Merchant advertises organic produce but sells regular items at premium prices. Multiple customers have confirmed this deceptive practice. Product labels don't match actual content.",
-    reporterName: "", reporterEmail: "", isAnonymous: true,
+    reporterName: "", reporterEmail: "", reporterId: "", isAnonymous: true,
     submittedDate: "2026-02-27", lastUpdated: "2026-03-02",
     assignedTo: "Admin Chidi",
     timeline: [
