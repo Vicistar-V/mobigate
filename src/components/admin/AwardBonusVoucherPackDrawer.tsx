@@ -107,16 +107,18 @@ export function AwardBonusVoucherPackDrawer({
   const [isAwarding, setIsAwarding] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  // Admin authorization state (2 of 3 required)
-  const [adminPasswords, setAdminPasswords] = useState({ admin1: "", admin2: "", admin3: "" });
-  const [adminVerified, setAdminVerified] = useState({ admin1: false, admin2: false, admin3: false });
+  // Admin authorization state — 4-admin protocol: Admin-1 solo OR Admins 2+3+4 together
+  const [adminPasswords, setAdminPasswords] = useState({ admin1: "", admin2: "", admin3: "", admin4: "" });
+  const [adminVerified, setAdminVerified] = useState({ admin1: false, admin2: false, admin3: false, admin4: false });
   const [authError, setAuthError] = useState("");
 
+  const admin1Solo = adminVerified.admin1;
+  const othersAllVerified = adminVerified.admin2 && adminVerified.admin3 && adminVerified.admin4;
   const verifiedCount = useMemo(() => 
-    [adminVerified.admin1, adminVerified.admin2, adminVerified.admin3].filter(Boolean).length,
+    [adminVerified.admin1, adminVerified.admin2, adminVerified.admin3, adminVerified.admin4].filter(Boolean).length,
     [adminVerified]
   );
-  const isAuthPassed = verifiedCount >= 2;
+  const isAuthPassed = admin1Solo || othersAllVerified;
 
   const handleSelectPack = (pack: BonusVoucherPack) => {
     setSelectedPack(pack);
@@ -144,8 +146,8 @@ export function AwardBonusVoucherPackDrawer({
     setSelectedPack(null);
     setIsAwarding(false);
     setShowCancelConfirm(false);
-    setAdminPasswords({ admin1: "", admin2: "", admin3: "" });
-    setAdminVerified({ admin1: false, admin2: false, admin3: false });
+    setAdminPasswords({ admin1: "", admin2: "", admin3: "", admin4: "" });
+    setAdminVerified({ admin1: false, admin2: false, admin3: false, admin4: false });
     setAuthError("");
     onOpenChange(false);
   };
@@ -161,7 +163,7 @@ export function AwardBonusVoucherPackDrawer({
     }
   };
 
-  const handleVerifyAdmin = (key: "admin1" | "admin2" | "admin3") => {
+  const handleVerifyAdmin = (key: "admin1" | "admin2" | "admin3" | "admin4") => {
     const pw = adminPasswords[key];
     if (!pw.trim()) return;
     // Simulated: accept any non-empty password
@@ -173,7 +175,7 @@ export function AwardBonusVoucherPackDrawer({
     if (isAuthPassed) {
       setStep("select");
     } else {
-      setAuthError("At least 2 of 3 admins must authorize to proceed.");
+      setAuthError("Admin-1 (Super Admin) can authorize alone, or Admins 2, 3 & 4 must all authorize together.");
     }
   };
 
@@ -500,10 +502,11 @@ export function AwardBonusVoucherPackDrawer({
   );
 
   // ─── Step: Admin Authorization ───
-  const adminSlots: { key: "admin1" | "admin2" | "admin3"; label: string; role: string }[] = [
-    { key: "admin1", label: "Admin-1", role: "Super Admin" },
-    { key: "admin2", label: "Admin-2", role: "Finance Admin" },
-    { key: "admin3", label: "Admin-3", role: "Operations Admin" },
+  const adminSlots: { key: "admin1" | "admin2" | "admin3" | "admin4"; label: string; role: string; isSuperAdmin: boolean }[] = [
+    { key: "admin1", label: "Admin-1", role: "Super Admin", isSuperAdmin: true },
+    { key: "admin2", label: "Admin-2", role: "Finance Admin", isSuperAdmin: false },
+    { key: "admin3", label: "Admin-3", role: "Operations Admin", isSuperAdmin: false },
+    { key: "admin4", label: "Admin-4", role: "Compliance Admin", isSuperAdmin: false },
   ];
 
   const renderAuthStep = () => (
@@ -517,26 +520,31 @@ export function AwardBonusVoucherPackDrawer({
             </div>
             <p className="text-lg font-bold text-foreground">Admin Authorization</p>
             <p className="text-sm text-muted-foreground mt-1">
-              At least <strong>2 of 3</strong> admins must authorize
+              <strong>Admin-1</strong> can authorize alone, or <strong>Admins 2, 3 & 4</strong> together
             </p>
           </div>
 
           {/* Authorization progress */}
-          <div className="flex items-center justify-center gap-2 mb-2">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className={`h-2 w-12 rounded-full transition-colors ${
-                  i < verifiedCount ? "bg-emerald-500" : "bg-muted"
-                }`}
-              />
-            ))}
-            <span className="text-xs font-semibold text-muted-foreground ml-2">{verifiedCount}/2 required</span>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1">
+              {adminSlots.map((admin) => (
+                <div
+                  key={admin.key}
+                  className={`h-2 rounded-full transition-colors ${
+                    admin.isSuperAdmin ? "w-12" : "w-8"
+                  } ${adminVerified[admin.key] ? "bg-emerald-500" : "bg-muted"}`}
+                />
+              ))}
+              <span className="text-xs font-semibold text-muted-foreground ml-2">{verifiedCount}/4 verified</span>
+            </div>
+            {admin1Solo && (
+              <p className="text-xs text-emerald-600 font-medium">✅ Super Admin authorized — proceed when ready</p>
+            )}
           </div>
 
           {/* Admin password fields */}
           <div className="space-y-3">
-            {adminSlots.map(({ key, label, role }) => (
+            {adminSlots.map(({ key, label, role, isSuperAdmin }) => (
               <Card
                 key={key}
                 className={`border transition-colors ${
@@ -598,7 +606,7 @@ export function AwardBonusVoucherPackDrawer({
               <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
               <p className="text-xs text-blue-700/80 leading-relaxed">
                 Bonus Voucher Pack awards require multi-admin authorization for security. 
-                Any <strong>2 of 3</strong> designated admins must enter their passwords to proceed.
+                <strong>Admin-1 (Super Admin)</strong> can authorize alone, or <strong>Admins 2, 3 & 4</strong> must all verify together.
               </p>
             </CardContent>
           </Card>
@@ -624,7 +632,7 @@ export function AwardBonusVoucherPackDrawer({
           }`}
         >
           <ShieldCheck className="h-4 w-4 mr-2" />
-          {isAuthPassed ? "Proceed to Award Bonus" : `${verifiedCount}/2 Admins Verified`}
+          {isAuthPassed ? "Proceed to Award Bonus" : admin1Solo ? "Proceed to Award Bonus" : `${verifiedCount}/4 Admins Verified`}
         </Button>
       </div>
     </div>
