@@ -549,7 +549,7 @@ export function AdminBonusAwardsTab() {
                   <CardContent className="p-3 flex items-start gap-2">
                     <Wallet className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-700/80 leading-relaxed">
-                      This bonus was credited to <strong>{selectedAward.merchantName}'s main‑Wallet</strong> and is <strong>tradable only as vouchers</strong>.
+                      This bonus was credited to <strong>{selectedAward.merchantName}'s Voucher Store</strong> and is <strong>tradable only as vouchers</strong>.
                     </p>
                   </CardContent>
                 </Card>
