@@ -380,9 +380,9 @@ export function AdminBonusAwardsTab() {
                         )}
                       </div>
                       <div className="flex items-center justify-between mt-1.5">
-                        <p className="text-[11px] text-muted-foreground truncate mr-2">{award.awardedBy}</p>
-                        <p className="text-[10px] text-muted-foreground shrink-0 flex items-center gap-1">
-                          <Clock className="h-2.5 w-2.5" />
+                      <p className="text-xs text-muted-foreground truncate mr-2">{award.awardedBy}</p>
+                        <p className="text-xs text-muted-foreground shrink-0 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
                           {formatDate(award.awardedAt)}
                         </p>
                       </div>
