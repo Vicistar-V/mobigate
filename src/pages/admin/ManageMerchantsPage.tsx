@@ -143,6 +143,10 @@ export default function ManageMerchantsPage() {
                 Complaints
                 <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 text-xs px-1">{getComplaintsPendingCount()}</Badge>
               </TabsTrigger>
+              <TabsTrigger value="bonuses" className="text-xs py-2.5 px-3">
+                <Gift className="h-4 w-4 mr-1" />
+                Bonuses
+              </TabsTrigger>
               <TabsTrigger value="settings" className="text-xs py-2.5 px-3">
                 <CreditCard className="h-4 w-4 mr-1" />
                 Settings
