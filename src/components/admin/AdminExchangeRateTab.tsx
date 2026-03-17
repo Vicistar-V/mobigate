@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
   RotateCcw,
   Globe,
   Info,
+  X,
 } from "lucide-react";
 
 interface CurrencyRate {
@@ -23,7 +24,7 @@ interface CurrencyRate {
   name: string;
   country: string;
   flag: string;
-  ratePerMobi: number; // How many units of this currency = 1 Mobi
+  ratePerMobi: number;
   previousRate: number;
   lastUpdated: string;
   isBase: boolean;
@@ -81,7 +82,6 @@ export function AdminExchangeRateTab() {
     );
   }, [rates, searchQuery]);
 
-  const baseRate = rates.find(r => r.isBase);
   const totalCurrencies = rates.length;
 
   const handleStartEdit = (code: string, currentRate: number) => {
@@ -95,7 +95,6 @@ export function AdminExchangeRateTab() {
       toast({ title: "Invalid Rate", description: "Please enter a valid positive number.", variant: "destructive" });
       return;
     }
-    // Optimistic update
     setRates(prev =>
       prev.map(r =>
         r.code === code
@@ -105,10 +104,7 @@ export function AdminExchangeRateTab() {
     );
     setEditingCode(null);
     setEditValue("");
-    toast({
-      title: "Rate Updated",
-      description: `${code} exchange rate updated to ${newRate} per Mobi.`,
-    });
+    toast({ title: "Rate Updated", description: `${code} exchange rate updated to ${newRate} per Mobi.` });
   };
 
   const handleCancelEdit = () => {
@@ -127,52 +123,46 @@ export function AdminExchangeRateTab() {
     return (((current - previous) / previous) * 100).toFixed(1);
   };
 
+  const formatRate = (rate: number) => {
+    if (rate < 0.01) return rate.toFixed(5);
+    if (rate < 1) return rate.toFixed(4);
+    return rate.toFixed(2);
+  };
+
   return (
     <ScrollArea className="h-[calc(100vh-200px)]">
-      <div className="space-y-4 pb-6">
-        {/* Base Rate Hero Card */}
-        <Card className="bg-gradient-to-br from-amber-500/15 to-orange-500/10 border-amber-500/30">
-          <CardContent className="p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Coins className="h-5 w-5 text-amber-600" />
-              <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Base Exchange Rate</span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-foreground">1 Mobi</span>
-              <span className="text-xl text-muted-foreground">=</span>
-              <span className="text-3xl font-bold text-amber-600">₦1.00</span>
-            </div>
-            <div className="flex items-center gap-1.5 pt-1">
-              <Info className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">
-                All other currencies are derived from this base rate. 1 Mobi = 1 Nigerian Naira (NGN).
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-3 pb-6">
+        {/* Base Rate Hero — compact vertical stack */}
+        <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-orange-500/10 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Coins className="h-5 w-5 text-amber-600" />
+            <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Base Exchange Rate</span>
+          </div>
+          <p className="text-2xl font-bold text-foreground">
+            1 Mobi <span className="text-muted-foreground font-normal">=</span> <span className="text-amber-600">₦1.00</span>
+          </p>
+          <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1.5">
+            <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            All currencies derived from this base. 1 Mobi = 1 NGN.
+          </p>
+        </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card>
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Globe className="h-4 w-4 text-primary" />
-                <span className="text-xs text-muted-foreground">Currencies</span>
-              </div>
-              <p className="text-xl font-bold">{totalCurrencies}</p>
-              <p className="text-xs text-muted-foreground">Active pairs</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <RotateCcw className="h-4 w-4 text-blue-500" />
-                <span className="text-xs text-muted-foreground">Last Sync</span>
-              </div>
-              <p className="text-xl font-bold">Today</p>
-              <p className="text-xs text-muted-foreground">17 Mar 2026</p>
-            </CardContent>
-          </Card>
+        {/* Stats — inline pills instead of cards */}
+        <div className="flex gap-2">
+          <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2">
+            <div className="flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5 text-primary" />
+              <span className="text-sm font-bold">{totalCurrencies}</span>
+              <span className="text-xs text-muted-foreground">pairs</span>
+            </div>
+          </div>
+          <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2">
+            <div className="flex items-center gap-1.5">
+              <RotateCcw className="h-3.5 w-3.5 text-blue-500" />
+              <span className="text-sm font-bold">Today</span>
+              <span className="text-xs text-muted-foreground">synced</span>
+            </div>
+          </div>
         </div>
 
         {/* Search */}
@@ -182,11 +172,11 @@ export function AdminExchangeRateTab() {
             placeholder="Search currency, country..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-11"
+            className="pl-9 h-11 touch-manipulation"
           />
         </div>
 
-        {/* Currency List */}
+        {/* Currency List — vertically restacked cards */}
         <div className="space-y-2">
           {filteredRates.map((rate) => {
             const changePercent = getChangePercent(rate.ratePerMobi, rate.previousRate);
@@ -195,96 +185,102 @@ export function AdminExchangeRateTab() {
             const isNegative = rate.ratePerMobi < rate.previousRate;
 
             return (
-              <Card key={rate.code} className={rate.isBase ? "border-amber-500/40 bg-amber-500/5" : ""}>
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    {/* Left: Flag + Currency Info */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <span className="text-2xl flex-shrink-0">{rate.flag}</span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-sm">{rate.code}</span>
-                          {rate.isBase && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600">
-                              BASE
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">{rate.name}</p>
-                        <p className="text-[11px] text-muted-foreground/70 truncate">{rate.country}</p>
-                      </div>
+              <div
+                key={rate.code}
+                className={`rounded-xl border bg-card p-3 ${
+                  rate.isBase ? "border-amber-500/40 bg-amber-500/5" : "border-border/50"
+                }`}
+              >
+                {/* Row 1: Flag + Code + Name + BASE badge */}
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="text-2xl leading-none">{rate.flag}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm">{rate.code}</span>
+                      <span className="text-xs text-muted-foreground">—</span>
+                      <span className="text-xs text-muted-foreground truncate">{rate.name}</span>
+                      {rate.isBase && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500 text-amber-600 ml-auto shrink-0">
+                          BASE
+                        </Badge>
+                      )}
                     </div>
+                    <p className="text-xs text-muted-foreground/70">{rate.country}</p>
+                  </div>
+                </div>
 
-                    {/* Right: Rate + Actions */}
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      {isEditing ? (
+                {/* Row 2: Rate value + trend + edit button — full width */}
+                {isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="flex-1 h-11 text-sm text-right touch-manipulation"
+                      step="any"
+                      autoFocus
+                    />
+                    <Button
+                      size="icon"
+                      className="h-11 w-11 bg-emerald-600 hover:bg-emerald-700 shrink-0 touch-manipulation active:scale-95"
+                      onClick={() => handleSaveRate(rate.code)}
+                    >
+                      <Check className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-11 w-11 shrink-0 touch-manipulation active:scale-95"
+                      onClick={handleCancelEdit}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold tabular-nums">{formatRate(rate.ratePerMobi)}</span>
+                      <span className="text-xs text-muted-foreground">per Mobi</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {!rate.isBase && (
                         <div className="flex items-center gap-1">
-                          <Input
-                            type="number"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="w-24 h-8 text-xs text-right"
-                            step="any"
-                            autoFocus
-                          />
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleSaveRate(rate.code)}>
-                            <Check className="h-4 w-4 text-emerald-500" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleCancelEdit}>
-                            <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
-                          </Button>
+                          {getTrendIcon(rate.ratePerMobi, rate.previousRate)}
+                          <span
+                            className={`text-xs font-medium ${
+                              isPositive ? "text-emerald-500" : isNegative ? "text-red-500" : "text-muted-foreground"
+                            }`}
+                          >
+                            {isPositive ? "+" : ""}{changePercent}%
+                          </span>
                         </div>
-                      ) : (
-                        <>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-sm tabular-nums">
-                              {rate.ratePerMobi < 0.01
-                                ? rate.ratePerMobi.toFixed(5)
-                                : rate.ratePerMobi < 1
-                                ? rate.ratePerMobi.toFixed(4)
-                                : rate.ratePerMobi.toFixed(2)}
-                            </span>
-                            {!rate.isBase && (
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7"
-                                onClick={() => handleStartEdit(rate.code, rate.ratePerMobi)}
-                              >
-                                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                              </Button>
-                            )}
-                          </div>
-                          {!rate.isBase && (
-                            <div className="flex items-center gap-1">
-                              {getTrendIcon(rate.ratePerMobi, rate.previousRate)}
-                              <span
-                                className={`text-[11px] font-medium ${
-                                  isPositive ? "text-emerald-500" : isNegative ? "text-red-500" : "text-muted-foreground"
-                                }`}
-                              >
-                                {isPositive ? "+" : ""}
-                                {changePercent}%
-                              </span>
-                            </div>
-                          )}
-                        </>
+                      )}
+                      {!rate.isBase && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-9 w-9 touch-manipulation active:scale-90"
+                          onClick={() => handleStartEdit(rate.code, rate.ratePerMobi)}
+                        >
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
+                        </Button>
                       )}
                     </div>
                   </div>
+                )}
 
-                  {/* Conversion preview */}
-                  {!rate.isBase && !isEditing && (
-                    <div className="mt-2 pt-2 border-t border-border/50">
-                      <p className="text-[11px] text-muted-foreground">
-                        M1,000 = {rate.code} {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        {"  ·  "}
-                        M1,000,000 = {rate.code} {(rate.ratePerMobi * 1000000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                {/* Row 3: Conversion preview — stacked vertically */}
+                {!rate.isBase && !isEditing && (
+                  <div className="mt-2 pt-2 border-t border-border/40 space-y-0.5">
+                    <p className="text-xs text-muted-foreground">
+                      M1,000 = {rate.code} {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      M1,000,000 = {rate.code} {(rate.ratePerMobi * 1000000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                )}
+              </div>
             );
           })}
 
