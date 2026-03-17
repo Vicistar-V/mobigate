@@ -340,42 +340,36 @@ export default function MobigateAdminDashboard() {
           {/* Elections Tab - Nomination Fee Settings */}
           <TabsContent value="elections" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="space-y-4 pb-6">
+              <div className="space-y-3 pb-6">
                 <AdminAuthGate tabLabel="Elections">
-                  {/* Active Elections Stats */}
-                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Active Elections</p>
-                          <p className="text-3xl font-bold">{platformStats.activeElections}</p>
+                  {/* Active Elections Stats — compact vertical */}
+                  <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 to-primary/5 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Vote className="h-5 w-5 text-primary" />
+                      <span className="text-sm font-semibold">Active Elections</span>
+                    </div>
+                    <p className="text-3xl font-bold mb-3">{platformStats.activeElections}</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { label: "Nominations", value: "12" },
+                        { label: "In Voting", value: "8" },
+                        { label: "Concluded", value: "25" },
+                      ].map((s) => (
+                        <div key={s.label} className="rounded-lg bg-background/60 p-2 text-center">
+                          <p className="text-lg font-bold">{s.value}</p>
+                          <p className="text-xs text-muted-foreground">{s.label}</p>
                         </div>
-                        <Vote className="h-10 w-10 text-primary/50" />
-                      </div>
-                      <div className="flex gap-4 mt-3 pt-3 border-t">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Nominations Open</p>
-                          <p className="font-bold">12</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">In Voting</p>
-                          <p className="font-bold">8</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Concluded</p>
-                          <p className="font-bold">25</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      ))}
+                    </div>
+                  </div>
 
-                  {/* Mobigate-Only Notice */}
+                  {/* Mobigate-Only Notice — compact */}
                   <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
                     <Shield className="h-5 w-5 text-primary shrink-0" />
                     <div>
                       <p className="text-sm font-medium">Mobigate Admin Only</p>
                       <p className="text-xs text-muted-foreground">
-                        These settings are only accessible to platform administrators
+                        Settings only accessible to platform administrators
                       </p>
                     </div>
                   </div>
