@@ -50,32 +50,31 @@ export function CampaignFeeDistributionSettings() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 px-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Campaign Fee Distribution
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Current Ratio Display */}
-          <div className="flex items-center justify-center gap-3 py-4 bg-muted/50 rounded-lg">
-            <div className="text-center">
+        <CardContent className="px-3 space-y-4">
+          {/* Current Ratio — side by side compact */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-center">
               <Building2 className="h-5 w-5 mx-auto text-primary mb-1" />
               <p className="text-2xl font-bold text-primary">{communityPercent}%</p>
               <p className="text-xs text-muted-foreground">Community</p>
             </div>
-            <div className="text-xl text-muted-foreground">:</div>
-            <div className="text-center">
+            <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-3 text-center">
               <Globe className="h-5 w-5 mx-auto text-orange-500 mb-1" />
               <p className="text-2xl font-bold text-orange-500">{mobigatePercent}%</p>
               <p className="text-xs text-muted-foreground">Mobigate</p>
             </div>
           </div>
 
-          {/* Slider Control */}
-          <div className="space-y-3">
+          {/* Slider */}
+          <div className="space-y-2">
             <Label className="text-sm">Adjust Distribution</Label>
             <Slider
               value={[communityPercent]}
@@ -92,7 +91,7 @@ export function CampaignFeeDistributionSettings() {
           </div>
 
           {/* Manual Input */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label className="text-xs">Community %</Label>
               <div className="relative">
@@ -105,7 +104,7 @@ export function CampaignFeeDistributionSettings() {
                   }}
                   min={10}
                   max={90}
-                  className="pr-8"
+                  className="pr-8 h-11 touch-manipulation"
                 />
                 <Percent className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
@@ -117,7 +116,7 @@ export function CampaignFeeDistributionSettings() {
                   type="number"
                   value={mobigatePercent}
                   disabled
-                  className="pr-8 bg-muted"
+                  className="pr-8 h-11 bg-muted"
                 />
                 <Percent className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
@@ -125,13 +124,13 @@ export function CampaignFeeDistributionSettings() {
           </div>
 
           {/* Last Updated */}
-          <div className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Last updated: {format(new Date(config.lastUpdatedAt), "MMM d, yyyy 'at' h:mm a")} by {config.lastUpdatedBy}
-          </div>
+          </p>
 
-          {/* Save Button */}
+          {/* Save */}
           <Button 
-            className="w-full" 
+            className="w-full h-11 touch-manipulation active:scale-[0.97]" 
             disabled={!hasChanges}
             onClick={() => setShowConfirm(true)}
           >
@@ -143,32 +142,28 @@ export function CampaignFeeDistributionSettings() {
 
       {/* History */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 px-3">
           <CardTitle className="text-base flex items-center gap-2">
             <History className="h-4 w-4" />
             Change History
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[150px]">
-            <div className="space-y-3">
-              {history.map((item) => (
-                <div key={item.id} className="border-l-2 border-muted pl-3 py-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">
-                      {item.previousCommunityPercentage}:{item.previousMobigatePercentage} → {item.newCommunityPercentage}:{item.newMobigatePercentage}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {format(new Date(item.changedAt), "MMM d, yyyy")} • {item.changedBy}
-                  </p>
-                  {item.reason && (
-                    <p className="text-xs mt-1">{item.reason}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+        <CardContent className="px-3">
+          <div className="space-y-3 max-h-[150px] overflow-y-auto touch-auto overscroll-contain">
+            {history.map((item) => (
+              <div key={item.id} className="border-l-2 border-muted pl-3 py-1">
+                <Badge variant="outline" className="text-xs">
+                  {item.previousCommunityPercentage}:{item.previousMobigatePercentage} → {item.newCommunityPercentage}:{item.newMobigatePercentage}
+                </Badge>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {format(new Date(item.changedAt), "MMM d, yyyy")} • {item.changedBy}
+                </p>
+                {item.reason && (
+                  <p className="text-xs mt-1">{item.reason}</p>
+                )}
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
