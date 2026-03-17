@@ -175,7 +175,7 @@ export function AwardBonusVoucherPackDrawer({
     if (isAuthPassed) {
       setStep("select");
     } else {
-      setAuthError("At least 2 of 3 admins must authorize to proceed.");
+      setAuthError("Admin-1 (Super Admin) can authorize alone, or Admins 2, 3 & 4 must all authorize together.");
     }
   };
 
