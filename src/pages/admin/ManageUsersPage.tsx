@@ -155,6 +155,8 @@ function generateMockUsers(): PlatformUser[] {
         avatar: "",
         countryId,
         city: u.city,
+        stateName: (u as any).stateName,
+        stateId: (u as any).stateId,
         status: statuses[hash % statuses.length],
         role: roles[hash % roles.length],
         joinDate: new Date(2024, hash % 12, (hash % 28) + 1),
