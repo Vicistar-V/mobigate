@@ -383,26 +383,20 @@ export default function MobigateAdminDashboard() {
               <div className="space-y-4 pb-6 pr-1">
                 {/* Revenue Overview */}
                 <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-1">
-                        <p className="text-sm text-muted-foreground">Total Platform Revenue</p>
-                        <MobiExplainerTooltip size="sm" />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-2xl font-bold text-emerald-600">
-                            {formatMobi(platformStats.platformRevenue)}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 text-emerald-600">
-                          <TrendingUp className="h-5 w-5" />
-                          <span className="font-bold">+12.5%</span>
-                        </div>
-                      </div>
+                  <CardContent className="p-4 space-y-1">
+                    <div className="flex items-center gap-1">
+                      <p className="text-sm text-muted-foreground">Total Platform Revenue</p>
+                      <MobiExplainerTooltip size="sm" />
+                    </div>
+                    <p className="text-2xl font-bold text-emerald-600">
+                      {formatMobi(platformStats.platformRevenue)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      ≈ {formatLocalAmount(platformStats.platformRevenue, "NGN")}
+                    </p>
+                    <div className="flex items-center gap-1 text-emerald-600 pt-1">
+                      <TrendingUp className="h-4 w-4" />
+                      <span className="text-sm font-bold">+12.5% this month</span>
                     </div>
                   </CardContent>
                 </Card>
