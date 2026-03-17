@@ -178,7 +178,7 @@ const initialComplaints: Complaint[] = [
     id: "c8", refNumber: "RPT-2026-0008", merchantName: "NaijaDeals Hub", merchantId: "m8",
     category: "scam-fraud", status: "penalised",
     description: "Merchant collected payment for bulk vouchers but never delivered them. Multiple victims reported identical scam pattern over 3 weeks.",
-    reporterName: "Emeka Nwosu", reporterEmail: "emeka.n@email.com", isAnonymous: false,
+    reporterName: "Emeka Nwosu", reporterEmail: "emeka.n@email.com", reporterId: "u8", isAnonymous: false,
     submittedDate: "2026-02-10", lastUpdated: "2026-02-28",
     resolutionNotes: "Merchant account suspended for 90 days. Official warning issued.",
     resolutionDate: "2026-02-28",
