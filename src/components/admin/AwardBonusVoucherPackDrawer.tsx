@@ -502,10 +502,11 @@ export function AwardBonusVoucherPackDrawer({
   );
 
   // ─── Step: Admin Authorization ───
-  const adminSlots: { key: "admin1" | "admin2" | "admin3"; label: string; role: string }[] = [
-    { key: "admin1", label: "Admin-1", role: "Super Admin" },
-    { key: "admin2", label: "Admin-2", role: "Finance Admin" },
-    { key: "admin3", label: "Admin-3", role: "Operations Admin" },
+  const adminSlots: { key: "admin1" | "admin2" | "admin3" | "admin4"; label: string; role: string; isSuperAdmin: boolean }[] = [
+    { key: "admin1", label: "Admin-1", role: "Super Admin", isSuperAdmin: true },
+    { key: "admin2", label: "Admin-2", role: "Finance Admin", isSuperAdmin: false },
+    { key: "admin3", label: "Admin-3", role: "Operations Admin", isSuperAdmin: false },
+    { key: "admin4", label: "Admin-4", role: "Compliance Admin", isSuperAdmin: false },
   ];
 
   const renderAuthStep = () => (
