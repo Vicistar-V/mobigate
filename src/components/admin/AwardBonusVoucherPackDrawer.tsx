@@ -544,7 +544,7 @@ export function AwardBonusVoucherPackDrawer({
 
           {/* Admin password fields */}
           <div className="space-y-3">
-            {adminSlots.map(({ key, label, role }) => (
+            {adminSlots.map(({ key, label, role, isSuperAdmin }) => (
               <Card
                 key={key}
                 className={`border transition-colors ${
