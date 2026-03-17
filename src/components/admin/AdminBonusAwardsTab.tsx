@@ -461,7 +461,7 @@ export function AdminBonusAwardsTab() {
                     <div className="p-3 flex justify-between items-center">
                       <span className="text-xs text-muted-foreground">Merchant</span>
                       <button
-                        onClick={() => window.open(`/merchant/${selectedAward.merchantId}`, '_blank')}
+                        onClick={() => navigate(`/merchant-home/${selectedAward.merchantId}`)}
                         className="text-sm font-semibold text-primary underline underline-offset-2 touch-manipulation"
                       >
                         {selectedAward.merchantName}
