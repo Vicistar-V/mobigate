@@ -332,7 +332,7 @@ export default function SubMerchantApplicationPage() {
 
       {/* ── Payment Confirmation Drawer ── */}
       <Drawer open={showConfirmDrawer} onOpenChange={o => { if (!processing) setShowConfirmDrawer(o); }}>
-        <DrawerContent className="max-h-[92vh] overflow-y-auto touch-auto overscroll-contain">
+        <DrawerContent className="max-h-[92vh]">
           <DrawerHeader className="text-left pb-2">
             <DrawerTitle className="text-lg font-bold">Confirm Payment</DrawerTitle>
           </DrawerHeader>
@@ -351,7 +351,7 @@ export default function SubMerchantApplicationPage() {
               </div>
             </div>
           ) : (
-            <div className="px-5 pb-6 space-y-4">
+            <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-5 pb-6 space-y-4">
               {/* Summary */}
               <div className="rounded-xl border border-border/50 bg-muted/30 p-4 space-y-3">
                 <div className="flex items-center gap-3 pb-3 border-b border-border/50">
