@@ -251,7 +251,7 @@ export function AwardBonusVoucherPackDrawer({
                 <p className="text-xs font-semibold text-amber-700">Important</p>
                 <p className="text-xs text-amber-700/80 mt-0.5 leading-relaxed">
                   Bonus Voucher Packs are <strong>tradable only as vouchers</strong>. 
-                  The value is credited directly to the Merchant's <strong>main‑Wallet</strong> and can only be traded as voucher cards.
+                  The value is credited directly to the Merchant's <strong>Voucher Store</strong> and can only be traded as voucher cards.
                 </p>
               </div>
             </CardContent>
@@ -372,7 +372,7 @@ export function AwardBonusVoucherPackDrawer({
                 <div>
                   <p className="text-xs font-semibold text-blue-700">Credit Destination</p>
                   <p className="text-xs text-blue-700/80 mt-0.5 leading-relaxed">
-                    This bonus will be credited directly to <strong>{merchantName}'s main‑Wallet</strong>. 
+                    This bonus will be credited directly to <strong>{merchantName}'s Voucher Store</strong>. 
                     The value is <strong>tradable only as vouchers</strong> and can only be used for voucher card trading.
                   </p>
                 </div>
@@ -386,7 +386,7 @@ export function AwardBonusVoucherPackDrawer({
                 <div>
                   <p className="text-xs font-semibold text-amber-700">This action cannot be undone</p>
                   <p className="text-xs text-amber-700/80 mt-0.5">
-                    Once awarded, the bonus voucher pack value will be immediately available in the merchant's main‑Wallet.
+                    Once awarded, the bonus voucher pack value will be immediately available in the merchant's Voucher Store.
                   </p>
                 </div>
               </CardContent>
@@ -430,7 +430,7 @@ export function AwardBonusVoucherPackDrawer({
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">Bonus Awarded!</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-[280px]">
-              <strong>{getPackLabel(selectedPack)}</strong> has been successfully credited to <strong>{merchantName}'s main‑Wallet</strong>.
+              <strong>{getPackLabel(selectedPack)}</strong> has been successfully credited to <strong>{merchantName}'s Voucher Store</strong>.
             </p>
 
             <Card className="w-full border-emerald-200 bg-emerald-50 mb-6">

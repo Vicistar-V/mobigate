@@ -8,8 +8,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import {
   Gift, Search, Calendar, TrendingUp, Wallet, ChevronRight,
-  Ticket, ArrowUpRight, ArrowDownRight, Filter, Clock, User, ShieldCheck,
+  Ticket, ArrowUpRight, ArrowDownRight, Filter, Clock, User, ShieldCheck, Globe, MapPin,
 } from "lucide-react";
+import { getUniqueCountries, getNigerianStatesForFilter, getCitiesForLGA } from "@/data/nigerianLocationsData";
 
 // ─── Types ───
 interface BonusAwardRecord {
@@ -23,127 +24,82 @@ interface BonusAwardRecord {
   awardedBy: string;
   authorizedBy: string[];
   reason?: string;
+  countryName?: string;
+  stateName?: string;
+  cityName?: string;
 }
 
 // ─── Mock Data ───
 const mockBonusAwards: BonusAwardRecord[] = [
   {
-    id: "ba-001",
-    merchantId: "m1",
-    merchantName: "QuickBuy Electronics",
-    packUnits: 50,
-    denomination: 5000,
-    totalValue: 250000,
-    awardedAt: "2026-03-15T10:30:00",
-    awardedBy: "Admin-1 (Super Admin)",
-    authorizedBy: ["Admin-1"],
-    reason: "Top seller Q1 2026",
+    id: "ba-001", merchantId: "m1", merchantName: "QuickBuy Electronics",
+    packUnits: 50, denomination: 5000, totalValue: 250000,
+    awardedAt: "2026-03-15T10:30:00", awardedBy: "Admin-1 (Super Admin)",
+    authorizedBy: ["Admin-1"], reason: "Top seller Q1 2026",
+    countryName: "Nigeria", stateName: "Lagos", cityName: "Ikeja",
   },
   {
-    id: "ba-002",
-    merchantId: "m3",
-    merchantName: "TechZone Repairs",
-    packUnits: 25,
-    denomination: 500,
-    totalValue: 12500,
-    awardedAt: "2026-03-12T14:15:00",
-    awardedBy: "Admin-2 (Finance Admin)",
+    id: "ba-002", merchantId: "m3", merchantName: "TechZone Repairs",
+    packUnits: 25, denomination: 500, totalValue: 12500,
+    awardedAt: "2026-03-12T14:15:00", awardedBy: "Admin-2 (Finance Admin)",
+    authorizedBy: ["Admin-2", "Admin-3", "Admin-4"], reason: "Customer satisfaction award",
+    countryName: "Nigeria", stateName: "Abuja FCT", cityName: "Garki",
+  },
+  {
+    id: "ba-003", merchantId: "m2", merchantName: "FreshMart Foods",
+    packUnits: 100, denomination: 5000, totalValue: 500000,
+    awardedAt: "2026-03-08T09:00:00", awardedBy: "Admin-1 (Super Admin)",
+    authorizedBy: ["Admin-1"], reason: "New market expansion bonus",
+    countryName: "Nigeria", stateName: "Rivers", cityName: "Port Harcourt",
+  },
+  {
+    id: "ba-004", merchantId: "m5", merchantName: "DataPlug Hub",
+    packUnits: 75, denomination: 500, totalValue: 37500,
+    awardedAt: "2026-03-01T16:45:00", awardedBy: "Admin-3 (Operations Admin)",
     authorizedBy: ["Admin-2", "Admin-3", "Admin-4"],
-    reason: "Customer satisfaction award",
+    countryName: "Nigeria", stateName: "Lagos", cityName: "Lekki",
   },
   {
-    id: "ba-003",
-    merchantId: "m2",
-    merchantName: "FreshMart Foods",
-    packUnits: 100,
-    denomination: 5000,
-    totalValue: 500000,
-    awardedAt: "2026-03-08T09:00:00",
-    awardedBy: "Admin-1 (Super Admin)",
+    id: "ba-005", merchantId: "m1", merchantName: "QuickBuy Electronics",
+    packUnits: 25, denomination: 5000, totalValue: 125000,
+    awardedAt: "2026-02-20T11:30:00", awardedBy: "Admin-1 (Super Admin)",
+    authorizedBy: ["Admin-1"], reason: "Platform loyalty bonus",
+    countryName: "Nigeria", stateName: "Lagos", cityName: "Ikeja",
+  },
+  {
+    id: "ba-006", merchantId: "m4", merchantName: "GlamStyle Beauty",
+    packUnits: 50, denomination: 500, totalValue: 25000,
+    awardedAt: "2026-02-14T08:00:00", awardedBy: "Admin-2 (Finance Admin)",
+    authorizedBy: ["Admin-2", "Admin-3", "Admin-4"], reason: "Valentine's promo winner",
+    countryName: "Nigeria", stateName: "Kano", cityName: "Kano City",
+  },
+  {
+    id: "ba-007", merchantId: "m8", merchantName: "NaijaDeals Hub",
+    packUnits: 100, denomination: 500, totalValue: 50000,
+    awardedAt: "2026-02-01T13:20:00", awardedBy: "Admin-1 (Super Admin)",
+    authorizedBy: ["Admin-1"], reason: "High volume retailer bonus",
+    countryName: "Nigeria", stateName: "Oyo", cityName: "Ibadan",
+  },
+  {
+    id: "ba-008", merchantId: "m3", merchantName: "TechZone Repairs",
+    packUnits: 75, denomination: 5000, totalValue: 375000,
+    awardedAt: "2026-01-15T10:00:00", awardedBy: "Admin-1 (Super Admin)",
+    authorizedBy: ["Admin-1"], reason: "Annual excellence award",
+    countryName: "Nigeria", stateName: "Abuja FCT", cityName: "Wuse",
+  },
+  {
+    id: "ba-009", merchantId: "m2", merchantName: "FreshMart Foods",
+    packUnits: 50, denomination: 500, totalValue: 25000,
+    awardedAt: "2025-12-20T15:30:00", awardedBy: "Admin-4 (Compliance Admin)",
+    authorizedBy: ["Admin-2", "Admin-3", "Admin-4"], reason: "Christmas season top merchant",
+    countryName: "Nigeria", stateName: "Enugu", cityName: "Enugu City",
+  },
+  {
+    id: "ba-010", merchantId: "m5", merchantName: "DataPlug Hub",
+    packUnits: 25, denomination: 5000, totalValue: 125000,
+    awardedAt: "2025-12-01T09:45:00", awardedBy: "Admin-1 (Super Admin)",
     authorizedBy: ["Admin-1"],
-    reason: "New market expansion bonus",
-  },
-  {
-    id: "ba-004",
-    merchantId: "m5",
-    merchantName: "DataPlug Hub",
-    packUnits: 75,
-    denomination: 500,
-    totalValue: 37500,
-    awardedAt: "2026-03-01T16:45:00",
-    awardedBy: "Admin-3 (Operations Admin)",
-    authorizedBy: ["Admin-2", "Admin-3", "Admin-4"],
-  },
-  {
-    id: "ba-005",
-    merchantId: "m1",
-    merchantName: "QuickBuy Electronics",
-    packUnits: 25,
-    denomination: 5000,
-    totalValue: 125000,
-    awardedAt: "2026-02-20T11:30:00",
-    awardedBy: "Admin-1 (Super Admin)",
-    authorizedBy: ["Admin-1"],
-    reason: "Platform loyalty bonus",
-  },
-  {
-    id: "ba-006",
-    merchantId: "m4",
-    merchantName: "GlamStyle Beauty",
-    packUnits: 50,
-    denomination: 500,
-    totalValue: 25000,
-    awardedAt: "2026-02-14T08:00:00",
-    awardedBy: "Admin-2 (Finance Admin)",
-    authorizedBy: ["Admin-2", "Admin-3", "Admin-4"],
-    reason: "Valentine's promo winner",
-  },
-  {
-    id: "ba-007",
-    merchantId: "m8",
-    merchantName: "NaijaDeals Hub",
-    packUnits: 100,
-    denomination: 500,
-    totalValue: 50000,
-    awardedAt: "2026-02-01T13:20:00",
-    awardedBy: "Admin-1 (Super Admin)",
-    authorizedBy: ["Admin-1"],
-    reason: "High volume retailer bonus",
-  },
-  {
-    id: "ba-008",
-    merchantId: "m3",
-    merchantName: "TechZone Repairs",
-    packUnits: 75,
-    denomination: 5000,
-    totalValue: 375000,
-    awardedAt: "2026-01-15T10:00:00",
-    awardedBy: "Admin-1 (Super Admin)",
-    authorizedBy: ["Admin-1"],
-    reason: "Annual excellence award",
-  },
-  {
-    id: "ba-009",
-    merchantId: "m2",
-    merchantName: "FreshMart Foods",
-    packUnits: 50,
-    denomination: 500,
-    totalValue: 25000,
-    awardedAt: "2025-12-20T15:30:00",
-    awardedBy: "Admin-4 (Compliance Admin)",
-    authorizedBy: ["Admin-2", "Admin-3", "Admin-4"],
-    reason: "Christmas season top merchant",
-  },
-  {
-    id: "ba-010",
-    merchantId: "m5",
-    merchantName: "DataPlug Hub",
-    packUnits: 25,
-    denomination: 5000,
-    totalValue: 125000,
-    awardedAt: "2025-12-01T09:45:00",
-    awardedBy: "Admin-1 (Super Admin)",
-    authorizedBy: ["Admin-1"],
+    countryName: "Nigeria", stateName: "Lagos", cityName: "Victoria Island",
   },
 ];
 
@@ -182,8 +138,19 @@ function getTimeFilterDate(filter: TimeFilter): { cutoff: Date; mode: "after" | 
 export function AdminBonusAwardsTab() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [denomFilter, setDenomFilter] = useState<DenomFilter>("all");
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
+  const [cityFilter, setCityFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAward, setSelectedAward] = useState<BonusAwardRecord | null>(null);
+
+  const countries = useMemo(() => getUniqueCountries(), []);
+  const states = useMemo(() => getNigerianStatesForFilter(), []);
+  const cities = useMemo(() => {
+    if (stateFilter === "all") return [];
+    const stateObj = states.find(s => s.name === stateFilter);
+    return stateObj ? getCitiesForLGA(undefined, stateObj.id) : [];
+  }, [stateFilter, states]);
 
   const filteredAwards = useMemo(() => {
     let list = [...mockBonusAwards];
@@ -201,6 +168,11 @@ export function AdminBonusAwardsTab() {
     // Denomination filter
     if (denomFilter !== "all") list = list.filter((a) => a.denomination === Number(denomFilter));
 
+    // Location filters
+    if (countryFilter !== "all") list = list.filter((a) => a.countryName === countryFilter);
+    if (stateFilter !== "all") list = list.filter((a) => a.stateName === stateFilter);
+    if (cityFilter !== "all") list = list.filter((a) => a.cityName === cityFilter);
+
     // Search
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -213,7 +185,7 @@ export function AdminBonusAwardsTab() {
     }
 
     return list.sort((a, b) => new Date(b.awardedAt).getTime() - new Date(a.awardedAt).getTime());
-  }, [timeFilter, denomFilter, searchQuery]);
+  }, [timeFilter, denomFilter, countryFilter, stateFilter, cityFilter, searchQuery]);
 
   // Stats
   const stats = useMemo(() => {
@@ -339,6 +311,50 @@ export function AdminBonusAwardsTab() {
               <SelectItem value="5000" className="text-xs">M5,000 Packs</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Location filters */}
+        <div className="flex gap-2">
+          <Select value={countryFilter} onValueChange={(v) => { setCountryFilter(v); setStateFilter("all"); setCityFilter("all"); }}>
+            <SelectTrigger className="h-9 text-xs flex-1">
+              <Globe className="h-3.5 w-3.5 mr-1 shrink-0" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-xs">All Countries</SelectItem>
+              {countries.map((c) => (
+                <SelectItem key={c.id} value={c.name} className="text-xs">{c.flag} {c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {countryFilter === "Nigeria" && (
+            <Select value={stateFilter} onValueChange={(v) => { setStateFilter(v); setCityFilter("all"); }}>
+              <SelectTrigger className="h-9 text-xs flex-1">
+                <MapPin className="h-3.5 w-3.5 mr-1 shrink-0" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs">All States</SelectItem>
+                {states.map((s) => (
+                  <SelectItem key={s.id} value={s.name} className="text-xs">{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {stateFilter !== "all" && cities.length > 0 && (
+            <Select value={cityFilter} onValueChange={setCityFilter}>
+              <SelectTrigger className="h-9 text-xs flex-1">
+                <MapPin className="h-3.5 w-3.5 mr-1 shrink-0" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs">All Cities</SelectItem>
+                {cities.map((c) => (
+                  <SelectItem key={c.id} value={c.name} className="text-xs">{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
@@ -477,7 +493,7 @@ export function AdminBonusAwardsTab() {
                     </div>
                     <div className="p-3 flex justify-between items-center">
                       <span className="text-xs text-muted-foreground">Credited to</span>
-                      <span className="text-sm font-semibold">main‑Wallet</span>
+                      <span className="text-sm font-semibold">Voucher Store</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -533,7 +549,7 @@ export function AdminBonusAwardsTab() {
                   <CardContent className="p-3 flex items-start gap-2">
                     <Wallet className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-700/80 leading-relaxed">
-                      This bonus was credited to <strong>{selectedAward.merchantName}'s main‑Wallet</strong> and is <strong>tradable only as vouchers</strong>.
+                      This bonus was credited to <strong>{selectedAward.merchantName}'s Voucher Store</strong> and is <strong>tradable only as vouchers</strong>.
                     </p>
                   </CardContent>
                 </Card>

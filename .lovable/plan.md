@@ -1,33 +1,42 @@
 
 
-## Plan: Add Location Filters + Replace "main-Wallet" with "Voucher Store"
+## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
 
-### Two changes needed:
+### What We're Building
 
-### 1. Add Country → State → City cascading filters to AdminBonusAwardsTab
+A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
 
-**Location:** `src/components/admin/AdminBonusAwardsTab.tsx`
+### Tab Layout
 
-- Import `getUniqueCountries`, `getNigerianStatesForFilter`, `getCitiesForLGA` from `@/data/nigerianLocationsData`
-- Add three new state variables: `countryFilter`, `stateFilter`, `cityFilter` (all default to `"all"`)
-- Add a second row of filters below the existing Time + Denomination row with three `Select` dropdowns: Country → State → City
-- State dropdown only shows when a country is selected (Nigeria specifically since that's where state data exists); City dropdown only shows when a state is selected
-- Changing country resets state and city; changing state resets city
-- Wire filters into `filteredAwards` (note: mock award data doesn't have location fields, so we'll add optional `countryName`, `stateName`, `cityName` fields to the `BonusAwardRecord` interface and populate some mock entries with location data so the filters actually work)
+```text
+[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
+```
 
-### 2. Replace all "main-Wallet" references with "Voucher Store"
+The Complaints tab will show:
+1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
+2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
+3. **Complaint cards list** — Each card shows:
+   - Category badge + status badge (color-coded)
+   - Merchant name the complaint is against
+   - Truncated description
+   - Reporter info (or "Anonymous")
+   - Submission date + reference number
+   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
+4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
 
-**Files:** `src/components/admin/AdminBonusAwardsTab.tsx` and `src/components/admin/AwardBonusVoucherPackDrawer.tsx`
+### Files to Modify/Create
 
-Every occurrence of "main‑Wallet" or "main-Wallet" in these two files will be changed to "Voucher Store". Specifically:
+| File | Action |
+|------|--------|
+| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
+| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
 
-- **AdminBonusAwardsTab.tsx** (2 places):
-  - Line 480: "Credited to" → "Voucher Store"
-  - Line 536: "credited to merchant's main‑Wallet" → "Voucher Store"
+### Technical Details
 
-- **AwardBonusVoucherPackDrawer.tsx** (4 places):
-  - Line 254: "credited to Merchant's main‑Wallet" → "Voucher Store"
-  - Line 375: "credited to merchant's main‑Wallet" → "Voucher Store"  
-  - Line 389: "available in merchant's main‑Wallet" → "Voucher Store"
-  - Line 433: "credited to merchant's main‑Wallet" → "Voucher Store"
+- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
+- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
+- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
+- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
+- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
+- All touch targets h-11 minimum, no font size reductions, mobile-only focus
 
