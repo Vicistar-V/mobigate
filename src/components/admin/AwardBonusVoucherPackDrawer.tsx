@@ -606,7 +606,7 @@ export function AwardBonusVoucherPackDrawer({
               <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
               <p className="text-xs text-blue-700/80 leading-relaxed">
                 Bonus Voucher Pack awards require multi-admin authorization for security. 
-                Any <strong>2 of 3</strong> designated admins must enter their passwords to proceed.
+                <strong>Admin-1 (Super Admin)</strong> can authorize alone, or <strong>Admins 2, 3 & 4</strong> must all verify together.
               </p>
             </CardContent>
           </Card>
