@@ -121,7 +121,7 @@ const initialComplaints: Complaint[] = [
     id: "c3", refNumber: "RPT-2026-0003", merchantName: "TechZone Repairs", merchantId: "m3",
     category: "harassment-threat", status: "pending",
     description: "Merchant staff used abusive language and threatened physical harm when I tried to return a defective product within the warranty period. I have witness testimony.",
-    reporterName: "Chioma Eze", reporterEmail: "chioma.e@email.com", isAnonymous: false,
+    reporterName: "Chioma Eze", reporterEmail: "chioma.e@email.com", reporterId: "u3", isAnonymous: false,
     submittedDate: "2026-02-28", lastUpdated: "2026-02-28",
     timeline: [{ date: "2026-02-28", action: "Report submitted", by: "Chioma Eze" }],
   },
