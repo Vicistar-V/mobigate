@@ -189,8 +189,14 @@ export function AdminBonusAwardsTab() {
     let list = [...mockBonusAwards];
 
     // Time filter
-    const cutoff = getTimeFilterDate(timeFilter);
-    if (cutoff) list = list.filter((a) => new Date(a.awardedAt) >= cutoff);
+    const timeResult = getTimeFilterDate(timeFilter);
+    if (timeResult) {
+      if (timeResult.mode === "after") {
+        list = list.filter((a) => new Date(a.awardedAt) >= timeResult.cutoff);
+      } else {
+        list = list.filter((a) => new Date(a.awardedAt) < timeResult.cutoff);
+      }
+    }
 
     // Denomination filter
     if (denomFilter !== "all") list = list.filter((a) => a.denomination === Number(denomFilter));
