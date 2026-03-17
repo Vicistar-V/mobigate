@@ -262,7 +262,7 @@ export function AdminBonusAwardsTab() {
           <CardContent className="p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Gift className="h-3.5 w-3.5 text-amber-500" />
-              <p className="text-[10px] text-muted-foreground font-medium">Awards Made</p>
+              <p className="text-xs text-muted-foreground font-medium">Awards Made</p>
             </div>
             <p className="text-base font-black text-foreground">{stats.count}</p>
             <p className="text-[10px] text-muted-foreground">{stats.totalUnits} total units</p>
