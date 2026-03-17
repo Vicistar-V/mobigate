@@ -151,7 +151,7 @@ const formatMobi = (n: number) => `M${n.toLocaleString()}`;
 const formatNaira = (n: number) => `₦${n.toLocaleString()}`;
 
 type TimeFilter = "all" | "today" | "7days" | "30days" | "90days" | "6months" | "1year";
-type DenomFilter = "all" | "500" | "5000";
+type DenomFilter = "all" | "200" | "500" | "1000" | "5000";
 
 const timeFilterLabels: Record<TimeFilter, string> = {
   all: "All Time",
