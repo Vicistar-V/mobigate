@@ -107,16 +107,18 @@ export function AwardBonusVoucherPackDrawer({
   const [isAwarding, setIsAwarding] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  // Admin authorization state (2 of 3 required)
-  const [adminPasswords, setAdminPasswords] = useState({ admin1: "", admin2: "", admin3: "" });
-  const [adminVerified, setAdminVerified] = useState({ admin1: false, admin2: false, admin3: false });
+  // Admin authorization state — 4-admin protocol: Admin-1 solo OR Admins 2+3+4 together
+  const [adminPasswords, setAdminPasswords] = useState({ admin1: "", admin2: "", admin3: "", admin4: "" });
+  const [adminVerified, setAdminVerified] = useState({ admin1: false, admin2: false, admin3: false, admin4: false });
   const [authError, setAuthError] = useState("");
 
+  const admin1Solo = adminVerified.admin1;
+  const othersAllVerified = adminVerified.admin2 && adminVerified.admin3 && adminVerified.admin4;
   const verifiedCount = useMemo(() => 
-    [adminVerified.admin1, adminVerified.admin2, adminVerified.admin3].filter(Boolean).length,
+    [adminVerified.admin1, adminVerified.admin2, adminVerified.admin3, adminVerified.admin4].filter(Boolean).length,
     [adminVerified]
   );
-  const isAuthPassed = verifiedCount >= 2;
+  const isAuthPassed = admin1Solo || othersAllVerified;
 
   const handleSelectPack = (pack: BonusVoucherPack) => {
     setSelectedPack(pack);
