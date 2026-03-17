@@ -249,7 +249,7 @@ export function AdminBonusAwardsTab() {
               <p className="text-xs text-muted-foreground font-medium">Total Value</p>
             </div>
             <p className="text-base font-black text-primary">{formatMobi(stats.totalValue)}</p>
-            <p className="text-[10px] text-muted-foreground">{formatNaira(stats.totalValue)}</p>
+            <p className="text-xs text-muted-foreground">{formatNaira(stats.totalValue)}</p>
             {valueChange !== null && (
               <div className={`flex items-center justify-center gap-0.5 mt-1 text-[10px] font-semibold ${valueChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                 {valueChange >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
