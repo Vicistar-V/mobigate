@@ -278,6 +278,21 @@ export function MerchantApplicationsAdmin() {
                   <span className="text-muted-foreground">Fee Paid</span>
                   <span className="font-medium text-primary">{formatMobi(app.feePaid)}</span>
                 </div>
+
+                {/* Authorised by */}
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Authorised by</span>
+                  {approvedBy[app.id] ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); window.open(`/profile/${approvedBy[app.id].id}`, '_blank'); }}
+                      className="font-medium text-primary underline underline-offset-2 touch-manipulation active:scale-[0.97] transition-transform"
+                    >
+                      {approvedBy[app.id].name}
+                    </button>
+                  ) : (
+                    <span className="font-medium text-muted-foreground italic">Admin</span>
+                  )}
+                </div>
               </div>
 
               {/* Expandable full details */}
