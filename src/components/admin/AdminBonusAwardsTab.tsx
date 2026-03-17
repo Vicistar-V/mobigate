@@ -150,8 +150,8 @@ const mockBonusAwards: BonusAwardRecord[] = [
 const formatMobi = (n: number) => `M${n.toLocaleString()}`;
 const formatNaira = (n: number) => `₦${n.toLocaleString()}`;
 
-type TimeFilter = "all" | "today" | "7days" | "30days" | "90days" | "6months" | "1year";
-type DenomFilter = "all" | "200" | "500" | "1000" | "5000";
+type TimeFilter = "all" | "today" | "7days" | "30days" | "90days" | "6months" | "1year" | "over1year";
+type DenomFilter = "all" | "100" | "200" | "500" | "1000" | "5000";
 
 const timeFilterLabels: Record<TimeFilter, string> = {
   all: "All Time",
@@ -161,18 +161,20 @@ const timeFilterLabels: Record<TimeFilter, string> = {
   "90days": "Last 90 Days",
   "6months": "Last 6 Months",
   "1year": "Last Year",
+  over1year: "Over a Year",
 };
 
-function getTimeFilterDate(filter: TimeFilter): Date | null {
+function getTimeFilterDate(filter: TimeFilter): { cutoff: Date; mode: "after" | "before" } | null {
   if (filter === "all") return null;
   const now = new Date();
   switch (filter) {
-    case "today": return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    case "7days": return new Date(now.getTime() - 7 * 86400000);
-    case "30days": return new Date(now.getTime() - 30 * 86400000);
-    case "90days": return new Date(now.getTime() - 90 * 86400000);
-    case "6months": return new Date(now.getTime() - 180 * 86400000);
-    case "1year": return new Date(now.getTime() - 365 * 86400000);
+    case "today": return { cutoff: new Date(now.getFullYear(), now.getMonth(), now.getDate()), mode: "after" };
+    case "7days": return { cutoff: new Date(now.getTime() - 7 * 86400000), mode: "after" };
+    case "30days": return { cutoff: new Date(now.getTime() - 30 * 86400000), mode: "after" };
+    case "90days": return { cutoff: new Date(now.getTime() - 90 * 86400000), mode: "after" };
+    case "6months": return { cutoff: new Date(now.getTime() - 180 * 86400000), mode: "after" };
+    case "1year": return { cutoff: new Date(now.getTime() - 365 * 86400000), mode: "after" };
+    case "over1year": return { cutoff: new Date(now.getTime() - 365 * 86400000), mode: "before" };
     default: return null;
   }
 }
@@ -187,8 +189,14 @@ export function AdminBonusAwardsTab() {
     let list = [...mockBonusAwards];
 
     // Time filter
-    const cutoff = getTimeFilterDate(timeFilter);
-    if (cutoff) list = list.filter((a) => new Date(a.awardedAt) >= cutoff);
+    const timeResult = getTimeFilterDate(timeFilter);
+    if (timeResult) {
+      if (timeResult.mode === "after") {
+        list = list.filter((a) => new Date(a.awardedAt) >= timeResult.cutoff);
+      } else {
+        list = list.filter((a) => new Date(a.awardedAt) < timeResult.cutoff);
+      }
+    }
 
     // Denomination filter
     if (denomFilter !== "all") list = list.filter((a) => a.denomination === Number(denomFilter));
@@ -223,13 +231,13 @@ export function AdminBonusAwardsTab() {
 
   // Compare with previous period
   const prevPeriodValue = useMemo(() => {
-    const cutoff = getTimeFilterDate(timeFilter);
-    if (!cutoff || timeFilter === "all") return null;
-    const duration = Date.now() - cutoff.getTime();
-    const prevCutoff = new Date(cutoff.getTime() - duration);
+    const timeResult = getTimeFilterDate(timeFilter);
+    if (!timeResult || timeFilter === "all" || timeFilter === "over1year") return null;
+    const duration = Date.now() - timeResult.cutoff.getTime();
+    const prevCutoff = new Date(timeResult.cutoff.getTime() - duration);
     const prevAwards = mockBonusAwards.filter((a) => {
       const d = new Date(a.awardedAt);
-      return d >= prevCutoff && d < cutoff;
+      return d >= prevCutoff && d < timeResult.cutoff;
     });
     return prevAwards.reduce((s, a) => s + a.totalValue, 0);
   }, [timeFilter]);
@@ -324,6 +332,7 @@ export function AdminBonusAwardsTab() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">All Packs</SelectItem>
+              <SelectItem value="100" className="text-xs">M100 Packs</SelectItem>
               <SelectItem value="200" className="text-xs">M200 Packs</SelectItem>
               <SelectItem value="500" className="text-xs">M500 Packs</SelectItem>
               <SelectItem value="1000" className="text-xs">M1,000 Packs</SelectItem>

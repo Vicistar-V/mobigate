@@ -54,6 +54,11 @@ interface BonusVoucherPack {
 }
 
 const bonusVoucherPacks: BonusVoucherPack[] = [
+  // M100
+  { id: "bp-25-100", units: 25, denomination: 100, totalValue: 2500 },
+  { id: "bp-50-100", units: 50, denomination: 100, totalValue: 5000 },
+  { id: "bp-75-100", units: 75, denomination: 100, totalValue: 7500 },
+  { id: "bp-100-100", units: 100, denomination: 100, totalValue: 10000 },
   // M200
   { id: "bp-25-200", units: 25, denomination: 200, totalValue: 5000 },
   { id: "bp-50-200", units: 50, denomination: 200, totalValue: 10000 },
@@ -114,6 +119,7 @@ const mockAwardHistory: AwardHistoryItem[] = [
 ];
 
 const denominationGroups = [
+  { denomination: 100, color: "text-rose-600", bgColor: "bg-rose-500/10", borderColor: "border-rose-300" },
   { denomination: 200, color: "text-blue-600", bgColor: "bg-blue-500/10", borderColor: "border-blue-300" },
   { denomination: 500, color: "text-emerald-600", bgColor: "bg-emerald-500/10", borderColor: "border-emerald-300" },
   { denomination: 1000, color: "text-purple-600", bgColor: "bg-purple-500/10", borderColor: "border-purple-300" },
