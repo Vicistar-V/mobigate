@@ -341,49 +341,51 @@ export default function MobigateAdminDashboard() {
           <TabsContent value="elections" className="mt-0">
             <ScrollArea className="h-[calc(100vh-200px)]">
               <div className="space-y-4 pb-6">
-                {/* Active Elections Stats */}
-                <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Active Elections</p>
-                        <p className="text-3xl font-bold">{platformStats.activeElections}</p>
+                <AdminAuthGate tabLabel="Elections">
+                  {/* Active Elections Stats */}
+                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Active Elections</p>
+                          <p className="text-3xl font-bold">{platformStats.activeElections}</p>
+                        </div>
+                        <Vote className="h-10 w-10 text-primary/50" />
                       </div>
-                      <Vote className="h-10 w-10 text-primary/50" />
-                    </div>
-                    <div className="flex gap-4 mt-3 pt-3 border-t">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Nominations Open</p>
-                        <p className="font-bold">12</p>
+                      <div className="flex gap-4 mt-3 pt-3 border-t">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Nominations Open</p>
+                          <p className="font-bold">12</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">In Voting</p>
+                          <p className="font-bold">8</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Concluded</p>
+                          <p className="font-bold">25</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">In Voting</p>
-                        <p className="font-bold">8</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Concluded</p>
-                        <p className="font-bold">25</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                {/* Mobigate-Only Notice */}
-                <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                  <Shield className="h-5 w-5 text-primary shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium">Mobigate Admin Only</p>
-                    <p className="text-xs text-muted-foreground">
-                      These settings are only accessible to platform administrators
-                    </p>
+                  {/* Mobigate-Only Notice */}
+                  <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                    <Shield className="h-5 w-5 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Mobigate Admin Only</p>
+                      <p className="text-xs text-muted-foreground">
+                        These settings are only accessible to platform administrators
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Nomination Fee Settings */}
-                <NominationFeeSettingsSection />
+                  {/* Nomination Fee Settings */}
+                  <NominationFeeSettingsSection />
 
-                {/* Campaign Fee Distribution Settings */}
-                <CampaignFeeDistributionSettings />
+                  {/* Campaign Fee Distribution Settings */}
+                  <CampaignFeeDistributionSettings />
+                </AdminAuthGate>
               </div>
             </ScrollArea>
           </TabsContent>
