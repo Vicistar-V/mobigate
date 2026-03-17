@@ -632,7 +632,7 @@ export function AwardBonusVoucherPackDrawer({
           }`}
         >
           <ShieldCheck className="h-4 w-4 mr-2" />
-          {isAuthPassed ? "Proceed to Award Bonus" : `${verifiedCount}/2 Admins Verified`}
+          {isAuthPassed ? "Proceed to Award Bonus" : admin1Solo ? "Proceed to Award Bonus" : `${verifiedCount}/4 Admins Verified`}
         </Button>
       </div>
     </div>
