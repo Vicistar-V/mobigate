@@ -160,7 +160,27 @@ function generateMockUsers(): PlatformUser[] {
         status: statuses[hash % statuses.length],
         role: roles[hash % roles.length],
         joinDate: new Date(2024, hash % 12, (hash % 28) + 1),
-        lastActive: new Date(2026, 2, (hash % 9) + 1),
+        lastActive: (() => {
+          // Distribute lastActive across now → 18 months ago for realistic Online filtering
+          const now = Date.now();
+          const buckets = [
+            0, // now (online)
+            1000 * 60 * 5, // 5 min
+            1000 * 60 * 30, // 30 min
+            1000 * 60 * 60 * 3, // 3h
+            1000 * 60 * 60 * 20, // ~yesterday
+            1000 * 60 * 60 * 24 * 2, // 2d
+            1000 * 60 * 60 * 24 * 5, // 5d
+            1000 * 60 * 60 * 24 * 12, // 12d
+            1000 * 60 * 60 * 24 * 25, // 25d
+            1000 * 60 * 60 * 24 * 60, // 2mo
+            1000 * 60 * 60 * 24 * 120, // 4mo
+            1000 * 60 * 60 * 24 * 200, // 6.5mo
+            1000 * 60 * 60 * 24 * 330, // 11mo
+            1000 * 60 * 60 * 24 * 480, // 16mo
+          ];
+          return new Date(now - buckets[hash % buckets.length]);
+        })(),
         communitiesJoined: hash % 8,
         totalTransactions: hash % 200 + 10,
         isVerified: hash % 3 !== 0,
