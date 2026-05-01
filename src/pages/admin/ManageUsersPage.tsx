@@ -253,6 +253,40 @@ export default function ManageUsersPage() {
     };
   }, [selectedCountry]);
 
+  // Online filter helpers — boundaries in ms from now
+  const onlineFilterOptions: { value: string; label: string }[] = [
+    { value: "all", label: "Any time" },
+    { value: "now", label: "Online now" },
+    { value: "today", label: "Today" },
+    { value: "yesterday", label: "Yesterday" },
+    { value: "3d", label: "Last 3 days" },
+    { value: "7d", label: "Last 7 days" },
+    { value: "1mo", label: "Last month" },
+    { value: "3mo", label: "Last 3 months" },
+    { value: "6mo", label: "Last 6 months" },
+    { value: "12mo", label: "Last 12 months" },
+  ];
+
+  const matchesOnlineFilter = (lastActive: Date, key: string): boolean => {
+    if (key === "all") return true;
+    const ms = Date.now() - lastActive.getTime();
+    const MIN = 60 * 1000;
+    const HR = 60 * MIN;
+    const DAY = 24 * HR;
+    switch (key) {
+      case "now": return ms <= 5 * MIN;
+      case "today": return ms <= DAY;
+      case "yesterday": return ms > DAY && ms <= 2 * DAY;
+      case "3d": return ms <= 3 * DAY;
+      case "7d": return ms <= 7 * DAY;
+      case "1mo": return ms <= 30 * DAY;
+      case "3mo": return ms <= 90 * DAY;
+      case "6mo": return ms <= 180 * DAY;
+      case "12mo": return ms <= 365 * DAY;
+      default: return true;
+    }
+  };
+
   // Filtered users
   const filteredUsers = useMemo(() => {
     let users = [...mockUsers];
@@ -260,6 +294,7 @@ export default function ManageUsersPage() {
     if (isNigeria && selectedState !== "all") users = users.filter((u) => u.stateId === selectedState);
     if (isNigeria && selectedCity !== "all") users = users.filter((u) => u.city.toLowerCase() === selectedCity.toLowerCase());
     if (selectedStatus !== "all") users = users.filter((u) => u.status === selectedStatus);
+    if (selectedOnline !== "all") users = users.filter((u) => matchesOnlineFilter(u.lastActive, selectedOnline));
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       users = users.filter(
@@ -276,7 +311,7 @@ export default function ManageUsersPage() {
       return a.name.localeCompare(b.name);
     });
     return users;
-  }, [selectedCountry, selectedState, selectedCity, selectedStatus, searchQuery, sortOrder, isNigeria]);
+  }, [selectedCountry, selectedState, selectedCity, selectedStatus, selectedOnline, searchQuery, sortOrder, isNigeria]);
 
   const selectedCountryObj = countries.find((c) => c.id === selectedCountry);
 
