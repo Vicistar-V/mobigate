@@ -160,7 +160,27 @@ function generateMockUsers(): PlatformUser[] {
         status: statuses[hash % statuses.length],
         role: roles[hash % roles.length],
         joinDate: new Date(2024, hash % 12, (hash % 28) + 1),
-        lastActive: new Date(2026, 2, (hash % 9) + 1),
+        lastActive: (() => {
+          // Distribute lastActive across now → 18 months ago for realistic Online filtering
+          const now = Date.now();
+          const buckets = [
+            0, // now (online)
+            1000 * 60 * 5, // 5 min
+            1000 * 60 * 30, // 30 min
+            1000 * 60 * 60 * 3, // 3h
+            1000 * 60 * 60 * 20, // ~yesterday
+            1000 * 60 * 60 * 24 * 2, // 2d
+            1000 * 60 * 60 * 24 * 5, // 5d
+            1000 * 60 * 60 * 24 * 12, // 12d
+            1000 * 60 * 60 * 24 * 25, // 25d
+            1000 * 60 * 60 * 24 * 60, // 2mo
+            1000 * 60 * 60 * 24 * 120, // 4mo
+            1000 * 60 * 60 * 24 * 200, // 6.5mo
+            1000 * 60 * 60 * 24 * 330, // 11mo
+            1000 * 60 * 60 * 24 * 480, // 16mo
+          ];
+          return new Date(now - buckets[hash % buckets.length]);
+        })(),
         communitiesJoined: hash % 8,
         totalTransactions: hash % 200 + 10,
         isVerified: hash % 3 !== 0,
@@ -195,6 +215,7 @@ export default function ManageUsersPage() {
   const [selectedState, setSelectedState] = useState("all");
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedOnline, setSelectedOnline] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "name">("newest");
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
@@ -232,6 +253,40 @@ export default function ManageUsersPage() {
     };
   }, [selectedCountry]);
 
+  // Online filter helpers — boundaries in ms from now
+  const onlineFilterOptions: { value: string; label: string }[] = [
+    { value: "all", label: "Any time" },
+    { value: "now", label: "Online now" },
+    { value: "today", label: "Today" },
+    { value: "yesterday", label: "Yesterday" },
+    { value: "3d", label: "Last 3 days" },
+    { value: "7d", label: "Last 7 days" },
+    { value: "1mo", label: "Last month" },
+    { value: "3mo", label: "Last 3 months" },
+    { value: "6mo", label: "Last 6 months" },
+    { value: "12mo", label: "Last 12 months" },
+  ];
+
+  const matchesOnlineFilter = (lastActive: Date, key: string): boolean => {
+    if (key === "all") return true;
+    const ms = Date.now() - lastActive.getTime();
+    const MIN = 60 * 1000;
+    const HR = 60 * MIN;
+    const DAY = 24 * HR;
+    switch (key) {
+      case "now": return ms <= 5 * MIN;
+      case "today": return ms <= DAY;
+      case "yesterday": return ms > DAY && ms <= 2 * DAY;
+      case "3d": return ms <= 3 * DAY;
+      case "7d": return ms <= 7 * DAY;
+      case "1mo": return ms <= 30 * DAY;
+      case "3mo": return ms <= 90 * DAY;
+      case "6mo": return ms <= 180 * DAY;
+      case "12mo": return ms <= 365 * DAY;
+      default: return true;
+    }
+  };
+
   // Filtered users
   const filteredUsers = useMemo(() => {
     let users = [...mockUsers];
@@ -239,6 +294,7 @@ export default function ManageUsersPage() {
     if (isNigeria && selectedState !== "all") users = users.filter((u) => u.stateId === selectedState);
     if (isNigeria && selectedCity !== "all") users = users.filter((u) => u.city.toLowerCase() === selectedCity.toLowerCase());
     if (selectedStatus !== "all") users = users.filter((u) => u.status === selectedStatus);
+    if (selectedOnline !== "all") users = users.filter((u) => matchesOnlineFilter(u.lastActive, selectedOnline));
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       users = users.filter(
@@ -255,7 +311,7 @@ export default function ManageUsersPage() {
       return a.name.localeCompare(b.name);
     });
     return users;
-  }, [selectedCountry, selectedState, selectedCity, selectedStatus, searchQuery, sortOrder, isNigeria]);
+  }, [selectedCountry, selectedState, selectedCity, selectedStatus, selectedOnline, searchQuery, sortOrder, isNigeria]);
 
   const selectedCountryObj = countries.find((c) => c.id === selectedCountry);
 
@@ -397,6 +453,25 @@ export default function ManageUsersPage() {
             )}
           </div>
         )}
+
+        {/* Online Filter */}
+        <div className="mb-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold flex items-center gap-1">
+            <Activity className="h-3 w-3" /> Online
+          </p>
+          <Select value={selectedOnline} onValueChange={setSelectedOnline}>
+            <SelectTrigger className="h-9 text-sm font-medium touch-manipulation">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-popover">
+              {onlineFilterOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Search + Sort */}
         <div className="flex gap-2 mb-4">

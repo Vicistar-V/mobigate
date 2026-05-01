@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Filter, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { initialMockTransactions, formatNum } from "@/data/merchantVoucherData";
 
 type FilterType = "all" | "funding" | "voucher_generation";
@@ -57,11 +58,17 @@ export default function MerchantVoucherTransactions() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Sort</p>
-              <div className="flex gap-1.5 flex-wrap">
-                {([["newest", "Newest"], ["oldest", "Oldest"], ["amount_high", "Amount ↓"], ["amount_low", "Amount ↑"]] as [SortOption, string][]).map(([val, label]) => (
-                  <button key={val} onClick={() => setSortBy(val)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
-                ))}
-              </div>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                <SelectTrigger className="h-9 text-sm font-semibold touch-manipulation">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-50 bg-popover">
+                  <SelectItem value="newest">Newest first</SelectItem>
+                  <SelectItem value="oldest">Oldest first</SelectItem>
+                  <SelectItem value="amount_high">Amount: High to Low ↓</SelectItem>
+                  <SelectItem value="amount_low">Amount: Low to High ↑</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
