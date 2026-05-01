@@ -25,12 +25,24 @@ import { CreateAlbumDialog } from "./CreateAlbumDialog";
 import { useUserAlbums } from "@/hooks/useWindowData";
 import { mockAlbums } from "@/data/posts";
 
-export const CreatePostDialog = () => {
+interface CreatePostDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+}
+
+export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigger }: CreatePostDialogProps = {}) => {
   const { toast } = useToast();
   const phpAlbums = useUserAlbums();
   const albums = phpAlbums || mockAlbums;
   
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (v: boolean) => {
+    if (!isControlled) setInternalOpen(v);
+    onOpenChange?.(v);
+  };
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
