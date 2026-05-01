@@ -55,6 +55,16 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
   const [showNewAlbumDialog, setShowNewAlbumDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Prefill from preset media when dialog opens
+  useEffect(() => {
+    if (open && presetMediaUrl) {
+      setMediaPreview(presetMediaUrl);
+      setMediaFile(null);
+      setType("Photo");
+      if (presetTitle) setTitle(presetTitle);
+    }
+  }, [open, presetMediaUrl, presetTitle]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
