@@ -454,6 +454,25 @@ export default function ManageUsersPage() {
           </div>
         )}
 
+        {/* Online Filter */}
+        <div className="mb-2">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold flex items-center gap-1">
+            <Activity className="h-3 w-3" /> Online
+          </p>
+          <Select value={selectedOnline} onValueChange={setSelectedOnline}>
+            <SelectTrigger className="h-9 text-sm font-medium touch-manipulation">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-popover">
+              {onlineFilterOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Search + Sort */}
         <div className="flex gap-2 mb-4">
           <div className="flex-1 relative">
